@@ -32,7 +32,7 @@ struct JsFreeInstallObserverObject {
     std::string startTime;
     std::string url;
     napi_deferred deferred;
-    napi_ref callback;
+    std::shared_ptr<NativeReference> callback;
     bool isAbilityResult = false;
 };
 
@@ -128,7 +128,7 @@ private:
      * @param callback The callback that is to be called.
      * @param resultCode The result code of the promise.
      */
-    void CallCallback(napi_ref callback, int32_t resultCode);
+    void CallCallback(std::shared_ptr<NativeReference> callback, int32_t resultCode);
 
     /**
      * CallCallback, call callback.
@@ -136,7 +136,7 @@ private:
      * @param callback The callback that is to be called.
      * @param abilityResult The ability result of the promise.
      */
-    void CallCallback(napi_ref callback, napi_value abilityResult);
+    void CallCallback(std::shared_ptr<NativeReference> callback, napi_value abilityResult);
 
     /**
      * HandleOnInstallFinished, handle the event of free install upon finished.

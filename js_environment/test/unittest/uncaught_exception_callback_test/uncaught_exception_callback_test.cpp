@@ -22,6 +22,7 @@
 #include "js_runtime.h"
 #include "securec.h"
 #include "string_printf.h"
+#include "async_stack.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -363,8 +364,8 @@ static void TimerCallback(uv_timer_t* handle)
 HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 start";
-    setenv("HAP_DEBUGGABLE", "true", 1);
     ASSERT_EQ(NapiUncaughtExceptionCallback::GetSubmitterStackLocal(), "");
+    DfxInitAsyncStack();
     uv_timer_t timerHandle;
     uv_work_t work;
     uv_loop_t* loop = uv_default_loop();
@@ -373,7 +374,11 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSiz
     uv_timer_start(&timerHandle, TimerCallback, timeout, 0);
     uv_queue_work(loop, &work, WorkCallback, AfterWorkCallback);
     uv_run(loop, UV_RUN_DEFAULT);
+#if defined(__aarch64__)
+    EXPECT_TRUE(!submitterStack.empty());
+#else
     EXPECT_TRUE(submitterStack.empty());
+#endif
     GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 end";
 }
 } // namespace AppExecFwk

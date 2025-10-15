@@ -66,7 +66,6 @@ ohos_source_set("appmgr_test_source") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:hitrace_chain_util",
   ]
 
   external_deps = [
@@ -184,6 +183,7 @@ group("unittest") {
       "ability_record_mgr_test:unittest",
       "ability_record_second_test:unittest",
       "ability_record_test:unittest",
+      "ability_resident_process_rdb_test:unittest",
       "ability_running_info_test:unittest",
       "ability_running_record_test:unittest",
       "ability_runtime_error_util_test:unittest",
@@ -210,7 +210,6 @@ group("unittest") {
       "ams_ipc_interface_test:unittest",
       "ams_mgr_kill_process_test:unittest",
       "ams_mgr_proxy_test:unittest",
-      "ams_mgr_scheduler_dump_test:unittest",
       "ams_mgr_scheduler_second_test:unittest",
       "ams_mgr_scheduler_test:unittest",
       "ams_mgr_stub_test:unittest",
@@ -398,6 +397,7 @@ group("unittest") {
       "keep_alive_process_manager_test:unittest",
       "keep_alive_utils_test:unittest",
       "killing_process_manager_test:unittest",
+      "kiosk_interceptor_test:unittest",
       "kiosk_manager_test:unittest",
       "lifecycle_deal_test:unittest",
       "lifecycle_test:unittest",

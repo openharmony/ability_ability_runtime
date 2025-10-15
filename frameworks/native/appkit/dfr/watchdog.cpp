@@ -165,16 +165,13 @@ void Watchdog::ChangeTimeOut(const std::string& bundleName)
 
 void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& bundleVersion, bool isSystemApp)
 {
-    OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion, isSystemApp);
+    OHOS::HiviewDFX::Watchdog::GetInstance().SetSystemApp(isSystemApp);
+    OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion);
 #ifdef APP_NO_RESPONSE_DIALOG
     if (isDeviceType2in1()) {
         ChangeTimeOut(bundleName);
     }
 #endif
-    {
-        std::unique_lock<std::mutex> lock(cvMutex_);
-        bundleName_ = bundleName;
-    }
 }
 
 void Watchdog::SetBackgroundStatus(const bool isInBackground)
@@ -287,16 +284,13 @@ void Watchdog::ReportEvent()
     }
 
     if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
-        bool enableCheck = std::find(std::begin(CHECK_BACKGROUND_THREAD), std::end(CHECK_BACKGROUND_THREAD),
-            bundleName_) != std::end(CHECK_BACKGROUND_THREAD);
-        if (enableCheck) {
-            backgroundReportCount_++;
-        }
+        backgroundReportCount_++;
         TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, not report time"
-            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 ", enableCheck: %{public}d",
-            static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_), enableCheck);
+            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 ", count: %{public}d",
+            static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_), backgroundReportCount_.load());
         return;
     }
+    backgroundReportCount_++;
 
     if (!needReport_) {
         return;

@@ -612,6 +612,7 @@ public:
      */
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want);
     bool AllowDebugCheck(const ApplicationInfo &appInfo);
+    bool HasPermissionAllDebug(const ApplicationInfo &appInfo);
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam,

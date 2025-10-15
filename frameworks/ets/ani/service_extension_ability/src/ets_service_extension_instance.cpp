@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const char *ETS_ANI_LIBNAME = "libservice_extension_ani.z.so";
-const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Service_Extension_Create";
+const char *ETS_ANI_CREATE_FUNC = "OHOS_ETS_Service_Extension_Create";
 using CreateETSServiceExtensionFunc = ServiceExtension*(*)(const std::unique_ptr<Runtime>&);
 CreateETSServiceExtensionFunc g_etsCreateFunc = nullptr;
 }
@@ -41,9 +41,9 @@ ServiceExtension *CreateETSServiceExtension(const std::unique_ptr<Runtime> &runt
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
-    auto symbol = dlsym(handle, ETS_ANI_Create_FUNC);
+    auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }

@@ -172,6 +172,7 @@ private:
 
     // for new version ability (call ability)
     int StartAbilityByCallInner(MessageParcel &data, MessageParcel &reply);
+    int StartAbilityForPrelaunchInner(MessageParcel &data, MessageParcel &reply);
     int CallRequestDoneInner(MessageParcel &data, MessageParcel &reply);
     int ReleaseCallInner(MessageParcel &data, MessageParcel &reply);
     int StartUserInner(MessageParcel &data, MessageParcel &reply);
@@ -405,6 +406,7 @@ private:
     int32_t EnterKioskModeInner(MessageParcel &data, MessageParcel &reply);
     int32_t ExitKioskModeInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetKioskStatusInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartSelfUIAbilityInCurrentProcessInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

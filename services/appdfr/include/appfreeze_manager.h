@@ -108,6 +108,8 @@ public:
     void ReportAppFreezeSysEvents(int32_t pid, const std::string& bundleName);
     void RegisterAppKillTime(int32_t pid, uint64_t killTime);
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
+    bool CheckInBackGround(const FaultData &faultData);
+    bool CheckAppfreezeHappend(int32_t pid, const std::string& eventName);
 
 private:
     struct PeerBinderInfo {

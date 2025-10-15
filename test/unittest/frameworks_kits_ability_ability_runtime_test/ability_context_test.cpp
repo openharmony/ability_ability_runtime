@@ -215,6 +215,10 @@ public:
     {
         return "MockAbilityContext for tdd";
     }
+    virtual std::string GetLogFileDir()
+    {
+        return "MockAbilityContext for tdd";
+    }
     virtual sptr<IRemoteObject> GetToken()
     {
         return nullptr;
@@ -369,6 +373,10 @@ public:
     }
     virtual ErrCode StartAbilityByCall(const AAFwk::Want& want,
         const std::shared_ptr<CallerCallBack> &callback, int32_t accountId = DEFAULT_INVAL_VALUE)
+    {
+        return ERR_OK;
+    }
+    virtual ErrCode StartAbilityForPrelaunch(const Want &want)
     {
         return ERR_OK;
     }
@@ -573,6 +581,12 @@ public:
     virtual ErrCode SetOnNewWantSkipScenarios(int32_t scenarios)
     {
         return 0;
+    }
+
+    virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool isHaveOptions)
+    {
+        return ERR_OK;
     }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;

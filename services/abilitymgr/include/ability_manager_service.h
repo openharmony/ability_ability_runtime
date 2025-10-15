@@ -178,6 +178,17 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Start Self UIAbility In Current Process.
+     * @param want Ability want.
+     * @param specifiedFlag specified flag.
+     * @param startOptions Indicates the options used to start.
+     * @param hasOptions Is have start options.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken) override;
+
+    /**
      * StartAbilityWithSpecifyTokenIdInner with want and specialId, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -1082,6 +1093,14 @@ public:
         bool isSilent = false) override;
 
     /**
+     * Start Ability for prelauch.
+     *
+     * @param want, Special want for service type's ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityForPrelaunch(const Want &want) override;
+
+    /**
      * As abilityRequest is prepared, just execute starting ability procedure.
      * By now, this is only used by start_ability_sandbox_savefile.
      * @param abilityRequest, Prepared with all info for starting a ability.
@@ -1119,7 +1138,7 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
 
     int32_t StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId,
-        int32_t requestCode, bool hideFailureTipDialog = false);
+        int32_t requestCode, bool hideFailureTipDialog = false, bool isFreeInstallFromService = false);
 
     int StartAbilityWrap(const StartAbilityWrapParam &startAbilityWrapParam);
 
@@ -1136,7 +1155,8 @@ public:
         bool isUIAbilityOnly = false,
         bool isAppCloneSelector = false,
         bool hideFailureTipDialog = false,
-        bool isBySCB = false);
+        bool isBySCB = false,
+        bool isFreeInstallFromService = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -1289,6 +1309,14 @@ public:
      * @return the missionId of target mission.
      */
     int32_t GetMissionIdByAbilityToken(const sptr<IRemoteObject> &token);
+
+    /**
+     * Get ability token by target mission id.
+     *
+     * @param missionId target missionId.
+     * @return the ability token of target mission.
+     */
+    sptr<IRemoteObject> GetAbilityTokenByMissionId(int32_t missionId);
 
     virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
         bool isAppRecovery = false) override;
@@ -2228,6 +2256,10 @@ public:
      */
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex) override;
 
+    int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
+        int32_t userId, int requestCode, bool removeInsightIntentFlag,
+        bool hideFailureTipDialog = false, bool isFreeInstallFromService = false);
+    
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2509,7 +2541,6 @@ private:
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
-    bool HasScreenUnlockInterceptor();
     void AddWatchParameters();
 
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
@@ -2628,7 +2659,7 @@ private:
      * @return Returns whether the caller is allowed to start Ability.
      */
     int CheckCallAbilityPermission(const AbilityRequest &abilityRequest, bool isSelector, uint32_t specifyTokenId = 0,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isFreeInstallFromService = false);
 
     /**
      * Check if Caller is allowed to start Ability(Stage) by call.
@@ -2673,6 +2704,12 @@ private:
 
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
     AAFwk::EventInfo BuildEventInfoByAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    ErrCode IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
+        const std::string &specifiedFlag, int32_t appIndex);
+    
+    bool IsAppCloneOrMultiInstance(Want &want, const sptr<IRemoteObject> &callerToken,
+        int32_t appIndex, const std::string &callerInstanceKey);
 
 #ifdef WITH_DLP
     int CheckDlpForExtension(
@@ -2810,17 +2847,17 @@ private:
     int CheckBrokerCallPermission(const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo);
 
-    int CheckAbilityCallPermission(const AbilityRequest& abilityRequest,
-        const AppExecFwk::AbilityInfo& abilityInfo, uint32_t specifyTokenId, bool isSelector);
+    int CheckAbilityCallPermission(const AbilityRequest& abilityRequest, const AppExecFwk::AbilityInfo& abilityInfo,
+        uint32_t specifyTokenId, bool isSelector, bool isFreeInstallFromService = false);
 
     int CheckCallPermission(const Want& want, const AppExecFwk::AbilityInfo& abilityInfo,
         const AbilityRequest& abilityRequest, bool isForegroundToRestartApp,
         bool isSendDialogResult, uint32_t specifyTokenId,
-        const std::string& callerBundleName, bool isSelector);
+        const std::string& callerBundleName, bool isSelector, bool isFreeInstallFromService = false);
 
     void CheckExtensionRateLimit();
 
-    int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken);
+    int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken, bool &isTargetPlugin);
 
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
@@ -2953,9 +2990,6 @@ private:
  
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
-
-    int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t userId, int requestCode, bool removeInsightIntentFlag, bool hideFailureTipDialog = false);
 
     int32_t UpdateApplicationKeepAlive(int32_t userId) const;
 

@@ -38,7 +38,7 @@ const std::string JSON_KEY_SUB_KILL_REASON = "sub_kill_reason";
 const std::string JSON_KEY_EXIT_MSG = "exit_msg";
 constexpr uint32_t ACCESS_TOKEN_ID = 123;
 const int SESSION_ID = 111;
-constexpr int32_t TIME_SLEEP = 4000;
+constexpr int32_t TIME_SLEEP = 400000;
 } // namespace
 
 class AppExitReasonDataManagerTest : public testing::Test {
@@ -60,6 +60,62 @@ void AppExitReasonDataManagerTest::SetUp()
 }
 
 void AppExitReasonDataManagerTest::TearDown() {}
+
+
+/**
+ * @tc.name: AppExitReasonDataManager_PutAsync_001
+ * @tc.desc: PutAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_PutAsync_001, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+
+    DistributedKv::Key key("test_key");
+    DistributedKv::Value value("test_value");
+    AppExitReasonDataManager::PutAsync(key, value);
+    usleep(TIME_SLEEP);
+    EXPECT_EQ(kvStorePtr->putCallTimes_, 1);
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_PutAsync_002
+ * @tc.desc: PutAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_PutAsync_002, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Put_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+
+    DistributedKv::Key key("test_key");
+    DistributedKv::Value value("test_value");
+    AppExitReasonDataManager::PutAsync(key, value);
+    usleep(TIME_SLEEP);
+    EXPECT_EQ(kvStorePtr->putCallTimes_, 1);
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_PutAsync_003
+ * @tc.desc: PutAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_PutAsync_003, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+
+    DistributedKv::Key key("test_key");
+    DistributedKv::Value value("test_value");
+    AppExitReasonDataManager::PutAsync(key, value);
+    usleep(TIME_SLEEP);
+    auto pThis = DelayedSingleton<AppExitReasonDataManager>::GetInstance();
+    EXPECT_EQ(pThis->kvStorePtr_, nullptr);
+}
 
 /* *
  * @tc.name: AppExitReasonDataManager_AddAbilityRecoverInfo_001
@@ -506,41 +562,6 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertAppExitRe
     ASSERT_TRUE(jsonObject[JSON_KEY_EXIT_MSG].is_string());
     auto exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
     EXPECT_EQ(exitMsg, exitReason.exitMsg);
-}
-
-/**
- * @tc.name: AppExitReasonDataManager_PutAsync_001
- * @tc.desc: PutAsync
- * @tc.type: FUNC
- */
-HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_PutAsync_001, TestSize.Level1)
-{
-    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
-    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
-
-    DistributedKv::Key key("test_key");
-    DistributedKv::Value value("test_value");
-    AppExitReasonDataManager::PutAsync(key, value);
-    usleep(TIME_SLEEP);
-    EXPECT_EQ(kvStorePtr->putCallTimes_, 1);
-}
-
-/**
- * @tc.name: AppExitReasonDataManager_PutAsync_002
- * @tc.desc: PutAsync
- * @tc.type: FUNC
- */
-HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_PutAsync_002, TestSize.Level1)
-{
-    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
-    kvStorePtr->Put_ = DistributedKv::Status::ERROR;
-    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
-
-    DistributedKv::Key key("test_key");
-    DistributedKv::Value value("test_value");
-    AppExitReasonDataManager::PutAsync(key, value);
-    usleep(TIME_SLEEP);
-    EXPECT_EQ(kvStorePtr->putCallTimes_, 1);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

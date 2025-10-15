@@ -303,7 +303,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(ret, ERR_OK);
     }
-    
+
     wptr<IRemoteObject> token(new IPCObjectStub());
     context_->SetWeakSessionToken(token);
     context_->SetMissionContinueState(state);
@@ -339,7 +339,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_03
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(ret, ERR_OK);
     }
-    
+
     wptr<IRemoteObject> token(new IPCObjectStub());
     context_->SetWeakSessionToken(token);
     context_->SetMissionContinueState(state);
@@ -1145,6 +1145,30 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetCloudFileDir_0200, Func
 {
     context_->SetStageContext(nullptr);
     auto ret = context_->GetCloudFileDir();
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetLogFileDir_0100
+ * @tc.name: GetLogFileDir
+ * @tc.desc: Get Log File Dir sucess
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetLogFileDir_0100, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(mock_);
+    auto ret = context_->GetLogFileDir();
+    EXPECT_EQ(ret, "/log");
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetLogFileDir_0200
+ * @tc.name: GetLogFileDir
+ * @tc.desc: Get Log File Dir failed
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetLogFileDir_0200, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(nullptr);
+    auto ret = context_->GetLogFileDir();
     EXPECT_EQ(ret, "");
 }
 
@@ -2765,6 +2789,20 @@ HWTEST_F(AbilityContextImplTest, GetFailureInfoByMessage_0100, Function | Medium
     context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 0);
     EXPECT_EQ(failReason, "A system error occurred");
+}
+
+/**
+ * @tc.number: StartSelfUIAbilityInCurrentProcess_0100
+ * @tc.name: StartSelfUIAbilityInCurrentProcess
+ * @tc.desc: Verify that function StartSelfUIAbilityInCurrentProcess.
+ */
+HWTEST_F(AbilityContextImplTest, StartSelfUIAbilityInCurrentProcess_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    std::string specifiedFlag;
+    AAFwk::StartOptions startOptions;
+    auto ret = context_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false);
+    EXPECT_EQ(ret, ERR_OK);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

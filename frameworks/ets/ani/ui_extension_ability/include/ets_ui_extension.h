@@ -36,6 +36,10 @@ namespace OHOS {
 namespace AbilityRuntime {
 class UIExtension;
 class UIExtensionContext;
+struct ContentSessionType {
+    ani_ref etsContentSession = nullptr;
+    std::shared_ptr<NativeReference> jsContentSession = nullptr;
+};
 
 /**
  * @brief Basic ui extension components.
@@ -85,7 +89,10 @@ public:
      */
     void OnStop() override;
     void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
-
+    /**
+     * @brief The callback of OnStop.
+     */
+    virtual void OnStopCallBack() override;
     /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
      *
@@ -144,7 +151,8 @@ private:
     ani_status CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
     bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
-        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
+        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo,
+        const std::string &arkTSMode);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground) override;
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo) override;
@@ -162,7 +170,7 @@ private:
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsObj_ = nullptr;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_ = nullptr;
     std::mutex uiWindowMutex_;
-    std::map<uint64_t, ani_ref> contentSessions_;
+    std::map<uint64_t, ContentSessionType> contentSessions_;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> token_ = nullptr;

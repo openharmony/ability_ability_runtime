@@ -175,13 +175,15 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
     if (currentTopAbility && !currentTopAbility->GetRestartAppFlag()) {
-        std::string element = currentTopAbility->GetElementName().GetURI();
         auto state = currentTopAbility->GetAbilityState();
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "current top: %{public}s, state: %{public}s",
-            element.c_str(), AbilityRecord::ConvertAbilityState(state).c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "current top: %{public}s/%{public}s, state: %{public}s",
+            currentTopAbility->GetElementName().GetBundleName().c_str(),
+            currentTopAbility->GetElementName().GetAbilityName().c_str(),
+            AbilityRecord::ConvertAbilityState(state).c_str());
         if (state == FOREGROUNDING) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "top ability:%{public}s foregrounding",
-                element.c_str());
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "top ability:%{public}s/%{public}s foregrounding",
+                currentTopAbility->GetElementName().GetBundleName().c_str(),
+                currentTopAbility->GetElementName().GetAbilityName().c_str());
             EnqueueWaitingAbility(abilityRequest);
             return START_ABILITY_WAITING;
         }
@@ -189,10 +191,11 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 
     auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
     if (callerAbility) {
-        std::string element = callerAbility->GetElementName().GetURI();
         auto state = callerAbility->GetAbilityState();
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbility is: %{public}s, state: %{public}s",
-            element.c_str(), AbilityRecord::ConvertAbilityState(state).c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbility is: %{public}s/%{public}s, state: %{public}s",
+            callerAbility->GetElementName().GetBundleName().c_str(),
+            callerAbility->GetElementName().GetAbilityName().c_str(),
+            AbilityRecord::ConvertAbilityState(state).c_str());
     }
 
     abilityRequest.callerAccessTokenId = IPCSkeleton::GetCallingTokenID();
@@ -1073,8 +1076,9 @@ void MissionListManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, 
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetAliveAbilityRecordByToken(token);
         CHECK_POINTER(abilityRecord);
-        std::string element = abilityRecord->GetElementName().GetURI();
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s/%{public}s, start to foreground.",
+            abilityRecord->GetElementName().GetBundleName().c_str(),
+            abilityRecord->GetElementName().GetAbilityName().c_str());
         abilityRecord->ForegroundAbility(abilityRecord->lifeCycleStateInfo_.sceneFlagBak);
     }
 }
@@ -1220,8 +1224,9 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     }
     abilityRecord->RemoveSignatureInfo();
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s/%{public}s, state: %{public}s",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str(), abilityState.c_str());
 
     if (targetState == AbilityState::BACKGROUND) {
         abilityRecord->SaveAbilityState(saveData);
@@ -1314,8 +1319,9 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     CHECK_POINTER(abilityRecord);
     // ability do not save window mode
     abilityRecord->RemoveWindowMode();
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s/%{public}s",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(abilityRecord);
@@ -1655,8 +1661,9 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability, ability is %{public}s.", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability, ability is %{public}s/%{public}s.",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     if (abilityRecord->IsTerminating() && !abilityRecord->IsForeground()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability terminating");
         return ERR_OK;
@@ -1690,8 +1697,9 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
 int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
 {
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "terminate ability locked, ability is %{public}s.", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "terminate ability locked, ability is %{public}s/%{public}s.",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     // remove AbilityRecord out of list
     RemoveTerminatingAbility(abilityRecord, flag);
     abilityRecord->SendResultToCallers();
@@ -1756,8 +1764,9 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
 void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
 {
     CHECK_POINTER(abilityRecord);
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Remove terminating ability, ability is %{public}s.", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Remove terminating ability, ability is %{public}s/%{public}s.",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     if (GetAbilityFromTerminateListInner(abilityRecord->GetToken())) {
         abilityRecord->SetNextAbilityRecord(nullptr);
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Find ability in terminating list, return.");
@@ -2623,8 +2632,9 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return;
     }
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "OnAbilityDied come, ability is %{public}s", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "OnAbilityDied come, ability is %{public}s/%{public}s",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     if (abilityRecord->GetAbilityInfo().type != AbilityType::PAGE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability type not page");
         return;
@@ -3322,7 +3332,9 @@ void MissionListManager::DumpMission(int missionId, std::vector<std::string> &in
 
 int MissionListManager::ResolveLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability_name:%{public}s/%{public}s",
+        abilityRequest.want.GetElement().GetBundleName().c_str(),
+        abilityRequest.want.GetElement().GetAbilityName().c_str());
 
     if (!abilityRequest.IsCallType(AbilityCallType::CALL_REQUEST_TYPE)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s, resolve ability_name:", __func__);
@@ -3421,8 +3433,9 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     }
 
     // schedule target ability
-    std::string element = targetAbilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "load ability record: %{public}s", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "load ability record: %{public}s/%{public}s",
+        targetAbilityRecord->GetElementName().GetBundleName().c_str(),
+        targetAbilityRecord->GetElementName().GetAbilityName().c_str());
 
     // flag the first ability.
     auto currentTopAbility = GetCurrentTopAbilityLocked();

@@ -114,7 +114,7 @@ void ServiceExtensionContext::ClearFailedCallConnection(const std::shared_ptr<Ca
 ErrCode ServiceExtensionContext::ConnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "ConnectAbility called, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::APPKIT, "Connect c:%{public}s, t:%{public}s",
         GetAbilityInfo() == nullptr ? "" : GetAbilityInfo()->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
@@ -128,8 +128,9 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(const AAFwk::Want &want
     if (GetAbilityInfo() != nullptr) {
         callerName = GetAbilityInfo()->name;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s, caller: %{public}s",
-        accountId, want.GetElement().GetURI().c_str(), callerName.c_str());
+    TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s/%{public}s, caller: %{public}s",
+        accountId, want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        callerName.c_str());
     (const_cast<Want &>(want)).SetParam(START_ABILITY_TYPE, true);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
         want, token_, ILLEGAL_REQUEST_CODE, accountId);
@@ -208,7 +209,7 @@ ErrCode ServiceExtensionContext::ConnectAbilityWithAccount(
 ErrCode ServiceExtensionContext::DisconnectAbility(const AAFwk::Want &want,
     const sptr<AbilityConnectCallback> &connectCallback, int32_t accountId) const
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "DisconnectAbility called, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::APPKIT, "Disconnect c:%{public}s, t:%{public}s",
         GetAbilityInfo() == nullptr ? "" : GetAbilityInfo()->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);

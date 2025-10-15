@@ -85,6 +85,7 @@ constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.produ
 constexpr const char* FORBID_START = "persist.sys.abilityms.forbid_start";
 constexpr const char* RESTART_APP_WITH_WINDOW = "persist.sys.abilityms.restart_app_with_window";
 constexpr const char* ALLOW_DEBUG_PERMISSION = "persist.sys.abilityms.allow_debug_permission";
+constexpr const char* START_ABILITY_IN_CURRENT_PROCESS = "persist.sys.abilityms.start_ability_in_current_process";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -669,6 +670,7 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
         "ReasonMessage_SystemShare",
         "ReasonMessage_DesktopShortcut",
         "ReasonMessage_Notification",
+        "ReasonMessage_DesktopIcon",
     };
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
@@ -867,6 +869,16 @@ bool AppUtils::IsSupportAllowDebugPermission()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportAllowDebugPermission_.value);
     return isSupportAllowDebugPermission_.value;
+}
+
+bool AppUtils::IsStartUIAbilityInCurrentProcess()
+{
+    if (!isStartUIAbilityInCurrentProcess_.isLoaded) {
+        isStartUIAbilityInCurrentProcess_.value = system::GetBoolParameter(START_ABILITY_IN_CURRENT_PROCESS, false);
+        isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "startAbilityInCurrentProcess: %{public}d", isStartUIAbilityInCurrentProcess_.value);
+    return isStartUIAbilityInCurrentProcess_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

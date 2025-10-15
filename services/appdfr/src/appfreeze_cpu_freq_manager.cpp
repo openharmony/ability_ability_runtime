@@ -92,7 +92,7 @@ bool AppfreezeCpuFreqManager::RemoveOldInfo()
             ++it;
         }
     }
-    TAG_LOGI(AAFwkTag::APPDFR, "reomve old tasks count: %{public}d, "
+    TAG_LOGI(AAFwkTag::APPDFR, "remove old tasks count: %{public}d, "
         "current tasks count: %{public}zu", removeCount, cpuInfoMap_.size());
     return removeCount != 0;
 }
@@ -135,7 +135,8 @@ bool AppfreezeCpuFreqManager::GetInfoByCpuCount(int32_t cpu, std::vector<CpuFreq
     TotalTime& totalTime)
 {
     std::string cpuFreqFile = CpuSysConfig::GetFreqTimePath(cpu);
-    std::ifstream fin(cpuFreqFile);
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(cpuFreqFile);
+    std::ifstream fin(realPath);
     if (!fin.is_open()) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read cpu time failed, cpuFreqFile:%{public}s, errno:%{public}d",
             cpuFreqFile.c_str(), errno);
@@ -189,7 +190,7 @@ std::string AppfreezeCpuFreqManager::GetCpuStr(int code, std::vector<FrequencyPa
 bool AppfreezeCpuFreqManager::GetCpuTotalValue(size_t i, const std::vector<TotalTime>& totalTimeList,
     const std::vector<TotalTime>& blockTotalTimeList, TotalTime& totalTime)
 {
-    if (totalTimeList.size() <= i || totalTimeList.size() != blockTotalTimeList.size()) {
+    if (totalTimeList.size() <= 0 || totalTimeList.size() <= i || totalTimeList.size() != blockTotalTimeList.size()) {
         TAG_LOGE(AAFwkTag::APPDFR, "index:%{public}zu, halfTotal size:%{public}zu, "
             "blockTotal size:%{public}zu.", i, totalTimeList.size(), blockTotalTimeList.size());
         return false;
@@ -211,12 +212,12 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(const std::vector<TotalTi
     const std::vector<std::vector<CpuFreqData>> &warnCpuDetailInfo,
     const std::vector<TotalTime> &blockTotalTimeList, const std::vector<std::vector<CpuFreqData>> &blockCpuDetailInfo)
 {
-    if (warnTotalTimeList.size() == 0 || warnTotalTimeList.size() == 0) {
-        return "";
-    }
-    if (warnTotalTimeList.size() != blockTotalTimeList.size()) {
-        TAG_LOGE(AAFwkTag::APPDFR, "Warning and block have different sizes, warning size:%{public}zu,"
-            " block size:%{public}zu", warnTotalTimeList.size(), blockTotalTimeList.size());
+    size_t warnTotalSize = warnTotalTimeList.size();
+    size_t warnCpuSize = warnCpuDetailInfo.size();
+    if (warnTotalSize == 0 || warnTotalSize != warnCpuSize ||
+        warnTotalSize != blockTotalTimeList.size() || warnCpuSize != blockCpuDetailInfo.size()) {
+        TAG_LOGE(AAFwkTag::APPDFR, "warning total size:%{public}zu, warning cpi size:%{public}zu",
+            warnTotalSize, warnCpuSize);
         return "";
     }
     std::stringstream ss;
@@ -258,7 +259,8 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(const std::vector<TotalTi
 uint64_t AppfreezeCpuFreqManager::GetAppCpuTime(int32_t pid)
 {
     std::string cpuFile = CpuSysConfig::GetMainThreadRunningTimePath(pid);
-    std::ifstream fin(cpuFile);
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(cpuFile);
+    std::ifstream fin(realPath);
     if (!fin.is_open()) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read cpu info failed, cpuFile:%{public}s, errno:%{public}d",
             cpuFile.c_str(), errno);
@@ -284,7 +286,8 @@ uint64_t AppfreezeCpuFreqManager::GetAppCpuTime(int32_t pid)
 uint64_t AppfreezeCpuFreqManager::GetProcessCpuTime(int32_t pid)
 {
     std::string processFile = CpuSysConfig::GetProcRunningTimePath(pid);
-    std::ifstream fin(processFile);
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(processFile);
+    std::ifstream fin(realPath);
     if (!fin.is_open()) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read cpu info failed, processFile:%{public}s", processFile.c_str());
         return 0;
@@ -316,8 +319,7 @@ uint64_t AppfreezeCpuFreqManager::GetDeviceRuntime()
     }
     uint64_t deviceRuntime = 0;
     std::string line;
-    std::istringstream iss(line);
-    if (std::getline(iss, line) && !line.empty()) {
+    if (getline(fin, line) && !line.empty()) {
         std::vector<std::string> strings;
         SplitStr(line, " ", strings);
         if (strings.size() <= DEFAULT_CPU_SIZE) {
@@ -336,7 +338,8 @@ double AppfreezeCpuFreqManager::GetOptimalCpuTime(int32_t pid)
 {
     int maxCpuCount = cpuCount_ - AppfreezeUtil::CPU_COUNT_SUBTRACT;
     std::string cpuFile = CpuSysConfig::GetMaxCoreDimpsPath(maxCpuCount);
-    std::ifstream fin(cpuFile);
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(cpuFile);
+    std::ifstream fin(realPath);
     if (!fin.is_open()) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read cpu info failed, cpuFile:%{public}s, errno:%{public}d",
             cpuFile.c_str(), errno);
@@ -344,7 +347,7 @@ double AppfreezeCpuFreqManager::GetOptimalCpuTime(int32_t pid)
     }
     std::string content;
     double ret = 0;
-    if (getline(fin, content) && content.empty()) {
+    if (!getline(fin, content) || content.empty()) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read info failed, path:%{public}s", cpuFile.c_str());
         return ret;
     }
@@ -484,12 +487,15 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoPath(const std::string &type,
     str << "#CpuFreq Usage (usage >=1%)" << std::endl << GetCpuInfoContent(
         warnCpuInfo.GetTotalTimeList(), warnCpuInfo.GetCpuDetailData(),
         blockCpuInfo.GetTotalTimeList(), blockCpuInfo.GetCpuDetailData()) << std::endl;
-    OHOS::SaveStringToFile(logFile, str.str(), false);
+    if (!OHOS::SaveStringToFile(logFile, str.str(), false)) {
+        TAG_LOGE(AAFwkTag::APPDFR, "save to cpu info to file failed, logFile: %{public}s", logFile.c_str());
+    } else {
+        TAG_LOGW(AAFwkTag::APPDFR, "write cpu info success, logFile: %{public}s", logFile.c_str());
+    }
     {
         std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
         cpuInfoMap_.erase(type);
     }
-    TAG_LOGW(AAFwkTag::APPDFR, "write cpu info success, logFile: %{public}s", logFile.c_str());
     return logFile;
 }
 }  // namespace AppExecFwk

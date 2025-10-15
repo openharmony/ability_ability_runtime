@@ -227,7 +227,7 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
         return;
     }
     g_etsEnvFuncs->InitETSSysNS(ETS_SYSLIB_PATH);
-    
+
     if (g_etsEnvFuncs->SetAppLibPath == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null SetAppLibPath");
         return;
@@ -244,7 +244,6 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
     };
     g_etsEnvFuncs->SetAppLibPath(abcPathsToBundleModuleNameMap, cb);
 }
-
 void ETSRuntime::SetExtensionApiCheckCallback(
     std::function<bool(const std::string &className, const std::string &fileName)> &cb)
 {

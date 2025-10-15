@@ -37,8 +37,9 @@ public:
 private:
     napi_env env_ = nullptr;
     std::unique_ptr<NativeReference> jsCallbackObject_ = nullptr;
-    napi_ref onRequestSuccess_ = nullptr;
-    napi_ref onRequestFailure_ = nullptr;
+    std::unique_ptr<NativeReference> onRequestSuccess_ = nullptr;
+    std::unique_ptr<NativeReference> onRequestFailure_ = nullptr;
+    void FreeNativeReference(std::unique_ptr<NativeReference>& reference);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

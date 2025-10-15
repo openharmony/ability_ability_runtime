@@ -630,7 +630,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
     } else {
         pid = result.pid;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "pid = [%{public}d]", pid);
+    TAG_LOGI(AAFwkTag::APPMGR, "pid%{public}d", pid);
     return result.result;
 }
 

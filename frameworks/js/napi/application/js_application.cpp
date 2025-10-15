@@ -26,6 +26,8 @@
 #include "js_context_utils.h"
 #include "napi_base_context.h"
 #include "singleton.h"
+#include "application_env.h"
+#include "js_application_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -104,6 +106,11 @@ napi_value JsApplication::CreatePluginModuleContext(napi_env env, napi_callback_
 napi_value JsApplication::CreatePluginModuleContextForBundle(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnCreatePluginModuleContextForBundle);
+}
+
+napi_value JsApplication::GetAppPreloadType(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnGetAppPreloadType);
 }
 
 napi_value JsApplication::OnCreatePluginModuleContext(napi_env env, NapiCallbackInfo &info)
@@ -620,6 +627,14 @@ napi_value JsApplication::OnExitMasterProcessRole(napi_env env, NapiCallbackInfo
     return result;
 }
 
+napi_value JsApplication::OnGetAppPreloadType(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "GetAppPreloadType called");
+    auto appPreload = GetAppPreload();
+    AppPreloadType appPreloadType = static_cast<AppPreloadType>(appPreload);
+    return CreateJsValue(env, appPreloadType);
+}
+
 napi_value ApplicationInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
@@ -630,6 +645,7 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 
     auto jsApplication = std::make_unique<JsApplication>();
     napi_wrap(env, exportObj, jsApplication.release(), JsApplication::Finalizer, nullptr, nullptr);
+    JsApplicationInitProperty(env, exportObj);
 
     const char *moduleName = "application";
     BindNativeFunction(env, exportObj, "getApplicationContext", moduleName,
@@ -656,7 +672,15 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "exitMasterProcessRole", moduleName,
         JsApplication::ExitMasterProcessRole);
 
+    BindNativeFunction(env, exportObj, "getAppPreloadType", moduleName,
+        JsApplication::GetAppPreloadType);
+
     return CreateJsUndefined(env);
+}
+
+void JsApplicationInitProperty(napi_env env, napi_value exportObj)
+{
+    napi_set_named_property(env, exportObj, "AppPreloadType", AppPreloadTypeInit(env));
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

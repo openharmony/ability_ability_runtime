@@ -25,6 +25,8 @@
 #include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 #include "permission_verification.h"
+#include "application_env.h"
+#include "ani_enum_convert.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -32,6 +34,7 @@ namespace {
 constexpr const char* PERMISSION_GET_BUNDLE_INFO = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 constexpr const char* APPLICATION_SPACE_NAME = "L@ohos/app/ability/application/application;";
+constexpr const char* APP_PRELOAD_TYPE_NAME = "L@ohos/app/ability/application/application/AppPreloadType;";
 }
 
 ani_object CreateEmptyContextObject(ani_env *env)
@@ -83,22 +86,20 @@ bool SetNativeContextLong(ani_env *env, std::shared_ptr<Context> context, ani_cl
     }
     ani_status status = ANI_ERROR;
     ani_method method {};
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_New(cls, method, &contextObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        return false;
-    }
-    ani_field field = nullptr;
-    if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        return false;
-    }
-    auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
+
+    std::unique_ptr<EtsBaseContext> eteBaseContext = std::make_unique<EtsBaseContext>(context);
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(eteBaseContext->GetContext());
     if (workContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "workContext nullptr");
+        return false;
+    }
+    if ((status = env->Object_New(cls, method, &contextObj, (ani_long)(eteBaseContext.release()))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        delete workContext;
         return false;
     }
     ani_long nativeContextLong = reinterpret_cast<ani_long>(workContext);
@@ -269,6 +270,20 @@ ani_object EtsApplication::GetApplicationContext(ani_env *env)
     return reinterpret_cast<ani_object>(etsReference->aniRef);
 }
 
+ani_enum_item EtsApplication::GetAppPreloadType(ani_env *env)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "GetAppPreloadType Call");
+    ani_enum_item appPreloadTypeItem = nullptr;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return appPreloadTypeItem;
+    }
+    auto appPreload = GetAppPreload();
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
+        env, APP_PRELOAD_TYPE_NAME, appPreload, appPreloadTypeItem);
+    return appPreloadTypeItem;
+}
+
 void ApplicationInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "ApplicationInit Call");
@@ -300,6 +315,11 @@ void ApplicationInit(ani_env *env)
             "nativeGetApplicationContext",
             ":Lapplication/ApplicationContext/ApplicationContext;",
             reinterpret_cast<void *>(EtsApplication::GetApplicationContext)
+        },
+        ani_native_function {
+            "nativeGetAppPreloadType",
+            ":L@ohos/app/ability/application/application/AppPreloadType;",
+            reinterpret_cast<void *>(EtsApplication::GetAppPreloadType)
         },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());

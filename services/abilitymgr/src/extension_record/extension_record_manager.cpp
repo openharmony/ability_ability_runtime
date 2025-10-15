@@ -316,8 +316,9 @@ int32_t ExtensionRecordManager::AddPreloadUIExtensionRecord(const std::shared_pt
         auto preLoadUIExtensionInfo = std::make_tuple(abilityRecord->GetWant().GetElement().GetAbilityName(),
             abilityRecord->GetWant().GetElement().GetBundleName(),
             abilityRecord->GetWant().GetElement().GetModuleName(), hostBundleName);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "hostBundleName: %{public}s, elementName:%{public}s ",
-            hostBundleName.c_str(), abilityRecord->GetWant().GetElement().GetURI().c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "hostBundleName: %{public}s, elementName:%{public}s/%{public}s",
+            hostBundleName.c_str(), abilityRecord->GetWant().GetElement().GetBundleName().c_str(),
+            abilityRecord->GetWant().GetElement().GetAbilityName().c_str());
         std::lock_guard<std::mutex> lock(preloadUIExtensionMapMutex_);
         preloadUIExtensionMap_[preLoadUIExtensionInfo].push_back(extensionRecord);
         return ERR_OK;
@@ -740,8 +741,9 @@ void ExtensionRecordManager::GetCallerTokenList(
         return;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, pid: %{public}d, tokenId: %{public}d",
-        callerAbilityRecord->GetWant().GetElement().GetURI().c_str(), callerAbilityRecord->GetPid(),
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s/%{public}s, pid: %{public}d, tokenId: %{public}d",
+        callerAbilityRecord->GetWant().GetElement().GetBundleName().c_str(),
+        callerAbilityRecord->GetWant().GetElement().GetAbilityName().c_str(), callerAbilityRecord->GetPid(),
         callerAbilityRecord->GetApplicationInfo().accessTokenId);
 
     auto callerExtensionRecordId = callerAbilityRecord->GetUIExtensionAbilityId();
@@ -777,8 +779,9 @@ bool ExtensionRecordManager::IsFocused(
         return false;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, pid: %{public}d, tokenId: %{public}d",
-        abilityRecord->GetWant().GetElement().GetURI().c_str(), abilityRecord->GetPid(),
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s/%{public}s, pid: %{public}d, tokenId: %{public}d",
+        abilityRecord->GetWant().GetElement().GetBundleName().c_str(),
+        abilityRecord->GetWant().GetElement().GetAbilityName().c_str(), abilityRecord->GetPid(),
         abilityRecord->GetApplicationInfo().accessTokenId);
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {

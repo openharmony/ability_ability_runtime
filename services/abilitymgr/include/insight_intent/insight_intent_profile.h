@@ -48,6 +48,7 @@ struct InsightIntentInfo {
     std::string intentDomain;
     std::string intentVersion;
     std::string srcEntry;
+    std::string arkTSMode;
     UIAbilityIntentInfo uiAbilityIntentInfo;
     UIExtensionIntentInfo uiExtensionIntentInfo;
     ServiceExtensionIntentInfo serviceExtensionIntentInfo;

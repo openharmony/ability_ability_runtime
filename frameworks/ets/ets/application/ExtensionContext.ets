@@ -19,7 +19,30 @@ import { Configuration } from '@ohos.app.ability.Configuration'
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class ExtensionContext extends Context {
-    extensionAbilityInfo!: ExtensionAbilityInfo;
-    config!: Configuration;
-    currentHapModuleInfo!: HapModuleInfo;
+  static {
+    loadLibrary("extension_context_ani_kit.z");
+  }
+
+  extensionAbilityInfo!: ExtensionAbilityInfo;
+  config!: Configuration;
+  currentHapModuleInfo!: HapModuleInfo;
+
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'ExtensionContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return ExtensionContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return ExtensionContext.nativeTransferDynamic(input).unwrap();
+  }
 }

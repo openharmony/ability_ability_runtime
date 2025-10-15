@@ -376,6 +376,9 @@ napi_value CreateJsAppServiceExtensionContext(napi_env env, std::shared_ptr<AppS
     std::unique_ptr<JsAppServiceExtensionContext> jsContext = std::make_unique<JsAppServiceExtensionContext>(context);
     napi_wrap(env, object, jsContext.release(), JsAppServiceExtensionContext::Finalizer, nullptr, nullptr);
 
+    std::string type = "AppServiceExtensionContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     const char *moduleName = "JsAppServiceExtensionContext";
     BindNativeFunction(
         env, object, "connectServiceExtensionAbility", moduleName, JsAppServiceExtensionContext::ConnectAbility);

@@ -948,8 +948,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 #endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     auto isKeepAliveApp = appRecord->IsKeepAliveApp();
-    TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:isLast:%{public}d,keepAlive:%{public}d",
-        isLastAbility, isKeepAliveApp);
+    TAG_LOGI(AAFwkTag::APPMGR, "terminate isLast:%{public}d,keepAlive:%{public}d", isLastAbility, isKeepAliveApp);
     if (isLastAbility && !isKeepAliveApp && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr) {
@@ -1318,9 +1317,9 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
         auto pid = priorityObject->GetPid();
         auto it = procLevelMap.find(pid);
         if (it == procLevelMap.end()) {
-            TAG_LOGW(AAFwkTag::APPMGR, "proc[pid=%{public}d] is not found", pid);
+            TAG_LOGW(AAFwkTag::APPMGR, "pid%{public}d not found", pid);
         } else {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, it->second);
+            TAG_LOGD(AAFwkTag::APPMGR, "pid%{public}d memory level = %{public}d", pid, it->second);
             appRecord->ScheduleMemoryLevel(it->second);
         }
     }

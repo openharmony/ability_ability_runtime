@@ -81,6 +81,7 @@ const std::string ContextImpl::CONTEXT_FILES("/files");
 const std::string ContextImpl::CONTEXT_HAPS("/haps");
 const std::string ContextImpl::CONTEXT_ELS[] = {"el1", "el2", "el3", "el4", "el5"};
 const std::string ContextImpl::CONTEXT_RESOURCE_END = "/resources/resfile";
+const std::string ContextImpl::CONTEXT_LOGFILE("log");
 Global::Resource::DeviceType ContextImpl::deviceType_ = Global::Resource::DeviceType::DEVICE_NOT_SET;
 const std::string OVERLAY_STATE_CHANGED = "usual.event.OVERLAY_STATE_CHANGED";
 const int32_t TYPE_RESERVE = 1;
@@ -406,6 +407,12 @@ std::string ContextImpl::GetCloudFileDir()
 {
     std::string dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_CLOUDFILE;
     CreateDirIfNotExist(dir, MODE);
+    return dir;
+}
+
+std::string ContextImpl::GetLogFileDir()
+{
+    std::string dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_LOGFILE;
     return dir;
 }
 

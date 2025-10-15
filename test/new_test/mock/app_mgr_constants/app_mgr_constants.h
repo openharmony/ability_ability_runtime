@@ -109,6 +109,7 @@ enum class PreloadMode {
     PRESS_DOWN = 0,
     PRE_MAKE = 1,
     PRELOAD_MODULE = 2,
+    PRE_LAUNCH = 4,
 };
 
 enum class AppStartReason {

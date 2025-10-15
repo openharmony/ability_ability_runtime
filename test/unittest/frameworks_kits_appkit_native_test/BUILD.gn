@@ -575,6 +575,11 @@ ohos_unittest("context_deal_test") {
 
 ohos_unittest("application_impl_test") {
   module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+  ]
+
   sources = [
     "${ability_runtime_native_path}/appkit/app/app_context.cpp",
     "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
@@ -1090,7 +1095,7 @@ ohos_unittest("native_lib_util_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -1173,7 +1178,7 @@ ohos_unittest("startup_manager_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -1234,7 +1239,7 @@ ohos_unittest("startup_manager_mock_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [

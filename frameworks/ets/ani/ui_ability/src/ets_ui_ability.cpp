@@ -22,20 +22,27 @@
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #ifdef SUPPORT_SCREEN
 #include "ani_window_stage.h"
+#include "js_window_stage.h"
 #endif
 #include "app_recovery.h"
 #include "connection_manager.h"
+#include "context/application_context.h"
 #include "display_util.h"
 #include "ets_ability_context.h"
+#include "ets_ability_lifecycle_callback.h"
 #include "ets_data_struct_converter.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
+#include "napi_common_want.h"
+#include "napi/native_api.h"
 #include "ohos_application.h"
 #include "string_wrapper.h"
 
@@ -321,6 +328,11 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         TAG_LOGE(AAFwkTag::UIABILITY, "WrapLaunchParam failed");
         return;
     }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillCreate(ability);
+    }
     CallObjectMethod(false, "onCreate", nullptr, wantObj, launchParamObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
@@ -329,6 +341,12 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
         property->object_ = etsAbilityObj_;
         delegator->PostPerformStart(property);
+    }
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityCreate");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityCreate(ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
@@ -342,7 +360,11 @@ void EtsUIAbility::OnStop()
         abilityContext_->SetTerminating(true);
     }
     UIAbility::OnStop();
-
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillDestroy(ability);
+    }
     CallObjectMethod(false, "onDestroy", nullptr);
     OnStopCallback();
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStop end");
@@ -362,6 +384,11 @@ void EtsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
         abilityContext_->SetTerminating(true);
     }
     UIAbility::OnStop();
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillDestroy(ability);
+    }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     auto asyncCallback = [abilityWeakPtr = weakPtr]() {
         auto ability = abilityWeakPtr.lock();
@@ -411,6 +438,13 @@ void EtsUIAbility::OnStopCallback()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::UIABILITY, "the service connection is not disconnected");
     }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityDestroy");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
+    }
 }
 
 #ifdef SUPPORT_SCREEN
@@ -435,6 +469,12 @@ void EtsUIAbility::OnSceneCreated()
     ani_ref entryObjectRef = nullptr;
     env->GlobalReference_Create(etsAppWindowStage, &entryObjectRef);
     etsWindowStageObj_->aniRef = entryObjectRef;
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageWillCreate(ability, stage);
+    }
     CallObjectMethod(false, "onWindowStageCreate", nullptr, etsAppWindowStage);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
@@ -443,6 +483,14 @@ void EtsUIAbility::OnSceneCreated()
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
         property->object_ = etsAbilityObj_;
         delegator->PostPerformScenceCreated(property);
+    }
+
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageCreate");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageCreate(ability, stage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
@@ -472,7 +520,17 @@ void EtsUIAbility::OnSceneRestored()
     ani_ref entryObjectRef = nullptr;
     env->GlobalReference_Create(etsAppWindowStage, &entryObjectRef);
     etsWindowStageObj_->aniRef = entryObjectRef;
+    EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+    EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnWindowStageWillRestore(ability, stage);
+    }
     CallObjectMethod(false, "onWindowStageRestore", nullptr, etsAppWindowStage);
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnWindowStageRestore(ability, stage);
+    }
 }
 
 void EtsUIAbility::OnSceneWillDestroy()
@@ -489,6 +547,12 @@ void EtsUIAbility::onSceneDestroyed()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     UIAbility::onSceneDestroyed();
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageWillDestroy(ability, stage);
+    }
     UpdateEtsWindowStage(nullptr);
     CallObjectMethod(false, "onWindowStageDestroy", nullptr);
     if (scene_ != nullptr) {
@@ -505,6 +569,14 @@ void EtsUIAbility::onSceneDestroyed()
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
         property->object_ = etsAbilityObj_;
         delegator->PostPerformScenceDestroyed(property);
+    }
+
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageDestroy");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageDestroy(ability, stage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed end");
 }
@@ -538,6 +610,11 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
     }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillForeground(ability);
+    }
     if ((status = env->Object_SetFieldByName_Ref(etsAbilityObj_->aniObj, "lastRequestWant", wantRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "lastRequestWant Object_SetFieldByName_Ref status: %{public}d", status);
         return;
@@ -551,6 +628,13 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         property->object_ = etsAbilityObj_;
         delegator->PostPerformForeground(property);
     }
+
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityForeground");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityForeground(ability);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "CallOnForegroundFunc end");
 }
 
@@ -558,6 +642,11 @@ void EtsUIAbility::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillBackground(ability);
+    }
     CallObjectMethod(false, "onBackground", nullptr);
     UIAbility::OnBackground();
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
@@ -567,6 +656,18 @@ void EtsUIAbility::OnBackground()
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
         property->object_ = etsAbilityObj_;
         delegator->PostPerformBackground(property);
+    }
+
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        auto env = etsRuntime_.GetAniEnv();
+        if (env == nullptr || etsAbilityObj_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null env or ability");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityBackground");
+        EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+        applicationContext->DispatchOnAbilityBackground(ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnBackground end");
 }
@@ -812,6 +913,19 @@ void EtsUIAbility::UpdateEtsWindowStage(ani_ref windowStage)
     }
 }
 
+std::unique_ptr<NativeReference> EtsUIAbility::CreateJsAppWindowStage()
+{
+    auto& jsRuntime = etsRuntime_.GetJsRuntime();
+    auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+    auto env = jsRuntimePoint.GetNapiEnv();
+    napi_value jsWindowStage = Rosen::CreateJsWindowStage(env, GetScene());
+    if (jsWindowStage == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null jsWindowStage");
+        return nullptr;
+    }
+    return JsRuntime::LoadSystemModuleByEngine(env, "application.WindowStage", &jsWindowStage, 1);
+}
+
 void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
@@ -834,21 +948,53 @@ void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
         ability->RequestFocus(want);
     };
     callback->Push(asyncCallback);
-
+    const WantParams &wantParams = want.GetParams();
+    std::string arkTSMode = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE);
     InsightIntentExecutorInfo executeInfo;
-    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
-    if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        InsightIntentExecutorMgr::TriggerCallbackInner(
-            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-        return;
-    }
+    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+            InsightIntentExecutorMgr::TriggerCallbackInner(
+                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+            return;
+        }
 
-    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-        etsRuntime_, executeInfo, std::move(callback));
-    if (!ret) {
-        // callback has removed, release in insight intent executor.
-        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            etsRuntime_, executeInfo, std::move(callback));
+        if (!ret) {
+            // callback has removed, release in insight intent executor.
+            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        }
+    } else {
+        auto jsAppWindowStage = CreateJsAppWindowStage();
+        if (jsAppWindowStage == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null jsAppWindowStage");
+            return;
+        }
+        jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
+        auto& jsRuntime = etsRuntime_.GetJsRuntime();
+        if (jsRuntime == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null jsRuntime");
+            return;
+        }
+        if (abilityInfo_) {
+            auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+            jsRuntimePoint.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
+        }
+        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+            InsightIntentExecutorMgr::TriggerCallbackInner(
+                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+            return;
+        }
+        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            *jsRuntime, executeInfo, std::move(callback));
+        if (!ret) {
+            // callback has removed, release in insight intent executor.
+            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        }
     }
 }
 
@@ -878,21 +1024,54 @@ void EtsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
         ability->CallOnForegroundFunc(want);
     };
     callback->Push(asyncCallback);
-
+    const WantParams &wantParams = want.GetParams();
+    std::string arkTSMode = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE);
     InsightIntentExecutorInfo executeInfo;
-    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
-    if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        InsightIntentExecutorMgr::TriggerCallbackInner(
-            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-        return;
-    }
+    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+            InsightIntentExecutorMgr::TriggerCallbackInner(
+                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+            return;
+        }
 
-    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-        etsRuntime_, executeInfo, std::move(callback));
-    if (!ret) {
-        // callback has removed, release in insight intent executor.
-        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            etsRuntime_, executeInfo, std::move(callback));
+        if (!ret) {
+            // callback has removed, release in insight intent executor.
+            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        }
+    } else {
+        auto jsAppWindowStage = CreateJsAppWindowStage();
+        if (jsAppWindowStage == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null jsAppWindowStage");
+            return;
+        }
+        jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
+        auto& jsRuntime = etsRuntime_.GetJsRuntime();
+        if (jsRuntime == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null jsRuntime");
+            return;
+        }
+        if (abilityInfo_) {
+            auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+            jsRuntimePoint.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
+        }
+        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+            InsightIntentExecutorMgr::TriggerCallbackInner(
+                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+            return;
+        }
+
+        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            *jsRuntime, executeInfo, std::move(callback));
+        if (!ret) {
+            // callback has removed, release in insight intent executor.
+            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        }
     }
 }
 
@@ -928,7 +1107,8 @@ void EtsUIAbility::ExecuteInsightIntentBackground(const Want &want,
 }
 
 bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
-    const std::shared_ptr<InsightIntentExecuteParam> &executeParam, InsightIntentExecutorInfo &executeInfo)
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam, InsightIntentExecutorInfo &executeInfo,
+    std::string arkTSMode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "GetInsightIntentExecutorInfo called");
 
@@ -938,9 +1118,18 @@ bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
         return false;
     }
 
-    if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND &&etsWindowStageObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
-        return false;
+    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND &&
+            etsWindowStageObj_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+            return false;
+        }
+    } else {
+        if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND
+            && jsWindowStageObj_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+            return false;
+        }
     }
 
     const WantParams &wantParams = want.GetParams();
@@ -949,8 +1138,14 @@ bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     executeInfo.windowMode = windowMode_;
     executeInfo.token = context->GetToken();
-    if (etsWindowStageObj_ != nullptr) {
-        executeInfo.etsPageLoader = reinterpret_cast<void *>(etsWindowStageObj_->aniRef);
+    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        if (etsWindowStageObj_ != nullptr) {
+            executeInfo.etsPageLoader = reinterpret_cast<void *>(etsWindowStageObj_->aniRef);
+        }
+    } else {
+        if (jsWindowStageObj_ != nullptr) {
+            executeInfo.pageLoader = jsWindowStageObj_;
+        }
     }
     executeInfo.executeParam = executeParam;
     return true;
@@ -1053,6 +1248,11 @@ void EtsUIAbility::OnNewWant(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
     }
+    EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnWillNewWant(ability);
+    }
     ani_status status = env->Object_SetFieldByName_Ref(etsAbilityObj_->aniObj, "lastRequestWant", wantObj);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "lastRequestWant Object_SetFieldByName_Ref status: %{public}d", status);
@@ -1069,6 +1269,10 @@ void EtsUIAbility::OnNewWant(const Want &want)
     }
     std::string methodName = "OnNewWant";
     CallObjectMethod(false, "onNewWant", nullptr, wantObj, launchParamObj);
+    applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnNewWant(ability);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnNewWant end");
 }
 
@@ -1162,6 +1366,27 @@ sptr<IRemoteObject> EtsUIAbility::CallRequest()
         TAG_LOGE(AAFwkTag::UIABILITY, "AniGetNativeRemoteObject null");
     }
     return remoteObj;
+}
+
+void EtsUIAbility::OnAfterFocusedCommon(bool isFocused)
+{
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    auto applicationContext = abilityContext->GetApplicationContext();
+    if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
+        return;
+    }
+    EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
+    EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
+    if (isFocused) {
+        applicationContext->DispatchWindowStageFocus(ability, stage);
+    } else {
+        applicationContext->DispatchWindowStageUnfocus(ability, stage);
+    }
 }
 
 bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)

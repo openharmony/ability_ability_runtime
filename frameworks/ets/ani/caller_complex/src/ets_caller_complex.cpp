@@ -17,7 +17,7 @@
 
 #include "ability_business_error.h"
 #include "ability_runtime/js_caller_complex.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #include "ets_error_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "interop_js/arkts_esvalue.h"

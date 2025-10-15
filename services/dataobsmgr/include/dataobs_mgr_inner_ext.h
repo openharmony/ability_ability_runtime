@@ -33,6 +33,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+static const int32_t MAX_ENTRY_CNT = 100000;
 class DataObsMgrInnerExt : public std::enable_shared_from_this<DataObsMgrInnerExt> {
 public:
 
@@ -43,7 +44,8 @@ public:
         bool isDescendants = false);
     Status HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver);
     Status HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver);
-    Status HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId);
+    Status HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId,
+        std::vector<NotifyInfo> &verifyResult);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -58,6 +60,11 @@ private:
             std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
             : observer(obs), userId(userId), tokenId(tokenId), deathRecipientRef(deathRef), isDescendants(isDes)
         {
+            entryId = nextEntryId_++;
+            if (nextEntryId_ > MAX_ENTRY_CNT) {
+                // reset nextEntryId_
+                nextEntryId_ = 1;
+            }
         }
         sptr<IDataAbilityObserver> observer;
         int32_t userId;
@@ -65,18 +72,19 @@ private:
         std::shared_ptr<DeathRecipientRef> deathRecipientRef;
         bool isDescendants;
         std::string permission;
+        int32_t pid = 0;
+        int32_t entryId = -1;
+        static inline int32_t nextEntryId_ = 1;
     };
 
     struct ObsNotifyInfo {
         ObsNotifyInfo()
         {
-            tokenId = 0;
-            permission = "";
-            uriList = std::list<Uri>();
+            uriList = std::list<NotifyInfo>();
         }
-        uint32_t tokenId;
-        std::string permission;
-        std::list<Uri> uriList;
+        uint32_t tokenId = 0;
+        int32_t pid = 0;
+        std::list<NotifyInfo> uriList;
     };
 
     using ObsMap = std::map<sptr<IDataAbilityObserver>, ObsNotifyInfo>;
@@ -85,7 +93,8 @@ private:
     class Node {
     public:
         Node(const std::string &name);
-        void GetObs(const std::vector<std::string> &path, uint32_t index, Uri &uri, int32_t userId, ObsMap &obsMap);
+        void GetObs(const std::vector<std::string> &path, uint32_t index, NotifyInfo &info,
+            int32_t userId, ObsMap &obsMap);
         bool AddObserver(const std::vector<std::string> &path, uint32_t index, const Entry &entry);
         bool RemoveObserver(const std::vector<std::string> &path, uint32_t index,
             sptr<IDataAbilityObserver> dataObserver);
@@ -101,6 +110,8 @@ private:
 
     std::shared_ptr<DeathRecipientRef> AddObsDeathRecipient(const sptr<IRemoteObject> &dataObserver);
     void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, bool isForce = false);
+    void NotifyObserver(const ChangeInfo &changeInfo, sptr<IDataAbilityObserver> obs,
+        ObsNotifyInfo &info);
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
     static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;

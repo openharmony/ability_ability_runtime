@@ -76,6 +76,72 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 
+void SendWantAgentNumberEvent(std::shared_ptr<PendingWantKey> pendingKey, int32_t wantAgentNumber)
+{
+    std::string bundleName = pendingKey->GetBundleName();
+    std::int32_t appIndex = pendingKey->GetAppIndex();
+
+    EventInfo eventInfo;
+    eventInfo.callerBundleName = bundleName;
+    eventInfo.callerUid = appIndex;
+    eventInfo.wantAgentNumber = wantAgentNumber;
+    EventReport::SendWantAgentEvent(EventName::WANTAGENT_NUMBER, HiSysEventType::STATISTIC, eventInfo);
+}
+
+void PendingWantManager::AddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "add wantAgent number");
+    if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
+        PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "systemCall");
+        return;
+    }
+
+    std::string bundleName = pendingKey->GetBundleName();
+    std::lock_guard<ffrt::mutex> locker(countMutex_);
+    auto it = wantAgentCount_.find(bundleName);
+    if (it == wantAgentCount_.end()) {
+        wantAgentCount_.insert(std::make_pair(bundleName, AgentCount{1, 1, false}));
+    } else {
+        it->second.currentNumber = it->second.currentNumber + 1;
+        if (it->second.DFXFlag) { // Not First DFX
+            if ((it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) &&
+                (it->second.currentNumber - it->second.latestMinNumber > WANTAGENT_FLOAT_THRESHOLD)) {
+                SendWantAgentNumberEvent(pendingKey, it->second.currentNumber);
+            }
+        } else { // First DFX
+            if (it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) {
+                SendWantAgentNumberEvent(pendingKey, it->second.currentNumber);
+                it->second.DFXFlag = true;
+            }
+        }
+    }
+}
+
+void PendingWantManager::ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "reduce wantAgent number");
+    if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
+        PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "systemCall");
+        return;
+    }
+
+    std::string bundleName = pendingKey->GetBundleName();
+    std::lock_guard<ffrt::mutex> locker(countMutex_);
+    auto it = wantAgentCount_.find(bundleName);
+    if (it == wantAgentCount_.end()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "No WantAgent");
+    } else {
+        if (it->second.currentNumber == 1) {
+            wantAgentCount_.erase(bundleName);
+        } else {
+            it->second.currentNumber = it->second.currentNumber - 1;
+            it->second.latestMinNumber = it->second.currentNumber; // Record Latest Minimum WantAgent Number
+        }
+    }
+}
+
 sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingUid, const int32_t uid,
     const int32_t userId, WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t appIndex)
 {
@@ -118,6 +184,7 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         }
         MakeWantSenderCanceledLocked(*ref);
         wantRecords_.erase(ref->GetKey());
+        ReduceWantAgentNumber(ref->GetKey());
     }
 
     if (!needCreate) {
@@ -130,6 +197,7 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
     if (rec != nullptr) {
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
+        AddWantAgentNumber(pendingKey);
         wantRecords_.insert(std::make_pair(pendingKey, rec));
         TAG_LOGI(AAFwkTag::WANTAGENT,
             "wantRecords_ size %{public}zu, bundleName=%{public}s, flags=%{public}d, type=%{public}d, code=%{public}d",
@@ -299,6 +367,7 @@ void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool 
     MakeWantSenderCanceledLocked(record);
     if (cleanAbility) {
         wantRecords_.erase(record.GetKey());
+        ReduceWantAgentNumber(record.GetKey());
     }
 }
 
@@ -358,8 +427,8 @@ int32_t PendingWantManager::PendingWantStartAbility(const Want &want, const sptr
 int32_t PendingWantManager::PendingWantStartServiceExtension(Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "start service extension");
-    if (!PermissionVerification::GetInstance()->IsSystemAppCall()
-        && !PermissionVerification::GetInstance()->IsSACall()) {
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
+        !PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "non-system app called");
         return ERR_INVALID_VALUE;
     }
@@ -675,6 +744,7 @@ void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleNam
             }
             if (hasBundle) {
                 iter = wantRecords_.erase(iter);
+                ReduceWantAgentNumber(iter->first);
                 TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
             } else {
                 ++iter;

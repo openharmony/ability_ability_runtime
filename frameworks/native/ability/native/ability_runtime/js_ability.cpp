@@ -26,6 +26,7 @@
 #include "connection_manager.h"
 #include "display_util.h"
 #include "hilog_tag_wrapper.h"
+#include "js_ability_lifecycle_callback.h"
 #include "js_data_struct_converter.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
@@ -296,7 +297,8 @@ void JsAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityCreate(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityCreate(ability);
     }
     TAG_LOGD(AAFwkTag::ABILITY, "end, ability:%{public}s", GetAbilityName().c_str());
 }
@@ -409,7 +411,8 @@ void JsAbility::OnStopCallback()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
     }
 }
 
@@ -447,7 +450,9 @@ void JsAbility::OnSceneCreated()
     jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnWindowStageCreate(jsAbilityObj_, jsWindowStageObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageCreate(ability, stage);
     }
 
     TAG_LOGD(AAFwkTag::ABILITY, "end, ability:%{public}s", GetAbilityName().c_str());
@@ -498,7 +503,9 @@ void JsAbility::onSceneDestroyed()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnWindowStageDestroy(jsAbilityObj_, jsWindowStageObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
+        applicationContext->DispatchOnWindowStageDestroy(ability, stage);
     }
     TAG_LOGD(AAFwkTag::ABILITY, "end, ability:%{public}s", GetAbilityName().c_str());
 }
@@ -545,7 +552,8 @@ void JsAbility::OnForeground(const Want &want)
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityForeground(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityForeground(ability);
     }
     TAG_LOGD(AAFwkTag::ABILITY, "end, ability:%{public}s", GetAbilityName().c_str());
 }
@@ -570,7 +578,8 @@ void JsAbility::OnBackground()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityBackground(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityBackground(ability);
     }
     TAG_LOGD(AAFwkTag::ABILITY, "end, ability:%{public}s", GetAbilityName().c_str());
 }
@@ -824,7 +833,8 @@ int32_t JsAbility::OnContinue(WantParams &wantParams)
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityContinue(jsAbilityObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityContinue(ability);
     }
 
     return numberResult;

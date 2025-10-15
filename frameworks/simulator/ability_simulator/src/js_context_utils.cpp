@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,7 @@ public:
     static napi_value GetPreferencesDir(napi_env env, napi_callback_info info);
     static napi_value GetBundleCodeDir(napi_env env, napi_callback_info info);
     static napi_value GetCloudFileDir(napi_env env, napi_callback_info info);
+    static napi_value GetLogFileDir(napi_env env, napi_callback_info info);
 
     napi_value OnGetCacheDir(napi_env env, NapiCallbackInfo &info);
     napi_value OnGetTempDir(napi_env env, NapiCallbackInfo &info);
@@ -81,6 +82,7 @@ public:
     napi_value OnGetPreferencesDir(napi_env env, NapiCallbackInfo &info);
     napi_value OnGetBundleCodeDir(napi_env env, NapiCallbackInfo &info);
     napi_value OnGetCloudFileDir(napi_env env, NapiCallbackInfo &info);
+    napi_value OnGetLogFileDir(napi_env env, NapiCallbackInfo &info);
     napi_value OnSwitchArea(napi_env env, NapiCallbackInfo &info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo &info);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo &info);
@@ -150,6 +152,7 @@ napi_value JsBaseContext::OnSwitchArea(napi_env env, NapiCallbackInfo &info)
     BindNativeProperty(env, object, "preferencesDir", GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", GetLogFileDir);
     return CreateJsUndefined(env);
 }
 
@@ -395,6 +398,22 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo &info
     return CreateJsValue(env, path);
 }
 
+napi_value JsBaseContext::GetLogFileDir(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetLogFileDir, BASE_CONTEXT_NAME);
+}
+
+napi_value JsBaseContext::OnGetLogFileDir(napi_env env, NapiCallbackInfo &info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
+        return CreateJsUndefined(env);
+    }
+    std::string path = context->GetLogFileDir();
+    return CreateJsValue(env, path);
+}
+
 napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
@@ -453,6 +472,7 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     BindNativeProperty(env, object, "preferencesDir", JsBaseContext::GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", JsBaseContext::GetLogFileDir);
     BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
     const char *moduleName = "JsBaseContext";
     BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);

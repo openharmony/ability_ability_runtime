@@ -27,6 +27,7 @@
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
+#include "js_ability_lifecycle_callback.h"
 #include "js_data_struct_converter.h"
 #include "js_embeddable_ui_ability_context.h"
 #include "js_embeddable_window_stage.h"
@@ -53,6 +54,8 @@ using namespace OHOS::AppExecFwk;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_HIGH = "ohos.ability.params.uiExtensionLaunchTimestampHigh";
+constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_LOW = "ohos.ability.params.uiExtensionLaunchTimestampLow";
 
 bool IsEmbeddableStart(int32_t screenMode)
 {
@@ -357,7 +360,8 @@ void JsUIExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
     }
 }
 
@@ -611,17 +615,20 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         return false;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
-        sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", bundle/ability: %{public}s/%{public}s",
+        sessionInfo->uiExtensionComponentId, want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str());
     std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>(want);
     auto compId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(compId) == uiWindowMap_.end()) {
         auto context = GetContext();
-        auto uiWindow = CreateUIWindow(context, sessionInfo);
+        auto uiWindow = CreateUIWindow(context, sessionInfo, want);
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
+        sharedWant->RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
+        sharedWant->RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
         uiWindow->UpdateExtensionConfig(sharedWant);
         HandleScope handleScope(jsRuntime_);
         napi_env env = jsRuntime_.GetNapiEnv();
@@ -663,7 +670,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
 }
 
 sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
-    const sptr<AAFwk::SessionInfo> &sessionInfo)
+    const sptr<AAFwk::SessionInfo> &sessionInfo, const AAFwk::Want &want)
 {
     if (context == nullptr || context->GetAbilityInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null context");
@@ -689,6 +696,16 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
         TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
         option->SetConstrainedModal(isNotAllow);
     }
+    int64_t launchTimestamp = -1;
+    bool hasHigh = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
+    bool hasLow = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
+    if (hasHigh && hasLow) {
+        int32_t high = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1);
+        int32_t low = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1);
+        uint64_t temp = (static_cast<uint64_t>(high) << 32) | (static_cast<uint64_t>(low) & 0xFFFFFFFFLL);
+        launchTimestamp = static_cast<int64_t>(temp);
+    }
+    option->SetStartModalExtensionTimeStamp(launchTimestamp);
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }

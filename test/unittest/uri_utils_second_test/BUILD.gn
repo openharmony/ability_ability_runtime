@@ -35,10 +35,12 @@ ohos_unittest("uri_utils_second_test") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include/",
+    "${ability_runtime_test_path}/new_test/mock/ability_manager_service",
     "mock/include",
   ]
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
+    "${ability_runtime_test_path}/new_test/mock/ability_manager_service/ability_manager_client.cpp",
     "mock/src/mock_accesstoken_kit.cpp",
     "mock/src/mock_my_flag.cpp",
     "uri_utils_second_test.cpp",
@@ -52,7 +54,6 @@ ohos_unittest("uri_utils_second_test") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [

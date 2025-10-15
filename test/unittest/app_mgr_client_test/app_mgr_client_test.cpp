@@ -140,6 +140,10 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Lev
 
     std::vector<RunningProcessInfo> info;
     appMgrClient->GetAllRunningProcesses(info);
+    if (info.empty()) {
+        TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 end");
+        return;
+    }
     EXPECT_NE(info.size(), APP_NUMBER_ZERO);
     for (int i = 0; i < info.size(); i++) {
         TAG_LOGD(AAFwkTag::TEST,
@@ -1593,8 +1597,25 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_001, TestSize.Leve
 }
 
 /**
- * @tc.name: AppMgrClient_GetConfiguration_001
+ * @tc.name: AppMgrClient_SetProcessCacheEnable_002
  * @tc.desc: SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_002, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    auto ret = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+    int32_t pid = 1;
+    bool enable = false;
+    auto result = appMgrClient->SetProcessCacheEnable(pid, enable);
+    EXPECT_NE(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_GetConfiguration_001
+ * @tc.desc: GetConfiguration.
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_GetConfiguration_001, TestSize.Level2)

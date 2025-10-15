@@ -325,8 +325,8 @@ bool GetFieldStringArrayByName(ani_env *env, ani_object object, const char *name
         TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
         return false;
     }
-    ani_double length = 0;
-    if ((status = env->Object_GetPropertyByName_Double(reinterpret_cast<ani_object>(arrayObj),
+    ani_int length = 0;
+    if ((status = env->Object_GetPropertyByName_Int(reinterpret_cast<ani_object>(arrayObj),
         "length", &length)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;

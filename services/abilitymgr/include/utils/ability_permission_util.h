@@ -114,6 +114,8 @@ public:
 
     int32_t CheckPrepareTerminateEnable(std::shared_ptr<AbilityRecord> abilityRecord);
 
+    bool NeedCheckStatusBar(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
+
 private:
     /**
      * AbilityPermissionUtil, the private constructor.

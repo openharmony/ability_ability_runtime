@@ -134,6 +134,11 @@ std::string AbilityContextImpl::GetCloudFileDir()
     return stageContext_ ? stageContext_->GetCloudFileDir() : "";
 }
 
+std::string AbilityContextImpl::GetLogFileDir()
+{
+    return stageContext_ ? stageContext_->GetLogFileDir() : "";
+}
+
 bool AbilityContextImpl::IsUpdatingConfigurations()
 {
     return stageContext_ ? stageContext_->IsUpdatingConfigurations() : false;
@@ -1568,6 +1573,18 @@ void AbilityContextImpl::GetFailureInfoByMessage(
         failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_SYSTEM_MALFUNCTION);
         failureMessage = "A system error occurred";
     }
+}
+
+ErrCode AbilityContextImpl::StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want,
+    const std::string &specifiedFlag, const AAFwk::StartOptions &startOptions, bool hasOptions)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartSelfUIAbilityInCurrentProcess(
+        want, specifiedFlag, startOptions, hasOptions, token_);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
+    }
+    return err;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -81,6 +81,11 @@ std::string MockContext::GetCloudFileDir()
     return "/cloud";
 }
 
+std::string MockContext::GetLogFileDir()
+{
+    return "/log";
+}
+
 std::shared_ptr<Context> MockContext::CreateModuleContext(const std::string &moduleName)
 {
     return nullptr;

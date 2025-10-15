@@ -92,7 +92,7 @@ void AbilityStartWithWaitObserverManager::NotifyAATerminateWait(Want& want, Term
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto observerId = want.GetIntParam(Want::START_ABILITY_WITH_WAIT_OBSERVER_ID_KEY, -1);
     if (observerId == -1) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invaid observerId");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "invaid observerId");
         return;
     }
     sptr<IAbilityStartWithWaitObserver> abilityStartWithWaitObserver = nullptr;

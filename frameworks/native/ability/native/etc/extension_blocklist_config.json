@@ -42,6 +42,18 @@
             "telephony.sim",
             "telephony.sms"
         ],
+        "PrintExtension":[
+            "contact",
+            "geolocation",
+            "geoLocationManager",
+            "multimedia.camera",
+            "multimedia.audio",
+            "multimedia.media",
+            "multimedia.mediaLibrary",
+            "telephony.call",
+            "telephony.sim",
+            "telephony.sms"
+        ],
         "AdsServiceExtension": [
             "multimedia.camera",
             "multimedia.mediaLibrary",
@@ -416,7 +428,13 @@
             "application.formHost",
             "application.formInfo",
             "application.formProvider",
-            "telephony.voipCall"
+            "telephony.voipCall",
+            "telephony.numberLookup",
+            "telephony.CallerInfoQueryExtensionAbility",
+            "telephony.CallerInfoQueryExtensionContext",
+            "core.liveview.liveViewManager",
+            "core.liveview.LiveViewLockScreenExtensionContext",
+            "core.liveview.LiveViewLockScreenExtensionAbility"
         ],
         "VoIPExtension": [
             "app.form.formProvider",
@@ -673,6 +691,24 @@
             "collaboration.CollaborationDevicePicker"
         ],
         "WebNativeMessagingExtension": [
+            "window"
+        ],
+        "NotificationSubscriberExtension": [
+            "app.form.formBindingData",
+            "app.form.formHost",
+            "app.form.formInfo",
+            "app.form.formProvider",
+            "app.form.FormExtensionAbility",
+            "application.formBindingData",
+            "application.formHost",
+            "application.formInfo",
+            "application.formProvider",
+            "core.liveview.liveViewManager",
+            "notification",
+            "notificationManager",
+            "prompt",
+            "promptAction",
+            "telephony.voipCall",
             "window"
         ]
     }

@@ -17,7 +17,32 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import Want from '@ohos.app.ability.Want';
 
 export default class InsightIntentContext {
+  static {
+    loadLibrary("insight_intent_context_ani_kit.z");
+  }
   nativeContext: long;
+
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+
+  private static native nativeTransferDynamic(input: Object): ESValue;
+
+  private static contextType: string = 'InsightIntentContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    let contextImpl : ESValue = ESValue.wrap(input).getProperty('__context_impl__');
+    console.log('transferStatic type: ' + type);
+    return InsightIntentContext.nativeTransferStatic(contextImpl, type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return InsightIntentContext.nativeTransferDynamic(input).unwrap();
+  }
 
   public native nativeStartAbilitySync(want: Want): BusinessError;
 

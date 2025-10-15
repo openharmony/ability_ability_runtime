@@ -28,6 +28,7 @@ constexpr const char *ABILITY_STATE_ENUM_NAME = "L@ohos/app/ability/abilityManag
 constexpr const char *CLASSNAME_EXTENSION_RUNNINGINFO = "Lapplication/ExtensionRunningInfo/ExtensionRunningInfoInner;";
 constexpr const char *EXTENSION_ABILITY_TYPE_ENUM_NAME
     = "L@ohos/bundle/bundleManager/bundleManager/ExtensionAbilityType;";
+constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 
 bool WrapAbilityRunningInfoArray(
     ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::AbilityRunningInfo> &infos)
@@ -86,9 +87,9 @@ bool WrapAbilityRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::Abil
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
         return false;
     }
-    ani_object elementNameObj = WrapElementName(env, info.ability);
+    ani_object elementNameObj = WrapAbilityElementName(env, info.ability);
     if (elementNameObj == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapElementName failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapAbilityElementName failed");
         return false;
     }
     ani_class cls;
@@ -250,9 +251,9 @@ bool WrapExtensionRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::Ex
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
         return false;
     }
-    ani_object elementNameObj = WrapElementName(env, info.extension);
+    ani_object elementNameObj = WrapAbilityElementName(env, info.extension);
     if (elementNameObj == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapElementName failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapAbilityElementName failed");
         return false;
     }
     ani_class cls = nullptr;
@@ -411,6 +412,61 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &abilitySta
     if (!SetAbilityStateData(env, object, abilityStateData)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppStateData failed");
         return nullptr;
+    }
+    return object;
+}
+
+ani_object WrapAbilityElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapAbilityElementName");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return nullptr;
+    }
+    ani_class elementNameObj = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    ani_object object = nullptr;
+    if ((status = env->FindClass(ELEMENTNAME_CLASS_NAME, &elementNameObj)) != ANI_OK || elementNameObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status: %{public}d or null elementNameObj", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod status: %{public}d or null method", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(elementNameObj, method, &object)) != ANI_OK || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_New status: %{public}d or null object", status);
+        return nullptr;
+    }
+    return WrapAbilityElementNameInner(env, elementNameObj, object, elementNameParam);
+}
+
+ani_object WrapAbilityElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
+    const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapAbilityElementNameInner");
+    if (env == nullptr || elementNameObj == nullptr || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid args");
+        return nullptr;
+    }
+    if (!AppExecFwk::SetFieldStringByName(env, elementNameObj, object, "bundleName",
+        elementNameParam.GetBundleName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set bundleName failed");
+        return nullptr;
+    }
+    if (!AppExecFwk::SetFieldStringByName(env, elementNameObj, object, "abilityName",
+        elementNameParam.GetAbilityName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set abilityName failed");
+        return nullptr;
+    }
+    if (!AppExecFwk::SetFieldStringByName(env, elementNameObj, object, "deviceId",
+        elementNameParam.GetDeviceID())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set deviceId failed");
+    }
+    if (!AppExecFwk::SetFieldStringByName(env, elementNameObj, object, "moduleName",
+        elementNameParam.GetModuleName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set moduleName failed");
     }
     return object;
 }

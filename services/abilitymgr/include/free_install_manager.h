@@ -47,6 +47,7 @@ struct FreeInstallInfo {
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
     Want want;
+    bool isFreeInstallFromService = false;
 };
 
 struct FreeInstallParams {
