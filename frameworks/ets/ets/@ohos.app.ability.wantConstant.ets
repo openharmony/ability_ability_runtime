@@ -45,6 +45,7 @@ namespace wantConstant {
     ATOMIC_SERVICE_SHARE_ROUTER = 'ohos.params.atomicservice.shareRouter',
     DESTINATION_PLUGIN_ABILITY = 'ohos.params.pluginAbility',
     APP_LAUNCH_TRUSTLIST = 'ohos.params.appLaunchTrustList',
+    ABILITY_UNIFIED_DATA_KEY = 'ohos.param.ability.udKey',
   }
 
   export enum Flags {
