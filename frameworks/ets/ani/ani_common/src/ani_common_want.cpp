@@ -1164,6 +1164,10 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return false;
     }
+    AAFwk::WantParams wantParams;
+    if (InnerUnwrapWantParams(env, param, wantParams)) {
+        want.SetParams(wantParams);
+    }
     std::string action;
     if (GetFieldStringByName(env, param, "action", action)) {
         TAG_LOGD(AAFwkTag::ANI, "action %{public}s", action.c_str());
@@ -1198,10 +1202,6 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         for (size_t i = 0; i < valueStringList.size(); i++) {
             want.AddEntity(valueStringList[i]);
         }
-    }
-    AAFwk::WantParams wantParams;
-    if (InnerUnwrapWantParams(env, param, wantParams)) {
-        want.SetParams(wantParams);
     }
     return true;
 }
