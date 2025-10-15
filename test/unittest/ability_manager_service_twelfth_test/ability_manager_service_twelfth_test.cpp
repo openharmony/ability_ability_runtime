@@ -1372,6 +1372,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, OnAbilityDied_001, TestSize.Level1)
     abilityMs->OnAbilityDied(abilityRecord);
     EXPECT_NE(abilityRecord->GetToken(), nullptr);
     KioskManager::GetInstance().whitelist_.emplace(abilityRecord->GetAbilityInfo().bundleName);
+    KioskManager::GetInstance().kioskStatus_.kioskBundleUid_ = abilityRecord->GetAbilityInfo().uid;
     abilityMs->OnAbilityDied(abilityRecord);
     if (system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         EXPECT_EQ(KioskManager::GetInstance().kioskStatus_.kioskBundleName_, "");
