@@ -64,7 +64,7 @@ const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
-const std::string UIEXTENSION_LAUNCH_TIMESTAMP = "ohos.ability.params.uiExtensionLaunchTimestamp";
+constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_HIGH = "ohos.ability.params.uiExtensionLaunchTimestampHigh";
 constexpr pid_t pid_ = 2000;
 }
 class AbilityRecordTest : public testing::TestWithParam<OHOS::AAFwk::AbilityState> {
@@ -3304,7 +3304,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_001, Tes
     ASSERT_NE(sessionInfo, nullptr);
     abilityRecord_->SetSessionInfo(sessionInfo);
     abilityRecord_->AddUIExtensionLaunchTimestamp();
-    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
 }
 
 /*
@@ -3325,7 +3325,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_002, Tes
     ASSERT_NE(sessionInfo, nullptr);
     abilityRecord_->SetSessionInfo(sessionInfo);
     abilityRecord_->AddUIExtensionLaunchTimestamp();
-    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
 }
 
 /*
@@ -3346,9 +3346,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, 
     ASSERT_NE(sessionInfo, nullptr);
     abilityRecord_->SetSessionInfo(sessionInfo);
     abilityRecord_->AddUIExtensionLaunchTimestamp();
-    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
     abilityRecord_->RemoveUIExtensionLaunchTimestamp();
-    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
