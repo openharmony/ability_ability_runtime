@@ -243,6 +243,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return ret;
     }
 
+    // reset calling indentity
+    IPCSkeleton::SetCallingIdentity(identity);
+
     //There is a default opening method add Only one application supports
     bool defaultPicker = false;
     defaultPicker = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, defaultPicker);
@@ -277,10 +280,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
             return DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request,
                 want, userId, dialogAppInfos, needGrantUriPermission);
         }
-        ret = abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr);
-        // reset calling indentity
-        IPCSkeleton::SetCallingIdentity(identity);
-        return ret;
+        return IN_PROCESS_CALL(abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr));
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ImplicitQueryInfos success, multiple apps available in pc");
@@ -301,10 +301,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request, want, userId,
             dialogAppInfos);
     }
-    ret = abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr);
-    // reset calling indentity
-    IPCSkeleton::SetCallingIdentity(identity);
-    return ret;
+    return IN_PROCESS_CALL(abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr));
 }
 
 std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
