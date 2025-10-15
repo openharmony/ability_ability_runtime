@@ -222,6 +222,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
             uiExtensionMap_[remoteObj] = UIExtWindowMapValType(targetService, abilityRequest.sessionInfo);
         }
         AddUIExtWindowDeathRecipient(remoteObj);
+        targetService->AddUIExtensionLaunchTimestamp();
     }
 
     ret = ReportXiaoYiToRSSIfNeeded(abilityRequest.abilityInfo);
@@ -1039,6 +1040,7 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::EXT, "Ability is %{public}s, start to foreground.", element.c_str());
         abilityRecord->ForegroundUIExtensionAbility();
+        abilityRecord->RemoveUIExtensionLaunchTimestamp();
     }
 }
 
