@@ -408,7 +408,7 @@ int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<Start
     DistributedClient dmsClient;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    result = dmsClient.StartRemoteAbility(want, callingUid, requestCode, accessToken);
+    result = dmsClient.StartRemoteAbility(want, callingUid, requestCode, accessToken, callerTokenId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "StartRemoteAbility failed result = %{public}d", result);
     }
