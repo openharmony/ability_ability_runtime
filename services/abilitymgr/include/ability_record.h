@@ -1308,6 +1308,10 @@ public:
     void UpdateUIExtensionBindInfo(const WantParams &wantParams);
 
     void SendTerminateAbilityErrorEvent(int32_t errCode);
+
+    void AddUIExtensionLaunchTimestamp();
+
+    void RemoveUIExtensionLaunchTimestamp();
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
