@@ -1459,6 +1459,7 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         }
         int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
             HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", KILL_REASON,
+            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
             "FOREGROUND", foreground);
         TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event "
             "[FRAMEWORK,PROCESS_KILL],"
@@ -2045,9 +2046,8 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         }
 
         // if app's callback has been registered, let app decide whether exit or not.
-        TAG_LOGE(AAFwkTag::APPKIT,
-            "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
-            bundleName.c_str(), errorObject.name.c_str(), summary.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n"
+            "%{public}s", bundleName.c_str(), errorObject.name.c_str(), summary.c_str());
         bool foreground = false;
         if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
             ApplicationImpl::APP_STATE_FOREGROUND) {
@@ -2055,6 +2055,7 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         }
         int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
             HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
+            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
             "MSG", KILL_REASON, "FOREGROUND", foreground, "IS_UNCATCHABLE", isUncatchable);
         TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
             " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
