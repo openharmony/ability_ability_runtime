@@ -23,6 +23,12 @@
 #include "insight_intent_executor_info.h"
 #include "service_extension.h"
 
+#ifdef SUPPORT_GRAPHICS
+#include "display_manager.h"
+#include "system_ability_status_change_stub.h"
+#include "window_manager.h"
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 /**
@@ -154,9 +160,57 @@ private:
     sptr<IRemoteObject> OnConnectInner(ani_env *env, ani_object &aniRemoteobj, bool &isAsyncCallback);
     void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
     ani_object CreateETSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context);
+    void ListenWMS();
+    bool HasScreenDensityBeenSet(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
 
     ETSRuntime &etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsObj_;
+    std::shared_ptr<AbilityHandler> handler_ = nullptr;
+
+#ifdef SUPPORT_GRAPHICS
+protected:
+    class EtsServiceExtensionDisplayListener : public Rosen::IDisplayInfoChangedListener {
+    public:
+        explicit EtsServiceExtensionDisplayListener(const std::weak_ptr<EtsServiceExtension>& etsServiceExtension)
+        {
+            etsServiceExtension_ = etsServiceExtension;
+        }
+
+        void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
+            Rosen::DisplayOrientation orientation) override
+            {
+                auto sptr = etsServiceExtension_.lock();
+                if (sptr != nullptr) {
+                    sptr->OnDisplayInfoChange(token, displayId, density, orientation);
+                }
+            }
+
+    private:
+        std::weak_ptr<EtsServiceExtension> etsServiceExtension_;
+    };
+
+    void OnCreate(Rosen::DisplayId displayId);
+    void OnDestroy(Rosen::DisplayId displayId);
+    void OnChange(Rosen::DisplayId displayId);
+    void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
+        Rosen::DisplayOrientation orientation);
+
+private:
+    class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
+    public:
+        SystemAbilityStatusChangeListener(sptr<EtsServiceExtensionDisplayListener> displayListener,
+            const sptr<IRemoteObject> & token): tmpDisplayListener_(displayListener), token_(token) {};
+        virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override {}
+
+    private:
+        sptr<EtsServiceExtensionDisplayListener> tmpDisplayListener_ = nullptr;
+        sptr<IRemoteObject> token_ = nullptr;
+    };
+
+    sptr<EtsServiceExtensionDisplayListener> displayListener_ = nullptr;
+    sptr<SystemAbilityStatusChangeListener> saStatusChangeListener_ = nullptr;
+#endif
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
