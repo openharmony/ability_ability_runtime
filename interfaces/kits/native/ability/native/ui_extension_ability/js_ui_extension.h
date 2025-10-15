@@ -190,7 +190,7 @@ private:
     std::unique_ptr<NativeReference> CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
         sptr<AAFwk::SessionInfo> sessionInfo);
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
-        const sptr<AAFwk::SessionInfo> &sessionInfo);
+        const sptr<AAFwk::SessionInfo> &sessionInfo, const AAFwk::Want &want);
     void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
 
     JsRuntime& jsRuntime_;
