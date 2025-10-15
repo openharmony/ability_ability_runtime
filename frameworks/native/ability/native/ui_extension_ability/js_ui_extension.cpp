@@ -697,11 +697,11 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
         option->SetConstrainedModal(isNotAllow);
     }
     int64_t launchTimestamp = -1;
-    bool hasHigh = want_.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
-    bool hasLow = want_.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
+    bool hasHigh = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
+    bool hasLow = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
     if (hasHigh && hasLow) {
-        int32_t high = want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1);
-        int32_t low = want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1);
+        int32_t high = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1);
+        int32_t low = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1);
         uint64_t temp = (static_cast<uint64_t>(high) << 32) | (static_cast<uint64_t>(low) & 0xFFFFFFFFLL);
         launchTimestamp = static_cast<int64_t>(temp);
     }
