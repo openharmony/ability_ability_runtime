@@ -126,8 +126,8 @@ constexpr const char* ERROR_MSG_NOT_IN_KIOSK_MODE =
     "The current application is not in the kiosk mode. Exit is not allowed.";
 constexpr const char* ERROR_MSG_APP_NOT_IN_FOCUS = "The current ability is not foreground.";
 
-constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "The current process is not running a component configured "
-                                        "with \"isolationProcess\" and cannot be set as a candidate master process.";
+constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS =
+    "The current process cannot be set as a candidate master process.";
 constexpr const char* ERROR_MSG_ALREADY_MASTER_PROCESS =
     "The current process is already a master process and does not support cancellation.";
 constexpr const char* ERROR_MSG_NOT_CANDIDATE_MASTER_PROCESS =
@@ -150,7 +150,11 @@ constexpr const char* ERROR_MSG_MAIN_WINDOW_NOT_EXIST =
 constexpr const char* ERROR_MSG_NOT_MASTER_PROCESS =
     "Not a master process.";
 constexpr const char* ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE =
-    "Cannot exit because there is an unfinished onNewProcessRequest.";
+    "Cannot exit because there is an unfinished request.";
+constexpr const char* ERROR_MSG_UIABILITY_NOT_BELONG_TO_CALLER =
+    "The UIAbility does not belong to the caller.";
+constexpr const char* ERROR_MSG_UIABILITY_IS_ALREADY_EXIST =
+    "The UIAbility already exists.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -255,6 +259,8 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_MAIN_WINDOW_NOT_EXIST, ERROR_MSG_MAIN_WINDOW_NOT_EXIST },
     { AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS, ERROR_MSG_NOT_MASTER_PROCESS },
     { AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE, ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE },
+    { AbilityErrorCode::ERROR_CODE_UIABILITY_NOT_BELONG_TO_CALLER, ERROR_MSG_UIABILITY_NOT_BELONG_TO_CALLER },
+    { AbilityErrorCode::ERROR_CODE_UIABILITY_IS_ALREADY_EXIST, ERROR_MSG_UIABILITY_IS_ALREADY_EXIST },
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -365,6 +371,8 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_NOT_MASTER_PROCESS, AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS },
     {ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE, AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE },
     {ERROR_SA_INTERCEPTOR_START_FAILED, AbilityErrorCode::ERROR_CODE_CONTROLLED},
+    {ERROR_UIABILITY_NOT_BELONG_TO_CALLER, AbilityErrorCode::ERROR_CODE_UIABILITY_NOT_BELONG_TO_CALLER},
+    {ERROR_UIABILITY_IS_ALREADY_EXIST, AbilityErrorCode::ERROR_CODE_UIABILITY_IS_ALREADY_EXIST},
 };
 }
 

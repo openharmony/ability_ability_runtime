@@ -561,6 +561,11 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     }
     BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
         appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+    if (state == ApplicationState::APP_STATE_FOREGROUND && appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
+        TAG_LOGI(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, prelaunch status cancel notify forground state",
+            appRecord->GetBundleName().c_str(), appRecord->GetUid());
+        return;
+    }
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp && !isFromWindowFocusChanged) {
             AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
@@ -683,16 +688,17 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
-    data.isPreload = isPreload;
+    data.isPreload = isPreload || appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
     data.isPreloadModule = appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN;
+    data.isPrelaunch = appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
+    data.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
     }
     TAG_LOGI(AAFwkTag::APPMGR,
-        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
-        "extensionType:%{public}d, processName:%{public}s, renderUid:%{public}d, isTestMode:%{public}d, "
-        "callerPid:%{public}d, callerUid:%{public}d",
+        "b:%{public}s pid:%{public}d u:%{public}d pt:%{public}d et:%{public}d pName:%{public}s ru:%{public}d "
+        "tMode:%{public}d cPid:%{public}d cU:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.extensionType, data.processName.c_str(),
         data.renderUid, data.isTestMode, data.callerPid, data.callerUid);
     BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
@@ -1225,6 +1231,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     appStateData.uid = appRecord->GetUid();
     appStateData.extensionType = appRecord->GetExtensionType();
     appStateData.isPreloadModule = appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN;
+    appStateData.isPrelaunch = appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
     appStateData.callerUid = appRecord->GetCallerUid();
     appStateData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     if (appRecord->GetApplicationInfo() != nullptr) {

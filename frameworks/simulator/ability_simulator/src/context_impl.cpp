@@ -45,6 +45,7 @@ constexpr const char *CONTEXT_ASSET("asset");
 constexpr const char *CONTEXT_ELS[] = {"el1", "el2", "el3", "el4", "el5"};
 constexpr const char *CONTEXT_RESOURCE_BASE("/data/storage/el1/bundle");
 constexpr const char *CONTEXT_RESOURCE_END("/resources/resfile");
+constexpr const char *CONTEXT_LOG("log");
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 const int32_t API11 = 11;
@@ -235,6 +236,18 @@ std::string ContextImpl::GetCloudFileDir()
     }
 
     auto dir = GetBaseDir() + fileSeparator_ + CONTEXT_CLOUD;
+    CreateMultiDir(dir);
+    return dir;
+}
+
+std::string ContextImpl::GetLogFileDir()
+{
+    auto previewPath = GetPreviewPath();
+    if (previewPath.empty()) {
+        return "";
+    }
+
+    auto dir = GetBaseDir() + fileSeparator_ + CONTEXT_LOG;
     CreateMultiDir(dir);
     return dir;
 }

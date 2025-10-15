@@ -68,7 +68,7 @@ ohos_unittest("cj_ui_ability_test") {
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
     "${ability_runtime_path}/services/abilitymgr:abilityms_target",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
-    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [

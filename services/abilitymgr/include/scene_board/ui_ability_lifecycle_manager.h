@@ -199,6 +199,14 @@ public:
     int ResolveLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
 
     /**
+     * resolve the call ipc of ability for prelaunch.
+     *
+     * @param abilityRequest target ability request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int PrelaunchAbilityLocked(const AbilityRequest &abilityRequest);
+
+    /**
      * Call UIAbility by SCB.
      *
      * @param sessionInfo the session info of the ability to be called.
@@ -526,6 +534,9 @@ public:
      * @return ERR_OK if successful, error code otherwise
      */
     int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
+
+    ErrCode IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
+        const std::string &specifiedFlag, int32_t appIndex);
 
 private:
     /**
@@ -886,6 +897,8 @@ private:
      */
     int32_t StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
         std::shared_ptr<AbilityRecord> callerAbility);
+    
+    int32_t StartAbilityBySpecified(const AbilityRequest &abilityRequest, int32_t requestId);
 
     /**
      * @brief Set last exit reason for ability

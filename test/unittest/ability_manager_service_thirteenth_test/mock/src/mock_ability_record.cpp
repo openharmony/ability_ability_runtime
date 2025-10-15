@@ -2017,5 +2017,13 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
 void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
 {
 }
+
+void AbilityRecord::AddUIExtensionLaunchTimestamp()
+{
+}
+
+void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
+{
+}
 }  // namespace AAFwk
 }  // namespace OHOS

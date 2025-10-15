@@ -642,6 +642,8 @@ public:
     bool IsCompleteFirstFrameDrawing() const;
     bool GetColdStartFlag();
     void SetColdStartFlag(bool isColdStart);
+    bool GetPrelaunchFlag();
+    void SetPrelaunchFlag(bool isPrelaunch);
 #endif
 
     /**
@@ -1306,6 +1308,10 @@ public:
     void UpdateUIExtensionBindInfo(const WantParams &wantParams);
 
     void SendTerminateAbilityErrorEvent(int32_t errCode);
+
+    void AddUIExtensionLaunchTimestamp();
+
+    void RemoveUIExtensionLaunchTimestamp();
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1321,7 +1327,8 @@ private:
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
 #ifdef SUPPORT_UPMS
-    void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
+    void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId,
+        bool isNotifyCollaborator);
 #endif // SUPPORT_UPMS
     int32_t GetCurrentAccountId() const;
 
@@ -1403,6 +1410,8 @@ private:
     void GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor);
     void SetAbilityStateInner(AbilityState state);
 #endif
+    void PostStartAbilityByCallTimeoutTask(bool isHalf);
+    void CancelStartAbilityByCallTimeoutTask() const;
     void SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
 
@@ -1515,6 +1524,7 @@ private:
     bool isStartingWindow_ = false;
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
+    bool isPrelaunch_ = false;
     uint32_t bgColor_ = 0;
     std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 #endif

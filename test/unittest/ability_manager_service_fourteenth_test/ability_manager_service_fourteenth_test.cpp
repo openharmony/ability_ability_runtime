@@ -20,6 +20,7 @@
 #include "rate_limiter.h"
 #include "sub_managers_helper.h"
 #include "mission_list_manager.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,6 +41,11 @@ public:
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
     sptr<SessionInfo> MockSessionInfo(int32_t persistentId);
+    AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
+        const std::string& appName, const std::string& bundleName, const std::string& moduleName);
+
+    AbilityRequest abilityRequest_{};
+    Want want_{};
 };
 
 void AbilityManagerServiceFourteenthTest::SetUpTestCase() {}
@@ -77,6 +83,33 @@ sptr<SessionInfo> AbilityManagerServiceFourteenthTest::MockSessionInfo(int32_t p
     }
     sessionInfo->persistentId = persistentId;
     return sessionInfo;
+}
+
+AbilityRequest AbilityManagerServiceFourteenthTest::GenerateAbilityRequest(const std::string& deviceName,
+    const std::string& abilityName, const std::string& appName, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    ElementName element(deviceName, bundleName, abilityName, moduleName);
+    want_.SetElement(element);
+
+    AbilityInfo abilityInfo;
+    abilityInfo.visible = true;
+    abilityInfo.applicationName = appName;
+    abilityInfo.type = AbilityType::EXTENSION;
+    abilityInfo.name = abilityName;
+    abilityInfo.bundleName = bundleName;
+    abilityInfo.moduleName = moduleName;
+    abilityInfo.deviceId = deviceName;
+    ApplicationInfo appinfo;
+    appinfo.name = appName;
+    appinfo.bundleName = bundleName;
+    abilityInfo.applicationInfo = appinfo;
+    AbilityRequest abilityRequest;
+    abilityRequest.want = want_;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = appinfo;
+
+    return abilityRequest;
 }
 
 /*
@@ -1540,5 +1573,39 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, JudgeSystemParamsForPicker_003, Te
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_003 end");
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckUIExtensionCallerPidByHostWindowId
+ * FunctionPoints: AbilityManagerService CheckUIExtensionCallerPidByHostWindowId
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, CheckUIExtensionCallerPidByHostWindowId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckUIExtensionCallerPidByHostWindowId_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    auto callerRecord = AbilityRecord::CreateAbilityRecord(callerRequest);
+    ASSERT_NE(callerRecord, nullptr);
+    AppInfo info;
+    info.userId = 0;
+    abilityMs->OnAppStateChanged(info);
+    info.userId = 1;
+    abilityMs->OnAppStateChanged(info);
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    abilityRequest.callerToken = callerRecord->GetToken();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->hostWindowId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto result = abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest, ERR_INVALID_VALUE);
+    sleep(1);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_TRUE(result);
+    } else {
+        EXPECT_FALSE(result);
+    }
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckUIExtensionCallerPidByHostWindowId_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

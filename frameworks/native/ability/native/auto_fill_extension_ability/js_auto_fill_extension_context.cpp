@@ -107,6 +107,9 @@ napi_value JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(
     const char *moduleName = "JsAutoFillExtensionContext";
     BindNativeFunction(env, objValue, "reloadInModal", moduleName, ReloadInModal);
 
+    std::string type = "AutoFillExtensionContext";
+    napi_set_named_property(env, objValue, "contextType", CreateJsValue(env, type));
+
     return objValue;
 }
 } // namespace AbilityRuntime

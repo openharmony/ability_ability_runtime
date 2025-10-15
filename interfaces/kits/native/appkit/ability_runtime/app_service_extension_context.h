@@ -84,6 +84,15 @@ public:
      * @return errCode ERR_OK on success, others on failure.
      */
     ErrCode TerminateSelf();
+
+    using SelfType = AppServiceExtensionContext;
+    static const size_t CONTEXT_TYPE_ID;
+
+protected:
+    bool IsContext(size_t contextTypeId) override
+    {
+        return contextTypeId == CONTEXT_TYPE_ID || ExtensionContext::IsContext(contextTypeId);
+    }
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

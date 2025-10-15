@@ -35,6 +35,7 @@ public:
     static uint64_t GetMilliseconds();
     static std::string RoundToTwoDecimals(float value);
     static int GetCpuCount();
+    static std::string FreezePathToRealPath(const std::string& filePath);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

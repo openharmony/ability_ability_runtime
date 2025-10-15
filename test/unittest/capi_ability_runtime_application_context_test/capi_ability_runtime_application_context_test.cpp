@@ -1838,7 +1838,6 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
     ASSERT_STREQ(buffer, cloudFileDir.c_str());
 }
 
-
 /**
  * @tc.number: GetResourceDirTest_001
  * @tc.desc: Function test with applicationContext is nullptr

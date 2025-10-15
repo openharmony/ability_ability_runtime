@@ -104,6 +104,11 @@ int MockAbilityDelegatorStub::StartAbilityByCall(const Want& want, const sptr<IA
     return 0;
 }
 
+int MockAbilityDelegatorStub::StartAbilityForPrelaunch(const Want& want)
+{
+    return 0;
+}
+
 void MockAbilityDelegatorStub::CallRequestDone(
     const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
@@ -294,6 +299,11 @@ int MockAbilityDelegatorStub2::UnRegisterMissionListener(const std::string& devi
 
 int MockAbilityDelegatorStub2::StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
     const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent)
+{
+    return 0;
+}
+
+int MockAbilityDelegatorStub2::StartAbilityForPrelaunch(const Want& want)
 {
     return 0;
 }

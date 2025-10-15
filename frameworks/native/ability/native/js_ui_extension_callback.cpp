@@ -67,6 +67,44 @@ JsUIExtensionCallback::~JsUIExtensionCallback()
         delete work;
         work = nullptr;
     }
+    FreeNativeReference(onRequestSuccess_);
+    FreeNativeReference(onRequestFailure_);
+}
+
+void JsUIExtensionCallback::FreeNativeReference(std::unique_ptr<NativeReference>& reference)
+{
+    if (reference  == nullptr) {
+        return;
+    }
+
+    uv_loop_t *loop = nullptr;
+    napi_get_uv_event_loop(env_, &loop);
+    if (loop == nullptr) {
+        return;
+    }
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        return;
+    }
+    work->data = reinterpret_cast<void *>(reference.release());
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
+    [](uv_work_t *work, int status) {
+        if (work != nullptr) {
+            if (work->data != nullptr) {
+            delete reinterpret_cast<NativeReference *>(work->data);
+            work->data = nullptr;
+            }
+            delete work;
+            work = nullptr;
+        }
+    });
+    if (ret != 0) {
+        delete reinterpret_cast<NativeReference *>(work->data);
+        work->data = nullptr;
+        delete work;
+        work = nullptr;
+    }
 }
 
 #ifdef SUPPORT_SCREEN
@@ -212,16 +250,22 @@ void JsUIExtensionCallback::SetCompletionHandler(napi_env env, napi_value comple
     napi_value onSuccess = AppExecFwk::GetPropertyValueByPropertyName(
         env, completionHandler, "onRequestSuccess", napi_function);
     if (onSuccess != nullptr) {
-        napi_status status = napi_create_reference(env, onSuccess, 1, &onRequestSuccess_);
-        if (status != napi_ok) {
+        napi_ref succRef = nullptr;
+        napi_status status = napi_create_reference(env, onSuccess, 1, &succRef);
+        if (status == napi_ok) {
+            onRequestSuccess_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(succRef));
+        } else {
             TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestSuccess, failed: %{public}d", status);
         }
     }
     napi_value onFailure = AppExecFwk::GetPropertyValueByPropertyName(
         env, completionHandler, "onRequestFailure", napi_function);
     if (onFailure != nullptr) {
-        napi_status status = napi_create_reference(env, onFailure, 1, &onRequestFailure_);
-        if (status != napi_ok) {
+        napi_ref failRef = nullptr;
+        napi_status status = napi_create_reference(env, onFailure, 1, &failRef);
+        if (status == napi_ok) {
+            onRequestFailure_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(failRef));
+        } else {
             TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestFailure, failed: %{public}d", status);
         }
     }
@@ -233,8 +277,7 @@ void JsUIExtensionCallback::OnRequestSuccess(const std::string& name)
     if (onRequestSuccess_ == nullptr || env_ == nullptr) {
         return;
     }
-    napi_value callback = nullptr;
-    napi_get_reference_value(env_, onRequestSuccess_, &callback);
+    napi_value callback = onRequestSuccess_->GetNapiValue();
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid callback");
         return;
@@ -253,8 +296,7 @@ void JsUIExtensionCallback::OnRequestFailure(const std::string& name,
     if (onRequestFailure_ == nullptr || env_ == nullptr) {
         return;
     }
-    napi_value callback = nullptr;
-    napi_get_reference_value(env_, onRequestFailure_, &callback);
+    napi_value callback = onRequestFailure_->GetNapiValue();
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid callback");
         return;

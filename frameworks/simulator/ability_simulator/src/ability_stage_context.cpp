@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ constexpr const char *CONTEXT_ASSET("asset");
 constexpr const char *CONTEXT_ELS[] = {"el1", "el2", "el3", "el4", "el5"};
 constexpr const char *CONTEXT_RESOURCE_BASE("/data/storage/el1/bundle");
 constexpr const char *CONTEXT_RESOURCE_END("/resources/resfile");
+constexpr const char *CONTEXT_LOG("log");
 constexpr int DIR_DEFAULT_PERM = 0770;
 }
 const size_t AbilityStageContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("AbilityStageContext"));
@@ -235,6 +236,18 @@ std::string AbilityStageContext::GetCloudFileDir()
     }
 
     auto dir = GetBaseDir() + fileSeparator_ + CONTEXT_CLOUD;
+    CreateMultiDir(dir);
+    return dir;
+}
+
+std::string AbilityStageContext::GetLogFileDir()
+{
+    auto preivewDir = GetPreviewPath();
+    if (preivewDir.empty()) {
+        return "";
+    }
+
+    auto dir = GetBaseDir() + fileSeparator_ + CONTEXT_LOG;
     CreateMultiDir(dir);
     return dir;
 }

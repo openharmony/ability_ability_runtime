@@ -64,6 +64,7 @@ const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
+const std::string UIEXTENSION_LAUNCH_TIMESTAMP = "ohos.ability.params.uiExtensionLaunchTimestamp";
 constexpr pid_t pid_ = 2000;
 }
 class AbilityRecordTest : public testing::TestWithParam<OHOS::AAFwk::AbilityState> {
@@ -1860,7 +1861,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_001, TestSize.Level
     EXPECT_NE(abilityRecord, nullptr);
     Want want;
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, true, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, true, 0, false);
 }
 
 /*
@@ -1879,7 +1880,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_002, TestSize.Level
     want.SetFlags(1);
     want.SetUri("datashare://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1898,7 +1899,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_003, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://com.example.mock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1917,7 +1918,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_004, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1938,7 +1939,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_005, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 #ifdef WITH_DLP
@@ -3283,6 +3284,71 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_003, TestSize
     abilityRecord_->SetFrozenByPreload(true);
     abilityRecord_->ProcessForegroundAbility(tokenId);
     EXPECT_EQ(abilityRecord_->IsFrozenByPreload(), false);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: AddUIExtensionLaunchTimestamp
+ * SubFunction: AddUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord AddUIExtensionLaunchTimestamp
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sessionInfo->persistentId  = 1;
+    sessionInfo->hostWindowId  = 1;
+    sessionInfo->uiExtensionUsage  = AAFwk::UIExtensionUsage::MODAL;
+    ASSERT_NE(sessionInfo, nullptr);
+    abilityRecord_->SetSessionInfo(sessionInfo);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: AddUIExtensionLaunchTimestamp
+ * SubFunction: AddUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord AddUIExtensionLaunchTimestamp
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sessionInfo->persistentId  = 1;
+    sessionInfo->hostWindowId  = 1;
+    sessionInfo->uiExtensionUsage  = AAFwk::UIExtensionUsage::EMBEDDED;
+    ASSERT_NE(sessionInfo, nullptr);
+    abilityRecord_->SetSessionInfo(sessionInfo);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveUIExtensionLaunchTimestamp
+ * SubFunction: RemoveUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sessionInfo->persistentId  = 1;
+    sessionInfo->hostWindowId  = 1;
+    sessionInfo->uiExtensionUsage  = AAFwk::UIExtensionUsage::MODAL;
+    ASSERT_NE(sessionInfo, nullptr);
+    abilityRecord_->SetSessionInfo(sessionInfo);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
+    abilityRecord_->RemoveUIExtensionLaunchTimestamp();
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP, -1), -1);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

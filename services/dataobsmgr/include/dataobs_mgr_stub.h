@@ -43,7 +43,6 @@ private:
     int32_t UnregisterObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyChangeFromExtensionInner(MessageParcel &data, MessageParcel &reply);
-    int32_t VerifyWhiteListInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterObserverExtInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterObserverExtInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterObserverExtALLInner(MessageParcel &data, MessageParcel &reply);

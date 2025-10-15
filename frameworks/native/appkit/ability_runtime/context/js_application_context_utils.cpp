@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,6 +160,7 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
     BindNativeProperty(env, object, "preferencesDir", GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", GetLogFileDir);
     return CreateJsUndefined(env);
 }
 
@@ -445,6 +446,23 @@ napi_value JsApplicationContextUtils::OnGetCloudFileDir(napi_env env, NapiCallba
         return CreateJsUndefined(env);
     }
     std::string path = applicationContext->GetCloudFileDir();
+    return CreateJsValue(env, path);
+}
+
+napi_value JsApplicationContextUtils::GetLogFileDir(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetLogFileDir, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetLogFileDir(napi_env env, NapiCallbackInfo& info)
+{
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
+        return CreateJsUndefined(env);
+    }
+    std::string path = applicationContext->GetLogFileDir();
     return CreateJsValue(env, path);
 }
 
@@ -911,6 +929,7 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
             napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo->bundleNames));
             napi_set_named_property(env, object,
                 "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo->state_, processInfo->isFocused)));
+            napi_set_named_property(env, object, "bundleType", CreateJsValue(env, processInfo->bundleType));
             if (processInfo->appCloneIndex != -1) {
                 napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo->appCloneIndex));
             }
@@ -1824,6 +1843,7 @@ void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, na
     BindNativeProperty(env, object, "preferencesDir", JsApplicationContextUtils::GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", JsApplicationContextUtils::GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", JsApplicationContextUtils::GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", JsApplicationContextUtils::GetLogFileDir);
     BindNativeProperty(env, object, "processName", JsApplicationContextUtils::GetProcessName);
     BindNativeFunction(env, object, "registerAbilityLifecycleCallback", MD_NAME,
         JsApplicationContextUtils::RegisterAbilityLifecycleCallback);

@@ -868,6 +868,14 @@ public:
         bool isSilent = false) override;
 
     /**
+     * Start Ability for prelauch.
+     *
+     * @param want, Special want for service type's ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityForPrelaunch(const Want &want) override;
+
+    /**
      * Start Ability, connect session with common ability.
      *
      * @param want, Special want for service type's ability.
@@ -1875,6 +1883,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex) override;
+
+    /**
+     * Start Self UIAbility In Current Process.
+     * @param want Ability want.
+     * @param specifiedFlag specified flag.
+     * @param startOptions Indicates the options used to start.
+     * @param hasOptions Is have start options.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken) override;
 
 private:
     template <typename T>

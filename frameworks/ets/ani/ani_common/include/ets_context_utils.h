@@ -32,6 +32,7 @@ ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj);
 std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj);
 void SwitchArea(ani_env *env, ani_object obj, ani_enum_item areaModeItem);
 ani_enum_item GetArea(ani_env *env, ani_object obj);
+ani_string GetLogFileDir(ani_env *env, ani_object obj);
 ani_object CreateModuleResourceManagerSync(ani_env *env, ani_object aniObj,
     ani_string bundleName, ani_string moduleName);
 void Clean(ani_env *env, ani_object object);
@@ -43,7 +44,22 @@ ani_object NativeCreateAreaModeContext(ani_env *env, ani_object aniObj, ani_obje
 ani_object NativeCreateSystemHspModuleResourceManager(ani_env *env, ani_object aniObj,
     ani_string bundleNameObj, ani_string moduleNameObj);
 ani_object CreateContextObject(ani_env* env, ani_class contextClass, std::shared_ptr<Context> nativeContext);
+void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong);
 }
+
+class EtsBaseContext final {
+public:
+    explicit EtsBaseContext(const std::shared_ptr<Context> &context)
+        : context_(context) {}
+    ~EtsBaseContext() = default;
+
+    std::weak_ptr<Context> GetContext()
+    {
+        return context_;
+    }
+private:
+    std::shared_ptr<Context> context_;
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_CONTEXT_UTILS_H

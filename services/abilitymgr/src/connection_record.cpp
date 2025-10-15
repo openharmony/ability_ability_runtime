@@ -159,7 +159,8 @@ void ConnectionRecord::CompleteConnect()
     auto callback = GetAbilityConnectCallback();
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     if (remoteObject == nullptr) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "null remoteObject: %{public}s", element.GetURI().c_str());
+        TAG_LOGW(AAFwkTag::CONNECTION, "null remoteObject: %{public}s/%{public}s",
+            element.GetBundleName().c_str(), element.GetAbilityName().c_str());
         if (handler) {
             SetConnectState(ConnectionState::DISCONNECTING);
             handler->SubmitTask([service = targetService_]() {
@@ -204,7 +205,8 @@ void ConnectionRecord::CompleteConnectAndOnlyCallConnectDone()
     auto callback = GetAbilityConnectCallback();
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     if (remoteObject == nullptr) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "Complete null remoteObject: %{public}s", element.GetURI().c_str());
+        TAG_LOGW(AAFwkTag::CONNECTION, "Complete null remoteObject: %{public}s/%{public}s",
+            element.GetBundleName().c_str(), element.GetAbilityName().c_str());
         return;
     }
 
@@ -335,7 +337,7 @@ void ConnectionRecord::CancelConnectTimeoutTask()
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
     std::string taskName = std::to_string(recordId_);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask taskName:%{public}s", taskName.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask:%{public}s", taskName.c_str());
     handler->RemoveEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, taskName);
     handler->RemoveEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, taskName);
     auto targetToken = GetTargetToken();

@@ -125,6 +125,17 @@ bool UnwrapFilterCallbackFromJS(napi_env env, napi_value param, FilterCallback &
             callbacks |= static_cast<uint32_t>(FilterCallback::ON_EXTENSION_STATE_CHANGED);
         }
         filterCallback = static_cast<FilterCallback>(callbacks);
+    } else {
+        filterCallback = static_cast<FilterCallback>(
+            static_cast<uint32_t>(FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_ABILITY_STATE_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_CREATED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_DIED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_STATE_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_APP_STARTED) |
+            static_cast<uint32_t>(FilterCallback::ON_APP_STOPPED) |
+            static_cast<uint32_t>(FilterCallback::ON_EXTENSION_STATE_CHANGED)
+        );
     }
     return true;
 }

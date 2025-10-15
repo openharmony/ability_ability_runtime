@@ -231,6 +231,11 @@ int UIAbilityLifecycleManager::ResolveLocked(const AbilityRequest &abilityReques
     return 0;
 }
 
+int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
+{
+    return 0;
+}
+
 bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> &targetRecord)
 {
@@ -749,6 +754,12 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
 }
 
 int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason)
+{
+    return ERR_OK;
+}
+
+ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &bundleName,
+    const std::string &abilityName, const std::string &specifiedFlag, int32_t appIndex)
 {
     return ERR_OK;
 }

@@ -19,10 +19,10 @@
 #include <memory>
 #include <mutex>
 
-#include "ability_lifecycle_callback.h"
 #include "application_context.h"
 #include "application_state_change_callback.h"
 #include "js_ability_auto_startup_callback.h"
+#include "js_ability_lifecycle_callback.h"
 #include "native_engine/native_engine.h"
 #include "running_process_info.h"
 
@@ -81,6 +81,7 @@ public:
     napi_value OnGetGroupDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetBundleCodeDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetLogFileDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetProcessName(napi_env env, NapiCallbackInfo &info);
     napi_value OnKillProcessBySelf(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetRunningProcessInformation(napi_env env, NapiCallbackInfo& info);
@@ -106,6 +107,7 @@ public:
     static napi_value GetGroupDir(napi_env env, napi_callback_info info);
     static napi_value GetBundleCodeDir(napi_env env, napi_callback_info info);
     static napi_value GetCloudFileDir(napi_env env, napi_callback_info info);
+    static napi_value GetLogFileDir(napi_env env, napi_callback_info info);
     static napi_value GetProcessName(napi_env env, napi_callback_info info);
     static napi_value GetApplicationContext(napi_env env, napi_callback_info info);
     static napi_value KillProcessBySelf(napi_env env, napi_callback_info info);

@@ -25,6 +25,7 @@
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
+#include "ets_ability_lifecycle_callback.h"
 #include "ets_data_struct_converter.h"
 #include "ets_extension_common.h"
 #include "ets_extension_context.h"
@@ -36,6 +37,10 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
+#include "js_ui_extension_content_session.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
+#include "napi/native_api.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
 
@@ -95,7 +100,26 @@ EtsUIExtension::~EtsUIExtension()
     if (context) {
         context->Unbind();
     }
+    auto &jsRuntime = etsRuntime_.GetJsRuntime();
+    if (jsRuntime == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsRuntime");
+        return;
+    }
+    auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+    for (auto &item : contentSessions_) {
+        if (item.second.jsContentSession != nullptr) {
+            jsRuntimePoint.FreeNativeReference(std::move(item.second.jsContentSession));
+        }
+    }
     contentSessions_.clear();
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    if (shellContextRef_ && shellContextRef_->aniRef) {
+        env->GlobalReference_Delete(shellContextRef_->aniRef);
+    }
 }
 
 void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -159,7 +183,8 @@ bool EtsUIExtension::BindNativeMethods()
         TAG_LOGE(AAFwkTag::UI_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
         return false;
     }
@@ -323,8 +348,18 @@ void EtsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
     }
 }
 
+void EtsUIExtension::OnStopCallBack()
+{
+    UIExtension::OnStopCallBack();
+    auto applicationContext = Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
+    }
+}
+
 bool EtsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
-    const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo)
+    const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo, const std::string &arkTSmode)
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -341,7 +376,47 @@ bool EtsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::
         executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     }
     executorInfo.token = context->GetToken();
-    executorInfo.etsPageLoader = reinterpret_cast<void *>(contentSessions_[sessionInfo->uiExtensionComponentId]);
+    if (arkTSmode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        executorInfo.etsPageLoader =
+            reinterpret_cast<void *>(contentSessions_[sessionInfo->uiExtensionComponentId].etsContentSession);
+    } else {
+        auto aniEnv = etsRuntime_.GetAniEnv();
+        if (aniEnv == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null aniEnv");
+            return false;
+        }
+        ani_ref etsContentSessionTemp = contentSessions_[sessionInfo->uiExtensionComponentId].etsContentSession;
+        if (etsContentSessionTemp == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSessionTemp");
+            return false;
+        }
+        auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(
+            aniEnv, static_cast<ani_object>(etsContentSessionTemp));
+        if (etsContentSession == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSession");
+            return false;
+        }
+        auto& jsRuntime = etsRuntime_.GetJsRuntime();
+        if (jsRuntime == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null jsRuntime");
+            return false;
+        }
+        auto abilityResultListeners = std::make_shared<AbilityResultListeners>();
+        auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+        auto env = jsRuntimePoint.GetNapiEnv();
+        if (abilityInfo_) {
+            auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
+            jsRuntimePoint.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
+        }
+        std::weak_ptr<Context> wkctx = context;
+        napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
+            env, etsContentSession->GetSessionInfo(), etsContentSession->GetUIWindow(), wkctx, abilityResultListeners);
+        napi_ref ref = nullptr;
+        napi_create_reference(env, nativeContentSession, 1, &ref);
+        contentSessions_[sessionInfo->uiExtensionComponentId].jsContentSession =
+            std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
+        executorInfo.pageLoader = contentSessions_[sessionInfo->uiExtensionComponentId].jsContentSession;
+    }
     executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
     InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
     executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
@@ -382,16 +457,29 @@ bool EtsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
         }
         uiExtension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
     });
-
+    const WantParams &wantParams = want.GetParams();
+    std::string arkTSMode = wantParams.GetStringParam(INSIGHT_INTENT_ARKTS_MODE);
     InsightIntentExecutorInfo executorInfo;
-    if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
+    if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo, arkTSMode)) {
         return false;
     }
-
-    int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-        etsRuntime_, executorInfo, std::move(executorCallback));
-    if (!ret) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            etsRuntime_, executorInfo, std::move(executorCallback));
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+        }
+    } else {
+        auto& jsRuntime = etsRuntime_.GetJsRuntime();
+        if (jsRuntime == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null jsRuntime");
+            return false;
+        }
+        int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+            *jsRuntime, executorInfo, std::move(executorCallback));
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+        }
     }
     return true;
 }
@@ -491,13 +579,15 @@ bool EtsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         etsUiExtContentSession_ = std::make_shared<EtsUIExtensionContentSession>(sessionInfo, uiWindow,
             wkctx, abilityResultListeners_);
         ani_object sessonObj = EtsUIExtensionContentSession::CreateEtsUIExtensionContentSession(env,
-            sessionInfo, uiWindow, context, abilityResultListeners_, etsUiExtContentSession_);
+            etsUiExtContentSession_.get());
         ani_ref sessonObjRef = nullptr;
         if ((status = env->GlobalReference_Create(sessonObj, &sessonObjRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
             return false;
         }
-        contentSessions_.emplace(compId, sessonObjRef);
+        ContentSessionType contentSession;
+        contentSession.etsContentSession = sessonObjRef;
+        contentSessions_.emplace(compId, contentSession);
         int32_t screenMode = want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
         if (!IsEmbeddableStart(screenMode)) {
             CallObjectMethod(false, "onSessionCreate", nullptr, wantObj, sessonObj);
@@ -562,8 +652,9 @@ void EtsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong to find uiWindow");
         return;
     }
-    if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
-        ani_object contenSessionObj = reinterpret_cast<ani_object>(contentSessions_[componentId]);
+    if (contentSessions_.find(componentId) != contentSessions_.end() &&
+        contentSessions_[componentId].etsContentSession != nullptr) {
+        ani_object contenSessionObj = reinterpret_cast<ani_object>(contentSessions_[componentId].etsContentSession);
         if (contenSessionObj == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "contenSessionObj null ptr");
             return;

@@ -113,6 +113,7 @@
             "webview",
             "window_manager",
             "zlib",
+            "skia",
             "hiperf"
   ],
           "third_party": [
@@ -127,11 +128,14 @@
           "//foundation/ability/ability_runtime/tools:tools_target",
           "//foundation/ability/ability_runtime/interfaces/inner_api:innerkits_target",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_thread",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:app_service_extension_ani",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:auto_fill_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:extension_module",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:insight_intent_executor_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:service_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_ability_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension_ani",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_service_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/appkit:ability_stage_ani",
           "//foundation/ability/ability_runtime/frameworks/native/appkit:test_runner_ani",
           "//foundation/ability/ability_runtime/frameworks/native/child_process:child_process",
@@ -218,6 +222,15 @@
               "header_files": []
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:ets_form_extension"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/dialog_request_info/include",
+              "header_files": [
+                "ets_request_info.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/dialog_request_info:dialog_request_info_ani_kit"
           },
           {
             "header": {

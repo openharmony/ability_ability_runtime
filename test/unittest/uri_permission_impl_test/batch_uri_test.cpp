@@ -132,17 +132,12 @@ HWTEST_F(BatchUriTest, Init_0500, TestSize.Level2)
     ASSERT_NE(batchUri, nullptr);
     std::vector<std::string> uriVec;
     uriVec.push_back("content://temp.txt");
-    uriVec.push_back("file://docs/temp.txt?networkid=1001");
     uint32_t mode = 0;
     std::string callerAlterBundleName = "callerBundleName";
     std::string targetAlterBundleName = "targetBundleName";
-    MyFlag::isDocsCloudUri_ = true;
     auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, false);
-    EXPECT_EQ(ret, 2);
+    EXPECT_EQ(ret, 1);
     EXPECT_EQ(batchUri->contentUris.size(), 1);
-    EXPECT_EQ(batchUri->dfsDocsUris.size(), 1);
-    EXPECT_EQ(batchUri->isDfsDocsUriVec[1], true);
-    EXPECT_EQ(batchUri->isDocsUriVec[1], true);
 }
 
 /**
@@ -211,47 +206,6 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0300, TestSize.Level2)
 }
 
 /**
- * @tc.number: GetUriToGrantByPolicy_0400
- * @tc.name: GetUriToGrantByPolicy
- * @tc.desc: Test GetUriToGrantByPolicy.
- */
-HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0400, TestSize.Level2)
-{
-    auto batchUri = std::make_shared<BatchUri>();
-    ASSERT_NE(batchUri, nullptr);
-    std::vector<std::string> uriVec;
-    MyFlag::isDocsCloudUri_ = true;
-    uriVec.emplace_back("file://docs/temp.txt?networkid=1001");
-    uint32_t mode = 0;
-    std::string callerAlterBundleName = "callerBundleName";
-    std::string targetAlterBundleName = "targetBundleName";
-    auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, false);
-    EXPECT_EQ(ret, 1);
-    batchUri->otherPolicyInfos = { PolicyInfo() };
-
-    std::vector<PolicyInfo> docsPolicyInfoVec;
-    std::vector<PolicyInfo> bundlePolicyInfoVec;
-    bool isRemoveDfsDocsUri = false;
-    batchUri->checkResult = { false };
-    auto count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec, isRemoveDfsDocsUri);
-    EXPECT_EQ(count, 0);
-
-    isRemoveDfsDocsUri = false;
-    docsPolicyInfoVec.clear();
-    batchUri->checkResult = { true };
-    count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec, isRemoveDfsDocsUri);
-    EXPECT_EQ(count, 1);
-    EXPECT_EQ(docsPolicyInfoVec.size(), 1);
-
-    isRemoveDfsDocsUri = true;
-    docsPolicyInfoVec.clear();
-    batchUri->checkResult = { true };
-    count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec, isRemoveDfsDocsUri);
-    EXPECT_EQ(count, 1);
-    EXPECT_EQ(docsPolicyInfoVec.size(), 0);
-}
-
-/**
  * @tc.number: GetUriToGrantByPolicy_0500
  * @tc.name: GetUriToGrantByPolicy
  * @tc.desc: Test GetUriToGrantByPolicy.
@@ -274,16 +228,7 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0500, TestSize.Level2)
     std::vector<PolicyInfo> docsPolicyInfoVec;
     std::vector<PolicyInfo> bundlePolicyInfoVec;
     batchUri->checkResult = { true, true };
-    bool isRemoveDfsDocsUri = true;
-    auto count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec, isRemoveDfsDocsUri);
-    EXPECT_EQ(count, 2);
-    EXPECT_EQ(docsPolicyInfoVec.size(), 1);
-    EXPECT_EQ(bundlePolicyInfoVec.size(), 1);
-
-    isRemoveDfsDocsUri = false;
-    docsPolicyInfoVec.clear();
-    bundlePolicyInfoVec.clear();
-    count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec, isRemoveDfsDocsUri);
+    auto count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec);
     EXPECT_EQ(count, 2);
     EXPECT_EQ(docsPolicyInfoVec.size(), 1);
     EXPECT_EQ(bundlePolicyInfoVec.size(), 1);

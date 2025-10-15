@@ -692,9 +692,9 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnOn);
     }
  
-    static napi_value Set(napi_env env, napi_callback_info info)
+    static napi_value SetDefaultErrorHandler(napi_env env, napi_callback_info info)
     {
-        GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSet);
+        GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSetDefaultErrorHandler);
     }
 
     static napi_value Off(napi_env env, napi_callback_info info)
@@ -770,7 +770,7 @@ private:
         return OnOnFreeze(env, argv[INDEX_ONE]);
     }
 
-    napi_value OnOnSet(napi_env env, napi_value function)
+    napi_value OnOnSetDefaultErrorHandler(napi_env env, napi_value function)
     {
         if (!AppExecFwk::EventRunner::IsAppMainThread()) {
             TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
@@ -805,7 +805,7 @@ private:
         return object;
     }
 
-    napi_value OnSet(napi_env env, const size_t argc, napi_value *argv)
+    napi_value OnSetDefaultErrorHandler(napi_env env, const size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
         std::string type = ParseParamType(env, argc, argv);
@@ -814,7 +814,8 @@ private:
             ThrowInvalidNumParametersError(env);
             return CreateJsUndefined(env);
         }
-        return argc == ARGC_ONE ? OnOnSet(env, argv[INDEX_ZERO]) : OnOnSet(env, nullptr);
+        return argc == ARGC_ONE ?
+        OnOnSetDefaultErrorHandler(env, argv[INDEX_ZERO]) : OnOnSetDefaultErrorHandler(env, nullptr);
     }
 
     napi_value OnOn(napi_env env, const size_t argc, napi_value* argv)
@@ -1439,7 +1440,7 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     const char *moduleName = "JsErrorManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsErrorManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsErrorManager::Off);
-    BindNativeFunction(env, exportObj, "setDefaultErrorHandler", moduleName, JsErrorManager::Set);
+    BindNativeFunction(env, exportObj, "setDefaultErrorHandler", moduleName, JsErrorManager::SetDefaultErrorHandler);
     return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime

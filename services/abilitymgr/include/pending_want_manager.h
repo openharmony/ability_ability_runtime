@@ -36,6 +36,8 @@
 
 namespace OHOS {
 namespace AAFwk {
+constexpr int32_t WANTAGENT_NUMBER_THRESHOLD = 288; // DFX THRESHOLD
+constexpr int32_t WANTAGENT_FLOAT_THRESHOLD = 40; // FLOAT RANGE
 enum class OperationType {
     /**
      * Unknown operation.
@@ -135,6 +137,12 @@ enum class Flags {
     ALLOW_CANCEL_FLAG = 1 << 20
 };
 
+struct AgentCount {
+    int32_t currentNumber = 1;
+    int32_t latestMinNumber = 1; // Slove Number Floating
+    bool DFXFlag = false; // Record Not First DFX
+};
+
 class PendingWantManager : public std::enable_shared_from_this<PendingWantManager>, public NoCopyable {
 public:
     PendingWantManager();
@@ -179,6 +187,9 @@ private:
         WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t appIndex = 0);
     void MakeWantSenderCanceledLocked(PendingWantRecord &record);
 
+    void AddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey);
+    void ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey);
+
     sptr<PendingWantRecord> GetPendingWantRecordByKey(const std::shared_ptr<PendingWantKey> &key);
     bool CheckPendingWantRecordByKey(
         const std::shared_ptr<PendingWantKey> &inputKey, const std::shared_ptr<PendingWantKey> &key);
@@ -194,8 +205,10 @@ private:
 
 private:
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
+    std::unordered_map<std::string, AgentCount> wantAgentCount_;
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
     ffrt::mutex mutex_;
+    ffrt::mutex countMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

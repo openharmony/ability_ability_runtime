@@ -41,7 +41,7 @@ ohos_shared_library("want_ani_kit") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:rpc_ani",
+    "ipc:rpc_taihe",
     "runtime_core:ani",
   ]
 

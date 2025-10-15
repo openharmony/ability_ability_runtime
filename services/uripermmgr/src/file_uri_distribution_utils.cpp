@@ -36,6 +36,7 @@ constexpr int32_t API_VERSION_MOD = 100;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t UDMF_UID = 3012;
 constexpr int32_t PASTEBOARD_UID = 3816;
+constexpr int32_t BROKER_PASTEBOARD_UID = 5557;
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
@@ -332,7 +333,7 @@ bool FUDUtils::IsDocsCloudUri(Uri &uri)
 bool FUDUtils::IsUdmfOrPasteboardCall()
 {
     auto uid = IPCSkeleton::GetCallingUid();
-    return uid == UDMF_UID || uid == PASTEBOARD_UID;
+    return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

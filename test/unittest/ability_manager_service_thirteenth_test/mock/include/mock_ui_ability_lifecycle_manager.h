@@ -196,6 +196,14 @@ public:
     int ResolveLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
 
     /**
+     * resolve the call ipc of ability for prelaunch.
+     *
+     * @param abilityRequest target ability request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int PrelaunchAbilityLocked(const AbilityRequest &abilityRequest);
+
+    /**
      * Call UIAbility by SCB.
      *
      * @param sessionInfo the session info of the ability to be called.
@@ -392,6 +400,9 @@ public:
     void RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart);
 
     int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
+
+    ErrCode IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
+        const std::string &specifiedFlag, int32_t appIndex);
 
 private:
     void AddStartingPid(pid_t pid);

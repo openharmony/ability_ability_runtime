@@ -391,6 +391,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckStartByCallPermission_001, TestSi
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
     Want want;
@@ -398,6 +399,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_001, TestSize.Level1)
 
     want.SetFlags(Want::FLAG_ABILITY_CONTINUATION);
     EXPECT_EQ(abilityMs_->StartAbility(want, nullptr, 100, 0), ERR_INVALID_CONTINUATION_FLAG);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_001 end");
 }
 
 /*
@@ -408,6 +410,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_001, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
     Want want;
@@ -416,6 +419,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
     int requestCode = 0;
     auto ret = abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode);
     EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_002 end");
 }
 
 /*
@@ -426,6 +430,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_003 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
     Want want;
@@ -434,6 +439,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
     int requestCode = 0;
     auto ret = abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode);
     EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_003 end");
 }
 
 /*
@@ -444,6 +450,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_004, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_004 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
     Want want;
@@ -454,6 +461,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_004, TestSize.Level1)
     int requestCode = 0;
     EXPECT_NE(abilityMs_->StartAbilityWithSpecifyTokenIdInner(want, startOptions, callerToken,
         USER_ID_U100, requestCode), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbility_004 end");
 }
 
 /*
@@ -464,9 +472,9 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_004, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_001 start");
     Want want;
     int requestCode = 0;
     sptr<IRemoteObject> callerToken = nullptr;
@@ -486,9 +494,9 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_001, TestSize.Lev
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_002 start");
     Want want;
     StartOptions startOptions;
     sptr<IRemoteObject> callerToken = nullptr;
@@ -506,9 +514,9 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_002, TestSize.Lev
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_001 start");
     Want want;
     StartOptions startOptions;
     sptr<IRemoteObject> callerToken = nullptr;
@@ -525,9 +533,9 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_001, Tes
  */
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->Init();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_002 start");
     Want want;
     StartOptions startOptions;
     sptr<IRemoteObject> callerToken = nullptr;
@@ -545,9 +553,11 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_002, Tes
  */
 HWTEST_F(AbilityManagerServiceSecondTest, IsBackgroundTaskUid_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest IsBackgroundTaskUid_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     int uid = USER_ID_U100;
     EXPECT_FALSE(abilityMs_->IsBackgroundTaskUid(uid));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest IsBackgroundTaskUid_001 end");
 }
 
 /*
@@ -1885,14 +1895,14 @@ HWTEST_F(AbilityManagerServiceSecondTest, UpdateKeepAliveEnableState_001, TestSi
  */
 HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_001 begin.");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
     abilityRequest_.abilityInfo.visible = true;
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
     abilityRequest_.appInfo.isSystemApp = false;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
     EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), CHECK_PERMISSION_FAILED);
-    TAG_LOGI(AAFwkTag::TEST, "testcase end.");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_001 end.");
 }
 
 /**
@@ -1902,14 +1912,14 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
  */
 HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_002 begin.");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
     abilityRequest_.abilityInfo.visible = true;
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
     abilityRequest_.appInfo.isSystemApp = true;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
     EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "testcase end.");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_002 end.");
 }
 #endif // SUPPORT_AUTO_FILL
 
@@ -1921,10 +1931,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
  */
 HWTEST_F(AbilityManagerServiceSecondTest, GetConfiguration_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetConfiguration_001 begin.");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     AppExecFwk::Configuration config;
     auto ret = abilityMs_->GetConfiguration(config, USER_ID_U100);
     EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetConfiguration_001 end.");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -338,7 +338,7 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, GrantUriPermission_0100, TestSize.
     uint32_t targetTokenId = 0;
     std::string targetBundleName = "";
     int32_t res = proxy_->GrantUriPermission(uriVec, flag, targetTokenId, targetBundleName);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::GRANT_URI_PERMISSION), mock_->GetCode());
 }
 
@@ -354,8 +354,75 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, RevokeUriPermission_0100, TestSize
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     uint32_t tokenId = 0;
     int32_t res = proxy_->RevokeUriPermission(tokenId);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::REVOKE_URI_PERMISSION), mock_->GetCode());
+}
+
+/**
+ * @tc.number: NotifyGrantUriPermissionStart_0100
+ * @tc.desc: NotifyGrantUriPermissionStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyGrantUriPermissionStart_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
+    int32_t userId = 0;
+    uint32_t flag = 1;
+    std::vector<std::string> uris = { "file://com.example.test/temp.txt" };
+    int32_t res = proxy_->NotifyGrantUriPermissionStart(uris, flag, userId);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_START), mock_->GetCode());
+}
+
+/**
+ * @tc.number: NotifyGrantUriPermissionEnd_0100
+ * @tc.desc: NotifyGrantUriPermissionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyGrantUriPermissionEnd_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
+    int32_t userId = 0;
+    uint32_t flag = 1;
+    std::vector<std::string> uris = { "file://com.example.test/temp.txt" };
+    std::vector<bool> checkResults = { true };
+    int32_t res = proxy_->NotifyGrantUriPermissionEnd(uris, flag, userId, checkResults);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_END), mock_->GetCode());
+}
+
+/**
+ * @tc.number: NotifyGrantUriPermissionEnd_0200
+ * @tc.desc: NotifyGrantUriPermissionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyGrantUriPermissionEnd_0200, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint32_t flag = 1;
+    std::vector<std::string> uris = { "file://com.example.test/temp.txt" };
+    std::vector<bool> checkResults;
+    int32_t res = proxy_->NotifyGrantUriPermissionEnd(uris, flag, userId, checkResults);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.number: NotifyGrantUriPermissionEnd_0300
+ * @tc.desc: NotifyGrantUriPermissionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyGrantUriPermissionEnd_0300, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint32_t flag = 1;
+    std::vector<std::string> uris(501, "file://com.example.test/temp.txt");
+    std::vector<bool> checkResults(501, false);
+    int32_t res = proxy_->NotifyGrantUriPermissionEnd(uris, flag, userId, checkResults);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

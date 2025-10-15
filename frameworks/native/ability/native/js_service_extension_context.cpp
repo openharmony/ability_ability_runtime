@@ -1615,6 +1615,9 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
     std::unique_ptr<JsServiceExtensionContext> jsContext = std::make_unique<JsServiceExtensionContext>(context);
     napi_wrap(env, object, jsContext.release(), JsServiceExtensionContext::Finalizer, nullptr, nullptr);
 
+    std::string type = "ServiceExtensionContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     const char *moduleName = "JsServiceExtensionContext";
     BindNativeFunction(env, object, "startAbility", moduleName, JsServiceExtensionContext::StartAbility);
     BindNativeFunction(env, object, "openLink", moduleName, JsServiceExtensionContext::OpenLink);

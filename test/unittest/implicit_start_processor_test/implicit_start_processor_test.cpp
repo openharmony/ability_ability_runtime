@@ -713,11 +713,9 @@ HWTEST_F(ImplicitStartProcessorTest, CallStartAbilityInner_001, TestSize.Level1)
     auto processor = std::make_shared<ImplicitStartProcessor>();
     int32_t userId = 0;
     Want want;
-    ImplicitStartProcessor::StartAbilityClosure callBack = []() -> int32_t {
-        return 1;
-    };
+    AbilityRequest request;
     AbilityCallType callType = AbilityCallType::INVALID_TYPE;
-    bool res = processor->CallStartAbilityInner(userId, want, callBack, callType);
+    bool res = processor->CallStartAbilityInner(userId, want, request, callType);
     EXPECT_NE(res, ERR_OK);
 }
 
@@ -734,33 +732,10 @@ HWTEST_F(ImplicitStartProcessorTest, CallStartAbilityInner_002, TestSize.Level1)
     auto processor = std::make_shared<ImplicitStartProcessor>();
     int32_t userId = 0;
     Want want;
-    ImplicitStartProcessor::StartAbilityClosure callBack = []() -> int32_t {
-        return 1;
-    };
+    AbilityRequest request;
     AbilityCallType callType = AbilityCallType::CALL_REQUEST_TYPE;
-    bool res = processor->CallStartAbilityInner(userId, want, callBack, callType);
+    bool res = processor->CallStartAbilityInner(userId, want, request, callType);
     EXPECT_NE(res, ERR_OK);
-}
-
-/*
- * Feature: ImplicitStartProcessor
- * Function: CallStartAbilityInner
- * SubFunction: NA
- * FunctionPoints:ImplicitStartProcessor CallStartAbilityInner
- * EnvConditions: NA
- * CaseDescription: Verify CallStartAbilityInner
- */
-HWTEST_F(ImplicitStartProcessorTest, CallStartAbilityInner_003, TestSize.Level1)
-{
-    auto processor = std::make_shared<ImplicitStartProcessor>();
-    int32_t userId = 0;
-    Want want;
-    ImplicitStartProcessor::StartAbilityClosure callBack = []() -> int32_t {
-        return ERR_OK;
-    };
-    AbilityCallType callType = AbilityCallType::CALL_REQUEST_TYPE;
-    bool res = processor->CallStartAbilityInner(userId, want, callBack, callType);
-    EXPECT_EQ(res, ERR_OK);
 }
 
 /*

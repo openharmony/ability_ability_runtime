@@ -50,6 +50,7 @@ struct AppInfo {
     int32_t appIndex = 0;
     std::string instanceKey = "";
     std::string bundleName = "";
+    int32_t userId = -1;
 };
 
 /**

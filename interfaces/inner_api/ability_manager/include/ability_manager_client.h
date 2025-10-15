@@ -994,6 +994,13 @@ public:
         sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
 
     /**
+     * Start Ability for prelaunch
+     *
+     * @param want, Special want for service type's ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForPrelaunch(const Want &want);
+    /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
      * @param token, ability's token.
@@ -1941,6 +1948,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex);
+
+    /**
+     * Preload application.
+     * @param want Ability want.
+     * @param specifiedFlag specified flag.
+     * @param startOptions Indicates the options used to start.
+     * @param hasOptions Is have start options.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken);
 
 private:
     AbilityManagerClient();

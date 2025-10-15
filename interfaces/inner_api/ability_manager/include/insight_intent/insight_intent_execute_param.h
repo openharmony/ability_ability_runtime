@@ -43,6 +43,7 @@ constexpr char INSIGHT_INTENT_EXECUTE_PARAM_ID[] = "ohos.insightIntent.executePa
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_URI[] = "ohos.insightIntent.executeParam.uris";
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_FLAGS[] = "ohos.insightIntent.executeParam.flags";
 constexpr char INSIGHT_INTENT_SRC_ENTRY[] = "ohos.insightIntent.srcEntry";
+constexpr char INSIGHT_INTENT_ARKTS_MODE[] = "ohos.insightIntent.arkTSMode";
 constexpr char INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG[] = "ohos.insightIntent.execute.openlink.flag";
 constexpr char INSIGHT_INTENT_DECORATOR_TYPE[] = "ohos.insightIntent.decoratorType";
 constexpr char INSIGHT_INTENT_SRC_ENTRANCE[] = "ohos.insightIntent.srcEntrance";
