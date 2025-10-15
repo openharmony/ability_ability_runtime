@@ -86,22 +86,20 @@ bool SetNativeContextLong(ani_env *env, std::shared_ptr<Context> context, ani_cl
     }
     ani_status status = ANI_ERROR;
     ani_method method {};
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_New(cls, method, &contextObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        return false;
-    }
-    ani_field field = nullptr;
-    if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        return false;
-    }
-    auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
+
+    std::unique_ptr<EtsBaseContext> eteBaseContext = std::make_unique<EtsBaseContext>(context);
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(eteBaseContext->GetContext());
     if (workContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "workContext nullptr");
+        return false;
+    }
+    if ((status = env->Object_New(cls, method, &contextObj, (ani_long)(eteBaseContext.release()))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        delete workContext;
         return false;
     }
     ani_long nativeContextLong = reinterpret_cast<ani_long>(workContext);
