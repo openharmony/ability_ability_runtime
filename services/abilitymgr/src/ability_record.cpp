@@ -99,6 +99,8 @@ constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendRe
 constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 constexpr const char* SPECIFIED_ABILITY_FLAG = "ohos.ability.params.specifiedAbilityFlag";
+constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_HIGH = "ohos.ability.params.uiExtensionLaunchTimestampHigh";
+constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_LOW = "ohos.ability.params.uiExtensionLaunchTimestampLow";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 constexpr const char* APP_PROVISION_TYPE_DEBUG = "debug";
@@ -4057,6 +4059,34 @@ void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType start
     eventInfo.pid = static_cast<int32_t>(GetPid());
     eventInfo.startType = static_cast<int32_t>(startType);
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
+}
+
+void AbilityRecord::AddUIExtensionLaunchTimestamp()
+{
+    if (sessionInfo_->uiExtensionUsage != AAFwk::UIExtensionUsage::MODAL) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "not modal uiExtension");
+        return;
+    }
+    std::lock_guard guard(wantLock_);
+    struct timespec ts;
+    int64_t launchTimestamp = -1;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        launchTimestamp = (ts.tv_sec * 1000LL) + (ts.tv_nsec / 1000000LL);
+        int32_t high = static_cast<int32_t>(launchTimestamp >> 32);
+        int32_t low = static_cast<int32_t>(launchTimestamp & 0xFFFFFFFFLL);
+        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, high);
+        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, low);
+    } else {
+        TAG_LOGE(AAFwkTag::UI_EXT, "clock_gettime failed: %{public}s", strerror(errno));
+    }
+}
+
+void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
+{
+    std::lock_guard guard(wantLock_);
+    want_.RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
+    want_.RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
