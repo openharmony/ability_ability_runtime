@@ -682,6 +682,9 @@ enum class AbilityManagerInterfaceCode {
 
     // start self uiability in current process
     START_SELF_UI_ABILITY_IN_CURRENT_PROCESS = 6153,
+
+    // restart app limit check
+    IS_RESTART_APP_LIMIT = 6154,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

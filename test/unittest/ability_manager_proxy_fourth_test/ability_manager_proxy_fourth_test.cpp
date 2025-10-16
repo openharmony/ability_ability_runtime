@@ -72,12 +72,12 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilityBySCB_0100, 
     uint32_t sceneFlag = 0;
 
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
-    EXPECT_EQ(proxy_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(proxy_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false), INVALID_PARAMETERS_ERR);
 
     sessionInfo = sptr<SessionInfo>::MakeSptr();
     ASSERT_NE(sessionInfo, nullptr);
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
-    EXPECT_EQ(proxy_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag), NO_ERROR);
+    EXPECT_EQ(proxy_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false), NO_ERROR);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartUIAbilityBySCB_0100 end");
 }

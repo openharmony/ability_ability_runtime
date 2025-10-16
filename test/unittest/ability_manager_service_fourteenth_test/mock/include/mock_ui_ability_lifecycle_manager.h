@@ -70,7 +70,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
-        bool &isColdStart);
+        bool isRestart, bool &isColdStart);
 
     /**
      * @brief execute after the ability schedule the lifecycle

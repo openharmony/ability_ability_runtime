@@ -159,6 +159,8 @@ export default class UIAbilityContext extends Context {
   private native nativeStartUIServiceExtensionAbility(want: Want, callback:AsyncCallbackWrapper<void>): void;
   private native nativeDisconnectUIServiceExtensionAbility(proxy: UIServiceProxy, callback:AsyncCallbackWrapper<void>): void;
 
+  private native nativeRestartAppSync(want: Want): void;
+
   startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
     this.nativeStartAbilitySyncCheck(options);
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -582,5 +584,11 @@ export default class UIAbilityContext extends Context {
         reject(err as BusinessError);
       });
     });
+  }
+
+  restartApp(want: Want): Promise<void> {
+    return taskpool.execute((): void => {
+      this.nativeRestartAppSync(want);
+    }) as Promise<void>;
   }
 }

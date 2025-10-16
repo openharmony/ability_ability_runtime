@@ -18,6 +18,7 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
+#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "process_options.h"
 #include "ipc_skeleton.h"
@@ -334,16 +335,16 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     bool isColdStart = false;
     uint32_t sceneFlag = 0;
     sptr<SessionInfo> sessionInfo = nullptr;
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     sessionInfo = new (std::nothrow) SessionInfo();
     EXPECT_NE(sessionInfo, nullptr);
     sessionInfo->sessionToken == nullptr;
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     Rosen::SessionInfo info;
     sessionInfo->sessionToken = new Rosen::Session(info);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
@@ -351,22 +352,22 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     connectManager->sceneBoardTokenId_ = TEST_VALUE_ONE;
     abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
     IPCSkeleton::SetCallingTokenID(ONE);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
     std::string value;
     sessionInfo->want.SetParam(KEY_SESSION_ID, value);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
     abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     abilityMs_->subManagersHelper_->uiAbilityManagers_.emplace(ONE, uiAbilityLifecycleManager);
     sessionInfo->want.SetElementName(TEST_DEVICEID, TEST_BUNDLE_NAME, TEST_ABILITY_NAME, TEST_MODULE_NAME);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
@@ -376,7 +377,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     sessionInfo->persistentId = TWO;
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(TWO, abilityRecord);
     abilityMs_->subManagersHelper_->uiAbilityManagers_.emplace(TWO, uiAbilityLifecycleManager);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
 }
 
@@ -408,19 +409,51 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001_002, TestSize.
     freeInstallInfo.want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     abilityMs_->freeInstallManager_->freeInstallList_.push_back(freeInstallInfo);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_EQ(ret, ERR_OK);
     abilityMs_->freeInstallManager_->freeInstallList_.clear();
     freeInstallInfo.isFreeInstallFinished = true;
     abilityMs_->freeInstallManager_->freeInstallList_.push_back(freeInstallInfo);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_EQ(ret, ERR_OK);
     abilityMs_->freeInstallManager_->freeInstallList_.clear();
     freeInstallInfo.isInstalled = true;
     abilityMs_->freeInstallManager_->freeInstallList_.push_back(freeInstallInfo);
-    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
+    EXPECT_NE(ret, ERR_OK);
+
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, true);
+    AppUtils::GetInstance().isSupportRestartAppWithWindow_.isLoaded = true;
+    AppUtils::GetInstance().isSupportRestartAppWithWindow_.value = false;
+    EXPECT_NE(ret, ERR_OK);
+
+    ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, true);
+    AppUtils::GetInstance().isSupportRestartAppWithWindow_.value = true;
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest StartUIAbilityBySCB_001_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SignRestartAppFlag
+ * FunctionPoints: SignRestartAppFlag
+ */
+HWTEST_F(AbilityManagerServiceEighthTest, SignRestartAppFlag_002, TestSize.Level1)
+{
+    int32_t uid = 100;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
+    abilityMs->subManagersHelper_->uiAbilityManagers_.emplace(uid, std::make_shared<UIAbilityLifecycleManager>());
+    abilityMs->subManagersHelper_->connectManagers_.emplace(uid, std::make_shared<AbilityConnectManager>(uid));
+
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled)
+        .WillRepeatedly(Return(true));
+    AbilityManagerService::SignRestartAppFlagParam param =
+        { uid, uid, "", AppExecFwk::MultiAppModeType::UNSPECIFIED, true, false, true, "testBundleName" };
+    auto ret = abilityMs->SignRestartAppFlag(param);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
