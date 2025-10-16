@@ -30,7 +30,7 @@ const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 const int MAX_URI_COUNT = 200000;
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
 
-bool CheckUseRawData(const std::vector<std::string> &uriVec)
+bool CheckUseRawData()
 {
     // broker can't use raw data
     return getuid() != AppUtils::GetInstance().GetCollaboratorBrokerUID();
@@ -81,7 +81,7 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
     for (auto &uri : uriVec) {
         uriStrVec.emplace_back(uri.ToString());
     }
-    bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
+    bool isWriteUriByRawData = CheckUseRawData();
     ErrCode res = INNER_ERR;
     int32_t funcResult = INNER_ERR;
     if (isWriteUriByRawData) {
@@ -125,7 +125,7 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     for (auto &uri : uriVec) {
         uriStrVec.emplace_back(uri.ToString());
     }
-    bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
+    bool isWriteUriByRawData = CheckUseRawData();
     ErrCode res = INNER_ERR;
     int32_t funcResult = INNER_ERR;
     if (isWriteUriByRawData) {
@@ -146,7 +146,31 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     res = uriPermMgr->GrantUriPermissionPrivileged(uriStrVec, flag, targetBundleName, appIndex,
         initiatorTokenId, hideSensitiveType, funcResult);
     if (res != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
+}
+
+int32_t UriPermissionManagerClient::GrantUriPermissionWithType(const std::vector<Uri> &uriVec, uint32_t flag,
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
+    const std::vector<int32_t> &permissionTypes)
+{
+    if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT || permissionTypes.size() != uriVec.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid param: %{public}d, %{public}zu, %{public}zu",
+            MAX_URI_COUNT, uriVec.size(), permissionTypes.size());
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
+    }
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->GrantUriPermissionWithType(uriVec, flag, targetBundleName, appIndex,
+        initiatorTokenId, hideSensitiveType, permissionTypes, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
         return INNER_ERR;
     }
     return funcResult;
@@ -255,7 +279,7 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
         TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
         return errorRes;
     }
-    bool isWriteUriByRawData = CheckUseRawData(uriVec);
+    bool isWriteUriByRawData = CheckUseRawData();
     if (isWriteUriByRawData) {
         UriPermissionRawData resRawData;
         UriPermissionRawData rawData;
@@ -280,6 +304,28 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
         errorRes = std::vector<bool>(uriVec.size(), false);
     }
     return errorRes;
+}
+
+std::vector<CheckResult> UriPermissionManagerClient::CheckUriAuthorizationWithType(
+    const std::vector<std::string> &uriVec, uint32_t flag, uint32_t tokenId)
+{
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
+    if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid uriVec %{public}zu-%{public}d", uriVec.size(), MAX_URI_COUNT);
+        return std::vector<CheckResult>(uriVec.size(), CheckResult());
+    }
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return std::vector<CheckResult>(uriVec.size(), CheckResult());
+    }
+    std::vector<CheckResult> funcResult;
+    uriPermMgr->CheckUriAuthorizationWithType(uriVec, flag, tokenId, funcResult);
+    if (funcResult.size() != uriVec.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid result: %{public}zu-%{public}zu", uriVec.size(), funcResult.size());
+        return std::vector<CheckResult>(uriVec.size(), CheckResult());
+    }
+    return funcResult;
 }
 
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()

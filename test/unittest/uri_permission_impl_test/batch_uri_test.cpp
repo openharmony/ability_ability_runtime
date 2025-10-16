@@ -98,7 +98,7 @@ HWTEST_F(BatchUriTest, Init_0300, TestSize.Level2)
     std::string targetAlterBundleName = "targetBundleName";
     auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, true);
     EXPECT_EQ(ret, 2);
-    EXPECT_EQ(batchUri->checkResult[0], true);
+    EXPECT_EQ(batchUri->checkResult[0].result, true);
 }
 
 /**
@@ -118,7 +118,7 @@ HWTEST_F(BatchUriTest, Init_0400, TestSize.Level2)
     std::string targetAlterBundleName = "targetBundleName";
     auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, false);
     EXPECT_EQ(ret, 2);
-    EXPECT_EQ(batchUri->checkResult[0], false);
+    EXPECT_EQ(batchUri->checkResult[0].result, false);
 }
 
 /**
@@ -141,6 +141,92 @@ HWTEST_F(BatchUriTest, Init_0500, TestSize.Level2)
 }
 
 /**
+ * @tc.number: Init_0600
+ * @tc.name: Init
+ * @tc.desc: Test Init.
+ */
+HWTEST_F(BatchUriTest, Init_0600, TestSize.Level2)
+{
+    auto batchUri = std::make_shared<BatchUri>();
+    ASSERT_NE(batchUri, nullptr);
+    std::vector<std::string> uriVec;
+    uriVec.push_back("file://com.example.caller/temp.txt");
+    uint32_t mode = 0;
+    std::string callerAlterBundleName = "com.example.caller";
+    std::string targetAlterBundleName = "target";
+    auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, false);
+    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(batchUri->checkResult[0].result, true);
+    EXPECT_EQ(batchUri->checkResult[0].permissionType, PolicyType::SELF_PATH);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos.size(), 0);
+}
+
+/**
+ * @tc.number: Init_0700
+ * @tc.name: Init
+ * @tc.desc: Test Init.
+ */
+HWTEST_F(BatchUriTest, Init_0700, TestSize.Level2)
+{
+    auto batchUri = std::make_shared<BatchUri>();
+    ASSERT_NE(batchUri, nullptr);
+    std::vector<std::string> uriVec;
+    uriVec.push_back("file://com.example.caller/temp.txt");
+    uint32_t mode = 1;
+    std::string callerAlterBundleName = "com.example.caller";
+    std::string targetAlterBundleName = "target";
+    auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, false);
+    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(batchUri->checkResult[0].result, true);
+    EXPECT_EQ(batchUri->checkResult[0].permissionType, PolicyType::SELF_PATH);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos.size(), 1);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos[0].type, PolicyType::SELF_PATH);
+}
+
+/**
+ * @tc.number: Init_0800
+ * @tc.name: Init
+ * @tc.desc: Test Init.
+ */
+HWTEST_F(BatchUriTest, Init_0800, TestSize.Level2)
+{
+    auto batchUri = std::make_shared<BatchUri>();
+    ASSERT_NE(batchUri, nullptr);
+    std::vector<std::string> uriVec;
+    uriVec.push_back("file://com.example.test/temp.txt");
+    uint32_t mode = 0;
+    std::string callerAlterBundleName = "caller";
+    std::string targetAlterBundleName = "target";
+    auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, true);
+    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(batchUri->checkResult[0].result, true);
+    EXPECT_EQ(batchUri->checkResult[0].permissionType, PolicyType::UNKNOWN);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos.size(), 0);
+}
+
+/**
+ * @tc.number: Init_0900
+ * @tc.name: Init
+ * @tc.desc: Test Init.
+ */
+HWTEST_F(BatchUriTest, Init_0900, TestSize.Level2)
+{
+    auto batchUri = std::make_shared<BatchUri>();
+    ASSERT_NE(batchUri, nullptr);
+    std::vector<std::string> uriVec;
+    uriVec.push_back("file://com.example.test/temp.txt");
+    uint32_t mode = 1;
+    std::string callerAlterBundleName = "caller";
+    std::string targetAlterBundleName = "target";
+    auto ret = batchUri->Init(uriVec, mode, callerAlterBundleName, targetAlterBundleName, true);
+    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(batchUri->checkResult[0].result, true);
+    EXPECT_EQ(batchUri->checkResult[0].permissionType, PolicyType::UNKNOWN);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos.size(), 1);
+    EXPECT_EQ(batchUri->selfBundlePolicyInfos[0].type, PolicyType::UNKNOWN);
+}
+
+/**
  * @tc.number: GetUriToGrantByPolicy_0100
  * @tc.name: GetUriToGrantByPolicy
  * @tc.desc: Test GetUriToGrantByPolicy.
@@ -155,7 +241,7 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0100, TestSize.Level2)
     batchUri->selfBundlePolicyInfos.push_back(policyInfo);
     batchUri->otherPolicyInfos.push_back(policyInfo);
     batchUri->otherIndexes.push_back(0);
-    batchUri->checkResult.push_back(false);
+    batchUri->checkResult.push_back(CheckResult(false, 0));
     std::vector<PolicyInfo> policys;
     auto ret = batchUri->GetUriToGrantByPolicy(policys);
     EXPECT_FALSE(ret);
@@ -176,7 +262,7 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0200, TestSize.Level2)
     batchUri->selfBundlePolicyInfos.push_back(policyInfo);
     batchUri->otherPolicyInfos.push_back(policyInfo);
     batchUri->otherIndexes.push_back(0);
-    batchUri->checkResult.push_back(true);
+    batchUri->checkResult.push_back(CheckResult(true, 0));
     batchUri->isTargetBundleUri.push_back(true);
     std::vector<PolicyInfo> policys;
     auto ret = batchUri->GetUriToGrantByPolicy(policys);
@@ -196,13 +282,17 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0300, TestSize.Level2)
     policyInfo.path = "testPath";
     policyInfo.mode = 0;
     batchUri->selfBundlePolicyInfos.push_back(policyInfo);
+    batchUri->selfBundlePolicyInfos[0].type = PolicyType::SELF_PATH;
     batchUri->otherPolicyInfos.push_back(policyInfo);
-    batchUri->otherIndexes.push_back(0);
-    batchUri->checkResult.push_back(true);
+    batchUri->otherIndexes.push_back(1);
+    batchUri->checkResult = { CheckResult(true, PolicyType::SELF_PATH),
+        CheckResult(true, PolicyType::AUTHORIZATION_PATH) };
     batchUri->isTargetBundleUri.push_back(false);
     std::vector<PolicyInfo> policys;
     auto ret = batchUri->GetUriToGrantByPolicy(policys);
     EXPECT_TRUE(ret);
+    EXPECT_EQ(policys[0].type, PolicyType::SELF_PATH);
+    EXPECT_EQ(policys[1].type, PolicyType::AUTHORIZATION_PATH);
 }
 
 /**
@@ -227,11 +317,11 @@ HWTEST_F(BatchUriTest, GetUriToGrantByPolicy_0500, TestSize.Level2)
 
     std::vector<PolicyInfo> docsPolicyInfoVec;
     std::vector<PolicyInfo> bundlePolicyInfoVec;
-    batchUri->checkResult = { true, true };
+    batchUri->checkResult = { CheckResult(true, 2), CheckResult(true, 2) };
     auto count = batchUri->GetUriToGrantByPolicy(docsPolicyInfoVec, bundlePolicyInfoVec);
     EXPECT_EQ(count, 2);
-    EXPECT_EQ(docsPolicyInfoVec.size(), 1);
-    EXPECT_EQ(bundlePolicyInfoVec.size(), 1);
+    EXPECT_EQ(docsPolicyInfoVec[0].type, 2);
+    EXPECT_EQ(bundlePolicyInfoVec[0].type, 2);
 }
 
 /**
@@ -262,7 +352,7 @@ HWTEST_F(BatchUriTest, IsAllUriPermissioned_0100, TestSize.Level2)
 {
     auto batchUri = std::make_shared<BatchUri>();
     ASSERT_NE(batchUri, nullptr);
-    batchUri->checkResult.push_back(false);
+    batchUri->checkResult.push_back(CheckResult(false, 0));
     auto ret = batchUri->IsAllUriPermissioned();
     EXPECT_FALSE(ret);
 }
@@ -278,9 +368,57 @@ HWTEST_F(BatchUriTest, IsAllUriPermissioned_0200, TestSize.Level2)
     ASSERT_NE(batchUri, nullptr);
     auto ret = batchUri->IsAllUriPermissioned();
     EXPECT_TRUE(ret);
-    batchUri->checkResult.push_back(true);
+    batchUri->checkResult.push_back(CheckResult(true, 0));
     ret = batchUri->IsAllUriPermissioned();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: SetCheckUriAuthorizationResult_0100
+ * @tc.name: SetCheckUriAuthorizationResult
+ * @tc.desc: Test SetCheckUriAuthorizationResult.
+ */
+HWTEST_F(BatchUriTest, SetCheckUriAuthorizationResult_0100, TestSize.Level2)
+{
+    auto batchUri = BatchUri();
+    batchUri.checkResult = { CheckResult(true, 0) };
+    std::vector<bool> funcResult;
+    auto ret = batchUri.SetCheckUriAuthorizationResult(funcResult);
+    EXPECT_FALSE(ret);
+
+    funcResult = { false };
+    ret = batchUri.SetCheckUriAuthorizationResult(funcResult);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(funcResult[0]);
+}
+
+/**
+ * @tc.number: SetCheckProxyByPolicyResult_0100
+ * @tc.name: SetCheckProxyByPolicyResult
+ * @tc.desc: Test SetCheckProxyByPolicyResult.
+ */
+HWTEST_F(BatchUriTest, SetCheckProxyByPolicyResult_0100, TestSize.Level2)
+{
+    auto batchUri = BatchUri();
+    batchUri.proxyIndexesByPolicy = { 0 };
+    batchUri.checkResult = { CheckResult(false, 0) };
+    std::vector<bool> proxyResultByPolicy;
+    auto ret = batchUri.SetCheckProxyByPolicyResult(proxyResultByPolicy);
+    EXPECT_FALSE(ret);
+
+    batchUri.proxyIndexesByPolicy = { 0 };
+    proxyResultByPolicy = { false };
+    ret = batchUri.SetCheckProxyByPolicyResult(proxyResultByPolicy);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(batchUri.checkResult[0].result);
+    EXPECT_EQ(batchUri.checkResult[0].permissionType, 0);
+
+    batchUri.proxyIndexesByPolicy = { 0 };
+    proxyResultByPolicy = { true };
+    ret = batchUri.SetCheckProxyByPolicyResult(proxyResultByPolicy);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(batchUri.checkResult[0].result);
+    EXPECT_EQ(batchUri.checkResult[0].permissionType, PolicyType::AUTHORIZATION_PATH);
 }
 }
 }
