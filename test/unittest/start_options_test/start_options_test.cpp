@@ -168,5 +168,31 @@ HWTEST_F(StartOptionsTest, MarshallingTwo_test_001, TestSize.Level1)
     bool marshallResult = startOptions.MarshallingTwo(parcel);
     EXPECT_EQ(marshallResult, true);
 }
+
+/**
+ * @tc.name: start_options_test_006
+ * @tc.desc: test class StartOptions SetCurrentProcessName function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsTest, start_options_test_006, TestSize.Level1)
+{
+    StartOptions startOptions;
+    std::string processName = "test";
+    startOptions.SetCurrentProcessName(processName);
+    EXPECT_EQ(startOptions.GetCurrentProcessName(), processName);
+}
+
+/**
+ * @tc.name: start_options_test_007
+ * @tc.desc: test class StartOptions SetCurrentProcessName function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsTest, start_options_test_007, TestSize.Level1)
+{
+    StartOptions startOptions;
+    std::string processName = "";
+    startOptions.SetCurrentProcessName(processName);
+    EXPECT_EQ(startOptions.GetCurrentProcessName(), processName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
