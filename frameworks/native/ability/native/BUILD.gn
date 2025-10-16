@@ -1204,6 +1204,7 @@ ohos_shared_library("ets_form_extension") {
   if (ability_runtime_graphics) {
     include_dirs = [
       "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+      "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
       "${ability_runtime_path}/frameworks/ets/ani/form_extension_ability/include",
       "${ability_runtime_path}/interfaces/kits/native/ability/native",
       "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
