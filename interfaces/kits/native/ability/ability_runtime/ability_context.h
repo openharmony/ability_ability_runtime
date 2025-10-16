@@ -397,6 +397,7 @@ public:
     virtual void SetHookOff(bool hookOff) = 0;
     virtual ErrCode RevokeDelegator() = 0;
     virtual ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) = 0;
+    virtual ErrCode RestartAppWithWindow(const AAFwk::Want &want) = 0;
     void SetScreenMode(int32_t screenMode)
     {
         screenMode_ = screenMode;

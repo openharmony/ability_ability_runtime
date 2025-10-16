@@ -1875,7 +1875,7 @@ int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &in
         if (appRecord == nullptr || appRecord->GetUid() != uid || appRecord->GetInstanceKey() != instanceKey) {
             continue;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "sign");
+        TAG_LOGI(AAFwkTag::APPMGR, "SignRestartAppFlag");
         appRecord->SetRestartAppFlag(true);
         return ERR_OK;
     }

@@ -989,7 +989,8 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag)
+int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag,
+    bool isRestart)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start by scb");
@@ -1013,8 +1014,8 @@ int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool
             return INNER_ERR;
         }
     }
-    if (!data.WriteUint32(sceneFlag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag write fail");
+    if (!data.WriteUint32(sceneFlag) || !data.WriteBool(isRestart)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag or isRestart write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::START_UI_ABILITY_BY_SCB, data, reply, option);
@@ -7331,6 +7332,23 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityInCurrentProcess(const Want &want
         return ret;
     }
     return reply.ReadInt32();
+}
+
+bool AbilityManagerProxy::IsRestartAppLimit()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return false;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::IS_RESTART_APP_LIMIT, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return false;
+    }
+
+    return reply.ReadBool();
 }
 } // namespace AAFwk
 } // namespace OHOS
