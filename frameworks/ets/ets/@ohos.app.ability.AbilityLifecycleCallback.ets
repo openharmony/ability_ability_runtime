@@ -31,16 +31,16 @@ export type OnWindowStageWillCreateFn = (ability: UIAbility, windowStage: window
 export type OnWindowStageWillRestoreFn = (ability: UIAbility, windowStage: window.WindowStage) => void;
 
 
-interface AbilityLifecycleCallback {
-  onAbilityCreate(ability: UIAbility): void;
-  onAbilityForeground(ability: UIAbility): void;
-  onAbilityBackground(ability: UIAbility): void;
-  onAbilityDestroy(ability: UIAbility): void;
-  onWindowStageCreate(ability: UIAbility, windowStage: window.WindowStage): void;
-  onWindowStageDestroy(ability: UIAbility, windowStage: window.WindowStage): void;
-  onAbilityContinue(ability: UIAbility): void;
-  onWindowStageInactive(ability: UIAbility, windowStage: window.WindowStage): void;
-  onWindowStageActive(ability: UIAbility, windowStage: window.WindowStage): void;
+export default class AbilityLifecycleCallback {
+  onAbilityCreate(ability: UIAbility): void {}
+  onAbilityForeground(ability: UIAbility): void {}
+  onAbilityBackground(ability: UIAbility): void {}
+  onAbilityDestroy(ability: UIAbility): void {}
+  onWindowStageCreate(ability: UIAbility, windowStage: window.WindowStage): void {}
+  onWindowStageDestroy(ability: UIAbility, windowStage: window.WindowStage): void {}
+  onAbilityContinue(ability: UIAbility): void {}
+  onWindowStageInactive(ability: UIAbility, windowStage: window.WindowStage): void {}
+  onWindowStageActive(ability: UIAbility, windowStage: window.WindowStage): void {}
 
   onNewWant?: OnNewWantFn;
   onAbilityWillBackground?: OnAbilityWillBackgroundFn;
@@ -56,31 +56,3 @@ interface AbilityLifecycleCallback {
   onWindowStageWillCreate?: OnWindowStageWillCreateFn;
   onWindowStageWillRestore?: OnWindowStageWillRestoreFn;
 }
-
-class AbilityLifecycleCallbackInner implements AbilityLifecycleCallback {
-  onAbilityCreate(ability: UIAbility): void {};
-  onAbilityForeground(ability: UIAbility): void {};
-  onAbilityBackground(ability: UIAbility): void {};
-  onAbilityDestroy(ability: UIAbility): void {};
-  onWindowStageCreate(ability: UIAbility, windowStage: window.WindowStage): void {};
-  onWindowStageDestroy(ability: UIAbility, windowStage: window.WindowStage): void {};
-  onAbilityContinue(ability: UIAbility): void {};
-  onWindowStageInactive(ability: UIAbility, windowStage: window.WindowStage): void {};
-  onWindowStageActive(ability: UIAbility, windowStage: window.WindowStage): void {};
-
-  onNewWant?: OnNewWantFn;
-  onAbilityWillBackground?: OnAbilityWillBackgroundFn;
-  onAbilityWillForeground?: OnAbilityWillForegroundFn;
-  onAbilityWillCreate?: OnAbilityWillCreateFn;
-  onWindowStageWillDestroy?: OnWindowStageWillDestroyFn;
-  onAbilityWillDestroy?: OnAbilityWillDestroyFn;
-  onWindowStageRestore?: OnWindowStageRestoreFn;
-  onAbilitySaveState?: OnAbilitySaveStateFn;
-  onAbilityWillContinue?: OnAbilityWillContinueFn;
-  onAbilityWillSaveState?: OnAbilityWillSaveStateFn;
-  onWillNewWant?: OnWillNewWantFn;
-  onWindowStageWillCreate?: OnWindowStageWillCreateFn;
-  onWindowStageWillRestore?: OnWindowStageWillRestoreFn;
-}
-
-export default AbilityLifecycleCallback;
