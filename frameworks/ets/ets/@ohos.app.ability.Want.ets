@@ -18,15 +18,47 @@ import rpc from '@ohos.rpc';
 
 type valueType = NullishType;
 const DOMAIN_ID = 0xD001300;
-const TAG = 'WantSerializeTool';
+const TAG = 'RecordSerializeTool';
+const int32Max: number = Math.pow(2, 31) - 1;
+const int32Min: number = -Math.pow(2, 31);
+
+const PARAM_RESV_WINDOW_MODE = 'ohos.aafwk.param.windowMode';
+const PARAM_RESV_DISPLAY_ID = 'ohos.aafwk.param.displayId';
+
+const TYPE_PROPERTY = 'type';
+const REMOTE_OBJECT = 'RemoteObject';
+const VALUE_PROPERTY = 'value';
+const PROPERTIES_SIZE: number = 2;
+
+interface ComplexArrayData {
+  intList: Array<int>;
+  boolList: Array<boolean>;
+  doubleList: Array<double>;
+  stringList: Array<string>;
+  objectList: Array<Any>;
+}
 
 class RecordWriter {
   private buffer = new StringBuilder();
   private store = new Set<Object>();
+  private wantParams: NativeWantParams | null = null;
 
-  public write(obj: Object): String {
-    this.writeObject(obj);
-    return this.buffer.toString();
+  constructor(wantParams: long) {
+    this.wantParams = new NativeWantParams(wantParams);
+  }
+
+  public write(obj: Object): boolean {
+    return this.parseRecord(obj);
+  }
+
+  private parseRecord(obj: Any): boolean {
+    if (obj instanceof Record) {
+      this.writeRecordToNative(obj as Object as Record<string, valueType>, this.wantParams);
+      return true;
+    } else {
+      hilog.error(DOMAIN_ID, TAG, `input object not record type`);
+      return false;
+    }
   }
 
   private writeObject(obj: NullishType): void {
@@ -50,6 +82,105 @@ class RecordWriter {
         this.buffer.append('null');
       }
     }
+  }
+
+  private tupleToArray(tuple: Tuple): Array<valueType> {
+    let arr: Array<valueType> = [];
+
+    const objType = Type.of(tuple as Object) as ClassType;
+    const writableFields = this.getWritableFields(objType, reflect.Value.of(tuple as Object) as ClassValue);
+    for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
+        const fieldValue = writableFields[fieldIdx][1].getData();
+        arr.push(fieldValue);
+    }
+    return arr;
+  }
+
+  private writeObjectToNative(key: string, obj: Any, wantParams?: NativeWantParams | null): boolean {
+    let localWantParams = (wantParams === undefined) ? this.wantParams : wantParams;
+    hilog.debug(DOMAIN_ID, TAG, `key: %{public}s, value type: %{public}s`, JSON.stringify(key), typeof obj);
+    // skip reserved param
+    if (this.blackListFilter(key)) {
+      hilog.debug(DOMAIN_ID, TAG, `%{public}s is filtered.`, JSON.stringify(key));
+      return true;
+    }
+    if (obj === null) {
+      hilog.debug(DOMAIN_ID, TAG, `value is null, key: %{public}s`, JSON.stringify(key));
+      return true;
+    } else if (obj === undefined) {
+      hilog.debug(DOMAIN_ID, TAG, `value is undefined, key: %{public}s`, JSON.stringify(key));
+      return true;
+    } else if (obj instanceof String) {
+      localWantParams?.setParam(key, obj as String);
+      return true;
+    } else if (this.writeValueTypeToNative(localWantParams, key, obj as Object)) {
+      // nothing to do
+      return true;
+    } else if (obj instanceof Array) {
+      this.writeArrayToNative(key, obj as Object as Array<valueType>, localWantParams);
+      return true;
+    } else if (obj instanceof Tuple) {
+      let tupleAsArray = this.tupleToArray(obj as Tuple);
+      this.writeArrayToNative(key, tupleAsArray as Object as Array<valueType>, localWantParams);
+      return true;
+    } else if (this.isRemoteObjectFormat(obj)) { // consistent with napi behavior
+      hilog.debug(DOMAIN_ID, TAG, `key: %{public}s, value is rpc.RemoteObject type`, JSON.stringify(key));
+      let newWantParams = new NativeWantParams();
+       if (this.writeRemoteObjectToNative(obj as Object as Record<string, valueType>, newWantParams) === true) {
+          localWantParams?.setParam(key, newWantParams);
+       }
+      return true;
+    } else if (obj instanceof Record) {
+      let newWantParams = new NativeWantParams();
+      this.writeRecordToNative(obj as Object as Record<string, valueType>, newWantParams);
+      localWantParams?.setParam(key, newWantParams);
+      return true;
+    } else {
+      const objType = Type.of(obj);
+      if (objType instanceof ClassType) {
+        // enum value are string
+        if (typeof obj === 'string') {
+          hilog.debug(DOMAIN_ID, TAG, `key: %{public}s,  value is ClassType string`, key);
+          let value: string = String(obj as Object);
+          localWantParams?.setParam(key, value);
+          return true;
+        }
+        // enum value are number
+        if (typeof obj === 'number') {
+          hilog.debug(DOMAIN_ID, TAG, `key: %{public}s,  value is ClassType number`, key);
+          let value: string = String(obj as Object);
+          let num: number = Number(value);
+          if (Number.isInteger(num)) {
+            if (num >= int32Min && num <= int32Max) {
+              localWantParams?.setParam(key, num as int);
+            } else {
+              localWantParams?.setParam(key, num as double);
+            }
+          } else {
+            localWantParams?.setParam(key, num as double);
+          }
+          return true;
+        }
+        let newWantParams = new NativeWantParams();
+        this.writeClassValueToNative(obj as Object, objType as ClassType, newWantParams);
+        localWantParams?.setParam(key, newWantParams);
+        return true;
+      } else {
+        hilog.error(DOMAIN_ID, TAG, `object type not support parse, key: %{public}s`, key);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private blackListFilter(key: string): boolean {
+    if (key === PARAM_RESV_WINDOW_MODE) {
+      return true;
+    }
+    if (key === PARAM_RESV_DISPLAY_ID) {
+      return true;
+    }
+    return false;
   }
 
   private writeValueType(obj: Object): boolean {
@@ -85,6 +216,49 @@ class RecordWriter {
     }
   }
 
+  private writeValueTypeToNative(wantParams: NativeWantParams | null, key: string, obj: Object): boolean {
+    if (obj instanceof Boolean) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Byte) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Char) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Short) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Int) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Long) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Float) {
+      wantParams?.setParam(key, obj.unboxed());
+      return true;
+    } else if (obj instanceof Double) {
+      // consistent with napi behavior
+      if (key === VALUE_PROPERTY) {
+        let value: double = obj.unboxed();
+        if (Number.isInteger(value) && value >= int32Min && value <= int32Max) {
+          wantParams?.setParam(key, value as int);
+        } else {
+          wantParams?.setParam(key, value as double);
+        }
+      } else {
+        wantParams?.setParam(key, obj.unboxed());
+      }
+      return true;
+    } else if (obj instanceof BigInt) {
+      // consistent with napi behavior
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private writeArray(arr: Array<valueType>): void {
     this.buffer.append('[');
     const length = arr.length as int;
@@ -102,6 +276,180 @@ class RecordWriter {
     }
     this.store.delete(arr);
     this.buffer.append(']');
+  }
+
+  private unwrapArrayElementNumber(element: valueType, complexArray: ComplexArrayData): void {
+    if (element instanceof Int) {
+      hilog.debug(DOMAIN_ID, TAG, `array value type Int`);
+      if (complexArray.doubleList.length > 0) {
+        complexArray.intList.forEach(num => {
+          complexArray.doubleList.push(Number(num));
+        });
+        complexArray.intList = [];
+        complexArray.doubleList.push((element as number).unboxed());
+      } else {
+        complexArray.intList.push((element as int).unboxed());
+      }
+    } else if (element instanceof Long) {
+      hilog.debug(DOMAIN_ID, TAG, `array value type Long`);
+      // consistent with napi behavior
+      const doubleValue = Number(element.unboxed());
+      if (complexArray.intList.length > 0) {
+        complexArray.intList.forEach(num => {
+          complexArray.doubleList.push(Number(num));
+        });
+        complexArray.intList = [];
+      }
+      complexArray.doubleList.push(doubleValue);
+    } else if (element instanceof Double) {
+      hilog.debug(DOMAIN_ID, TAG, `array value type Double`);
+      if (complexArray.intList.length > 0) {
+        complexArray.intList.forEach(num => {
+          complexArray.doubleList.push(Number(num));
+        });
+        complexArray.intList = [];
+      }
+      complexArray.doubleList.push((element as number).unboxed());
+    } else {
+      const objType = Type.of(element);
+      // enum value are number
+      if (objType instanceof ClassType) {
+        let value: string = String(element as Object);
+        let enumNum: number = Number(value);
+        if (Number.isInteger(enumNum) && enumNum >= int32Min && enumNum <= int32Max) {
+          hilog.debug(DOMAIN_ID, TAG, `array value type Class Int`);
+          if (complexArray.doubleList.length > 0) {
+            complexArray.intList.forEach(num => {
+              complexArray.doubleList.push(Number(num));
+            });
+            complexArray.intList = [];
+            complexArray.doubleList.push(enumNum as double);
+          } else {
+            complexArray.intList.push(enumNum as int);
+          }
+        } else {
+          hilog.debug(DOMAIN_ID, TAG, `array value type Class double`);
+          if (complexArray.intList.length > 0) {
+            complexArray.intList.forEach(num => {
+              complexArray.doubleList.push(Number(num));
+            });
+            complexArray.intList = [];
+          }
+          complexArray.doubleList.push(enumNum as double);
+        }
+      }
+    }
+  }
+
+  private unwrapArray(arr: Array<valueType>, complexArray: ComplexArrayData): void {
+    const length = arr.length as int;
+    this.checkReferencesCycle(arr);
+    this.store.add(arr);
+    for (let idx = 0; idx < length; idx++) {
+      const element = arr[idx];
+      if (element === null || element === undefined) {
+        continue;
+      }
+      const valueType = typeof element;
+      hilog.debug(DOMAIN_ID, TAG, `array value type: %{public}s`, valueType);
+      switch (valueType) {
+        case 'string':
+          if (element instanceof String) {
+            complexArray.stringList.push(element as string);
+          } else {
+            const objType = Type.of(element);
+            if (objType instanceof ClassType) {
+              let value: string = String(element as Object);
+              complexArray.stringList.push(value as string);
+            }
+          }
+          break;
+        case 'boolean':
+          complexArray.boolList.push((element as Boolean).unboxed());
+          break;
+        case 'number':
+          try {
+            this.unwrapArrayElementNumber(element, complexArray);
+          } catch (err) {
+            hilog.error(DOMAIN_ID, TAG, `unwrapArray number error: ${err}`);
+          }
+          break;
+        case 'object':
+          complexArray.objectList.push(element);
+          break;
+        default:
+          hilog.error(DOMAIN_ID, TAG, `unknown array value type: %{public}s`, JSON.stringify(arr[idx]));
+          break;
+      }
+    }
+    this.store.delete(arr);
+  }
+
+  private handleArrayObject(obj: object, wantParams: NativeWantParams): boolean {
+    if (Array.isArray(obj)) { // consistent with napi behavior
+      let localArr: Array<valueType> = obj as Array<valueType>;
+      hilog.debug(DOMAIN_ID, TAG, `array object element type array, length: %{public}d`, localArr.length);
+      for (let i = 0; i < localArr.length; i++) {
+        this.writeObjectToNative(i.toString(), localArr[i] as Object, wantParams);
+      }
+      wantParams.setParam("length", localArr.length as int);
+    } else if (obj instanceof Tuple) { // consistent with napi behavior
+      let tupleAsArray = this.tupleToArray(obj as Tuple);
+      hilog.debug(DOMAIN_ID, TAG, `array object element type tuple, length: %{public}d`, tupleAsArray.length);
+      for (let i = 0; i < tupleAsArray.length; i++) {
+        this.writeObjectToNative(i.toString(), tupleAsArray[i] as Object, wantParams);
+      }
+      wantParams.setParam("length", tupleAsArray.length as int);
+    } else if (obj instanceof Record) {
+      hilog.debug(DOMAIN_ID, TAG, `array object element type Record`);
+      this.writeRecordToNative(obj as Object as Record<string, valueType>, wantParams);
+    } else {
+      const objType = Type.of(obj);
+      if (objType instanceof ClassType) {
+        hilog.debug(DOMAIN_ID, TAG, `array object element type class`);
+        this.writeClassValueToNative(obj, objType as ClassType, wantParams);
+      } else {
+        hilog.error(DOMAIN_ID, TAG, `array member object type invalid`);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private writeArrayToNative(key: string, arr: Array<valueType>, wantParams: NativeWantParams | null): void {
+    let complexArray: ComplexArrayData = {
+      intList: [],
+      boolList: [],
+      doubleList: [],
+      stringList: [],
+      objectList: []
+    }
+    this.unwrapArray(arr, complexArray);
+    if (complexArray.objectList.length > 0) {
+      hilog.debug(DOMAIN_ID, TAG, `array %{public}s objectList size: %{public}d`, key, complexArray.objectList.length);
+      let wantParamsArray: Array<NativeWantParams> = [];
+      let newWantParams: NativeWantParams;
+      for (let i = 0; i < complexArray.objectList.length; i++) {
+        newWantParams = new NativeWantParams();
+        if (this.handleArrayObject(complexArray.objectList[i] as object, newWantParams)!= true) {
+          hilog.error(DOMAIN_ID, TAG, `parse array member failed, index: %{public}d`, i);
+        }
+        wantParamsArray.push(newWantParams);
+      }
+      wantParams?.SetArrayWantParams(key, wantParamsArray);
+    } else if (complexArray.stringList.length > 0) {
+      hilog.debug(DOMAIN_ID, TAG, `array %{public}s stringList size: %{public}d`, key, complexArray.stringList.length);
+      wantParams?.SetArrayStringParam(key, complexArray.stringList);
+    } else if (complexArray.intList.length > 0) {
+      hilog.debug(DOMAIN_ID, TAG, `array %{public}s intList size: %{public}d`, key, complexArray.intList.length);
+      wantParams?.SetArrayIntParam(key, complexArray.intList);
+    } else if (complexArray.boolList.length > 0) {
+      hilog.debug(DOMAIN_ID, TAG, `array %{public}s boolList size: %{public}d`, key, complexArray.boolList.length);
+      wantParams?.SetArrayBooleanParam(key, complexArray.boolList);
+    } else if (complexArray.doubleList.length > 0) {
+      hilog.debug(DOMAIN_ID, TAG, `array %{public}s doubleList size: %{public}d`, key, complexArray.doubleList.length);
+      wantParams?.SetArrayDoubleParam(key, complexArray.doubleList);
+    }
   }
 
   private writeBuildArray(arr: Object, arrayValue: ArrayValue): void {
@@ -145,6 +493,154 @@ class RecordWriter {
     this.buffer.append('}');
   }
 
+  private isRemoteObjectFormat(obj: valueType): boolean {
+    if (!(obj instanceof Record)) {
+      return false;
+    }
+    let hasType = false;
+    let hasValue = false;
+    let typeValue: valueType = undefined;
+    let valueValue: valueType = undefined;
+    let count = 0;
+    let rec: Record<string, valueType> = obj as Object as Record<string, valueType>;
+    for (let key of rec.keys()) {
+      if (rec[key] === undefined || rec[key] === null) {
+        return false;
+      }
+      if (key === TYPE_PROPERTY) {
+        hasType = true;
+        typeValue = rec[key];
+      } else if (key === VALUE_PROPERTY) {
+        hasValue = true;
+        valueValue = rec[key];
+      }
+      count++;
+    }
+
+    if (count !== PROPERTIES_SIZE) {
+      return false;
+    }
+    if (!hasType || !hasValue) {
+      return false;
+    }
+    if (typeof typeValue !== 'string' || typeValue !== REMOTE_OBJECT) {
+      return false;
+    }
+    if (!(valueValue instanceof rpc.RemoteObject)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private writeRemoteObjectToNative(obj: Record<string, valueType>, wantParams: NativeWantParams | null): boolean {
+    for (let key of obj.keys()) {
+      if (key === TYPE_PROPERTY) {
+        wantParams?.setParam(TYPE_PROPERTY, REMOTE_OBJECT);
+      } else if (key === VALUE_PROPERTY) {
+        if (wantParams === null || wantParams.setParam(VALUE_PROPERTY, obj[key] as rpc.RemoteObject) != true) {
+          hilog.error(DOMAIN_ID, TAG, `write RemoteObject to native failed`);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private writeRecordToNative(rec: Record<string, valueType>, wantParams: NativeWantParams | null): boolean {
+    this.checkReferencesCycle(rec);
+    this.store.add(rec);
+    let isSuccess = false;
+    for (let key of rec.keys()) {
+      if (rec[key] === undefined || rec[key] === null) {
+        continue;
+      }
+      if (this.writeObjectToNative(key as String, rec[key] as Object, wantParams) != true) {
+        hilog.error(DOMAIN_ID, TAG, `write object to native failed, key: %{public}s`, JSON.stringify(key as String));
+      }
+      isSuccess = true;
+    }
+    this.store.delete(rec);
+    if (isSuccess != true) {
+      hilog.info(DOMAIN_ID, TAG, `null record`);
+    }
+    return isSuccess;
+  }
+
+  private writeClassValueToNative(obj: Object, objType: ClassType, wantParams: NativeWantParams): boolean {
+    const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue);
+
+    let isSuccess = false;
+    if (writableFields.length > 0) {
+      this.checkReferencesCycle(obj);
+      this.store.add(obj);
+      isSuccess = this.writeClassFields(writableFields, wantParams);
+      this.store.delete(obj);
+    }
+
+    return isSuccess;
+  }
+
+  private writeField(fieldName: string, fieldVal: Any, wantParams: NativeWantParams): boolean {
+    if (fieldVal === undefined) {
+      return false;
+    }
+
+    const fieldValType = Type.of(fieldVal);
+    if (fieldValType instanceof LambdaType) {
+      return false;
+    }
+
+    return this.writeObjectToNative(fieldName, fieldVal, wantParams);
+  }
+
+  private writeClassFields(writableFields: Array<[Field, reflect.Value]>, wantParams: NativeWantParams): boolean {
+    const FIELD_TYPE = 0
+    const FIELD_VALUE = 1
+
+    let isSuccess = false;
+    for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
+      const fieldTypeValuePair = writableFields[fieldIdx];
+
+      const objField = fieldTypeValuePair[0] as Field;
+      const objFieldValue = fieldTypeValuePair[1] as reflect.Value;
+
+      if (this.writeField(objField.getName(), objFieldValue.getData(), wantParams) == true) {
+        isSuccess= true;
+      }
+    }
+
+    return isSuccess;
+  }
+
+  private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
+    return fields.findIndex((value, index, array) => {return value[0].getName() == field.getName()});
+  }
+
+  private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
+    const writableFields = new Array<[Field, reflect.Value]>();
+    let fieldRename : string | undefined = undefined;
+
+    const fieldsCount = classValue.getFieldsNum();
+    for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
+      const field = classType.getField(fieldIdx);
+      if (field.isStatic()) {
+        continue;
+      }
+      const index: int = this.findKeyIndex(field, writableFields).toInt();
+      const fieldValue = classValue.getField(fieldIdx);
+
+      const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue];
+      if (fieldRename != undefined || index == -1) {
+        writableFields.push(fieldTypeValuePair);
+      } else {
+        writableFields[index] = fieldTypeValuePair;
+      }
+    }
+
+    return writableFields;
+  }
+
   private checkReferencesCycle(obj: Object): void {
     if (this.store.has(obj)) {
       throw new TypeError('cyclic object value');
@@ -153,12 +649,12 @@ class RecordWriter {
 }
 
 export class RecordSerializeTool {
-  public static stringifyNoThrow(obj: Record<string, Object>): String {
+  public static unwrapRecordNoThrow(obj: Record<string, Object>, nativeWantParams: long): boolean {
     try {
-      return JSON.stringify(obj as Object as Record<string, NullishType>);
+      return RecordSerializeTool.unwrapRecord(obj as Object as Record<string, Any>, nativeWantParams);
     } catch (err) {
       hilog.error(DOMAIN_ID, TAG, `RecordSerializeTool.stringify error: ${err}`);
-      return '';
+      return false;
     }
   }
 
@@ -171,8 +667,8 @@ export class RecordSerializeTool {
     }
   }
 
-  public static stringify(obj: Record<string, valueType>): String {
-    return new RecordWriter().write(obj);
+  public static unwrapRecord(obj: Record<string, valueType>, nativeWantParams: long): boolean {
+    return new RecordWriter(nativeWantParams).write(obj);
   }
 
   public static parse(text: string): Record<string, valueType> {

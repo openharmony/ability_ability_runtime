@@ -1222,33 +1222,19 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
         TAG_LOGE(AAFwkTag::ANI, "RecordSerializeTool class null");
         return false;
     }
-    ani_static_method stringifyMethod = nullptr;
-    status = env->Class_FindStaticMethod(cls, "stringifyNoThrow", nullptr, &stringifyMethod);
+    ani_static_method unwrapRecordMethod = nullptr;
+    status = env->Class_FindStaticMethod(cls, "unwrapRecordNoThrow", nullptr, &unwrapRecordMethod);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to get stringifyNoThrow method, status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "failed to get unwrapRecordNoThrow method, status: %{public}d", status);
         return false;
     }
-    ani_ref wantParamsAniString;
-    status = env->Class_CallStaticMethod_Ref(cls, stringifyMethod, &wantParamsAniString, param);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to call stringifyNoThrow method, status: %{public}d", status);
+    ani_boolean isSuccess;
+    ani_long wantParamsLong = reinterpret_cast<ani_long>(&wantParams);
+    status = env->Class_CallStaticMethod_Boolean(cls, unwrapRecordMethod, &isSuccess, param, wantParamsLong);
+    if (status != ANI_OK || isSuccess != ANI_TRUE) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to call unwrapRecordNoThrow method, status: %{public}d", status);
         return false;
     }
-    std::string wantParamsString;
-    if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
-        TAG_LOGE(AAFwkTag::ANI, "GetStdString failed");
-        return false;
-    }
-    if (wantParamsString.empty()) {
-        TAG_LOGE(AAFwkTag::ANI, "wantParamsString empty");
-        return false;
-    }
-    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString, nullptr, false);
-    if (wantParamsJson.is_discarded()) {
-        TAG_LOGE(AAFwkTag::ANI, "Failed to parse json string");
-        return false;
-    }
-    from_json(wantParamsJson, wantParams);
     return true;
 }
 
