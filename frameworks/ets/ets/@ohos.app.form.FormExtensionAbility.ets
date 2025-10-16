@@ -14,10 +14,13 @@
  */
 
 import formBindingData from '@ohos.app.form.formBindingData';
+import formInfo from '@ohos.app.form.formInfo';
 import FormExtensionContext from './application/FormExtensionContext';
 import Want from '@ohos.app.ability.Want';
+import { Configuration } from '@ohos.app.ability.Configuration';
 
 type OnStopFn = () => void;
+type OnAcquireFormStateFn = (want: Want) => formInfo.FormState;
 
 export default class FormExtensionAbility {
   public context: FormExtensionContext = new FormExtensionContext();
@@ -53,6 +56,12 @@ export default class FormExtensionAbility {
   onRemoveForm(formId: string): void {
     console.log(`FormExtensionAbility onRemoveForm, formId: ${formId}`);
   }
+
+  onConfigurationUpdate(newConfig: Configuration): void {
+    console.log(`FormExtensionAbility onConfigurationUpdate`);
+  }
+
+  public onAcquireFormState?: OnAcquireFormStateFn;
   
   public onStop?: OnStopFn;
 }
