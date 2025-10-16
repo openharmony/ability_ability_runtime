@@ -230,6 +230,11 @@ bool KioskManager::IsInKioskModeInner()
     return kioskStatus_.isKioskMode_;
 }
 
+bool KioskManager::IsKioskBundleUid(int32_t uid)
+{
+    return uid == kioskStatus_.kioskBundleUid_;
+}
+
 void KioskManager::NotifyKioskModeChanged(bool isInKioskMode)
 {
     std::string eventData = isInKioskMode

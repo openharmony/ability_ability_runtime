@@ -766,5 +766,21 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_006, TestSize.Level1) {
     auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, true);
     EXPECT_NE(result, ERR_NOT_IN_KIOSK_MODE);
 }
+
+/*
+ * Feature: KioskManager
+ * Function: IsKioskBundleUid
+ * FunctionPoints: KioskManager IsKioskBundleUid
+ */
+HWTEST_F(KioskManagerTest, IsKioskBundleUid_001, TestSize.Level1) {
+    int32_t uid = 20010080;
+    KioskManager::GetInstance().kioskStatus_.kioskBundleUid_ = uid;
+    bool result = KioskManager::GetInstance().IsKioskBundleUid(uid);
+    EXPECT_TRUE(result);
+
+    uid = uid + 1;
+    result = KioskManager::GetInstance().IsKioskBundleUid(uid);
+    EXPECT_FALSE(result);
+}
 } // namespace AAFwk
 } // namespace OHOS

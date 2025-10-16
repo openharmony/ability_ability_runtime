@@ -41,6 +41,7 @@ public:
     void OnAppStop(const AppInfo &info);
     void FilterDialogAppInfos(std::vector<DialogAppInfo> &dialogAppInfos);
     void FilterAbilityInfos(std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
+    bool IsKioskBundleUid(int32_t uid);
 
 private:
     KioskManager() = default;

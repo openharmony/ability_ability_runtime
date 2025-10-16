@@ -7966,7 +7966,7 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
     if (abilityRecord->GetToken()) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
         if (KioskManager::GetInstance().IsInKioskMode() &&
-            KioskManager::GetInstance().IsInWhiteList(abilityRecord->GetAbilityInfo().bundleName)) {
+            KioskManager::GetInstance().IsKioskBundleUid(abilityRecord->GetAbilityInfo().uid)) {
             KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject(), true);
         }
     }
