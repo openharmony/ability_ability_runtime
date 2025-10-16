@@ -31,12 +31,12 @@ ohos_unittest("uri_utils_test") {
   ]
   defines = [ "SUPPORT_UPMS" ]
   include_dirs = [
-    "${ability_runtime_test_path}/new_test/mock/security",
+    "${ability_runtime_test_path}/new_test/mock/security/accesstoken",
     "${ability_runtime_test_path}/new_test/mock/ability_manager_service",
   ]
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
-    "${ability_runtime_test_path}/new_test/mock/security/accesstoken_kit.cpp",
+    "${ability_runtime_test_path}/new_test/mock/security/accesstoken/accesstoken_kit.cpp",
     "${ability_runtime_test_path}/new_test/mock/ability_manager_service/ability_manager_client.cpp",
     "uri_utils_test.cpp",
   ]

@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
 #define OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
 
+#include "check_result.h"
 #include "event_report.h"
 #include "uri.h"
 

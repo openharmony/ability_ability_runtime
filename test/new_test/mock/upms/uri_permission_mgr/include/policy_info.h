@@ -20,9 +20,25 @@
 
 namespace OHOS {
 namespace AAFwk {
+
+typedef enum PolicyType {
+    UNKNOWN = 0,
+    SELF_PATH = 1,
+    AUTHORIZATION_PATH = 2,
+    OTHERS_PATH = 3,
+} PolicyType;
+
 struct PolicyInfo final {
     std::string path;
     uint64_t mode;
+    PolicyType type = PolicyType::UNKNOWN;
+};
+
+struct SetInfo final {
+public:
+    std::string bundleName;
+    uint64_t timestamp;
+    SetInfo() : bundleName(""), timestamp(0) {}
 };
 } // AAFwk
 } // OHOS

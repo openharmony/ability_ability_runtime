@@ -557,6 +557,43 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const UriPerm
     return ERR_OK;
 }
 
+ErrCode UriPermissionManagerStubImpl::GrantUriPermissionWithType(const std::vector<Uri> &uriVec, uint32_t flag,
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
+    const std::vector<int32_t> &permisionTypes, int32_t &funcResult)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!FUDUtils::IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Not foundation call");
+        return WrapErrorCode(CHECK_PERMISSION_FAILED, funcResult);
+    }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, flag:%{public}u, uris:%{public}zu",
+        targetBundleName.c_str(), appIndex, flag, uriVec.size());
+    if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT || uriVec.size() != permisionTypes.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Out of range: %{public}zu,%{public}zu", uriVec.size(), permisionTypes.size());
+        return WrapErrorCode(ERR_URI_LIST_OUT_OF_RANGE, funcResult);
+    }
+    if ((flag & FLAG_READ_WRITE_URI) == 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid flag:%{public}u", flag);
+        return ERR_CODE_INVALID_URI_FLAG;
+    }
+    if (initiatorTokenId == 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid initiatorTokenId");
+        return WrapErrorCode(ERR_UPMS_INVALID_CALLER_TOKENID, funcResult);
+    }
+    uint32_t targetTokenId = 0;
+    auto ret = FUDUtils::GetTokenIdByBundleName(targetBundleName, appIndex, targetTokenId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "get tokenId failed, bundleName:%{public}s", targetBundleName.c_str());
+        return WrapErrorCode(ret, funcResult);
+    }
+    std::string targetAlterBundleName = "";
+    FUDUtils::GetDirByBundleNameAndAppIndex(targetBundleName, appIndex, targetAlterBundleName);
+    FUDAppInfo targetAppInfo = { targetTokenId, targetBundleName, targetAlterBundleName };
+    ret = GrantUriPermissionPrivilegedInner(uriVec, flag, initiatorTokenId, targetAppInfo, hideSensitiveType);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermissionWithType finished.");
+    return WrapErrorCode(ret, funcResult);
+}
+
 int32_t UriPermissionManagerStubImpl::GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag,
     uint32_t callerTokenId, FUDAppInfo &targetAppInfo, int32_t hideSensitiveType)
 {
@@ -778,6 +815,37 @@ int32_t UriPermissionManagerStubImpl::CheckGrantUriPermissionByKeyParams(const s
     return ERR_OK;
 }
 #endif // ABILITY_RUNTIME_UDMF_ENABLE
+
+ErrCode UriPermissionManagerStubImpl::CheckUriAuthorizationWithType(const std::vector<std::string>& uriVec,
+    uint32_t flag, uint32_t tokenId, std::vector<CheckResult>& funcResult)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    funcResult = std::vector<CheckResult>(uriVec.size(), CheckResult());
+    if (!FUDUtils::IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Not foundation call");
+        return CHECK_PERMISSION_FAILED;
+    }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "tokenId:%{private}u, flag:%{public}u, uris:%{public}zu",
+        tokenId, flag, uriVec.size());
+    if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid uriVec: %{public}zu", uriVec.size());
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    if ((flag & FLAG_READ_WRITE_URI) == 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Flag invalid");
+        return ERR_OK;
+    }
+    TokenIdPermission tokenIdPermission(tokenId);
+    std::vector<bool> boolResult = CheckUriPermission(tokenIdPermission, uriVec, flag);
+    if (boolResult.size() != funcResult.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid checkresult:%{public}zu", boolResult.size());
+        return INNER_ERR;
+    }
+    for (size_t i = 0; i < boolResult.size(); i++) {
+        funcResult[i].result = boolResult[i];
+    }
+    return ERR_OK;
+}
 
 ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<std::string>& uriStrVec,
     uint32_t flag, uint32_t tokenId, std::vector<bool>& funcResult)

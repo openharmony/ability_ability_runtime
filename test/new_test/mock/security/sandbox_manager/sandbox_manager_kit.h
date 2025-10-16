@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -16,47 +16,39 @@
 #define SANDBOXMANAGER_KIT_H
 
 #include <sys/types.h>
-#include <map>
-#include <mutex>
-#include <unordered_set>
 #include <vector>
 
-#include "ability_manager_errors.h"
 #include "policy_info.h"
 
 namespace OHOS {
 namespace AccessControl {
 namespace SandboxManager {
-
 class SandboxManagerKit {
 public:
     static int32_t SetPolicy(uint32_t tokenid, const std::vector<PolicyInfo> &policys, uint64_t policyFlag,
-        std::vector<uint32_t> &results);
-
+        std::vector<uint32_t> &results, const SetInfo &setInfo);
     static int32_t CheckPolicy(uint32_t tokenid, const std::vector<PolicyInfo> &policys, std::vector<bool> &results);
-
     static int32_t CheckPersistPolicy(uint32_t tokenid, const std::vector<PolicyInfo> &policys,
         std::vector<bool> &results);
-
     static int32_t PersistPolicy(uint32_t tokenid, const std::vector<PolicyInfo> &policys,
         std::vector<uint32_t> &results);
-
     static int32_t UnSetPolicy(uint32_t tokenid, const PolicyInfo &policy);
-
-    static int32_t StartAccessingByTokenId(uint32_t tokenid);
-
+    static int32_t UnSetAllPolicyByToken(uint32_t tokenId, uint64_t timestamp);
+    static int32_t StartAccessingPolicy(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result,
+        bool useCallerToken, uint32_t tokenId, uint64_t timestamp);
     static void Init();
-
 public:
-    static std::mutex mutex_;
-    static std::mutex persistMutex_;
-    static std::map<std::string, int32_t> policyMap_;
-    static std::map<std::string, int32_t> persistPolicyMap_;
-
-    static int32_t SetPolicyRet_;
-    static int32_t UnSetPolicyRet_;
+    static int32_t setPolicyRet_;
+    static int32_t checkPolicyRet_;
+    static int32_t checkPersistPolicyRet_;
+    static int32_t persistPolicyRet_;
+    static int32_t unSetPolicyRet_;
+    static int32_t startAccessingPolicyRet_;
+    static int32_t unSetAllPolicyByTokenRet_;
+    static std::vector<uint32_t> setPolicyResult_;
+    static std::vector<bool> checkPolicyResult_;
+    static std::vector<bool> checkPersistPolicyResult_;
 };
-
 } // SandboxManager
 } // AccessControl
 } // OHOS
