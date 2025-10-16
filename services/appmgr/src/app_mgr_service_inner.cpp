@@ -1843,8 +1843,9 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
         return;
     }
     appRecord->ApplicationTerminated();
-    if (appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
-        TAG_LOGD(AAFwkTag::APPMGR, "current state is not background");
+    if (appRecord->GetState() != ApplicationState::APP_STATE_READY &&
+        appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
+        TAG_LOGD(AAFwkTag::APPMGR, "current state is not background or ready");
         return;
     }
 

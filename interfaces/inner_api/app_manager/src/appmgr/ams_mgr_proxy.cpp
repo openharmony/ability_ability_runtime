@@ -1382,7 +1382,7 @@ void AmsMgrProxy::ClearProcessByToken(sptr<IRemoteObject> token)
     }
 }
 
-bool AmsMgrProxy::IsMemorySizeSufficent()
+bool AmsMgrProxy::IsMemorySizeSufficient()
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

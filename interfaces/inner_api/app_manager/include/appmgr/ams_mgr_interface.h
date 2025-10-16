@@ -437,7 +437,7 @@ public:
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
-    virtual bool IsMemorySizeSufficent() = 0;
+    virtual bool IsMemorySizeSufficient() = 0;
 
     /**
      * whether or not requier a big memory

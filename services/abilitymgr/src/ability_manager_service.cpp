@@ -8068,7 +8068,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
 
     KeepAliveType type;
     if (KeepAliveUtils::IsKeepAliveBundle(bundleInfo, userId, type)
-        && DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
+        && DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficient()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no kill alive process");
         return KILL_PROCESS_KEEP_ALIVE;
     }

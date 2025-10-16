@@ -402,7 +402,7 @@ public:
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
-    virtual bool IsMemorySizeSufficent() override;
+    virtual bool IsMemorySizeSufficient() override;
 
     /**
      * whether or not requier a big memory

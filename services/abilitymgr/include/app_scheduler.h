@@ -619,7 +619,7 @@ public:
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
-    virtual bool IsMemorySizeSufficent() const;
+    virtual bool IsMemorySizeSufficient() const;
 
     /**
      * whether or not requier a big memory

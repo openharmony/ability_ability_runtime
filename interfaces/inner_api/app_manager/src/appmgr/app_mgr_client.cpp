@@ -1418,7 +1418,7 @@ int32_t AppMgrClient::NotifyMemorySizeStateChanged(int32_t memorySizeState)
     return service->NotifyMemorySizeStateChanged(memorySizeState);
 }
 
-bool AppMgrClient::IsMemorySizeSufficent() const
+bool AppMgrClient::IsMemorySizeSufficient() const
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
@@ -1430,7 +1430,7 @@ bool AppMgrClient::IsMemorySizeSufficent() const
         TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
         return true;
     }
-    return amsService->IsMemorySizeSufficent();
+    return amsService->IsMemorySizeSufficient();
 }
 
 bool AppMgrClient::IsNoRequireBigMemory() const
