@@ -2192,7 +2192,7 @@ napi_value JsAbilityContext::OnStartSelfUIAbilityInCurrentProcess(napi_env env, 
     size_t unwrapArgc = ARGC_TWO;
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_TWO && CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_object)) {
-        if (!AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_TWO], startOptions)) {
+        if (!AppExecFwk::UnwrapStartOptionsWithProcessOption(env, info.argv[INDEX_TWO], startOptions)) {
             TAG_LOGE(AAFwkTag::CONTEXT, "invalid startOptions");
             ThrowInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOption.");
             return CreateJsUndefined(env);
