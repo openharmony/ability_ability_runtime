@@ -180,7 +180,7 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(IAmsMgr::Message::ATTACH_PID_TO_PARENT):
             return HandleAttachPidToParent(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_MEMORY_SIZE_SUFFICIENT):
-            return HandleIsMemorySizeSufficent(data, reply);
+            return HandleIsMemorySizeSufficient(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_NO_REQUIRE_BIG_MEMORY):
             return HandleIsNoRequireBigMemory(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_ENABLE_STATE):
@@ -875,9 +875,9 @@ int32_t AmsMgrStub::HandleClearProcessByToken(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
-int32_t AmsMgrStub::HandleIsMemorySizeSufficent(MessageParcel &data, MessageParcel &reply)
+int32_t AmsMgrStub::HandleIsMemorySizeSufficient(MessageParcel &data, MessageParcel &reply)
 {
-    auto result = IsMemorySizeSufficent();
+    auto result = IsMemorySizeSufficient();
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;

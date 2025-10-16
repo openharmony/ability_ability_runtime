@@ -731,7 +731,7 @@ void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)
     amsHandler_->SubmitTask(clearProcessByTokenFunc, TASK_CLEAR_PROCESS_BY_ABILITY_TOKEN);
 }
 
-bool AmsMgrScheduler::IsMemorySizeSufficent()
+bool AmsMgrScheduler::IsMemorySizeSufficient()
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");

@@ -70,7 +70,7 @@ public:
     MOCK_METHOD1(ScheduleDumpFfrt, int32_t(std::string& result));
     MOCK_METHOD1(SetWatchdogBackgroundStatus, void(bool status));
     MOCK_METHOD0(ScheduleClearPageStack, void());
-    MOCK_METHOD0(IsMemorySizeSufficent, bool());
+    MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD0(ScheduleCacheProcess, void());
     MOCK_METHOD2(OnLoadAbilityFinished, void(uint64_t, int32_t));
 };

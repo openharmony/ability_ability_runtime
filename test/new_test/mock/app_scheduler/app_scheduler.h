@@ -116,7 +116,7 @@ public:
         return 0;
     }
 
-    virtual bool IsMemorySizeSufficent() const
+    virtual bool IsMemorySizeSufficient() const
     {
         return false;
     }

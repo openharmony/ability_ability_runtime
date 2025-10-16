@@ -187,11 +187,11 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByToken_001, TestSi
 }
 
 /**
- * @tc.name: AppMgrClient_IsMemorySizeSufficent_001
+ * @tc.name: AppMgrClient_IsMemorySizeSufficient_001
  * @tc.desc: can not get the not running process info by AccessTokenID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Level2)
+HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficient_001, TestSize.Level2)
 {
     AppExecFwk::RunningProcessInfo info;
 
@@ -201,7 +201,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Leve
     auto result = appMgrClient->ConnectAppMgrService();
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
-    bool res = appMgrClient->IsMemorySizeSufficent();
+    bool res = appMgrClient->IsMemorySizeSufficient();
     EXPECT_EQ(res, true);
 }
 

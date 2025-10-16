@@ -2180,12 +2180,12 @@ HWTEST_F(AppMgrServiceInnerTest, CheckGetRunningInfoPermission_001, TestSize.Lev
 }
 
 /**
- * @tc.name: IsMemorySizeSufficent_001
+ * @tc.name: IsMemorySizeSufficient_001
  * @tc.desc: check get running info permission.
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, IsMemorySizeSufficent_001, TestSize.Level2)
+HWTEST_F(AppMgrServiceInnerTest, IsMemorySizeSufficient_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficient start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2196,7 +2196,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsMemorySizeSufficent_001, TestSize.Level2)
     appMgrServiceInner->appRunningManager_ = nullptr;
     appMgrServiceInner->IsMemorySizeSufficient();
 
-    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficent_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficient_001 end");
 }
 
 /**
