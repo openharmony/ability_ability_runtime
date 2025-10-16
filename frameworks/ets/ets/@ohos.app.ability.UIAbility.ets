@@ -32,8 +32,8 @@ export interface Caller {
   onRelease(callback: OnReleaseCallback): void;
   onRemoteStateChange(callback: OnRemoteStateChangeCallback): void;
   on(type: string, callback: OnReleaseCallback): void;
-  off(type: string, callback: OnReleaseCallback): void;
-  off(type: string): void;
+  offRelease(callback: OnReleaseCallback): void;
+  offRelease(): void;
 }
 export interface Callee {
   on(method: string, callback: CalleeCallback): void;
