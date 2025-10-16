@@ -758,8 +758,9 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
     return ERR_OK;
 }
 
-ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &bundleName,
-    const std::string &abilityName, const std::string &specifiedFlag, int32_t appIndex)
+ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &abilityName,
+    const std::string &specifiedFlag, int32_t appIndex,
+    const std::string &instanceKey, AppExecFwk::LaunchMode launchMode)
 {
     return ERR_OK;
 }
