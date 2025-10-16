@@ -118,11 +118,13 @@ HWTEST_F(AppExitReasonHelperThirdTest, GetActiveAbilityListWithPid_0100, TestSiz
     eventHandler_ = std::make_shared<AAFwk::AbilityEventHandler>(taskHandler_, service);
     std::shared_ptr<AAFwk::SubManagersHelper> subManagersHelper_;
     subManagersHelper_ = std::make_shared<AAFwk::SubManagersHelper>(taskHandler_, eventHandler_);
-    subManagersHelper_->currentUIAbilityManager_ = std::make_shared<AAFwk::UIAbilityLifecycleManager>();
-    subManagersHelper_->currentMissionListManager_ = std::make_shared<AAFwk::MissionListManager>(0);
+    int32_t userId = 100;
+    bool switchUser = false;
+    subManagersHelper_->InitUIAbilityManager(userId, switchUser);
+    subManagersHelper_->InitMissionListManager(userId, switchUser);
     std::shared_ptr<AAFwk::AppExitReasonHelper> appExitReasonHelper_;
     appExitReasonHelper_ = std::make_shared<AAFwk::AppExitReasonHelper>(subManagersHelper_);
-    int32_t uid = 0;
+    int32_t uid = 20020020;
     std::vector<std::string> abilityLists;
     int32_t pid = 0;
 
