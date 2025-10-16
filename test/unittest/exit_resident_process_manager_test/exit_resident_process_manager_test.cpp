@@ -170,11 +170,11 @@ HWTEST_F(ExitResidentProcessManagerTest, IsKilledForUpgradeWeb_001, TestSize.Lev
 }
 
 /**
- * @tc.name: IsMemorySizeSufficient_001
+ * @tc.name: IsMemorySizeSufficient_002
  * @tc.desc: Verify that the IsMemorySizeSufficient interface calls normally
  * @tc.type: FUNC
  */
-HWTEST_F(ExitResidentProcessManagerTest, IsMemorySizeSufficient_001, TestSize.Level1)
+HWTEST_F(ExitResidentProcessManagerTest, IsMemorySizeSufficient_002, TestSize.Level1)
 {
     auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
     exitResidentProcessManager->currentBigMemoryState_ = MemoryState::MEMORY_RECOVERY;
