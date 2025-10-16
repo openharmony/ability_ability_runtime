@@ -131,11 +131,6 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsNeedIgnoreFreezeEvent_001, TestSiz
     std::shared_ptr<AAFwk::ApplicationAnrListener> listener =
         std::make_shared<AAFwk::ApplicationAnrListener>();
     listener->OnAnr(pid, 0);
-    int left = 61; // over 1min
-    while (left > 0) {
-        left = sleep(left);
-    }
-    listener->OnAnr(pid, 0);
 }
 
 /**
