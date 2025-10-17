@@ -111,6 +111,8 @@ public:
     static EtsAbilityContext *GetEtsAbilityContext(ani_env *env, ani_object aniObj);
     static void ConfigurationUpdated(ani_env *env, std::shared_ptr<AppExecFwk::ETSNativeReference> etsContext,
         std::shared_ptr<AppExecFwk::Configuration> config);
+    static void SetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
+        ani_object callbackobj);
 
 private:
     void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
@@ -146,6 +148,8 @@ private:
         ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj);
     void OnStartSelfUIAbilityInCurrentProcess(ani_env *env, ani_object aniObj,
         ani_object wantObj, ani_string aniSpecifiedFlag, ani_object opt, ani_object call);
+    void OnSetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
+        ani_object callbackObj);
 
     void UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions,
         AAFwk::Want &want);

@@ -429,6 +429,14 @@ public:
     virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) = 0;
 
     /**
+     * @brief Set mission window icon of this ability.
+     *
+     * @param windowIcon the window icon of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionWindowIcon(std::shared_ptr<OHOS::Media::PixelMap> windowIcon) = 0;
+
+    /**
      * @brief Set ability label and icon of this ability.
      *
      * @param label the label of this ability.
