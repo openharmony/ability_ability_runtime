@@ -58,6 +58,8 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, struct ObserverNode 
     }
 
     obsPair->second.push_back(observerNode);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "uri:%{public}s p:%{public}d Id:%{public}" PRId64,
+        CommonUtils::Anonymous(uri.ToString()).c_str(), observerNode.pid_, observerNode.nodeId_);
 
     AddObsDeathRecipient(observerNode.observer_);
 
@@ -88,6 +90,8 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, struct ObserverNod
             AAFwkTag::DBOBSMGR, "uri no obs:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "uri:%{public}s p:%{public}d Id:%{public}" PRId64,
+        CommonUtils::Anonymous(uri.ToString()).c_str(), observerNode.pid_, observerNode.nodeId_);
     obsPair->second.remove(*obs);
     if (obsPair->second.empty()) {
         observers_.erase(obsPair);
@@ -140,7 +144,7 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
             continue;
         }
         obs.observer_->OnChange();
-        obsStr += "pid:" + std::to_string(obs.pid_) + "nodeId:" + std::to_string(obs.nodeId_) + ",";
+        obsStr += "p:" + std::to_string(obs.pid_) + "Id:" + std::to_string(obs.nodeId_) + ",";
         logFlag = true;
     }
     if (logFlag) {
