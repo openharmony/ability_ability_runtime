@@ -832,5 +832,33 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_DataMgrServiceUid_01
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_GetDataMgrServiceUid_0100 end");
 }
+
+/*
+ * Feature: DataObsMgrService
+ * Function: test ConstructObserverNode normal func
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService ConstructObserverNode
+ * EnvConditions: NA
+ * CaseDescription: Verify that the ConstructObserverNode is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_ConstructObserverNode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_ConstructObserverNode_0100 start");
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    int32_t userId = 0;
+    uint32_t tokenId = 0;
+    int32_t pid = 0;
+    auto [ret1, obsNode1] = dataObsMgrServer->ConstructObserverNode(dataobsAbility, userId, tokenId, pid);
+    EXPECT_TRUE(ret1);
+    tokenId = 1;
+    pid = 1;
+    auto [ret2, obsNode2] = dataObsMgrServer->ConstructObserverNode(dataobsAbility, userId, tokenId, pid);
+    EXPECT_TRUE(ret2);
+    EXPECT_EQ(obsNode2.nodeId_, obsNode1.nodeId_ + 1);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_ConstructObserverNode_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

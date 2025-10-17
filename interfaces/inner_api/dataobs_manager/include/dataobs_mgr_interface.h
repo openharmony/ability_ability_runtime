@@ -52,7 +52,7 @@ public:
     {
         firstCallerTokenID = token;
     }
-    uint32_t FirstCallerPid()
+    int32_t FirstCallerPid()
     {
         return firstCallerPid;
     }
