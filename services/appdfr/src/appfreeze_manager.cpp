@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <fstream>
 
-#include "backtrace_local.h"
 #include "faultloggerd_client.h"
 #include "file_ex.h"
 #include "ffrt.h"
@@ -42,6 +41,7 @@
 #endif
 #include "appfreeze_cpu_freq_manager.h"
 #include "appfreeze_event_report.h"
+#include "appfreeze_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -59,6 +59,7 @@ static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nan
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
 static constexpr int DUMP_STACK_FAILED = -1;
 static constexpr int DUMP_KERNEL_STACK_SUCCESS = 1;
+static constexpr int MIN_APP_UID = 20000;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
 static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
 static bool g_overseaVersion = OHOS::system::GetParameter("const.global.region", "CN") != "CN";
@@ -316,14 +317,6 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
     }
     faultDataSA.errorObject.name = info.eventName;
     faultDataSA.errorObject.message = info.msg;
-    faultDataSA.errorObject.stack = "\nDump tid stack start time:" +
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
-    std::string stack;
-    if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, info.pid, 0, true)) {
-        stack = "Failed to dump stacktrace for " + stack;
-    }
-    faultDataSA.errorObject.stack += stack + "\nDump tid stack end time:" +
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     faultDataSA.faultType = FaultDataType::APP_FREEZE;
     faultDataSA.timeoutMarkers = "notifyFault" + std::to_string(info.pid) +
                                  "-" + std::to_string(AbilityRuntime::TimeUtil::CurrentTimeMillis());
@@ -391,6 +384,10 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
         binderInfo += content;
     }
     for (auto& pidTemp : asyncPids) {
+        if (AppfreezeUtil::GetUidByPid(pidTemp) >= MIN_APP_UID) {
+            TAG_LOGI(AAFwkTag::APPDFR, "Async stack, skip current pid: %{public}d", pid);
+            continue;
+        }
         TAG_LOGI(AAFwkTag::APPDFR, "AsyncBinder pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid && syncPids.find(pidTemp) == syncPids.end()) {
             std::string content = "Binder catcher stacktrace, type is async, pid : " + std::to_string(pidTemp) + "\n";

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 
 #include "directory_ex.h"
 #include "file_ex.h"
@@ -122,10 +123,38 @@ std::string AppfreezeUtil::FreezePathToRealPath(const std::string& filePath)
 {
     std::string realPath;
     if (!OHOS::PathToRealPath(filePath, realPath)) {
-        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed:%{public}s", filePath.c_str());
+        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed, file:%{public}s, errno:%{public}d",
+            filePath.c_str(), errno);
         return "";
     }
     return realPath;
+}
+
+int32_t AppfreezeUtil::GetUidByPid(const int32_t pid)
+{
+    std::string pidStatusPath = "/proc/" + std::to_string(pid) + "/status";
+    std::string realPath = FreezePathToRealPath(pidStatusPath);
+    std::string content;
+    int32_t uid = -1;
+    if (!LoadStringFromFile(realPath, content) || content.empty()) {
+        TAG_LOGW(AAFwkTag::APPDFR, "failed to read path:%{public}s, errno:%{public}d",
+            realPath.c_str(), errno);
+        return uid;
+    }
+    std::istringstream iss(content);
+    std::string uidFlag = "Uid:";
+    std::string infoLine;
+    while (std::getline(iss, infoLine)) {
+        if (infoLine.compare(0, uidFlag.size(), uidFlag) == 0) {
+            std::istringstream infoStream(infoLine);
+            if (std::getline(infoStream, infoLine, ':') && std::getline(infoStream, infoLine)) {
+                std::stringstream(infoLine) >> uid;
+                TAG_LOGI(AAFwkTag::APPDFR, "uid of pid %{public}" PRId32 " is %{public}" PRId32 ".", pid, uid);
+                break;
+            }
+        }
+    }
+    return uid;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

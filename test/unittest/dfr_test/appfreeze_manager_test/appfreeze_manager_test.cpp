@@ -26,6 +26,7 @@
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
 #include "hitrace/hitracechain.h"
 #endif
+#include "appfreeze_util.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -446,6 +447,21 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckAppfreezeHappend_001, T
     appfreezeManager->CheckAppfreezeHappend(getpid(), "THREAD_BLOCK_6S");
     appfreezeManager->CheckAppfreezeHappend(getpid(), "APP_INPUT_BLOCK");
     appfreezeManager->CheckAppfreezeHappend(getpid(), "THREAD_BLOCK_3S");
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest GetUidByPid Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetUidByPid_Test001, TestSize.Level1)
+{
+    int ret = AppfreezeUtil::GetUidByPid(getpid());
+    EXPECT_TRUE(ret > 0);
+    ret = AppfreezeUtil::GetUidByPid(-1);
+    EXPECT_TRUE(ret < 0);
+    ret = AppfreezeUtil::GetUidByPid(1);
+    EXPECT_TRUE(ret > 0);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
