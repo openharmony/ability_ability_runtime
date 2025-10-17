@@ -278,6 +278,14 @@ public:
      */
     ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
+    /**
+     * @brief Set mission window icon of this ability.
+     *
+     * @param windowIcon the window icon of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode SetMissionWindowIcon(std::shared_ptr<OHOS::Media::PixelMap> windowIcon) override;
+
      /**
      * @brief Set ability label and icon of this ability.
      *
