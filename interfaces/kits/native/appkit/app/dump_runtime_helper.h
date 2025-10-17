@@ -52,7 +52,6 @@ private:
     static bool SetDirXattr(const std::string &path, const std::string &name, const std::string &value);
     static bool GetDirXattr(const std::string &path, const std::string &name, std::string &value);
     static bool IsFileExists(const std::string &file);
-    static bool ForceCreateDirectory(const std::string &path);
     static bool CreateDir(const std::string &path);
     static void CreateDirDelay(const std::string &path);
     static bool CheckOomdumpSwitch();
