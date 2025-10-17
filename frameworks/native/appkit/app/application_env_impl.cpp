@@ -50,7 +50,8 @@ void ApplicationEnvImpl::SetAppInfo(const ApplicationInfo &appInfo, PreloadMode 
     switch (preloadMode) {
         case PreloadMode::PRESS_DOWN:
         case PreloadMode::PRE_MAKE:
-            appPreloadType_ = TYPE_CREATE_PROCESS;
+            int32_t appPreloadPhase = static_cast<int32_t>(appInfo.appPreloadPhase);
+            appPreloadType_ = appPreloadPhase == 0 ? UNSPECIFIED : TYPE_CREATE_PROCESS;
             break;
         case PreloadMode::PRELOAD_MODULE:
             appPreloadType_ = TYPE_CREATE_ABILITY_STAGE;
