@@ -24,9 +24,9 @@ namespace {
 constexpr const char *CLASSNAME_LAUNCHPARAM = "@ohos.app.ability.AbilityConstant.LaunchParamImpl";
 constexpr const char *CLASSNAME_LAUNCHREASON = "@ohos.app.ability.AbilityConstant.AbilityConstant.LaunchReason";
 constexpr const char *CLASSNAME_LAST_EXITREASION = "@ohos.app.ability.AbilityConstant.AbilityConstant.LastExitReason";
-constexpr const char* LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
+constexpr const char *LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
     "@ohos.app.ability.AbilityConstant.LastExitDetailInfoImpl";
-constexpr const char* ENUMNAME_PROCESS = "L@ohos/app/ability/appManager/appManager/ProcessState;";
+constexpr const char *ENUMNAME_PROCESS = "@ohos.app.ability.appManager.appManager.ProcessState";
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
     if (env == nullptr) {
