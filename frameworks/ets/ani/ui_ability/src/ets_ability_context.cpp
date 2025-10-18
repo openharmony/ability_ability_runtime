@@ -32,6 +32,9 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "want.h"
+#ifdef SUPPORT_GRAPHICS
+#include "pixel_map_taihe_ani.h"
+#endif
 #include "ets_ui_service_proxy.h"
 #include "ets_uiservice_ability_connection.h"
 #include "ets_ui_ability_servicehost_stub_impl.h"
@@ -402,6 +405,18 @@ void EtsAbilityContext::RequestModalUIExtension(ani_env *env, ani_object aniObj,
         return;
     }
     etsContext->OnRequestModalUIExtension(env, aniObj, pickerWantObj, callbackobj);
+}
+
+void EtsAbilityContext::SetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
+    ani_object callbackobj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionWindowIcon called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnSetMissionWindowIcon(env, aniObj, pixelMapObj, callbackobj);
 }
 
 void EtsAbilityContext::BackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
@@ -923,6 +938,34 @@ void EtsAbilityContext::OnRequestModalUIExtension(ani_env *env, ani_object aniOb
     ErrCode ret = ERR_OK;
     ret = AAFwk::AbilityManagerClient::GetInstance()->RequestModalUIExtension(want);
     errorObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+    AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+}
+
+void EtsAbilityContext::OnSetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
+    ani_object callbackObj)
+{
+    ani_object errorObject = nullptr;
+#ifdef SUPPORT_SCREEN
+    auto pixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
+    if (pixelMap == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "pixelMap is nullptr");
+        errorObject = EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        errorObject = EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+
+    auto ret = context->SetMissionWindowIcon(pixelMap);
+    errorObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+#endif
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
@@ -1797,6 +1840,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void *>(EtsAbilityContext::StartSelfUIAbilityInCurrentProcessWithOptions) },
             ani_native_function { "nativeRestartAppSync", "L@ohos/app/ability/Want/Want;:V",
                 reinterpret_cast<void*>(EtsAbilityContext::RestartAppWithWindow) },
+            ani_native_function { "nativeSetMissionWindowIcon",
+                "L@ohos/multimedia/image/image/PixelMap;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(EtsAbilityContext::SetMissionWindowIcon) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
