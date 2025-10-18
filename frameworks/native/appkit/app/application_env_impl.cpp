@@ -47,16 +47,17 @@ void ApplicationEnvImpl::SetAppInfo(const ApplicationInfo &appInfo, PreloadMode 
     bundleName_ = appInfo.bundleName;
     dataPath_ = appInfo.dataDir;
     srcPath_ = appInfo.codePath;
+    int32_t appPreloadPhase = static_cast<int32_t>(appInfo.appPreloadPhase);
     switch (preloadMode) {
         case PreloadMode::PRESS_DOWN:
         case PreloadMode::PRE_MAKE:
-            appPreloadType_ = TYPE_CREATE_PROCESS;
+            appPreloadType_ = appPreloadPhase == 0 ? UNSPECIFIED : TYPE_CREATE_PROCESS;
             break;
         case PreloadMode::PRELOAD_MODULE:
             appPreloadType_ = TYPE_CREATE_ABILITY_STAGE;
             break;
         case PreloadMode::PRELOAD_BY_PHASE:
-            appPreloadType_ = static_cast<int32_t>(appInfo.appPreloadPhase);
+            appPreloadType_ = appPreloadPhase;
             break;
         default:
             appPreloadType_ = UNSPECIFIED;
