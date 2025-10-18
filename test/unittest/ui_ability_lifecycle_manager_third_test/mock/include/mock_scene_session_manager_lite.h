@@ -134,6 +134,8 @@ public:
         ((const std::vector<uint64_t> &windowIds), (std::unordered_map<uint64_t, DisplayId> & windowDisplayIdMap)),
         (override));
     MOCK_METHOD(WMError, GetParentMainWindowId, (int32_t windowIds, int32_t& mainWindowId), (override));
+    MOCK_METHOD(WSError, SetSessionIconForThirdParty, (const sptr<IRemoteObject>& token,
+        const std::shared_ptr<Media::PixelMap>& icon), (override));
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H

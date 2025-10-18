@@ -197,6 +197,10 @@ class AbilityContext extends Context {
     return this.__context_impl__.setMissionIcon(icon, callback);
   }
 
+  setMissionWindowIcon(windowIcon) {
+    return this.__context_impl__.setMissionWindowIcon(windowIcon);
+  }
+
   setAbilityInstanceInfo(label, callback) {
     return this.__context_impl__.setAbilityInstanceInfo(label, callback);
   }
