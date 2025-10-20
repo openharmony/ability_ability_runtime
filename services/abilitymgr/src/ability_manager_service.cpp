@@ -13742,10 +13742,6 @@ int32_t AbilityManagerService::SignRestartAppFlag(const SignRestartAppFlagParam 
         missionListManager->SignRestartAppFlag(param.uid, param.instanceKey);
     }
 
-    if (param.isRestartUIAbility) {
-        return IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationByUid(
-            param.bundleName, param.uid, "RestartUIAbility"));
-    }
     if (param.type == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
         return appMgr->KillAppSelfWithInstanceKey(param.instanceKey, false, "RestartInstance");
     }
@@ -13754,6 +13750,30 @@ int32_t AbilityManagerService::SignRestartAppFlag(const SignRestartAppFlagParam 
             "RestartSelfAtomicService");
     }
     return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
+}
+
+int32_t AbilityManagerService::SignRestartProcess(int32_t pid, int32_t userId)
+{
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
+        return ERR_INVALID_VALUE;
+    }
+    auto ret = IN_PROCESS_CALL(appMgr->SignRestartProcess(pid));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr SignRestartProcess error");
+        return ret;
+    }
+
+    auto connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
+    connectManager->SignRestartProcess(pid);
+
+    auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    uiAbilityManager->SignRestartProcess(pid);
+
+    return IN_PROCESS_CALL(appMgr->KillProcessByPidForExit(pid, "RestartUIAbility"));
 }
 
 bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken, const std::string &appId)

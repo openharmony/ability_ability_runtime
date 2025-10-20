@@ -322,13 +322,10 @@ bool UIAbilityLifecycleManager::HandleRestartUIAbility(sptr<SessionInfo> session
         sessionAbilityMap_.erase(sessionInfo->persistentId);
     }
     lock.unlock();
-    const auto &appInfo = callerRecord->GetApplicationInfo();
-    AbilityManagerService::SignRestartAppFlagParam param = { userId_, callerRecord->GetUid(),
-        callerRecord->GetInstanceKey(), appInfo.multiAppMode.multiAppModeType, false,
-        appInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE, true, appInfo.name };
-    auto result = DelayedSingleton<AbilityManagerService>::GetInstance()->SignRestartAppFlag(param);
+    auto result = DelayedSingleton<AbilityManagerService>::GetInstance()->SignRestartProcess(
+        callerRecord->GetPid(), userId_);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error: %{public}d", result);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartProcess error: %{public}d", result);
         return false;
     }
     RestartAppKeyType key(callerRecord->GetInstanceKey(), callerRecord->GetUid());
@@ -3809,6 +3806,21 @@ void UIAbilityLifecycleManager::SignRestartAppFlag(int32_t uid, const std::strin
         if (isAppRecovery) {
             reason = "appRecovery";
         }
+        NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
+            reason);
+    }
+}
+
+void UIAbilityLifecycleManager::SignRestartProcess(int32_t pid)
+{
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    auto tempSessionAbilityMap = sessionAbilityMap_;
+    for (auto &[sessionId, abilityRecord] : tempSessionAbilityMap) {
+        if (abilityRecord == nullptr || abilityRecord->GetPid() != pid) {
+            continue;
+        }
+        abilityRecord->SetRestartAppFlag(true);
+        std::string reason = "onAbilityDied";
         NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
             reason);
     }

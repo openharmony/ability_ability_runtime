@@ -19,9 +19,11 @@
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "app_utils.h"
+#include "app_mgr_util.h"
 #include "hilog_tag_wrapper.h"
 #include "process_options.h"
 #include "ipc_skeleton.h"
+#include "mock_app_mgr_service.h"
 #include "mock_parameters.h"
 #include "mock_scene_board_judgement.h"
 #include "start_ability_handler.h"
@@ -435,25 +437,37 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001_002, TestSize.
 
 /*
  * Feature: AbilityManagerService
- * Function: SignRestartAppFlag
- * FunctionPoints: SignRestartAppFlag
+ * Function: SignRestartProcess
+ * FunctionPoints: SignRestartProcess
  */
-HWTEST_F(AbilityManagerServiceEighthTest, SignRestartAppFlag_002, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceEighthTest, SignRestartProcess_001, TestSize.Level1)
 {
+    auto oriAppMgr = AppMgrUtil::appMgr_;
+    auto mockAppMgr = sptr<MockAppMgrService>::MakeSptr();
+    AppMgrUtil::appMgr_ = mockAppMgr;
     int32_t uid = 100;
+
+    EXPECT_CALL(*mockAppMgr, SignRestartProcess).Times(1).WillOnce(Return(-1));
     auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto ret = abilityMs->SignRestartProcess(uid, uid);
+    EXPECT_EQ(ret, -1);
+
+    EXPECT_CALL(*mockAppMgr, SignRestartProcess).WillRepeatedly(Return(ERR_OK));
+    ret = abilityMs->SignRestartProcess(uid, uid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
     auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
-    abilityMs->subManagersHelper_->uiAbilityManagers_.emplace(uid, std::make_shared<UIAbilityLifecycleManager>());
     abilityMs->subManagersHelper_->connectManagers_.emplace(uid, std::make_shared<AbilityConnectManager>(uid));
+    ret = abilityMs->SignRestartProcess(uid, uid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled)
-        .WillRepeatedly(Return(true));
-    AbilityManagerService::SignRestartAppFlagParam param =
-        { uid, uid, "", AppExecFwk::MultiAppModeType::UNSPECIFIED, true, false, true, "testBundleName" };
-    auto ret = abilityMs->SignRestartAppFlag(param);
+    abilityMs->subManagersHelper_->uiAbilityManagers_.emplace(uid, std::make_shared<UIAbilityLifecycleManager>());
+    ret = abilityMs->SignRestartProcess(uid, uid);
     EXPECT_EQ(ret, ERR_OK);
+
+    AppMgrUtil::appMgr_ = oriAppMgr;
 }
 
 /*

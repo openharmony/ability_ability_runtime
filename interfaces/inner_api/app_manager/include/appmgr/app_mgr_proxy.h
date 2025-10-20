@@ -737,6 +737,14 @@ public:
     int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey) override;
 
     /**
+     * @brief mark a process which is going restart.
+     * @param pid the pid of the process.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SignRestartProcess(int32_t pid) override;
+
+    /**
      * Get appRunningUniqueId by pid.
      * @param pid pid.
      * @param appRunningUniqueId appRunningUniqueId.
@@ -838,6 +846,7 @@ public:
 
     virtual int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
         const std::string& reason) override;
+    int32_t KillProcessByPidForExit(int32_t pid, const std::string& reason) override;
 
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 

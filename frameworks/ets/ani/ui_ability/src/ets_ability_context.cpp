@@ -664,6 +664,7 @@ void EtsAbilityContext::RestartAppWithWindow(ani_env *env, ani_object aniObj, an
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return;
     }
+    InheritWindowMode(env, aniObj, want);
     auto ret = context->RestartAppWithWindow(want);
     if (ret != ERR_OK) {
         EtsErrorUtil::ThrowErrorByNativeErr(env, ret);

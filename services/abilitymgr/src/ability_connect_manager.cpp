@@ -3637,6 +3637,20 @@ void AbilityConnectManager::SignRestartAppFlag(int32_t uid, const std::string &i
     AbilityCacheManager::GetInstance().SignRestartAppFlag(uid, instanceKey);
 }
 
+void AbilityConnectManager::SignRestartProcess(int32_t pid)
+{
+    {
+        std::lock_guard lock(serviceMapMutex_);
+        for (auto &[key, abilityRecord] : serviceMap_) {
+            if (abilityRecord == nullptr || abilityRecord->GetPid() != pid) {
+                continue;
+            }
+            abilityRecord->SetRestartAppFlag(true);
+        }
+    }
+    AbilityCacheManager::GetInstance().SignRestartProcess(pid);
+}
+
 bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord)
 {
     std::lock_guard lock(serviceMapMutex_);
