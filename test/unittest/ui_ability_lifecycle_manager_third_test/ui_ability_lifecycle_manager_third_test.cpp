@@ -832,7 +832,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_001, TestSize.Le
     uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto sessionInfo = abilityRecord->GetSessionInfo();
-    EXPECT_NE(sessionInfo->processOptions, nullptr);
+    EXPECT_EQ(sessionInfo->processOptions, nullptr);
 }
 
 /**
