@@ -605,6 +605,8 @@ public:
     virtual int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
 
+    int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, int32_t userId, bool &isRunning);
+
     /**
      * start native process for debugger.
      *

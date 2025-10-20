@@ -7810,6 +7810,28 @@ int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t 
     return appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
 }
 
+int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, int32_t userId, bool &isRunning)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called, bundleName: %{public}s", bundleName.c_str());
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation call");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!CheckGetRunningInfoPermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (appCloneIndex < 0 || appCloneIndex > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        TAG_LOGI(AAFwkTag::APPMGR, "appCloneIndex invalid");
+        appCloneIndex = -1;
+    }
+    if (userId < 0) {
+        TAG_LOGI(AAFwkTag::APPMGR, "userId invalid");
+    }
+
+    return appRunningManager_->IsAppRunningByBundleName(bundleName, appCloneIndex, userId, isRunning);
+}
+
 int32_t AppMgrServiceInner::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
     bool &isRunning)
 {
