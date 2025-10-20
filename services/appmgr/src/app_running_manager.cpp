@@ -383,6 +383,23 @@ int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const s
     return ERR_OK;
 }
 
+int32_t AppRunningManager::IsAppRunningByBundleName(const std::string &bundleName, int32_t appCloneIndex,
+    int32_t userId, bool &isRunning)
+{
+    isRunning = false;
+    std::lock_guard guard(runningRecordMapMutex_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag()) &&
+            (appCloneIndex < 0 || appRecord->GetAppIndex() == appCloneIndex) &&
+            (userId < 0 || appRecord->GetUserId() == userId)) {
+            isRunning = true;
+            break;
+        }
+    }
+    return ERR_OK;
+}
+
 int32_t AppRunningManager::IsAppRunningByBundleNameAndUserId(const std::string &bundleName,
     int32_t userId, bool &isRunning)
 {

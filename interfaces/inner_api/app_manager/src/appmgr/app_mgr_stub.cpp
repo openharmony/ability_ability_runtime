@@ -370,6 +370,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleSaveBrowserChannel(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING):
             return HandleIsAppRunning(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING_BY_USER_ID):
+            return HandleIsAppRunningByUserId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_CALLING_IS_USER_TEST_MODE):
             return HandleCheckCallingIsUserTestMode(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PROCESS_DEPENDED_ON_WEB):
@@ -1580,6 +1582,24 @@ int32_t AppMgrStub::HandleIsAppRunningByBundleNameAndUserId(MessageParcel &data,
     bool isRunning = false;
     int32_t userId = data.ReadInt32();
     int32_t result = IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
+    if (!reply.WriteBool(isRunning)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsAppRunningByUserId(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string bundleName = data.ReadString();
+    bool isRunning = false;
+    int32_t appCloneIndex = data.ReadInt32();
+    int32_t userId = data.ReadInt32();
+    int32_t result = IsAppRunning(bundleName, appCloneIndex, userId, isRunning);
     if (!reply.WriteBool(isRunning)) {
         return ERR_INVALID_VALUE;
     }

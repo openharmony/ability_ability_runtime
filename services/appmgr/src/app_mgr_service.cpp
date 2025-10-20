@@ -1506,6 +1506,7 @@ int32_t AppMgrService::UnregisterAppForegroundStateObserver(const sptr<IAppForeg
 int32_t AppMgrService::IsApplicationRunning(const std::string &bundleName, bool &isRunning)
 {
     if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->IsApplicationRunning(bundleName, isRunning);
@@ -1515,6 +1516,7 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
 {
     isRunning = false;
     if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->IsAppRunning(bundleName, appCloneIndex, isRunning);
@@ -1525,9 +1527,21 @@ int32_t AppMgrService::IsAppRunningByBundleNameAndUserId(const std::string &bund
 {
     isRunning = false;
     if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
+}
+
+int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+    int32_t userId, bool &isRunning)
+{
+    isRunning = false;
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->IsAppRunning(bundleName, appCloneIndex, userId, isRunning);
 }
 
 #ifdef SUPPORT_CHILD_PROCESS

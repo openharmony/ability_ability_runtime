@@ -759,6 +759,12 @@ public:
     virtual int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning) = 0;
 
+    virtual int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId, bool &isRunning)
+    {
+        return 0;
+    }
+
 #ifdef SUPPORT_CHILD_PROCESS
     /**
      * Start child process, called by ChildProcessManager.
