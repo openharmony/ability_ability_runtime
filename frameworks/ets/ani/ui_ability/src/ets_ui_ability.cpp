@@ -1089,48 +1089,20 @@ void EtsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     if (abilityInfo_) {
     }
 
-    const WantParams &wantParams = want.GetParams();
-    std::string arkTSMode = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE);
     InsightIntentExecutorInfo executeInfo;
-    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-            InsightIntentExecutorMgr::TriggerCallbackInner(
-                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-            return;
-        }
+    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
 
-        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-            etsRuntime_, executeInfo, std::move(callback));
-        if (!ret) {
-            // callback has removed, release in insight intent executor.
-            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
-        }
-    } else {
-        auto& jsRuntime = etsRuntime_.GetJsRuntime();
-        if (jsRuntime == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null jsRuntime");
-            return;
-        }
-        if (abilityInfo_) {
-            auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
-            jsRuntimePoint.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
-        }
-        auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-            InsightIntentExecutorMgr::TriggerCallbackInner(
-                std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-            return;
-        }
-
-        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-            *jsRuntime, executeInfo, std::move(callback));
-        if (!ret) {
-            // callback has removed, release in insight intent executor.
-            TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
-        }
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
     }
 }
 

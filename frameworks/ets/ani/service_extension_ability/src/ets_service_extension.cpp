@@ -516,48 +516,20 @@ bool EtsServiceExtension::HandleInsightIntent(const AAFwk::Want &want)
     };
     callback->Push(asyncCallback);
     InsightIntentExecutorInfo executorInfo;
-    const WantParams &wantParams = want.GetParams();
-    std::string arkTSMode = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE);
-    if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-        ret = GetInsightIntentExecutorInfo(want, executeParam, executorInfo);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Get Intent executor failed");
-            InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-            return false;
-        }
-        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-            etsRuntime_, executorInfo, std::move(callback));
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Execute insight intent failed");
-            return false;
-        }
-        return true;
-    } else {
-        auto& jsRuntime = etsRuntime_.GetJsRuntime();
-        if (jsRuntime == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null jsRuntime");
-            return false;
-        }
-        if (abilityInfo_) {
-            auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime));
-            jsRuntimePoint.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
-        }
-        ret = GetInsightIntentExecutorInfo(want, executeParam, executorInfo);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Get Intent executor failed");
-            InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-            return false;
-        }
-        ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-            *jsRuntime, executorInfo, std::move(callback));
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Execute insight intent failed");
-            return false;
-        }
-        return true;
+    ret = GetInsightIntentExecutorInfo(want, executeParam, executorInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Get Intent executor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return false;
     }
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executorInfo, std::move(callback));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Execute insight intent failed");
+        return false;
+    }
+    return true;
 }
 
 ani_ref EtsServiceExtension::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
