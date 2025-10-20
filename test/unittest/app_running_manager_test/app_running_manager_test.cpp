@@ -348,12 +348,10 @@ HWTEST_F(AppRunningManagerTest, AppRunningRecord_0100, TestSize.Level1)
     auto task = []() {
         TAG_LOGI(AAFwkTag::TEST, "Running in thread %{public}d.", gettid());
         std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
-        static std::string processName = "test.ProcessName";
+        std::string processName = "test.ProcessName"+std::to_string(gettid());
         BundleInfo bundleInfo;
         auto appRecord = appRunningManager_Record0100->CreateAppRunningRecord(appInfo, processName, bundleInfo, "");
         ASSERT_NE(appRecord, nullptr);
-        processName += "a";
-
         static int32_t uiExtensionAbilityId = 1;
         static pid_t hostPid = 100000;
         static pid_t providerPid = 200000;
