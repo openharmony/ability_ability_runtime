@@ -182,6 +182,11 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
         .startOptions = param->startOptions,
         .want = want
     };
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord &&
+        abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        info.isFreeInstallFromService = true;
+    }
     if (param->startOptions != nullptr && !param->startOptions->requestId_.empty()) {
         TAG_LOGD(AAFwkTag::FREE_INSTALL, "set requestId:%{public}s", param->startOptions->requestId_.c_str());
         info.want.SetParam(KEY_REQUEST_ID, param->startOptions->requestId_);
@@ -397,7 +402,7 @@ void FreeInstallManager::StartAbilityByFreeInstall(FreeInstallInfo &info, std::s
     if (result == ERR_OK) {
         if (info.startOptions == nullptr) {
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(info.want,
-                info.callerToken, info.userId, info.requestCode);
+                info.callerToken, info.userId, info.requestCode, info.isFreeInstallFromService);
         } else {
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityForOptionWrap(info.want,
                 *info.startOptions, info.callerToken, false, info.userId, info.requestCode);
@@ -454,8 +459,8 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
         result = UpdateElementName(info.want, info.userId);
     }
     if (result == ERR_OK) {
-        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(info.want,
-            info.callerToken, info.userId, info.requestCode);
+        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(info.want,
+            info.callerToken, info.userId, info.requestCode, true, info.isFreeInstallFromService);
     }
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);

@@ -1066,7 +1066,7 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
 
     int32_t StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId,
-        int32_t requestCode);
+        int32_t requestCode, bool isFreeInstallFromService = false);
 
     int StartAbilityWrap(
         const Want &want,
@@ -1079,7 +1079,8 @@ public:
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
         bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isAppCloneSelector = false,
+        bool isFreeInstallFromService = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1092,7 +1093,8 @@ public:
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
         bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isAppCloneSelector = false,
+        bool isFreeInstallFromService = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -2139,6 +2141,9 @@ public:
      */
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex) override;
 
+    int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
+        int32_t userId, int requestCode, bool removeInsightIntentFlag, bool isFreeInstallFromService = false);
+    
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2506,7 +2511,7 @@ private:
      * @return Returns whether the caller is allowed to start Ability.
      */
     int CheckCallAbilityPermission(const AbilityRequest &abilityRequest, bool isSelector, uint32_t specifyTokenId = 0,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isFreeInstallFromService = false);
 
     /**
      * Check if Caller is allowed to start Ability(Stage) by call.
@@ -2681,13 +2686,13 @@ private:
     int CheckBrokerCallPermission(const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo);
 
-    int CheckAbilityCallPermission(const AbilityRequest& abilityRequest,
-        const AppExecFwk::AbilityInfo& abilityInfo, uint32_t specifyTokenId, bool isSelector);
+    int CheckAbilityCallPermission(const AbilityRequest& abilityRequest, const AppExecFwk::AbilityInfo& abilityInfo,
+        uint32_t specifyTokenId, bool isSelector, bool isFreeInstallFromService = false);
 
     int CheckCallPermission(const Want& want, const AppExecFwk::AbilityInfo& abilityInfo,
         const AbilityRequest& abilityRequest, bool isForegroundToRestartApp,
         bool isSendDialogResult, uint32_t specifyTokenId,
-        const std::string& callerBundleName, bool isSelector);
+        const std::string& callerBundleName, bool isSelector, bool isFreeInstallFromService = false);
 
     void CheckExtensionRateLimit();
 
@@ -2824,9 +2829,6 @@ private:
  
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
-
-    int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t userId, int requestCode, bool removeInsightIntentFlag);
 
     int32_t OpenLinkInner(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
         bool removeInsightIntentFlag);
