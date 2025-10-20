@@ -25,6 +25,7 @@
 #include "ability_manager_client.h"
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
+#include "ani_extension_window_config.h"
 #include "ani_window.h"
 #include "configuration_utils.h"
 #include "display_util.h"
@@ -668,6 +669,12 @@ void EtsUIServiceExtension::OnSceneWillCreated(std::shared_ptr<Rosen::ExtensionW
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "env nullptr");
         return;
     }
+    ani_ref aniWindowConfig = Rosen::CreateAniExtensionWindowConfig(env, extensionWindowConfig);
+    if (aniWindowConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null aniWindowConfig");
+        return;
+    }
+    CallObjectMethod(false, "onWindowWillCreate", nullptr, aniWindowConfig);
     TAG_LOGI(AAFwkTag::UISERVC_EXT, "end OnSceneWillCreated");
 }
 
