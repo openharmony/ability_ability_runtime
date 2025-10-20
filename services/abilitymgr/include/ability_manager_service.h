@@ -2253,6 +2253,7 @@ public:
      * @return Returns true on being limited.
      */
     bool IsRestartAppLimit() override;
+    int32_t SignRestartProcess(int32_t pid, int32_t userId);
 
     /**
      * Preload application.
@@ -2818,7 +2819,7 @@ private:
     bool CheckCallerIsDmsProcess();
 
     void WaitBootAnimationStart();
-public:
+
     struct SignRestartAppFlagParam {
         int32_t userId;
         int32_t uid;
@@ -2826,11 +2827,9 @@ public:
         AppExecFwk::MultiAppModeType type;
         bool isAppRecovery = false;
         bool isAtomicService = false;
-        bool isRestartUIAbility = false;
-        std::string bundleName;
     };
     int32_t SignRestartAppFlag(const SignRestartAppFlagParam &param);
-private:
+
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();

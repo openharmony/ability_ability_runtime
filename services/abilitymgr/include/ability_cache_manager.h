@@ -105,6 +105,7 @@ public:
      * @param instanceKey the instance key of the process.
      */
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    void SignRestartProcess(int32_t pid);
 
     /**
      * Delete the invalid ability by bundleName from ability cache manager.

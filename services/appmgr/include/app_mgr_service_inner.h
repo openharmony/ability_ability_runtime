@@ -387,6 +387,7 @@ public:
         const std::string& reason = "KillApplicationSelf");
 
     int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack, const std::string& reason);
+    int32_t KillProcessByPidForExit(int32_t pid, const std::string& reason);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -1429,6 +1430,10 @@ public:
      * Mark processes of the uid as the app is going to be restarted.
      */
     int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    /**
+     * Mark processes of the pid as the app is going to be restarted.
+     */
+    int32_t SignRestartProcess(int32_t pid);
 
     /**
      * Set application assertion pause state.

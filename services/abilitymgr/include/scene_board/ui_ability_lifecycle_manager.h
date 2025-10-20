@@ -72,6 +72,7 @@ public:
     virtual ~UIAbilityLifecycleManager() = default;
 
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey, bool isAppRecovery = false);
+    void SignRestartProcess(int32_t pid);
 
     /**
      * StartUIAbility with request.

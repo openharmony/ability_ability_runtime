@@ -333,6 +333,7 @@ public:
         bool clearPageStack);
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
         bool clearPageStack);
+    bool ProcessExitByPid(int32_t pid, const KillProcessConfig &config);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
     bool GetProcessInfosByUserId(int32_t userId, std::list<SimpleProcessInfo> &processInfos);
 
@@ -395,6 +396,7 @@ public:
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
     int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    int32_t SignRestartProcess(int32_t pid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 

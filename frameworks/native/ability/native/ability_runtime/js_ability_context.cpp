@@ -3352,7 +3352,7 @@ napi_value JsAbilityContext::OnRestartAppWithWindow(napi_env env, NapiCallbackIn
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
-
+    InheritWindowMode(want);
     auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, innerErrCode, want] {

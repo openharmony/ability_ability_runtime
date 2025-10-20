@@ -2231,5 +2231,50 @@ HWTEST_F(AppMgrServiceInnerNinthTest, AllowScbProcessMoveToBackground_001, TestS
     EXPECT_EQ(AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->IsAllowScbProcessMoveToBackground(), false);
     TAG_LOGI(AAFwkTag::TEST, "AllowScbProcessMoveToBackground_001 end");
 }
+
+/**
+ * @tc.name: KillProcessByPidForExit_0100
+ * @tc.desc: Test KillProcessByPidForExit
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, KillProcessByPidForExit_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidForExit_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    auto ret = appMgrServiceInner->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(ret, ERR_NO_INIT);
+
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    AAFwk::MyStatus::GetInstance().exitByPidstatus_ = false;
+    ret = appMgrServiceInner->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().exitByPidstatus_ = true;
+    ret = appMgrServiceInner->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().exitByPidstatus_ = false;
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidForExit_0100 end");
+}
+
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: test SignRestartProcess_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, SignRestartProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SignRestartProcess_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto pid = 100;
+    auto ret = appMgrServiceInner->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_OK);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "SignRestartProcess_001 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

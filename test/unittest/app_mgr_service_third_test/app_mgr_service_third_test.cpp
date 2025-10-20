@@ -475,5 +475,61 @@ HWTEST_F(AppMgrServiceThirdTest, ShowHelp_001, TestSize.Level1)
     EXPECT_EQ(resultBuffer, expectedOutput);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: SignRestartProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService SignRestartProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify SignRestartProcess
+ */
+HWTEST_F(AppMgrServiceThirdTest, SignRestartProcess_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->SignRestartProcess(0);
+    EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+
+    AAFwk::MyFlag::flag_ = 0;
+    res = appMgrService->SignRestartProcess(0);
+    EXPECT_EQ(res, AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL);
+
+    AAFwk::MyFlag::flag_ = 1;
+    res = appMgrService->SignRestartProcess(0);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: KillProcessByPidForExit
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService KillProcessByPidForExit
+ * EnvConditions: NA
+ * CaseDescription: Verify KillProcessByPidForExit
+ */
+HWTEST_F(AppMgrServiceThirdTest, KillProcessByPidForExit_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+
+    AAFwk::MyFlag::flag_ = 0;
+    res = appMgrService->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(res, AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL);
+
+    AAFwk::MyFlag::flag_ = 1;
+    res = appMgrService->KillProcessByPidForExit(0, "");
+    EXPECT_EQ(res, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
