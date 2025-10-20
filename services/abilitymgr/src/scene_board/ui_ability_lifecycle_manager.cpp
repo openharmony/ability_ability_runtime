@@ -2665,12 +2665,9 @@ int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &sp
     const auto &abilityRequest = specifiedRequest.abilityRequest;
     int32_t requestId = specifiedRequest.requestId;
     int32_t requestListId = specifiedRequest.requestListId;
-    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
-    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+    auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
     CHECK_POINTER_AND_RETURN(abilityRecord->GetSessionInfo(), ERR_INVALID_VALUE);
     sessionInfo->persistentId = abilityRecord->GetSessionInfo()->persistentId;
-    sessionInfo->want = abilityRequest.want;
-    sessionInfo->callerToken = abilityRequest.callerToken;
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->processOptions = nullptr;
     if (AppUtils::GetInstance().IsStartOptionsWithProcessOptions() &&
@@ -2679,8 +2676,8 @@ int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &sp
     }
     sessionInfo->startWindowOption = nullptr;
     sessionInfo->isFromIcon = abilityRequest.isFromIcon;
-    sessionInfo->requestId = requestId;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
+    sessionInfo->userId = userId_;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveAbilityToFront: %{public}d-%{public}s", requestId,
         abilityRequest.specifiedFlag.c_str());
     if (requestListId != REQUEST_LIST_ID_INIT) {
