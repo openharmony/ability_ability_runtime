@@ -154,6 +154,22 @@ void AbilityManagerServiceSixthTest::SetUp()
 void AbilityManagerServiceSixthTest::TearDown()
 {}
 
+struct TestAppMgrClientMock : public AppExecFwk::AppMgrClient {
+    mutable std::vector<std::string> configuredBundleNames;
+    mutable std::string configuredInstanceKey;
+    mutable AppExecFwk::AppProcessState configuredState { AppExecFwk::AppProcessState::APP_STATE_FOREGROUND };
+    mutable std::string configuredProcessName { "testProcess" };
+    int32_t GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+        OHOS::AppExecFwk::RunningProcessInfo &info) const override
+    {
+        info.bundleNames = configuredBundleNames;
+        info.instanceKey = configuredInstanceKey;
+        info.state_ = configuredState;
+        info.processName_ = configuredProcessName;
+        return ERR_OK;
+    }
+};
+
 /*
  * Feature: AbilityManagerService
  * Function: InitPushTask
@@ -2112,6 +2128,146 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_002,
     auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityInCurrentProcess
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityInCurrentProcess
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    Want want;
+    std::string specifiedFlag;
+    StartOptions startOptions;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.value = true;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, token);
+    EXPECT_EQ(ret, START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START);
+    std::string bundleName = "test";
+    std::string abilityName = "testAbility";
+    want.SetElementName(bundleName, abilityName);
+    ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, token);
+    EXPECT_EQ(ret, INNER_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityInCurrentProcess
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityInCurrentProcess
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_004 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    auto scheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    ASSERT_NE(scheduler, nullptr);
+    auto mockClient = std::make_unique<TestAppMgrClientMock>();
+    mockClient->configuredBundleNames = { "other.bundle" };
+    scheduler->appMgrClient_ = std::move(mockClient);
+
+    Want want;
+    std::string bundleName = "target.bundle";
+    std::string abilityName = "TargetAbility";
+    want.SetElementName(bundleName, abilityName);
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.value = true;
+    StartOptions startOptions;
+    std::string specifiedFlag;
+    auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, token);
+    EXPECT_EQ(ret, ERROR_UIABILITY_NOT_BELONG_TO_CALLER);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityInCurrentProcess
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityInCurrentProcess
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_005 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    auto scheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    ASSERT_NE(scheduler, nullptr);
+    auto mockClient = std::make_unique<TestAppMgrClientMock>();
+    mockClient->configuredBundleNames = { "target.bundle" };
+    mockClient->configuredInstanceKey = "instance_origin";
+    scheduler->appMgrClient_ = std::move(mockClient);
+
+    Want want;
+    std::string bundleName = "target.bundle";
+    std::string abilityName = "TargetAbility";
+    want.SetElementName(bundleName, abilityName);
+    want.SetParam(Want::APP_INSTANCE_KEY, std::string("instance_other"));
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.value = true;
+    StartOptions startOptions;
+    std::string specifiedFlag;
+    auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, token);
+    EXPECT_EQ(ret, ERROR_UIABILITY_NOT_BELONG_TO_CALLER);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsAppCloneOrMultiInstance
+ * FunctionPoints: AbilityManagerService IsAppCloneOrMultiInstance
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, IsAppCloneOrMultiInstance_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsAppCloneOrMultiInstance_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    Want want;
+    int32_t targetAppIndex = -1;
+    std::string callerInstanceKey = "key";
+    auto ret = abilityMs->IsAppCloneOrMultiInstance(want, nullptr, targetAppIndex, callerInstanceKey);
+    EXPECT_FALSE(ret);
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    ret = abilityMs->IsAppCloneOrMultiInstance(want, abilityRecord, targetAppIndex, callerInstanceKey);
+    EXPECT_FALSE(ret);
+    abilityRecord->SetAppIndex(USER_ID_U100);
+    targetAppIndex = 1;
+    ret = abilityMs->IsAppCloneOrMultiInstance(want, abilityRecord, targetAppIndex, callerInstanceKey);
+    EXPECT_TRUE(ret);
+    abilityRecord->SetAppIndex(targetAppIndex);
+    std::string instanceKey = "testKey";
+    want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    ret = abilityMs->IsAppCloneOrMultiInstance(want, abilityRecord, targetAppIndex, callerInstanceKey);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsAppCloneOrMultiInstance_001 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
