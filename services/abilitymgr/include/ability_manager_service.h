@@ -1494,7 +1494,7 @@ public:
      * Upgrade app completed event.
      * @param uid.
      */
-    void AppUpgradeCompleted(int32_t uid);
+    void AppUpgradeCompleted(int32_t uid, int32_t installType);
 
     /**
      * Record app exit reason.
