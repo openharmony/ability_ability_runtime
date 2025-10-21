@@ -137,6 +137,25 @@ HWTEST_F(JsRuntimeTest, JsRuntimeTestCreate_0100, TestSize.Level0)
 }
 
 /**
+ * @tc.name: JsRuntimeTestInit_0100
+ * @tc.desc: JsRuntime Test for Init
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeTestInit_0100, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Init_0100 start");
+
+    Runtime::Options options;
+    options.isStageModel = false;
+    options.isTestFramework = false;
+    JsRuntime jsRuntime;
+    bool isInit = jsRuntime.Init(options);
+    EXPECT_EQ(isInit, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "Init_0100 end");
+}
+
+/**
  * @tc.name: JsRuntimeTestSetAppLibPath_0100
  * @tc.desc: JsRuntime Test for SetAppLibPath
  * @tc.type: FUNC
