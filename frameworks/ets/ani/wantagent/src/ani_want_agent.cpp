@@ -35,16 +35,6 @@ constexpr int32_t PARAMETER_ERROR = -1;
 constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
 constexpr const char* WANT_AGENT_NAMESPACE = "L@ohos/app/ability/wantAgent/wantAgent;";
 constexpr const char* CLEANER_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/Cleaner;";
-
-bool CheckCallerIsSystemApp()
-{
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app forbidden to call");
-        return false;
-    }
-    return true;
-}
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -347,7 +337,7 @@ void EtsWantAgent::OnGetWant(ani_env *env, ani_object agent, ani_object call)
         return;
     }
     WantAgent* pWantAgent = nullptr;
-    if (!CheckCallerIsSystemApp()) {
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
         EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
             AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
@@ -609,7 +599,7 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
     }
     std::shared_ptr<AAFwk::StartOptions> startOptions = nullptr;
     if (!isUndefined) {
-        if (!CheckCallerIsSystemApp()) {
+        if (!AppExecFwk::CheckCallerIsSystemApp()) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
             EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
                 AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
