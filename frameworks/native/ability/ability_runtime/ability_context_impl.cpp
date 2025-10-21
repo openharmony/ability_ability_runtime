@@ -50,6 +50,14 @@ static std::unordered_map<Rosen::WSError, int32_t> SCB_TO_MISSION_ERROR_CODE_MAP
     { Rosen::WSError::WS_ERROR_INVALID_WINDOW, AAFwk::ERR_MAIN_WINDOW_NOT_EXIST },
     { Rosen::WSError::WS_ERROR_IPC_FAILED, AAFwk::INNER_ERR },
 };
+
+ErrCode WSErrorConvertToAAFwkError(Rosen::WSError err)
+{
+    if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+        return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+    }
+    return static_cast<int32_t>(err);
+}
 #endif // SUPPORT_SCREEN
 } // namespace
 #ifdef SUPPORT_SCREEN
@@ -1035,11 +1043,16 @@ ErrCode AbilityContextImpl::SetMissionWindowIcon(std::shared_ptr<OHOS::Media::Pi
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, SetMissionWindowIcon");
         auto err = sceneSessionManager->SetSessionIconForThirdParty(token_, windowIcon);
-        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, SetMissionWindowIcon err");
-            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        if (err != Rosen::WSError::WS_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, SetMissionWindowIcon err, errcode: %{public}d",
+                static_cast<int32_t>(err));
+            return WSErrorConvertToAAFwkError(err);
         }
-        return static_cast<int32_t>(err);
+        auto abilityCallback = abilityCallback_.lock();
+        if (abilityCallback) {
+            abilityCallback->SetMissionIcon(windowIcon);
+        }
+        return ERR_OK;
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "device not support scene board");
     return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
