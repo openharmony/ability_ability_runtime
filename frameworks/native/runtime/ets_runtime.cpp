@@ -33,7 +33,7 @@
 #include "hybrid_js_module_reader.h"
 #include "nocopyable.h"
 #include "parameters.h"
-#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
+#include "ets/runtime/ets_namespace_manager.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
