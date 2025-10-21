@@ -251,6 +251,7 @@ constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig.screenmode";
+constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -2997,7 +2998,7 @@ bool AbilityManagerService::IsDmsAlive() const
     return g_isDmsAlive.load();
 }
 
-void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
+void AbilityManagerService::AppUpgradeCompleted(int32_t uid, int32_t installType)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not sa call");
@@ -3037,7 +3038,7 @@ void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
     }
 
     std::vector<AppExecFwk::BundleInfo> bundleInfos = { bundleInfo };
-    if (type == KeepAliveType::THIRD_PARTY) {
+    if (type == KeepAliveType::THIRD_PARTY && installType == INSTALL_TYPE_UPGRADE) {
         KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfos, userId);
         if (IN_PROCESS_CALL(KeepAliveProcessManager::GetInstance().CheckNeedRestartAfterUpgrade(uid))) {
             IN_PROCESS_CALL_WITHOUT_RET(
