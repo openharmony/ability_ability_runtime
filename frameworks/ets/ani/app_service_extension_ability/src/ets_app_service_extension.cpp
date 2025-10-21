@@ -41,8 +41,6 @@ constexpr const char *APP_SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
     "Lapplication/AppServiceExtensionContext/AppServiceExtensionContext;";
 constexpr const char *ON_CREATE_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *VOID_SIGNATURE = ":V";
-constexpr const char *ON_CONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Lstd/core/Object;";
-constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;I:V";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "L@ohos/app/ability/Configuration/Configuration;:V";
 } // namespace
@@ -137,7 +135,7 @@ sptr<IRemoteObject> EtsAppServiceExtension::OnConnect(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null wantRef");
         return nullptr;
     }
-    ani_ref result = CallObjectMethod(true, "onConnect", ON_CONNECT_SIGNATURE, wantRef);
+    ani_ref result = CallObjectMethod(true, "onConnect", nullptr, wantRef);
     auto obj = reinterpret_cast<ani_object>(result);
     auto remoteObj = AniGetNativeRemoteObject(env, obj);
     if (remoteObj == nullptr) {
@@ -163,7 +161,7 @@ void EtsAppServiceExtension::OnDisconnect(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null wantRef");
         return;
     }
-    CallObjectMethod(false, "onDisconnect", ON_DISCONNECT_SIGNATURE, wantRef);
+    CallObjectMethod(false, "onDisconnect", nullptr, wantRef);
     TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "end");
 }
 
