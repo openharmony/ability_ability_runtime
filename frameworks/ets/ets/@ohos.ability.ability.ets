@@ -11,6 +11,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-export type PacMap = Record<string, int | double | string | boolean | Array<string | int | double | boolean> | null>;
+import { PacMap as _PacMap } from './ability/dataAbilityHelper';
+
+export default namespace ability {
+  export type PacMap = _PacMap;
+}
