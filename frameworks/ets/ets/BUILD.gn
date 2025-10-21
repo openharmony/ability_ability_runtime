@@ -1522,8 +1522,25 @@ ohos_prebuilt_etc("quick_fix_manager_abc_etc") {
   deps = [ ":quick_fix_manager_abc" ]
 }
 
+generate_static_abc("ability_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.ability.ability.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_ability_abc_etc") {
+  source = "$target_out_dir/ability_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_ability_abc" ]
+}
+
 group("ets_packages") {
   deps = [
+    ":ability_ability_abc_etc",
     ":ability_application_abc_etc",
     ":ability_delegator_abc_etc",
     ":ability_delegator_ability_monitor_abc_etc",
