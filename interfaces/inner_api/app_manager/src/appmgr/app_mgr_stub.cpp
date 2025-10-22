@@ -424,6 +424,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleAllowScbProcessMoveToBackground(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_PROCESS_BY_PID_FOR_EXIT):
             return HandleKillProcessByPidForExit(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID):
+            return HandleKillChildProcessByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -2220,6 +2222,19 @@ int32_t AppMgrStub::HandleAllowScbProcessMoveToBackground(MessageParcel &data, M
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     AllowScbProcessMoveToBackground();
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleKillChildProcessByPid(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleKillChildProcessByPid call");
+    pid_t pid = data.ReadInt32();
+
+    int32_t result = KillChildProcessByPid(pid);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result fail");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

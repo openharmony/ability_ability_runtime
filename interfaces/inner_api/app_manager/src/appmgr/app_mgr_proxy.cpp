@@ -2683,5 +2683,21 @@ void AppMgrProxy::AllowScbProcessMoveToBackground()
 
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::ALLOW_SCB_PROCESS_MOVE_TO_BACKGROUND, data, reply, option);
 }
+
+int32_t AppMgrProxy::KillChildProcessByPid(int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID, data, reply, option);
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -355,3 +355,13 @@ Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUi
     configs->isIsolationUid = isolationUid;
     return NCP_NO_ERROR;
 }
+
+Ability_NativeChildProcess_ErrCode OH_Ability_KillChildProcess(int32_t pid)
+{
+    auto cpmErr = ChildProcessManager::GetInstance().KillChildProcessByPid(pid);
+    if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "kill child process by pid, pid:%{public}d, error: %{public}d", pid, cpmErr);
+        return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
+    }
+    return NCP_NO_ERROR;
+}
