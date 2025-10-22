@@ -140,7 +140,8 @@ public:
     static void SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
         ani_object callback);
     static void SetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
-    static void SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_object iconObj);
+    static void SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_string labelObj,
+        ani_object iconObj);
     static void SetMissionIconCheck(ani_env *env, ani_object aniObj, ani_object pixelMapObj);
 
 private:
