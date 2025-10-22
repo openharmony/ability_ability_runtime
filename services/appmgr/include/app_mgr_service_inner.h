@@ -102,6 +102,10 @@ class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
+// for child process isolation
+constexpr int32_t START_ID_FOR_CHILD_PROCESS_ISOLATION = 110000;
+constexpr int32_t END_ID_FOR_CHILD_PROCESS_ISOLATION = 119999;
+
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
     struct LoadAbilityCallbackGuard {
@@ -1644,6 +1648,13 @@ private:
      */
     bool GetBundleInfo(const std::string &bundleName, BundleInfo &bundleInfo);
 
+    int32_t GenerateUidByUserId(int32_t userId, int32_t id);
+
+    bool GenerateUid(std::unordered_set<int32_t> &assignedUids,
+                        int32_t beginId, int32_t endId,
+                        int32_t userId, int32_t &uid,
+                        std::unordered_map<int32_t, int32_t> &lastIsolationIdMap);
+
     bool GenerateRenderUid(int32_t &renderUid);
 
     /**
@@ -1855,6 +1866,10 @@ private:
 
     int32_t GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+
+    void RemoveChildProcessIsolationUid(int32_t uid);
+    
+    void OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childProcessRecord);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
@@ -2153,6 +2168,7 @@ private:
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
     int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
+    std::unordered_map<int32_t, int32_t> lastChildProcessIsolationIdMap_;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -2163,6 +2179,7 @@ private:
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
     ffrt::mutex renderUidSetLock_;
+    ffrt::mutex childProcessIsolationUidSetLock_;
     ffrt::mutex exceptionLock_;
     ffrt::mutex browserHostLock_;
     ffrt::mutex restartResidentTaskListMutex_;
@@ -2181,6 +2198,7 @@ private:
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
     std::unordered_set<int32_t> renderUidSet_;
+    std::unordered_set<int32_t> childProcessIsolationUidSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
