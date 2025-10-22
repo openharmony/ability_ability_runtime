@@ -192,7 +192,7 @@ export default class UIAbilityContext extends Context {
 
   private native nativeOpenAtomicServiceCheck(): void;
 
-  private native nativeSetAbilityInstanceInfoCheck(icon: image.PixelMap): void;
+  private native nativeSetAbilityInstanceInfoCheck(label: string, icon: image.PixelMap): void;
 
   private native nativeSetMissionIconCheck(icon: image.PixelMap): void;
 
@@ -573,7 +573,7 @@ hideAbility(): Promise<void> {
   }
 
   setAbilityInstanceInfo(label: string, icon: image.PixelMap): Promise<void> {
-    this.nativeSetAbilityInstanceInfoCheck(icon);
+    this.nativeSetAbilityInstanceInfoCheck(label, icon);
     let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject: (err: BusinessError)=>void):void => {
       let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {

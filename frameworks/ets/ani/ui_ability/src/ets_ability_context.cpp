@@ -669,11 +669,18 @@ void EtsAbilityContext::SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, 
     etsContext->OnSetAbilityInstanceInfo(env, aniObj, labelObj, iconObj, callback);
 }
 
-void EtsAbilityContext::SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_object iconObj)
+void EtsAbilityContext::SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_string labelObj,
+    ani_object iconObj)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "SetAbilityInstanceInfoCheck called");
     if (env == nullptr || aniObj == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    std::string label;
+    if (!AppExecFwk::GetStdString(env, labelObj, label) || label.empty()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Invalid label.");
         return;
     }
     auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, iconObj);
@@ -1947,7 +1954,7 @@ void EtsAbilityContext::OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj
     }
 
     std::string label;
-    if (!AppExecFwk::GetStdString(env, labelObj, label)) {
+    if (!AppExecFwk::GetStdString(env, labelObj, label) || label.empty()) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param label failed");
         return;
@@ -2252,7 +2259,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeSetAbilityInstanceInfo",
                 "C{std.core.String}C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::SetAbilityInstanceInfo) },
-            ani_native_function { "nativeSetAbilityInstanceInfoCheck", "C{@ohos.multimedia.image.image.PixelMap}:",
+            ani_native_function { "nativeSetAbilityInstanceInfoCheck",
+                "C{std.core.String}C{@ohos.multimedia.image.image.PixelMap}:",
                 reinterpret_cast<void *>(EtsAbilityContext::SetAbilityInstanceInfoCheck) },
             ani_native_function { "nativeSetMissionIcon",
                 "C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
