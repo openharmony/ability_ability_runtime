@@ -35,6 +35,7 @@ constexpr const char* NEW_WEB_BUNDLE_NAME = "com.ohos.arkwebcore";
 constexpr const char* ARKWEB_CORE_PACKAGE_NAME = "persist.arkwebcore.package_name";
 constexpr const char* BUNDLE_TYPE = "bundleType";
 constexpr const char* IS_RECOVER = "isRecover";
+const std::string TYPE = "type";
 }
 AbilityBundleEventCallback::AbilityBundleEventCallback(
     std::shared_ptr<TaskHandlerWrap> taskHandler, std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService)
@@ -50,6 +51,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     const Want& want = eventData.GetWant();
     // action contains the change type of haps.
     std::string action = want.GetAction();
+    int32_t installType = want.GetIntParam(TYPE, 0);
     std::string bundleName = want.GetElement().GetBundleName();
     std::string moduleName = want.GetElement().GetModuleName();
     auto tokenId = static_cast<uint32_t>(want.GetIntParam(KEY_TOKEN, 0));
@@ -90,7 +92,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
         bool isRecover = want.GetBoolParam(IS_RECOVER, false);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "COMMON_EVENT_PACKAGE_ADDED, isRecover:%{public}d", isRecover);
         if (isRecover) {
-            HandleAppUpgradeCompleted(uid);
+            HandleAppUpgradeCompleted(uid, installType);
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
@@ -100,7 +102,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             HandleRestartResidentProcessDependedOnWeb();
         }
         HandleUpdatedModuleInfo(bundleName, uid, moduleName, false);
-        HandleAppUpgradeCompleted(uid);
+        HandleAppUpgradeCompleted(uid, installType);
         if (abilityAutoStartupService_ == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, abilityAutoStartupService is nullptr");
             return;
@@ -136,10 +138,10 @@ void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bund
     taskHandler_->SubmitTask(task);
 }
 
-void AbilityBundleEventCallback::HandleAppUpgradeCompleted(int32_t uid)
+void AbilityBundleEventCallback::HandleAppUpgradeCompleted(int32_t uid, int32_t installType)
 {
     wptr<AbilityBundleEventCallback> weakThis = this;
-    auto task = [weakThis, uid]() {
+    auto task = [weakThis, uid, installType]() {
         sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
         if (sharedThis == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sharedThis is nullptr.");
@@ -151,7 +153,7 @@ void AbilityBundleEventCallback::HandleAppUpgradeCompleted(int32_t uid)
             TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
             return;
         }
-        abilityMgr->AppUpgradeCompleted(uid);
+        abilityMgr->AppUpgradeCompleted(uid, installType);
     };
     taskHandler_->SubmitTask(task);
 }
