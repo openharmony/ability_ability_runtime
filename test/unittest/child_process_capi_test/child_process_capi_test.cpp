@@ -315,5 +315,19 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_GetCurrentChildProcessArgs_001, TestSi
     EXPECT_NE(OH_Ability_GetCurrentChildProcessArgs(), nullptr);
     GTEST_LOG_(INFO) << "OH_Ability_GetCurrentChildProcessArgs_001 end";
 }
+
+/**
+ * @tc.number: OH_Ability_KillChildProcess_001
+ * @tc.desc: Test API OH_Ability_KillChildProcess_001 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_KillChildProcess_001, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_KillChildProcess_001 begin";
+    int32_t pid = -1;
+    auto ret = OH_Ability_KillChildProcess(pid);
+    EXPECT_EQ(ret, NCP_ERR_INVALID_PID);
+    GTEST_LOG_(INFO) << "OH_Ability_KillChildProcess_001 end";
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

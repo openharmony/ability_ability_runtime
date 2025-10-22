@@ -558,5 +558,21 @@ std::string ChildProcessManager::GetModuleNameFromSrcEntry(const std::string &sr
     }
     return moduleName;
 }
+
+ChildProcessManagerErrorCode ChildProcessManager::KillChildProcessByPid(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::PROCESSMGR, "pid:%{public}d", pid);
+    sptr<AppExecFwk::IAppMgr> appMgr = GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null appMgr");
+        return ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED;
+    }
+    auto ret = appMgr->KillChildProcessByPid(pid);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "KillChildProcessByPid error:%{public}d, pid:%{public}d", ret, pid);
+        return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
+    }
+    return ChildProcessManagerErrorCode::ERR_OK;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

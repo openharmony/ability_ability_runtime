@@ -2084,5 +2084,15 @@ void AppMgrService::AllowScbProcessMoveToBackground()
     }
     appMgrServiceInner_->AllowScbProcessMoveToBackground();
 }
+
+int32_t AppMgrService::KillChildProcessByPid(int32_t pid)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    return appMgrServiceInner_->KillChildProcessByPid(pid);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

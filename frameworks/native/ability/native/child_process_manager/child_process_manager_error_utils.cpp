@@ -31,6 +31,7 @@ const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode>
     { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
     { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
     { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_MULTI_PROCESS_DISABLED },
+    { ChildProcessManagerErrorCode::ERR_INVALID_PID, NCP_ERR_INVALID_PID },
 };
 
 AbilityErrorCode ChildProcessManagerErrorUtil::GetAbilityErrorCode(const ChildProcessManagerErrorCode &internalErrCode)

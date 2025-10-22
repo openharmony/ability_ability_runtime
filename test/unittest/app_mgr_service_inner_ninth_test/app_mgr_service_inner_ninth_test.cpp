@@ -2276,5 +2276,96 @@ HWTEST_F(AppMgrServiceInnerNinthTest, SignRestartProcess_001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "SignRestartProcess_001 end");
 }
+
+/**
+ * @tc.name: KillChildProcessByPid_0100
+ * @tc.desc: Test KillChildProcessByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, KillChildProcessByPid_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(applicationInfo, nullptr);
+    applicationInfo->name = "test.app.name";
+    applicationInfo->bundleName = "test.bundle.name";
+    const int32_t hostPid = 1234;
+    const std::string processName = "test_process";
+    auto appRecord = std::make_shared<AppRunningRecord>(applicationInfo, 1, processName);
+    ASSERT_NE(appRecord, nullptr);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = appRecord;
+    int32_t childPid = 1;
+    ChildProcessRequest childRequest;
+    childRequest.childProcessType = 1;
+    auto childProcessRecord = std::make_shared<ChildProcessRecord>(hostPid, childRequest, appRecord);
+    childProcessRecord->SetPid(childPid);
+    AAFwk::MyStatus::GetInstance().getChildProcessRecordByPid_ = childProcessRecord;
+    auto ret = appMgrServiceInner->KillChildProcessByPid(childPid);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0100 end");
+}
+
+/**
+ * @tc.name: KillChildProcessByPid_0200
+ * @tc.desc: Test KillChildProcessByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, KillChildProcessByPid_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(applicationInfo, nullptr);
+    applicationInfo->name = "test.app.name";
+    applicationInfo->bundleName = "test.bundle.name";
+    const int32_t hostPid = 1234;
+    const std::string processName = "test_process";
+    auto appRecord = std::make_shared<AppRunningRecord>(applicationInfo, 1, processName);
+    ASSERT_NE(appRecord, nullptr);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = appRecord;
+    int32_t childPid = 1;
+    ChildProcessRequest childRequest;
+    childRequest.childProcessType = 1;
+    auto childProcessRecord = std::make_shared<ChildProcessRecord>(hostPid, childRequest, appRecord);
+    childProcessRecord->SetPid(childPid);
+    AAFwk::MyStatus::GetInstance().getChildProcessRecordByPid_ = nullptr;
+    auto ret = appMgrServiceInner->KillChildProcessByPid(childPid);
+    EXPECT_EQ(ret, AAFwk::ERR_INVALID_PID);
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0200 end");
+}
+
+/**
+ * @tc.name: KillChildProcessByPid_0300
+ * @tc.desc: Test KillChildProcessByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, KillChildProcessByPid_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(applicationInfo, nullptr);
+    applicationInfo->name = "test.app.name";
+    applicationInfo->bundleName = "test.bundle.name";
+    const int32_t hostPid = 1234;
+    const std::string processName = "test_process";
+    auto appRecord = std::make_shared<AppRunningRecord>(applicationInfo, 1, processName);
+    ASSERT_NE(appRecord, nullptr);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    int32_t childPid = 1;
+    ChildProcessRequest childRequest;
+    childRequest.childProcessType = 1;
+    auto childProcessRecord = std::make_shared<ChildProcessRecord>(hostPid, childRequest, appRecord);
+    childProcessRecord->SetPid(childPid);
+    AAFwk::MyStatus::GetInstance().getChildProcessRecordByPid_ = childProcessRecord;
+    auto ret = appMgrServiceInner->KillChildProcessByPid(childPid);
+    EXPECT_EQ(ret, AAFwk::ERR_INVALID_PID);
+    AAFwk::MyStatus::GetInstance().getChildProcessRecordByPid_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "KillChildProcessByPid_0300 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

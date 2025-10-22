@@ -1337,6 +1337,11 @@ enum NativeFreeInstallError {
      */
     ERROR_UIABILITY_IS_ALREADY_EXIST = 29360225,
 
+    /*
+     * Result (29360226) Invalid pid.
+     */
+    ERR_INVALID_PID = 29360226,
+
     /**
      * Undefine error code.
      */
