@@ -1647,9 +1647,9 @@ private:
 
     int32_t GenerateUidByUserId(int32_t userId, int32_t id);
 
-    bool GenerateUid(std::unordered_set<int32_t> &assignedUids, 
+    bool GenerateUid(std::unordered_set<int32_t> &assignedUids,
                         int32_t beginId, int32_t endId,
-                        int32_t userId, int32_t &uid, 
+                        int32_t userId, int32_t &uid,
                         std::unordered_map<int32_t, int32_t> &lastIsolationIdMap);
 
     bool GenerateRenderUid(int32_t &renderUid);
