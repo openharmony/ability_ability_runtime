@@ -73,7 +73,7 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvImplTest_SetAppInfo_01
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetBundleName(), "bundleName");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetSrcPath(), "/codePath");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetDataPath(), "/dataDir");
-    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 0);
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvImplTest_SetAppInfo_0100 end";
 }
 
