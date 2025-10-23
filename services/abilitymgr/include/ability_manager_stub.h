@@ -24,6 +24,7 @@
 #include "dlp_connection_info.h"
 #endif // WITH_DLP
 #include "iconnection_observer.h"
+#include "iforeground_app_connection.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -60,6 +61,10 @@ public:
     virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
+    virtual int RegisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer);
+
+    virtual int UnregisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer);
 
 #ifdef WITH_DLP
     virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos);
@@ -231,6 +236,9 @@ private:
 
     int FreeInstallAbilityFromRemoteInner(MessageParcel &data, MessageParcel &reply);
     int AddFreeInstallObserverInner(MessageParcel &data, MessageParcel &reply);
+
+    int32_t RegisterForegroundAppObserverInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregisterForegroundAppObserverInner(MessageParcel &data, MessageParcel &reply);
 
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int SubmitSaveRecoveryInfoInner(MessageParcel &data, MessageParcel &reply);

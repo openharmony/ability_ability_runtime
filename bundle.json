@@ -419,6 +419,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/foreground_app_obs_manager/include",
+              "header_files": [
+                "foreground_app_connection_client.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/foreground_app_obs_manager:foreground_app_obs_manager"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/",
               "header_files": [
                 "service_extension.h"
