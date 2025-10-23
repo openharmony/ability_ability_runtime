@@ -1104,6 +1104,10 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
             auto self(weak_from_this());
             auto task = [abilityRecord, self]() {
                 auto selfObj = self.lock();
+                if (selfObj == nullptr) {
+                    TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager invalid");
+                    return;
+                }
                 abilityRecord->SetMinimizeReason(true);
                 selfObj->MoveToBackground(abilityRecord);
             };
