@@ -2044,5 +2044,15 @@ int32_t AppMgrService::RegisterApplicationStateObserverWithFilter(sptr<IApplicat
     }
     return ret;
 }
+
+void AppMgrService::SetIsAllowedScbAccessBackground()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return;
+    }
+    appMgrServiceInner_->SetIsAllowedScbAccessBackground();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
