@@ -507,7 +507,10 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     {
         std::lock_guard guard(wantLock_);
         std::string targetBundleName = abilityInfo_.applicationInfo.bundleName;
-        bool isNotifyCollaborator = (targetBundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName());
+        bool isNotifyCollaborator = !options.targetGrantBundleName.empty();
+        if (isNotifyCollaborator) {
+            targetBundleName = options.targetGrantBundleName;
+        }
         GrantUriPermission(want_, targetBundleName, false, tokenId, isNotifyCollaborator);
     }
 #endif // SUPPORT_UPMS
