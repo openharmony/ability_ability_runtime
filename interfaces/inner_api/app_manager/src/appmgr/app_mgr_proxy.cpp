@@ -2528,7 +2528,7 @@ int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
         return ERR_INVALID_DATA;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
 
@@ -2544,7 +2544,7 @@ int32_t AppMgrProxy::ExitMasterProcessRole()
         return ERR_INVALID_DATA;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE, data, reply, option);
     return reply.ReadInt32();
 }
 
