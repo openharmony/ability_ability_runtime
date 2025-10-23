@@ -1903,7 +1903,7 @@ int32_t AppMgrService::KillAppSelfWithInstanceKey(const std::string &instanceKey
     return appMgrServiceInner_->KillAppSelfWithInstanceKey(instanceKey, clearPageStack, reason);
 }
 
-int32_t AppMgrService::KillProcessByPidForExit(int32_t pid, const std::string& reason)
+int32_t AppMgrService::KillProcessByPidForExit(int32_t pid, const std::string &reason)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");

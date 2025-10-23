@@ -3813,14 +3813,14 @@ void UIAbilityLifecycleManager::SignRestartAppFlag(int32_t uid, const std::strin
 
 void UIAbilityLifecycleManager::SignRestartProcess(int32_t pid)
 {
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    std::lock_guard guard(sessionLock_);
     auto tempSessionAbilityMap = sessionAbilityMap_;
     for (auto &[sessionId, abilityRecord] : tempSessionAbilityMap) {
         if (abilityRecord == nullptr || abilityRecord->GetPid() != pid) {
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);
-        std::string reason = "onAbilityDied";
+        std::string reason = "restartProcess";
         NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
             reason);
     }

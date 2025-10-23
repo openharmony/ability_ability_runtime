@@ -2044,7 +2044,6 @@ int32_t AppMgrStub::HandleKillAppSelfWithInstanceKey(MessageParcel &data, Messag
 
 int32_t AppMgrStub::HandleKillProcessByPidForExit(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
     auto pid = data.ReadInt32();
     auto reason = data.ReadString();
     auto result = KillProcessByPidForExit(pid, reason);

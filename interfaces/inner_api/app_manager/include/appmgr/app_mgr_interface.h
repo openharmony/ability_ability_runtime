@@ -1010,7 +1010,7 @@ public:
         return 0;
     }
     
-    virtual int32_t KillProcessByPidForExit(int32_t pid, const std::string& reason)
+    virtual int32_t KillProcessByPidForExit(int32_t pid, const std::string &reason)
     {
         return 0;
     }

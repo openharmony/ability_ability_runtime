@@ -1926,7 +1926,6 @@ int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &in
 
 int32_t AppRunningManager::SignRestartProcess(int32_t pid)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;

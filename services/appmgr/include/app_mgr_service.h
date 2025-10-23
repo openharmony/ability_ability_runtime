@@ -889,7 +889,7 @@ public:
 
     virtual int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
         const std::string& reason) override;
-    int32_t KillProcessByPidForExit(int32_t pid, const std::string& reason) override;
+    int32_t KillProcessByPidForExit(int32_t pid, const std::string &reason) override;
 
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 
