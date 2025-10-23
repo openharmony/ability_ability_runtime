@@ -2431,7 +2431,7 @@ int32_t AppMgrProxy::KillAppSelfWithInstanceKey(const std::string &instanceKey, 
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::KillProcessByPidForExit(int32_t pid, const std::string& reason)
+int32_t AppMgrProxy::KillProcessByPidForExit(int32_t pid, const std::string &reason)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

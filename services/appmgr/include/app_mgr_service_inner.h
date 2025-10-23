@@ -387,7 +387,7 @@ public:
         const std::string& reason = "KillApplicationSelf");
 
     int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack, const std::string& reason);
-    int32_t KillProcessByPidForExit(int32_t pid, const std::string& reason);
+    int32_t KillProcessByPidForExit(int32_t pid, const std::string &reason);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.

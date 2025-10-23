@@ -2295,7 +2295,7 @@ int32_t AppMgrServiceInner::KillAppSelfWithInstanceKey(const std::string &instan
     return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
-int32_t AppMgrServiceInner::KillProcessByPidForExit(int32_t pid, const std::string& reason)
+int32_t AppMgrServiceInner::KillProcessByPidForExit(int32_t pid, const std::string &reason)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
