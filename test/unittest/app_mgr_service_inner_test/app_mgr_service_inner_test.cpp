@@ -4044,9 +4044,33 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_001, TestSize.Level2)
     want.SetParam("ohos.dlp.params.index", 1);
     abilityInfo.extensionAbilityType = ExtensionAbilityType::BACKUP;
     uint32_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
-    EXPECT_EQ(result, 7);
+    EXPECT_EQ(result, 3);
 
     TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_001 end");
+}
+
+/**
+ * @tc.name: BuildStartFlags_002
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_002, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_002 start");
+
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    AppspawnUtil::BuildStartFlags(want, abilityInfo);
+
+    want.SetParam("coldStart", true);
+    want.SetParam("ohos.dlp.params.index", 1);
+    want.SetParam("ohos.dlp.params.securityFlag", true);
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::BACKUP;
+    uint32_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    EXPECT_EQ(result, 1);
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_002 end");
 }
 #endif // WITH_DLP
 
