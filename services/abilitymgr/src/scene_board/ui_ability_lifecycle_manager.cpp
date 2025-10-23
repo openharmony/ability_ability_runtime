@@ -62,7 +62,6 @@ constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
 constexpr const char* BACKGROUND_DELAY_TIME = "persist.sys.abilityms.backgroundDelayTime";
 constexpr int32_t DEFAULT_BACKGROUND_DELAY_TIME = 6 * 1000 * 1000;
-
 #ifdef SUPPORT_ASAN
 constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -1102,10 +1101,11 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         if (abilityRecord->GetPrelaunchFlag()) {
             auto delayTime = OHOS::system::GetIntParameter<Int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
-            auto self(shared_from_this());
+            auto self(weak_from_this());
             auto task = [abilityRecord, self]() {
+                auto selfObj = self.lock();
                 abilityRecord->SetMinimizeReason(true);
-                self->MoveToBackground(abilityRecord);
+                selfObj->MoveToBackground(abilityRecord);
             };
             TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
             ffrt::submit(task, ffrt::task_attr().delay(delayTime));
