@@ -10924,5 +10924,22 @@ void AppMgrServiceInner::SetSpecifiedProcessRequestId(int32_t recordId, int32_t 
     appRecord->SetSpecifiedProcessRequestId(requestId);
     return;
 }
+
+void AppMgrServiceInner::SetIsAllowedScbAccessBackground()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    if (!IsSceneBoardCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not called by sceneBoard");
+        return;
+    }
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        return;
+    }
+    appRecord->SetIsAllowedScbAccessBackground();
+    return;
+}
 } // namespace AppExecFwk
 }  // namespace OHOS
