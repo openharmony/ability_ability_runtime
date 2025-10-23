@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace AbilityManagerEts {
 constexpr const char *CLASSNAME_ARRAY = "escompat.Array";
-constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iY:";
 constexpr const char *CLASSNAME_ABILITY_RRUNNINGINFO = "application.AbilityRunningInfo.AbilityRunningInfoImpl";
 constexpr const char *ABILITY_STATE_ENUM_NAME = "@ohos.app.ability.abilityManager.abilityManager.AbilityState";
 constexpr const char *CLASSNAME_EXTENSION_RUNNINGINFO = "application.ExtensionRunningInfo.ExtensionRunningInfoInner";
@@ -196,7 +196,7 @@ bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::
             TAG_LOGE(AAFwkTag::ABILITYMGR, "String_NewUTF8 failed, status : %{public}d", status);
             return false;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, aniStr);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, i, aniStr);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed, status : %{public}d", status);
             return false;

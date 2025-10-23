@@ -146,7 +146,7 @@ ani_object CreateAppStateDataArray(ani_env *env, const std::vector<AppExecFwk::A
             TAG_LOGE(AAFwkTag::APPMGR, "null aniData");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, aniData);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, aniData);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
             break;
@@ -192,7 +192,7 @@ ani_object NewArrayClass(ani_env *env, const std::vector<std::string> &data)
             TAG_LOGE(AAFwkTag::APPMGR, "String_NewUTF8 failed status : %{public}d", status);
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, aniString);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, aniString);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
@@ -305,7 +305,7 @@ ani_object CreateRunningMultiInstanceInfoArray(ani_env *env,
             TAG_LOGE(AAFwkTag::APPMGR, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
             break;
@@ -352,7 +352,7 @@ ani_object CreateRunningAppCloneArray(ani_env *env, const std::vector<AppExecFwk
             TAG_LOGE(AAFwkTag::APPMGR, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
             break;
@@ -511,7 +511,7 @@ bool SetRunningMultiInstanceInfo(
     ani_size index = 0;
     for (auto &pid : instanceInfo.pids) {
         ani_object aniPid = AppExecFwk::CreateInt(env, pid);
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, aniPid);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, aniPid);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "set failed status : %{public}d", status);
             return false;
@@ -599,7 +599,7 @@ bool SetRunningAppClone(ani_env *env, ani_object object, const AppExecFwk::Runni
     ani_size index = 0;
     for (auto &pid : runningAppClone.pids) {
         ani_object aniPid = AppExecFwk::CreateInt(env, pid);
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, aniPid);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, aniPid);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "set failed status : %{public}d", status);
             return false;
@@ -757,7 +757,7 @@ ani_object CreateIntAniArray(ani_env * env, const std::vector<int32_t> &dataArry
             TAG_LOGE(AAFwkTag::APPMGR, "intObj nullptr");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, intObj);
+        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", i, intObj);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
             return nullptr;
@@ -912,7 +912,7 @@ ani_object CreateKeepAliveInfoArray(ani_env *env, const std::vector<AbilityRunti
             TAG_LOGW(AAFwkTag::APPMGR, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGW(AAFwkTag::APPMGR, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
