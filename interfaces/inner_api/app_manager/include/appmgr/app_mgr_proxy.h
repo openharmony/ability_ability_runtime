@@ -904,6 +904,8 @@ public:
         const std::vector<std::string> &bundleNameList = {},
         const AppStateFilter &appStateFilter = AppStateFilter(),
         bool isUsingFilter = false) override;
+    
+    void SetIsAllowedScbAccessBackground() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
