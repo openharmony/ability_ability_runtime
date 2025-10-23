@@ -45,6 +45,7 @@ abilityms_files = [
   "src/extension_record/extension_record_manager.cpp",
   "src/extension_record/extension_record.cpp",
   "src/extension_record/extension_record_factory.cpp",
+  "src/foreground_app_connection_manager/foreground_app_connection_manager.cpp",
   "src/caller_info.cpp",
   "src/sub_managers_helper.cpp",
   "src/pending_want_record.cpp",
