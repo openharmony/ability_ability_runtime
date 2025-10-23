@@ -142,7 +142,7 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
             TAG_LOGE(AAFwkTag::ABILITYMGR, "null obj");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "iC{std.core.Object}:", index, obj)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "iY:", index, obj)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed");
             return nullptr;
         }
