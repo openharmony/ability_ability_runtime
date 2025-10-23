@@ -979,7 +979,8 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     }
 
     // Then schedule application background when all ability is not foreground.
-    if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && IsWindowIdsEmpty()) {
+    if (foregroundSize == 0 && (mainBundleName_ != LAUNCHER_NAME || IsAllowedScbAccessBackground())
+        && IsWindowIdsEmpty()) {
         auto pendingState = pendingState_;
         SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         if (pendingState == ApplicationPendingState::READY) {

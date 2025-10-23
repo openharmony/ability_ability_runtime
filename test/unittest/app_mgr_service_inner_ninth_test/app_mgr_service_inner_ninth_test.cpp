@@ -2213,5 +2213,23 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0500, TestSize.Level
     EXPECT_EQ(userId, 100);
     TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0500 end");
 }
+
+/**
+* @tc.name: SetIsAllowedScbAccessBackground_001
+* @tc.desc: test SetIsAllowedScbAccessBackground_001
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerNinthTest, SetIsAllowedScbAccessBackground_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetIsAllowedScbAccessBackground_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    std::string temp = "";
+    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, temp);
+    appMgrServiceInner->SetIsAllowedScbAccessBackground();
+    EXPECT_EQ(AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->IsAllowedScbAccessBackground(), false);
+    TAG_LOGI(AAFwkTag::TEST, "SetIsAllowedScbAccessBackground_001 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
