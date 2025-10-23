@@ -397,11 +397,11 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo->isNewWant);
         uiAbilityRecord = iter->second;
-        uiAbilityRecord->SetPrelaunchFlag(false);
         if (uiAbilityRecord == nullptr || uiAbilityRecord->GetSessionInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord invalid");
             return nullptr;
         }
+        uiAbilityRecord->SetPrelaunchFlag(false);
         if (sessionInfo->sessionToken != uiAbilityRecord->GetSessionInfo()->sessionToken) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
             return nullptr;
@@ -1097,8 +1097,20 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "has last want");
         abilityRecord->ForegroundAbility(0, true);
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
-        abilityRecord->SetMinimizeReason(true);
-        MoveToBackground(abilityRecord);
+        if (AbilityRecord->GetPrelauncyFlag()) {
+            auto delayTime = OHOS::system::GetParameter<Int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
+            auto self(shared_from_this());
+            auto task = [abilityRecord, self]() {
+                abilityRecord->SetMinimizeReason(true);
+                MoveToBackground(abilityRecord);
+            };
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
+            ffrt::submit(task, ffrt::task_attr().delay(delayTime));
+        } else {
+            abilityRecord->SetMinimizeReason(true);
+            MoveToBackground(abilityRecord);
+        }
+        
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not continuous startup.");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
