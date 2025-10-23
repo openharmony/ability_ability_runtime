@@ -756,6 +756,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_business_error"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/featureAbility/include",
+              "header_files": [
+                "ani_data_ability_helper.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/featureAbility:featureability_ani"
           }
         ],
         "test": [

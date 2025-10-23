@@ -15,6 +15,11 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
+config("featureability_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
+}
+
 ohos_shared_library("featureability_ani") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -26,17 +31,19 @@ ohos_shared_library("featureability_ani") {
 
   include_dirs = [ "./include" ]
 
+  public_configs = [ ":featureability_public_config" ]
+
   sources = [ "./src/ani_data_ability_helper.cpp" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
 
   external_deps = [
-    "runtime_core:ani",
     "hilog:libhilog",
+    "runtime_core:ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]
