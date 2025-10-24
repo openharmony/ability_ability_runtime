@@ -1102,15 +1102,16 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         if (abilityRecord->GetPrelaunchFlag()) {
             auto delayTime = OHOS::system::GetIntParameter<int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
             auto self(weak_from_this());
-            auto task = [std::weak_ptr<AbilityRecord> weakAbilityRecord(abilityRecord), self]() {
+            std::weak_ptr<AbilityRecord> weakAbilityRecord(abilityRecord);
+            auto task = [weakAbilityRecord, self]() {
                 auto selfObj = self.lock();
                 auto abilityRecordObj = weakAbilityRecord.lock();
                 if (selfObj == nullptr || abilityRecordObj == nullptr) {
                     TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecordObj invalid");
                     return;
                 }
-                abilityRecord->SetMinimizeReason(true);
-                selfObj->MoveToBackground(abilityRecord);
+                abilityRecordObj->SetMinimizeReason(true);
+                selfObj->MoveToBackground(abilityRecordObj);
             };
             TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
             ffrt::submit(task, ffrt::task_attr().delay(delayTime));
