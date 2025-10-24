@@ -3627,18 +3627,16 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
 
     if (faultData.faultType == FaultDataType::SLEEP_CLEAN) {
         if (AppExecFwk::SleepClean::GetInstance().HandleSleepClean(faultData, application_)&&faultData.waitSaveState) {
-            wptr<MainThread> weak = this;
-            auto task = [weak]() {
+            auto task = [ weak = wptr<MainThread>(this)]() {
             auto appThread = weak.promote();
             if (appThread == nullptr) {
                 TAGLOGE(AAFwk::APPKIT, "null appThread");
                 return ;
             }
-            AAFwk::ExitReason exitReason = { REASON_SIGNAL, "Sleep Clean Kill" };
-            AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+            AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_SIGNAL, "Sleep Clean Kill" });
             appThread->ScheduleProcessSecurityExit();
         };
-        mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", 2000);
+        mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
         return NO_ERROR;
         }
         return ERR_INVALID_VALUE;
