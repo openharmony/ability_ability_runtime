@@ -113,7 +113,6 @@
             "webview",
             "window_manager",
             "zlib",
-            "skia",
             "hiperf"
   ],
           "third_party": [
