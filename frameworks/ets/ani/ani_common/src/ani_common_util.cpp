@@ -32,7 +32,8 @@ constexpr const char* CLASSNAME_ARRAY = "escompat.Array";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_ASYNC_CALLBACK_WRAPPER = "utils.AbilityUtils.AsyncCallbackWrapper";
-constexpr const char* SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
+constexpr const char* SET_OBJECT_VOID_SIGNATURE = "iY:";
+constexpr const char* GET_OBJECT_VOID_SIGNATURE = "i:Y";
 constexpr const char* CLASSNAME_INNER = "application.ProcessInformation.ProcessInformationInner";
 constexpr const char* ENUMNAME_PROCESS = "@ohos.app.ability.appManager.appManager.ProcessState";
 constexpr const char* ENUMNAME_BUNDLE = "@ohos.bundle.bundleManager.bundleManager.BundleType";
@@ -336,7 +337,7 @@ bool GetFieldStringArrayByName(ani_env *env, ani_object object, const char *name
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
+            "$_get", GET_OBJECT_VOID_SIGNATURE, &stringEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d, index: %{public}d", status, i);
             return false;
@@ -386,7 +387,7 @@ bool SetFieldArrayStringByName(ani_env *env, ani_class cls, ani_object object, c
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
             return false;
         }
-        if ((status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:",
+        if ((status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE,
             i, str)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
             return false;
@@ -951,7 +952,7 @@ ani_object CreateRunningProcessInfoArray(ani_env *env, std::vector<AppExecFwk::R
             TAG_LOGW(AAFwkTag::ANI, "null aniInfo");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, aniInfo);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, index, aniInfo);
         if (status != ANI_OK) {
             TAG_LOGW(AAFwkTag::ANI, "Object_CallMethodByName_Void failed status: %{public}d", status);
             break;
@@ -1076,7 +1077,7 @@ bool GetStringArrayProperty(ani_env *env, ani_object param, const char *name, st
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
+            "$_get", GET_OBJECT_VOID_SIGNATURE, &stringEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d, index: %{public}d", status, i);
             return false;
@@ -1346,7 +1347,7 @@ bool SetStringArrayProperty(ani_env *env, ani_object param, const char *name, co
             return false;
         }
 
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, string);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, i, string);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
             return false;
@@ -1524,7 +1525,7 @@ ani_object CreateIntAniArray(ani_env *env, const std::vector<int32_t> &dataArry)
             return nullptr;
         }
         ani_status status =
-            env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, intObj);
+            env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, i, intObj);
         if (status != ANI_OK) {
             TAG_LOGE(
                 AAFwkTag::ANI, "Object_CallMethodByName_Void failed, status : %{public}d", status);
