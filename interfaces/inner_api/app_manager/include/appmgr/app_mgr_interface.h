@@ -1067,7 +1067,7 @@ public:
 
     virtual void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId) {}
 
-    virtual void SetIsAllowedScbAccessBackground() {}
+    virtual void AllowScbProcessMoveToBackground() {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

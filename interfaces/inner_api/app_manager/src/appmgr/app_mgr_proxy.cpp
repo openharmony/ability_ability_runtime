@@ -2639,7 +2639,7 @@ int32_t AppMgrProxy::RegisterApplicationStateObserverWithFilter(sptr<IApplicatio
     return reply.ReadInt32();
 }
 
-void AppMgrProxy::SetIsAllowedScbAccessBackground()
+void AppMgrProxy::AllowScbProcessMoveToBackground()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -2650,7 +2650,7 @@ void AppMgrProxy::SetIsAllowedScbAccessBackground()
         return;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_IS_ALLOWED_SCB_ACCESSS_BACKGROUND, data, reply, option);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::ALLOW_SCB_PROCESS_MOVE_TO_BACKGROUND, data, reply, option);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
