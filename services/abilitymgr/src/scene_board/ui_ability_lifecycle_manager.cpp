@@ -1100,26 +1100,11 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         abilityRecord->ForegroundAbility(0, true);
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         if (abilityRecord->GetPrelaunchFlag()) {
-            auto delayTime = OHOS::system::GetIntParameter<int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
-            auto self(weak_from_this());
-            std::weak_ptr<AbilityRecord> weakAbilityRecord(abilityRecord);
-            auto task = [weakAbilityRecord, self]() {
-                auto selfObj = self.lock();
-                auto abilityRecordObj = weakAbilityRecord.lock();
-                if (selfObj == nullptr || abilityRecordObj == nullptr) {
-                    TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecordObj invalid");
-                    return;
-                }
-                abilityRecordObj->SetMinimizeReason(true);
-                selfObj->MoveToBackground(abilityRecordObj);
-            };
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
-            ffrt::submit(task, ffrt::task_attr().delay(delayTime));
+            HandlePrelaunchBackground(abilityRecord);
         } else {
             abilityRecord->SetMinimizeReason(true);
             MoveToBackground(abilityRecord);
         }
-        
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not continuous startup.");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
@@ -1128,6 +1113,25 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnSessionMovedToFront() called");
         handler_->OnSessionMovedToFront(abilityRecord->GetSessionInfo()->persistentId);
     }
+}
+
+void UIAbilityLifecycleManager::HandlePrelaunchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    auto delayTime = OHOS::system::GetIntParameter<int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
+    auto self(weak_from_this());
+    std::weak_ptr<AbilityRecord> weakAbilityRecord(abilityRecord);
+    auto task = [weakAbilityRecord, self]() {
+        auto selfObj = self.lock();
+        auto abilityRecordObj = weakAbilityRecord.lock();
+        if (selfObj == nullptr || abilityRecordObj == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecordObj invalid");
+            return;
+        }
+        abilityRecordObj->SetMinimizeReason(true);
+        selfObj->MoveToBackground(abilityRecordObj);
+    };
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
+    ffrt::submit(task, ffrt::task_attr().delay(delayTime));
 }
 
 void UIAbilityLifecycleManager::HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
