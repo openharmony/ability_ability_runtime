@@ -1765,7 +1765,7 @@ void AppMgrClient::SetSpecifiedProcessRequestId(int32_t recordId, int32_t reques
     service->SetSpecifiedProcessRequestId(recordId, requestId);
 }
 
-void AppMgrClient::SetIsAllowedScbAccessBackground()
+void AppMgrClient::AllowScbProcessMoveToBackground()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (mgrHolder_ == nullptr) {
@@ -1777,7 +1777,7 @@ void AppMgrClient::SetIsAllowedScbAccessBackground()
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return;
     }
-    service->SetIsAllowedScbAccessBackground();
+    service->AllowScbProcessMoveToBackground();
 }
 
 int32_t AppMgrClient::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
