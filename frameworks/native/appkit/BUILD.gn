@@ -153,6 +153,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/dfr/appfreeze_state.cpp",
     "${ability_runtime_native_path}/appkit/dfr/dump_process_helper.cpp",
     "${ability_runtime_native_path}/appkit/dfr/watchdog.cpp",
+    "${ability_runtime_native_path}/appkit/dfr/sleep_clean.cpp",
   ]
   cflags = []
   if (target_cpu == "arm") {

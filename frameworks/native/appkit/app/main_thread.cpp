@@ -107,6 +107,8 @@
 #include "appcapture_perf.h"
 #endif
 
+#include "sleep_clean.h"
+
 #if defined(NWEB)
 #include <thread>
 #include "app_mgr_client.h"
@@ -3622,6 +3624,25 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
         return NO_ERROR;
     }
 #endif
+
+    if (faultData.faultType == FaultDataType::SLEEP_CLEAN) {
+        if (AppExecFwk::SleepClean::GetInstance().HandleSleepClean(faultData, application_)&&faultData.waitSaveState) {
+            wptr<MainThread> weak = this;
+            auto task = [weak]() {
+            auto appThread = weak.promote();
+            if (appThread == nullptr) {
+                TAGLOGE(AAFwk::APPKIT, "null appThread");
+                return ;
+            }
+            AAFwk::ExitReason exitReason = { REASON_SIGNAL, "Sleep Clean Kill" };
+            AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+            appThread->ScheduleProcessSecurityExit();
+        };
+        mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", 2000);
+        return NO_ERROR;
+        }
+        return ERR_INVALID_VALUE;
+    }
 
     wptr<MainThread> weak = this;
     auto task = [weak, faultData] {
