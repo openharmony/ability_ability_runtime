@@ -7038,5 +7038,95 @@ HWTEST_F(UIAbilityLifecycleManagerTest, EnableListForSCBRecovery_001, TestSize.L
     EXPECT_TRUE(mgr->isSCBRecovery_);
     EXPECT_TRUE(mgr->coldStartInSCBRecovery_.empty());
 }
+
+/**
+ * @tc.name: IsUIAbilityAlreadyExist_0001
+ * @tc.desc: In STANDARD launch mode if a record with same ability exists return ERROR_UIABILITY_IS_ALREADY_EXIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+    std::string abilityName = "AbilityA";
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    int32_t appIndex = 0;
+    std::string instanceKey = "ik1";
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.name = abilityName;
+    abilityRequest.abilityInfo.bundleName = bundleName;
+    abilityRequest.abilityInfo.moduleName = moduleName;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.sessionInfo = new SessionInfo();
+    abilityRequest.sessionInfo->instanceKey = instanceKey;
+    auto record = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->SetAppIndex(appIndex);
+    record->SetInstanceKey(instanceKey);
+    mgr->sessionAbilityMap_[1] = record;
+
+    auto ret = mgr->IsUIAbilityAlreadyExist(abilityName, "", appIndex, instanceKey, AppExecFwk::LaunchMode::STANDARD);
+    EXPECT_EQ(ret, ERROR_UIABILITY_IS_ALREADY_EXIST);
+}
+
+/**
+ * @tc.name: IsUIAbilityAlreadyExist_0002
+ * @tc.desc: In SPECIFIED launch mode match ability should return ERROR_UIABILITY_IS_ALREADY_EXIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+    std::string abilityName = "AbilityB";
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    std::string specifiedFlag = "flagX";
+    int32_t appIndex = 2;
+    std::string instanceKey = "ik2";
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.name = abilityName;
+    abilityRequest.abilityInfo.bundleName = bundleName;
+    abilityRequest.abilityInfo.moduleName = moduleName;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.sessionInfo = new SessionInfo();
+    abilityRequest.sessionInfo->instanceKey = instanceKey;
+    auto record = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->SetAppIndex(appIndex);
+    record->SetInstanceKey(instanceKey);
+    record->SetSpecifiedFlag(specifiedFlag);
+    mgr->sessionAbilityMap_[10] = record;
+
+    auto ret = mgr->IsUIAbilityAlreadyExist(abilityName, specifiedFlag, appIndex, instanceKey,
+        AppExecFwk::LaunchMode::SPECIFIED);
+    EXPECT_EQ(ret, ERROR_UIABILITY_IS_ALREADY_EXIST);
+}
+
+/**
+ * @tc.name: IsUIAbilityAlreadyExist_0003
+ * @tc.desc: Return ERR_OK when no matching record or abilityName differs
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+    auto ret = mgr->IsUIAbilityAlreadyExist("NoExistAbility", "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
+    EXPECT_EQ(ret, ERR_OK);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.name = "OtherAbility";
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.sessionInfo = new SessionInfo();
+    abilityRequest.sessionInfo->instanceKey = "key";
+    auto record = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->SetAppIndex(0);
+    record->SetInstanceKey("key");
+    mgr->sessionAbilityMap_[5] = record;
+    ret = mgr->IsUIAbilityAlreadyExist("NoExistAbility", "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
