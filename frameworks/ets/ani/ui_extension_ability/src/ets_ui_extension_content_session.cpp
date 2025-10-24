@@ -50,7 +50,7 @@ const char* UI_EXTENSION_CONTENT_SESSION_CLEANER_CLASS_NAME =
 const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
 const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
-    "C{std.core.String}C{escompat.Record}C{application.AbilityStartCallback.AbilityStartCallback}:C{@ohos.base."
+    "C{std.core.String}C{std.core.Record}C{application.AbilityStartCallback.AbilityStartCallback}:C{@ohos.base."
     "BusinessError}";
 constexpr const char *SIGNATURE_GET_UI_EXTENSION_HOST_WINDOW_PROXY =
     ":C{@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostWindowProxy}";

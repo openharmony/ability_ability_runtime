@@ -68,7 +68,7 @@ constexpr const char* SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils
     "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
-    "C{std.core.String}C{escompat.Record}C{application.AbilityStartCallback.AbilityStartCallback}:C{@ohos.base."
+    "C{std.core.String}C{std.core.Record}C{application.AbilityStartCallback.AbilityStartCallback}:C{@ohos.base."
     "BusinessError}";
 constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT =
     "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
