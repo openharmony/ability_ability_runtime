@@ -816,6 +816,7 @@ private:
     void RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData);
     bool GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
         AppExecFwk::ModuleTestRunner &tsTestRunner);
+    void SleepCleanKill();
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
