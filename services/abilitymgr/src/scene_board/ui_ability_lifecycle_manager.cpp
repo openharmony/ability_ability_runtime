@@ -60,6 +60,8 @@ constexpr const char* DMS_PROCESS_NAME = "distributedsched";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
+constexpr const char* BACKGROUND_DELAY_TIME = "persist.sys.abilityms.backgroundDelayTime";
+constexpr int32_t DEFAULT_BACKGROUND_DELAY_TIME = 6 * 1000 * 1000;
 #ifdef SUPPORT_ASAN
 constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -397,11 +399,11 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo->isNewWant);
         uiAbilityRecord = iter->second;
-        uiAbilityRecord->SetPrelaunchFlag(false);
         if (uiAbilityRecord == nullptr || uiAbilityRecord->GetSessionInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord invalid");
             return nullptr;
         }
+        uiAbilityRecord->SetPrelaunchFlag(false);
         if (sessionInfo->sessionToken != uiAbilityRecord->GetSessionInfo()->sessionToken) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
             return nullptr;
@@ -1097,8 +1099,12 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "has last want");
         abilityRecord->ForegroundAbility(0, true);
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
-        abilityRecord->SetMinimizeReason(true);
-        MoveToBackground(abilityRecord);
+        if (abilityRecord->GetPrelaunchFlag()) {
+            HandlePrelaunchBackground(abilityRecord);
+        } else {
+            abilityRecord->SetMinimizeReason(true);
+            MoveToBackground(abilityRecord);
+        }
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not continuous startup.");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
@@ -1107,6 +1113,25 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnSessionMovedToFront() called");
         handler_->OnSessionMovedToFront(abilityRecord->GetSessionInfo()->persistentId);
     }
+}
+
+void UIAbilityLifecycleManager::HandlePrelaunchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    auto delayTime = OHOS::system::GetIntParameter<int>(BACKGROUND_DELAY_TIME, DEFAULT_BACKGROUND_DELAY_TIME);
+    auto self(weak_from_this());
+    std::weak_ptr<AbilityRecord> weakAbilityRecord(abilityRecord);
+    auto task = [weakAbilityRecord, self]() {
+        auto selfObj = self.lock();
+        auto abilityRecordObj = weakAbilityRecord.lock();
+        if (selfObj == nullptr || abilityRecordObj == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecordObj invalid");
+            return;
+        }
+        abilityRecordObj->SetMinimizeReason(true);
+        selfObj->MoveToBackground(abilityRecordObj);
+    };
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "delay to MoveToBackground");
+    ffrt::submit(task, ffrt::task_attr().delay(delayTime));
 }
 
 void UIAbilityLifecycleManager::HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
