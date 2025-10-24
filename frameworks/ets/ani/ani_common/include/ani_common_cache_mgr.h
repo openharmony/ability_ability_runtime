@@ -30,7 +30,7 @@ constexpr const char *CLASSNAME_LONG = "std.core.Long";
 constexpr const char *CLASSNAME_FLOAT = "std.core.Float";
 constexpr const char *CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char *CLASSNAME_STRING = "std.core.String";
-constexpr const char *CLASSNAME_RECORD = "escompat.Record";
+constexpr const char *CLASSNAME_RECORD = "std.core.Record";
 
 using AniCommonMethodCacheKey = std::pair<const char *, const char *>;
 

@@ -60,9 +60,9 @@ constexpr int32_t BASE_DISPLAY_ID_NUM(10);
 constexpr const char *UI_ABILITY_CLASS_NAME = "@ohos.app.ability.UIAbility.UIAbility";
 constexpr const char *UI_ABILITY_SIGNATURE_VOID = ":";
 constexpr const char *MEMORY_LEVEL_ENUM_NAME = "@ohos.app.ability.AbilityConstant.AbilityConstant.MemoryLevel";
-constexpr const char *ON_SHARE_SIGNATURE = "C{escompat.Record}:";
+constexpr const char *ON_SHARE_SIGNATURE = "C{std.core.Record}:";
 constexpr const char *ON_COLLABORATE =
-    "C{escompat.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
+    "C{std.core.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
 
 void OnDestroyPromiseCallback(ani_env *env, ani_object aniObj)
 {
