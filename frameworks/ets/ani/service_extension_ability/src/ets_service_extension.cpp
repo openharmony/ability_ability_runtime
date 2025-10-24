@@ -53,7 +53,7 @@ constexpr const char *CALL_PROMISE_SIGNATURE = "C{std.core.Promise}:z";
 constexpr const char *ON_DISCONNECT_SIGNATURE = "C{@ohos.app.ability.Want.Want}:z";
 constexpr const char *ON_REQUEST_SIGNATURE = "C{@ohos.app.ability.Want.Want}i:";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "C{@ohos.app.ability.Configuration.Configuration}:";
-constexpr const char *ON_DUMP_SIGNATURE = "C{escompat.Array}:C{escompat.Array}";
+constexpr const char *ON_DUMP_SIGNATURE = "C{std.core.Array}:C{std.core.Array}";
 
 void DisconnectPromiseCallback(ani_env *env, ani_object aniObj)
 {

@@ -27,7 +27,7 @@ namespace OHOS {
 namespace AppManagerEts {
 namespace {
 constexpr const char *DATA_CLASS_NAME = "application.AppStateData.AppStateData";
-constexpr const char *CLASSNAME_ARRAY = "escompat.Array";
+constexpr const char *CLASSNAME_ARRAY = "std.core.Array";
 constexpr const char *INFO_INNER_CLASS_NAME = "application.RunningMultiAppInfo.RunningMultiAppInfoInner";
 constexpr const char *INSTANCE_INNER_CLASS_NAME =
     "application.RunningMultiInstanceInfo.RunningMultiInstanceInfoInner";
