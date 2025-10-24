@@ -674,6 +674,12 @@ private:
      */
     void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
         AbilityState state = AbilityState::INITIAL);
+    
+     /**
+     * @brief Handle background for prelaunch
+     * @param abilityRecordabilityRecord The ability record that prelaunch
+     */
+    void HandlePrelaunchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * @brief Handle foreground timeout for ability
