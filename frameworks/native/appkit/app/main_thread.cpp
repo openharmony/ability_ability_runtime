@@ -3627,17 +3627,8 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
 
     if (faultData.faultType == FaultDataType::SLEEP_CLEAN) {
         if (AppExecFwk::SleepClean::GetInstance().HandleSleepClean(faultData, application_)&&faultData.waitSaveState) {
-            auto task = [ weak = wptr<MainThread>(this)]() {
-            auto appThread = weak.promote();
-            if (appThread == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
-                return ;
-            }
-            AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_SIGNAL, "Sleep Clean Kill" });
-            appThread->ScheduleProcessSecurityExit();
-        };
-        mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
-        return NO_ERROR;
+            SleepCleanKill();
+            return NO_ERROR;
         }
         return ERR_INVALID_VALUE;
     }
@@ -4232,6 +4223,20 @@ bool MainThread::IsPluginNamespaceInherited()
     isPluginNamespaceInherited_ = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, false);
     TAG_LOGD(AAFwkTag::DEFAULT, "inherit_plugin_namespace: %{public}d", isPluginNamespaceInherited_);
     return isPluginNamespaceInherited_;
+}
+
+void MainThread::SleepCleanKill()
+{
+    auto task = [ weak = wptr<MainThread>(this)]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return ;
+        }
+        AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_SIGNAL, "Sleep Clean Kill" });
+        appThread->ScheduleProcessSecurityExit();
+    };
+    mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
