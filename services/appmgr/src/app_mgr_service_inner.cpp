@@ -10925,7 +10925,7 @@ void AppMgrServiceInner::SetSpecifiedProcessRequestId(int32_t recordId, int32_t 
     return;
 }
 
-void AppMgrServiceInner::SetIsAllowedScbAccessBackground()
+void AppMgrServiceInner::AllowScbProcessMoveToBackground()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (!IsSceneBoardCall()) {
@@ -10938,7 +10938,7 @@ void AppMgrServiceInner::SetIsAllowedScbAccessBackground()
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
         return;
     }
-    appRecord->SetIsAllowedScbAccessBackground();
+    appRecord->AllowScbProcessMoveToBackground();
     return;
 }
 } // namespace AppExecFwk

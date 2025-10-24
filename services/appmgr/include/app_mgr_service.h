@@ -923,7 +923,7 @@ public:
         const AppStateFilter &appStateFilter = AppStateFilter(),
         bool isUsingFilter = false) override;
     
-    void SetIsAllowedScbAccessBackground() override;
+    void AllowScbProcessMoveToBackground() override;
 
 private:
     /**

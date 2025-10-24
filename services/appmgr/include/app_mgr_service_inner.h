@@ -1616,7 +1616,7 @@ public:
 
     void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
 
-    void SetIsAllowedScbAccessBackground();
+    void AllowScbProcessMoveToBackground();
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
