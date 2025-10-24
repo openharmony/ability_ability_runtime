@@ -47,7 +47,7 @@ constexpr const char* ON_OFF_TYPE_ABILITY_FIRST_FRAME_STATE = "abilityFirstFrame
 constexpr const char* ON_OFF_TYPE_APP_FOREGROUND_STATE = "appForegroundState";
 
 constexpr const char *APPLICATION_STATE_WITH_BUNDLELIST_ON_SIGNATURE =
-    "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}C{escompat.Array}:i";
+    "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}C{std.core.Array}:i";
 constexpr const char *APPLICATION_STATE_ON_SIGNATURE =
     "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}:i";
 constexpr const char *APPLICATION_STATE_OFF_SIGNATURE =
