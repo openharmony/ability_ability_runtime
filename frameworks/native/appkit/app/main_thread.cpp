@@ -3630,7 +3630,7 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
             auto task = [ weak = wptr<MainThread>(this)]() {
             auto appThread = weak.promote();
             if (appThread == nullptr) {
-                TAGLOGE(AAFwk::APPKIT, "null appThread");
+                TAGLOGE(AAFwkTag::APPKIT, "null appThread");
                 return ;
             }
             AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_SIGNAL, "Sleep Clean Kill" });
