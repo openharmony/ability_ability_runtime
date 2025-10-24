@@ -245,7 +245,7 @@ bool ETSFormExtension::ConvertFromDataProxies(
         FormDataProxy formDataProxy("", "");
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            arrayValue, "$_get", "i:C{std.core.Object}",
+            arrayValue, "$_get", "i:Y",
             &stringEntryRef, (ani_int)i)) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "Object_CallMethodByName_Ref _get Failed");
             return false;
@@ -605,7 +605,8 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", "C{std.core.Object}C{std.core.Object}:", &recordSetMethod);
+    status = env->Class_FindMethod(recordCls, "$_set",
+        "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}Y:", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
