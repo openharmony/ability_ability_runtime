@@ -3433,7 +3433,22 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     auto callerRecord_4 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_4);
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+}
 
+/*
+ * Feature: AbilityRecord
+ * Function: ReportForegroundAppConnection
+ * SubFunction: ReportForegroundAppConnection
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ReportForegroundAppConnection
+ */
+HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord_->abilityInfo_.applicationInfo.name = "app";
+    int32_t requestCode = 0;
     //caller is not null :1,0,1,1
     requestCode = 5;
     abilityRecord_->SetConnectionReported(false);
