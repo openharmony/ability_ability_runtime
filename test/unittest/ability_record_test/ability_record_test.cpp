@@ -3389,7 +3389,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
     //caller is not null :0,0,0,0
-    auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_1);
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
 
