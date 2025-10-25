@@ -3363,7 +3363,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectionReported_001, TestSize.Level
 {
     EXPECT_NE(abilityRecord_, nullptr);
     EXPECT_EQ(abilityRecord_->IsConnectionReported(), false);
-    abilityRecord_->SetConnectionReported();
+    abilityRecord_->SetConnectionReported(true);
     EXPECT_EQ(abilityRecord_->IsConnectionReported(), true);
 }
 
