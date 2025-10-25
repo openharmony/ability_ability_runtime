@@ -3350,5 +3350,95 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, 
     abilityRecord_->RemoveUIExtensionLaunchTimestamp();
     EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
 }
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetConnectionReported/IsConnectionReported
+ * SubFunction: SetConnectionReported/IsConnectionReported
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetConnectionReported/IsConnectionReported
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectionReported_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_EQ(abilityRecord_->IsConnectionReported(), false);
+    abilityRecord_->SetConnectionReported();
+    EXPECT_EQ(abilityRecord_->IsConnectionReported(), true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ReportForegroundAppConnection
+ * SubFunction: ReportForegroundAppConnection
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ReportForegroundAppConnection
+ */
+HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    //has ConnectionReported
+    abilityRecord_->SetConnectionReported();
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    //caller is null
+    abilityRecord->callerList_.push_back(nullptr);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
+    //caller is not null :0,0,0,0
+    auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    abilityRecord->callerList_.push_back(callerRecord_1);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+
+    //caller is not null :1,0,0,0
+    abilityRecord_->SetPid(1);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    
+    //caller is not null :1,1,0,0
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(1);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    //caller is not null :1,1,1,0
+    callerAbilityRecord->SetPid(1);
+    auto callerRecord_2 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    EXPECT_NE(callerRecord_1, nullptr);
+    abilityRecord->callerList_.push_back(callerRecord_2);
+    //caller is not null :1,1,1,1
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_3 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    abilityRecord->callerList_.push_back(callerRecord_3);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), true);
+
+    //caller is not null :1,0,1,0
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(0);
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(0);
+    auto callerRecord_4 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    abilityRecord->callerList_.push_back(callerRecord_4);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+
+    //caller is not null :1,0,1,1
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(0);
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_4 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    abilityRecord->callerList_.push_back(callerRecord_4);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+
+    //caller is not null :1,1,0,1
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(1);
+    callerAbilityRecord->SetPid(0);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_5 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord); 
+    abilityRecord->callerList_.push_back(callerRecord_5);
+    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
