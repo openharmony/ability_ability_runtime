@@ -3380,6 +3380,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     EXPECT_NE(abilityRecord_, nullptr);
     abilityRecord_->abilityInfo_.type = AbilityType::DATA;
     abilityRecord_->abilityInfo_.applicationInfo.name = "app";
+    int32_t requestCode = 0;
     //has ConnectionReported
     abilityRecord_->SetConnectionReported(true);
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
@@ -3390,6 +3391,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
     //caller is not null :0,0,0,0
+    requestCode = 1;
     abilityRecord_->SetConnectionReported(false);
     auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_1);
@@ -3406,12 +3408,14 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     abilityRecord_->SetUid(1);
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
     //caller is not null :1,1,1,0
+    requestCode = 2;
     abilityRecord_->SetConnectionReported(false);
     callerAbilityRecord->SetPid(1);
     auto callerRecord_2 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     EXPECT_NE(callerRecord_1, nullptr);
     abilityRecord_->callerList_.push_back(callerRecord_2);
     //caller is not null :1,1,1,1
+    requestCode = 3;
     abilityRecord_->SetConnectionReported(false);
     callerAbilityRecord->SetPid(1);
     callerAbilityRecord->SetUid(1);
@@ -3420,6 +3424,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), true);
 
     //caller is not null :1,0,1,0
+    requestCode = 4;
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->SetPid(1);
     abilityRecord_->SetUid(0);
@@ -3430,6 +3435,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
 
     //caller is not null :1,0,1,1
+    requestCode = 5;
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->SetPid(1);
     abilityRecord_->SetUid(0);
@@ -3440,6 +3446,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
 
     //caller is not null :1,1,0,1
+    requestCode = 6;
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->SetPid(1);
     abilityRecord_->SetUid(1);
