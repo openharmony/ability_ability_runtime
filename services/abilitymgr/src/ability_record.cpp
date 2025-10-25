@@ -4123,13 +4123,14 @@ bool AbilityRecord::ReportForegroundAppConnection()
     auto callerBundleName = recordCallerInfo->callerBundleName;
     auto targetBundleName = GetElementName().GetBundleName();
     if (targetPid <= 0 || targetUid <= 0 || callerPid <= 0 || callerUid <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid target process: targetPid=%{public}d, targetUid=%{public}d, callerPid=%{public}d, callerUid=%{public}d", targetPid, targetUid, callerPid, callerUid);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid target process: targetPid=%{public}d, targetUid=%{public}d, "
+            "callerPid=%{public}d, callerUid=%{public}d", targetPid, targetUid, callerPid, callerUid);
         return false;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, 
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
         "ConnectionInfo: targetPid=%{public}d, targetUid=%{public}d, targetBundleName=%{public}s, "
-        "callerPid=%{public}d, callerUid=%{public}d, callerBundleName=%{public}s", 
+        "callerPid=%{public}d, callerUid=%{public}d, callerBundleName=%{public}s",
         targetPid, targetUid, targetBundleName.c_str(), callerPid, callerUid, callerBundleName.c_str());
 
     ForegroundAppConnectionInfo info(callerPid, targetPid, callerUid, targetUid, callerBundleName, targetBundleName);
