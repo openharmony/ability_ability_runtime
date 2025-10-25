@@ -1781,5 +1781,76 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChange
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600 end");
 }
+
+/**
+ * @tc.name: AppRunningManager_SignRestartProcess_0100
+ * @tc.desc: Test SignRestartProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartProcess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartProcess_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    auto pid = 100;
+    auto ret = appRunningManager->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    auto recordId = AppRecordId::Create();
+    appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
+    ret = appRunningManager->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    appInfo_->bundleName = BUNDLE_NAME;
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    recordId = AppRecordId::Create();
+    appRunningManager->appRunningRecordMap_.emplace(recordId, record);
+    ret = appRunningManager->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    record->priorityObject_->pid_ = pid;
+    ret = appRunningManager->SignRestartProcess(pid);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartProcess_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_ProcessExitByPid_0100
+ * @tc.desc: Test ProcessExitByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByPid_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_ProcessExitByPid_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    auto pid = 100;
+    KillProcessConfig config{false, false, "ProcessExitByPidTest"};
+    auto ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, false);
+
+    auto recordId = AppRecordId::Create();
+    appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
+    ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, false);
+
+    appInfo_->bundleName = BUNDLE_NAME;
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    recordId = AppRecordId::Create();
+    appRunningManager->appRunningRecordMap_.emplace(recordId, record);
+    ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, false);
+
+    record->priorityObject_->pid_ = pid;
+    ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, true);
+
+    config.clearPageStack = true;
+    ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, true);
+
+    config.addKillingCaller = true;
+    ret = appRunningManager->ProcessExitByPid(pid, config);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_ProcessExitByPid_0100 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

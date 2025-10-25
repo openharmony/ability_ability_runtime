@@ -2008,6 +2008,21 @@ int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid, const std::string &instance
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::SignRestartProcess(int32_t pid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SIGN_RESTART_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -2413,6 +2428,22 @@ int32_t AppMgrProxy::KillAppSelfWithInstanceKey(const std::string &instanceKey, 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_APP_SELF_WITH_INSTANCE_KEY, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::KillProcessByPidForExit(int32_t pid, const std::string &reason)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_VALUE;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, reason);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_PROCESS_BY_PID_FOR_EXIT, data, reply, option);
     return reply.ReadInt32();
 }
 

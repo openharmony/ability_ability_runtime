@@ -1551,5 +1551,32 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleRestartUIAbility_0100, TestSi
     sessionInfo2->sessionToken = sessionInfo->sessionToken;
     EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
 }
+
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: Put a single ability record into map and sign restart app flag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SignRestartProcess_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    auto pid = 100;
+    mgr->sessionAbilityMap_.emplace(0, nullptr);
+    mgr->SignRestartProcess(pid);
+    EXPECT_FALSE(mgr->sessionAbilityMap_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_.emplace(pid, abilityRecord);
+    mgr->SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecord->GetRestartAppFlag());
+
+    abilityRecord->SetPid(pid);
+    mgr->SignRestartProcess(pid);
+    EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

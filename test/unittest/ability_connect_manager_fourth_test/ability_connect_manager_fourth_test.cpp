@@ -1051,5 +1051,31 @@ HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_ResumeExtensionAbilityLocked
     EXPECT_EQ(result3, OHOS::ERR_OK);
 }
 
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: Put a single ability record into map and sign restart app flag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, SignRestartProcess_001, TestSize.Level2)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    auto pid = 100;
+    connectManager->serviceMap_.emplace("", nullptr);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_FALSE(connectManager->serviceMap_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    connectManager->serviceMap_.emplace("TestKey", abilityRecord);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecord->GetRestartAppFlag());
+
+    abilityRecord->SetPid(pid);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
