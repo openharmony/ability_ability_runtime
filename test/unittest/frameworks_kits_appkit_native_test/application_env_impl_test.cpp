@@ -208,13 +208,13 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0600, 
     applicationInfo.dataDir = "/dataDir";
     applicationInfo.codePath = "/codePath";
     PreloadMode preloadMode = PreloadMode::PRELOAD_BY_PHASE;
-    applicationInfo.appPreloadPhase = 1;
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::PROCESS_CREATED;
     ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
-    applicationInfo.appPreloadPhase = 2;
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::ABILITY_STAGE_CREATED;
     ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 2);
-    applicationInfo.appPreloadPhase = 3;
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::WINDOW_STAGE_CREATED;
     ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 3);
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0600 end";
