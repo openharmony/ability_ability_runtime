@@ -56,6 +56,7 @@ ohos_unittest("js_uiservice_uiext_connection_test") {
     "ipc:ipc_napi",
     "libuv:uv",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
