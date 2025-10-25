@@ -362,6 +362,9 @@ public:
     }
     std::shared_ptr<AppExecFwk::AppRunningRecord> masterProcessRunningRecord_ = nullptr;
     std::shared_ptr<AppExecFwk::AppRunningRecord> appRecordForSpecifiedProcess_ = nullptr;
+
+    bool exitByPidstatus_ = false;
+    int32_t signRestartProcessStatus_ = ERR_OK;
 private:
     MyStatus() = default;
     bool isLogoutUserCalled_ = false;

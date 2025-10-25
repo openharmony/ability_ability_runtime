@@ -2295,6 +2295,24 @@ int32_t AppMgrServiceInner::KillAppSelfWithInstanceKey(const std::string &instan
     return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
+int32_t AppMgrServiceInner::KillProcessByPidForExit(int32_t pid, const std::string &reason)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+
+    TAG_LOGI(AAFwkTag::APPMGR, "KillProcessByPidForExit %{public}d", pid);
+    KillProcessConfig config{false, false, reason};
+    if (!appRunningManager_->ProcessExitByPid(pid, config)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "not exist");
+        return ERR_OK;
+    }
+    int64_t startTime = SystemTimeMillisecond();
+    std::list<pid_t> pids { pid };
+    return WaitProcessesExitAndKill(pids, startTime, reason);
+}
+
 int32_t AppMgrServiceInner::KillApplicationByBundleName(
     const std::string &bundleName, int32_t appIndex, bool clearPageStack, const std::string& reason)
 {
@@ -9496,6 +9514,15 @@ int32_t AppMgrServiceInner::SignRestartAppFlag(int32_t uid, const std::string &i
         return ERR_NO_INIT;
     }
     return appRunningManager_->SignRestartAppFlag(uid, instanceKey);
+}
+
+int32_t AppMgrServiceInner::SignRestartProcess(int32_t pid)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+    return appRunningManager_->SignRestartProcess(pid);
 }
 
 int32_t AppMgrServiceInner::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)

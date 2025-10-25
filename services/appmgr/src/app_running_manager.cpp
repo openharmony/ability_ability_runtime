@@ -594,6 +594,30 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     return (pids.empty() ? false : true);
 }
 
+bool AppRunningManager::ProcessExitByPid(int32_t pid, const KillProcessConfig &config)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &[id, appRecord] : appRunningMap) {
+        if (appRecord == nullptr || appRecord->GetPid() != pid) {
+            continue;
+        }
+
+        if (config.clearPageStack) {
+            appRecord->ScheduleClearPageStack();
+        }
+        if (config.addKillingCaller) {
+            std::string callerKey = std::to_string(pid) + ":" + std::to_string(appRecord->GetUid());
+            KillingProcessManager::GetInstance().AddKillingCallerKey(callerKey);
+        }
+        appRecord->SetKilling();
+        appRecord->SetKillReason(config.reason);
+        appRecord->ScheduleProcessSecurityExit();
+        return true;
+    }
+
+    return false;
+}
+
 bool AppRunningManager::ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex,
     std::list<pid_t> &pids, bool clearPageStack)
 {
@@ -1893,6 +1917,22 @@ int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &in
             continue;
         }
         TAG_LOGI(AAFwkTag::APPMGR, "SignRestartAppFlag");
+        appRecord->SetRestartAppFlag(true);
+        return ERR_OK;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "null apprecord");
+    return ERR_INVALID_VALUE;
+}
+
+int32_t AppRunningManager::SignRestartProcess(int32_t pid)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr || appRecord->GetPid() != pid) {
+            continue;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "SignRestartProcess");
         appRecord->SetRestartAppFlag(true);
         return ERR_OK;
     }
