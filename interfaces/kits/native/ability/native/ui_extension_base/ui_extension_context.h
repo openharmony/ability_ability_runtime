@@ -27,7 +27,7 @@
 #include "js_ui_extension_callback.h"
 #include "string_wrapper.h"
 #ifdef SUPPORT_SCREEN
-#include "window.h"
+#include "wm/window.h"
 #endif // SUPPORT_SCREEN
 
 namespace OHOS {
