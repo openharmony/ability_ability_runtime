@@ -4113,7 +4113,7 @@ bool AbilityRecord::ReportForegroundAppConnection()
         return false;
     }
 
-    auto recordCallerInfo = abilityRecord->GetCallerInfo();
+    auto recordCallerInfo = GetCallerInfo();
     CHECK_POINTER_RETURN_BOOL(recordCallerInfo);
     
     auto targetPid = GetPid();
