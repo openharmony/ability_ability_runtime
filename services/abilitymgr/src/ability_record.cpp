@@ -29,6 +29,7 @@
 #include "connection_state_manager.h"
 #include "common_event_manager.h"
 #include "error_msg_util.h"
+#include "foreground_app_connection_manager.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -114,6 +115,7 @@ const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 std::atomic<int64_t> AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
+const int32_t DEFAULT_REQUEST_CODE = -1;
 const int VECTOR_SIZE = 2;
 const int LOAD_TIMEOUT_ASANENABLED = 150;
 const int TERMINATE_TIMEOUT_ASANENABLED = 150;
@@ -520,6 +522,13 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
 
     DelayedSingleton<AppScheduler>::GetInstance()->NotifyLoadAbilityFinished(options.callingPid,
         GetPid(), options.loadAbilityCallbackId);
+    auto recordCallerInfo = GetCallerInfo();
+    if (recordCallerInfo != nullptr && GetRequestCode() != DEFAULT_REQUEST_CODE) {
+        ForegroundAppConnectionInfo info(recordCallerInfo->callerPid, GetPid(), recordCallerInfo->callerUid, GetUid(),
+            recordCallerInfo->callerBundleName, GetElementName().GetBundleName());
+        DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityAddPidConnection(
+            info, GetAbilityRecordId());
+    }
 
     PostForegroundTimeoutTask();
     if (IsAbilityState(AbilityState::FOREGROUND)) {
@@ -1837,6 +1846,10 @@ void AbilityRecord::Terminate(const Closure &task)
     SetAbilityStateInner(AbilityState::TERMINATING);
 #endif // SUPPORT_SCREEN
     lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
+    if (GetCallerInfo() != nullptr && GetRequestCode() != DEFAULT_REQUEST_CODE) {
+        DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityRemovePidConnection(
+            GetCallerInfo()->callerPid, GetPid(), GetAbilityRecordId());
+    }
 }
 
 void AbilityRecord::ShareData(const int32_t &uniqueId)
@@ -1980,6 +1993,10 @@ void AbilityRecord::SendResultByBackToCaller(const std::shared_ptr<AbilityResult
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result);
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
+    if (GetCallerInfo() != nullptr) {
+        DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityRemovePidConnection(
+            GetCallerInfo()->callerPid, GetPid(), GetAbilityRecordId());
+    }
 }
 
 void AbilityRecord::SendSandboxSavefileResult(const Want &want, int resultCode, int requestCode)

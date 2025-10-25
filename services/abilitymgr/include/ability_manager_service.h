@@ -1525,6 +1525,9 @@ public:
     virtual int AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
         const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
 
+    virtual int32_t RegisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer) override;
+    virtual int32_t UnregisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer) override;
+
     /**
      * Check the uid is background task uid.
      *
