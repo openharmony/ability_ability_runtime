@@ -21,6 +21,7 @@ group("innerkits_target") {
     "dataobs_manager:dataobs_manager",
     "deps_wrapper:ability_deps_wrapper",
     "error_utils:ability_runtime_error_util",
+    "foreground_app_obs_manager:foreground_app_obs_manager",
     "quick_fix:quickfix_manager",
     "wantagent:wantagent_innerkits",
   ]
