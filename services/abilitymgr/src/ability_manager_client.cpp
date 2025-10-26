@@ -1772,9 +1772,12 @@ void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, boo
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB target: %{public}s/%{public}s",
-        sessionInfo->want.GetElement().GetBundleName().c_str(),
-        sessionInfo->want.GetElement().GetAbilityName().c_str());
+    if (sessionInfo) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "CallUIAbilityBySCB t:%{public}s/%{public}s",
+            sessionInfo->want.GetElement().GetBundleName().c_str(),
+            sessionInfo->want.GetElement().GetAbilityName().c_str());
+    }
+
     abms->CallUIAbilityBySCB(sessionInfo, isColdStart);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB, isColdStart: %{public}d", isColdStart);
 }
