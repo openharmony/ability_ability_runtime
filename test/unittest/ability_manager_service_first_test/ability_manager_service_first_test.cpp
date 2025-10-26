@@ -2094,7 +2094,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
     bool isSaCall = false;
     bool isImplicit = false;
     abilityRequest.abilityInfo.permissions.push_back("test1");
-
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
     isSaCall = true;
     int ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
@@ -2106,6 +2106,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
     ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
     EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    MyFlag::flag_ = 0;
 }
 
 /**
