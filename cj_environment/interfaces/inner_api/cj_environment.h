@@ -109,6 +109,8 @@ public:
     void ForceFullGC();
     void* LoadRuntimeLib(const char* runtimeLibName);
     void UnLoadRuntimeApis();
+    static void DumpCjHeap(int fd);
+    static void GC();
 
     static const char *cjChipSDKNSName;
     static const char *cjAppNSName;

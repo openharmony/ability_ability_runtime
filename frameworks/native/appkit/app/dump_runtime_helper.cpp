@@ -30,6 +30,9 @@
 #include "ffrt.h"
 #include "directory_ex.h"
 #include "storage_acl.h"
+#ifdef CJ_FRONTEND
+#include "cj_runtime.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -247,26 +250,26 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
 
 void DumpRuntimeHelper::DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
 {
-    if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null application");
-        return;
-    }
-    auto &runtime = application_->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-        return;
-    }
-    if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::CJ) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not CJ");
+#ifdef CJ_FRONTEND
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjEnv");
         return;
     }
     if (info.needSnapshot == true) {
-        runtime->DumpHeapSnapshot(info.pid, info.needGc);
-    } else {
-        if (info.needGc == true) {
-            runtime->ForceFullGC(info.pid);
+        int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::CJ_HEAP_SNAPSHOT));
+        if (fd < 0) {
+            TAG_LOGE(AAFwkTag::APPKIT, "fd:%{public}d.\n", fd);
+            return;
         }
+        cjEnv->dumpHeapSnapshot(fd);
+        close(fd);
+        return;
     }
+    if (info.needGc == true) {
+        cjEnv->forceFullGC();
+    }
+#endif
 }
 
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
