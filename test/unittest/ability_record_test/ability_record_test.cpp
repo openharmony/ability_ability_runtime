@@ -3449,6 +3449,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_002, TestSize.Level1)
     abilityRecord_->abilityInfo_.type = AbilityType::DATA;
     abilityRecord_->abilityInfo_.applicationInfo.name = "app";
     int32_t requestCode = 0;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
     //caller is not null :1,0,1,1
     requestCode = 5;
     abilityRecord_->SetConnectionReported(false);
