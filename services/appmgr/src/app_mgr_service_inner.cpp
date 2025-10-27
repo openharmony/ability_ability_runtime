@@ -620,7 +620,10 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     }
     TAG_LOGD(AAFwkTag::APPMGR, "submit task, bundleName:%{public}s, userId:%{public}d",
         bundleName.c_str(), userId);
-    taskHandler_->SubmitTask(task, PRELOAD_APPLIATION_TASK);
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = PRELOAD_APPLIATION_TASK,
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
     return ERR_OK;
 }
 
@@ -2223,7 +2226,8 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, const std::string &
         innerService->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     };
     CHECK_POINTER_AND_RETURN_LOG(taskHandler_, "Task handler is nullptr.");
-    taskHandler_->SubmitTaskJust(sendEventTask, PROCESS_EXIT_EVENT_TASK, KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
+    ffrt::submit(std::move(sendEventTask), ffrt::task_attr().name(PROCESS_EXIT_EVENT_TASK)
+        .delay(KILL_PROCESS_DELAYTIME_MICRO_SECONDS));
 }
 
 void AppMgrServiceInner::SendProcessExitEvent(std::shared_ptr<AppRunningRecord> appRecord)
