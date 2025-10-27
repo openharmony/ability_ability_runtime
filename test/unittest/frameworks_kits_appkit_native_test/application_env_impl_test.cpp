@@ -73,7 +73,7 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvImplTest_SetAppInfo_01
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetBundleName(), "bundleName");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetSrcPath(), "/codePath");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetDataPath(), "/dataDir");
-    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 0);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvImplTest_SetAppInfo_0100 end";
 }
 
@@ -141,5 +141,83 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0200, 
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0200 end";
 }
 
+/**
+ * @tc.number: AppExecFwk_ApplicationEnvTest_SetAppInfo_0300
+ * @tc.name: ApplicationEnv SetAppInfo
+ * @tc.desc: Test ApplicationEnv get applicationInfo.
+ */
+HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0300 start";
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "bundleName";
+    applicationInfo.dataDir = "/dataDir";
+    applicationInfo.codePath = "/codePath";
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0300 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ApplicationEnvTest_SetAppInfo_0400
+ * @tc.name: ApplicationEnv SetAppInfo
+ * @tc.desc: Test ApplicationEnv get applicationInfo.
+ */
+HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0400 start";
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "bundleName";
+    applicationInfo.dataDir = "/dataDir";
+    applicationInfo.codePath = "/codePath";
+    PreloadMode preloadMode = PreloadMode::PRELOAD_MODULE;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 2);
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0400 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ApplicationEnvTest_SetAppInfo_0500
+ * @tc.name: ApplicationEnv SetAppInfo
+ * @tc.desc: Test ApplicationEnv get applicationInfo.
+ */
+HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0500, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0500 start";
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "bundleName";
+    applicationInfo.dataDir = "/dataDir";
+    applicationInfo.codePath = "/codePath";
+    PreloadMode preloadMode = PreloadMode::PRELOAD_NONE;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 0);
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0500 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ApplicationEnvTest_SetAppInfo_0600
+ * @tc.name: ApplicationEnv SetAppInfo
+ * @tc.desc: Test ApplicationEnv get applicationInfo.
+ */
+HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0600, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0500 start";
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "bundleName";
+    applicationInfo.dataDir = "/dataDir";
+    applicationInfo.codePath = "/codePath";
+    PreloadMode preloadMode = PreloadMode::PRELOAD_BY_PHASE;
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::PROCESS_CREATED;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::ABILITY_STAGE_CREATED;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 2);
+    applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase::WINDOW_STAGE_CREATED;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 3);
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0600 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
