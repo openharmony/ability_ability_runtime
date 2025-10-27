@@ -4106,13 +4106,8 @@ void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
     want_.RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
 }
 
-bool AbilityRecord::ReportForegroundAppConnection()
+bool AbilityRecord::ReportAbilityConnectionRelations()
 {
-    if (IsConnectionReported()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Connection already reported, skipping");
-        return false;
-    }
-
     auto recordCallerInfo = GetCallerInfo();
     CHECK_POINTER_RETURN_BOOL(recordCallerInfo);
     
@@ -4136,7 +4131,6 @@ bool AbilityRecord::ReportForegroundAppConnection()
     ForegroundAppConnectionInfo info(callerPid, targetPid, callerUid, targetUid, callerBundleName, targetBundleName);
     DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityAddPidConnection(info,
         GetAbilityRecordId());
-    SetConnectionReported(true);
     return true;
 }
 }  // namespace AAFwk

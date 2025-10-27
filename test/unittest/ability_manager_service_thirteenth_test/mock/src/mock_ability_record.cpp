@@ -2026,7 +2026,7 @@ void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
 {
 }
 
-bool AbilityRecord::ReportForegroundAppConnection()
+bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
 }
