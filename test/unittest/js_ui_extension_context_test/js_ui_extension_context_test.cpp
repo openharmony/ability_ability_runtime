@@ -20,6 +20,7 @@
 #include "ability_context_impl.h"
 #include "ability_business_error.h"
 #include "errors.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #define private public
 #define protected public
@@ -222,7 +223,10 @@ void UIExtensionContextTest::Connect(napi_value* argv, int32_t argc)
     napi_create_function(env_, "testFunc", NAPI_AUTO_LENGTH, func, nullptr, &funcValue);
 
     napi_value funcResultValue = nullptr;
-    napi_call_function(env_, recv, funcValue, argc, argv, &funcResultValue);
+    napi_status status = napi_call_function(env_, recv, funcValue, argc, argv, &funcResultValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 void UIExtensionContextTest::Disconnect(napi_value* argv, int32_t argc)
@@ -243,7 +247,10 @@ void UIExtensionContextTest::Disconnect(napi_value* argv, int32_t argc)
     napi_value funcResultValue = nullptr;
     napi_value funcValue = nullptr;
     napi_create_function(env_, "disconnectFunc", NAPI_AUTO_LENGTH, func, nullptr, &funcValue);
-    napi_call_function(env_, recv, funcValue, argc, argv, &funcResultValue);
+    napi_status status = napi_call_function(env_, recv, funcValue, argc, argv, &funcResultValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0100, TestSize.Level1)
