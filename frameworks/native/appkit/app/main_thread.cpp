@@ -178,6 +178,7 @@ constexpr char EVENT_KEY_PROCESS_LIFETIME[] = "PROCESS_LIFETIME";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_plugin_namespace";
+constexpr const char* SUPPORT_PLUGIN_DEFAULT_NAMESPACE = "persist.sys.abilityms.support_plugin_default_namespace";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
 
 const int32_t JSCRASH_TYPE = 3;
@@ -1671,6 +1672,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
             if (IsPluginNamespaceInherited()) {
                 AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+            }
+            if (IsPluginDefaultNamespaceSupported()) {
+                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace();
             }
         }
 #ifdef CJ_FRONTEND
@@ -4221,8 +4225,15 @@ void MainThread::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
 bool MainThread::IsPluginNamespaceInherited()
 {
     isPluginNamespaceInherited_ = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, false);
-    TAG_LOGD(AAFwkTag::DEFAULT, "inherit_plugin_namespace: %{public}d", isPluginNamespaceInherited_);
+    TAG_LOGD(AAFwkTag::APPKIT, "inherit_plugin_namespace: %{public}d", isPluginNamespaceInherited_);
     return isPluginNamespaceInherited_;
+}
+
+bool MainThread::IsPluginDefaultNamespaceSupported()
+{
+    isPluginDefaultNamespaceSupported_ = system::GetBoolParameter(SUPPORT_PLUGIN_DEFAULT_NAMESPACE, false);
+    TAG_LOGD(AAFwkTag::APPKIT, "support_plugin_default_namespace: %{public}d", isPluginDefaultNamespaceSupported_);
+    return isPluginDefaultNamespaceSupported_;
 }
 
 void MainThread::SleepCleanKill()
