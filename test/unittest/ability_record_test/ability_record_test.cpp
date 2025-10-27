@@ -3369,25 +3369,22 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectionReported_001, TestSize.Level
 
 /*
  * Feature: AbilityRecord
- * Function: ReportForegroundAppConnection
- * SubFunction: ReportForegroundAppConnection
+ * Function: ReportAbilityConnectionRelations
+ * SubFunction: ReportAbilityConnectionRelations
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ReportForegroundAppConnection
+ * CaseDescription: Verify AbilityRecord ReportAbilityConnectionRelations
  */
-HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
+HWTEST_F(AbilityRecordTest, ReportAbilityConnectionRelations_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
     abilityRecord_->abilityInfo_.type = AbilityType::DATA;
     abilityRecord_->abilityInfo_.applicationInfo.name = "app";
     int32_t requestCode = 0;
-    //has ConnectionReported
-    abilityRecord_->SetConnectionReported(true);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
     //caller is null
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->callerList_.push_back(nullptr);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
     
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
     //caller is not null :0,0,0,0
@@ -3395,18 +3392,18 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     abilityRecord_->SetConnectionReported(false);
     auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_1);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
 
     //caller is not null :1,0,0,0
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->SetPid(1);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
     
     //caller is not null :1,1,0,0
     abilityRecord_->SetConnectionReported(false);
     abilityRecord_->SetPid(1);
     abilityRecord_->SetUid(1);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
     //caller is not null :1,1,1,0
     requestCode = 2;
     abilityRecord_->SetConnectionReported(false);
@@ -3421,7 +3418,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     callerAbilityRecord->SetUid(1);
     auto callerRecord_3 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_3);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), true);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), true);
 
     //caller is not null :1,0,1,0
     requestCode = 4;
@@ -3432,18 +3429,18 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_001, TestSize.Level1)
     callerAbilityRecord->SetUid(0);
     auto callerRecord_4 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_4);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
 }
 
 /*
  * Feature: AbilityRecord
- * Function: ReportForegroundAppConnection
- * SubFunction: ReportForegroundAppConnection
+ * Function: ReportAbilityConnectionRelations
+ * SubFunction: ReportAbilityConnectionRelations
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ReportForegroundAppConnection
+ * CaseDescription: Verify AbilityRecord ReportAbilityConnectionRelations
  */
-HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_002, TestSize.Level1)
+HWTEST_F(AbilityRecordTest, ReportAbilityConnectionRelations_002, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
     abilityRecord_->abilityInfo_.type = AbilityType::DATA;
@@ -3459,7 +3456,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_002, TestSize.Level1)
     callerAbilityRecord->SetUid(1);
     auto callerRecord_5 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_5);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
 
     //caller is not null :1,1,0,1
     requestCode = 6;
@@ -3470,7 +3467,7 @@ HWTEST_F(AbilityRecordTest, ReportForegroundAppConnection_002, TestSize.Level1)
     callerAbilityRecord->SetUid(1);
     auto callerRecord_6 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_6);
-    EXPECT_EQ(abilityRecord_->ReportForegroundAppConnection(), false);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

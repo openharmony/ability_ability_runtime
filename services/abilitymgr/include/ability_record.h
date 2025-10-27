@@ -1323,7 +1323,7 @@ public:
         return isForegroundAppConnectionReported_.load();
     }
 
-    bool ReportForegroundAppConnection();
+    bool ReportAbilityConnectionRelations();
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms

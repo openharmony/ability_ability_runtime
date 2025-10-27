@@ -316,7 +316,10 @@ void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecor
             abilityRecord->SetWant(abilityRequest.want);
             abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
-            abilityRecord->ReportForegroundAppConnection();
+            if (!IsConnectionReported()) {
+                abilityRecord->ReportAbilityConnectionRelations();
+                SetConnectionReported(true);
+            }
             return;
         }
     }
@@ -1025,7 +1028,10 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         && !abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
-        abilityRecord->ReportForegroundAppConnection();
+        if (!IsConnectionReported()) {
+            abilityRecord->ReportAbilityConnectionRelations();
+            SetConnectionReported(true);
+        }
     } else {
         TAG_LOGD(AAFwkTag::EXT, "Inactivate");
         abilityRecord->Inactivate();

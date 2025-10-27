@@ -1990,7 +1990,7 @@ void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
 {
 }
 
-bool AbilityRecord::ReportForegroundAppConnection()
+bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
 }
