@@ -1989,5 +1989,10 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
 void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
 {
 }
+
+bool AbilityRecord::ReportAbilityConnectionRelations()
+{
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
