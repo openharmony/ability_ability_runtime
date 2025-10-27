@@ -62,7 +62,6 @@ std::mutex ConnectServerManager::instanceMutex_;
 std::mutex ConnectServerManager::connectServerCallbackMutex_;
 std::mutex ConnectServerManager::addInstanceCallbackMutex_;
 std::mutex ConnectServerManager::sendInstanceMessageCallbackMutex_;
-std::unordered_map<int, std::pair<void*, const DebuggerPostTask>> g_debuggerInfo;
 
 ConnectServerManager::~ConnectServerManager()
 {
@@ -303,7 +302,11 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         tid = std::move(it->second.second);
         instanceMap_.erase(it);
     }
-
+    {
+        std::lock_guard<std::mutex> lock(g_debuggerMutex);
+        g_debuggerInfo.erase(tid);
+    }
+    
     if (!isConnected_) {
         TAG_LOGW(AAFwkTag::JSRUNTIME, "not Connected");
         return;
