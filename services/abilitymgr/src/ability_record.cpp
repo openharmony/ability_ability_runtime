@@ -2762,11 +2762,12 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         .taskName_ = "OnSchedulerDied",
         .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
     });
-    auto uriTask = [want = GetWant(), ability = shared_from_this()]() {
+    auto resultTask = [ability = shared_from_this()]() {
+        Want want;
         ability->SaveResultToCallers(-1, &want);
         ability->SendResultToCallers(true);
     };
-    handler->SubmitTask(uriTask);
+    handler->SubmitTask(resultTask);
 #ifdef SUPPORT_GRAPHICS
     NotifyAnimationAbilityDied();
 #endif
