@@ -19,6 +19,7 @@
 #include "pending_want_manager.h"
 #include "int_wrapper.h"
 #include "multi_app_utils.h"
+#include "ability_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -141,6 +142,27 @@ int32_t PendingWantRecord::ExecuteOperation(
     return res;
 }
 
+int32_t PendingWantRecord::GetAppIndexbyUid(int32_t uid, const std::string bundleName, int32_t &appIndex)
+{
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    std::string getBundleName;
+
+    if (IN_PROCESS_CALL(bms->GetNameAndIndexForUid(uid, getBundleName, appIndex)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "failed get appIndex for bundleName: %{public}s, uid: %{public}d",
+            bundleName.c_str(), uid);
+        return ERR_INVALID_VALUE;
+    }
+    if (getBundleName != bundleName) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "getBundleName: %{public}s not match src BundleName: %{public}s",
+            getBundleName.c_str(), bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    TAG_LOGD(AAFwkTag::WANTAGENT, "getBundleName: %{public}s, srcBundleName: %{public}s, uid: %{public}d, "
+        "appIndex: %{public}d", getBundleName.c_str(), bundleName.c_str(), uid, appIndex);
+    return ERR_OK;
+}
+
 void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
 {
     if (key_->GetAllWantsInfos().size() != 0) {
@@ -168,7 +190,10 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
     if (!wantParams.HasParam(Want::PARAM_APP_CLONE_INDEX_KEY)) {
         int32_t appIndex = key_->GetAppIndex();
         if (GetUid() != INVALID_UID && !want.GetBundle().empty()) {
-            MultiAppUtils::GetRunningMultiAppIndex(want.GetBundle(), GetUid(), appIndex);
+            if (GetAppIndexbyUid(GetUid(), want.GetBundle(), appIndex) != ERR_OK) {
+                TAG_LOGE(AAFwkTag::WANTAGENT, "getAppIndex failed, srcBundleName: %{public}s, uid: %{public}d",
+                    want.GetBundle().c_str(), GetUid());
+            }
         }
         wantParams.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, Integer::Box(appIndex));
     }
