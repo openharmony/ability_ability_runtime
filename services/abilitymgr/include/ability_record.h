@@ -1312,6 +1312,18 @@ public:
     void AddUIExtensionLaunchTimestamp();
 
     void RemoveUIExtensionLaunchTimestamp();
+
+    inline void SetConnectionReported(bool isForegroundAppConnectionReported)
+    {
+        isAbilityConnectionReported_.store(isForegroundAppConnectionReported);
+    }
+
+    inline bool IsConnectionReported() const
+    {
+        return isAbilityConnectionReported_.load();
+    }
+
+    bool ReportAbilityConnectionRelations();
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1558,6 +1570,7 @@ private:
     std::atomic<int32_t> scenarios_ = 0;
     std::atomic<bool> isPreloaded_ = false;
     std::atomic<bool> isFrozenByPreload_ = false;
+    std::atomic<bool> isAbilityConnectionReported_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

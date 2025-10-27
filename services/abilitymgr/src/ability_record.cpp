@@ -4106,5 +4106,33 @@ void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
     want_.RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
     want_.RemoveParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
 }
+
+bool AbilityRecord::ReportAbilityConnectionRelations()
+{
+    auto recordCallerInfo = GetCallerInfo();
+    CHECK_POINTER_RETURN_BOOL(recordCallerInfo);
+    
+    auto targetPid = GetPid();
+    auto targetUid = GetUid();
+    auto callerPid = recordCallerInfo->callerPid;
+    auto callerUid = recordCallerInfo->callerUid;
+    auto callerBundleName = recordCallerInfo->callerBundleName;
+    auto targetBundleName = GetElementName().GetBundleName();
+    if (targetPid <= 0 || targetUid <= 0 || callerPid <= 0 || callerUid <= 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid target process: targetPid=%{public}d, targetUid=%{public}d, "
+            "callerPid=%{public}d, callerUid=%{public}d", targetPid, targetUid, callerPid, callerUid);
+        return false;
+    }
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "ConnectionInfo: targetPid=%{public}d, targetUid=%{public}d, targetBundleName=%{public}s, "
+        "callerPid=%{public}d, callerUid=%{public}d, callerBundleName=%{public}s",
+        targetPid, targetUid, targetBundleName.c_str(), callerPid, callerUid, callerBundleName.c_str());
+
+    ForegroundAppConnectionInfo info(callerPid, targetPid, callerUid, targetUid, callerBundleName, targetBundleName);
+    DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityAddPidConnection(info,
+        GetAbilityRecordId());
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -2025,5 +2025,10 @@ void AbilityRecord::AddUIExtensionLaunchTimestamp()
 void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
 {
 }
+
+bool AbilityRecord::ReportAbilityConnectionRelations()
+{
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
