@@ -1315,12 +1315,12 @@ public:
 
     inline void SetConnectionReported(bool isForegroundAppConnectionReported)
     {
-        isForegroundAppConnectionReported_.store(isForegroundAppConnectionReported);
+        isAbilityConnectionReported_.store(isForegroundAppConnectionReported);
     }
 
     inline bool IsConnectionReported() const
     {
-        return isForegroundAppConnectionReported_.load();
+        return isAbilityConnectionReported_.load();
     }
 
     bool ReportAbilityConnectionRelations();
@@ -1570,7 +1570,7 @@ private:
     std::atomic<int32_t> scenarios_ = 0;
     std::atomic<bool> isPreloaded_ = false;
     std::atomic<bool> isFrozenByPreload_ = false;
-    std::atomic<bool> isForegroundAppConnectionReported_ = false;
+    std::atomic<bool> isAbilityConnectionReported_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
