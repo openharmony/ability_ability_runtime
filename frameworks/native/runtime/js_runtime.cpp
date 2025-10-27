@@ -89,6 +89,7 @@ const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr const char* PERMISSION_RUN_ANY_CODE = "ohos.permission.RUN_ANY_CODE";
+constexpr const char* PERMISSION_LOAD_INDEPENDENT_LIBRARY = "ohos.permission.kernel.LOAD_INDEPENDENT_LIBRARY";
 
 const std::string CONFIG_PATH = "/etc/system_kits_config.json";
 const std::string SYSTEM_KITS_CONFIG_PATH = "/system/etc/system_kits_config.json";
@@ -942,6 +943,30 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
         }
         moduleManager->InheritNamespaceEachOther(currentNamespace, pluginNamespace);
     }
+}
+
+void JsRuntime::CreatePluginDefaultNamespace()
+{
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);
+    if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "permission denied: PERMISSION_LOAD_INDEPENDENT_LIBRARY");
+        return;
+    }
+    auto moduleManager = NativeModuleManager::GetInstance();
+    if (moduleManager == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null moduleManager");
+        return;
+    }
+    std::string currentNamespace;
+    if (!moduleManager->GetLdNamespaceName("default", currentNamespace)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "get current namespace failed");
+        return;
+    }
+    moduleManager->CreateLdNamespace("defaultPlugin", "", false);
+    std::string pluginDefaultNamespace;
+    moduleManager->GetLdNamespaceName("defaultPlugin", pluginDefaultNamespace);
+    moduleManager->InheritNamespaceEachOther(currentNamespace, pluginDefaultNamespace);
 }
 
 void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj)
