@@ -57,6 +57,8 @@ public:
         const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid);
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
         const int32_t pid = -1, const int32_t callerPid = -1);
+    void PromotePriorityToRSS(int32_t callerUid, int32_t callerPid, const std::string &targetBundleName,
+        int32_t targetUid, int32_t targetPid);
     std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
     bool CheckShouldForceKillProcess(int32_t pid, const std::string& bundleName);
