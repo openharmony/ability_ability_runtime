@@ -1580,7 +1580,7 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()
+        if (appRecord == nullptr || appRecord->GetUid() != foregroundingRecord.GetUid()
             || AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
             || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
             || appRecord->GetAppIndex() != foregroundingRecord.GetAppIndex()) {
@@ -1605,14 +1605,14 @@ bool AppRunningManager::IsApplicationBackground(const AppRunningRecord &backgrou
             TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
             return false;
         }
-        if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
+        if (appRecord->GetUid() != backgroundingRecord.GetUid()
+            || AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
             || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
             || appRecord->GetAppIndex() != backgroundingRecord.GetAppIndex()) {
             continue;
         }
         auto state = appRecord->GetState();
-        if (appRecord && appRecord->GetBundleName() == backgroundingRecord.GetBundleName() &&
-            state == ApplicationState::APP_STATE_FOREGROUND) {
+        if (state == ApplicationState::APP_STATE_FOREGROUND) {
             return false;
         }
     }
@@ -1687,7 +1687,7 @@ bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focuse
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != focusedRecord.GetBundleName()) {
+        if (appRecord == nullptr || appRecord->GetUid() != focusedRecord.GetUid()) {
             continue;
         }
         if (appRecord->GetFocusFlag() && appRecord->GetRecordId() != focusedRecord.GetRecordId()) {
@@ -1697,13 +1697,13 @@ bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focuse
     return true;
 }
 
-bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
+bool AppRunningManager::IsApplicationUnfocused(const int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "check is application unfocused.");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord && appRecord->GetBundleName() == bundleName && appRecord->GetFocusFlag()) {
+        if (appRecord && appRecord->GetUid() == uid && appRecord->GetFocusFlag()) {
             return false;
         }
     }
