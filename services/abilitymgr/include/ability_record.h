@@ -378,6 +378,7 @@ struct ForegroundOptions {
     uint32_t sceneFlag = 0;
     bool isShellCall = false;
     bool isStartupHide = false;
+    std::string targetGrantBundleName = "";
     pid_t callingPid = -1;
     uint64_t loadAbilityCallbackId = 0;
 };
