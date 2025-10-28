@@ -3282,7 +3282,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_003, TestSize
     abilityRecord_->currentState_ = AbilityState::FOREGROUND;
     abilityRecord_->pid_ = pid_;
     abilityRecord_->SetFrozenByPreload(true);
-    abilityRecord_->ProcessForegroundAbility(tokenId);
+    ForegroundOptions options;
+    options.targetGrantBundleName = "com.ohos.demo";
+    abilityRecord_->ProcessForegroundAbility(tokenId, options);
     EXPECT_EQ(abilityRecord_->IsFrozenByPreload(), false);
 }
 
