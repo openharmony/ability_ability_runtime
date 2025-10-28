@@ -3851,14 +3851,15 @@ int AbilityManagerProxy::UnRegisterMissionListener(const std::string &deviceId,
 }
 
 int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     std::string errMsg;
-    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg, isSilent);
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg, isSilent, promotePriority);
 }
 
 int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent,
+    bool promotePriority)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -3911,6 +3912,12 @@ int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sp
     if (!data.WriteBool(isSilent)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "isSilent write fail");
         errMsg = "isSilent write fail";
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteBool(promotePriority)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "promotePriority write fail");
+        errMsg = "promotePriority write fail";
         return ERR_INVALID_VALUE;
     }
 

@@ -1145,23 +1145,23 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent)
+    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId, isSilent);
-    return abms->StartAbilityByCall(want, connect, callToken, accountId, isSilent);
+    return abms->StartAbilityByCall(want, connect, callToken, accountId, isSilent, promotePriority);
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent)
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent, bool promotePriority)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId, isSilent);
-    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent);
+    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent, promotePriority);
 }
 
 ErrCode AbilityManagerClient::StartAbilityForPrelaunch(const Want &want)

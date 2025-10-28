@@ -136,7 +136,7 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
     int StartAbilityForPrelaunch(const Want &want) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     int ReleaseCall(const sptr<IAbilityConnection>& connect,
@@ -318,7 +318,7 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
     int StartAbilityForPrelaunch(const Want &want) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     virtual int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)
