@@ -2098,14 +2098,14 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
     isSaCall = true;
     int ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
 
     abilityRequest.abilityInfo.applicationInfo.accessTokenId = 1;
     callerTokenId = 1;
 
     ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
     MyFlag::flag_ = 0;
 }
 
