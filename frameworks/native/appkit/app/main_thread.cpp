@@ -4235,7 +4235,7 @@ std::vector<std::string> MainThread::ParsePluginDefaultNamespaceLdDictionary()
     auto pluginDefaultNamespaceLdDictionary_ = system::GetParameter(PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
     TAG_LOGD(AAFwkTag::APPKIT, "plugin_default_namespace_lddictionary: %{public}d", pluginDefaultNamespaceLdDictionary_);
     std::vector<std::string> result;
-    SplitStr(pluginDefaultNamespaceLdDictionary_, ";", result);
+    SplitStr(pluginDefaultNamespaceLdDictionary_, ":", result);
     return result;
 }
 
