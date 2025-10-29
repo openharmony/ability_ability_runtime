@@ -307,5 +307,27 @@ HWTEST_F(JsRuntimeTest, InheritPluginNamespace_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "InheritPluginNamespace_0100 end");
 }
 
+/**
+ * @tc.name: CreatePluginDefaultNamespace_0100
+ * @tc.desc: JsRuntime test for CreatePluginDefaultNamespace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, CreatePluginDefaultNamespace_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreatePluginDefaultNamespace_0100 start");
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+    jsRuntime->instanceId_ = 999;
+    std::vector<std::string> lddictionarys;
+    lddictionarys.push_back("/storage/Users/currentUser/");
+    jsRuntime->CreatePluginDefaultNamespace(lddictionarys);
+    EXPECT_EQ(jsRuntime->instanceId_, 999);
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "CreatePluginDefaultNamespace_0100 end");
+}
+
 }  // namespace AbilityRuntime
 }  // namespace OHOS
