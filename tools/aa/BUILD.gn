@@ -30,7 +30,6 @@ config("ability_command_exception_config") {
 ohos_static_library("tools_aa_source_set") {
   sources = [
     "src/ability_command.cpp",
-    "src/ability_tool_command.cpp",
     "src/shell_command.cpp",
     "src/shell_command_config_loader.cpp",
     "src/shell_command_executor.cpp",
@@ -106,8 +105,6 @@ ohos_executable("aa") {
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
-
-  symlink_target_name = [ "ability_tool" ]
 
   defines = []
 
