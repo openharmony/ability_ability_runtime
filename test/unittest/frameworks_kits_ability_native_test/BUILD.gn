@@ -503,6 +503,8 @@ ohos_unittest("data_ability_helper_impl_test") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",

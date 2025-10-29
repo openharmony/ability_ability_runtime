@@ -55,6 +55,8 @@ ohos_unittest("dataobs_mgr_service_third_test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "c_utils:utils",
     "data_share:datashare_permission",
