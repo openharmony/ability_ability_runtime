@@ -17,11 +17,12 @@
 #define OHOS_ABILITY_RUNTIME_DATAOBS_MGR_SERVICE_H
 
 #include <memory>
+#include <list>
 #include <singleton.h>
 #include <thread_ex.h>
-#include <unordered_map>
 #include "cpp/mutex.h"
 
+#include "bundle_mgr_interface.h"
 #include "data_share_permission.h"
 #include "dataobs_mgr_inner.h"
 #include "dataobs_mgr_inner_common.h"
@@ -35,6 +36,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+using namespace AppExecFwk;
 enum class DataObsServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 constexpr char SHARE_PREFERENCES[] = "sharepreferences";
 /**
@@ -99,8 +101,13 @@ private:
     int32_t RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
         DataObsOption opt, bool isExtension);
     std::pair<Status, std::string> GetUriPermission(Uri &uri, bool isRead, ObserverInfo &info);
+    std::vector<DataGroupInfo> GetGroupInfosFromCache(const std::string &bundleName, const uint32_t userId);
+    std::string GetCallingName(uint32_t callingTokenid);
     int32_t VerifyDataShareExtension(Uri &uri, ObserverInfo &info);
     int32_t VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info);
+    void VerifyUriPermission(Uri &uri, const uint32_t tokenId, const uint32_t userId, const std::string &uriType);
+    int32_t ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        uint32_t token, int32_t userId, int32_t pid);
     Status VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
     int32_t NotifyChangeInner(Uri &uri, int32_t userId,
         DataObsOption opt, bool isExtension);
@@ -116,7 +123,8 @@ private:
     std::uint32_t taskCount_ = 0;
     std::shared_ptr<TaskHandlerWrap> handler_;
     std::shared_ptr<DataShare::DataSharePermission> permission_;
-
+    std::mutex groupsIdMutex_;
+    std::list<std::pair<std::string, std::vector<DataGroupInfo>>> groupsIdCache_;
     DataObsServiceRunningState state_;
 
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner_;

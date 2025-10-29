@@ -21,6 +21,7 @@
 #include "ability_manager_interface.h"
 #include "ability_manager_proxy.h"
 #include "accesstoken_kit.h"
+#include "bundle_mgr_helper.h"
 #include "dataobs_mgr_errors.h"
 #include "data_share_permission.h"
 #include "datashare_log.h"
@@ -45,9 +46,16 @@
 namespace OHOS {
 namespace AAFwk {
 using namespace DataShare;
+using namespace Security::AccessToken;
+using namespace AppExecFwk;
+static constexpr const char *SCHEME_RDB = "rdb://";
+static constexpr const char *SCHEME_SP = "sharepreferences://";
+static constexpr const char *RDB_REPORT = "RelationalDatabase";
+static constexpr const char *PREFERENCES_REPORT = "preferences";
 static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
+static const int32_t CACHE_SIZE_THRESHOLD = 10;
 static const int32_t DATA_MANAGER_SERVICE_UID = 3012;
 
 const bool REGISTER_RESULT =
@@ -325,6 +333,104 @@ Status DataObsMgrService::VerifyDataSharePermissionInner(Uri &uri, bool isRead, 
     return SUCCESS;
 }
 
+std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
+{
+    std::string callingName;
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenid);
+    int result = -1;
+    if (tokenType == Security::AccessToken::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo tokenInfo;
+        result = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenid, tokenInfo);
+        if (result == Security::AccessToken::RET_SUCCESS) {
+            callingName = tokenInfo.bundleName;
+        }
+    }
+    else if (tokenType == Security::AccessToken::TOKEN_NATIVE || tokenType == Security::AccessToken::TOKEN_SHELL) {
+        Security::AccessToken::NativeTokenInfo tokenInfo;
+        result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenid, tokenInfo);
+        if (result == Security::AccessToken::RET_SUCCESS) {
+            callingName = tokenInfo.processName;
+        }
+    }
+    else {
+        LOG_ERROR("tokenType is invalid, tokenType:%{public}d", tokenType);
+    }
+    return callingName;
+}
+std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
+    const uint32_t userId)
+{
+    std::lock_guard<std::mutex> lock(groupsIdMutex_);
+    auto key = bundleName + ":" + std::to_string(userId);
+    auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
+        [&key](const auto& pair) { return pair.first == key; });
+    if (it == groupsIdCache_.end()) {
+        std::vector<DataGroupInfo> infos;
+        auto bmsHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+        bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
+        if (!res) {
+            LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d",
+                bundleName.c_str(), userId);
+            return infos;
+        }
+        if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
+            LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
+            groupsIdCache_.pop_front();
+        }
+        groupsIdCache_.emplace_back(key, infos);
+        return infos;
+    }
+    LOG_DEBUG("Cache hit for %{public}s", key.c_str());
+    return it->second;
+}
+
+void DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
+    const uint32_t userId, const std::string &uriType)
+{
+    std::string authority = uri.GetAuthority();
+    std::string callingName = GetCallingName(tokenId);
+    std::string errMsg = uriType;
+    if (callingName.empty()) {
+        errMsg = "callingNmae is empty";
+        DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
+        return;
+    }
+    if (uri.GetAuthority() == callingName) {
+        return;
+    }
+    std::vector<DataGroupInfo> infos = GetGroupInfosFromCache(callingName, userId);
+    if (infos.empty()) {
+        LOG_ERROR("%{public}s group infos is empty.", uriType.c_str());
+        errMsg = errMsg + " callingName check failed";
+        DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
+        return;
+    }
+    for (auto &groupId : infos) {
+        if (uri.GetAuthority() == groupId.dataGroupId) {
+            return;
+        }
+    }
+    LOG_ERROR("%{public}s OBS permission check is failed", uriType.c_str());
+    errMsg = errMsg + " group id check failed";
+    DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
+}
+
+int32_t DataObsMgrService::ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    uint32_t token, int32_t userId, int32_t pid)
+{
+    auto [success, observerNode] = ConstructObserverNode(dataObserver, userId, token, pid);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "ConstructObserverNode fail, uri:%{public}s, userId:%{public}d",
+            CommonUtils::Anonymous(uri.ToString()).c_str(), userId);
+        return DATAOBS_INVALID_USERID;
+    }
+
+    if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
+        return dataObsMgrInnerPref_->HandleRegisterObserver(uri, observerNode);
+    }
+    return dataObsMgrInner_->HandleRegisterObserver(uri, observerNode);
+}
+
 int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
     int32_t userId, DataObsOption opt, bool isExtension)
 {
@@ -343,37 +449,29 @@ int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbili
     }
     int32_t pid = isExtension ? opt.FirstCallerPid() : IPCSkeleton::GetCallingPid();
     uint32_t token = isExtension ? opt.FirstCallerTokenID() : callingToken;
-    Uri uriInner = uri;
     ObserverInfo info(callingToken, fullTokenId, opt.FirstCallerTokenID(), userId, isExtension);
     info.callingUserId = callingUserId;
     info.errMsg = __FUNCTION__;
     info.pid = pid;
-    int status;
+    Uri uriInner = uri;
     bool isDataShareUri = DataSharePermission::IsDataShareUri(uriInner);
     if (opt.IsDataShare() && !isDataShareUri) {
         LOG_ERROR("uri invalid, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_INVALID_URI;
     }
-    bool checkPermission = opt.IsDataShare() || isDataShareUri;
-    if (checkPermission) {
+    int status;
+    if (opt.IsDataShare() || isDataShareUri) {
         status = VerifyDataSharePermission(uriInner, true, info);
         if (status != 0) {
             return status;
         }
     }
-    auto [success, observerNode] = ConstructObserverNode(dataObserver, userId, token, pid);
-    if (!success) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "ConstructObserverNode fail, uri:%{public}s, userId:%{public}d",
-            CommonUtils::Anonymous(uri.ToString()).c_str(), userId);
-        return DATAOBS_INVALID_USERID;
+    if (uriInner.GetScheme() == SCHEME_RDB) {
+        VerifyUriPermission(uriInner, callingToken, callingUserId, RDB_REPORT + info.errMsg);
+    } else if (uriInner.GetScheme() == SCHEME_SP) {
+        VerifyUriPermission(uriInner, callingToken, callingUserId, PREFERENCES_REPORT + info.errMsg);
     }
-
-    if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
-        status = dataObsMgrInnerPref_->HandleRegisterObserver(uri, observerNode);
-    } else {
-        status = dataObsMgrInner_->HandleRegisterObserver(uri, observerNode);
-    }
-
+    status = ConstructRegisterObserver(uri, dataObserver, token, userId, pid);
     if (status != NO_ERROR) {
         LOG_ERROR("register failed:%{public}d,uri:%{public}s", status, CommonUtils::Anonymous(uri.ToString()).c_str());
         return status;
@@ -406,6 +504,12 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
     }
 
     auto tokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t callingUserId = GetCallingUserId(tokenId);
+    if (uriInner.GetScheme() == SCHEME_RDB) {
+        VerifyUriPermission(uriInner, tokenId, callingUserId, RDB_REPORT + info.errMsg);
+    } else if (uriInner.GetScheme() == SCHEME_SP) {
+        VerifyUriPermission(uriInner, tokenId, callingUserId, PREFERENCES_REPORT + info.errMsg);
+    }
     auto [success, observerNode] = ConstructObserverNode(dataObserver, userId, tokenId, 0);
     if (!success) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "ConstructObserverNode fail, uri:%{public}s, userId:%{public}d",
@@ -515,7 +619,12 @@ int32_t DataObsMgrService::NotifyChangeInner(Uri &uri, int32_t userId, DataObsOp
             return ret;
         }
     }
-    
+    Uri uriStr = uri;
+    if (uri.GetScheme() == SCHEME_RDB) {
+        VerifyUriPermission(uriStr, tokenId, callingUserId, RDB_REPORT + info.errMsg);
+    } else if (uri.GetScheme() == SCHEME_SP) {
+        VerifyUriPermission(uriStr, tokenId, callingUserId, PREFERENCES_REPORT + info.errMsg);
+    }
     std::string readPermission = DataSharePermission::NO_PERMISSION;
     if (checkPermission) {
         std::tie(ret, readPermission) = GetUriPermission(uri, true, info);
