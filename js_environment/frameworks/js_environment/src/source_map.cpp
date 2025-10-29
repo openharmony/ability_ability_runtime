@@ -191,7 +191,7 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
             }
         }
         if (StringStartWith(tmp.c_str(), FLAG_MAPPINGS)) { // mapping
-            ExtractSourceMapData(tmp.substr(FLAG_MAPPINGS_LEN, tmp.size() - FLAG_MAPPINGS_LEN - 1), mapData);
+            ExtractSourceMapData(tmp.substr(FLAG_MAPPINGS_LEN, tmp.size() - FLAG_MAPPINGS_LEN - INDEX_TWO), mapData);
             continue;
         }
         if (StringStartWith(tmp.c_str(), FLAG_ENTRY_PACKAGE_INFO)) { // entryPackageInfo
@@ -278,7 +278,7 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
     size_t realSourceIndex = std::min(REAL_SOURCE_INDEX, targetMap.sources_.size());
     std::string sources = targetMap.sources_.substr(realSourceIndex,
                                                     targetMap.sources_.size() - realSourceIndex - 1);
-    if (key.rfind(".js") != std::string::npos) {
+    if (key.rfind(".js") == key.size() - INDEX_THREE) {
         return MappingInfo {
             .row = row,
             .col = col,
@@ -304,6 +304,13 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
             left = mid + 1;
         }
     }
+
+    if (res + 1 < static_cast<int32_t>(targetMap.afterPos_.size()) &&
+        targetMap.afterPos_[res].afterRow != row &&
+        targetMap.afterPos_[res + 1].afterRow == row) {
+        res++;
+    }
+
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
         sources.replace(pos, sizeof(WEBPACK) - 1, "");
