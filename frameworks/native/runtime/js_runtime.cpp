@@ -21,6 +21,8 @@
 #include <fstream>
 #include <mutex>
 #include <regex>
+#include <string>
+#include <vector>
 
 #include <atomic>
 #include <sys/epoll.h>
@@ -98,6 +100,8 @@ const std::string SYSTEM_KITS = "systemkits";
 const std::string NAMESPACE = "namespace";
 const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
+const std::string DEFAULT_PLUGIN = "defaultPlugin";
+const
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string MERGE_SOURCE_MAP_PATH = "ets/sourceMaps.map";
@@ -945,7 +949,7 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
     }
 }
 
-void JsRuntime::CreatePluginDefaultNamespace()
+void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &lddictorys)
 {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);
@@ -963,9 +967,10 @@ void JsRuntime::CreatePluginDefaultNamespace()
         TAG_LOGE(AAFwkTag::JSRUNTIME, "get current namespace failed");
         return;
     }
-    moduleManager->CreateLdNamespace("defaultPlugin", "", false);
+    moduleManager->CreateLdNamespace(DEFAULT_PLUGIN, "", false);
     std::string pluginDefaultNamespace;
-    moduleManager->GetLdNamespaceName("defaultPlugin", pluginDefaultNamespace);
+    moduleManager->GetLdNamespaceName(DEFAULT_PLUGIN, pluginDefaultNamespace);
+    moduleManager->SetLdPermittedPathsForNamespace(pluginDefaultNamespace, lddictorys);
     moduleManager->InheritNamespaceEachOther(currentNamespace, pluginDefaultNamespace);
 }
 

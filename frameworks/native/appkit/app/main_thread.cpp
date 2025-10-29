@@ -178,7 +178,7 @@ constexpr char EVENT_KEY_PROCESS_LIFETIME[] = "PROCESS_LIFETIME";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_plugin_namespace";
-constexpr const char* SUPPORT_PLUGIN_DEFAULT_NAMESPACE = "persist.sys.abilityms.support_plugin_default_namespace";
+constexpr const char* PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY = "persist.sys.abilityms.plugin_default_namespace_lddictionary";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
 
 const int32_t JSCRASH_TYPE = 3;
@@ -1673,8 +1673,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             if (IsPluginNamespaceInherited()) {
                 AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
             }
-            if (IsPluginDefaultNamespaceSupported()) {
-                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace();
+            auto lddictionarys = ParsePluginDefaultNamespaceLdDictionary();
+            if (lddictionarys.size() > 0) {
+                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace(lddictionarys);
             }
         }
 #ifdef CJ_FRONTEND
@@ -4229,11 +4230,13 @@ bool MainThread::IsPluginNamespaceInherited()
     return isPluginNamespaceInherited_;
 }
 
-bool MainThread::IsPluginDefaultNamespaceSupported()
+std::vector<std::string> MainThread::ParsePluginDefaultNamespaceLdDictionary()
 {
-    isPluginDefaultNamespaceSupported_ = system::GetBoolParameter(SUPPORT_PLUGIN_DEFAULT_NAMESPACE, false);
-    TAG_LOGD(AAFwkTag::APPKIT, "support_plugin_default_namespace: %{public}d", isPluginDefaultNamespaceSupported_);
-    return isPluginDefaultNamespaceSupported_;
+    auto pluginDefaultNamespaceLdDictionary_ = system::GetParameter(PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
+    TAG_LOGD(AAFwkTag::APPKIT, "plugin_default_namespace_lddictionary: %{public}d", pluginDefaultNamespaceLdDictionary_);
+    std::vector<std::string> result;
+    SplitStr(pluginDefaultNamespaceLdDictionary_, ";", result);
+    return result;
 }
 
 void MainThread::SleepCleanKill()
