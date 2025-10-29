@@ -17,7 +17,6 @@
 #include <unistd.h>
 
 #include "ability_command.h"
-#include "ability_tool_command.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
 #ifdef A11Y_ENABLE
@@ -58,9 +57,6 @@ int main(int argc, char* argv[])
     if (strstr(argv[0], "aa") != nullptr) {
         CommandTimer commandTimer("ability::aa_command", COMMAND_TIME_OUT, operation);
         OHOS::AAFwk::AbilityManagerShellCommand cmd(argc, argv);
-        std::cout << cmd.ExecCommand();
-    } else if (strstr(argv[0], "ability_tool") != nullptr) {
-        OHOS::AAFwk::AbilityToolCommand cmd(argc, argv);
         std::cout << cmd.ExecCommand();
     } else {
 #ifdef A11Y_ENABLE
