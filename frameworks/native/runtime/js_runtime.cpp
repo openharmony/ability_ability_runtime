@@ -967,7 +967,8 @@ void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &ldd
         TAG_LOGE(AAFwkTag::JSRUNTIME, "get current namespace failed");
         return;
     }
-    moduleManager->CreateLdNamespace(DEFAULT_PLUGIN, "", false);
+    std::vector<std::string> appLibPaths;
+    moduleManager->SetAppLibPath(DEFAULT_PLUGIN, appLibPaths, false);
     std::string pluginDefaultNamespace;
     moduleManager->GetLdNamespaceName(DEFAULT_PLUGIN, pluginDefaultNamespace);
     moduleManager->SetLdPermittedPathsForNamespace(pluginDefaultNamespace, lddictorys);
