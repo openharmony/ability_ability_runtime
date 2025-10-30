@@ -1673,9 +1673,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             if (IsPluginNamespaceInherited()) {
                 AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
             }
-            auto lddictionarys = ParsePluginDefaultNamespaceLdDictionary();
-            if (lddictionarys.size() > 0) {
-                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace(lddictionarys);
+            auto lddictionaries = ParsePluginDefaultNamespaceLdDictionary();
+            if (lddictionaries.size() > 0) {
+                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace(lddictionaries);
             }
         }
 #ifdef CJ_FRONTEND

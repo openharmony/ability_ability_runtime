@@ -949,12 +949,11 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
     }
 }
 
-void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &lddictorys)
+void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &lddictionaries)
 {
-    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
-    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);
+    Security::AccessToken::AccessTokenID selfToken = IPCSkeleton::GetSelfTokenID();
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);
     if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "permission denied: PERMISSION_LOAD_INDEPENDENT_LIBRARY");
         return;
     }
     auto moduleManager = NativeModuleManager::GetInstance();
@@ -971,7 +970,7 @@ void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &ldd
     moduleManager->SetAppLibPath(DEFAULT_PLUGIN, appLibPaths, false);
     std::string pluginDefaultNamespace;
     moduleManager->GetLdNamespaceName(DEFAULT_PLUGIN, pluginDefaultNamespace);
-    moduleManager->SetLdPermittedPathsForNamespace(pluginDefaultNamespace, lddictorys);
+    moduleManager->SetLdPermittedPathsForNamespace(pluginDefaultNamespace, lddictionaries);
     moduleManager->InheritNamespaceEachOther(currentNamespace, pluginDefaultNamespace);
 }
 
