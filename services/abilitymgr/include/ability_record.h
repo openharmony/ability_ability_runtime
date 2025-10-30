@@ -1048,7 +1048,7 @@ public:
 
     void SetUid(int32_t uid);
     int32_t GetUid();
-    pid_t GetPid();
+    pid_t GetPid() const;
     void SetPid(pid_t pid);
     void SetSwitchingPause(bool state);
     bool IsSwitchingPause();
