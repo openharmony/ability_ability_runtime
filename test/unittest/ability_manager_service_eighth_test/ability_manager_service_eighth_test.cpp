@@ -46,6 +46,7 @@ constexpr uint32_t TEST_FLAG_ABILITY_CONTINUATION = 0x00000008;
 constexpr int32_t TEST_U0_USER_ID = 0;
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
+constexpr int32_t DLP_APP_INDEX = 1001;
 constexpr uint32_t TEST_VALUE_ONE = 1;
 const std::string TEST_STRING_VALUE_1 = "1";
 const std::string TEST_CREATE_FILE = "ohos.want.action.CREATE_FILE";
@@ -311,7 +312,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartAbilityInChainTest_001, TestSize.
     want.SetParam(key, value);
     StartAbilityParams params2(want);
     params2.callerToken = callerToken;
-    params2.callerAppIndex = ONE;
+    params2.callerAppIndex = DLP_APP_INDEX;
     ret = abilityMs_->StartAbilityInChain(params2, result);
     EXPECT_TRUE(ret);
     const int32_t userId = -1;
