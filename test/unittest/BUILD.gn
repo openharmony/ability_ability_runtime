@@ -382,6 +382,8 @@ group("unittest") {
       "free_install_manager_third_test:unittest",
       "free_install_observer_manager_test:unittest",
       "freeze_util_test:unittest",
+      "foreground_app_connection_manager_test:unittest",
+      "foreground_app_connection_test:unittest",
       "hidden_start_observer_manager_test:unittest",
       "hidden_start_utils_test:unittest",
       "hitrace_chain_utils_test:unittest",
