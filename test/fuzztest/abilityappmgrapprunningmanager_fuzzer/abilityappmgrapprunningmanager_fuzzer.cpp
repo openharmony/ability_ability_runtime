@@ -122,7 +122,7 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     manager->IsApplicationFirstForeground(foregroundingRecord);
     manager->IsApplicationBackground(foregroundingRecord);
     manager->IsApplicationFirstFocused(foregroundingRecord);
-    manager->IsApplicationUnfocused(jsonStr);
+    manager->IsApplicationUnfocused(foregroundingRecord.GetUid());
     bool isAttachDebug = *data % ENABLE;
     manager->SetAttachAppDebug(jsonStr, isAttachDebug, false);
     bool isDetachDebug = *data % ENABLE;

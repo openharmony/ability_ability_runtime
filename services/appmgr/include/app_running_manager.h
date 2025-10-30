@@ -356,7 +356,7 @@ public:
     bool IsApplicationBackground(const AppRunningRecord &backgroundingRecord);
     bool NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<AppRunningRecord> currentAppRecord);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
-    bool IsApplicationUnfocused(const std::string &bundleName);
+    bool IsApplicationUnfocused(int32_t uid);
 #ifdef SUPPORT_SCREEN
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 #endif //SUPPORT_SCREEN
