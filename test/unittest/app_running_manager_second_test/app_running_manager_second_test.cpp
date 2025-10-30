@@ -1438,7 +1438,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step1 first focused true
      */
-    auto ret = appRunningManager->IsApplicationUnfocused("");
+    auto ret = appRunningManager->IsApplicationUnfocused(0);
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationUnfocused_0100 end");
 }
@@ -1465,7 +1465,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step1 different bundle unfocused true
      */
-    auto ret = appRunningManager->IsApplicationUnfocused("");
+    auto ret = appRunningManager->IsApplicationUnfocused(record->GetUid());
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationUnfocused_0200 end");
 }
@@ -1492,7 +1492,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step2 focused false
      */
-    auto ret = appRunningManager->IsApplicationUnfocused(BUNDLE_NAME);
+    auto ret = appRunningManager->IsApplicationUnfocused(record->GetUid());
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationUnfocused_0300 end");
 }
@@ -1522,7 +1522,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step1 focused false
      */
-    auto ret = appRunningManager->IsApplicationUnfocused(BUNDLE_NAME);
+    auto ret = appRunningManager->IsApplicationUnfocused(record->GetUid());
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationUnfocused_0400 end");
 }

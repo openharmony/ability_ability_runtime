@@ -7086,7 +7086,7 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
         return;
     }
 
-    bool needNotifyApp = appRunningManager_->IsApplicationUnfocused(appRecord->GetBundleName());
+    bool needNotifyApp = appRunningManager_->IsApplicationUnfocused(appRecord->GetUid());
     OnAppStateChanged(appRecord, appRecord->GetState(), needNotifyApp, true);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord, true);
 }
