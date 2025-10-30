@@ -90,6 +90,9 @@ void SendWantAgentNumberEvent(std::shared_ptr<PendingWantKey> pendingKey, int32_
 
 void PendingWantManager::AddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
 {
+    if (pendingKey == nullptr) {
+        return;
+    }
     TAG_LOGD(AAFwkTag::WANTAGENT, "add wantAgent number");
     if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
         PermissionVerification::GetInstance()->IsSACall()) {
@@ -120,6 +123,9 @@ void PendingWantManager::AddWantAgentNumber(std::shared_ptr<PendingWantKey> pend
 
 void PendingWantManager::ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
 {
+    if (pendingKey == nullptr) {
+        return;
+    }
     TAG_LOGD(AAFwkTag::WANTAGENT, "reduce wantAgent number");
     if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
         PermissionVerification::GetInstance()->IsSACall()) {
@@ -183,8 +189,8 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
             return ref;
         }
         MakeWantSenderCanceledLocked(*ref);
-        wantRecords_.erase(ref->GetKey());
         ReduceWantAgentNumber(ref->GetKey());
+        wantRecords_.erase(ref->GetKey());
     }
 
     if (!needCreate) {
@@ -366,8 +372,8 @@ void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool 
     std::lock_guard<ffrt::mutex> locker(mutex_);
     MakeWantSenderCanceledLocked(record);
     if (cleanAbility) {
-        wantRecords_.erase(record.GetKey());
         ReduceWantAgentNumber(record.GetKey());
+        wantRecords_.erase(record.GetKey());
     }
 }
 
@@ -743,8 +749,8 @@ void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleNam
                 }
             }
             if (hasBundle) {
-                iter = wantRecords_.erase(iter);
                 ReduceWantAgentNumber(iter->first);
+                iter = wantRecords_.erase(iter);
                 TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
             } else {
                 ++iter;
