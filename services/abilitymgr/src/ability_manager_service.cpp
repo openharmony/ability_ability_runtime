@@ -8627,6 +8627,7 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
         info.retryCount = START_AUTO_START_APP_RETRY_MAX_TIMES;
         infoQueue.push(info);
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAutoStartupApps userId:%{public}d", userId);
     StartAutoStartupApps(infoQueue, userId);
     auto removeParameterWatcherTask = []() {
         int32_t ret = RemoveParameterWatcher(
