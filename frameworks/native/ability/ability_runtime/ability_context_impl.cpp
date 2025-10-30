@@ -269,7 +269,7 @@ ErrCode AbilityContextImpl::StartAbilityWithAccount(
 
 ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, int requestCode, RuntimeTask&& task)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    TAG_LOGI(AAFwkTag::CONTEXT, "AMC, ForResult code:%{public}d", requestCode);
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode, -1);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
@@ -282,7 +282,7 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, int r
 ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
     const AAFwk::Want& want, const int accountId, int requestCode, RuntimeTask&& task)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "accountId:%{private}d", accountId);
+    TAG_LOGI(AAFwkTag::CONTEXT, "AMC, ForResult code:%{public}d, userId:%{public}d", requestCode, accountId);
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode, accountId);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
