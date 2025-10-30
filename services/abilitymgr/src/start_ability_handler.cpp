@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,13 @@
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
+#include "global_constant.h"
 
 namespace OHOS {
 namespace AAFwk {
 bool StartAbilityParams::IsCallerSandboxApp()
 {
-    return GetCallerAppIndex() > 0;
+    return GetCallerAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX;
 }
 
 #ifdef WITH_DLP
