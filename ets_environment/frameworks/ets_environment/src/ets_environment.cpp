@@ -59,6 +59,8 @@ const char ETS_LIB_PATH[] = "libets_interop_js_napi.z.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
 const char BACKTRACE[] = "=====================Backtrace========================";
 static const std::string DEBUGGER = "@Debugger";
+static const std::string SYS_HSP_FILE_PATH_PREFIX = "/system/app/";
+
 
 using CreateVMETSRuntimeType = ani_status (*)(const ani_options *options, uint32_t version, ani_vm **result);
 using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
@@ -778,6 +780,12 @@ std::vector<std::string> ETSEnvironment::GetHspPathList()
         if (bundleInfo.moduleArkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
             continue;
         }
+
+        if (bundleInfo.hapPath.compare(0, SYS_HSP_FILE_PATH_PREFIX.size(), SYS_HSP_FILE_PATH_PREFIX) == 0) {
+            hspPathList.push_back(bundleInfo.hapPath);
+            continue;
+        }
+
         auto pos = bundleInfo.hapPath.rfind('/');
         if (pos == std::string::npos) {
             TAG_LOGW(AAFwkTag::ETSRUNTIME, "hapPath invalid:%{public}s", bundleInfo.hapPath.c_str());
