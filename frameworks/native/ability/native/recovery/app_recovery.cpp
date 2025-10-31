@@ -492,7 +492,7 @@ void AppRecovery::DeleteInValidMissionFiles()
         return;
     }
     for (auto& item : results) {
-        TAG_LOGI(AAFwkTag::RECOVERY, "missionId: %{public}d, isValid: %{public}d",
+        TAG_LOGD(AAFwkTag::RECOVERY, "missionId: %{public}d, isValid: %{public}d",
             item.missionId, item.isValid);
         if (!item.isValid) {
             DeleteInValidMissionFileById(fileDir, item.missionId);
