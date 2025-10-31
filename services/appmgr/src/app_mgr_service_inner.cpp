@@ -1740,9 +1740,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp, false);
-        if (appRecord->GetPreloadMode() != PreloadMode::PRE_LAUNCH) {
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
-        }
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "app name(%{public}s), app state(%{public}d)",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appState));
