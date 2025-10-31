@@ -18,6 +18,7 @@
 #ifdef WITH_DLP
 #include "dlp_file_kits.h"
 #endif // WITH_DLP
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
@@ -1172,6 +1173,7 @@ ErrCode AbilityManagerClient::StartAbilityForPrelaunch(const Want &want)
 
 void AbilityManagerClient::CallRequestDone(sptr<IRemoteObject> token, sptr<IRemoteObject> callStub)
 {
+    AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(token, "AbilityManagerClient::CallRequestDone");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     abms->CallRequestDone(token, callStub);

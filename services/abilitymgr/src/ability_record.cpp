@@ -316,7 +316,7 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-pid_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid() const
 {
     return pid_;
 }
@@ -3343,11 +3343,11 @@ void AbilityRecord::PostStartAbilityByCallTimeoutTask(bool isHalf)
     CHECK_POINTER(handler);
 
     auto timeoutTask = [isHalf, ability = shared_from_this()]() {
-        AppExecFwk::RunningProcessInfo processInfo;
         std::string abilityName = ability->GetAbilityInfo().name;
         std::string bundleName = ability->GetAbilityInfo().bundleName;
-        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
-        if (processInfo.pid_ == 0) {
+        auto pid = ability->GetPid();
+        auto uid = ability->GetUid();
+        if (pid == 0) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "ability:%{public}s, app fork fail/not run", abilityName.c_str());
             return;
         }
@@ -3360,10 +3360,10 @@ void AbilityRecord::PostStartAbilityByCallTimeoutTask(bool isHalf)
             : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT_WARNING;
 
         TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, "
-            "abilityName: %{public}s, msg: %{public}s", eventName.c_str(), processInfo.uid_, processInfo.pid_,
+            "abilityName: %{public}s, msg: %{public}s", eventName.c_str(), uid, pid,
             bundleName.c_str(), abilityName.c_str(), msgContent.c_str());
 
-        AppExecFwk::AppfreezeManager::ParamInfo info = { false, typeId, processInfo.pid_, eventName, bundleName };
+        AppExecFwk::AppfreezeManager::ParamInfo info = { false, typeId, pid, eventName, bundleName };
         FreezeUtil::LifecycleFlow flow;
         if (ability->GetToken() != nullptr) {
             flow.token = ability->GetToken()->AsObject();
@@ -3371,10 +3371,10 @@ void AbilityRecord::PostStartAbilityByCallTimeoutTask(bool isHalf)
         }
         info.msg = msgContent + "\nserver actions for ability:\n" +
             FreezeUtil::GetInstance().GetLifecycleEvent(flow.token)
-            + "\nserver actions for app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
+            + "\nserver actions for app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(pid);
         if (!isHalf) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow.token);
-            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(processInfo.pid_);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(pid);
         }
         AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
     };
@@ -3401,6 +3401,10 @@ void AbilityRecord::CancelStartAbilityByCallTimeoutTask() const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail get AbilityEventHandler");
         return;
     }
+    if (GetToken() && GetToken()->AsObject()) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(GetToken()->AsObject());
+    }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     handler->CancelTask("by_call_timeout_" + std::to_string(recordId_));
     handler->CancelTask("by_call_half_timeout_" + std::to_string(recordId_));
 }

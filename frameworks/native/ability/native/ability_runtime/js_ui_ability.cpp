@@ -1861,6 +1861,7 @@ sptr<IRemoteObject> JsUIAbility::CallRequest()
         return nullptr;
     }
 
+    FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, "JsUIAbility::CallRequest");
     if (remoteCallee_ != nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "remoteCallee_ is exist");
         return remoteCallee_;

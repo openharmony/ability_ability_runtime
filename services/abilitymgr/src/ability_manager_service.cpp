@@ -11974,6 +11974,7 @@ bool AbilityManagerService::GetStartUpNewRuleFlag() const
 
 void AbilityManagerService::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
+    FreezeUtil::GetInstance().AddLifecycleEvent(token, "AbilityManagerService::CallRequestDone");
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
     if (!JudgeSelfCalled(abilityRecord)) {
