@@ -731,12 +731,6 @@ private:
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
-     * @brief Complete terminate operation with lock
-     * @param abilityRecord The ability record to terminate
-     */
-    void CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
-    /**
      * @brief Check if token is contained in internal storage
      * @param token The token to check
      * @return true if contained, false otherwise
