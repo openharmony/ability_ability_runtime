@@ -320,12 +320,11 @@ HWTEST_F(JsRuntimeTest, CreatePluginDefaultNamespace_0100, TestSize.Level1)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     ASSERT_NE(jsRuntime, nullptr);
     jsRuntime->instanceId_ = 999;
-    std::vector<std::string> lddictionarys;
-    lddictionarys.push_back("/storage/Users/currentUser/");
+    std::string lddictionarys = "/storage/Users/currentUser/";
     jsRuntime->CreatePluginDefaultNamespace(lddictionarys);
     EXPECT_EQ(jsRuntime->instanceId_, 999);
     jsRuntime.reset();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     TAG_LOGI(AAFwkTag::TEST, "CreatePluginDefaultNamespace_0100 end");
 }
 
