@@ -52,11 +52,10 @@ void AbilityEventUtilTest::TearDown() {}
 HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0100 start");
-    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
     EventInfo eventInfo = {};
     int32_t errCode = -1;
     std::string errMsg = "test event";
-    eventUtil->SendStartAbilityErrorEvent(eventInfo, errCode, errMsg);
+    AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, errCode, errMsg);
     EXPECT_EQ(eventInfo.userId, -1);
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0100 end");
 }
@@ -70,11 +69,10 @@ HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0100, Test
 HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0200 start");
-    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
     EventInfo eventInfo = {};
     int32_t errCode = -1;
     std::string errMsg = "test event";
-    eventUtil->SendStartAbilityErrorEvent(eventInfo, errCode, errMsg, true);
+    AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, errCode, errMsg, true);
     EXPECT_EQ(eventInfo.userId, -1);
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0200 end");
 }
@@ -88,11 +86,10 @@ HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0200, Test
 HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0300 start");
-    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
     EventInfo eventInfo = {};
     int32_t errCode = 0;
     std::string errMsg = "test event";
-    eventUtil->SendStartAbilityErrorEvent(eventInfo, errCode, errMsg);
+    AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, errCode, errMsg);
     EXPECT_EQ(eventInfo.userId, -1);
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0300 end");
 }
@@ -106,11 +103,10 @@ HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0300, Test
 HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendKillProcessWithReasonEvent_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendKillProcessWithReasonEvent_0100 start");
-    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
     EventInfo eventInfo = {};
     int32_t errCode = -1;
     std::string errMsg = "test event";
-    eventUtil->SendKillProcessWithReasonEvent(errCode, errMsg, eventInfo);
+    AbilityEventUtil::SendKillProcessWithReasonEvent(errCode, errMsg, eventInfo);
     EXPECT_EQ(eventInfo.userId, -1);
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendKillProcessWithReasonEvent_0100 end");
 }
