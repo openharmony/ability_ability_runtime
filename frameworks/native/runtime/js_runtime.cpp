@@ -101,7 +101,6 @@ const std::string NAMESPACE = "namespace";
 const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
 const std::string DEFAULT_PLUGIN = "defaultPlugin";
-const
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string MERGE_SOURCE_MAP_PATH = "ets/sourceMaps.map";
@@ -949,7 +948,7 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
     }
 }
 
-void JsRuntime::CreatePluginDefaultNamespace(const std::vector<std::string> &lddictionaries)
+void JsRuntime::CreatePluginDefaultNamespace(const std::string &lddictionaries)
 {
     Security::AccessToken::AccessTokenID selfToken = IPCSkeleton::GetSelfTokenID();
     int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);

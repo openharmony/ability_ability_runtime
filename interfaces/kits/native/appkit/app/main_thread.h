@@ -687,7 +687,7 @@ private:
 
     bool IsPluginNamespaceInherited();
 
-    std::vector<std::string> ParsePluginDefaultNamespaceLdDictionary();
+    std::string ParsePluginDefaultNamespaceLdDictionary();
 
     /**
      * @brief parse app configuration params

@@ -1674,7 +1674,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
             }
             auto lddictionaries = ParsePluginDefaultNamespaceLdDictionary();
-            if (lddictionaries.size() > 0) {
+            if (!lddictionaries.empty()) {
                 AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace(lddictionaries);
             }
         }
@@ -4230,13 +4230,11 @@ bool MainThread::IsPluginNamespaceInherited()
     return isPluginNamespaceInherited_;
 }
 
-std::vector<std::string> MainThread::ParsePluginDefaultNamespaceLdDictionary()
+std::string MainThread::ParsePluginDefaultNamespaceLdDictionary()
 {
-    auto pluginDefaultNamespaceLdDictionary_ = system::GetParameter(PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
+    pluginDefaultNamespaceLdDictionary_ = system:: (PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
     TAG_LOGD(AAFwkTag::APPKIT, "plugin_default_namespace_lddictionary: %{public}s", pluginDefaultNamespaceLdDictionary_.c_str());
-    std::vector<std::string> result;
-    SplitStr(pluginDefaultNamespaceLdDictionary_, ":", result);
-    return result;
+    return pluginDefaultNamespaceLdDictionary_;
 }
 
 void MainThread::SleepCleanKill()
