@@ -1662,8 +1662,6 @@ private:
                         int32_t userId, int32_t &uid,
                         std::unordered_map<int32_t, int32_t> &lastIsolationIdMap);
 
-    bool GenerateRenderUid(int32_t &renderUid);
-
     /**
      * Build a process's name for service extension
      */
@@ -1873,6 +1871,10 @@ private:
 
     int32_t GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+
+    void RemoveRenderProcessIsolationUid(int32_t uid);
+
+    void OnRenderProcessDied(std::shared_ptr<RenderRecord> renderProcessRecord);
 
     void RemoveChildProcessIsolationUid(int32_t uid);
     
@@ -2174,7 +2176,7 @@ private:
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
-    int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
+    std::unordered_map<int32_t, int32_t> lastRenderProcessIsolationIdMap_;
     std::unordered_map<int32_t, int32_t> lastChildProcessIsolationIdMap_;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
@@ -2185,7 +2187,7 @@ private:
     std::shared_ptr<AMSEventHandler> eventHandler_;
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
-    ffrt::mutex renderUidSetLock_;
+    ffrt::mutex renderProcessIsolationUidSetLock_;
     ffrt::mutex childProcessIsolationUidSetLock_;
     ffrt::mutex exceptionLock_;
     ffrt::mutex browserHostLock_;
@@ -2204,7 +2206,7 @@ private:
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
-    std::unordered_set<int32_t> renderUidSet_;
+    std::unordered_set<int32_t> renderProcessIsolationUidSet_;
     std::unordered_set<int32_t> childProcessIsolationUidSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};
