@@ -23,6 +23,7 @@
 #include "startup_task_result.h"
 #undef private
 #undef protected
+#include "ability_stage_context.h"
 #include "want_params.h"
 #include "string_wrapper.h"
 #include "napi_common_execute_result.h"
@@ -117,7 +118,8 @@ HWTEST_F(JsStartupConfigTest, JsInsightIntentEntryInit_001, TestSize.Level1)
     MyFlag::isGetNapiValueNullptr_ = true;
     auto want = std::make_shared<Want>();
     std::unique_ptr<NativeReference> ptr = nullptr;
-    auto res = jsStartupConfig->Init(ptr, want);
+    JsRuntime jsRuntime;
+    auto res = jsStartupConfig->Init(jsRuntime, nullptr, "", want);
     EXPECT_EQ(res, ERR_STARTUP_INTERNAL_ERROR);
 }
 
@@ -128,12 +130,11 @@ HWTEST_F(JsStartupConfigTest, JsInsightIntentEntryInit_001, TestSize.Level1)
 */
 HWTEST_F(JsStartupConfigTest, JsInsightIntentEntryInit_002, TestSize.Level1)
 {
-    auto jsRuntime = std::make_shared<JsRuntime>();
     MyFlag::isGetNapiValueNullptr_ = true;
     auto jsStartupConfig = std::make_shared<JsStartupConfig>(nullptr);
     auto want = std::make_shared<Want>();
-    std::unique_ptr<NativeReference> ptr = std::make_unique<NativeReferenceMock>();
-    auto res = jsStartupConfig->Init(ptr, want);
+    JsRuntime jsRuntime;
+    auto res = jsStartupConfig->Init(jsRuntime, nullptr, "StartupConfig.ets", want);
     EXPECT_EQ(res, ERR_STARTUP_INTERNAL_ERROR);
 }
 
@@ -150,9 +151,9 @@ HWTEST_F(JsStartupConfigTest, JsInsightIntentEntryInit_003, TestSize.Level1)
     jsRuntime_->jsEnv_->Initialize(pandaOption, static_cast<void*>(this));
     auto jsStartupConfig = std::make_shared<JsStartupConfig>(jsRuntime_->GetNapiEnv());
     auto want = std::make_shared<Want>();
-    std::unique_ptr<NativeReference> ptr = std::make_unique<NativeReferenceMock>();
-    NativeReferenceMock::propertyName_ = "onConfig";
-    auto res = jsStartupConfig->Init(ptr, want);
+    JsRuntime jsRuntime;
+    auto context = std::make_shared<AbilityStageContext>();
+    auto res = jsStartupConfig->Init(jsRuntime, context, "StartupConfig.ets", want);
     EXPECT_EQ(res, ERR_STARTUP_INTERNAL_ERROR);
 }
 

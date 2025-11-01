@@ -19,6 +19,7 @@
 #include <string>
 
 #include "bundle_info.h"
+#include "native_engine/native_engine.h"
 #include "startup_task.h"
 #include "startup_utils.h"
 
@@ -37,6 +38,7 @@ struct StartupTaskInfo {
     std::string ohmUrl;
     std::string moduleName;
     std::string hapPath;
+    std::string arkTSMode;
     std::vector<std::string> dependencies;
     bool excludeFromAutoStart = false;
     bool callCreateOnMainThread = true;
@@ -49,6 +51,10 @@ struct StartupTaskInfo {
 
 class AppStartupTask : public StartupTask {
 public:
+    static const std::string TASK_TYPE_JS;
+    static const std::string TASK_TYPE_ETS;
+    static const std::string TASK_TYPE_PRELOAD_SO;
+
     explicit AppStartupTask(const std::string& name);
 
     ~AppStartupTask() override;
@@ -78,6 +84,8 @@ public:
     bool IsPreAbilityStageLoad() const;
 
     void SetPreAbilityStageLoad(bool preAbilityStageLoad);
+    
+    virtual void UpdateContextRef(std::shared_ptr<NativeReference> contextJsRef);
 
 private:
     bool isExcludeFromAutoStart_ = false;

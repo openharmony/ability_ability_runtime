@@ -16,6 +16,7 @@
 #include "js_startup_config.h"
 
 #include "hilog_tag_wrapper.h"
+#include "hap_module_info.h"
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -28,9 +29,11 @@ JsStartupConfig::JsStartupConfig(napi_env env) : StartupConfig(), env_(env)
 
 JsStartupConfig::~JsStartupConfig() = default;
 
-int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef,
-    std::shared_ptr<AAFwk::Want> want)
+int32_t JsStartupConfig::Init(Runtime &runtime, std::shared_ptr<Context> context,
+    const std::string &srcEntry, std::shared_ptr<AAFwk::Want> want)
 {
+    auto &jsRuntime = static_cast<JsRuntime&>(runtime);
+    auto configEntryJsRef = LoadSrcEntry(jsRuntime, context, srcEntry);
     if (configEntryJsRef == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "null configEntry");
         return ERR_STARTUP_INTERNAL_ERROR;
@@ -77,6 +80,39 @@ int32_t JsStartupConfig::Init(napi_value config)
     InitAwaitTimeout(env_, config);
     InitListener(env_, config);
     return ERR_OK;
+}
+
+std::unique_ptr<NativeReference> JsStartupConfig::LoadSrcEntry(JsRuntime &jsRuntime,
+    std::shared_ptr<Context> context, const std::string &srcEntry)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "call");
+    if (srcEntry.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "srcEntry invalid");
+        return nullptr;
+    }
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        return nullptr;
+    }
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    if (!hapModuleInfo) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
+        return nullptr;
+    }
+
+    bool esmodule = hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    std::string moduleNameWithStartupConfig(hapModuleInfo->moduleName + "::startupConfig");
+    std::string srcPath(hapModuleInfo->moduleName + "/" + srcEntry);
+
+    auto pos = srcPath.rfind('.');
+    if (pos == std::string::npos) {
+        return nullptr;
+    }
+    srcPath.erase(pos);
+    srcPath.append(".abc");
+
+    jsRuntime.UpdateModuleNameAndAssetPath(hapModuleInfo->moduleName);
+    return jsRuntime.LoadModule(moduleNameWithStartupConfig, srcPath, hapModuleInfo->hapPath, esmodule);
 }
 
 void JsStartupConfig::InitAwaitTimeout(napi_env env, napi_value config)

@@ -58,7 +58,7 @@ public:
 
     const std::vector<StartupTaskInfo> GetStartupTaskInfos(const std::string &name);
 
-    const std::string &GetPendingConfigEntry() const;
+    const std::pair<std::string, std::string> &GetPendingConfigEntry() const;
 
     int32_t RegisterAppStartupTask(
         const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
@@ -128,7 +128,7 @@ private:
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks_;
     std::map<std::string, std::shared_ptr<AppStartupTask>> appStartupTasks_;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos_;
-    std::string pendingConfigEntry_;
+    std::pair<std::string, std::string> pendingConfigEntry_;
 
     std::mutex autoPreloadSoTaskManagerMutex_;
     std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager_;
@@ -177,7 +177,8 @@ private:
     bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSystemSoStartupTasks,
-        std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
+        std::vector<StartupTaskInfo>& pendingStartupTaskInfos,
+        std::pair<std::string, std::string> &pendingConfigEntry);
     bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
     bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,

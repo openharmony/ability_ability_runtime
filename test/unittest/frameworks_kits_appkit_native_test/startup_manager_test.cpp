@@ -137,11 +137,11 @@ HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0100, Function | Med
 HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0200, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "StartupManagerTest BuildAutoAppStartupTaskManager_0200 start";
-    std::unique_ptr<NativeReference> startupJsRef = nullptr;
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
     JsRuntime jsRuntime;
     const std::string taskName = "task1";
-    auto task = std::make_shared<JsStartupTask>(taskName, jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskInfo startupTaskInfo;
+    startupTaskInfo.name = taskName;
+    auto task = std::make_shared<JsStartupTask>(jsRuntime, startupTaskInfo, false);
     StartupTaskMatchRules matchRules;
     std::string action = "com.example.test.action1";
     matchRules.actions.emplace_back(action);
@@ -685,7 +685,7 @@ HWTEST_F(StartupManagerTest, AnalyzeStartupConfig_0100, Function | MediumTest | 
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
-    std::string pendingConfigEntry;
+    std::pair<std::string, std::string> pendingConfigEntry;
     bool ret = false;
     ret = startupManager->AnalyzeStartupConfig(info, startupConfig, preloadSoStartupTasks,
         preloadSystemSoStartupTasks, pendingStartupTaskInfos, pendingConfigEntry);
