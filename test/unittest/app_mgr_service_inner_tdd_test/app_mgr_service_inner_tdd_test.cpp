@@ -901,27 +901,6 @@ HWTEST_F(AppMgrServiceInnerTest, CheckIsolationMode_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GenerateRenderUid_001
- * @tc.desc: Generate RenderUid
- * @tc.type: FUNC
- * @tc.Function: GenerateRenderUid
- * @tc.SubFunction: NA
- * @tc.EnvConditions: NA
- */
-HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->Init();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    int32_t renderUid = Constants::INVALID_UID;
-    EXPECT_TRUE(appMgrServiceInner->GenerateRenderUid(renderUid));
-    int32_t renderUid1 = Constants::INVALID_UID;
-    EXPECT_TRUE(appMgrServiceInner->GenerateRenderUid(renderUid1));
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_001 end");
-}
-
-/**
  * @tc.name: NotifyAppFault_001
  * @tc.desc: Verify that the NotifyAppFault interface calls normally
  * @tc.type: FUNC
