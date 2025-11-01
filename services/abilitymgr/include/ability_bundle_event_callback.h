@@ -52,7 +52,6 @@ private:
     void HandleRestartResidentProcessDependedOnWeb();
 
     DISALLOW_COPY_AND_MOVE(AbilityBundleEventCallback);
-    AbilityEventUtil abilityEventHelper_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityRuntime::AbilityAutoStartupService> abilityAutoStartupService_;
 };
