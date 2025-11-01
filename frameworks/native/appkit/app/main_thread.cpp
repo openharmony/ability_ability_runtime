@@ -4232,7 +4232,7 @@ bool MainThread::IsPluginNamespaceInherited()
 
 std::string MainThread::ParsePluginDefaultNamespaceLdDictionary()
 {
-    pluginDefaultNamespaceLdDictionary_ = system:: (PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
+    pluginDefaultNamespaceLdDictionary_ = system::GetParameter(PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
     TAG_LOGD(AAFwkTag::APPKIT, "plugin_default_namespace_lddictionary: %{public}s", pluginDefaultNamespaceLdDictionary_.c_str());
     return pluginDefaultNamespaceLdDictionary_;
 }
