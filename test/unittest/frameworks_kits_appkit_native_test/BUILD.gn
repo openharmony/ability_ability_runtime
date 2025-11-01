@@ -1229,7 +1229,6 @@ ohos_unittest("startup_manager_mock_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
     "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_extractor.cpp",
-    "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_native_module_manager.cpp",
     "startup_manager_mock_test.cpp",
   ]
 

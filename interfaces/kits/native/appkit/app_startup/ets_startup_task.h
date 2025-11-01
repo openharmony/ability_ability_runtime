@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_STARTUP_TASK_H
-#define OHOS_ABILITY_RUNTIME_JS_STARTUP_TASK_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_STARTUP_TASK_H
+#define OHOS_ABILITY_RUNTIME_ETS_STARTUP_TASK_H
 
 #include "app_startup_task.h"
-#include "js_runtime.h"
-#include "js_runtime_utils.h"
-#include "js_startup_task_result.h"
+#include "ets_native_reference.h"
+#include "ets_runtime.h"
+#include "ets_startup_task_result.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class JsStartupTask : public AppStartupTask {
+class EtsStartupTask : public AppStartupTask {
 public:
 
-    JsStartupTask(JsRuntime &jsRuntime, const StartupTaskInfo &info, bool lazyLoad);
+    EtsStartupTask(ETSRuntime &etsRuntime, const StartupTaskInfo &info, bool lazyLoad);
 
-    ~JsStartupTask() override;
+    ~EtsStartupTask() override;
 
     const std::string &GetType() const override;
 
@@ -41,27 +41,23 @@ public:
 
     void UpdateContextRef(std::shared_ptr<NativeReference> contextJsRef) override;
 
+    void UpdateContextRef(ani_ref contextRef);
+
 private:
-    JsRuntime &jsRuntime_;
-    std::unique_ptr<NativeReference> startupJsRef_;
-    std::shared_ptr<NativeReference> contextJsRef_;
-    std::unique_ptr<NativeReference> AsyncTaskExecutorJsRef_;
-    std::unique_ptr<NativeReference> AsyncTaskExecutorCallbackJsRef_;
-    std::unique_ptr<StartupTaskResultCallback> startupTaskResultCallback_;
+    ETSRuntime &etsRuntime_;
+    ani_ref contextRef_ = nullptr;
+    ani_ref startupRef_ = nullptr;
     std::string srcEntry_;
     std::string ohmUrl_;
     std::string hapPath_;
     bool esModule_ = true;
+    std::shared_ptr<StartupTaskResultCallback> resultCallback_;
 
-    static napi_value GetDependencyResult(napi_env env, const std::string &dependencyName,
-        const std::shared_ptr<StartupTaskResult> &result);
+    static ani_ref GetDependencyResult(ani_env *env, const std::string &dependencyName,
+        std::shared_ptr<StartupTaskResult> result);
 
-    int32_t LoadJsOhmUrl();
-
-    int32_t LoadJsAsyncTaskExecutor();
-
-    void LoadJsAsyncTaskCallback();
+    int32_t LoadEtsOhmUrl();
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_JS_STARTUP_TASK_H
+#endif // OHOS_ABILITY_RUNTIME_ETS_STARTUP_TASK_H
