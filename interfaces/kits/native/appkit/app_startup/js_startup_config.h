@@ -31,17 +31,18 @@ public:
 
     ~JsStartupConfig() override;
 
-    int32_t Init(std::unique_ptr<NativeReference> &configEntryJsRef, std::shared_ptr<AAFwk::Want> want);
+    int32_t Init(Runtime &runtime, std::shared_ptr<Context> context, const std::string &srcEntry,
+        std::shared_ptr<AAFwk::Want> want) override;
 
     int32_t Init(napi_value config);
-
-    static napi_value GetConfigFromEntry(napi_env env, std::unique_ptr<NativeReference> &configEntryJsRef);
 
     static napi_value BuildResult(napi_env env, const std::shared_ptr<StartupTaskResult> &result);
 
 private:
     napi_env env_;
 
+    std::unique_ptr<NativeReference> LoadSrcEntry(JsRuntime &jsRuntime, std::shared_ptr<Context> context,
+        const std::string &srcEntry);
     void InitAwaitTimeout(napi_env env, napi_value config);
     void InitListener(napi_env env, napi_value config);
     void InitCustomization(napi_env env, napi_value configEntry, std::shared_ptr<AAFwk::Want> want);

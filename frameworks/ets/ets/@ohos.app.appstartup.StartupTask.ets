@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#include "native_module_manager.h"
+import AbilityStageContext from 'application.AbilityStageContext'
 
-NativeModuleManager* NativeModuleManager::GetInstance()
-{
-    return nullptr;
-}
+export default class StartupTask {
+    onDependencyCompleted(dependency: string, result: Any): void {}
 
-NativeModule* LoadNativeModule(const char* moduleName, const char* path, bool isAppModule,
-    std::string& errInfo, bool internal = false, const char* relativePath = "")
-{
-    return nullptr;
+    init(context: AbilityStageContext): Promise<Any> | Promise<void> {
+        return Promise.resolve();
+    }
 }

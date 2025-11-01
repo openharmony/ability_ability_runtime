@@ -13,27 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_OHOS_ABILITY_RUNTIME_NATIVE_MODULE_MANAGER_H
-#define MOCK_OHOS_ABILITY_RUNTIME_NATIVE_MODULE_MANAGER_H
+import StartupListener from './@ohos.app.appstartup.StartupListener';
 
-#include <cstdint>
-#include <map>
-#include <mutex>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-#include <string>
-#include <pthread.h>
-
-struct NativeModule {
-};
- 
-class NativeModuleManager {
-public:
-    static NativeModuleManager* GetInstance();
-    NativeModule* LoadNativeModule(const char* moduleName, const char* path, bool isAppModule,
-        std::string& errInfo, bool internal = false, const char* relativePath = "");
-};
-
-#endif
- 
+export default interface StartupConfig {
+  timeoutMs?: int;
+  startupListener?: StartupListener;
+}

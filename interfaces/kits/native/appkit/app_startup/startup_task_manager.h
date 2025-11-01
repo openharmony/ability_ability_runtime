@@ -42,6 +42,8 @@ public:
 
     size_t GetStartupTaskCount() const;
 
+    std::map<std::string, std::shared_ptr<StartupTask>> GetStartupTasks();
+
     int32_t Prepare();
 
     int32_t Run(const std::shared_ptr<OnCompletedCallback> &mainThreadAwaitCallback);
