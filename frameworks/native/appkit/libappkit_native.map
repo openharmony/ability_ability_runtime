@@ -21,13 +21,17 @@
       *ApplicationImpl*;
       *ApplicationLoader*;
       *AppMgrDeathRecipient*;
+      *AppStartupTask*;
       *GetDataPath*;
       *JsStartupConfig*;
       *MainHandlerDumper*;
       *MainThread*;
       *OHOSApplication*;
       *OnCompletedCallback*;
+      *StartupConfig*;
+      *StartupListener*;
       *StartupManager*;
+      *StartupTask*;
       *StartupTaskManager*;
       *StartupTaskResult*;
       *StartupUtils*;

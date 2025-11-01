@@ -22,7 +22,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 class PreloadSoStartupTask : public AppStartupTask {
 public:
-    static const std::string TASK_TYPE;
 
     PreloadSoStartupTask(const std::string& name, const std::string& ohmUrl, const std::string& path = "");
 

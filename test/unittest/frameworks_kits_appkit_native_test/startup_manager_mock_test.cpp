@@ -81,10 +81,9 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0100, Function | MediumTest | Lev
 {
     std::string name = "test_name";
     JsRuntime jsRuntime;
-    std::unique_ptr<NativeReference> startupJsRef = nullptr;
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
-    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
-        name, jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskInfo startupTaskInfo;
+    startupTaskInfo.name = name;
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(jsRuntime, startupTaskInfo, false);
     startupTask->callCreateOnMainThread_ = false;
     auto ret = startupTask->RunTaskInit(nullptr);
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
@@ -100,10 +99,9 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0200, Function | MediumTest | Lev
     std::string name = "test_name";
     JsRuntime jsRuntime;
     StartupTaskInfo info;
+    info.name = name;
     info.ohmUrl = "ohmurl";
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
-    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
-        name, jsRuntime, info, contextJsRef);
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(jsRuntime, info, false);
     startupTask->callCreateOnMainThread_ = false;
     auto ret = startupTask->RunTaskInit(nullptr);
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
@@ -119,10 +117,9 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0300, Function | MediumTest | Lev
     std::string name = "test_name";
     JsRuntime jsRuntime;
     StartupTaskInfo info;
+    info.name = name;
     info.srcEntry = "startup_task.ets";
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
-    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
-        name, jsRuntime, info, contextJsRef);
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(jsRuntime, info, false);
     startupTask->callCreateOnMainThread_ = false;
     auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
@@ -138,11 +135,10 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0400, Function | MediumTest | Lev
     std::string name = "test_name";
     JsRuntime jsRuntime;
     StartupTaskInfo info;
+    info.name = name;
     info.ohmUrl = "ohmurl";
     info.srcEntry = "startup_task";
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
-    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
-        name, jsRuntime, info, contextJsRef);
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(jsRuntime, info, false);
     startupTask->callCreateOnMainThread_ = false;
     auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
@@ -158,11 +154,10 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0500, Function | MediumTest | Lev
     std::string name = "test_name";
     JsRuntime jsRuntime;
     StartupTaskInfo info;
+    info.name = name;
     info.ohmUrl = "ohmurl";
     info.srcEntry = "startup_task.ets";
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
-    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
-        name, jsRuntime, info, contextJsRef);
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(jsRuntime, info, false);
     startupTask->callCreateOnMainThread_ = false;
     auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
