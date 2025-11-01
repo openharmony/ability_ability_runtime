@@ -27,6 +27,7 @@ public:
     static void CreateBundleContext(ani_env *env,
         ani_object contextObj, ani_string bundleName, ani_object callback);
     static ani_object GetApplicationContext(ani_env *env);
+    static ani_object GetApplicationContextInstance(ani_env *env);
     static ani_enum_item GetAppPreloadType(ani_env *env);
 };
 void ApplicationInit(ani_env *env);
