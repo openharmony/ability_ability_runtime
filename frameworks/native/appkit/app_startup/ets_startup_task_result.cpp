@@ -112,9 +112,17 @@ ani_object EtsStartupTaskResult::JsToEtsResult(ani_env *aniEnv, std::shared_ptr<
         arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
+    ani_ref unwrapResult = nullptr;
+    ani_status status = aniEnv->Object_CallMethodByName_Ref(result, "unwrap", ":Lstd/core/Object;", &unwrapResult);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName_Ref failed: %{public}d", status);
+        hybridgref_delete_from_napi(napiEnv, ref);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
+        return nullptr;
+    }
     hybridgref_delete_from_napi(napiEnv, ref);
     arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
-    return result;
+    return reinterpret_cast<ani_object>(unwrapResult);
 }
 
 const std::shared_ptr<NativeReference> EtsStartupTaskResult::GetJsStartupResultRef()

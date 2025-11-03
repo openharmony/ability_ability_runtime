@@ -135,18 +135,12 @@ ani_object ETSStartupManager::NativeGetStartupTaskResult(ani_env *env, ani_strin
         EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: Failed to get result");
         return nullptr;
     }
-    if (result->GetResultType() != StartupTaskResult::ResultType::ETS) {
-        TAG_LOGE(AAFwkTag::STARTUP, "result type not ets");
-        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: result type not ets");
-        return nullptr;
-    }
-    std::shared_ptr<EtsStartupTaskResult> etsResult = std::static_pointer_cast<EtsStartupTaskResult>(result);
-    if (etsResult == nullptr) {
+    ani_ref etsResultRef = StartupTaskUtils::GetDependencyResult(env, result);
+    if (etsResultRef == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "ets result is null");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: ets result is null");
         return nullptr;
     }
-    ani_ref etsResultRef = etsResult->GetEtsStartupResultRef();
     return reinterpret_cast<ani_object>(etsResultRef);
 }
 
