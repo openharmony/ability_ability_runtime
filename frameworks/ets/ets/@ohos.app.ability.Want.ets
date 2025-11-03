@@ -224,7 +224,7 @@ class RecordWriter {
       wantParams?.setParam(key, obj.unboxed());
       return true;
     } else if (obj instanceof Char) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, Char.toByte(obj).unboxed());
       return true;
     } else if (obj instanceof Short) {
       wantParams?.setParam(key, obj.unboxed());
@@ -785,14 +785,6 @@ class NativeWantParams {
     return NativeWantParams.nativeSetStringParam(this.nativeWantParams, key, value);
   }
 
-  public setParam(key: string, value: double): boolean {
-    if (this.nativeWantParams == 0) {
-      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
-      return false;
-    }
-    return NativeWantParams.nativeSetDoubleParam(this.nativeWantParams, key, value);
-  }
-
   public setParam(key: string, value: int): boolean {
     if (this.nativeWantParams == 0) {
       hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
@@ -807,6 +799,14 @@ class NativeWantParams {
       return false;
     }
     return NativeWantParams.nativeSetLongParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: double): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetDoubleParam(this.nativeWantParams, key, value);
   }
 
   public setParam(key: string, value: boolean): boolean {
