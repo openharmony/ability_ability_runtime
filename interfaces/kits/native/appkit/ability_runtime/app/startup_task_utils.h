@@ -22,6 +22,7 @@
 #include "app_startup_task.h"
 #include "context.h"
 #include "ets_native_reference.h"
+#include "startup_task_result.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -29,6 +30,8 @@ class StartupTaskUtils {
 public:
     static void UpdateStartupTaskContextRef(napi_env env, std::shared_ptr<AppStartupTask> startupTask,
         std::shared_ptr<Context> context, ani_ref contextAniRef);
+
+    static ani_ref GetDependencyResult(ani_env *env, std::shared_ptr<StartupTaskResult> result);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

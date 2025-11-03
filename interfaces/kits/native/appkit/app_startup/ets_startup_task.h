@@ -53,9 +53,6 @@ private:
     bool esModule_ = true;
     std::shared_ptr<StartupTaskResultCallback> resultCallback_;
 
-    static ani_ref GetDependencyResult(ani_env *env, const std::string &dependencyName,
-        std::shared_ptr<StartupTaskResult> result);
-
     int32_t LoadEtsOhmUrl();
 };
 } // namespace AbilityRuntime

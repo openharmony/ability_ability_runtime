@@ -37,7 +37,7 @@ constexpr const char *STARTUP_LISTEN_SIGNATURE_ON_COMPLETED = "L@ohos/base/Busin
 constexpr int32_t DEFAULT_AWAIT_TIMEOUT_MS = 10000;
 constexpr int32_t ARGC_ONE = 1;
 }
-ETSStartupConfig::ETSStartupConfig(ani_env *env) : StartupConfig(), env_(env)
+ETSStartupConfig::ETSStartupConfig(ani_vm *etsVm) : StartupConfig(), etsVm_(etsVm)
 {}
 
 ETSStartupConfig::~ETSStartupConfig() = default;
@@ -52,36 +52,55 @@ int32_t ETSStartupConfig::Init(Runtime &runtime, std::shared_ptr<Context> contex
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     ani_ref configEntry = configEntryRef->aniRef;
-    if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "null env_");
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null etsVm_");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    bool isAttachThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(etsVm_, isAttachThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "GetEnv failed");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     ani_status status = ANI_ERROR;
     ani_ref config = nullptr;
-    if ((status = env_->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(configEntry), "onConfig",
+    if ((status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(configEntry), "onConfig",
         ":L@ohos/app/appstartup/StartupConfig/StartupConfig;", &config)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName_Ref onConfig failed");
+        return ERR_STARTUP_INTERNAL_ERROR;
     }
     if (config == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "null config");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    InitAwaitTimeout(env_, reinterpret_cast<ani_object>(config));
-    InitListener(env_, reinterpret_cast<ani_object>(config));
-    InitCustomization(env_, reinterpret_cast<ani_object>(configEntry), want);
+    InitAwaitTimeout(env, reinterpret_cast<ani_object>(config));
+    InitListener(env, reinterpret_cast<ani_object>(config));
+    InitCustomization(env, reinterpret_cast<ani_object>(configEntry), want);
+    AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     return ERR_OK;
 }
 
 int32_t ETSStartupConfig::Init(ani_object config)
 {
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null etsVm_");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    bool isAttachThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(etsVm_, isAttachThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "GetEnv failed");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
     if (config == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "null config");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    InitAwaitTimeout(env_, config);
-    InitListener(env_, config);
+    InitAwaitTimeout(env, config);
+    InitListener(env, config);
+    AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     return ERR_OK;
 }
 
@@ -118,6 +137,10 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> ETSStartupConfig::LoadSrcEntry(E
 bool ETSStartupConfig::GetTimeoutMs(ani_env *env, ani_object config, int32_t &timeoutMs)
 {
     ani_class cls = nullptr;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null env");
+        return false;
+    }
     ani_status status = env->FindClass("L@ohos/app/appstartup/StartupConfig/StartupConfig;", &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "Findclass failed, status: %{public}d", status);
@@ -259,7 +282,7 @@ void ETSStartupConfig::InitCustomization(ani_env *env, ani_object configEntry, s
 
     ani_status status = ANI_ERROR;
     ani_ref callResult = nullptr;
-    if ((status = env_->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(configEntry),
+    if ((status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(configEntry),
         "onRequestCustomMatchRule", STARTUP_CONFIG_ENTRY_SIGNATURE_ON_REQUEST_CUSTOM_MATCH_RULE,
         &callResult, wantAniObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName_Ref onRequestCustomMatchRule failed");
@@ -294,7 +317,11 @@ ani_object ETSStartupConfig::BuildResult(ani_env *env, const std::shared_ptr<Sta
 
 extern "C" ETS_EXPORT StartupConfig* OHOS_CreateEtsStartupConfig(ani_env *env)
 {
-    return new (std::nothrow) ETSStartupConfig(env);
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STARTUP, "get vm failed");
+    }
+    return new (std::nothrow) ETSStartupConfig(aniVM);
 }
 }
 }
