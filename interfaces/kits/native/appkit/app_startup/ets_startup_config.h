@@ -28,7 +28,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class ETSStartupConfig : public StartupConfig {
 public:
-    ETSStartupConfig(ani_env *env);
+    ETSStartupConfig(ani_vm *etsVm);
 
     ~ETSStartupConfig() override;
 
@@ -40,7 +40,7 @@ public:
     static ani_object BuildResult(ani_env *env, const std::shared_ptr<StartupTaskResult> &result);
 
 private:
-    ani_env *env_ = nullptr;
+    ani_vm *etsVm_ = nullptr;
 
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadSrcEntry(ETSRuntime &etsRuntime,
         std::shared_ptr<Context> context, const std::string &srcEntry);
