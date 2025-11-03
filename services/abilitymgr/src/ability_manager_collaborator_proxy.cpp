@@ -748,16 +748,9 @@ int32_t AbilityManagerCollaboratorProxy::NotifyGrantUriPermissionEnd(const std::
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
         return ERR_INVALID_OPERATION;
     }
-    int32_t uriCount = checkResults.size();
-    if (!data.WriteInt32(uriCount)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uriCount failed");
+    if (!data.WriteBoolVector(checkResults)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write checkResults failed");
         return ERR_INVALID_OPERATION;
-    }
-    for (int32_t i = 0; i < uriCount; i++) {
-        if (!data.WriteBool(checkResults[i])) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write check result failed");
-            return ERR_INVALID_OPERATION;
-        }
     }
     int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_END, data, reply, option);
     if (ret != NO_ERROR) {
