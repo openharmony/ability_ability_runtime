@@ -222,8 +222,9 @@ ErrCode AbilityManagerClient::StartAbilityAsCaller(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityAsCaller ability:%{public}s/%{public}s, userId:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityAsCaller ability:%{public}s/%{public}s, userId:%{public}d, "
+        "appIndex:%{public}d", want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityAsCaller(want, callerToken, asCallerSourceToken, userId, requestCode);
 }
@@ -235,8 +236,9 @@ ErrCode AbilityManagerClient::StartAbilityAsCaller(const Want &want, const Start
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityAsCaller ability:%{public}s/%{public}s, userId:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityAsCaller ability:%{public}s/%{public}s, userId:%{public}d, "
+        "appIndex:%{public}d", want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityAsCaller(want, startOptions, callerToken, asCallerSourceToken, userId, requestCode);
 }
@@ -406,8 +408,9 @@ ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartUIAbilityBySCB target: %{public}s/%{public}s, "
-        "persistentId: %{public}d", sessionInfo->want.GetElement().GetBundleName().c_str(),
-        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->persistentId);
+        "persistentId: %{public}d, appIndex: %{public}d", sessionInfo->want.GetElement().GetBundleName().c_str(),
+        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->persistentId,
+        sessionInfo->want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     return abms->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, isRestart);
 }
 
