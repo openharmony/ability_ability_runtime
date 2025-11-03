@@ -428,6 +428,26 @@ void CJEnvironment::RegisterEventHandlerCallbacks()
     lazyApis_->RegisterEventHandlerCallbacks(PostTaskWrapper, HasHigherPriorityTaskWrapper);
 }
 
+void CJEnvironment::DumpCjHeap(int fd)
+{
+    auto instance = CJEnvironment::GetInstance();
+    if (instance == nullptr) {
+        LOGE("cjEnv instance is null.");
+        return;
+    }
+    instance->DumpHeapSnapshot(fd);
+}
+
+void CJEnvironment::GC()
+{
+    auto instance = CJEnvironment::GetInstance();
+    if (instance == nullptr) {
+        LOGE("cjEnv instance is null.");
+        return;
+    }
+    instance->ForceFullGC();
+}
+
 int CJEnvironment::InitCJRuntime()
 {
     if (!lazyApis_ || !lazyApis_->InitCJRuntime) {
@@ -903,10 +923,10 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
             CJEnvironment::SetAppVersion(version);
         },
         .dumpHeapSnapshot = [](int fd) {
-            CJEnvironment::GetInstance()->DumpHeapSnapshot(fd);
+            CJEnvironment::DumpCjHeap(fd);
         },
         .forceFullGC = []() {
-            CJEnvironment::GetInstance()->ForceFullGC();
+            CJEnvironment::GC();
         }
     };
     return &gCJEnvMethods;
