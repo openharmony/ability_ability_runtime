@@ -1169,7 +1169,7 @@ HWTEST_F(FormAbilityTest, AaFwk_Ability_CheckFMSReady_0100, Function | MediumTes
     std::string bundleName = "Bundle";
     std::vector<FormInfo> formInfos;
     formInfos.clear();
-    EXPECT_EQ(true, ability_->CheckFMSReady());
+    EXPECT_EQ(0, ability_->CheckFMSReady());
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_CheckFMSReady_0100 end";
 }
