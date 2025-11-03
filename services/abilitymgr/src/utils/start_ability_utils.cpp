@@ -221,6 +221,10 @@ std::shared_ptr<StartAbilityInfo> QueryAbilityInfo(const Want &want, int32_t use
     if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneAbilityInfo(want.GetElement(), abilityInfoFlag, appIndex,
             request->abilityInfo, userId));
+        if (appIndex != request->abilityInfo.applicationInfo.appIndex) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "query appIndex no equal: want_%{public}d, bundle_%{public}d",
+                appIndex, request->abilityInfo.applicationInfo.appIndex);
+        }
         return request;
     }
     if (appIndex == 0) {
