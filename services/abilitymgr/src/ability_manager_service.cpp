@@ -749,9 +749,9 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
         return ERR_INVALID_CONTINUATION_FLAG;
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "start ability come, ability:%{public}s, userId:%{public}d, specifyTokenId:%{public}u",
-        want.GetElement().GetAbilityName().c_str(), userId, specifyTokenId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability come, ability:%{public}s, userId:%{public}d, "
+        "specifyTokenId:%{public}u, appIndex:%{public}d", want.GetElement().GetAbilityName().c_str(), userId,
+        specifyTokenId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     StartAbilityWrapParam startAbilityWrapParam = {
         want, callerToken, requestCode, isPendingWantCaller, userId, false, specifyTokenId };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
@@ -3029,6 +3029,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     auto requestCode = sessionInfo->requestCode;
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(sessionInfo->want, sessionInfo->callerToken, appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get app index error");
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
