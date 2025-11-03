@@ -944,12 +944,18 @@ ohos_unittest("dump_ipc_helper_test") {
 }
 
 ohos_unittest("dump_runtime_helper_test") {
-  include_dirs = []
+  include_dirs = [
+    "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+  ]
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_native_path}/appkit/app/dump_runtime_helper.cpp",
     "dump_runtime_helper_test.cpp",
   ]
+
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
 
   configs = [ ":module_context_config" ]
 
