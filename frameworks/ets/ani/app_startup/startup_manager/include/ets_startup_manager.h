@@ -39,12 +39,13 @@ public:
      *
      * @param env The ANI environment
      * @param startupTasks Array of startup tasks to run
-     * @param abilityStageContext The ability stage context
-     * @param startupConfig Configuration for startup tasks
+     * @param isDefaultContext IsDefaultContext for ability stage context
      * @param callback Callback for async operation completion
+     * @param startupConfig Configuration for startup tasks
+     * @param abilityStageContext The ability stage context
      */
-    static void NativeRun(ani_env *env, ani_object startupTasks,
-        ani_object abilityStageContext, ani_object startupConfig, ani_object callback);
+    static void NativeRun(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
+        ani_object callback, ani_object startupConfig, ani_object abilityStageContext);
 
     /**
      * Native method to get the result of a specific startup task
@@ -85,13 +86,15 @@ private:
      *
      * @param env The ANI environment
      * @param startupTasks Array of startup tasks
+     * @param isDefaultContext IsDefaultContext for ability stage context
      * @param startupConfig Configuration for startup tasks
      * @param abilityStageContext The ability stage context
      * @param startupTaskManager Output parameter for the created startup task manager
      * @return Error code indicating success or failure
      */
-    static int32_t RunStartupTask(ani_env *env, ani_object startupTasks, ani_object startupConfig,
-        ani_object abilityStageContext, std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    static int32_t RunStartupTask(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
+        ani_object startupConfig, ani_object abilityStageContext,
+        std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
     /**
      * Get startup configuration from the given object

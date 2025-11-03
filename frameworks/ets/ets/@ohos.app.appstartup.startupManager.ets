@@ -21,8 +21,8 @@ import AsyncCallbackWrapper from './utils/AbilityUtils';
 export default namespace startupManager {
     loadLibraryWithPermissionCheck("startup_manager_ani_kit.z", "@ohos.app.appstartup.startupManager");
 
-    export native function nativeRun(startupTasks: Array<string>, callback: AsyncCallbackWrapper<void>,
-        config?: StartupConfig, context?: common.AbilityStageContext): void;
+    export native function nativeRun(startupTasks: Array<string>, isDefaultContext: boolean,
+        callback: AsyncCallbackWrapper<void>, config?: StartupConfig, context?: common.AbilityStageContext): void;
 
     export native function nativeRemoveAllStartupTaskResults(): void;
 
@@ -43,7 +43,7 @@ export default namespace startupManager {
             });
             taskpool.execute((): void => {
                 console.log('ready to call nativeRun');
-                startupManager.nativeRun(startupTasks, myCall, config, undefined);
+                startupManager.nativeRun(startupTasks, true, myCall, config, undefined);
             });
         });
         return p;
@@ -61,7 +61,7 @@ export default namespace startupManager {
             });
             taskpool.execute((): void => {
                 console.log('ready to call nativeRun');
-                startupManager.nativeRun(startupTasks, myCall, config, context);
+                startupManager.nativeRun(startupTasks, false, myCall, config, context);
             });
         });
         return p;

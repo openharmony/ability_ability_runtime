@@ -59,7 +59,6 @@ AbilityStage *ETSAbilityStage::Create(
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::Create");
 
     auto& etsRuntime = static_cast<ETSRuntime&>(*runtime);
-    // RegisterStopPreloadSoCallback(etsRuntime); // todo RegisterStopPreloadSoCallback实现
     return new (std::nothrow) ETSAbilityStage(etsRuntime);
 }
 
