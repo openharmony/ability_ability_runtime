@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
 #define OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
 
-#include "uri.h"
 #include "check_result.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace AAFwk {
