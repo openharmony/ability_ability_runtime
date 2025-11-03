@@ -100,7 +100,7 @@ const std::string SYSTEM_KITS = "systemkits";
 const std::string NAMESPACE = "namespace";
 const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
-const std::string DEFAULT_PLUGIN = "defaultPlugin";
+const std::string DEFAULT_PLUGIN = "plugin_default_namespace";
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string MERGE_SOURCE_MAP_PATH = "ets/sourceMaps.map";
