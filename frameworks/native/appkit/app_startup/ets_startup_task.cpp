@@ -20,6 +20,7 @@
 #include "ets_startup_task_executor.h"
 #include "hilog_tag_wrapper.h"
 #include "stage_context_transfer.h"
+#include "startup_task_utils.h"
 
 #ifdef WINDOWS_PLATFORM
 #define ETS_EXPORT __declspec(dllexport)
@@ -125,7 +126,7 @@ int32_t EtsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependen
     }
 
     ani_string dependency = AppExecFwk::GetAniString(env, dependencyName);
-    ani_ref etsResult = GetDependencyResult(env, dependencyName, result);
+    ani_ref etsResult = StartupTaskUtils::GetDependencyResult(env, result);
     ani_status status = env->Object_CallMethodByName_Void(startupObj, "onDependencyCompleted", nullptr, dependency,
         etsResult);
     if (status != ANI_OK) {
@@ -133,25 +134,6 @@ int32_t EtsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependen
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
     }
     return ERR_OK;
-}
-
-ani_ref EtsStartupTask::GetDependencyResult(ani_env *env, const std::string &dependencyName,
-    std::shared_ptr<StartupTaskResult> result)
-{
-    if (result == nullptr) {
-        return nullptr;
-    }
-    if (result->GetResultType() == StartupTaskResult::ResultType::ETS) {
-        std::shared_ptr<EtsStartupTaskResult> etsResultPtr = std::static_pointer_cast<EtsStartupTaskResult>(result);
-        return etsResultPtr->GetEtsStartupResultRef();
-    }
-    if (result->GetResultType() == StartupTaskResult::ResultType::JS) {
-        std::shared_ptr<JsStartupTaskResult> jsResultPtr = std::static_pointer_cast<JsStartupTaskResult>(result);
-        auto resultObj = EtsStartupTaskResult::JsToEtsResult(env, jsResultPtr->GetJsStartupResultRef());
-        return reinterpret_cast<ani_ref>(resultObj);
-    }
-    TAG_LOGE(AAFwkTag::STARTUP, "invalid result type:%{public}d", static_cast<int32_t>(result->GetResultType()));
-    return nullptr;
 }
 
 extern "C" ETS_EXPORT AppStartupTask* OHOS_CreateEtsStartupTask(
