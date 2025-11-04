@@ -48,11 +48,10 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
     std::string strParam(data, size);
     int intParam = static_cast<int>(GetU32Data(data));
-    auto abilityEventUtil = std::make_shared<AbilityEventUtil>();
-    abilityEventUtil->HandleModuleInfoUpdated(strParam, intParam, "", false);
+    AbilityEventUtil::HandleModuleInfoUpdated(strParam, intParam, "", false);
 
     EventInfo eventInfo = {};
-    abilityEventUtil->SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
+    AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
     return true;
 }
 }
