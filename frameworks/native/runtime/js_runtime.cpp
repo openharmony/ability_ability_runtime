@@ -950,6 +950,7 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
 
 void JsRuntime::CreatePluginDefaultNamespace(const std::string &lddictionaries)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     Security::AccessToken::AccessTokenID selfToken = IPCSkeleton::GetSelfTokenID();
     int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken,
         PERMISSION_LOAD_INDEPENDENT_LIBRARY);
