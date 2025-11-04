@@ -10971,5 +10971,31 @@ void AppMgrServiceInner::AllowScbProcessMoveToBackground()
     appRecord->AllowScbProcessMoveToBackground();
     return;
 }
+
+int32_t AppMgrServiceInner::KillChildProcessByPid(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callingPid);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        return AAFwk::ERR_INVALID_PID;
+    }
+    auto childRecord = appRecord->GetChildProcessRecordByPid(pid);
+    if (childRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no childRecord");
+        return AAFwk::ERR_INVALID_PID;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "kill child process, childPid:%{public}d", pid);
+    auto ret = KillProcessByPid(pid, "KillChildProcessByPid");
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail, pid:%{public}d, ret:%{public}d", pid, ret);
+        return ret;
+    }
+    appRecord->RemoveChildAppRecord(pid);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

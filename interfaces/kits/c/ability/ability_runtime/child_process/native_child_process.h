@@ -116,6 +116,11 @@ typedef enum Ability_NativeChildProcess_ErrCode {
      * @error The callback does not exist; it may not have been registered or has already been unregistered.
      */
     NCP_ERR_CALLBACK_NOT_EXIST = 16010009,
+
+    /**
+     * @error The specified PID does not exist or is not a child process of the current process.
+     */
+    NCP_ERR_INVALID_PID = 16010010,
 } Ability_NativeChildProcess_ErrCode;
 
 /**
@@ -151,13 +156,13 @@ typedef struct Ability_ChildProcessConfigs Ability_ChildProcessConfigs;
 Ability_ChildProcessConfigs* OH_Ability_CreateChildProcessConfigs();
 
 /**
- * @brief Destroys a child process configs object and releases associated rescources.
+ * @brief Destroys a child process configs object and releases associated resources.
  *
  * @param configs Pointer to the child process configs object to be destroyed.
  * After this call, the pointer becomes invalid and must not be used.
  * Passing nullptr is allowed and will be ignored.
  * @return Returns {@link NCP_NO_ERROR} if the operation is successful or if the input is nullptr.
- *         Returns {@link NCP_NO_ERR_INVALID_PARAM} if the input parameters are invalid.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the input parameters are invalid.
  * @since 20
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_DestroyChildProcessConfigs(Ability_ChildProcessConfigs* configs);
@@ -169,7 +174,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_DestroyChildProcessConfigs(Ability
  * @param configs Pointer to the child process configs object. Must not be nullptr.
  * @param isolationMode The isolation mode to set. See {@link NativeChildProcess_IsolationMode} for details.
  * @return Returns {@link NCP_NO_ERROR} if the isolation mode is set successful.
- *         Returns {@link NCP_NO_ERR_INVALID_PARAM} if the input parameters are invalid.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the input parameters are invalid.
  * @since 20
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationMode(
@@ -200,7 +205,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUi
  * Maximum length is 64 characters.
  * The name ultimately assigned to the process is {bundleName}:{processName}.
  * @return Returns {@link NCP_NO_ERROR} if the process name is set successful.
- *         Returns {@link NCP_NO_ERR_INVALID_PARAM} if the input parameters are invalid.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the input parameters are invalid.
  * @since 20
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetProcessName(Ability_ChildProcessConfigs* configs,
@@ -429,7 +434,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(
  * @since 20
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcessWithConfigs(
-    const char* entry, NativeChildProcess_Args args, Ability_ChildProcessConfigs* configs, int32_t *pid);
+    const char* entry, NativeChildProcess_Args args, Ability_ChildProcessConfigs* configs, int32_t* pid);
 
 /**
  * @brief Child process get self NativeChildProcess_Args.
@@ -478,6 +483,18 @@ Ability_NativeChildProcess_ErrCode OH_Ability_RegisterNativeChildProcessExitCall
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCallback(
     OH_Ability_OnNativeChildProcessExit onProcessExit);
+
+/**
+ * @brief Terminates a child process created by the current process.
+ *
+ * @param pid Process ID of the target child process to terminate.
+ * @return Returns {@link NCP_NO_ERROR} if the operation succeeds.
+ *         Returns {@link NCP_ERR_INVALID_PID} if the specified PID does not exist or
+ *             is not a child process of the current process.
+ *         For details, see {@link Ability_NativeChildProcess_ErrCode}.
+ * @since 22
+ */
+Ability_NativeChildProcess_ErrCode OH_Ability_KillChildProcess(int32_t pid);
 
 #ifdef __cplusplus
 } // extern "C"

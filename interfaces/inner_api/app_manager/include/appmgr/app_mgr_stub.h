@@ -209,6 +209,7 @@ private:
     int32_t HandleRegisterApplicationStateObserverWithFilter(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAllowScbProcessMoveToBackground(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessByPidForExit(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillChildProcessByPid(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AppMgrStub);
 };
 }  // namespace AppExecFwk

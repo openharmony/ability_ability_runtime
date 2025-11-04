@@ -39,6 +39,7 @@ enum class ChildProcessManagerErrorCode {
     ERR_CONNECTION_FAILED = 11,
     ERR_UNSUPPORTED_START_MODE = 12,
     ERR_MULTI_PROCESS_MODEL_DISABLED_NEW = 13,
+    ERR_INVALID_PID = 14,
 };
 
 const std::map<ChildProcessManagerErrorCode, AbilityErrorCode> INTERNAL_ERR_CODE_MAP = {
@@ -65,6 +66,7 @@ const std::map<int32_t, ChildProcessManagerErrorCode> ABILITY_MANAGER_ERR_CODE_M
     { AAFwk::ERR_ALREADY_IN_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS },
     { AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
     { ERR_OVERFLOW, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
+    { AAFwk::ERR_INVALID_PID, ChildProcessManagerErrorCode::ERR_INVALID_PID },
 };
 
 class ChildProcessManagerErrorUtil {
