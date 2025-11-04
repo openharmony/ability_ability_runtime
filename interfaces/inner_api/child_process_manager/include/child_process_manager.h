@@ -68,6 +68,7 @@ public:
     void SetAppSpawnForkDebugOption(Runtime::DebugOption &debugOption,
         std::shared_ptr<AppExecFwk::ChildProcessInfo> processInfo);
     std::string GetModuleNameFromSrcEntry(const std::string &srcEntry);
+    ChildProcessManagerErrorCode KillChildProcessByPid(int32_t pid);
 
 private:
     ChildProcessManager();

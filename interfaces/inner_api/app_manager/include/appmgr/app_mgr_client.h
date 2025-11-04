@@ -1064,6 +1064,8 @@ public:
 
     void AllowScbProcessMoveToBackground();
 
+    int32_t KillChildProcessByPid(int32_t pid);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**
