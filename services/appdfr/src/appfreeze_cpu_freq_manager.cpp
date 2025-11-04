@@ -398,8 +398,8 @@ std::string AppfreezeCpuFreqManager::GetStaticInfoHead()
     timeInfo << "T2:  CpuTime              --Time that spend on CPU." << std::endl;
     timeInfo << "T3:  SyncWaitTime         --SleepingTime + Runnable Time, etc." << std::endl;
     timeInfo << "T4:  OptimalCpuTime       --run the thread at the max Core's max cpu capacity." << std::endl;
-    timeInfo << "T5:  SupplyAvailableTime  --T2 - T3. Time can be optimized by scheduling." << std::endl;
-    timeInfo << "Equation:  T1 = T2 + T3. T2 = T4 = T5." << std::endl;
+    timeInfo << "T5:  SupplyAvailableTime  --T2 - T4. Time can be optimized by scheduling." << std::endl;
+    timeInfo << "Equation:  T1 = T2 + T3. T2 = T4 + T5." << std::endl;
     timeInfo <<
         "|-----------------------------------StaticsDuration-----------------------------------|." << std::endl;
     timeInfo <<
