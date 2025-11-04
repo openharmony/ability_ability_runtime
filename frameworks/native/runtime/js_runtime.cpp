@@ -951,7 +951,8 @@ void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNam
 void JsRuntime::CreatePluginDefaultNamespace(const std::string &lddictionaries)
 {
     Security::AccessToken::AccessTokenID selfToken = IPCSkeleton::GetSelfTokenID();
-    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken, PERMISSION_LOAD_INDEPENDENT_LIBRARY);
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken,
+         PERMISSION_LOAD_INDEPENDENT_LIBRARY);
     if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "verify access token failed: %{public}d", result);
         return;
