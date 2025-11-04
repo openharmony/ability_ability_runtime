@@ -4172,6 +4172,7 @@ void MainThread::PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunch
 
 void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::map<std::string, std::shared_ptr<AbilityRuntime::StartupTask>> nativeStartupTask;
     wptr<MainThread> weak = this;
     auto task = [weak, bundleInfo, appLaunchData](
