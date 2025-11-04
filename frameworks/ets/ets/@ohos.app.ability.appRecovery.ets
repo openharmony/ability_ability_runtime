@@ -39,6 +39,5 @@ export default namespace appRecovery {
         saveMode?: SaveModeFlag): void;
     export native function restartApp(): void;
     export native function setRestartWant(want: Want): void;
-    export native function saveAppState(): boolean;
     export native function saveAppState(context?: UIAbilityContext): boolean;
 }
