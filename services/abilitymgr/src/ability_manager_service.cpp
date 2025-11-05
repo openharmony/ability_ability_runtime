@@ -8966,14 +8966,15 @@ int AbilityManagerService::ReleaseRemoteAbility(const sptr<IRemoteObject> &conne
 }
 
 int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     std::string errMsg;
-    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg, isSilent);
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg, isSilent, promotePriority);
 }
 
 int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent,
+    bool promotePriority)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -9050,6 +9051,7 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
     abilityRequest.callerToken = callerToken;
     abilityRequest.want = want;
     abilityRequest.connect = connect;
+    abilityRequest.promotePriority = PermissionVerification::GetInstance()->IsSACall() && promotePriority;
     result = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, oriValidUserId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
