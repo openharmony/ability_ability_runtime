@@ -115,6 +115,12 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
         }
     } else {
         summary += "Stacktrace:\n" + errorStack;
+        NativeEngine *engine = reinterpret_cast<NativeEngine*>(env_);
+        std::string stackTraceStr;
+        engine->GetHybridStackTraceForCrash(env_, stackTraceStr);
+        if (!stackTraceStr.empty()) {
+            summary += "HybridStack:\n" + stackTraceStr;
+        }
     }
 #ifdef SUPPORT_GRAPHICS
     std::string str = Ace::UIContent::GetCurrentUIStackInfo();
