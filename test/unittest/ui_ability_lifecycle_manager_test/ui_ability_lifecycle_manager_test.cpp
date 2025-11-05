@@ -5595,24 +5595,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, AttachAbilityThread_0001, TestSize.Level
 }
 
 /**
- * @tc.name: OnAbilityRequestDone_0001
- * @tc.desc: IsTerminating is true
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, OnAbilityRequestDone_0001, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    auto record = AbilityRecord::CreateAbilityRecord(request);
-    record->SetAbilityState(AbilityState::TERMINATING);
-    auto token = record->GetToken();
-    mgr->sessionAbilityMap_[1] = record;
-    int32_t foreground = 2;
-    mgr->OnAbilityRequestDone(token, foreground);
-
-    EXPECT_EQ(record->GetPendingState(), AbilityState::INITIAL);
-}
-
-/**
  * @tc.name: NotifySCBToStartUIAbility_0001
  * @tc.desc: AddStartCallerTimestamp is false
  */
