@@ -3615,10 +3615,10 @@ int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std:
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason);
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason, EVENT_KEY_REASON, killReason);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
-        "%{public}d, processName=%{public}s, msg=%{public}s, ret=%{public}d",
-        result, pid, eventInfo.processName.c_str(), killReason.c_str(), ret);
+        "%{public}d, processName=%{public}s, msg=%{public}s, reason=%{public}s, ret=%{public}d",
+        result, pid, eventInfo.processName.c_str(), killReason.c_str(), killReason.c_str(), ret);
     return ret;
 }
 
