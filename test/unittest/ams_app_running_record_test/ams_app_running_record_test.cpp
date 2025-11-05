@@ -2818,6 +2818,9 @@ HWTEST_F(AmsAppRunningRecordTest, CanRestartResidentProc_003, TestSize.Level1)
     abilityRecord4->SetState(AbilityState::ABILITY_STATE_BACKGROUND);
     record4->AbilityBackground(abilityRecord4);
 
+    abilityRecord4->SetState(AbilityState::ABILITY_STATE_READY);
+    record4->AbilityBackground(abilityRecord4);
+
     auto abilityInfo5 = std::make_shared<AbilityInfo>();
     abilityInfo5->name = GetTestAbilityName();
     sptr<IRemoteObject> token5 = new (std::nothrow) MockAbilityToken();
