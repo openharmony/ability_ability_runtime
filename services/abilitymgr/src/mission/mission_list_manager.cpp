@@ -1039,6 +1039,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     abilityRecord->SetScheduler(scheduler);
 
     if (abilityRecord->IsStartedByCall()) {
+        abilityRecord->PromotePriority();
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
@@ -3379,6 +3380,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
+    targetAbilityRecord->SetPromotePriority(abilityRequest.promotePriority);
+    targetAbilityRecord->PromotePriority();
 
 #ifdef SUPPORT_UPMS
     if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {

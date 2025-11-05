@@ -1994,5 +1994,18 @@ bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
 }
+
+void AbilityRecord::SetPromotePriority(bool promotePriority)
+{
+}
+
+bool AbilityRecord::GetPromotePriority()
+{
+    return false;
+}
+
+void AbilityRecord::PromotePriority()
+{
+}
 }  // namespace AAFwk
 }  // namespace OHOS
