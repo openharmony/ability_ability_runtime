@@ -687,6 +687,8 @@ private:
 
     bool IsPluginNamespaceInherited();
 
+    std::string ParsePluginDefaultNamespaceLdDictionary();
+
     /**
      * @brief parse app configuration params
      *
@@ -743,6 +745,7 @@ private:
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
     bool isPluginNamespaceInherited_ = false;
+    std::string pluginDefaultNamespaceLdDictionary_ = "";
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
     std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
