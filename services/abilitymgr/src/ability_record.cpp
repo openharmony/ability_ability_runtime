@@ -4100,10 +4100,10 @@ void AbilityRecord::AddUIExtensionLaunchTimestamp()
 
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
         launchTimestamp = (ts.tv_sec * 1000LL) + (ts.tv_nsec / 1000000LL);
-        int32_t high = static_cast<int32_t>(launchTimestamp >> 32);
-        int32_t low = static_cast<int32_t>(launchTimestamp & 0xFFFFFFFFLL);
-        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, high);
-        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, low);
+        uint32_t high = static_cast<uint32_t>(launchTimestamp >> 32);
+        uint32_t low = static_cast<uint32_t>(launchTimestamp & 0xFFFFFFFFLL);
+        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, static_cast<int32_t>(high));
+        want_.SetParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, static_cast<int32_t>(low));
     } else {
         TAG_LOGE(AAFwkTag::UI_EXT, "clock_gettime failed: %{public}s", strerror(errno));
     }
