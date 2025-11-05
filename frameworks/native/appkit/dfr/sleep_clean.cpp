@@ -21,9 +21,15 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "app_recovery.h"
 #include "recovery_param.h"
+#include "parameter.h"
+#include "parameters.h"
+#include "appfreeze_inner.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+    const size_t APP_SAVE_HEAP_SIZE_M = 1024 * 1024;    //M
+}
 
 SleepClean &SleepClean::GetInstance()
 {
@@ -31,14 +37,39 @@ SleepClean &SleepClean::GetInstance()
     return instance_;
 }
 
+void SleepClean::HandleAppSaveState(const std::shared_ptr<OHOSApplication> &application)
+{
+    auto &runtime = application->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPDFR, "null runtime");
+        return;
+    }
+    AbilityRuntime::JsRuntime *jsRuntime = static_cast<AbilityRuntime::JsRuntime *>(runtime.get());
+    if (jsRuntime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPDFR, "null runtime");
+        return;
+    }
+    auto task = []() {
+        AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    };
+    jsRuntime->PostTask(task, "Sleep_Clean_SaveAppState", 0);
+    return;
+}
+
 bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &application)
 {
-    auto appHeapTotalSize = GetHeapSize(application);
-    TAG_LOGI(AAFwkTag::APPDFR, "appHeapTotalSize is %{public}s", std::to_string(appHeapTotalSize).c_str());
-    if (appHeapTotalSize < APP_SAVE_HEAP_SIZE) {
+    string getParamHeapSizeStr = OHOS::system::GetParameter("const.dfx.nightclean.jsheap", "-1");
+    if (getParamHeapSizeStr == "-1") {
         return false;
     }
-    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    size_t getParamHeapSize = std::stoull(getParamHeapSizeStr) * APP_SAVE_HEAP_SIZE_M;
+    auto appHeapTotalSize = GetHeapSize(application);
+    TAG_LOGI(AAFwkTag::APPDFR, "SLEEPCLEAN_%{public}s, HEAP_TOTAL_SIZE is %{public}zu",
+        AppfreezeInner::GetInstance()->GetProcessLifeCycle().c_str(), appHeapTotalSize);
+    if (appHeapTotalSize < getParamHeapSize) {
+        return false;
+    }
+    HandleAppSaveState(application);
     return true;
 }
 
@@ -47,7 +78,8 @@ bool SleepClean::HandleSleepClean(const FaultData &faultData, const std::shared_
     if (faultData.waitSaveState) {
         return HandleAppSaveIfHeap(application);
     }
-    return AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    HandleAppSaveState(application);
+    return false;
 }
 
 size_t SleepClean::GetHeapSize(const std::shared_ptr<OHOSApplication> &application)

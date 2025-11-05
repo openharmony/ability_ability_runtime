@@ -26,7 +26,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const size_t APP_SAVE_HEAP_SIZE = 220 * 1024 * 1024;    //220M
 const size_t SLEEP_CLEAN_DELAY_TIME = 2000;    //2000ms
 
 class SleepClean {
@@ -41,6 +40,7 @@ public:
 private:
     size_t GetHeapSize(const std::shared_ptr<OHOSApplication> &application);
     bool HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &application);
+    void HandleAppSaveState(const std::shared_ptr<OHOSApplication> &application);
 };
 }   //namespace AppExecFwk
 }   //namespace OHOS
