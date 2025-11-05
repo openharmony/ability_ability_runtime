@@ -110,6 +110,10 @@ public:
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     bool CheckInBackGround(const FaultData &faultData);
     bool CheckAppfreezeHappend(int32_t pid, const std::string& eventName);
+    bool IsBetaVersion();
+    void InsertKillThread(int32_t killState, int32_t pid, int32_t uid, const std::string& bundleName);
+    bool IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,
+        const std::string& eventName);
 
 private:
     struct PeerBinderInfo {
@@ -129,6 +133,11 @@ private:
         int32_t eventTid;
         int32_t pid;
         int layer;
+    };
+
+    struct AppFreezeKillInfo {
+        int killState = 0;
+        int64_t occurTime = 0;
     };
 
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
@@ -167,6 +176,8 @@ private:
     std::string GetHitraceInfo();
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
+    bool RemoveOldKillInfo();
+    bool CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
@@ -183,6 +194,8 @@ private:
     static std::string appfreezeInfoPath_;
     std::mutex freezeMapMutex_;
     std::map<int32_t, std::map<std::string, AppfreezeEventRecord>> freezeEventMap_;
+    std::mutex freezeKillThreadMutex_;
+    std::map<std::string, AppFreezeKillInfo> freezeKillThreadMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
