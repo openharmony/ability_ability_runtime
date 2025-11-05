@@ -1784,7 +1784,8 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         return;
     }
     appRecord->SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_READY);
-    if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
+    if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
+        appRecord->GetState() == ApplicationState::APP_STATE_READY) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
         bool needNotifyApp = !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
             && !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
