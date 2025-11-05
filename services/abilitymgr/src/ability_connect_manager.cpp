@@ -25,6 +25,7 @@
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "extension_ability_info.h"
+#include "foreground_app_connection_manager.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
@@ -316,7 +317,8 @@ void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecor
             abilityRecord->SetWant(abilityRequest.want);
             abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
-            if (!abilityRecord->IsConnectionReported()) {
+            if (!abilityRecord->IsConnectionReported() && ForegroundAppConnectionManager::IsForegroundAppConnection(
+                abilityRecord->GetAbilityInfo(), abilityRecord->GetCallerRecord())) {
                 abilityRecord->ReportAbilityConnectionRelations();
                 abilityRecord->SetConnectionReported(true);
             }
@@ -1028,7 +1030,8 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         && !abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
-        if (!abilityRecord->IsConnectionReported()) {
+        if (!abilityRecord->IsConnectionReported() && ForegroundAppConnectionManager::IsForegroundAppConnection(
+            abilityRecord->GetAbilityInfo(), abilityRecord->GetCallerRecord())) {
             abilityRecord->ReportAbilityConnectionRelations();
             abilityRecord->SetConnectionReported(true);
         }

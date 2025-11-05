@@ -529,12 +529,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
 
     DelayedSingleton<AppScheduler>::GetInstance()->NotifyLoadAbilityFinished(options.callingPid,
         GetPid(), options.loadAbilityCallbackId);
-    auto recordCallerInfo = GetCallerInfo();
-    if (recordCallerInfo != nullptr && GetRequestCode() != DEFAULT_REQUEST_CODE) {
-        ForegroundAppConnectionInfo info(recordCallerInfo->callerPid, GetPid(), recordCallerInfo->callerUid, GetUid(),
-            recordCallerInfo->callerBundleName, GetElementName().GetBundleName());
-        DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityAddPidConnection(
-            info, GetAbilityRecordId());
+    if (GetRequestCode() != DEFAULT_REQUEST_CODE &&
+        ForegroundAppConnectionManager::IsForegroundAppConnection(GetAbilityInfo(), GetCallerRecord())) {
+        ReportAbilityConnectionRelations();
     }
 
     PostForegroundTimeoutTask();
@@ -1855,7 +1852,8 @@ void AbilityRecord::Terminate(const Closure &task)
     SetAbilityStateInner(AbilityState::TERMINATING);
 #endif // SUPPORT_SCREEN
     lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
-    if (GetCallerInfo() != nullptr && GetRequestCode() != DEFAULT_REQUEST_CODE) {
+    if (GetCallerInfo() != nullptr && (GetRequestCode() != DEFAULT_REQUEST_CODE ||
+        UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType))) {
         DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->AbilityRemovePidConnection(
             GetCallerInfo()->callerPid, GetPid(), GetAbilityRecordId());
     }
