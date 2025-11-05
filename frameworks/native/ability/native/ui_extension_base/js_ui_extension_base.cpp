@@ -776,7 +776,7 @@ sptr<Rosen::WindowOption> JsUIExtensionBase::CreateWindowOption(const sptr<AAFwk
     bool hasLow = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
     if (hasHigh && hasLow) {
         uint32_t high = static_cast<uint32_t>(want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1));
-        uint32_t low = static_cast<uint32_t>(want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1));        
+        uint32_t low = static_cast<uint32_t>(want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1));
         uint64_t temp = (static_cast<uint64_t>(high) << 32) | low;
         launchTimestamp = static_cast<int64_t>(temp);
     }
