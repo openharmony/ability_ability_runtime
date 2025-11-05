@@ -1409,5 +1409,71 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_6100, TestSize.Level1)
     auto ret = pendingManager_->GetAllRunningInstanceKeysByBundleName("HelloWorld", appKeyVec);
     EXPECT_NE(ret,  OBJECT_NULL);
 }
+
+/*
+ * @tc.number    : PendingWantManagerTest_6200
+ * @tc.name      : PendingWantManager AddWantAgentNumber
+ * @tc.desc      : 1.AddWantAgentNumber
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_6200, TestSize.Level1)
+{
+    Want want;
+    std::string bundleName = "bundleName";
+    ElementName element("device", "bundleName", "abilityName");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, static_cast<int32_t>(Flags::NO_BUILD_FLAG), 0);
+    EXPECT_TRUE(((unsigned int)wantSenderInfo.flags & (unsigned int)Flags::NO_BUILD_FLAG) != 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    pendingManager_->HandleAddWantAgentNumber(key);
+
+    auto it = pendingManager_->wantAgentCount_.find(key->GetBundleName());
+    EXPECT_EQ(it->second.currentNumber, 1);
+
+    // check DFX THRESHOLD
+    it->second.currentNumber = 289;
+    ElementName element2("device", bundleName, "abilityName2");
+    WantSenderInfo wantSenderInfo2 = MakeWantSenderInfo(want, static_cast<int32_t>(Flags::NO_BUILD_FLAG), 0);
+    std::shared_ptr<PendingWantKey> key2 = MakeWantKey(wantSenderInfo2);
+    pendingManager_->HandleAddWantAgentNumber(key2);
+
+    auto it2 = pendingManager_->wantAgentCount_.find(key2->GetBundleName());
+    EXPECT_EQ(it->second.currentNumber, 290);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_6300
+ * @tc.name      : PendingWantManager ReduceWantAgentNumber
+ * @tc.desc      : 1.ReduceWantAgentNumber
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_6300, TestSize.Level1)
+{
+    Want want;
+    std::string bundleName = "bundleName";
+    ElementName element("device", "bundleName", "abilityName");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, static_cast<int32_t>(Flags::NO_BUILD_FLAG), 0);
+    EXPECT_TRUE(((unsigned int)wantSenderInfo.flags & (unsigned int)Flags::NO_BUILD_FLAG) != 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    pendingManager_->HandleAddWantAgentNumber(key);
+
+    auto it = pendingManager_->wantAgentCount_.find(key->GetBundleName());
+    EXPECT_EQ(it->second.currentNumber, 1);
+
+    // check Reduce wantAgentNumber
+    it->second.currentNumber = 10;
+    ElementName element2("device", bundleName, "abilityName2");
+    WantSenderInfo wantSenderInfo2 = MakeWantSenderInfo(want, static_cast<int32_t>(Flags::NO_BUILD_FLAG), 0);
+    std::shared_ptr<PendingWantKey> key2 = MakeWantKey(wantSenderInfo2);
+    pendingManager_->HandleReduceWantAgentNumber(key2);
+
+    auto it2 = pendingManager_->wantAgentCount_.find(key2->GetBundleName());
+    EXPECT_EQ(it->second.currentNumber, 9);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

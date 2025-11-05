@@ -88,51 +88,55 @@ void SendWantAgentNumberEvent(std::shared_ptr<PendingWantKey> pendingKey, int32_
     EventReport::SendWantAgentEvent(EventName::WANTAGENT_NUMBER, HiSysEventType::STATISTIC, eventInfo);
 }
 
-void PendingWantManager::AddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+void PendingWantManager::HandleAddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
 {
     if (pendingKey == nullptr) {
         return;
     }
     TAG_LOGD(AAFwkTag::WANTAGENT, "add wantAgent number");
-    if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
-        PermissionVerification::GetInstance()->IsSACall()) {
-        TAG_LOGD(AAFwkTag::WANTAGENT, "systemCall");
-        return;
-    }
-
     std::string bundleName = pendingKey->GetBundleName();
     std::lock_guard<ffrt::mutex> locker(countMutex_);
     auto it = wantAgentCount_.find(bundleName);
     if (it == wantAgentCount_.end()) {
         wantAgentCount_.insert(std::make_pair(bundleName, AgentCount{1, 1, false}));
-    } else {
-        it->second.currentNumber = it->second.currentNumber + 1;
-        if (it->second.DFXFlag) { // Not First DFX
-            if ((it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) &&
-                (it->second.currentNumber - it->second.latestMinNumber > WANTAGENT_FLOAT_THRESHOLD)) {
+        return;
+    }
+
+    // not first add
+    it->second.currentNumber = it->second.currentNumber + 1;
+    if (it->second.DFXFlag) { // Not First DFX
+        TAG_LOGD(AAFwkTag::WANTAGENT, "wantagent current number: %{public}d", it->second.currentNumber);
+        if ((it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) &&
+            (it->second.currentNumber - it->second.latestMinNumber > WANTAGENT_FLOAT_THRESHOLD)) {
+            if (it->second.currentNumber % DFX_INTERVAL == 0) {
                 SendWantAgentNumberEvent(pendingKey, it->second.currentNumber);
             }
-        } else { // First DFX
-            if (it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) {
-                SendWantAgentNumberEvent(pendingKey, it->second.currentNumber);
-                it->second.DFXFlag = true;
-            }
+        }
+    } else { // First DFX
+        if (it->second.currentNumber > WANTAGENT_NUMBER_THRESHOLD) {
+            SendWantAgentNumberEvent(pendingKey, it->second.currentNumber);
+            it->second.DFXFlag = true;
         }
     }
 }
 
-void PendingWantManager::ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+void PendingWantManager::AddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
 {
-    if (pendingKey == nullptr) {
-        return;
-    }
-    TAG_LOGD(AAFwkTag::WANTAGENT, "reduce wantAgent number");
+    // check is third-party hap
     if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
         PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "systemCall");
         return;
     }
+    HandleAddWantAgentNumber(pendingKey);
+}
 
+void PendingWantManager::HandleReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+{
+    if (pendingKey == nullptr) {
+        return;
+    }
+    TAG_LOGD(AAFwkTag::WANTAGENT, "reduce wantAgent number");
     std::string bundleName = pendingKey->GetBundleName();
     std::lock_guard<ffrt::mutex> locker(countMutex_);
     auto it = wantAgentCount_.find(bundleName);
@@ -146,6 +150,17 @@ void PendingWantManager::ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> p
             it->second.latestMinNumber = it->second.currentNumber; // Record Latest Minimum WantAgent Number
         }
     }
+}
+
+void PendingWantManager::ReduceWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
+{
+    // check is third-party hap
+    if (PermissionVerification::GetInstance()->IsSystemAppCall() ||
+        PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "systemCall");
+        return;
+    }
+    HandleReduceWantAgentNumber(pendingKey);
 }
 
 sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingUid, const int32_t uid,
