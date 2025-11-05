@@ -153,5 +153,21 @@ HWTEST_F(SleepCleanTest, SleepCleanTest006, TestSize.Level1) {
     EXPECT_FALSE(ret);
     GTEST_LOG_(INFO) << "SleepCleanTest006 end";
 }
+
+/**
+* @tc.number: SleepCleanTest007
+* @tc.name: SleepCleanTest007
+* @tc.desc: test HandleSleepClean.
+*/
+HWTEST_F(SleepCleanTest, SleepCleanTest007, TestSize.Level1) {
+    GTEST_LOG_(INFO) << "SleepCleanTest007 start";
+    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
+    FaultData faultData;
+    faultData.waitSaveState = false;
+    currentHeapSize = "-30";
+    bool ret = SleepClean::GetInstance().HandleSleepClean(faultData, application);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "SleepCleanTest007 end";
+}
 }
 }
