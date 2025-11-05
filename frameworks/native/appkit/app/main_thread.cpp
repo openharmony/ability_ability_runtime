@@ -178,6 +178,8 @@ constexpr char EVENT_KEY_PROCESS_LIFETIME[] = "PROCESS_LIFETIME";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_plugin_namespace";
+constexpr const char* PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY =
+    "persist.sys.abilityms.plugin_default_namespace_lddictionary";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
 
 const int32_t JSCRASH_TYPE = 3;
@@ -1671,6 +1673,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
             if (IsPluginNamespaceInherited()) {
                 AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+            }
+            auto lddictionaries = ParsePluginDefaultNamespaceLdDictionary();
+            if (!lddictionaries.empty()) {
+                AbilityRuntime::JsRuntime::CreatePluginDefaultNamespace(lddictionaries);
             }
         }
 #ifdef CJ_FRONTEND
@@ -4166,6 +4172,7 @@ void MainThread::PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunch
 
 void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::map<std::string, std::shared_ptr<AbilityRuntime::StartupTask>> nativeStartupTask;
     wptr<MainThread> weak = this;
     auto task = [weak, bundleInfo, appLaunchData](
@@ -4220,8 +4227,16 @@ void MainThread::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
 bool MainThread::IsPluginNamespaceInherited()
 {
     isPluginNamespaceInherited_ = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, false);
-    TAG_LOGD(AAFwkTag::DEFAULT, "inherit_plugin_namespace: %{public}d", isPluginNamespaceInherited_);
+    TAG_LOGD(AAFwkTag::APPKIT, "inherit_plugin_namespace: %{public}d", isPluginNamespaceInherited_);
     return isPluginNamespaceInherited_;
+}
+
+std::string MainThread::ParsePluginDefaultNamespaceLdDictionary()
+{
+    pluginDefaultNamespaceLdDictionary_ = system::GetParameter(PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY, "");
+    TAG_LOGD(AAFwkTag::APPKIT, "plugin_default_namespace_lddictionary: %{public}s",
+        pluginDefaultNamespaceLdDictionary_.c_str());
+    return pluginDefaultNamespaceLdDictionary_;
 }
 
 void MainThread::SleepCleanKill()
