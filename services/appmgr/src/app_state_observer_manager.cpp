@@ -684,7 +684,9 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
     }
     ProcessData data = WrapProcessData(appRecord);
     data.isPreload = isPreload || appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
-    data.isPreloadModule = appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN;
+    data.isPreloadModule = appRecord->GetPreloadMode() == PreloadMode::PRE_MAKE
+        || appRecord->GetPreloadMode() == PreloadMode::PRELOAD_MODULE
+        || appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
     data.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
@@ -1228,7 +1230,10 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     appStateData.state = static_cast<int32_t>(state);
     appStateData.uid = appRecord->GetUid();
     appStateData.extensionType = appRecord->GetExtensionType();
-    appStateData.isPreloadModule = appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN;
+    appStateData.isPreloadModule = appRecord->GetPreloadMode() == PreloadMode::PRE_MAKE
+        || appRecord->GetPreloadMode() == PreloadMode::PRELOAD_MODULE
+        || appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH;
+    appStateData.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
     appStateData.callerUid = appRecord->GetCallerUid();
     appStateData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     if (appRecord->GetApplicationInfo() != nullptr) {
