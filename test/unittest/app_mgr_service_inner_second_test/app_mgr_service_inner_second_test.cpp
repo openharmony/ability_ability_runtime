@@ -260,6 +260,33 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
 }
 
 /**
+ * @tc.name: AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300
+ * @tc.desc: Test GetSpecifiedProcessFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    const BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.isStageBasedModel = true;
+    hapModuleInfo.process = TEST_PROCESS_NAME;
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->SetEmptyKeepAliveAppState(true);
+
+    appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
+        "", bundleInfo, hapModuleInfo, nullptr, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
+    EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), "");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300 end");
+}
+
+/**
  * @tc.name: AppMgrServiceInnerSecondTest_ForceKillApplicationInner_0100
  * @tc.desc: Test GetSpecifiedProcessFlag
  * @tc.type: FUNC
