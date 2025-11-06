@@ -32,9 +32,11 @@ namespace AbilityRuntime {
 
 namespace {
 constexpr const char *ETS_STARTUP_MANAGER_CLASS_NAME = "L@ohos/app/appstartup/startupManager/startupManager;";
+constexpr const char *SIGNATURE_STARTUP_MANAGER_CREATE_STARTUP_TASK_MANAGER =
+    "Lescompat/Array;ZL@ohos/app/appstartup/StartupConfig/StartupConfig;"
+    "Lapplication/AbilityStageContext/AbilityStageContext;:I";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_RUN_ASYNCCALLBACK =
-    "Lescompat/Array;ZLutils/AbilityUtils/AsyncCallbackWrapper;"
-    "L@ohos/app/appstartup/StartupConfig/StartupConfig;Lapplication/AbilityStageContext/AbilityStageContext;:V";
+    "ILutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_ALL_STARTUP_TASK_RESULTS =
     ":V";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_GET_STARTUP_TASK_RESULTS =
@@ -43,10 +45,36 @@ constexpr const char *SIGNATURE_STARTUP_MANAGER_IS_STARTUP_TASK_INITIALIZED =
     "Lstd/core/String;:Z";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_STARTUP_TASK_RESULT =
     "Lstd/core/String;:V";
+constexpr int32_t ERR_FAILURE = -1;
 }
 
-void ETSStartupManager::NativeRun(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
-    ani_object callback, ani_object startupConfig, ani_object abilityStageContext)
+int32_t ETSStartupManager::NativeCreateStartupTaskManager(ani_env *env, ani_object startupTasks,
+    ani_boolean isDefaultContext, ani_object startupConfig, ani_object abilityStageContext)
+{
+    TAG_LOGD(AAFwkTag::STARTUP, "NativeCreateStartupTaskManager");
+    uint32_t startupTaskManagerId = 0;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "env is null");
+        return ERR_FAILURE;
+    }
+    std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
+    int32_t result = ETSStartupManager::RunStartupTask(env, startupTasks, isDefaultContext, startupConfig,
+        abilityStageContext, startupTaskManager);
+    if (result != ERR_OK || startupTaskManager == nullptr) {
+        EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
+        TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
+        return result;
+    }
+    
+    if ((result =DelayedSingleton<StartupManager>::GetInstance()->
+        GetStartupTaskManagerIdByManager(startupTaskManager, startupTaskManagerId)) != ERR_OK) {
+        EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
+        TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
+        return result;
+    }
+    return static_cast<int32_t>(startupTaskManagerId);
+}
+void ETSStartupManager::NativeRun(ani_env *env, ani_int startupTaskManagerId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::STARTUP, "NativeRun");
     if (env == nullptr) {
@@ -54,8 +82,8 @@ void ETSStartupManager::NativeRun(ani_env *env, ani_object startupTasks, ani_boo
         return;
     }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    int32_t result = ETSStartupManager::RunStartupTask(env, startupTasks, isDefaultContext, startupConfig,
-        abilityStageContext, startupTaskManager);
+    int32_t result = DelayedSingleton<StartupManager>::GetInstance()->GetStartupTaskManagerById(
+        static_cast<uint32_t>(startupTaskManagerId), startupTaskManager);
     if (result != ERR_OK || startupTaskManager == nullptr) {
         EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
         TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
@@ -292,6 +320,8 @@ void ETSStartupManagerInit(ani_env *env)
         return;
     }
     std::array nativeFuncs = {
+        ani_native_function { "nativeCreateStartupTaskManager", SIGNATURE_STARTUP_MANAGER_CREATE_STARTUP_TASK_MANAGER,
+            reinterpret_cast<void*>(ETSStartupManager::NativeCreateStartupTaskManager) },
         ani_native_function { "nativeRun", SIGNATURE_STARTUP_MANAGER_RUN_ASYNCCALLBACK,
             reinterpret_cast<void*>(ETSStartupManager::NativeRun) },
         ani_native_function { "nativeRemoveAllStartupTaskResults",

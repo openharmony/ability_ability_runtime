@@ -149,7 +149,9 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
         ThrowInvalidParamError(env, "Parameter error: Failed to get result.");
         return CreateJsUndefined(env);
     }
-    if (result->GetResultType() != StartupTaskResult::ResultType::JS) {
+    if (result->GetResultType() != StartupTaskResult::ResultType::JS &&
+        result->GetResultType() != StartupTaskResult::ResultType::ETS) {
+        TAG_LOGE(AAFwkTag::STARTUP, "invalid result type: %{public}s", startupTask.c_str());
         return CreateJsUndefined(env);
     }
     std::shared_ptr<JsStartupTaskResult> jsResult = std::static_pointer_cast<JsStartupTaskResult>(result);

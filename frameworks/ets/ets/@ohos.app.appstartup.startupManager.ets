@@ -21,8 +21,10 @@ import AsyncCallbackWrapper from './utils/AbilityUtils';
 export default namespace startupManager {
     loadLibraryWithPermissionCheck("startup_manager_ani_kit.z", "@ohos.app.appstartup.startupManager");
 
-    export native function nativeRun(startupTasks: Array<string>, isDefaultContext: boolean,
-        callback: AsyncCallbackWrapper<void>, config?: StartupConfig, context?: common.AbilityStageContext): void;
+    export native function nativeCreateStartupTaskManager(startupTasks: Array<string>, isDefaultContext: boolean,
+        config?: StartupConfig, context?: common.AbilityStageContext): int;
+
+    export native function nativeRun(startupTaskManagerId: int, callback: AsyncCallbackWrapper<void>): void;
 
     export native function nativeRemoveAllStartupTaskResults(): void;
 
@@ -33,6 +35,10 @@ export default namespace startupManager {
     export native function nativeRemoveStartupTaskResult(startupTask: string): void;
 
     export function run(startupTasks: Array<string>, config?: StartupConfig): Promise<void> {
+        let startupTaskManagerId: int = startupManager.nativeCreateStartupTaskManager(startupTasks, true, config, undefined);
+        if (startupTaskManagerId === -1) {
+            throw new BusinessError(16000050, "internal error.");
+        }
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null, data: undefined)=>{
                 if (err === null || err.code === 0) {
@@ -41,16 +47,18 @@ export default namespace startupManager {
                     reject(err);
                 }
             });
-            taskpool.execute((): void => {
-                console.log('ready to call nativeRun');
-                startupManager.nativeRun(startupTasks, true, myCall, config, undefined);
-            });
+            console.log('ready to call nativeRun');
+            startupManager.nativeRun(startupTaskManagerId, myCall);
         });
         return p;
     }
 
     export function run(startupTasks: Array<string>, context: common.AbilityStageContext,
         config: StartupConfig): Promise<void> {
+        let startupTaskManagerId: int = startupManager.nativeCreateStartupTaskManager(startupTasks, false, config, context);
+        if (startupTaskManagerId === -1) {
+            throw new BusinessError(16000050, "internal error.");
+        }
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null, data: undefined)=>{
                 if (err === null || err.code === 0) {
@@ -59,10 +67,8 @@ export default namespace startupManager {
                     reject(err);
                 }
             });
-            taskpool.execute((): void => {
-                console.log('ready to call nativeRun');
-                startupManager.nativeRun(startupTasks, false, myCall, config, context);
-            });
+            console.log('ready to call nativeRun');
+            startupManager.nativeRun(startupTaskManagerId, myCall);
         });
         return p;
     }
