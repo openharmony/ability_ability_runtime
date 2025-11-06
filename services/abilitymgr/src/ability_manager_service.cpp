@@ -11454,6 +11454,9 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return ERR_OK;
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::ADS_SERVICE) {
+        if (!abilityRequest.appInfo.isSystemApp) {
+            return CHECK_PERMISSION_FAILED;
+        }
         return ERR_OK;
     }
 #ifdef SUPPORT_AUTO_FILL
