@@ -14,6 +14,7 @@
  */
 
 #include "app_state_data.h"
+#include "app_mgr_constants.h"
 
 #include "hilog_tag_wrapper.h"
 #include "ui_extension_utils.h"
