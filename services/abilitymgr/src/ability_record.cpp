@@ -338,7 +338,7 @@ void AbilityRecord::LoadUIAbility()
         std::lock_guard guard(wantLock_);
         loadTimeout = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
     }
-    if (IsPreloadStart()) {
+    if (IsPreloadStart() && !IsPreloaded()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "preload, no event sent");
         return;
     }
@@ -563,9 +563,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
 
 void AbilityRecord::PostForegroundTimeoutTask()
 {
-    if (IsDebug() || IsPreloadStart()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "isDebug=%{public}d, isPreload=%{public}d, no event sent",
-            IsDebug(), IsPreloadStart());
+    if (IsDebug() || (IsPreloadStart() && !IsPreloaded())) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "isDebug=%{public}d, isPreload=%{public}d, preloaded=%{public}d, no event sent",
+            IsDebug(), IsPreloadStart(), IsPreloaded());
         return;
     }
     int foregroundTimeout =
