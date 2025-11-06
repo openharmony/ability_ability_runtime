@@ -50,7 +50,7 @@ bool AppStateData::ReadFromParcel(Parcel &parcel)
     isPreloadModule = parcel.ReadBool();
     isPrelaunch = parcel.ReadBool();
     isFromWindowFocusChanged = parcel.ReadBool();
-    preloadMode = static_cast<PreloadMode>(parcel.ReadInt32());
+    preloadMode = parcel.ReadInt32();
     
     return true;
 }
