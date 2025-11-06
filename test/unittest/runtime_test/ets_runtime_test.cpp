@@ -82,7 +82,7 @@ HWTEST_F(EtsRuntimeTest, Create_100, TestSize.Level1)
     options_.lang = Runtime::Language::JS;
     options_.preload = true;
     options_.isStageModel = false;
-    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
+    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
     auto etsRuntime = ETSRuntime::Create(options_, jsRuntime);
     EXPECT_EQ(etsRuntime, nullptr);
     options_.lang = Runtime::Language::ETS;
@@ -114,7 +114,7 @@ HWTEST_F(EtsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, Initialize_100, TestSize.Level1)
 {
     options_.lang = Runtime::Language::JS;
-    std::unique_ptr<JsRuntime> jsRuntime = nullptr;
+    std::unique_ptr<Runtime> jsRuntime = nullptr;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     bool result = etsRuntime->Initialize(options_, jsRuntime);
     EXPECT_EQ(result, false);
@@ -132,7 +132,7 @@ HWTEST_F(EtsRuntimeTest, Initialize_200, TestSize.Level1)
     options.lang = Runtime::Language::ETS;
     options.arkNativeFilePath = "test_app/";
     options.moduleName = "TestModule";
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    std::unique_ptr<Runtime> jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     ASSERT_NE(jsRuntime, nullptr);
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     ASSERT_NE(etsRuntime, nullptr);
@@ -266,7 +266,7 @@ HWTEST_F(EtsRuntimeTest, PreFork_100, TestSize.Level1)
     options.lang = Runtime::Language::JS;
     options.preload = true;
     options.isStageModel = false;
-    std::unique_ptr<JsRuntime> jsRuntime = nullptr;
+    std::unique_ptr<Runtime> jsRuntime = nullptr;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     auto instance = etsRuntime->PreFork(options, jsRuntime);
     EXPECT_EQ(instance, nullptr);
@@ -283,7 +283,7 @@ HWTEST_F(EtsRuntimeTest, PostFork_100, TestSize.Level1)
     jsOptions.lang = Runtime::Language::JS;
     jsOptions.preload = true;
     jsOptions.isStageModel = false;
-    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(jsOptions);;
+    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(jsOptions);;
     ASSERT_NE(jsRuntime, nullptr);
 
     Runtime::Options etsOptions;

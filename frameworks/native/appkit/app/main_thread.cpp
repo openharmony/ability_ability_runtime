@@ -1424,6 +1424,39 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 }
 #endif
 
+bool GetBundleForUpdateRuntime(std::shared_ptr<OHOS::AppExecFwk::BundleMgrHelper> &bundleMgrHelper,
+    BundleInfo &bundleInfo)
+{
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+        return false;
+    }
+    ErrCode ret = bundleMgrHelper->GetBundleInfoForSelf (
+        (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)), bundleInfo);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get bundle Info failed: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool GetHspListForUpdateRuntime(std::shared_ptr<OHOS::AppExecFwk::BundleMgrHelper> &bundleMgrHelper,
+    std::string bundleName, HspList &hspList)
+{
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+        return false;
+    }
+    ErrCode ret = bundleMgrHelper->GetBaseSharedBundleInfos(bundleName, hspList,
+    AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::string &bundleName, uint32_t versionCode,
     const std::string &hapPath, std::string &appRunningId, int32_t pid, std::string &processName)
 {
@@ -1764,6 +1797,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
+        runtimeUpdateParam_.option = options;
 
         if (appInfo.debug && appLaunchData.GetDebugApp()) {
             wptr<MainThread> weak = this;
@@ -1834,7 +1868,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             } else {
                 JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
                 uncaughtExceptionInfo.hapPath = hapPath;
+                runtimeUpdateParam_.hapPath= hapPath;
                 UncatchableTaskInfo uncatchableTaskInfo = {bundleName, versionCode, appRunningId, pid, processName};
+                runtimeUpdateParam_.uncatchableTaskInfo = uncatchableTaskInfo;
                 InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);
                 (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(
                     uncaughtExceptionInfo);
@@ -2539,6 +2575,11 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
     CHECK_POINTER_LOG(applicationImpl_, "applicationImpl_ is null");
     CHECK_POINTER_LOG(abilityRecordMgr_, "abilityRecordMgr_ is null");
+
+    if (!CheckAndUpdateRuntime(abilityRecord)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "UpdateRuntime failed");
+        return;
+    }
 
     auto abilityToken = abilityRecord->GetToken();
     CHECK_POINTER_LOG(abilityToken, "abilityRecord->GetToken failed");
@@ -4251,6 +4292,66 @@ void MainThread::SleepCleanKill()
         _exit(0);
     };
     mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
+}
+
+bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr || applicationInfo_ == nullptr || abilityRecord->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord or applicationInfo or abilityInfo");
+        return false;
+    }
+    if (abilityRecord->GetAbilityInfo()->arkTSMode != AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        applicationInfo_->arkTSMode != AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
+        return true;
+    }
+    auto &runtime = application_->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return false;
+    }
+    if (runtime->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
+        return true;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "Updata Runtime");
+    std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
+    contextDeal->SetApplicationInfo(applicationInfo_);
+    contextDeal->SetBundleCodePath(applicationInfo_->codePath);
+    auto bundleMgrHelper = contextDeal->GetBundleManager();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+        return false;
+    }
+    BundleInfo bundleInfo;
+    if (!GetBundleForUpdateRuntime(bundleMgrHelper, bundleInfo)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get bundleInfo failed");
+        return false;
+    }
+    HspList hspList;
+    if (!GetHspListForUpdateRuntime(bundleMgrHelper,
+        runtimeUpdateParam_.uncatchableTaskInfo.bundleName, hspList)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get hspList failed");
+        return false;
+    }
+    AppLibPathMap etsAppLibPaths {};
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap {};
+    GetEtsNativeLibPath(bundleInfo, hspList, etsAppLibPaths, abcPathsToBundleModuleNameMap);
+    AbilityRuntime::ETSRuntime::SetAppLibPath(
+        etsAppLibPaths, abcPathsToBundleModuleNameMap, applicationInfo_->isSystemApp);
+    if (!application_->UpdateETSRuntime(runtimeUpdateParam_.option)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "UpdateETSRuntime failed");
+        return false;
+    }
+    auto &etsRuntime = application_->GetRuntime();
+    if (etsRuntime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsRuntime");
+        return false;
+    }
+    auto expectionInfo = CreateEtsExceptionInfo(runtimeUpdateParam_.uncatchableTaskInfo.bundleName,
+        runtimeUpdateParam_.uncatchableTaskInfo.versionCode, runtimeUpdateParam_.hapPath,
+        runtimeUpdateParam_.uncatchableTaskInfo.appRunningId, runtimeUpdateParam_.uncatchableTaskInfo.pid,
+        runtimeUpdateParam_.uncatchableTaskInfo.processName);
+    (static_cast<AbilityRuntime::ETSRuntime&>(*etsRuntime)).RegisterUncaughtExceptionHandler(expectionInfo);
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
