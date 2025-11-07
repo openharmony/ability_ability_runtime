@@ -37,7 +37,7 @@ std::unique_ptr<Runtime> Runtime::Create(Runtime::Options &options)
             return CJRuntime::Create(options);
 #endif
         case Runtime::Language::ETS: {
-            std::unique_ptr<JsRuntime> jsRuntime;
+            std::unique_ptr<Runtime> jsRuntime;
             if (options.lang == Runtime::Language::ETS) {
                 options.lang = Runtime::Language::JS;
                 jsRuntime = JsRuntime::Create(options);
