@@ -34,7 +34,7 @@ constexpr int32_t ERROR_CODE_TRANSFER_CLASS_NOT_FOUND = 10200067;
 void EtsErrorUtil::ThrowError(ani_env *env, ani_object err)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     env->ThrowError(static_cast<ani_error>(err));
@@ -43,7 +43,7 @@ void EtsErrorUtil::ThrowError(ani_env *env, ani_object err)
 void EtsErrorUtil::ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, errCode, errorMsg));
@@ -52,7 +52,7 @@ void EtsErrorUtil::ThrowError(ani_env *env, int32_t errCode, const std::string &
 void EtsErrorUtil::ThrowError(ani_env *env, const AbilityErrorCode &err)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
@@ -61,7 +61,7 @@ void EtsErrorUtil::ThrowError(ani_env *env, const AbilityErrorCode &err)
 void EtsErrorUtil::ThrowRuntimeError(ani_env *env, int32_t errCode, const std::string &errMessage)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     std::string eMes = errMessage;
@@ -74,7 +74,7 @@ void EtsErrorUtil::ThrowRuntimeError(ani_env *env, int32_t errCode, const std::s
 void EtsErrorUtil::ThrowInvalidCallerError(ani_env *env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
@@ -84,7 +84,7 @@ void EtsErrorUtil::ThrowInvalidCallerError(ani_env *env)
 void EtsErrorUtil::ThrowTooFewParametersError(ani_env *env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
@@ -94,7 +94,7 @@ void EtsErrorUtil::ThrowTooFewParametersError(ani_env *env)
 void EtsErrorUtil::ThrowInvalidNumParametersError(ani_env *env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
@@ -104,7 +104,7 @@ void EtsErrorUtil::ThrowInvalidNumParametersError(ani_env *env)
 void EtsErrorUtil::ThrowNoPermissionError(ani_env *env, const std::string &permission)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(
@@ -115,7 +115,7 @@ void EtsErrorUtil::ThrowNoPermissionError(ani_env *env, const std::string &permi
 void EtsErrorUtil::ThrowNotSystemAppError(ani_env *env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
@@ -131,7 +131,7 @@ void EtsErrorUtil::ThrowEtsTransferClassError(ani_env *env)
 void EtsErrorUtil::ThrowInvalidParamError(ani_env *env, const std::string &message)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateInvalidParamError(env, message));
@@ -140,7 +140,7 @@ void EtsErrorUtil::ThrowInvalidParamError(ani_env *env, const std::string &messa
 void EtsErrorUtil::ThrowErrorByNativeErr(ani_env *env, int32_t err)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateErrorByNativeErr(env, err));
@@ -149,7 +149,7 @@ void EtsErrorUtil::ThrowErrorByNativeErr(ani_env *env, int32_t err)
 ani_object EtsErrorUtil::CreateError(ani_env *env, const AbilityErrorCode &err)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     return EtsErrorUtil::CreateError(env, static_cast<int32_t>(err), GetErrorMsg(err));
@@ -158,7 +158,7 @@ ani_object EtsErrorUtil::CreateError(ani_env *env, const AbilityErrorCode &err)
 ani_object EtsErrorUtil::CreateInvalidParamError(ani_env *env, const std::string &message)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     return EtsErrorUtil::CreateError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), message);
@@ -167,7 +167,7 @@ ani_object EtsErrorUtil::CreateInvalidParamError(ani_env *env, const std::string
 ani_object EtsErrorUtil::CreateNoPermissionError(ani_env *env, const std::string &permission)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     return EtsErrorUtil::CreateError(
@@ -177,7 +177,7 @@ ani_object EtsErrorUtil::CreateNoPermissionError(ani_env *env, const std::string
 ani_object EtsErrorUtil::CreateErrorByNativeErr(ani_env *env, int32_t err, const std::string &permission)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     auto errCode = GetJsErrorCodeByNativeError(err);
@@ -190,34 +190,34 @@ ani_object EtsErrorUtil::CreateErrorByNativeErr(ani_env *env, int32_t err, const
 ani_object EtsErrorUtil::WrapError(ani_env *env, const std::string &msg)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     ani_status status = ANI_ERROR;
     ani_string aniMsg = nullptr;
     if ((status = env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "String_NewUTF8 failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "String_NewUTF8 failed %{public}d", status);
         return nullptr;
     }
     ani_ref undefRef;
     if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "GetUndefined failed %{public}d", status);
         return nullptr;
     }
     ani_class cls = nullptr;
     if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "FindClass failed %{public}d", status);
         return nullptr;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
     ani_object obj = nullptr;
     if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_New failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Object_New failed %{public}d", status);
         return nullptr;
     }
     return obj;
@@ -226,28 +226,28 @@ ani_object EtsErrorUtil::WrapError(ani_env *env, const std::string &msg)
 ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::string &msg)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     if ((status = env->FindClass(BUSINESS_ERROR_CLASS, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "FindClass failed %{public}d", status);
         return nullptr;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
     ani_object error = EtsErrorUtil::WrapError(env, msg);
     if (error == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "error nulll");
+        TAG_LOGE(AAFwkTag::BRIDGE, "error nulll");
         return nullptr;
     }
     ani_object obj = nullptr;
     if ((status = env->Object_New(cls, method, &obj, code, error)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_New failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Object_New failed %{public}d", status);
         return nullptr;
     }
     return obj;

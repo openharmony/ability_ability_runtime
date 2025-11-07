@@ -93,7 +93,7 @@ ani_object EtsAbilityContextModule::NativeTransferStatic(ani_env *aniEnv, ani_ob
     // if not exist, create a new one
     std::string contextType;
     if (!AppExecFwk::GetStdString(aniEnv, reinterpret_cast<ani_string>(type), contextType)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "GetStdString failed");
         EtsErrorUtil::ThrowEtsTransferClassError(aniEnv);
         return nullptr;
     }

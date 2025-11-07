@@ -39,26 +39,26 @@ bool UnwrapProcessOptions(napi_env env, napi_value param, std::shared_ptr<AAFwk:
     auto option = std::make_shared<AAFwk::ProcessOptions>();
     int32_t processMode = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "processMode", processMode)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processMode failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap processMode failed");
         return false;
     }
     option->processMode = AAFwk::ProcessOptions::ConvertInt32ToProcessMode(processMode);
     if (option->processMode == AAFwk::ProcessMode::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Convert processMode failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Convert processMode failed");
         return false;
     }
     int32_t startupVisibility = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "startupVisibility", startupVisibility)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startupVisibility failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap startupVisibility failed");
         return false;
     }
     option->startupVisibility = AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(startupVisibility);
     if (option->startupVisibility == AAFwk::StartupVisibility::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Convert startupVisibility failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Convert startupVisibility failed");
         return false;
     }
     processOptions = option;
-    TAG_LOGI(AAFwkTag::JSNAPI, "processMode:%{public}d, startupVisibility:%{public}d",
+    TAG_LOGI(AAFwkTag::BRIDGE, "processMode:%{public}d, startupVisibility:%{public}d",
         static_cast<int32_t>(processOptions->processMode),
         static_cast<int32_t>(processOptions->startupVisibility));
     return true;
@@ -69,7 +69,7 @@ bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media:
 {
     auto pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, param);
     if (!pixelMap) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap pixelMap failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap pixelMap failed");
         return false;
     }
     value = pixelMap;
@@ -95,7 +95,7 @@ bool UnwrapStartWindowOption(napi_env env, napi_value param,
     std::string startWindowBackgroundColor;
     if (IsExistsByPropertyName(env, param, "startWindowBackgroundColor")) {
         if (!UnwrapStringByPropertyName(env, param, "startWindowBackgroundColor", startWindowBackgroundColor)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowBackgroundColor failed");
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap startWindowBackgroundColor failed");
             return false;
         }
         option->startWindowBackgroundColor = startWindowBackgroundColor;
@@ -108,7 +108,7 @@ bool UnwrapStartWindowOption(napi_env env, napi_value param,
     std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
     if (IsExistsByPropertyName(env, param, "startWindowIcon")) {
         if (!UnwrapPixelMapByPropertyName(env, param, "startWindowIcon", startWindowIcon)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowIcon failed");
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap startWindowIcon failed");
             return false;
         }
         option->startWindowIcon = startWindowIcon;
@@ -125,11 +125,11 @@ bool UnwrapStartOptionsWithProcessOption(napi_env env, napi_value param, AAFwk::
 {
     UnwrapStartOptions(env, param, startOptions);
     if (!UnwrapProcessOptions(env, param, startOptions.processOptions)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processOptions failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap processOptions failed");
         return false;
     }
     if (!UnwrapStartWindowOption(env, param, startOptions.startWindowOption)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowOption failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Unwrap startWindowOption failed");
         return false;
     }
     return true;
@@ -188,10 +188,10 @@ void UnwrapStartOptionsWindowOptions(napi_env env, napi_value param, AAFwk::Star
 
 bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &startOptions)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
+        TAG_LOGI(AAFwkTag::BRIDGE, "not napi_object");
         return false;
     }
 
@@ -202,7 +202,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 
     int32_t displayId = 0;
     if (UnwrapInt32ByPropertyName(env, param, "displayId", displayId)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "get displayId %{public}d ok", displayId);
+        TAG_LOGI(AAFwkTag::BRIDGE, "get displayId %{public}d ok", displayId);
         startOptions.SetDisplayID(displayId);
     }
 
@@ -236,7 +236,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptions &startOptions, AAFwk::Want &want)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
+        TAG_LOGI(AAFwkTag::BRIDGE, "not napi_object");
         return false;
     }
     napi_value jsValue = GetPropertyValueByPropertyName(env, param, "parameters", napi_object);

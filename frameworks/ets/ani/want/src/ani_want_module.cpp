@@ -421,12 +421,12 @@ bool EtsWantParams::SetArrayDouble(ani_env *env, const std::string &key, ani_obj
         ani_double doubleValue {};
         status = env->Array_Get(array, i, &doubleRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Array_Get failed, status: %{public}d", status);
             return false;
         }
         status = unbox(env, static_cast<ani_object>(doubleRef), &doubleValue);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unbox failed, status: %{public}d", status);
             return false;
         }
         nativeArray[i] = doubleValue;
@@ -493,12 +493,12 @@ bool EtsWantParams::SetArrayInt(ani_env *env, const std::string &key, ani_object
         ani_int intValue {};
         status = env->Array_Get(array, i, &intRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Array_Get failed, status: %{public}d", status);
             return false;
         }
         status = unbox(env, static_cast<ani_object>(intRef), &intValue);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unbox failed, status: %{public}d", status);
             return false;
         }
         nativeArray[i] = intValue;
@@ -565,12 +565,12 @@ bool EtsWantParams::SetArrayLong(ani_env *env, const std::string &key, ani_objec
         ani_long longValue {};
         status = env->Array_Get(array, i, &longRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Array_Get failed, status: %{public}d", status);
             return false;
         }
         status = unbox(env, static_cast<ani_object>(longRef), &longValue);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unbox failed, status: %{public}d", status);
             return false;
         }
         nativeArray[i] = longValue;
@@ -637,12 +637,12 @@ bool EtsWantParams::SetArrayBoolean(ani_env *env, const std::string &key, ani_ob
         ani_boolean booleanValue {};
         status = env->Array_Get(array, i, &booleanRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Array_Get failed, status: %{public}d", status);
             return false;
         }
         status = unbox(env, static_cast<ani_object>(booleanRef), &booleanValue);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unbox failed, status: %{public}d", status);
             return false;
         }
         nativeArray[i] = booleanValue;
@@ -709,12 +709,12 @@ bool EtsWantParams::SetArrayWantParams(ani_env *env, const std::string &key, ani
         ani_long longValue {};
         status = env->Array_Get(array, i, &longRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Array_Get failed, status: %{public}d", status);
             return false;
         }
         status = unbox(env, static_cast<ani_object>(longRef), &longValue);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "Unbox failed, status: %{public}d", status);
             return false;
         }
         nativeArray[i] = longValue;

@@ -39,7 +39,7 @@ const std::string REASON_MESSAGE_DESKTOP_SHORTCUT = "ReasonMessage_DesktopShortc
 
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -65,7 +65,7 @@ static napi_value InitReasonMessageDesktopShortcut(napi_env env)
 
 static napi_value InitLaunchReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -84,7 +84,7 @@ static napi_value InitLaunchReasonObject(napi_env env)
 
 static napi_value InitLastExitReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -105,7 +105,7 @@ static napi_value InitLastExitReasonObject(napi_env env)
 
 static napi_value InitOnContinueResultObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -129,7 +129,7 @@ static napi_value InitContinueStateObject(napi_env env)
 
 static napi_value InitWindowModeObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -145,7 +145,7 @@ static napi_value InitWindowModeObject(napi_env env)
 // AbilityConstant.OnSaveResult
 static napi_value InitOnSaveResultEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "ALL_AGREE", AppExecFwk::ALL_AGREE));
@@ -161,7 +161,7 @@ static napi_value InitOnSaveResultEnum(napi_env env)
 // AbilityConstant.StateType
 static napi_value InitStateTypeEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "CONTINUATION", AppExecFwk::CONTINUATION));
@@ -172,7 +172,7 @@ static napi_value InitStateTypeEnum(napi_env env)
 
 static napi_value InitMemoryLevelObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -189,7 +189,7 @@ static napi_value InitMemoryLevelObject(napi_env env)
 // AbilityConstant.CollaborateResult
 static napi_value InitCollaborateResultEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "ACCEPT", CollaborateResult::ACCEPT));
@@ -199,7 +199,7 @@ static napi_value InitCollaborateResultEnum(napi_env env)
 
 static napi_value InitAbilityStagePrepareTerminationObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -217,67 +217,67 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
 {
     napi_value reasonMessageDesktopShortcut = InitReasonMessageDesktopShortcut(env);
     if (reasonMessageDesktopShortcut == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null reasonMessageDesktopShortcut");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null reasonMessageDesktopShortcut");
         return nullptr;
     }
 
     napi_value launchReason = InitLaunchReasonObject(env);
     if (launchReason == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null launchReason");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null launchReason");
         return nullptr;
     }
 
     napi_value lastExitReason = InitLastExitReasonObject(env);
     if (lastExitReason == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null lastExitReason");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null lastExitReason");
         return nullptr;
     }
 
     napi_value onContinueResult = InitOnContinueResultObject(env);
     if (onContinueResult == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null onContinueResult");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null onContinueResult");
         return nullptr;
     }
 
     napi_value continueState = InitContinueStateObject(env);
     if (continueState == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null continueState");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null continueState");
         return nullptr;
     }
 
     napi_value windowMode = InitWindowModeObject(env);
     if (windowMode == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null windowMode");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null windowMode");
         return nullptr;
     }
 
     napi_value memoryLevel = InitMemoryLevelObject(env);
     if (memoryLevel == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null memoryLevel");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null memoryLevel");
         return nullptr;
     }
 
     napi_value stateType = InitStateTypeEnum(env);
     if (stateType == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null stateType");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null stateType");
         return nullptr;
     }
 
     napi_value saveResult = InitOnSaveResultEnum(env);
     if (saveResult == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null saveResult");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null saveResult");
         return nullptr;
     }
 
     napi_value collaborateResult = InitCollaborateResultEnum(env);
     if (collaborateResult == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null collaborateResult");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null collaborateResult");
         return nullptr;
     }
 
     napi_value prepareTermination = InitAbilityStagePrepareTerminationObject(env);
     if (prepareTermination == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null prepareTermination");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null prepareTermination");
         return nullptr;
     }
 
@@ -296,7 +296,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
     };
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "define properties failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "define properties failed");
         return nullptr;
     }
 
