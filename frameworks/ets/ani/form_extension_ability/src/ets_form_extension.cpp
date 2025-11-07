@@ -717,8 +717,7 @@ FormState ETSFormExtension::OnAcquireFormState(const Want &want)
     ani_status status = env->Object_GetFieldByName_Ref(
         static_cast<ani_object>(etsAbilityObj_->aniRef), "onAcquireFormState", &nameRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
-            status, etsAbilityObj_->aniRef, etsAbilityObj_->aniObj);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return AppExecFwk::FormState::DEFAULT;
     }
     ani_ref argv[] = { wantRef };
