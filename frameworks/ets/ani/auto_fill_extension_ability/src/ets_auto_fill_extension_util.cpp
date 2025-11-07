@@ -25,6 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *FILL_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/FillRequestInner;";
+constexpr const char *SAVE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/SaveRequestInner;";
 constexpr const char *UPDATE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/UpdateRequestInner;";
 constexpr const char *VIEW_DATA_CLASS_NAME = "Lapplication/ViewData/ViewDataImpl;";
 constexpr const char *ARRAY_CLASS_NAME = "Lescompat/Array;";
@@ -74,6 +75,15 @@ ani_object EtsAutoFillExtensionUtil::WrapFillRequest(ani_env *env, const AAFwk::
         return nullptr;
     }
     return SetFillRequest(env, etsObject, want);
+}
+
+ani_object EtsAutoFillExtensionUtil::WrapSaveRequest(ani_env *env, const AAFwk::Want &want)
+{
+    ani_object etsObject = nullptr;
+    if (!CreateObject(env, etsObject, SAVE_REQUEST_CLASS_NAME)) {
+        return nullptr;
+    }
+    return SetSaveRequest(env, etsObject, want);
 }
 
 ani_object EtsAutoFillExtensionUtil::WrapUpdateRequest(ani_env *env, const AAFwk::WantParams &wantParams)
@@ -381,6 +391,26 @@ ani_object EtsAutoFillExtensionUtil::SetFillRequest(ani_env *env, ani_object obj
         ani_object customValue = WrapCustomData(env, param);
         if ((status = env->Object_SetPropertyByName_Ref(object, CUSTOM_DATA_CUSTOM_DATA, customValue)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
+        }
+    }
+    return object;
+}
+
+ani_object EtsAutoFillExtensionUtil::SetSaveRequest(ani_env *env, ani_object object, const AAFwk::Want &want)
+{
+    ani_status status = ANI_ERROR;
+    if (want.HasParameter(WANT_PARAMS_VIEW_DATA)) {
+        std::string viewDataString = want.GetStringParam(WANT_PARAMS_VIEW_DATA);
+        if (viewDataString.empty()) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty view data");
+            return object;
+        }
+        AbilityBase::ViewData viewData;
+        viewData.FromJsonString(viewDataString);
+        ani_object viewDataValue = WrapViewData(env, viewData);
+        if ((status = env->Object_SetPropertyByName_Ref(object, VIEW_DATA_VIEW_DATA, viewDataValue)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
+            return object;
         }
     }
     return object;
