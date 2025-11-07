@@ -372,6 +372,19 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppSDKNS_0100, TestSize.Level
 }
 
 /**
+ * @tc.name: InitCJAppNS_0100
+ * @tc.desc: Test InitCJAppNS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJAppNS(appPath);
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
+}
+
+/**
  * @tc.name: DumpCjHeap_0100
  * @tc.desc: Test DumpCjHeap.
  * @tc.type: FUNC
