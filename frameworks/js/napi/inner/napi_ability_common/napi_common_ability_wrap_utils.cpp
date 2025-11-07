@@ -95,18 +95,18 @@ bool CheckAbilityType(AbilityType typeInAbility, AbilityType typeWant)
 bool CheckAbilityType(const CBBase *cbBase)
 {
     if (cbBase == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null cbBase");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null cbBase");
         return false;
     }
 
     if (cbBase->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null cbBase->ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null cbBase->ability");
         return false;
     }
 
     const std::shared_ptr<AbilityInfo> info = cbBase->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null info");
         return false;
     }
     return CheckAbilityType((AbilityType)info->type, cbBase->abilityType);
@@ -114,20 +114,20 @@ bool CheckAbilityType(const CBBase *cbBase)
 
 bool CheckAbilityType(const AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "start");
+    TAG_LOGI(AAFwkTag::BRIDGE, "start");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return false;
     }
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         return false;
     }
 
     const std::shared_ptr<AbilityInfo> info = asyncCallbackInfo->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null info");
         return false;
     }
 
@@ -136,20 +136,20 @@ bool CheckAbilityType(const AsyncJSCallbackInfo *asyncCallbackInfo)
 
 bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return false;
     }
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         return false;
     }
 
     const std::shared_ptr<AbilityInfo> info = asyncCallbackInfo->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null info");
         return false;
     }
 
@@ -159,7 +159,7 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
 napi_value GetContinueAbilityOptionsInfoCommon(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value result = nullptr;
 
     // reversible?: boolean
@@ -180,7 +180,7 @@ napi_value GetContinueAbilityOptionsInfoCommon(
 napi_value GetContinueAbilityOptionsReversible(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
@@ -191,7 +191,7 @@ napi_value GetContinueAbilityOptionsReversible(
         napi_get_named_property(env, value, "reversible", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "bool expected");
+            TAG_LOGE(AAFwkTag::BRIDGE, "bool expected");
             return nullptr;
         }
         napi_get_value_bool(env, result, &reversible);
@@ -204,7 +204,7 @@ napi_value GetContinueAbilityOptionsReversible(
 napi_value GetContinueAbilityOptionsDeviceID(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
@@ -216,7 +216,7 @@ napi_value GetContinueAbilityOptionsDeviceID(
         napi_get_named_property(env, value, "deviceId", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "string expected");
+            TAG_LOGE(AAFwkTag::BRIDGE, "string expected");
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -228,7 +228,7 @@ napi_value GetContinueAbilityOptionsDeviceID(
 
 napi_value WrapAppInfo(napi_env env, const ApplicationInfo &appInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -284,23 +284,23 @@ int32_t GetStartAbilityErrorCode(ErrCode innerErrorCode)
  */
 void GetFilesDirExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "start");
+    TAG_LOGI(AAFwkTag::BRIDGE, "start");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error ability type");
+        TAG_LOGE(AAFwkTag::BRIDGE, "error ability type");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -309,34 +309,34 @@ void GetFilesDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
     asyncCallbackInfo->native_data.str_value = abilityContext->GetFilesDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end filesDir=%{public}s",
+    TAG_LOGI(AAFwkTag::BRIDGE, "end filesDir=%{public}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
 void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "begin");
+    TAG_LOGI(AAFwkTag::BRIDGE, "begin");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "ability type failed");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -354,23 +354,23 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
  */
 void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "ability type failed");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -383,23 +383,23 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
 
 void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
+        TAG_LOGE(AAFwkTag::BRIDGE, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -408,12 +408,12 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
     asyncCallbackInfo->native_data.str_value = abilityContext->GetDistributedFilesDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "filesDir=%{public}s",
+    TAG_LOGI(AAFwkTag::BRIDGE, "filesDir=%{public}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -425,23 +425,23 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
  */
 void GetCacheDirExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
+        TAG_LOGE(AAFwkTag::BRIDGE, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -450,12 +450,12 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
     asyncCallbackInfo->native_data.str_value = abilityContext->GetCacheDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "cacheDir=%{public}s",
+    TAG_LOGI(AAFwkTag::BRIDGE, "cacheDir=%{public}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -467,23 +467,23 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
  */
 void GetExternalCacheDirExecuteCallback(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null asyncCallbackInfo");
         return;
     }
 
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
+        TAG_LOGE(AAFwkTag::BRIDGE, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -491,7 +491,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     asyncCallbackInfo->native_data.str_value = asyncCallbackInfo->ability->GetExternalCacheDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "externalCacheDir=%{private}s",
+    TAG_LOGI(AAFwkTag::BRIDGE, "externalCacheDir=%{private}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -504,7 +504,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
  */
 AppTypeCB *CreateAppTypeCBInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value global = nullptr;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -516,7 +516,7 @@ AppTypeCB *CreateAppTypeCBInfo(napi_env env)
 
     AppTypeCB *appTypeCB = new (std::nothrow) AppTypeCB;
     if (appTypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null appTypeCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null appTypeCB");
         return nullptr;
     }
     appTypeCB->cbBase.cbInfo.env = env;
@@ -536,7 +536,7 @@ AppTypeCB *CreateAppTypeCBInfo(napi_env env)
  */
 AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value global = nullptr;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -548,7 +548,7 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
 
     AbilityInfoCB *abilityInfoCB = new (std::nothrow) AbilityInfoCB;
     if (abilityInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityInfoCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityInfoCB");
         return nullptr;
     }
     abilityInfoCB->cbBase.cbInfo.env = env;
@@ -650,7 +650,7 @@ napi_value BuildJsAbilityInfoNamedPropertySecond(napi_env env, const AbilityInfo
 
 napi_value WrapAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -719,7 +719,7 @@ napi_value ConvertAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
  */
 HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value global = nullptr;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -731,7 +731,7 @@ HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
 
     HapModuleInfoCB *hapModuleInfoCB = new (std::nothrow) HapModuleInfoCB;
     if (hapModuleInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null hapModuleInfoCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null hapModuleInfoCB");
         return nullptr;
     }
     hapModuleInfoCB->cbBase.cbInfo.env = env;
@@ -785,7 +785,7 @@ napi_value BuildJsHapModuleInfoNamedProperty(napi_env env, const HapModuleInfoCB
 
 napi_value WrapHapModuleInfo(napi_env env, const HapModuleInfoCB &cb)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -835,7 +835,7 @@ napi_value WrapHapModuleInfo(napi_env env, const HapModuleInfoCB &cb)
  */
 AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value global = nullptr;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -847,7 +847,7 @@ AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
 
     AppVersionInfoCB *appVersionInfoCB = new (std::nothrow) AppVersionInfoCB;
     if (appVersionInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null appVersionInfoCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null appVersionInfoCB");
         return nullptr;
     }
     appVersionInfoCB->cbBase.cbInfo.env = env;
@@ -861,7 +861,7 @@ AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
 void SaveAppVersionInfo(AppVersionInfo &appVersionInfo, const std::string appName, const std::string versionName,
     const int32_t versionCode)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     appVersionInfo.appName = appName;
     appVersionInfo.versionName = versionName;
     appVersionInfo.versionCode = versionCode;
@@ -869,7 +869,7 @@ void SaveAppVersionInfo(AppVersionInfo &appVersionInfo, const std::string appNam
 
 napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionInfoCB)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -896,7 +896,7 @@ napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionIn
  */
 AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     napi_value global = nullptr;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -908,7 +908,7 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
 
     AbilityNameCB *abilityNameCB = new (std::nothrow) AbilityNameCB;
     if (abilityNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityNameCB");
         return nullptr;
     }
     abilityNameCB->cbBase.cbInfo.env = env;
@@ -921,9 +921,9 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
 
 napi_value WrapAbilityName(napi_env env, const AbilityNameCB *abilityNameCB)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
     if (abilityNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null abilityNameCB");
         return nullptr;
     }
     napi_value result = nullptr;
@@ -940,12 +940,12 @@ void UnwrapAbilityStartSettingForNumber(
     bool isReadValue32 = false;
     bool isReadDouble = false;
     if (napi_get_value_int32(env, param, &natValue32) == napi_ok) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "property value=%{private}d", natValue32);
+        TAG_LOGI(AAFwkTag::BRIDGE, "property value=%{private}d", natValue32);
         isReadValue32 = true;
     }
 
     if (napi_get_value_double(env, param, &natValueDouble) == napi_ok) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{private}lf", natValueDouble);
+        TAG_LOGI(AAFwkTag::BRIDGE, "Property value=%{private}lf", natValueDouble);
         isReadDouble = true;
     }
 
@@ -964,7 +964,7 @@ void UnwrapAbilityStartSettingForNumber(
 
 bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilityStartSetting &setting)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    TAG_LOGI(AAFwkTag::BRIDGE, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         return false;
@@ -976,7 +976,7 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
 
     NAPI_CALL_BASE(env, napi_get_property_names(env, param, &jsProNameList), false);
     NAPI_CALL_BASE(env, napi_get_array_length(env, jsProNameList, &jsProCount), false);
-    TAG_LOGI(AAFwkTag::JSNAPI, "Property size: %{public}d", jsProCount);
+    TAG_LOGI(AAFwkTag::BRIDGE, "Property size: %{public}d", jsProCount);
 
     napi_value jsProName = nullptr;
     napi_value jsProValue = nullptr;
@@ -984,14 +984,14 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
         NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
 
         std::string strProName = UnwrapStringFromJS(env, jsProName);
-        TAG_LOGI(AAFwkTag::JSNAPI, "Property name=%{public}s", strProName.c_str());
+        TAG_LOGI(AAFwkTag::BRIDGE, "Property name=%{public}s", strProName.c_str());
         NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
         NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
 
         switch (jsValueType) {
             case napi_string: {
                 std::string natValue = UnwrapStringFromJS(env, jsProValue);
-                TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{private}s",
+                TAG_LOGI(AAFwkTag::BRIDGE, "Property value=%{private}s",
                          natValue.c_str());
                 setting.AddProperty(strProName, natValue);
                 break;
@@ -999,7 +999,7 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
             case napi_boolean: {
                 bool natValue = false;
                 NAPI_CALL_BASE(env, napi_get_value_bool(env, jsProValue, &natValue), false);
-                TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{public}s",
+                TAG_LOGI(AAFwkTag::BRIDGE, "Property value=%{public}s",
                          natValue ? "true" : "false");
                 setting.AddProperty(strProName, std::to_string(natValue));
                 break;
@@ -1017,16 +1017,16 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
 
 bool UnwrapParamStopAbilityWrap(napi_env env, size_t argc, napi_value *argv, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called argc=%{public}zu", argc);
+    TAG_LOGI(AAFwkTag::BRIDGE, "called argc=%{public}zu", argc);
     const size_t argcMax = 2;
     if (argc > argcMax || argc < argcMax - 1) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
+        TAG_LOGE(AAFwkTag::BRIDGE, "invalid argc");
         return false;
     }
 
     if (argc == argcMax) {
         if (!CreateAsyncCallback(env, argv[PARAM1], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "argv[PARAM1] invalid");
+            TAG_LOGI(AAFwkTag::BRIDGE, "argv[PARAM1] invalid");
             return false;
         }
     }

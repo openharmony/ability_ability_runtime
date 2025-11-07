@@ -26,22 +26,22 @@ std::shared_ptr<OHOS::AppExecFwk::EventHandler> AniTask::mainHandler_ = nullptr;
 
 ani_status AniTask::AniSendEvent(const std::function<void()> task)
 {
-    TAG_LOGD(AAFwkTag::ANI, "AniSendEvent");
+    TAG_LOGD(AAFwkTag::BRIDGE, "AniSendEvent");
     if (task == nullptr) {
-        TAG_LOGD(AAFwkTag::ANI, "null task");
+        TAG_LOGD(AAFwkTag::BRIDGE, "null task");
         return ani_status::ANI_INVALID_ARGS;
     }
 
     if (!mainHandler_) {
         std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
         if (!runner) {
-            TAG_LOGD(AAFwkTag::ANI, "null EventRunner");
+            TAG_LOGD(AAFwkTag::BRIDGE, "null EventRunner");
             return ani_status::ANI_NOT_FOUND;
         }
         mainHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     }
     if (mainHandler_ == nullptr) {
-        TAG_LOGD(AAFwkTag::ANI, "null mainHandler");
+        TAG_LOGD(AAFwkTag::BRIDGE, "null mainHandler");
         return ani_status::ANI_NOT_FOUND;
     }
     mainHandler_->PostTask(std::move(task));
