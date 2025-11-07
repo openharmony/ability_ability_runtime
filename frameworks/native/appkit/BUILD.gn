@@ -214,6 +214,7 @@ ohos_shared_library("appkit_native") {
     "hitrace:hitrace_meter",
     "i18n:preferred_language",
     "init:libbegetutil",
+    "input:libmmi-client",
     "ipc:ipc_capi",
     "ipc:ipc_core",
     "ipc:ipc_napi",

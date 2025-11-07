@@ -36,6 +36,7 @@ ApplicationAnrListener::~ApplicationAnrListener() {}
 
 void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
 {
+    TAG_LOGI(AAFwkTag::APPDFR, "OnAnr called, eventId:%{public}d", eventId);
     if (!BETA_VERSION) {
         int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "HIVIEW_HALF_FREEZE_LOG",
             HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
