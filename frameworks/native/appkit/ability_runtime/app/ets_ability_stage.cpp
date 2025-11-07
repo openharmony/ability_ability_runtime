@@ -166,7 +166,7 @@ void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration &co
         return;
     }
     ETSAbilityStageContext::ConfigurationUpdated(env, fullConfig);
-    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
+    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
     if (configObj == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null configObj");
         return;
