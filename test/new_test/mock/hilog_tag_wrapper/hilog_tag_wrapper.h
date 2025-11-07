@@ -56,7 +56,7 @@ enum class AAFwkLogTag : uint32_t {
     JSRUNTIME,
     FA,
     INTENT,
-    JSNAPI,
+    BRIDGE,
     CJRUNTIME,
 
     DELEGATOR = DEFAULT + 0x30, // 0xD001330
@@ -127,7 +127,7 @@ inline const char* GetDomainName1(AAFwkLogTag tag)
 
 inline const char* GetDomainName2(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "JsEnv", "JsRuntime", "FA", "Intent", "JsNapi" };
+    const char* tagNames[] = { "JsEnv", "JsRuntime", "FA", "Intent", "Bridge" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::JSENV);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

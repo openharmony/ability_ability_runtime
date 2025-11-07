@@ -30,50 +30,50 @@ using namespace arkts::ani_signature;
 ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return nullptr;
     }
     ani_class cls = nullptr;
     ani_status status = env->FindClass(ABILITY_RESULT_CLASS_NAME, &cls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "FindClass status: %{public}d", status);
         return nullptr;
     }
 
     ani_method ctor = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
 
     ani_object resultObj = nullptr;
     if ((status = env->Object_New(cls, ctor, &resultObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_New status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Object_New status: %{public}d", status);
         return nullptr;
     }
     
     ani_method resultCodeSetter = nullptr;
     if ((status = env->Class_FindMethod(cls, Builder::BuildSetterName("resultCode").c_str(),
         nullptr, &resultCodeSetter)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
 
     if ((status = env->Object_CallMethod_Void(resultObj, resultCodeSetter, resultCode)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_CallMethod_Void status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Object_CallMethod_Void status: %{public}d", status);
         return nullptr;
     }
 
     ani_method wantSetter = nullptr;
     if ((status = env->Class_FindMethod(cls, Builder::BuildSetterName("want").c_str(),
         nullptr, &wantSetter)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
 
     ani_object wantObj = AppExecFwk::WrapWant(env, want);
     if ((status = env->Object_CallMethod_Void(resultObj, wantSetter, wantObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_CallMethod_Void status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "Object_CallMethod_Void status: %{public}d", status);
         return nullptr;
     }
 

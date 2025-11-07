@@ -713,7 +713,7 @@ bool UnWrapArrayString(ani_env *env, ani_object arrayObj, std::vector<std::strin
         }
         std::string str = "";
         if (!OHOS::AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(ref), str)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed, index: %{public}zu", idx);
+            TAG_LOGE(AAFwkTag::BRIDGE, "GetStdString failed, index: %{public}zu", idx);
             return false;
         }
         stringList.push_back(str);
