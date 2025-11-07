@@ -85,7 +85,7 @@ ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
     AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
         ENUMNAME_PROCESS, lastExitDetailInfo.processState, stateItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "processState", stateItem)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "processState failed status:%{public}d", status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "processState failed status:%{public}d", status);
         return nullptr;
     }
     return object;

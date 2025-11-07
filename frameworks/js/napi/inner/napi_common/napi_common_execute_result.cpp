@@ -33,16 +33,16 @@ bool UnwrapResultOfExecuteResult(napi_env env, napi_value param, InsightIntentEx
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, result, &valueType);
         if (valueType != napi_object) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "type not function");
+            TAG_LOGE(AAFwkTag::BRIDGE, "type not function");
             return false;
         }
         auto wp = std::make_shared<AAFwk::WantParams>();
         if (!AppExecFwk::UnwrapWantParams(env, result, *wp)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want failed");
+            TAG_LOGE(AAFwkTag::BRIDGE, "unwrap want failed");
             return false;
         }
         if (!executeResult.CheckResult(wp)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Check wp fail");
+            TAG_LOGE(AAFwkTag::BRIDGE, "Check wp fail");
             return false;
         }
         executeResult.result = wp;
@@ -53,22 +53,22 @@ bool UnwrapResultOfExecuteResult(napi_env env, napi_value param, InsightIntentEx
 bool UnwrapResultOfDecoratorExecuteResult(napi_env env, napi_value param, InsightIntentExecuteResult &executeResult)
 {
     if (param == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "decorator param null");
+        TAG_LOGE(AAFwkTag::BRIDGE, "decorator param null");
         return false;
     }
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, param, &valueType);
     if (valueType != napi_object) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "type not object");
+        TAG_LOGE(AAFwkTag::BRIDGE, "type not object");
         return false;
     }
     auto wp = std::make_shared<AAFwk::WantParams>();
     if (!AppExecFwk::UnwrapWantParams(env, param, *wp)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want failed");
+        TAG_LOGE(AAFwkTag::BRIDGE, "unwrap want failed");
         return false;
     }
     if (!executeResult.CheckResult(wp)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Check wp fail");
+        TAG_LOGE(AAFwkTag::BRIDGE, "Check wp fail");
         return false;
     }
     executeResult.result = wp;
@@ -78,16 +78,16 @@ bool UnwrapResultOfDecoratorExecuteResult(napi_env env, napi_value param, Insigh
 bool UnwrapExecuteResult(
     napi_env env, napi_value param, InsightIntentExecuteResult &executeResult, bool isDecorator)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_valuetype::napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "UnwrapExecuteResult not object");
+        TAG_LOGE(AAFwkTag::BRIDGE, "UnwrapExecuteResult not object");
         return false;
     }
     if (isDecorator) {
         executeResult.isDecorator = true;
         if (!UnwrapResultOfDecoratorExecuteResult(env, param, executeResult)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap decorator fail");
+            TAG_LOGE(AAFwkTag::BRIDGE, "unwrap decorator fail");
             return false;
         }
         return true;
@@ -95,14 +95,14 @@ bool UnwrapExecuteResult(
 
     int32_t code = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "code", code)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "parse code fail");
+        TAG_LOGE(AAFwkTag::BRIDGE, "parse code fail");
         return false;
     }
     executeResult.code = code;
 
     if (IsExistsByPropertyName(env, param, "result")) {
         if (!UnwrapResultOfExecuteResult(env, param, executeResult)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap result fail");
+            TAG_LOGE(AAFwkTag::BRIDGE, "unwrap result fail");
             return false;
         }
     }
@@ -110,7 +110,7 @@ bool UnwrapExecuteResult(
     if (IsExistsByPropertyName(env, param, "uris")) {
         std::vector<std::string> uris;
         if (!UnwrapStringArrayByPropertyName(env, param, "uris", uris)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap uris is null");
+            TAG_LOGE(AAFwkTag::BRIDGE, "unwrap uris is null");
             return false;
         }
         executeResult.uris = uris;
@@ -119,7 +119,7 @@ bool UnwrapExecuteResult(
     if (IsExistsByPropertyName(env, param, "flags")) {
         int32_t flags = 0;
         if (!UnwrapInt32ByPropertyName(env, param, "flags", flags)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap flags is null");
+            TAG_LOGE(AAFwkTag::BRIDGE, "unwrap flags is null");
             return false;
         }
         executeResult.flags = flags;

@@ -31,7 +31,7 @@ JsErrorObserver::~JsErrorObserver() = default;
 
 void JsErrorObserver::OnUnhandledException(const std::string errMsg)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     std::weak_ptr<JsErrorObserver> thisWeakPtr(shared_from_this());
     std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
     if (jsObserver) {
@@ -41,7 +41,7 @@ void JsErrorObserver::OnUnhandledException(const std::string errMsg)
 
 void JsErrorObserver::HandleOnUnhandledException(const std::string &errMsg)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
         napi_value value = (item.second)->GetNapiValue();
@@ -58,16 +58,16 @@ void JsErrorObserver::HandleOnUnhandledException(const std::string &errMsg)
 
 void JsErrorObserver::CallJsFunction(napi_value obj, const char* methodName, napi_value const* argv, size_t argc)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "call method:%{public}s", methodName);
+    TAG_LOGD(AAFwkTag::BRIDGE, "call method:%{public}s", methodName);
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null obj");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null obj");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, methodName, &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null method");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null method");
         return;
     }
     napi_value callResult = nullptr;
@@ -106,7 +106,7 @@ bool JsErrorObserver::IsEmpty()
 
 void JsErrorObserver::OnExceptionObject(const AppExecFwk::ErrorObject &errorObj)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     std::weak_ptr<JsErrorObserver> thisWeakPtr(shared_from_this());
     std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
     if (jsObserver) {
@@ -116,7 +116,7 @@ void JsErrorObserver::OnExceptionObject(const AppExecFwk::ErrorObject &errorObj)
 
 void JsErrorObserver::HandleException(const AppExecFwk::ErrorObject &errorObj)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::BRIDGE, "called");
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
         napi_value jsObj = (item.second)->GetNapiValue();
@@ -136,7 +136,7 @@ napi_value JsErrorObserver::CreateJsErrorObject(napi_env env, const AppExecFwk::
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGW(AAFwkTag::JSNAPI, "null obj");
+        TAG_LOGW(AAFwkTag::BRIDGE, "null obj");
         return objValue;
     }
     napi_set_named_property(env, objValue, "name", CreateJsValue(env, errorObj.name));

@@ -34,14 +34,14 @@ std::map<std::string, AniCommonCacheItem> AniCommonCacheMgr::aniCache_ = {
 bool AniCommonCacheMgr::GetCachedClass(ani_env *env, const std::string &className, ani_class &cls)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return false;
     }
 
     std::lock_guard lock(mutex_);
     const auto iter = aniCache_.find(className);
     if (iter == aniCache_.end()) {
-        TAG_LOGE(AAFwkTag::ANI, "Not support cache %{public}s", className.c_str());
+        TAG_LOGE(AAFwkTag::BRIDGE, "Not support cache %{public}s", className.c_str());
         return false;
     }
     if (iter->second.classRef_ != nullptr) {
@@ -51,13 +51,13 @@ bool AniCommonCacheMgr::GetCachedClass(ani_env *env, const std::string &classNam
 
     ani_status status = env->FindClass(className.c_str(), &cls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass %{public}s failed %{public}d", className.c_str(), status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "FindClass %{public}s failed %{public}d", className.c_str(), status);
         return false;
     }
     ani_ref ref = nullptr;
     status = env->GlobalReference_Create(cls, &ref);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "GlobalReference_Create %{public}s failed %{public}d", className.c_str(), status);
+        TAG_LOGE(AAFwkTag::BRIDGE, "GlobalReference_Create %{public}s failed %{public}d", className.c_str(), status);
         return false;
     }
     iter->second.classRef_ = ref;
@@ -68,26 +68,27 @@ bool AniCommonCacheMgr::GetCachedClassAndMethod(ani_env *env, const std::string 
     const AniCommonMethodCacheKey &methodKey, ani_class &cls, ani_method &method)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "null env");
+        TAG_LOGE(AAFwkTag::BRIDGE, "null env");
         return false;
     }
 
     std::lock_guard lock(mutex_);
     const auto iter = aniCache_.find(className);
     if (iter == aniCache_.end()) {
-        TAG_LOGE(AAFwkTag::ANI, "Not support cache %{public}s", className.c_str());
+        TAG_LOGE(AAFwkTag::BRIDGE, "Not support cache %{public}s", className.c_str());
         return false;
     }
     if (iter->second.classRef_ == nullptr) {
         ani_status status = env->FindClass(className.c_str(), &cls);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "FindClass %{public}s failed %{public}d", className.c_str(), status);
+            TAG_LOGE(AAFwkTag::BRIDGE, "FindClass %{public}s failed %{public}d", className.c_str(), status);
             return false;
         }
         ani_ref ref = nullptr;
         status = env->GlobalReference_Create(cls, &ref);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "GlobalReference_Create %{public}s failed %{public}d", className.c_str(), status);
+            TAG_LOGE(AAFwkTag::BRIDGE,
+                "GlobalReference_Create %{public}s failed %{public}d", className.c_str(), status);
             return false;
         }
         iter->second.classRef_ = ref;
@@ -119,7 +120,7 @@ bool AniCommonCacheMgr::InnerFindMethod(ani_env *env, const AniCommonMethodCache
     ani_status status =
         env->Class_FindMethod(cls, methodKey.first, methodKey.second, &method);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod %{public}s signature %{public}s failed %{public}d",
+        TAG_LOGE(AAFwkTag::BRIDGE, "Class_FindMethod %{public}s signature %{public}s failed %{public}d",
             methodKey.first, methodKey.second, status);
         return false;
     }
