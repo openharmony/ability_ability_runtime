@@ -66,7 +66,7 @@ void ContinuationConnector::OnAbilityConnectDone(
         TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return;
     }
-    remoteRegisterService_ = iface_cast<RemoteRegisterServiceProxy>(remoteObject);
+    remoteRegisterService_ = iface_cast<IRemoteRegisterService>(remoteObject);
     if (remoteRegisterService_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return;
