@@ -40,6 +40,9 @@ constexpr char EVENT_ENABLE_MAINTHREAD_SAMPLE[] = "ENABLE_MAINTHREAD_SAMPLE";
 constexpr char EVENT_APPLICATION_HEAP_INFO[] = "APPLICATION_HEAP_INFO";
 constexpr char EVENT_PROCESS_LIFECYCLE_INFO[] = "PROCESS_LIFECYCLE_INFO";
 constexpr char EVENT_MAIN_STACK[] = "MAIN_STACK";
+constexpr char EVENT_LAST_DISPATCH_EVENTID[] = "LAST_DISPATCH_EVENTID";
+constexpr char EVENT_LAST_MARKED_EVENTID[] = "LAST_MARKED_EVENTID";
+constexpr char EVENT_LAST_PROCESS_EVENTID[] = "LAST_PROCESS_EVENTID";
 }
 
 int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSysEventType type,
@@ -81,7 +84,10 @@ int AppfreezeEventReport::LogAppInputBlockEvent(const std::string &name, HiSysEv
         EVENT_FOREGROUND, eventInfo.foregroundState,
         EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
         EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
-        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime,
+        EVENT_LAST_MARKED_EVENTID, eventInfo.markedId,
+        EVENT_LAST_PROCESS_EVENTID, eventInfo.processedId,
+        EVENT_LAST_DISPATCH_EVENTID, eventInfo.dispatchedEventId);
     return ret;
 }
 

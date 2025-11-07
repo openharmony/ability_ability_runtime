@@ -3126,7 +3126,8 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         TAG_LOGW(AAFwkTag::APPMGR, "nullptr");
         return ret;
     }
-
+    AppExecFwk::AppfreezeManager::GetInstance()->InsertKillThread(ret, pid, appRecord->GetUid(),
+        appRecord->GetBundleName());
     appRecord->SetKillReason(reason);
     appRecord->SetIsKillPrecedeStart(isKillPrecedeStart);
     if (ret >= 0) {
@@ -7506,6 +7507,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", pid);
@@ -7518,13 +7520,10 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     }
     std::string bundleName = appRecord->GetBundleName();
     std::string eventName = faultData.errorObject.name;
-
     TAG_LOGW(AAFwkTag::APPDFR, "called, eventName:%{public}s, pid:%{public}d, bundleName:%{public}s, "
         "currentTime:%{public}s", eventName.c_str(), pid, bundleName.c_str(),
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
-    if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
-        TAG_LOGW(AAFwkTag::APPMGR, "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
-            eventName.c_str(), pid, bundleName.c_str());
+    if (AppExecFwk::AppfreezeManager::GetInstance()->IsSkipDetect(pid, uid, bundleName, eventName)) {
         return ERR_OK;
     }
 
@@ -7602,8 +7601,8 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
             innerService->KillProcessByPid(pid, reason);
             return;
         };
-        constexpr int32_t waitTime = 3500;
-        // wait 3.5s before kill application
+        int32_t waitTime = AppExecFwk::AppfreezeManager::GetInstance()->IsBetaVersion() ? 6000 : 3500;
+        // wait 3.5s(or 6s) before kill application
         CHECK_POINTER_AND_RETURN_VALUE(taskHandler_, ERR_NO_INIT);
         taskHandler_->SubmitTaskJust(killAppTask, "killAppTask", waitTime);
     }
@@ -7650,10 +7649,8 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
     int32_t uid = record->GetUid();
     std::string bundleName = record->GetBundleName();
     std::string processName = record->GetProcessName();
-    if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
-        TAG_LOGW(AAFwkTag::APPMGR,
-            "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s.",
-            faultData.errorObject.name.c_str(), pid, bundleName.c_str());
+    if (AppExecFwk::AppfreezeManager::GetInstance()->IsSkipDetect(pid, uid, bundleName,
+        faultData.errorObject.name)) {
         return ERR_OK;
     }
     if (faultData.errorObject.name == "appRecovery") {
