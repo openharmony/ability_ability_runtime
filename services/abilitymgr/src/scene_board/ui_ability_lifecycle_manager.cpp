@@ -2020,6 +2020,10 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResultLocked(sptr<Sess
         TAG_LOGI(AAFwkTag::ABILITYMGR, "callerSessionInfo invalid");
         return ERR_INVALID_VALUE;
     }
+    sptr<SessionInfo> newSessionInfo = sptr<SessionInfo>::MakeSptr();
+    newSessionInfo->want = callerSessionInfo->want;
+    newSessionInfo->persistentId = callerSessionInfo->persistentId;
+    newSessionInfo->identityToken = callerSessionInfo->identityToken;
 
     std::string callerBundleName = currentSessionInfo->want.GetBundle();
     std::string currentName = callerAbilityRecord->GetApplicationInfo().bundleName;
@@ -2027,12 +2031,11 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResultLocked(sptr<Sess
     EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
 
     auto currentSession = iface_cast<Rosen::ISession>(currentSessionInfo->sessionToken);
-    callerSessionInfo->isBackTransition = true;
-    callerSessionInfo->want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
-    callerSessionInfo->scenarios = ServerConstant::SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT;
+    newSessionInfo->isBackTransition = true;
+    newSessionInfo->want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
+    newSessionInfo->scenarios = ServerConstant::SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, backToCaller");
-    auto ret = static_cast<int>(currentSession->PendingSessionActivation(callerSessionInfo));
-    callerSessionInfo->isBackTransition = false;
+    auto ret = static_cast<int>(currentSession->PendingSessionActivation(newSessionInfo));
     return ret;
 }
 
