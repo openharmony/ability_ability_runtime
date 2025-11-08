@@ -226,9 +226,9 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return ret == ERR_OK;
 }
 
-#ifdef WITH_DLP
 [[maybe_unused]] static bool HandleDlpApp(Want &want)
 {
+#ifdef WITH_DLP
     const std::unordered_set<std::string> whiteListDlpSet = { BUNDLE_NAME_SELECTOR_DIALOG };
     if (whiteListDlpSet.find(want.GetBundle()) != whiteListDlpSet.end()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "enter special app");
@@ -245,10 +245,9 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
         want.RemoveParam(DLP_PARAMS_SANDBOX);
         return true;
     }
-
+#endif // WITH_DLP
     return false;
 }
-#endif // WITH_DLP
 
 [[maybe_unused]] static bool IsStartIncludeAtomicService(const Want &want, const int32_t userId)
 {
