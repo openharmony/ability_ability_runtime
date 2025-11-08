@@ -493,5 +493,223 @@ HWTEST_F(ForegroundAppConnectionManagerTest, GenerateConnectionData_001, TestSiz
     EXPECT_EQ(info.targetBundleName_, data.targetBundleName_);
     TAG_LOGI(AAFwkTag::TEST, "GenerateConnectionData_001 End");
 }
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_001
+ * FunctionPoints: abilityRecord is nullptr
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_001 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, abilityRecord);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_001 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_002
+ * FunctionPoints: target true true
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_002 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_002 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_003
+ * FunctionPoints: target true false
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_003 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_003 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_004
+ * FunctionPoints: target false true
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_004 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_004 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_005
+ * FunctionPoints: target false false
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_005 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_005 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_006
+ * FunctionPoints: caller true true
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_006 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_006 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_007
+ * FunctionPoints: caller true false
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_007 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_007 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_008
+ * FunctionPoints: caller false true
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_008 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_008 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_009
+ * FunctionPoints: caller false false
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_009 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_009 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_010
+ * FunctionPoints: all true
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_010 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_010 End");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
