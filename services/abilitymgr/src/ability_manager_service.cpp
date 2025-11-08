@@ -8994,8 +8994,8 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
 
     StartAbilityInfoWrap threadLocalInfo(want, oriValidUserId, appIndex, callerToken);
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
-    isSilent = want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false) ? true : !isSilent;
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, oriValidUserId, isSilent, nullptr,
+    bool isWithUI = want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false) ? true : !isSilent;
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, oriValidUserId, isWithUI, nullptr,
         shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
@@ -9047,7 +9047,7 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
         abilityRequest.abilityInfo.applicationInfo.singleton ? "true" : "false");
     UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, oriValidUserId,
-        false, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityRequest.abilityInfo), false, appIndex);
+        isWithUI, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityRequest.abilityInfo), false, appIndex);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
         afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
