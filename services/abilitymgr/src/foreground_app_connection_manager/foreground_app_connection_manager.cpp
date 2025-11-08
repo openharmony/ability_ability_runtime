@@ -20,12 +20,33 @@
 #include "foreground_app_connection_data.h"
 #include "foreground_app_connection_errors.h"
 #include "hilog_tag_wrapper.h"
+#include "ui_extension_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
 
 ForegroundAppConnectionManager::ForegroundAppConnectionManager() {}
 ForegroundAppConnectionManager::~ForegroundAppConnectionManager() {}
+
+bool ForegroundAppConnectionManager::IsForegroundAppConnection(
+    const AppExecFwk::AbilityInfo &targetAbilityInfo, std::shared_ptr<AbilityRecord> callerAbilityRecord)
+{
+    if (callerAbilityRecord == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityRecord is null");
+        return false;
+    }
+    if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE &&
+        !(UIExtensionUtils::IsUIExtension(targetAbilityInfo.extensionAbilityType))) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "target not UIAbility or UIExtension");
+        return false;
+    }
+    if (callerAbilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE &&
+        !(UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType))) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "caller not UIAbility or UIExtension");
+        return false;
+    }
+    return true;
+}
 
 int32_t ForegroundAppConnectionManager::RegisterObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer)
 {
