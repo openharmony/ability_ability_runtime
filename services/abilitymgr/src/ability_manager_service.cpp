@@ -40,9 +40,7 @@
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
-#ifdef WITH_DLP
 #include "dlp_utils.h"
-#endif // WITH_DLP
 #include "exit_info_data_manager.h"
 #include "ffrt.h"
 #include "ffrt_inner.h"
@@ -1226,26 +1224,21 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, ERR_INVALID_CALLER, "caller invalid");
         return ERR_INVALID_CALLER;
     }
-    {
-#ifdef WITH_DLP
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
-        if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-            VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-            !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: permission verification failed", __func__);
-            AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, CHECK_PERMISSION_FAILED,
-                "dlp permission verification failed");
-            return CHECK_PERMISSION_FAILED;
-        }
 
-        if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
-            InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
-            result = StartExtensionAbilityInner(want, callerToken, userId,
-                AppExecFwk::ExtensionAbilityType::SERVICE, false, false, true, isStartAsCaller);
-            AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "StartExtensionAbilityInner failed");
-            return result;
-        }
-#endif // WITH_DLP
+    if (!DlpUtils::AccessCheck(callerToken, want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityInner permission verification failed");
+        AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, CHECK_PERMISSION_FAILED,
+            "dlp permission verification failed");
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
+        InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+        result = StartExtensionAbilityInner(want, callerToken, userId,
+            AppExecFwk::ExtensionAbilityType::SERVICE, false, false, true, isStartAsCaller);
+        AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "StartExtensionAbilityInner failed");
+        return result;
     }
     bool isTargetPlugin = false;
     if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
@@ -1686,17 +1679,13 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     }
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 
-#ifdef WITH_DLP
-    if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: permission verification failed:%{public}d",
-            __func__, CHECK_PERMISSION_FAILED);
+    if (!DlpUtils::AccessCheck(callerToken, want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityDetails permission verification failed");
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, CHECK_PERMISSION_FAILED,
             "permission verification failed");
         return CHECK_PERMISSION_FAILED;
     }
-#endif // WITH_DLP
     bool isTargetPlugin = false;
     if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, pluginRet, "CheckStartPlugin failed");
@@ -2034,11 +2023,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-#ifdef WITH_DLP
-    if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed:%{public}d", CHECK_PERMISSION_FAILED);
+    if (!DlpUtils::AccessCheck(callerToken, want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, CHECK_PERMISSION_FAILED,
             "permission verify failed");
         return CHECK_PERMISSION_FAILED;
@@ -2050,7 +2037,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "StartExtensionAbilityInner failed");
         return result;
     }
-#endif // WITH_DLP
     bool isTargetPlugin = false;
     if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, pluginRet, "CheckStartPlugin failed");
@@ -2684,20 +2670,16 @@ int32_t AbilityManagerService::StartUIAbilitiesHandleWant(const Want &want, sptr
 int32_t AbilityManagerService::StartUIAbilitiesCheckDlp(const Want &want, sptr<IRemoteObject> callerToken,
     int32_t userId)
 {
-#ifdef WITH_DLP
     if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUIAbilities not support Dlp");
         return START_UI_ABILITIES_NOT_SUPPORT_DLP;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
-    if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
+    if (!DlpUtils::AccessCheck(callerToken, want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
             "StartUIAbilities Dlp %{public}s: permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
     }
-#endif // WITH_DLP
     return ERR_OK;
 }
 
@@ -2784,20 +2766,14 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
         return ERR_INVALID_CALLER;
     }
 
-    {
-#ifdef WITH_DLP
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
-        if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-            !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: permission verification failed", __func__);
-            return CHECK_PERMISSION_FAILED;
-        }
+    if (!DlpUtils::AccessCheck(callerToken, want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "RequestDialogServiceInner permission verification failed");
+        return CHECK_PERMISSION_FAILED;
+    }
 
-        if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "cannot handle dlp by requestDialogService");
-            return ERR_WRONG_INTERFACE_CALL;
-        }
-#endif // WITH_DLP
+    if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "cannot handle dlp by requestDialogService");
+        return ERR_WRONG_INTERFACE_CALL;
     }
 
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
@@ -4206,14 +4182,11 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
 
     sptr<IRemoteObject> callerToken = extensionSessionInfo->callerToken;
 
-#ifdef WITH_DLP
-    if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, extensionSessionInfo->want) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, extensionSessionInfo->want)) {
+    if (!DlpUtils::AccessCheck(callerToken, extensionSessionInfo->want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "startUIExtensionAbility: permission verification failed");
         return CHECK_PERMISSION_FAILED;
     }
-#endif // WITH_DLP
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "startUIExtensionAbility verificationAllToken failed");
@@ -12031,9 +12004,8 @@ int AbilityManagerService::CheckDlpForExtension(
         return ERR_OK;
     }
 
-    if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
-        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
+    if (!DlpUtils::AccessCheck(callerToken, want) ||
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         EventReport::SendExtensionEvent(eventName, HiSysEventType::FAULT, eventInfo);
@@ -12059,7 +12031,7 @@ bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord>
         }
     }
     if (callingTokenId != tokenID) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no self, no enabled, callingTokenId:%{public}u, tokenId:%{public}u", callingTokenId, tokenID);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self, caller:%{public}u, tokenId:%{public}u", callingTokenId, tokenID);
         return false;
     }
 
