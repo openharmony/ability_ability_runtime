@@ -383,10 +383,11 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_001, TestSize.Le
     FaultData faultData;
     std::string msgContent = "AppfreezeInner_ChangeFaultDateInfo_001";
     appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
-    EXPECT_TRUE(!msgContent.empty());
+    EXPECT_EQ(faultData.errorObject.message, msgContent);
     faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
     appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
-    EXPECT_TRUE(!msgContent.empty());
+    std::string ret = "AppfreezeInner_ChangeFaultDateInfo_001AppfreezeInner_ChangeFaultDateInfo_001";
+    EXPECT_EQ(faultData.errorObject.message, ret);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
