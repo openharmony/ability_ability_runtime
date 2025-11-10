@@ -174,6 +174,7 @@ private:
         uint64_t dumpFinishTime, const std::string& dumpResult);
     std::string ParseDecToHex(uint64_t id);
     std::string GetHitraceInfo();
+    AppFaultDataBySA GenerateFaultDataBySA(const ParamInfo& info, const FreezeUtil::LifecycleFlow& flow);
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
     bool RemoveOldKillInfo();
