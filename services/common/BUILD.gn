@@ -157,6 +157,10 @@ ohos_shared_library("app_util") {
     defines += [ "ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE" ]
   }
 
+  if (ability_runtime_forbidstart_enable) {
+    defines += [ "ABILITY_RUNTIME_FORBIDSTART_ENABLE" ]
+  }
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
