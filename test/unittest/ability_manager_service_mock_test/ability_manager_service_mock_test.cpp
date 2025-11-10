@@ -289,7 +289,9 @@ HWTEST_F(AbilityManagerServiceMockTest, PreloadUIExtensionAbilityInner_0100, Tes
     StartAbilityUtils::startAbilityInfo->status = ERR_OK;
     StartAbilityUtils::startAbilityInfo->abilityInfo.visible = true;
     abilityMs->subManagersHelper_ = nullptr;
-    auto ret = abilityMs->PreloadUIExtensionAbilityInner(want, bundleName, 1, 1);
+    int32_t preloadId = 1;
+    int32_t userId = 1;
+    auto ret = abilityMs->PreloadUIExtensionAbilityInner(want, bundleName, preloadId, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 

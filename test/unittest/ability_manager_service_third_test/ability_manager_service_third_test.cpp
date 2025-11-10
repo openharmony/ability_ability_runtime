@@ -1134,7 +1134,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreloadUIExtensionAbilityInner_001, Tes
     AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
     providerWant.SetElement(providerElement);
     std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, DEFAULT_INVAL_VALUE);
+    int32_t preloadId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, preloadId);
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "finish.");
 }
@@ -3017,6 +3018,223 @@ HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_004, TestSize.
 
     EXPECT_EQ(abilityMs_->RestartSelfAtomicService(callerRecord->GetToken()), NOT_TOP_ABILITY);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbility
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbility without permission
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t extensionAbilityId = 1001;
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbility
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbility with invalid extensionAbilityId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t extensionAbilityId = DEFAULT_INVAL_VALUE;
+    int32_t userId = 100;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbility
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbility with null connectManager
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t extensionAbilityId = 1001;
+    int32_t userId = 999999;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbility
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbility with non-existent extension
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t extensionAbilityId = 9999;
+    int32_t userId = 100;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbility
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbility with default userId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t extensionAbilityId = 1001;
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities without permission
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities with empty hostBundleName
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "";
+    int32_t userId = 100;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities with null connectManager
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    int32_t userId = 999999;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities with non-existent hostBundleName
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "com.ohos.nonexistent.bundle";
+    int32_t userId = 100;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities with default userId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ClearPreloadedUIExtensionAbilities
+ * FunctionPoints: AbilityManagerService ClearPreloadedUIExtensionAbilities with valid parameters
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    int32_t userId = 100;
+    auto result = abilityMs->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * FunctionPoints: AbilityManagerService UnRegisterPreloadUIExtensionHostClient
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto result = abilityMs->UnRegisterPreloadUIExtensionHostClient();
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * FunctionPoints: AbilityManagerService UnRegisterPreloadUIExtensionHostClient
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto result = abilityMs->UnRegisterPreloadUIExtensionHostClient();
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * FunctionPoints: AbilityManagerService UnRegisterPreloadUIExtensionHostClient
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto result = abilityMs->UnRegisterPreloadUIExtensionHostClient();
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

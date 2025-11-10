@@ -3439,7 +3439,11 @@ HWTEST_F(AbilityConnectManagerTest, PreloadUIExtensionAbilityLocked_0100, TestSi
     abilityRequest.want.SetElement(providerElement);
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto ret = connectManager->PreloadUIExtensionAbilityLocked(abilityRequest, hostBundleName);
+
+    int32_t preloadId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;;
+    int32_t hostPid = DEFAULT_INVAL_VALUE;
+    auto ret = connectManager->PreloadUIExtensionAbilityLocked(
+        abilityRequest, hostBundleName, ERR_PRELOAD_APP_DATA_ABILITIES_FAILED);
     EXPECT_NE(ret, ERR_OK);
 }
 
@@ -4050,6 +4054,35 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_ScheduleDisconnectAbilityDon
     connectManager->serviceMap_.emplace("first", abilityRecord);
     res = connectManager->ScheduleDisconnectAbilityDoneLocked(nullptr);
     EXPECT_EQ(res, CONNECTION_NOT_EXIST);
+}
+
+/**
+ * @tc.name: UnPreloadUIExtensionAbilityLocked_0100
+ * @tc.desc: unpreload uiextension ability with invalid id
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UnPreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
+    auto ret = connectManager->UnPreloadUIExtensionAbilityLocked(extensionAbilityId);
+    EXPECT_EQ(ret, ERR_CODE_INVALID_ID);
+}
+
+/**
+ * @tc.name: ClearAllPreloadUIExtensionAbilityLocked_0100
+ * @tc.desc: clear all preload uiextension ability with empty bundle name
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, ClearAllPreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    std::string hostBundleName = "";
+    auto ret = connectManager->ClearAllPreloadUIExtensionAbilityLocked(hostBundleName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

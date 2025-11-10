@@ -90,6 +90,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_info_for_query.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/intent_exemption_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
@@ -104,13 +105,14 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/sa_interceptor_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sa_interceptor_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/system_ability_token_callback_stub.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ui_extension/preload_ui_extension_execute_callback_proxy.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ui_extension/preload_ui_extension_execute_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_ability_connect_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_host_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_session_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/window_config.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
     "src/aa_tools/ability_start_with_wait_data.cpp",
     "src/aa_tools/ability_start_with_wait_observer_proxy.cpp",
     "src/aa_tools/ability_start_with_wait_observer_stub.cpp",
@@ -382,8 +384,8 @@ ohos_shared_library("start_window_option") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics &&
