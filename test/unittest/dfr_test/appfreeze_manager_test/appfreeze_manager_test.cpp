@@ -476,7 +476,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetUidByPid_Test001, TestSiz
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_InsertKillThread_Test001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_KillThreadStateManagement_Test001, TestSize.Level1)
 {
     int32_t killState = 1;
     int32_t pid = getpid();
