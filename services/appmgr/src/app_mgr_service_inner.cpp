@@ -202,6 +202,8 @@ constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 60000;
 constexpr size_t MAX_PROCESS_NAME_LENGTH = 64;
+constexpr const int32_t DEFAULT_APPFREEZE_KILL_WAIT_TIME = 3500; // 3.5s
+constexpr const int32_t BETA_APPFREEZE_KILL_WAIT_TIME = 6000; // 6s
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -7601,8 +7603,9 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
             innerService->KillProcessByPid(pid, reason);
             return;
         };
-        int32_t waitTime = AppExecFwk::AppfreezeManager::GetInstance()->IsBetaVersion() ? 6000 : 3500;
-        // wait 3.5s(or 6s) before kill application
+        int32_t waitTime = AppExecFwk::AppfreezeManager::GetInstance()->IsBetaVersion() ?
+            BETA_APPFREEZE_KILL_WAIT_TIME : DEFAULT_APPFREEZE_KILL_WAIT_TIME;
+        // wait 3.5s or 6s before kill application
         CHECK_POINTER_AND_RETURN_VALUE(taskHandler_, ERR_NO_INIT);
         taskHandler_->SubmitTaskJust(killAppTask, "killAppTask", waitTime);
     }
