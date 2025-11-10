@@ -39,7 +39,7 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
             "ohos.permission.CONNECT_FAULT_LOG_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::CRYPTO) {
         return PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CRYPTO_EXTENSION_CONNECT");
+            "ohos.permission.CONNECT_CRYPTO_EXTENSION");
     if (PermissionVerification::GetInstance()->IsShellCall()) {
         return true;
     }
