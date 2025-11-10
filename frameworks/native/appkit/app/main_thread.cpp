@@ -3785,13 +3785,23 @@ int32_t MainThread::ChangeAppGcState(int32_t state, uint64_t tid)
     if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
         return NO_ERROR;
     }
-    auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+
+    NativeEngine* nativeEngine = nullptr;
+
+    if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+        auto& etsRuntime = static_cast<AbilityRuntime::ETSRuntime&>(*runtime);
+        auto& jsRuntime = static_cast<AbilityRuntime::JsRuntime&>(*etsRuntime.GetJsRuntime());
+        nativeEngine = &jsRuntime.GetNativeEngine();
+    } else {
+        nativeEngine = &(static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+    }
+
     if (tid > 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "tid is %{private}" PRIu64, tid);
-        nativeEngine.NotifyForceExpandState(tid, state);
+        nativeEngine->NotifyForceExpandState(tid, state);
         return NO_ERROR;
     }
-    nativeEngine.NotifyForceExpandState(state);
+    nativeEngine->NotifyForceExpandState(state);
     return NO_ERROR;
 }
 
