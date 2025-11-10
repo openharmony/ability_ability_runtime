@@ -85,9 +85,9 @@ int AppfreezeEventReport::LogAppInputBlockEvent(const std::string &name, HiSysEv
         EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
         EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
         EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime,
-        EVENT_LAST_MARKED_EVENTID, eventInfo.markedId,
-        EVENT_LAST_PROCESS_EVENTID, eventInfo.processedId,
-        EVENT_LAST_DISPATCH_EVENTID, eventInfo.dispatchedEventId);
+        EVENT_LAST_DISPATCH_EVENTID, std::to_string(eventInfo.dispatchedEventId),
+        EVENT_LAST_PROCESS_EVENTID, std::to_string(eventInfo.processedId),
+        EVENT_LAST_MARKED_EVENTID, std::to_string(eventInfo.markedId));
     return ret;
 }
 
