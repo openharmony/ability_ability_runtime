@@ -51,6 +51,7 @@ constexpr int MAX_LAYER = 8;
 constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
 constexpr int FREEZE_EVENT_MAX_SIZE = 200;
+constexpr int64_t FREEZE_KILL_LIMIT = 60000;
 static constexpr uint8_t ARR_SIZE = 7;
 static constexpr uint8_t DECIMAL = 10;
 static constexpr uint8_t FREE_ASYNC_INDEX = 6;
@@ -1049,10 +1050,10 @@ bool AppfreezeManager::RemoveOldKillInfo()
         return true;
     }
     int removeCount = 0;
-    uint64_t curTime = AppfreezeUtil::GetMilliseconds();
+    int64_t curTime = GetFreezeCurrentTime();
     for (auto it = freezeKillThreadMap_.begin(); it != freezeKillThreadMap_.end();) {
         auto interval = curTime - it->second.occurTime;
-        if (interval > AppfreezeUtil::TIME_LIMIT || interval < 0) {
+        if (interval > FREEZE_KILL_LIMIT || interval < 0) {
             it = freezeKillThreadMap_.erase(it);
             removeCount++;
         } else {
@@ -1089,7 +1090,7 @@ bool AppfreezeManager::CheckThreadKilled(int32_t pid, int32_t uid, const std::st
     std::string key = bundleName + AppfreezeUtil::KEY_SEPARATOR + std::to_string(pid) +
         AppfreezeUtil::KEY_SEPARATOR + std::to_string(uid);
     std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
-    if (freezeKillThreadMap_.size() == 0) {
+    if (freezeKillThreadMap_.empty()) {
         return false;
     }
     auto it = freezeKillThreadMap_.find(key);
