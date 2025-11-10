@@ -213,5 +213,15 @@ void Extension::OnExtensionAbilityRequestSuccess(const std::string &requestId, c
     const std::string &message)
 {
 }
+
+void Extension::SetPreloadedSuccess(bool isPreloadedSuccess)
+{
+    isPreloadedSuccess_ = isPreloadedSuccess;
 }
+
+bool Extension::IsPreloadedSuccess() const
+{
+    return isPreloadedSuccess_;
+}
+} // namespace AbilityRuntime
 }

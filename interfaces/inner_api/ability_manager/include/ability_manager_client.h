@@ -393,11 +393,13 @@ public:
      *
      * @param want, the want of the ability to start.
      * @param hostBundleName, the caller application bundle name.
+     * @param requestCode the resultCode of the preload ui extension ability to start.
      * @param userId, the extension runs in.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE);
+        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE,
+        int32_t hostPid = DEFAULT_INVAL_VALUE);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -1973,6 +1975,40 @@ public:
      * @return Returns true on being limited.
      */
     bool IsRestartAppLimit();
+
+    /**
+     * UnPreload UIExtension with want, send want to ability manager service.
+     *
+     * @param extensionAbilityId, the extension ability Id.
+     * @param userId, the extension runs in.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearPreloadedUIExtensionAbility(int32_t extensionAbilityId, int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * clear all Preload UIExtension with want, send want to ability manager service.
+     *
+     * @param hostBundleName, the caller application bundle name.
+     * @param userId, the extension runs in.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Register preload ui extension host client.
+     * @param callerToken Caller ability token.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * @brief UnRegister preload ui extension host client.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnRegisterPreloadUIExtensionHostClient();
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

@@ -64,6 +64,11 @@ public:
     virtual void SetContext(const std::shared_ptr<UIExtensionContext> &context) = 0;
 
     virtual void BindContext() = 0;
+
+    virtual bool IsPreloadedSuccess() const
+    {
+        return false;
+    }
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -625,5 +625,105 @@ HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_StartButIsActive
     TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButIsActiveStatus_001 end");
 }
 
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnPreloadUIExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: UnPreloadUIExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify UnPreloadUIExtensionAbilityInner with invalid extensionAbilityId
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, UnPreloadUIExtensionAbilityInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnPreloadUIExtensionAbilityInner_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
+    auto res = connectManager->UnPreloadUIExtensionAbilityInner(extensionAbilityId);
+    EXPECT_EQ(res, ERR_CODE_INVALID_ID);
+    
+    TAG_LOGI(AAFwkTag::TEST, "UnPreloadUIExtensionAbilityInner_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ClearAllPreloadUIExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: ClearAllPreloadUIExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify ClearAllPreloadUIExtensionAbilityInner with empty hostBundleName
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, ClearAllPreloadUIExtensionAbilityInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearAllPreloadUIExtensionAbilityInner_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    std::string hostBundleName = "";
+    auto res = connectManager->ClearAllPreloadUIExtensionAbilityInner(hostBundleName);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "ClearAllPreloadUIExtensionAbilityInner_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ClearAllPreloadUIExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: ClearAllPreloadUIExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify ClearAllPreloadUIExtensionAbilityInner with all valid conditions
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, ClearAllPreloadUIExtensionAbilityInner_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearAllPreloadUIExtensionAbilityInner_003 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+    std::string hostBundleName = "com.app.test";
+    auto res = connectManager->ClearAllPreloadUIExtensionAbilityInner(hostBundleName);
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "ClearAllPreloadUIExtensionAbilityInner_003 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: RegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: RegisterPreloadUIExtensionHostClient
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterPreloadUIExtensionHostClient with null callerToken
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, RegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto res = connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: UnRegisterPreloadUIExtensionHostClient
+ * EnvConditions: NA
+ * CaseDescription: Verify UnRegisterPreloadUIExtensionHostClient with null uiExtensionAbilityRecordMgr_
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, UnRegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    auto res = connectManager->UnRegisterPreloadUIExtensionHostClient();
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_001 end");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

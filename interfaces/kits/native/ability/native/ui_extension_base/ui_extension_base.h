@@ -58,6 +58,7 @@ public:
         if (impl_ != nullptr) {
             auto launchParam = Extension::GetLaunchParam();
             impl_->OnStart(want, launchParam, sessionInfo);
+            Extension::SetPreloadedSuccess(impl_->IsPreloadedSuccess());
         }
     }
 

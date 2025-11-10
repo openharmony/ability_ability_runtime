@@ -56,10 +56,9 @@ public:
 
     /**
      * @brief Connect the Extension. and Calling information back to Extension.
-     *
      * @param want The Want object to connect to.
      * @param targetState The terget state.
-     *  @param sessionInfo  Indicates the sessionInfo.
+     * @param sessionInfo  Indicates the sessionInfo.
      *
      */
     virtual void HandleExtensionTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState,
@@ -209,6 +208,8 @@ protected:
 
 private:
     inline bool UIExtensionAbilityExecuteInsightIntent(const Want &want);
+    bool ProcessLifecycleStateTransition(
+        const Want &want, const AAFwk::LifeCycleStateInfo &targetState, sptr<AAFwk::SessionInfo> sessionInfo);
 
     bool skipCommandExtensionWithIntent_ = false;
     int lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;

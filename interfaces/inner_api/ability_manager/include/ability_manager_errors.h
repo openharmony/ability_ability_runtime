@@ -1076,6 +1076,11 @@ enum {
     ERR_MAIN_WINDOW_NOT_EXIST = 2099200,
 
     /**
+     * Result (2099201) for specified ID does not exist.
+     */
+    ERR_CODE_INVALID_ID = 2099201,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,

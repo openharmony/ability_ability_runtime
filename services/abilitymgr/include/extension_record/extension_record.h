@@ -53,12 +53,18 @@ public:
 
     int32_t RegisterStateObserver(const std::string &hostBundleName);
 
+    void SetPreloadedSuccess(bool isPreloadedSuccess);
+
+    bool IsPreloadedSuccess() const;
+
     bool isHostSpecified_ = false;
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
     uint32_t processMode_ = 0;
     pid_t hostPid_ = 0;
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord_ = nullptr;
     std::string hostBundleName_;
+    int32_t requestCode_ = -1;
+    bool isPreloadedSuccess_ = false;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
     sptr<IRemoteObject> focusedCallerToken_ = nullptr;

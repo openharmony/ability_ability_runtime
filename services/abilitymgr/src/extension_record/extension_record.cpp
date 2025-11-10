@@ -85,5 +85,15 @@ bool ExtensionRecord::ContinueToGetCallerToken()
 void ExtensionRecord::Update(const AAFwk::AbilityRequest &abilityRequest)
 {
 }
+
+void ExtensionRecord::SetPreloadedSuccess(bool isPreloadedSuccess)
+{
+    isPreloadedSuccess_ = isPreloadedSuccess;
+}
+
+bool ExtensionRecord::IsPreloadedSuccess() const
+{
+    return isPreloadedSuccess_;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

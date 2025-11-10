@@ -24,10 +24,12 @@ import Context from 'application.Context';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import _AbilityForegroundStateObserver from 'application.AbilityForegroundStateObserver';
 import { ExtensionRunningInfo as _ExtensionRunningInfo } from './application/ExtensionRunningInfo';
-
+import Want from '@ohos.app.ability.Want';
 
 export default namespace abilityManager {
   loadLibraryWithPermissionCheck("ability_manager_ani_kit.z", "@ohos.app.ability.abilityManager")
+  export type PreloadedUIExtensionAbilityLoadedFn = (preloadId: int) => void;
+  export type PreloadedUIExtensionAbilityDestroyedFn = (preloadId: int) => void;
 
   export native function nativeGetForegroundUIAbilities(): Array<AbilityStateData>;
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
@@ -48,7 +50,14 @@ export default namespace abilityManager {
   export native function nativeQueryAtomicServiceStartupRule(context: Context, appId: string, callback:AsyncCallbackWrapper<AtomicServiceStartupRule>) : void;
   export native function nativeQueryAtomicServiceStartupRuleCheck(context: Context): void;
   export native function nativeGetExtensionRunningInfos(upperLimit:int, callback:AsyncCallbackWrapper<Array<ExtensionRunningInfo>>) : void;
-  
+  export native function nativeOnPreloadedUIExtensionAbilityLoaded(callback: PreloadedUIExtensionAbilityLoadedFn): void;
+  export native function nativeOffPreloadedUIExtensionAbilityLoaded(callback?: PreloadedUIExtensionAbilityLoadedFn): void;
+  export native function nativeOnPreloadedUIExtensionAbilityDestroyed(callback: PreloadedUIExtensionAbilityDestroyedFn): void;
+  export native function nativeOffPreloadedUIExtensionAbilityDestroyed(callback?: PreloadedUIExtensionAbilityDestroyedFn): void;
+  export native function nativePreloadUIExtensionAbility(want: Want, callback: AsyncCallbackWrapper<int>): void;
+  export native function nativeClearPreloadedUIExtensionAbility(preloadId: int, callback: AsyncCallbackWrapper<void>): void;
+  export native function nativeClearPreloadedUIExtensionAbilities(callback: AsyncCallbackWrapper<void>): void;
+
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
       let executeFunc = (): Array<AbilityStateData> => {
@@ -258,6 +267,79 @@ export default namespace abilityManager {
     let myCall = new AsyncCallbackWrapper<Array<ExtensionRunningInfo>>(callback);
     taskpool.execute( (): void => {
         abilityManager.nativeGetExtensionRunningInfos(upperLimit, myCall);
+    });
+  }
+
+  function onPreloadedUIExtensionAbilityLoaded(callback: PreloadedUIExtensionAbilityLoadedFn): void {
+    abilityManager.nativeOnPreloadedUIExtensionAbilityLoaded(callback);
+  }
+
+  function offPreloadedUIExtensionAbilityLoaded(callback?: PreloadedUIExtensionAbilityLoadedFn): void {
+    abilityManager.nativeOffPreloadedUIExtensionAbilityLoaded(callback);
+  }
+
+  function onPreloadedUIExtensionAbilityDestroyed(callback: PreloadedUIExtensionAbilityDestroyedFn): void {
+    abilityManager.nativeOnPreloadedUIExtensionAbilityDestroyed(callback);
+  }
+
+  function offPreloadedUIExtensionAbilityDestroyed(callback?: PreloadedUIExtensionAbilityDestroyedFn): void {
+    abilityManager.nativeOffPreloadedUIExtensionAbilityDestroyed(callback);
+  }
+
+  function preloadUIExtensionAbility(want: Want): Promise<int> {
+    return new Promise<int>((resolve: (data: int) => void, reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<int>((err: BusinessError | null, data: int | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as int);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        try {
+          abilityManager.nativePreloadUIExtensionAbility(want, call);
+        } catch (err: BusinessError) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function clearPreloadedUIExtensionAbility(preloadId: int): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        try {
+          abilityManager.nativeClearPreloadedUIExtensionAbility(preloadId, call);
+        } catch (err: BusinessError) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function clearPreloadedUIExtensionAbilities(): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        try {
+          abilityManager.nativeClearPreloadedUIExtensionAbilities(call);
+        } catch (err: BusinessError) {
+          reject(err);
+        }
+      });
     });
   }
 

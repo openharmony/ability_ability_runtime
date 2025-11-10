@@ -267,6 +267,9 @@ public:
     virtual void OnExtensionAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message);
 
+    virtual void SetPreloadedSuccess(bool isPreloadedSuccess);
+    bool IsPreloadedSuccess() const;
+
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
 protected:
     std::shared_ptr<AppExecFwk::AbilityHandler> handler_ = nullptr;
@@ -279,6 +282,7 @@ private:
     std::shared_ptr<AAFwk::Want> lastRequestWant_ = nullptr;
     AAFwk::LaunchParam launchParam_;
     std::shared_ptr<CallingInfo> callingInfo_ = nullptr;
+    bool isPreloadedSuccess_ = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

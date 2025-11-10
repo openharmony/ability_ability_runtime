@@ -785,5 +785,30 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
     const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind)
 {
 }
+
+void AbilityConnectManager::CheckIsPreloadUIExtensionRecordChangedById(
+    int32_t extensionRecordId, int32_t state, bool isPreloadedSuccess)
+{
+}
+
+int AbilityConnectManager::UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId)
+{
+    return 0;
+}
+
+int AbilityConnectManager::ClearAllPreloadUIExtensionAbilityLocked(const std::string &hostBundleName)
+{
+    return 0;
+}
+
+int32_t AbilityConnectManager::RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken)
+{
+    return 0;
+}
+
+int32_t AbilityConnectManager::UnRegisterPreloadUIExtensionHostClient(int32_t key)
+{
+    return 0;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

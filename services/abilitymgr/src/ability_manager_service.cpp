@@ -214,6 +214,7 @@ constexpr const char* FRS_BUNDLE_NAME = "com.ohos.formrenderservice";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 constexpr const char* RSS_PROCESS_NAME = "resource_schedule_service";
 constexpr const char* IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
+constexpr const char* IS_PRELOADED_UI_EXTENSION_SUCCESS = "ability.want.params.is_preload_ui_extension_ability_success";
 constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 constexpr const char* SUPPORT_CLOSE_ON_BLUR = "supportCloseOnBlur";
 constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
@@ -3618,7 +3619,7 @@ int AbilityManagerService::ImplicitStartExtensionAbility(const Want &want, const
 }
 
 int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::string &bundleName,
-    int32_t userId, int32_t hostPid)
+    int32_t requestCode, int32_t userId, int32_t hostPid)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -3635,11 +3636,11 @@ int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::stri
             PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
         return ERR_PERMISSION_DENIED;
     }
-    return PreloadUIExtensionAbilityInner(want, bundleName, userId, hostPid);
+    return PreloadUIExtensionAbilityInner(want, bundleName, requestCode, userId, hostPid);
 }
 
-int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std::string &hostBundleName,
-    int32_t userId, int32_t hostPid)
+int AbilityManagerService::PreloadUIExtensionAbilityInner(
+    const Want &want, std::string &hostBundleName, int32_t requestCode, int32_t userId, int32_t hostPid)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "PreloadUIExtension called, elementName: %{public}s/%{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
@@ -3669,6 +3670,7 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std:
         TAG_LOGE(AAFwkTag::UI_EXT, "generate abilityReq error");
         return result;
     }
+    abilityRequest.requestCode = requestCode;
     abilityRequest.extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     abilityRequest.want.SetParam(IS_PRELOAD_UIEXTENSION_ABILITY, true);
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -7393,6 +7395,12 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
         if (!connectManager) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
+        }
+        PacMap pacMap = saveData;        
+        bool isPreloadedSuccess = pacMap.GetBooleanValue(IS_PRELOADED_UI_EXTENSION_SUCCESS);
+        if (state == AbilityState::INACTIVE || isTerminate || state == AbilityState::INACTIVATING) {
+            connectManager->CheckIsPreloadUIExtensionRecordChangedById(
+                abilityRecord->GetUIExtensionAbilityId(), state, isPreloadedSuccess);
         }
         return connectManager->AbilityTransitionDone(token, state);
     }
@@ -15862,6 +15870,107 @@ ErrCode AbilityManagerService::StartSelfUIAbilityInCurrentProcess(const Want &wa
         useWant.SetParam(KEY_SPECIFIED_FLAG, specifiedFlag);
     }
     return StartAbility(useWant, useStartOptions, callerToken);
+}
+
+int32_t AbilityManagerService::ClearPreloadedUIExtensionAbility(int32_t extensionAbilityId, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ClearPreloadedUIExtensionAbility called, id: %{public}d, userId: %{public}d",
+        extensionAbilityId, userId);
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
+            PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t validUserId = GetValidUserId(userId);
+    AbilityRequest abilityRequest;
+    auto connectManager = GetConnectManagerByUserId(validUserId);
+    if (connectManager == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t ret = connectManager->UnPreloadUIExtensionAbilityLocked(extensionAbilityId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "UnPreloadUIExtensionAbilityLocked failed, id: %{public}d, ret: %{public}d",
+            extensionAbilityId, ret);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT,
+        "ClearPreloadedUIExtensionAbilities called, hostBundleName: %{public}s, userId: %{public}d",
+        hostBundleName.c_str(), userId);
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
+            PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+        return ERR_PERMISSION_DENIED;
+    }
+    if (hostBundleName.empty()) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "hostBundleName is empty");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t validUserId = GetValidUserId(userId);
+    auto connectManager = GetConnectManagerByUserId(validUserId);
+    if (connectManager == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t ret = connectManager->ClearAllPreloadUIExtensionAbilityLocked(hostBundleName);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT,
+            "ClearAllPreloadUIExtensionAbilityLocked failed, hostBundleName: %{public}s, ret: %{public}d",
+            hostBundleName.c_str(), ret);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "RegisterPreloadUIExtensionHostClient called");
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
+            PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+        return ERR_PERMISSION_DENIED;
+    }
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t validUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    auto connectManager = GetConnectManagerByUserId(validUserId);
+    if (connectManager == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
+        return ERR_INVALID_VALUE;
+    }
+    return connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+}
+
+int32_t AbilityManagerService::UnRegisterPreloadUIExtensionHostClient()
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "UnRegisterPreloadUIExtensionHostClient called");
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
+            PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t validUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    auto connectManager = GetConnectManagerByUserId(validUserId);
+    if (connectManager == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
+        return ERR_INVALID_VALUE;
+    }
+    return connectManager->UnRegisterPreloadUIExtensionHostClient();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
