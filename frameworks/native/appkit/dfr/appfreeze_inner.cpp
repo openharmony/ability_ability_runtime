@@ -295,18 +295,23 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
 void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
 {
     FaultData faultData;
-    faultData.errorObject.message =
-        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    std::string faultTimeStr = "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    faultData.errorObject.message = faultTimeStr;
     faultData.errorObject.message += "App main thread is not response!";
     int32_t pid = static_cast<int32_t>(getpid());
     if (isSixSecondEvent) {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
         faultData.procStatm = GetProcStatm(pid);
+        if (BETA_VERSION) {
+            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
+                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+            faultData.errorObject.message += (ret == 0) ? "FREEZE_HALF_HIVIEW_LOG write success" : "";
+        }
     } else {
         if (!BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "HIVIEW_HALF_FREEZE_LOG",
+            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
                 HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
-            TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write HIVIEW_HALF_FREEZE_LOG, pid:%{public}d, packageName:,"
+            TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:,"
                 " ret:%{public}d", pid, ret);
         }
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
@@ -446,8 +451,8 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent, uint64_t sc
     uint64_t now, bool isInBackground)
 {
     FaultData faultData;
-    faultData.errorObject.message =
-        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    std::string faultTimeStr = "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    faultData.errorObject.message = faultTimeStr;
     faultData.errorObject.message += "App main thread is not response!";
     bool onlyMainThread = false;
     int32_t pid = static_cast<int32_t>(getpid());
@@ -463,11 +468,16 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent, uint64_t sc
         isSixSecondEvent.store(false);
 #endif
         faultData.procStatm = GetProcStatm(pid);
+        if (BETA_VERSION) {
+            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
+                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+            faultData.errorObject.message += (ret == 0) ? "FREEZE_HALF_HIVIEW_LOG write success" : "";
+        }
     } else {
         if (!BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "HIVIEW_HALF_FREEZE_LOG",
+            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
                 HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
-            TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write HIVIEW_HALF_FREEZE_LOG, pid:%{public}d, packageName:,"
+            TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:,"
                 " ret:%{public}d", pid, ret);
         }
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
