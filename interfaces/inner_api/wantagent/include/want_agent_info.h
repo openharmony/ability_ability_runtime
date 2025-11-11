@@ -59,6 +59,23 @@ public:
      * A constructor used to create an WantAgentInfo instance based on the input parameters.
      *
      * @param requestCode Indicates the request code to set. It is a private value defined by the user.
+     * @param appIndex Indicates the appIndex for dual apps.
+     * @param operationType Indicates the type of the operation to be performed by the WantAgent object.
+     * For details about the value range, see WantAgentConstant.OperationType.
+     * @param flag Indicates the flag for handling the WantAgent.
+     * For details about the value range, see WantAgentConstant.Flags.
+     * @param Wants Indicates the collection of Want objects to be used for creating the WantAgent
+     * object. The number of Wants in the collection is determined by WantAgentConstant.OperationType.
+     * @param extraInfo Indicates the extra information to be used for creating the WantAgent object.
+     */
+    WantAgentInfo(int requestCode, int32_t appIndex, const WantAgentConstant::OperationType &operationType,
+        const std::vector<WantAgentConstant::Flags> &flags, std::vector<std::shared_ptr<AAFwk::Want>> &Wants,
+        const std::shared_ptr<AAFwk::WantParams> &extraInfo, int userId = -1);
+
+    /**
+     * A constructor used to create an WantAgentInfo instance based on the input parameters.
+     *
+     * @param requestCode Indicates the request code to set. It is a private value defined by the user.
      * @param operationType Indicates the type of the operation to be performed by the WantAgent object.
      * For details about the value range, see WantAgentConstant.OperationType.
      * @param flags Indicates the flags for handling the WantAgent.
@@ -100,6 +117,13 @@ public:
     std::vector<WantAgentConstant::Flags> GetFlags() const;
 
     /**
+     * Obtains the appIndex of the WantAgent object.
+     *
+     * @return Returns the appIndex of the WantAgent object.
+     */
+    int32_t GetAppIndex() const;
+
+    /**
      * Obtains the collection of all Wants of the WantAgent object.
      *
      * @return Returns the collection of all Wants of the WantAgent object.
@@ -123,6 +147,7 @@ public:
 private:
     int requestCode_ = 0;
     int userId_ = -1;
+    int32_t appIndex_ = 0;
     WantAgentConstant::OperationType operationType_ = WantAgentConstant::OperationType::UNKNOWN_TYPE;
     std::vector<WantAgentConstant::Flags> flags_ = std::vector<WantAgentConstant::Flags>();
     std::vector<std::shared_ptr<AAFwk::Want>> wants_ = std::vector<std::shared_ptr<AAFwk::Want>>();
