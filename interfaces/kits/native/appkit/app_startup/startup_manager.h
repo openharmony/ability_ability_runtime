@@ -107,9 +107,6 @@ public:
 
     int32_t GetUid() const;
 
-    int32_t GetStartupTaskManagerIdByManager(const std::shared_ptr<StartupTaskManager> startupTaskManager,
-        uint32_t &id);
-
     int32_t GetStartupTaskManagerById(uint32_t id, std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
 private:

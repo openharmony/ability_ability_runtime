@@ -58,20 +58,14 @@ int32_t ETSStartupManager::NativeCreateStartupTaskManager(ani_env *env, ani_obje
         return ERR_FAILURE;
     }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    int32_t result = ETSStartupManager::RunStartupTask(env, startupTasks, isDefaultContext, startupConfig,
+    int32_t result = ETSStartupManager::GetStartupTaskManager(env, startupTasks, isDefaultContext, startupConfig,
         abilityStageContext, startupTaskManager);
     if (result != ERR_OK || startupTaskManager == nullptr) {
         EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
-        TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
-        return result;
+        TAG_LOGE(AAFwkTag::STARTUP, "GetStartupTaskManager failed");
+        return ERR_FAILURE;
     }
-    
-    if ((result =DelayedSingleton<StartupManager>::GetInstance()->
-        GetStartupTaskManagerIdByManager(startupTaskManager, startupTaskManagerId)) != ERR_OK) {
-        EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
-        TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
-        return result;
-    }
+    startupTaskManagerId = startupTaskManager->GetStartupTaskManagerId();
     return static_cast<int32_t>(startupTaskManagerId);
 }
 void ETSStartupManager::NativeRun(ani_env *env, ani_int startupTaskManagerId, ani_object callback)
@@ -86,7 +80,7 @@ void ETSStartupManager::NativeRun(ani_env *env, ani_int startupTaskManagerId, an
         static_cast<uint32_t>(startupTaskManagerId), startupTaskManager);
     if (result != ERR_OK || startupTaskManager == nullptr) {
         EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
-        TAG_LOGE(AAFwkTag::STARTUP, "RunStartupTask failed");
+        TAG_LOGE(AAFwkTag::STARTUP, "GetStartupTaskManagerById failed");
         return;
     }
     ani_ref gl = nullptr;
@@ -208,7 +202,7 @@ void ETSStartupManager::NativeRemoveStartupTaskResult(ani_env *env, ani_string s
     return;
 }
 
-int32_t ETSStartupManager::RunStartupTask(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
+int32_t ETSStartupManager::GetStartupTaskManager(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
     ani_object startupConfig, ani_object abilityStageContext, std::shared_ptr<StartupTaskManager> &startupTaskManager)
 {
     std::vector<std::string> dependencies;

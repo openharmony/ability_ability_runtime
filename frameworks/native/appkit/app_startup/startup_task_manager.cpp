@@ -212,5 +212,10 @@ void StartupTaskManager::SetTimeoutCallback(const std::function<void()>& callbac
 {
     timeoutCallback_ = callback;
 }
+
+uint32_t StartupTaskManager::GetStartupTaskManagerId() const
+{
+    return startupTaskManagerId_;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
