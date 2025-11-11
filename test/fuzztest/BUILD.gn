@@ -83,6 +83,7 @@ group("fuzztest") {
     "abilityinterfacesappmanageramsmgrstub_fuzzer:fuzztest",
     "abilityinterfacesappmanageramsmgrstubfirst_fuzzer:fuzztest",
     "abilityinterfacesappmanageramsmgrstubsecond_fuzzer:fuzztest",
+    "abilityinterfacesappmanageramsmgrstubthird_fuzzer:fuzztest",
     "abilityinterfacesappmgrabilitydebugresponseproxy_fuzzer:fuzztest",
     "abilityinterfacesappmgrappdebuglistenerproxy_fuzzer:fuzztest",
     "abilityinterfacesappmgrappdebuglistenerstub_fuzzer:fuzztest",
