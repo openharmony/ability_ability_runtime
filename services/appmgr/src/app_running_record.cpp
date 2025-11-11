@@ -52,6 +52,7 @@ constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
 constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
+constexpr const char* UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 }
@@ -756,12 +757,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
             static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
             abilityStateData.appCloneIndex = appIndex_;
     }
-    if (ability->GetWant() != nullptr) {
-        abilityStateData.callerAbilityName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-        abilityStateData.callerBundleName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-        abilityStateData.callerUid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1);
-        abilityStateData.callerPid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1);
-    }
+    FillAbilityStateDataWithWant(ability, abilityStateData);
     if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         abilityStateData.isAtomicService = true;
     }
@@ -778,6 +774,29 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     auto serviceInner = appMgrServiceInner_.lock();
     if (serviceInner) {
         serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
+    }
+}
+
+void AppRunningRecord::FillAbilityStateDataWithWant(const std::shared_ptr<AbilityRunningRecord> &ability,
+    AbilityStateData &abilityStateData)
+{
+    if (ability == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ability");
+        return;
+    }
+    if (ability->GetWant() != nullptr) {
+        abilityStateData.callerAbilityName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+        abilityStateData.callerBundleName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        abilityStateData.callerUid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1);
+        abilityStateData.callerPid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1);
+        abilityStateData.hostPid = ability->GetWant()->GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1);
+        auto serviceInner = appMgrServiceInner_.lock();
+        if (serviceInner) {
+            auto hostAppRecord = serviceInner->GetAppRunningRecordByPid(abilityStateData.hostPid);
+            if (hostAppRecord) {
+                abilityStateData.hostBundleName = hostAppRecord->GetBundleName();
+            }
+        }
     }
 }
 

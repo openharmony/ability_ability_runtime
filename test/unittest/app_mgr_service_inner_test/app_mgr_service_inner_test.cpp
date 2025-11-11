@@ -5244,7 +5244,6 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
-    EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
     appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
 }
 
