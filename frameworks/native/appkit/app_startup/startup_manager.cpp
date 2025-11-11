@@ -1365,5 +1365,17 @@ int32_t StartupManager::GetUid() const
 {
     return uid_;
 }
+
+int32_t StartupManager::GetStartupTaskManagerById(uint32_t id, std::shared_ptr<StartupTaskManager> &startupTaskManager)
+{
+    std::lock_guard<std::mutex> lock(startupTaskManagerMutex_);
+    auto result = startupTaskManagerMap_.find(id);
+    if (result == startupTaskManagerMap_.end()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "StartupTaskManager id: %{public}u not found", id);
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    startupTaskManager = result->second;
+    return ERR_OK;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
