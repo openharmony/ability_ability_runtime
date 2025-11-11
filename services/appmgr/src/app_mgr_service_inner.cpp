@@ -1177,7 +1177,6 @@ void AppMgrServiceInner::AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want>
     appRunningManager_->AddUIExtensionLauncherItem(uiExtensionAbilityId, hostPid, providerPid);
 
     want->RemoveParam(UIEXTENSION_ABILITY_ID);
-    want->RemoveParam(UIEXTENSION_ROOT_HOST_PID);
 }
 
 void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunningRecord> appRecord,

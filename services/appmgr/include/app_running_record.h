@@ -1208,7 +1208,8 @@ private:
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
     int32_t GetAddStageTimeout() const;
     void SetModuleLoaded(const std::string &moduleName) const;
-
+    void FillAbilityStateDataWithWant(const std::shared_ptr<AbilityRunningRecord> &ability,
+        AbilityStateData &abilityStateData);
 private:
     class RemoteObjHash {
     public:
