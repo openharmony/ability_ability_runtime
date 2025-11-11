@@ -2716,5 +2716,85 @@ HWTEST_F(MainThreadTest, SplitString_0600, TestSize.Level1)
     EXPECT_TRUE(moduleNameList[1] == "name2");
     EXPECT_TRUE(moduleNameList[2] == "name3");
 }
+
+/**
+ * @tc.name: CheckAndUpdateRuntime_0100
+ * @tc.desc: CheckAndUpdateRuntime Ability 1.0, Application 1.2, Runtime Js.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, CheckAndUpdateRuntime_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>();
+    abilityRecord->abilityInfo_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    MainThread_->application_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    AbilityRuntime::Runtime::Options options;
+    option.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    mainThread_->application_->SetRuntime(std::move(runtime));
+    ApplicationInfo appInfo;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    mainThread_->SetRuntimeLang(appInfo, options);
+    EXPECT_TRUE(mainThread_->CheckAndUpdateRuntime(abilityRecord));
+}
+
+/**
+ * @tc.name: CheckAndUpdateRuntime_0200
+ * @tc.desc: CheckAndUpdateRuntime Ability 1.0, Application 1.2, Runtime Ets.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, CheckAndUpdateRuntime_0200, TestSize.Level1)
+{
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>();
+    abilityRecord->abilityInfo_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    MainThread_->application_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    AbilityRuntime::Runtime::Options options;
+    option.lang = AbilityRuntime::Runtime::Language::ETS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    mainThread_->application_->SetRuntime(std::move(runtime));
+    ApplicationInfo appInfo;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    mainThread_->SetRuntimeLang(appInfo, options);
+    EXPECT_TRUE(mainThread_->CheckAndUpdateRuntime(abilityRecord));
+}
+
+/**
+ * @tc.name: CheckAndUpdateRuntime_0300
+ * @tc.desc: CheckAndUpdateRuntime Ability 1.2, Application 1.2, Runtime Js.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, CheckAndUpdateRuntime_0300, TestSize.Level1)
+{
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>();
+    abilityRecord->abilityInfo_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    MainThread_->application_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    AbilityRuntime::Runtime::Options options;
+    option.lang = AbilityRuntime::Runtime::Language::ETS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    mainThread_->application_->SetRuntime(std::move(runtime));
+    ApplicationInfo appInfo;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    mainThread_->SetRuntimeLang(appInfo, options);
+    EXPECT_TRUE(mainThread_->CheckAndUpdateRuntime(abilityRecord));
+}
+
+/**
+ * @tc.name: CheckAndUpdateRuntime_0400
+ * @tc.desc: CheckAndUpdateRuntime Ability 1.0, Application 1.0, Runtime Js.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, CheckAndUpdateRuntime_0300, TestSize.Level1)
+{
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>();
+    abilityRecord->abilityInfo_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    MainThread_->application_->arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    AbilityRuntime::Runtime::Options options;
+    option.lang = AbilityRuntime::Runtime::Language::ETS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    mainThread_->application_->SetRuntime(std::move(runtime));
+    ApplicationInfo appInfo;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0;
+    mainThread_->SetRuntimeLang(appInfo, options);
+    EXPECT_TRUE(mainThread_->CheckAndUpdateRuntime(abilityRecord));
+}
 } // namespace AppExecFwk
 } // namespace OHOS

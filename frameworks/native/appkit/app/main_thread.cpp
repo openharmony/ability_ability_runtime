@@ -4296,6 +4296,7 @@ void MainThread::SleepCleanKill()
 
 bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr || applicationInfo_ == nullptr || abilityRecord->GetAbilityInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord or applicationInfo or abilityInfo");
         return false;
@@ -4312,7 +4313,7 @@ bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord>
     if (runtime->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
         return true;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_APP, "Updata Runtime");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "Update Runtime");
     std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
     contextDeal->SetApplicationInfo(applicationInfo_);
     contextDeal->SetBundleCodePath(applicationInfo_->codePath);
