@@ -56,6 +56,8 @@ public:
 
     void SetTimeoutCallback(const std::function<void()>& callback);
 
+    uint32_t GetStartupTaskManagerId() const;
+
 private:
     uint32_t startupTaskManagerId_ = 0;
     std::shared_ptr<StartupConfig> config_;

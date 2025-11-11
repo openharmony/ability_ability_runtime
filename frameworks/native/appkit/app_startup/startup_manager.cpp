@@ -1366,24 +1366,6 @@ int32_t StartupManager::GetUid() const
     return uid_;
 }
 
-int32_t StartupManager::GetStartupTaskManagerIdByManager(const std::shared_ptr<StartupTaskManager> startupTaskManager,
-    uint32_t &id)
-{
-    if (startupTaskManager == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "StartupTaskManager is null");
-        return ERR_STARTUP_INVALID_VALUE;
-    }
-    std::lock_guard<std::mutex> lock(startupTaskManagerMutex_);
-    for (const auto& pair : startupTaskManagerMap_) {
-        if (pair.second == startupTaskManager) {
-            id = pair.first;
-            return ERR_OK;
-        }
-    }
-    TAG_LOGE(AAFwkTag::STARTUP, "StartupTaskManager not found");
-    return ERR_STARTUP_INTERNAL_ERROR;
-}
-
 int32_t StartupManager::GetStartupTaskManagerById(uint32_t id, std::shared_ptr<StartupTaskManager> &startupTaskManager)
 {
     std::lock_guard<std::mutex> lock(startupTaskManagerMutex_);
