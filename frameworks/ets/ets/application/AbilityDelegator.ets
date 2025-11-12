@@ -34,9 +34,9 @@ export interface AbilityDelegator {
 
   executeShellCommand(cmd: String, callback: AsyncCallback<ShellCmdResult>): void;
 
-  executeShellCommand(cmd: String, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult>): void;
+  executeShellCommand(cmd: String, timeoutSecs: long, callback: AsyncCallback<ShellCmdResult>): void;
 
-  executeShellCommand(cmd: string, timeoutSecs?: number): Promise<ShellCmdResult>;
+  executeShellCommand(cmd: string, timeoutSecs?: long): Promise<ShellCmdResult>;
 
   addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void;
 
@@ -108,14 +108,18 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native nativeFinishTest(msg: String, code: long, callback: AsyncCallbackWrapper<void>): void;
 
-  public native nativeExecuteShellCommand(cmd: string, timeoutSecs: number,
+  public native nativeExecuteShellCommand(cmd: string, timeoutSecs: long,
     callback: AsyncCallbackWrapper<ShellCmdResult>): void;
 
   public native nativeAddAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallbackWrapper<void>): void;
 
+  public native addAbilityMonitorCheck(monitor: AbilityMonitor): void;
+
   public native addAbilityMonitorSync(monitor: AbilityMonitor): void;
 
   public native removeAbilityMonitorAsync(monitor: AbilityMonitor, callback: AsyncCallbackWrapper<void>): void;
+
+  public native removeAbilityMonitorCheck(monitor: AbilityMonitor): void;
 
   public native removeAbilityMonitorSync(monitor: AbilityMonitor): void;
 
@@ -126,15 +130,21 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native addAbilityStageMonitorSync(monitor: AbilityStageMonitor): void;
 
+  public native addAbilityStageMonitorCheck(monitor: AbilityStageMonitor): void;
+
   public native removeAbilityStageMonitorAsync(monitor: AbilityStageMonitor,
     callback: AsyncCallbackWrapper<void>): void;
 
   public native removeAbilityStageMonitorSync(monitor: AbilityStageMonitor): void;
 
+  public native removeAbilityStageMonitorCheck(monitor: AbilityStageMonitor): void;
+
   public native waitAbilityStageMonitorAsync(monitor: AbilityStageMonitor, timeout: long,
     callback: AsyncCallbackWrapper<AbilityStage>): void;
 
   public native doAbilityForegroundAsync(ability: UIAbility, callback: AsyncCallbackWrapper<void>): void;
+
+  public native doAbilityForegroundOrBackgroundCheck(ability: UIAbility): void;
 
   public native doAbilityBackgroundAsync(ability: UIAbility, callback: AsyncCallbackWrapper<void>): void;
 
@@ -176,13 +186,13 @@ class AbilityDelegatorInner implements AbilityDelegator {
       this.nativeExecuteShellCommand(cmd, timeoutSecs, myCall);
     });
   }
-  executeShellCommand(cmd: string, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult, void>): void {
+  executeShellCommand(cmd: string, timeoutSecs: long, callback: AsyncCallback<ShellCmdResult, void>): void {
     let myCall = new AsyncCallbackWrapper<ShellCmdResult>(callback);
     taskpool.execute((): void => {
       this.nativeExecuteShellCommand(cmd, timeoutSecs, myCall);
     });
   }
-  executeShellCommand(cmd: string, timeoutSecs?: number): Promise<ShellCmdResult> {
+  executeShellCommand(cmd: string, timeoutSecs?: long): Promise<ShellCmdResult> {
     let p = new Promise<ShellCmdResult>((resolve: (data: ShellCmdResult) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall =
@@ -197,7 +207,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         if (timeoutSecs == null) {
           this.nativeExecuteShellCommand(cmd, 0, myCall);
         } else {
-          this.nativeExecuteShellCommand(cmd, timeoutSecs as double, myCall);
+          this.nativeExecuteShellCommand(cmd, timeoutSecs as long, myCall);
         }
       });
     });
@@ -205,12 +215,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void {
+    this.addAbilityMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeAddAbilityMonitor(monitor, myCall);
     });
   }
   addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
+    this.addAbilityMonitorCheck(monitor);
     let p =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -228,12 +240,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   removeAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void {
+    this.removeAbilityMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.removeAbilityMonitorAsync(monitor, myCall);
     });
   }
   removeAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
+    this.removeAbilityMonitorCheck(monitor);
     let p =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -251,6 +265,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   waitAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<UIAbility, void>): void {
+    this.removeAbilityMonitorCheck(monitor);
     let timeout = -1;
     let myCall = new AsyncCallbackWrapper<UIAbility>(callback);
     taskpool.execute((): void => {
@@ -258,12 +273,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
     });
   }
   waitAbilityMonitor(monitor: AbilityMonitor, timeout: long, callback: AsyncCallback<UIAbility, void>): void {
+    this.removeAbilityMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<UIAbility>(callback);
     taskpool.execute((): void => {
       this.waitAbilityMonitorAsync(monitor, timeout, myCall);
     });
   }
   waitAbilityMonitor(monitor: AbilityMonitor, timeout?: long): Promise<UIAbility> {
+    this.removeAbilityMonitorCheck(monitor);
     let p = new Promise<UIAbility>((resolve: (data: UIAbility) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<UIAbility>((err: BusinessError | null, data: UIAbility | undefined) => {
@@ -285,12 +302,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   addAbilityStageMonitor(monitor: AbilityStageMonitor, callback: AsyncCallback<void>): void {
+    this.addAbilityStageMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.addAbilityStageMonitorAsync(monitor, myCall);
     });
   }
   addAbilityStageMonitor(monitor: AbilityStageMonitor): Promise<void> {
+    this.addAbilityStageMonitorCheck(monitor);
     let p =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -308,12 +327,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   removeAbilityStageMonitor(monitor: AbilityStageMonitor, callback: AsyncCallback<void>): void {
+    this.removeAbilityStageMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.removeAbilityStageMonitorAsync(monitor, myCall);
     });
   }
   removeAbilityStageMonitor(monitor: AbilityStageMonitor): Promise<void> {
+    this.removeAbilityStageMonitorCheck(monitor);
     let p =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -331,6 +352,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   waitAbilityStageMonitor(monitor: AbilityStageMonitor, callback: AsyncCallback<AbilityStage, void>): void {
+    this.removeAbilityStageMonitorCheck(monitor);
     let timeout = -1;
     let myCall = new AsyncCallbackWrapper<AbilityStage>(callback);
     taskpool.execute((): void => {
@@ -339,12 +361,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
   waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout: long,
     callback: AsyncCallback<AbilityStage, void>): void {
+    this.removeAbilityStageMonitorCheck(monitor);
     let myCall = new AsyncCallbackWrapper<AbilityStage>(callback);
     taskpool.execute((): void => {
       this.waitAbilityStageMonitorAsync(monitor, timeout, myCall);
     });
   }
   waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout?: long): Promise<AbilityStage> {
+    this.removeAbilityStageMonitorCheck(monitor);
     let p = new Promise<AbilityStage>((resolve: (data: AbilityStage) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall =
@@ -367,12 +391,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   doAbilityForeground(ability: UIAbility, callback: AsyncCallback<void>): void {
+    this.doAbilityForegroundOrBackgroundCheck(ability);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.doAbilityForegroundAsync(ability, myCall);
     });
   }
   doAbilityForeground(ability: UIAbility): Promise<void> {
+    this.doAbilityForegroundOrBackgroundCheck(ability);
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -390,12 +416,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
 
   doAbilityBackground(ability: UIAbility, callback: AsyncCallback<void>): void {
+    this.doAbilityForegroundOrBackgroundCheck(ability);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.doAbilityBackgroundAsync(ability, myCall);
     });
   }
   doAbilityBackground(ability: UIAbility): Promise<void> {
+    this.doAbilityForegroundOrBackgroundCheck(ability);
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {

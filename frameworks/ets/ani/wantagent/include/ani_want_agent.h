@@ -71,6 +71,7 @@ public:
     static void Clean(ani_env *env, ani_object object);
     static ani_object CreateLocalWantAgent(ani_env *env, ani_object info);
     static ani_boolean IsLocalWantAgent(ani_env *env, ani_object info);
+    static void TriggerCheck(ani_env *env, ani_object agent, ani_object triggerInfoObj);
 
 private:
     void OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);

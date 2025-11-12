@@ -15,6 +15,7 @@
 
 import hilog from '@ohos.hilog'
 import rpc from '@ohos.rpc';
+import { RecordData } from '@ohos.base';
 
 type valueType = NullishType;
 const DOMAIN_ID = 0xD001300;
@@ -894,7 +895,7 @@ export default class Want {
   type?: string;
   flags?: int;
   action?: string;
-  parameters?: Record<string, Object>;
+  parameters?: Record<string, RecordData>;
   entities?: Array<string>;
   moduleName?: string;
   readonly fds?: Record<string, int>;

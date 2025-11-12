@@ -34,9 +34,9 @@ public:
 
     static void Finalizer(ani_env *env, void *data, void *hint);
     static void TerminateSelf(ani_env *env, ani_object obj, ani_object callback);
-    static ani_long ConnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    static ani_long ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
-    static void DisconnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbilityWithOption(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
