@@ -2021,6 +2021,53 @@ HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBPendingActivation_002, TestSize
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBPendingActivation_0300
+ * @tc.desc: NotifySCBPendingActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBPendingActivation_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto token = abilityRecord->GetToken();
+    EXPECT_NE(token, nullptr);
+    abilityRequest.callerToken = token->AsObject();
+    abilityRequest.isStartInSplitMode = false;
+    abilityRequest.isTargetPlugin = true;
+    std::string errMsg;
+    uiAbilityLifecycleManager->NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBPendingActivation_0400
+ * @tc.desc: NotifySCBPendingActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBPendingActivation_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    abilityRequest.sessionInfo = sessionInfo;
+    abilityRequest.isStartInSplitMode = false;
+    abilityRequest.callerToken = nullptr;
+    abilityRequest.isTargetPlugin = true;
+    std::string errMsg;
+    uiAbilityLifecycleManager->NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_NotifySCBPendingActivationInSplitMode_0100
  * @tc.desc: NotifySCBPendingActivationInSplitMode
  * @tc.type: FUNC
