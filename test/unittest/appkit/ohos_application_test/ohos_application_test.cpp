@@ -1366,27 +1366,24 @@ HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0600, TestSize.Le
 HWTEST_F(OHOSApplicationTest, UpdateETSRuntime_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateETSRuntime_0100 start.";
+    ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockRuntime>();
     AbilityRuntime::Runtime::Options option;
-    option.lang = AbilityRuntime::Runtime::Language::JS;
-    auto jsRuntime = AbilityRuntime::Runtime::Create(option);
-    ohosApplication_->SetRuntime(std::move(jsRuntime));
     option.lang = AbilityRuntime::Runtime::Language::ETS;
-    EXPECT_TRUE(ohosApplication_->UpdateETSRuntime(option));
+    EXPECT_FALSE(ohosApplication_->UpdateETSRuntime(option));
     GTEST_LOG_(INFO) << "UpdateETSRuntime_0100 end.";
 }
 
 /*
 * @tc.number: UpdateETSRuntime_0200
 * @tc.name: UpdateETSRuntime
-* @tc.desc: Verify Runtime is etsRuntime
+* @tc.desc: Verify runtime is null
 */
 HWTEST_F(OHOSApplicationTest, UpdateETSRuntime_0200, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateETSRuntime_0200 start.";
     AbilityRuntime::Runtime::Options option;
     option.lang = AbilityRuntime::Runtime::Language::ETS;
-    auto Runtime = AbilityRuntime::Runtime::Create(option);
-    ohosApplication_->SetRuntime(std::move(Runtime));
+    ohosApplication_->runtime_ = nullptr;
     EXPECT_FALSE(ohosApplication_->UpdateETSRuntime(option));
     GTEST_LOG_(INFO) << "UpdateETSRuntime_0200 end.";
 }

@@ -2796,5 +2796,21 @@ HWTEST_F(MainThreadTest, CheckAndUpdateRuntime_0300, TestSize.Level1)
     mainThread_->SetRuntimeLang(appInfo, options);
     EXPECT_TRUE(mainThread_->CheckAndUpdateRuntime(abilityRecord));
 }
+
+/**
+ * @tc.name: GetBundleAndHspListForUpdateRuntime_0100
+ * @tc.desc: GetBundleAndHspListForUpdateRuntime Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, GetBundleAndHspListForUpdateRuntime_0100, TestSize.Level1)
+{
+    std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
+    contextDeal->SetApplicationInfo(mainThread_->applicationInfo_);
+    contextDeal->SetBundleCodePath(mainThread_->applicationInfo_->codePath);
+    auto bundleMgrHelper = contextDeal->GetBundleManager();
+    BundleInfo bundleInfo;
+    HspList hsplist;
+    EXPECT_TRUE(mainThread_->GetHspListForUpdateRuntime(bundleInfo, "com.ohos.myapplication", hsplist));
+}
 } // namespace AppExecFwk
 } // namespace OHOS

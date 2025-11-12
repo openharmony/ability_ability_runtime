@@ -694,6 +694,8 @@ private:
 
     std::string ParsePluginDefaultNamespaceLdDictionary();
 
+    bool GetBundleAndHspListForUpdateRuntime(BundleInfo &bundleInfo, std::string bundleName, HspList &hspList);
+
     /**
      * @brief parse app configuration params
      *
