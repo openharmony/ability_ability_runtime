@@ -21,6 +21,7 @@
 #include "ability_record.h"
 #include "app_utils.h"
 #include "bundle_mgr_helper.h"
+#include "dialog_session/dialog_session_manager.h"
 #include "mission_list_manager.h"
 #include "ui_ability_lifecycle_manager.h"
 #undef private
@@ -2268,6 +2269,49 @@ HWTEST_F(AbilityManagerServiceSixthTest, IsAppCloneOrMultiInstance_001, TestSize
     ret = abilityMs->IsAppCloneOrMultiInstance(want, abilityRecord, targetAppIndex, callerInstanceKey);
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsAppCloneOrMultiInstance_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityInner
+ * FunctionPoints: Verify that have dialog info.
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    AbilityRequest preAbilityRequest;
+    preAbilityRequest.abilityInfo.applicationInfo.uid = 0;
+    std::string dialogSessionId = "testDialogSessionId";
+    DialogSessionManager::GetInstance().OnlySetDialogCallerInfo(preAbilityRequest, preAbilityRequest.userId,
+        AAFwk::SelectorType::INTERCEPTOR_SELECTOR, dialogSessionId, false);
+    Want want;
+    want.SetParam("dialogSessionId", dialogSessionId);
+    want.SetParam("isSelector", true);
+    int ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityInner
+ * FunctionPoints: Verify that without dialog info SA interceptor executes.
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    Want want;
+    int ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
+    std::string dialogSessionId = "dialogSessionIdTest";
+    want.SetParam("dialogSessionId", dialogSessionId);
+    ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_003 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
