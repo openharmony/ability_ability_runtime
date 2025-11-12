@@ -1584,5 +1584,108 @@ HWTEST_F(AbilityExtensionConfigTest, IsScreenUnlockIntercept_011, TestSize.Level
     EXPECT_TRUE(flag);
     TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockIntercept_011 end.");
 }
+
+/*
+ * @tc.number    : IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenExtensionTypeNameNotFount
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsScreenUnlockAllowAbility
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenExtensionTypeNameNotFount,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenExtensionTypeNameNotFount start.");
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "ServiceExtension",
+            "extension_type_name": "service",
+            "screen_unlock_access": {
+                "allowlist": [],
+                "intercept": true
+            }
+        }]
+    })";
+    ASSERT_NE(extensionConfig_, nullptr);
+    LoadTestConfig(configStr);
+    bool flag = extensionConfig_->IsScreenUnlockAllowAbility("unknown_type", "com.example.test", "testAbility");
+    EXPECT_FALSE(flag);
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenExtensionTypeNameNotFount end.");
+}
+
+/*
+ * @tc.number    : IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenAllowlistEmpty
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsScreenUnlockAllowAbility
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenAllowlistEmpty, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenAllowlistEmpty start.");
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "ServiceExtension",
+            "extension_type_name": "service",
+            "screen_unlock_access": {
+                "allowlist": [],
+                "intercept": true
+            }
+        }]
+    })";
+    ASSERT_NE(extensionConfig_, nullptr);
+    LoadTestConfig(configStr);
+    bool flag = extensionConfig_->IsScreenUnlockAllowAbility("service", "com.example.test", "testAbility");
+    EXPECT_FALSE(flag);
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenAllowlistEmpty end.");
+}
+
+/*
+ * @tc.number    : IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenBundleAndAbilityNotInAllowlist
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsScreenUnlockAllowAbility
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenBundleAndAbilityNotInAllowlist,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenBundleAndAbilityNotInAllowlist start.");
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "ServiceExtension",
+            "extension_type_name": "service",
+            "screen_unlock_access": {
+                "allowlist": ["com.example.test/testAbilityxxx"],
+                "intercept": true
+            }
+        }]
+    })";
+    ASSERT_NE(extensionConfig_, nullptr);
+    LoadTestConfig(configStr);
+    bool flag = extensionConfig_->IsScreenUnlockAllowAbility("service", "com.example.test", "testAbility");
+    EXPECT_FALSE(flag);
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnFalse_WhenBundleAndAbilityNotInAllowlist end.");
+}
+
+/*
+ * @tc.number    : IsScreenUnlockAllowAbility_ShouldReturnTrue_WhenBundleAndAbilityInAllowlist
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsScreenUnlockAllowAbility
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsScreenUnlockAllowAbility_ShouldReturnTrue_WhenBundleAndAbilityInAllowlist,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnTrue_WhenBundleAndAbilityInAllowlist start.");
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "ServiceExtension",
+            "extension_type_name": "service",
+            "screen_unlock_access": {
+                "allowlist": ["com.example.test/testAbility"],
+                "intercept": true
+            }
+        }]
+    })";
+    ASSERT_NE(extensionConfig_, nullptr);
+    LoadTestConfig(configStr);
+    bool flag = extensionConfig_->IsScreenUnlockAllowAbility("service", "com.example.test", "testAbility");
+    EXPECT_TRUE(flag);
+    TAG_LOGI(AAFwkTag::TEST, "IsScreenUnlockAllowAbility_ShouldReturnTrue_WhenBundleAndAbilityInAllowlist end.");
+}
 }
 }
