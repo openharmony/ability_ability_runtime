@@ -25,6 +25,7 @@ ohos_unittest("screen_unlock_interceptor_test") {
     "${ability_runtime_path}/services/common/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+    "mock/include"
   ]
 
   sources = [
@@ -33,6 +34,7 @@ ohos_unittest("screen_unlock_interceptor_test") {
     "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/common/src/event_report.cpp",
     "screen_unlock_interceptor_test.cpp",
+    "mock/src/screenlock_manager.cpp"
   ]
 
   configs = [
@@ -95,9 +97,6 @@ ohos_unittest("screen_unlock_interceptor_test") {
   if (ability_runtime_graphics && ability_runtime_screenlock_enable) {
     defines += [
       "ABILITY_RUNTIME_SCREENLOCK_ENABLE"
-    ]
-    external_deps += [
-      "screenlock_mgr:screenlock_client",
     ]
   }
 
