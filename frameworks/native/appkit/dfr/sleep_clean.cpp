@@ -24,6 +24,7 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "appfreeze_inner.h"
+#include <charconv>
 
 namespace OHOS {
 namespace AppExecFwk {
