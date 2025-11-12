@@ -36,8 +36,6 @@
             "geoLocationManager",
             "multimedia.camera",
             "multimedia.audio",
-            "multimedia.media",
-            "multimedia.mediaLibrary",
             "telephony.call",
             "telephony.sim",
             "telephony.sms"
