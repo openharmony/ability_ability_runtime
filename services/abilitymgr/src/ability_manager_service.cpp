@@ -7802,6 +7802,7 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     request.extensionProcessMode = abilityInfo->extensionProcessMode;
     request.customProcess = abilityInfo->customProcess;
     request.collaboratorType = GetCollaboratorType(request.abilityInfo.applicationInfo.codePath);
+    request.isTargetPlugin = abilityInfo->isTargetPlugin;
 
     if (request.abilityInfo.type == AppExecFwk::AbilityType::SERVICE && request.abilityInfo.isStageBasedModel) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "stage mode, abilityInfo SERVICE type reset EXTENSION");
