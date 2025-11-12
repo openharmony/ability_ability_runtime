@@ -29,10 +29,10 @@
 #include "constants.h"
 #include "file_path_utils.h"
 #include "runtime.h"
-#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
+#include "ets/runtime/ets_namespace_manager.h"
 
 #include "ets_ani_expo.h"
-#include "static_core/runtime/tooling/inspector/debugger_arkapi.h"
+#include "tooling/inspector/debugger_arkapi.h"
 #ifdef LIKELY
 #undef LIKELY
 #endif
