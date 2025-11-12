@@ -243,7 +243,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
-    if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag) &&
+    if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, isRestart) &&
         ProcessColdStartBranch(abilityRequest, sessionInfo, uiAbilityRecord, isColdStart)) {
         return ERR_OK;
     }
@@ -4102,8 +4102,8 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     return ret == ERR_OK && isLoaded;
 }
 
-bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-    uint32_t sceneFlag)
+bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &abilityRequest,
+    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart)
 {
     if (!sessionInfo) {
         return false;
@@ -4111,6 +4111,20 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &ability
     const auto &abilityInfo = abilityRequest.abilityInfo;
     if (abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
         return false;
+    }
+
+    if (isRestart) {
+        auto request = std::make_shared<SpecifiedRequest>(RequestIdUtil::GetRequestId(), abilityRequest);
+        request->isCold = true;
+        auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+        auto accessTokenIdStr = std::to_string(abilityRequest.abilityInfo.applicationInfo.accessTokenId);
+        auto &list = specifiedRequestList_[accessTokenIdStr + instanceKey];
+        sessionInfo->requestId = request->requestId;
+        request->persistentId = sessionInfo->persistentId;
+        list.push_back(request);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "restart StartSpecified: %{public}d, persitentId: %{public}d, "
+            "list size: %{public}zu", request->requestId, sessionInfo->persistentId, list.size());
+        return true;
     }
 
     auto request = GetSpecifiedRequest(sessionInfo->requestId);

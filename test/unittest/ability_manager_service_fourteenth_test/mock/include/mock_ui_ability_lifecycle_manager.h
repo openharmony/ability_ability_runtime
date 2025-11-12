@@ -508,7 +508,8 @@ private:
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
     bool IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest, bool isSpecifiedProcess, bool &isDebug);
-    bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
+    bool HandleStartSpecifiedCold(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        uint32_t sceneFlag, bool isRestart);
     bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
         const SpecifiedRequest &specifiedRequest);
     void HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
