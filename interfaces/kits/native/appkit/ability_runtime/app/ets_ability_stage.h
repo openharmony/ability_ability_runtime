@@ -25,7 +25,6 @@
 #include "configuration.h"
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
-#include "native_engine/native_value.h"
 #include "resource_manager.h"
 
 namespace OHOS {
@@ -47,9 +46,15 @@ public:
 
     void OnDestroy() const override;
 
-    std::string OnAcceptWant(const AAFwk::Want &want) override;
+    std::string OnAcceptWant(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
 
-    std::string OnNewProcessRequest(const AAFwk::Want &want) override;
+    std::string OnNewProcessRequest(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
+
+    static void OnAcceptWantCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
+
+    static void OnNewProcessRequestCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
 
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
@@ -58,8 +63,13 @@ public:
     int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
         bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad) override;
 
+    bool OnPrepareTerminate(
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const override;
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
+
+    ani_object CallObjectMethod(const char *name, const char *signature, ...) const;
 
     std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> CreateStageProperty() const;
 
@@ -85,6 +95,21 @@ private:
     napi_env GetNapiEnv();
 
     bool isStartupTaskRegistered_ = false;
+    bool CallAcceptOrRequestSync(ani_env *env, const AAFwk::Want &want, std::string &methodName,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo) const;
+
+    bool CallAcceptOrRequestAsync(ani_env *env, const AAFwk::Want &want, std::string &methodName, bool &isAsync) const;
+
+    void SetEtsAbilityStage(const std::shared_ptr<Context> &context);
+
+    bool CallOnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>
+         *callbackInfo) const;
+
+    bool CallOnPrepareTerminateAsync(AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>
+        *callbackInfo, bool &isAsync) const;
+
+    bool BindNativeMethods();
+
     ETSRuntime& etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsAbilityStageObj_ = nullptr;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_ = nullptr;

@@ -43,6 +43,9 @@ void SetBasicConfiguration(ani_env *env, ani_object object, const AppExecFwk::Co
     std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     env->Object_SetPropertyByName_Ref(object, "language", GetAniString(env, str));
 
+    ani_object localeObj = WrapLocale(env, configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE));
+    env->Object_SetPropertyByName_Ref(object, "locale", localeObj);
+
     ani_enum_item colorModeItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
         COLOR_MODE_ENUM_NAME,
@@ -143,16 +146,24 @@ bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
         return false;
     }
     std::string language { "" };
-    if (GetFieldStringByName(env, param, "language", language)) {
+    if (GetStringProperty(env, param, "language", language)) {
         TAG_LOGD(AAFwkTag::ANI, "The parsed language part %{public}s", language.c_str());
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language)) {
             TAG_LOGE(AAFwkTag::ANI, "language Parsing failed");
             return false;
         }
     }
+    std::string locale { "" };
+    if (GetStringProperty(env, param, "locale", locale)) {
+        TAG_LOGD(AAFwkTag::ANI, "The parsed locale part %{public}s", locale.c_str());
+        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE, locale)) {
+            TAG_LOGE(AAFwkTag::ANI, "locale parsing failed");
+            return false;
+        }
+    }
 
     ani_double fontSizeScale = 0.0;
-    if (GetFieldDoubleByName(env, param, "fontSizeScale", fontSizeScale)) {
+    if (GetDoublePropertyObject(env, param, "fontSizeScale", fontSizeScale)) {
         if (fontSizeScale < FONT_SIZE_MIN_SCALE || fontSizeScale > FONT_SIZE_MAX_SCALE) {
             TAG_LOGE(AAFwkTag::ANI, "invalid fontSizeScale");
             return false;
@@ -163,7 +174,7 @@ bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
     }
 
     ani_double fontWeightScale = 0.0;
-    if (GetFieldDoubleByName(env, param, "fontWeightScale", fontWeightScale)) {
+    if (GetDoublePropertyObject(env, param, "fontWeightScale", fontWeightScale)) {
         if (fontWeightScale < FONT_WEIGHT_MIN_SCALE || fontWeightScale > FONT_WEIGHT_MAX_SCALE) {
             TAG_LOGE(AAFwkTag::ANI, "invalid fontWeightScale");
             return false;

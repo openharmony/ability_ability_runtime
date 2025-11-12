@@ -24,6 +24,9 @@ import bundleManager from '@ohos.bundle.bundleManager';
 import _AppForegroundStateObserver from 'application.AppForegroundStateObserver';
 import { AbilityFirstFrameStateObserver as _AbilityFirstFrameStateObserver } from 'application.AbilityFirstFrameStateObserver';
 import { AbilityFirstFrameStateData as _AbilityFirstFrameStateData } from 'application.AbilityFirstFrameStateData';
+import { AbilityUtils } from './utils/AbilityUtils';
+
+const ERROR_CODE_INVALID_PARAM: int = 401;
 
 export default namespace appManager {
 loadLibraryWithPermissionCheck("app_manager_ani.z", "@ohos.app.ability.appManager")
@@ -73,17 +76,25 @@ export interface KeepAliveBundleInfo {
     bundleName: string;
     type: KeepAliveAppType;
     setter: KeepAliveSetter;
+    setterUserId?: int;
+    allowUserToCancel?: boolean;
 }
 
 export class KeepAliveBundleInfoInner implements KeepAliveBundleInfo {
     bundleName: string = '';
     type: KeepAliveAppType = KeepAliveAppType.ALL;
     setter: KeepAliveSetter = KeepAliveSetter.SYSTEM;
+    setterUserId?: int;
+    allowUserToCancel?: boolean;
 }
 
 export native function nativePreloadApplication(callback: AsyncCallbackWrapper<void>, bundleName: string, userId: int,
     mode: PreloadMode, appIndex?: int): void;
 export function preloadApplication(bundleName: string, userId: int, mode: PreloadMode, appIndex?: int): Promise<void>{
+  if (mode !== PreloadMode.PRESS_DOWN) {
+    throw AbilityUtils.createBusinessError(
+      ERROR_CODE_INVALID_PARAM, 'Unsupported preloadMode, must be PreloadMode.PRESS_DOWN.');
+  }
    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {
@@ -147,8 +158,10 @@ export function getForegroundApplications(): Promise<Array<AppStateData>> {
     return p;
 }
 
+export native function nativeGetRunningMultiAppInfoCheck(bundleName: string): void;
 export native function nativeGetRunningMultiAppInfo(bundleName: string, callback: AsyncCallbackWrapper<RunningMultiAppInfo>): void;
 export function getRunningMultiAppInfo(bundleName: string): Promise<RunningMultiAppInfo> {
+    appManager.nativeGetRunningMultiAppInfoCheck(bundleName);
     let p = new Promise<RunningMultiAppInfo>((resolve:(data: RunningMultiAppInfo)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallbackWrapper<RunningMultiAppInfo>((err: BusinessError | null, data: RunningMultiAppInfo | undefined)=>{
         if (err == null || err.code == 0) {
@@ -216,23 +229,26 @@ export function getRunningProcessInfoByBundleName(bundleName: string, userId: in
 export native function nativeOn(type: string, observer: ApplicationStateObserver, bundleNameList?: Array<string>) : int;
 export native function nativeOn(type: string, observer: ApplicationStateObserver) : int;
 
-export function on(type: 'applicationState', observer: ApplicationStateObserver): int {
+export function onApplicationStateChange(observer: ApplicationStateObserver): int {
   return appManager.nativeOn('applicationState', observer);
 }
 
-export function on(type: 'applicationState', observer: ApplicationStateObserver, bundleNameList: Array<string>): int {
+export function onApplicationStateChange(observer: ApplicationStateObserver, bundleNameList: Array<string>): int {
   return appManager.nativeOn('applicationState', observer, bundleNameList);
 }
 
 export native function nativeOff(type:string, observerId: int, callback: AsyncCallbackWrapper<void>) : void;
-export function off(type: 'applicationState', observerId: int, callback: AsyncCallback<void>): void {
+export native function nativeOffApplicationStateCheck(observerId: int): void;
+export function offApplicationStateChange(observerId: int, callback: AsyncCallback<void>): void {
+    appManager.nativeOffApplicationStateCheck(observerId);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
-      appManager.nativeOff(type, observerId, myCall);
+      appManager.nativeOff('applicationState', observerId, myCall);
     });
 }
 
-export function off(type: 'applicationState', observerId: int): Promise<void> {
+export function offApplicationStateChange(observerId: int): Promise<void> {
+    appManager.nativeOffApplicationStateCheck(observerId);
     let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {
@@ -242,7 +258,7 @@ export function off(type: 'applicationState', observerId: int): Promise<void> {
         }
       });
       taskpool.execute((): void => {
-        appManager.nativeOff(type, observerId, myCall);
+        appManager.nativeOff('applicationState', observerId, myCall);
       });
     });
     return p;
@@ -358,22 +374,22 @@ export function killProcessesByBundleName(bundleName: string, clearPageStack: bo
 }
 
 export native function nativeOnAbilityFirstFrameState(type: string, observer: AbilityFirstFrameStateObserver, bundleName?: string) : void;
-export function on(type: 'abilityFirstFrameState', observer: AbilityFirstFrameStateObserver, bundleName?: string) : void {
+export function onAbilityFirstFrameStateChange(observer: AbilityFirstFrameStateObserver, bundleName?: string) : void {
   appManager.nativeOnAbilityFirstFrameState('abilityFirstFrameState', observer, bundleName);
 }
 
 export native function nativeOffAbilityFirstFrameState(type: string, observer?: AbilityFirstFrameStateObserver) : void;
-export function off(type: 'abilityFirstFrameState', observer?: AbilityFirstFrameStateObserver) : void {
+export function offAbilityFirstFrameStateChange(observer?: AbilityFirstFrameStateObserver) : void {
   appManager.nativeOffAbilityFirstFrameState('abilityFirstFrameState', observer);
 }
 
 export native function nativeOnAppForeGroundState(type: string, observer: AppForegroundStateObserver) : void;
-export function on(type: 'appForegroundState', observer: AppForegroundStateObserver) : void {
+export function onAppForegroundStateChange(observer: AppForegroundStateObserver) : void {
   appManager.nativeOnAppForeGroundState('appForegroundState', observer);
 }
 
 export native function nativeOffAppForeGroundState(type: string, observer?: AppForegroundStateObserver) : void;
-export function off(type: 'appForegroundState', observer?: AppForegroundStateObserver) : void {
+export function offAppForegroundStateChange(observer?: AppForegroundStateObserver) : void {
   appManager.nativeOffAppForeGroundState('appForegroundState', observer);
 }
 
@@ -571,4 +587,127 @@ export function getKeepAliveBundles(type: KeepAliveAppType, userId?: int): Promi
   return p;
 }
 
+export native function nativeClearUpApplicationDataCheck(bundleName: string) : void;
+export native function nativeClearUpApplicationData(bundleName: string, callback: AsyncCallbackWrapper<void>) : void;
+export function clearUpApplicationData(bundleName: string, callback: AsyncCallback<void>): void {
+  let myCall = new AsyncCallbackWrapper<void>(callback);
+  appManager.nativeClearUpApplicationDataCheck(bundleName);
+  taskpool.execute((): void => {
+    appManager.nativeClearUpApplicationData(bundleName, myCall);
+  });
+}
+
+function clearUpApplicationData(bundleName: string): Promise<void> {
+  appManager.nativeClearUpApplicationDataCheck(bundleName);
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeClearUpApplicationData(bundleName, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetKeepAliveAppServiceExtensions(callback: AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>) : void;
+export function getKeepAliveAppServiceExtensions(): Promise<Array<KeepAliveBundleInfo>> {
+  let p = new Promise<Array<KeepAliveBundleInfo>>((resolve: (data: Array<KeepAliveBundleInfo>) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>((err: BusinessError | null, data: Array<KeepAliveBundleInfo> | undefined) => {
+      if (err == null || err.code == 0) {
+        resolve(data as Array<KeepAliveBundleInfo>);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetKeepAliveAppServiceExtensions(myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeSetKeepAliveForAppServiceExtension(bundleName: string, enabled: boolean,
+  callback: AsyncCallbackWrapper<void>) : void;
+export function setKeepAliveForAppServiceExtension(bundleName: string, enabled: boolean): Promise<void> {
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeSetKeepAliveForAppServiceExtension(bundleName, enabled, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeClearUpAppDataCheck(bundleName: string) : void;
+export native function nativeClearUpAppData(callback: AsyncCallbackWrapper<void>, bundleName: string,
+  appCloneIndex?: int) : void;
+export function clearUpAppData(bundleName: string, appCloneIndex?: int): Promise<void> {
+  appManager.nativeClearUpAppDataCheck(bundleName);
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeClearUpAppData(myCall, bundleName, appCloneIndex);
+    });
+  });
+  return p;
+}
+
+export native function nativeTerminateMission(missionId: int, callback: AsyncCallbackWrapper<void>) : void;
+export function terminateMission(missionId: int): Promise<void> {
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeTerminateMission(missionId, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeIsApplicationRunning(bundleName: string, callback: AsyncCallbackWrapper<boolean>) : void;
+export function isApplicationRunning(bundleName: string): Promise<boolean>
+{
+  let p = new Promise<boolean>((resolve: (data: boolean) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined) => {
+      if (err == null || err.code == 0) {
+        resolve(data as boolean);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeIsApplicationRunning(bundleName, myCall);
+    });
+  });
+  return p;
+}
+
+export function isApplicationRunning(bundleName: string, callback: AsyncCallback<boolean>): void {
+  let myCall = new AsyncCallbackWrapper<boolean>(callback);
+  taskpool.execute((): void => {
+    appManager.nativeIsApplicationRunning(bundleName, myCall);
+  });
+}
 } // namespace appManager

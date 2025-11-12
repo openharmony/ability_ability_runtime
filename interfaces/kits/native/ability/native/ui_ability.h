@@ -393,6 +393,13 @@ private:
 public:
     uint32_t sceneFlag_ = 0;
 
+    enum CollaborateResult {
+        ACCEPT = 0,
+        REJECT = 1,
+        ON_COLLABORATE_NOT_IMPLEMENTED = 10,
+        ON_COLLABORATE_ERR = 11,
+    };
+
     /**
      * @brief Called after instantiating WindowScene.
      * You can override this function to implement your own processing logic.
@@ -631,7 +638,15 @@ public:
      * @brief Called when distributed system trying to collaborate remote ability.
      * @param want want with collaborative info.
      */
-    virtual void HandleCollaboration(const AAFwk::Want &want);
+    void HandleCollaboration(const AAFwk::Want &want);
+
+    /**
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
+     */
+    virtual int32_t OnCollaborate(WantParams &wantParams);
 
     /**
      * @brief Called when startAbility request failed.

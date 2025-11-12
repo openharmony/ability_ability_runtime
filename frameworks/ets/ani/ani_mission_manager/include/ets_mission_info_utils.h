@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_MISSION_INFO_UTILS_H
 #define OHOS_ABILITY_RUNTIME_ETS_MISSION_INFO_UTILS_H
 
+#include <vector>
+
 typedef struct __ani_env ani_env;
 typedef class __ani_object *ani_object;
 
@@ -25,6 +27,7 @@ struct MissionInfo;
 }
 namespace AbilityRuntime {
 ani_object CreateEtsMissionInfo(ani_env *env, const AAFwk::MissionInfo &missionInfo);
+ani_object CreateEtsMissionInfos(ani_env *env, const std::vector<AAFwk::MissionInfo> &missionInfos);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_MISSION_INFO_UTILS_H

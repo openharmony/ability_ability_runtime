@@ -41,7 +41,6 @@ ohos_shared_library("appRecovery_ani") {
     "ability_base:base",
     "ability_base:want",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
