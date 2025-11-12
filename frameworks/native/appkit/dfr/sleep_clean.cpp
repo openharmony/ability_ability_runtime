@@ -63,9 +63,9 @@ bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &app
         return false;
     }
     size_t getParamHeapSize;
-    auto [std::ignore, ec] = std::from_chars(getParamHeapSizeStr.data(),
+    auto fromCharsResult = std::from_chars(getParamHeapSizeStr.data(),
         getParamHeapSizeStr.data() + getParamHeapSizeStr.size(), getParamHeapSize);
-    if (ec == std::errc()) {
+    if (fromCharsResult.ec == std::errc()) {
         getParamHeapSize *= APP_SAVE_HEAP_SIZE_M;
     } else {
         return false;
