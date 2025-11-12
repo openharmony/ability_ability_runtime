@@ -287,6 +287,10 @@ std::pair<Status, std::string> DataObsMgrService::GetUriPermission(Uri &uri, boo
 {
     uint32_t tokenId = info.tokenId;
     std::string uriStr = uri.ToString();
+    if (permission_ == nullptr) {
+        LOG_ERROR("permission_ nullptr");
+        return std::make_pair(COMMON_ERROR, "");
+    }
     auto [ret, permission] = permission_->GetUriPermission(uri, info.userId, isRead, info.isSilentUri);
     if (ret != DataShare::E_OK) {
         info.errMsg.append(std::to_string(info.isFromExtension) + "_GetUriPermission");
