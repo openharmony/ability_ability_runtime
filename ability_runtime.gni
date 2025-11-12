@@ -121,7 +121,7 @@ declare_args() {
   ability_runtime_start_window_options_with_pixelmap = false
   ability_runtime_check_internet_permission = false
   ability_runtime_media_library_enable = true
-  ability_runtime_forbidstart_enable = false
+  ability_runtime_forbid_start_enabled = false
   ability_runtime_no_screen = false
   ability_runtime_hitrace_enable = true
   ability_runtime_hiperf_enable = true
