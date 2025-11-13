@@ -17,8 +17,8 @@
 
 #include <chrono>
 
+#include "connection_observer_errors.h"
 #include "foreground_app_connection_data.h"
-#include "foreground_app_connection_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "ui_extension_utils.h"
 
@@ -154,7 +154,7 @@ void ForegroundAppConnectionManager::AbilityAddPidConnection(ForegroundAppConnec
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityAddPidConnection called");
     int32_t callerPid = info.callerPid_;
     int32_t targetPid = info.targetPid_;
-    if (callerPid < 0 || targetPid < 0) {
+    if (callerPid <= 0 || targetPid <= 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid pid: callerPid: %{public}d targetPid: %{public}d",
             callerPid, targetPid);
         return;
@@ -200,6 +200,9 @@ void ForegroundAppConnectionManager::AbilityRemovePidConnection(int32_t callerPi
 
 void ForegroundAppConnectionManager::ProcessRemovePidConnection(int32_t diedPid)
 {
+    if (diedPid <= 0) {
+        return;
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ProcessRemovePidConnection pid: %{public}d",
         diedPid);
     std::lock_guard<std::mutex> guard(pidMapMutex_);
