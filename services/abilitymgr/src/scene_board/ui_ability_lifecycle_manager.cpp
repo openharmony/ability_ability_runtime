@@ -403,8 +403,8 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         }
         if (isLowMemKill) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
-                "replacing old record id=%{public}" PRId64 ", new record id=%{public}" PRId64,
-                iter->second->GetAbilityRecordId(), uiAbilityRecord->GetAbilityRecordId());
+                "replacing old record id=%{public}d, new record id=%{public}d",
+                iter->second->GetRecordId(), uiAbilityRecord->GetRecordId());
             lowMemKillAbilityMap_.emplace(sessionInfo->persistentId, iter->second);
             sessionAbilityMap_[sessionInfo->persistentId] = uiAbilityRecord;
         } else {
