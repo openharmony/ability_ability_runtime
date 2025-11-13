@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ namespace OHOS {
 namespace AAFwk {
 constexpr const uint32_t SANDBOX_MANAGER_OK = 0;
 const std::string FILE_MANAGER_AUTHORITY = "docs";
+const std::string STORAGE_URI = "/storage";
+const std::string APPDATA_URI = "/storage/Users/currentUser/appdata";
 const std::string DOWNLOAD_PATH = "/storage/Users/currentUser/Download";
 const std::string DESKTOP_PATH = "/storage/Users/currentUser/Desktop";
 const std::string DOCUMENTS_PATH = "/storage/Users/currentUser/Documents";
@@ -36,6 +38,21 @@ const std::string BACKFLASH = "/";
 static bool CheckPermission(uint64_t tokenCaller, const std::string &permission)
 {
     return PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenCaller, permission);
+}
+
+static bool CheckDocsUriPermission(bool hasFileManagerPermission,
+                                   bool hasSandboxManagerPermission,
+                                   const std::string &path)
+{
+    if (hasFileManagerPermission) {
+        if (path.find(STORAGE_URI) == 0 && path.find(APPDATA_URI) != 0) {
+            return true;
+        }
+    }
+    if (hasSandboxManagerPermission && path.find(APPDATA_URI) == 0) {
+        return true;
+    }
+    return false;
 }
 
 static bool CheckFileManagerUriPermission(uint64_t providerTokenId,
@@ -86,21 +103,19 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         "CheckUriPersistentPermission call, size of uri is %{public}zu", uriVec.size());
     std::vector<bool> resultCodes(uriVec.size(), false);
     pathPolicies.clear();
-    if (CheckPermission(callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)) {
-        for (size_t i = 0; i < uriVec.size(); i++) {
-            resultCodes[i] = true;
-            PolicyInfo policyInfo = GetPathPolicyInfoFromUri(uriVec[i], flag);
-            pathPolicies.emplace_back(policyInfo);
-        }
-        return resultCodes;
-    }
     std::vector<int32_t> resultIndex;
     std::vector<PolicyInfo> persistPolicys;
+    bool hasFileManagerPermission = CheckPermission(
+        callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
+    bool hasSandboxManagerPermission = CheckPermission(
+        callerTokenId, PermissionConstants::PERMISSION_SANDBOX_ACCESS_MANAGER);
     for (size_t i = 0; i < uriVec.size(); i++) {
         PolicyInfo policyInfo = GetPathPolicyInfoFromUri(uriVec[i], flag);
         pathPolicies.emplace_back(policyInfo);
-        if (uriVec[i].GetAuthority() == FILE_MANAGER_AUTHORITY &&
-            CheckFileManagerUriPermission(callerTokenId, policyInfo.path, bundleName)) {
+        if ((uriVec[i].GetAuthority() == FILE_MANAGER_AUTHORITY) &&
+            (CheckFileManagerUriPermission(callerTokenId, policyInfo.path,
+                                           bundleName) ||
+            CheckDocsUriPermission(hasFileManagerPermission, hasSandboxManagerPermission, policyInfo.path))) {
             resultCodes[i] = true;
             continue;
         }
@@ -108,6 +123,9 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         persistPolicys.emplace_back(policyInfo);
     }
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    if (persistPolicys.empty()) {
+        return resultCodes;
+    }
     std::vector<bool> persistResultCodes;
     int32_t ret = SandboxManagerKit::CheckPersistPolicy(callerTokenId, persistPolicys, persistResultCodes);
     if (ret == SANDBOX_MANAGER_OK && persistResultCodes.size() == resultIndex.size()) {
