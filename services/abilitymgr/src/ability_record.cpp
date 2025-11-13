@@ -4092,6 +4092,10 @@ void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType start
 
 void AbilityRecord::AddUIExtensionLaunchTimestamp()
 {
+    if (sessionInfo_ == nullptr) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "null sessionInfo_");
+        return;
+    }
     if (sessionInfo_->uiExtensionUsage != AAFwk::UIExtensionUsage::MODAL) {
         TAG_LOGD(AAFwkTag::UI_EXT, "not modal uiExtension");
         return;

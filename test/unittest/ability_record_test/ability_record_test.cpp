@@ -3338,6 +3338,21 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_002, Tes
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
  */
+HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_003, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveUIExtensionLaunchTimestamp
+ * SubFunction: RemoveUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
+ */
 HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
