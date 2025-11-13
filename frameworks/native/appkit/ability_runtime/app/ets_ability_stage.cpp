@@ -24,6 +24,8 @@
 
 #include "ability_delegator_registry.h"
 #include "ani_common_configuration.h"
+#include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "configuration_convertor.h"
 #include "ets_ability_stage_context.h"
 #include "ets_startup_config.h"
@@ -48,6 +50,63 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* CALLBACK_SUCCESS = "success";
+constexpr const char* ABILITY_STAGE_CLASS_NAME = "L@ohos/app/ability/AbilityStage/AbilityStage;";
+constexpr const char* ABILITY_STAGE_SYNC_METHOD_NAME = "L@ohos/app/ability/Want/Want;:Lstd/core/String;";
+constexpr const char* ABILITY_STAGE_ASYNC_METHOD_NAME = "L@ohos/app/ability/Want/Want;:Z";
+constexpr const char* MEMORY_LEVEL_ENUM_NAME =
+    "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
+constexpr const char *PREPARE_TERMINATION_CLASS_NAME =
+    ":L@ohos/app/ability/AbilityConstant/AbilityConstant/PrepareTermination;";
+
+void OnPrepareTerminatePromiseCallback(ani_env* env, ani_object aniObj, ani_object dataObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnPrepareTerminatePromiseCallback called");
+
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or null aniObj");
+        return;
+    }
+    ani_long callbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "prepareTerminationCallbackPoint", &callbackPoint)) !=
+        ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return;
+    }
+    auto *callbackInfo =
+        reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *>(
+            callbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return;
+    }
+    ani_boolean isUndefined = false;
+    if ((status = env->Reference_IsUndefined(dataObj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to check undefined status : %{public}d", status);
+        return;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::APPKIT, "onPrepareTermination unimplemented");
+        return;
+    }
+    ani_int result = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, dataObj, result)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "EnumConvert_EtsToNative param err");
+        return;
+    }
+    AppExecFwk::OnPrepareTerminationResult prepareTerminationResult = { result, true };
+    callbackInfo->Call(prepareTerminationResult);
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Destroy(callbackInfo);
+
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "prepareTerminationCallbackPoint",
+        static_cast<ani_long>(0))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
+        return;
+    }
+}
+} // namespace
 
 AbilityStage *ETSAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
@@ -83,6 +142,9 @@ void ETSAbilityStage::Init(const std::shared_ptr<Context> &context,
 {
     AbilityStage::Init(context, application);
     SetShellContextRef(context);
+    if (!BindNativeMethods()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "BindNativeMethods failed");
+    }
 }
 
 void ETSAbilityStage::LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo)
@@ -136,14 +198,151 @@ void ETSAbilityStage::OnDestroy() const
     CallObjectMethod(false, "onDestroy", ":V");
 }
 
-std::string ETSAbilityStage::OnAcceptWant(const AAFwk::Want &want)
+std::string ETSAbilityStage::OnAcceptWant(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
 {
-    return std::string();
+    TAG_LOGD(AAFwkTag::APPKIT, "OnAcceptWant called");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
+        return "";
+    }
+    AbilityStage::OnAcceptWant(want, callbackInfo, isAsync);
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return "";
+    }
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityStageObj_");
+        return "";
+    }
+    ani_long acceptCallbackPoint = reinterpret_cast<ani_long>(callbackInfo);
+    ani_status status = env->Object_SetFieldByName_Long(etsAbilityStageObj_->aniObj, "acceptCallbackPoint",
+        acceptCallbackPoint);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetFieldByName_Long status: %{public}d", status);
+        return "";
+    }
+    std::string methodName = "callOnAcceptWant";
+    if (CallAcceptOrRequestAsync(env, want, methodName, isAsync)) {
+        TAG_LOGD(AAFwkTag::APPKIT, "callOnAcceptWant is implemented");
+        return CALLBACK_SUCCESS;
+    }
+    methodName = "onAcceptWant";
+    isAsync = false;
+    if (CallAcceptOrRequestSync(env, want, methodName, callbackInfo)) {
+        return CALLBACK_SUCCESS;
+    }
+    return "";
 }
 
-std::string ETSAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
+std::string ETSAbilityStage::OnNewProcessRequest(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
 {
-    return std::string();
+    TAG_LOGD(AAFwkTag::APPKIT, "OnNewProcessRequest called");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
+        return "";
+    }
+    AbilityStage::OnNewProcessRequest(want, callbackInfo, isAsync);
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return "";
+    }
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityStageObj_");
+        return "";
+    }
+    ani_long newProcessRequestCallbackPoint = reinterpret_cast<ani_long>(callbackInfo);
+    ani_status status = env->Object_SetFieldByName_Long(etsAbilityStageObj_->aniObj, "newProcessRequestCallbackPoint",
+        newProcessRequestCallbackPoint);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetFieldByName_Long status: %{public}d", status);
+        return "";
+    }
+    std::string methodName = "callOnNewProcessRequest";
+    if (CallAcceptOrRequestAsync(env, want, methodName, isAsync)) {
+        TAG_LOGD(AAFwkTag::APPKIT, "callOnNewProcessRequest is implemented");
+        return CALLBACK_SUCCESS;
+    }
+    methodName = "onNewProcessRequest";
+    isAsync = false;
+    if (CallAcceptOrRequestSync(env, want, methodName, callbackInfo)) {
+        return CALLBACK_SUCCESS;
+    }
+    return "";
+}
+
+void ETSAbilityStage::OnAcceptWantCallback(ani_env *env, ani_object aniObj, ani_string aniResult)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnAcceptWantCallback called");
+
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or null aniObj");
+        return;
+    }
+    ani_long callbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "acceptCallbackPoint", &callbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return;
+    }
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<std::string> *>(callbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return;
+    }
+    std::string resultString = "";
+    if (!AppExecFwk::GetStdString(env, aniResult, resultString)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "fail to get resultString");
+        return;
+    }
+    callbackInfo->Call(resultString);
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
+
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "acceptCallbackPoint",
+        static_cast<ani_long>(0))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
+        return;
+    }
+}
+
+void ETSAbilityStage::OnNewProcessRequestCallback(ani_env *env, ani_object aniObj, ani_string aniResult)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnNewProcessRequestCallback called");
+
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or null aniObj");
+        return;
+    }
+    ani_long callbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "newProcessRequestCallbackPoint",
+        &callbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return;
+    }
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<std::string> *>(callbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return;
+    }
+    std::string resultString = "";
+    if (!AppExecFwk::GetStdString(env, aniResult, resultString)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "fail to get resultString");
+        return;
+    }
+    callbackInfo->Call(resultString);
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
+
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "newProcessRequestCallbackPoint",
+        static_cast<ani_long>(0))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
+        return;
+    }
 }
 
 void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
@@ -152,12 +351,12 @@ void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration &co
     AbilityStage::OnConfigurationUpdated(configuration);
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "env nullptr");
         return;
     }
     auto application = application_.lock();
     if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "application is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "application is null");
         return;
     }
     auto fullConfig = application->GetConfiguration();
@@ -176,25 +375,40 @@ void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration &co
 
 void ETSAbilityStage::OnMemoryLevel(int32_t level)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "OnMemoryLevel called");
+    AbilityStage::OnMemoryLevel(level);
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env nullptr");
+        return;
+    }
+    ani_enum_item memoryLevelItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
+        MEMORY_LEVEL_ENUM_NAME, level, memoryLevelItem);
+
+    CallObjectMethod(false, "onMemoryLevel", "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;:V",
+        memoryLevelItem);
+    TAG_LOGD(AAFwkTag::APPKIT, "end");
 }
 
 bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
-    TAG_LOGD(AAFwkTag::ABILITY, "CallObjectMethod: name:%{public}s", name);
+    TAG_LOGD(AAFwkTag::APPKIT, "CallObjectMethod: name:%{public}s", name);
     if (etsAbilityStageObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "etsAbilityStageObj_ nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "etsAbilityStageObj_ nullptr");
         return false;
     }
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "env nullptr");
         return false;
     }
     ani_status status = ANI_OK;
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(etsAbilityStageObj_->aniCls, name, signature, &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return false;
     }
     env->ResetError();
@@ -203,7 +417,7 @@ bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(etsAbilityStageObj_->aniObj, method, &res, args)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
             etsRuntime_.HandleUncaughtError();
         }
         va_end(args);
@@ -212,12 +426,47 @@ bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
     va_list args;
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(etsAbilityStageObj_->aniObj, method, args)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
         return false;
     }
     va_end(args);
     return false;
+}
+
+ani_object ETSAbilityStage::CallObjectMethod(const char *name, const char *signature, ...) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
+    TAG_LOGD(AAFwkTag::APPKIT, "ETSAbilityStage call ets, name: %{public}s", name);
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityStageObj_");
+        return nullptr;
+    }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return nullptr;
+    }
+    auto obj = etsAbilityStageObj_->aniObj;
+    auto cls = etsAbilityStageObj_->aniCls;
+    ani_status status = ANI_ERROR;
+
+    ani_method method {};
+    if ((status = env->Class_FindMethod(cls, name, signature, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
+        env->ResetError();
+        return nullptr;
+    }
+    ani_ref res {};
+    va_list args;
+    va_start(args, signature);
+    if ((status = env->Object_CallMethod_Ref(obj, method, &res, args)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
+        etsRuntime_.HandleUncaughtError();
+        return nullptr;
+    }
+    va_end(args);
+    return reinterpret_cast<ani_object>(res);
 }
 
 std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> ETSAbilityStage::CreateStageProperty() const
@@ -250,11 +499,90 @@ std::string ETSAbilityStage::GetHapModuleProp(const std::string &propName) const
     return std::string();
 }
 
+bool ETSAbilityStage::CallAcceptOrRequestSync(ani_env *env, const AAFwk::Want &want, std::string &methodName,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CallAcceptOrRequestSync called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
+    if (wantRef == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null wantRef");
+        return false;
+    }
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return false;
+    }
+    ani_object resObj = CallObjectMethod(methodName.c_str(), ABILITY_STAGE_SYNC_METHOD_NAME, wantRef);
+    if (resObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CallAcceptOrRequestSync unimplemented");
+        return false;
+    }
+    std::string resultString = "";
+    if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(resObj), resultString)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "fail to get resultString");
+        return false;
+    }
+    callbackInfo->Call(resultString);
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
+    return true;
+}
+
+bool ETSAbilityStage::CallAcceptOrRequestAsync(ani_env *env, const AAFwk::Want &want, std::string &methodName,
+    bool &isAsync) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CallAcceptOrRequestAsync called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
+    if (wantRef == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null wantRef");
+        return false;
+    }
+    isAsync = CallObjectMethod(true, methodName.c_str(), ABILITY_STAGE_ASYNC_METHOD_NAME, wantRef);
+    return isAsync;
+}
+
+bool ETSAbilityStage::BindNativeMethods()
+{
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    std::array functions = {
+        ani_native_function{
+            "nativeOnAcceptWantCallback", "Lstd/core/String;:V",
+            reinterpret_cast<void *>(ETSAbilityStage::OnAcceptWantCallback)},
+        ani_native_function{
+            "nativeOnNewProcessRequestCallback", "Lstd/core/String;:V",
+            reinterpret_cast<void *>(ETSAbilityStage::OnNewProcessRequestCallback)},
+        ani_native_function{"nativeOnPrepareTerminatePromiseCallback", ":V",
+            reinterpret_cast<void *>(OnPrepareTerminatePromiseCallback)},
+    };
+    ani_class cls {};
+    ani_status status = env->FindClass(ABILITY_STAGE_CLASS_NAME, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass failed status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_BindNativeMethods status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 void ETSAbilityStage::SetShellContextRef(std::shared_ptr<Context> context)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "context nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "context nullptr");
         return;
     }
     auto env = etsRuntime_.GetAniEnv();
@@ -292,13 +620,13 @@ void ETSAbilityStage::SetEtsAbilityStage()
     }
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "env nullptr");
         return;
     }
 
     ani_status status = ANI_OK;
     if (env->Object_SetFieldByName_Ref(etsAbilityStageObj_->aniObj, "context", shellContextRef_->aniRef) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetFieldByName_Ref context failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetFieldByName_Ref context failed");
     }
 }
 
@@ -542,6 +870,81 @@ napi_env ETSAbilityStage::GetNapiEnv()
     }
     auto &jsRuntime = static_cast<JsRuntime &>(*jsRuntimePtr);
     return jsRuntime.GetNapiEnv();
+}
+
+bool ETSAbilityStage::OnPrepareTerminate(
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+    bool &isAsync) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnPrepareTerminate called");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
+        return false;
+    }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityStageObj_");
+        return false;
+    }
+    ani_long prepareTerminationCallbackPoint = reinterpret_cast<ani_long>(callbackInfo);
+    ani_status status = env->Object_SetFieldByName_Long(etsAbilityStageObj_->aniObj, "prepareTerminationCallbackPoint",
+        prepareTerminationCallbackPoint);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetFieldByName_Long status: %{public}d", status);
+        return false;
+    }
+    if (CallOnPrepareTerminateAsync(callbackInfo, isAsync)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTerminationAsync is implemented");
+        return true;
+    }
+    isAsync = false;
+    return CallOnPrepareTerminate(callbackInfo);
+}
+
+bool ETSAbilityStage::CallOnPrepareTerminateAsync(
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+    bool &isAsync) const
+{
+    isAsync = false;
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
+        return false;
+    }
+    isAsync = CallObjectMethod(true, "callOnPrepareTermination", ":Z");
+    return isAsync;
+}
+
+bool ETSAbilityStage::CallOnPrepareTerminate(
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CallOnPrepareTerminate call");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
+        return false;
+    }
+    ani_env *env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    ani_object resObj = CallObjectMethod("onPrepareTermination", PREPARE_TERMINATION_CLASS_NAME);
+    if (resObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "onPrepareTermination unimplemented");
+        return false;
+    }
+    ani_int result = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, resObj, result)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "EnumConvert_EtsToNative param err");
+        return false;
+    }
+    AppExecFwk::OnPrepareTerminationResult prepareTerminationResult = { result, true };
+    callbackInfo->Call(prepareTerminationResult);
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Destroy(callbackInfo);
+    return true;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

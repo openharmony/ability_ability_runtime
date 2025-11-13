@@ -21,7 +21,10 @@ import { AbilityRunningInfo as _AbilityRunningInfo } from 'application.AbilityRu
 import { ExtensionRunningInfo } from 'application.ExtensionRunningInfo';
 import _AbilityStateData from 'application.AbilityStateData';
 import Context from 'application.Context';
+import { Configuration } from '@ohos.app.ability.Configuration';
 import _AbilityForegroundStateObserver from 'application.AbilityForegroundStateObserver';
+import { ExtensionRunningInfo as _ExtensionRunningInfo } from './application/ExtensionRunningInfo';
+
 
 export default namespace abilityManager {
   loadLibraryWithPermissionCheck("ability_manager_ani_kit.z", "@ohos.app.ability.abilityManager")
@@ -30,12 +33,22 @@ export default namespace abilityManager {
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
   export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
   export native function nativeCheckSystemApp() : void;
+  export native function nativeGetTopAbilityCheck() : void;
   export native function nativeGetAbilityRunningInfos(callback:AsyncCallbackWrapper<Array<AbilityRunningInfo>>) : void;
   export native function nativeIsEmbeddedOpenAllowed(context: Context, appId: string, callback:AsyncCallbackWrapper<boolean>) : void;
+  export native function nativeIsEmbeddedOpenAllowedCheck(context: Context): void;
   export native function nativeOn(type:string, observer: AbilityForegroundStateObserver): void;
   export native function nativeOff(type:string, observer?: AbilityForegroundStateObserver): void;
+  export native function nativeNotifyDebugAssertResult(sessionId: string, status: UserStatus, callback: AsyncCallbackWrapper<void>): void;
+  export native function nativeNotifyDebugAssertResultCheck(sessionId: string, status: UserStatus): void;
+  export native function nativeSetResidentProcessEnabled(bundleName: string, enable: boolean, callback: AsyncCallbackWrapper<void>): void;
+  export native function nativeSetResidentProcessEnabledCheck(bundleName: string): void;
+  export native function nativeAcquireShareData(missionId: int, callback: AsyncCallbackWrapper<Record<string, Object>>): void;
+  export native function nativeUpdateConfiguration(config: Configuration, callback: AsyncCallbackWrapper<void>): void;
+  export native function nativeQueryAtomicServiceStartupRule(context: Context, appId: string, callback:AsyncCallbackWrapper<AtomicServiceStartupRule>) : void;
+  export native function nativeQueryAtomicServiceStartupRuleCheck(context: Context): void;
   export native function nativeGetExtensionRunningInfos(upperLimit:int, callback:AsyncCallbackWrapper<Array<ExtensionRunningInfo>>) : void;
-
+  
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
       let executeFunc = (): Array<AbilityStateData> => {
@@ -60,7 +73,7 @@ export default namespace abilityManager {
   }
 
   export function getTopAbility():Promise<ElementName> {
-    abilityManager.nativeCheckSystemApp();
+    abilityManager.nativeGetTopAbilityCheck();
     let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError | null, data: ElementName | undefined)=>{
         if (err == null || err.code == 0) {
@@ -77,11 +90,11 @@ export default namespace abilityManager {
   }
 
   export function getTopAbility(callback: AsyncCallback<ElementName, void>): void {
-    abilityManager.nativeCheckSystemApp();
-    let myCall = new AsyncCallbackWrapper<ElementName>(callback);
-    taskpool.execute( (): void => {
-      abilityManager.nativeGetTopAbility(myCall);
-    });
+      abilityManager.nativeGetTopAbilityCheck();
+      let myCall = new AsyncCallbackWrapper<ElementName>(callback);
+      taskpool.execute( (): void => {
+          abilityManager.nativeGetTopAbility(myCall);
+      });
   }
 
   function getAbilityRunningInfos(): Promise<Array<AbilityRunningInfo>> {
@@ -109,6 +122,7 @@ export default namespace abilityManager {
   }
 
   function isEmbeddedOpenAllowed(context: Context, appId: string): Promise<boolean> {
+    abilityManager.nativeIsEmbeddedOpenAllowedCheck(context);
     return new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError | null)=>void):void => {
       let asyncCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined)=>{
         if (err == null || err.code == 0) {
@@ -123,12 +137,103 @@ export default namespace abilityManager {
     });
   }
 
-  export function on(type: 'abilityForegroundState', observer: AbilityForegroundStateObserver): void {
+ function notifyDebugAssertResult(sessionId: string, status: UserStatus): Promise<void> {
+  abilityManager.nativeNotifyDebugAssertResultCheck(sessionId, status);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeNotifyDebugAssertResult(sessionId, status, asyncCall);
+      });
+    });
+  }
+
+  function setResidentProcessEnabled(bundleName: string, enable: boolean): Promise<void> {
+    abilityManager.nativeSetResidentProcessEnabledCheck(bundleName);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeSetResidentProcessEnabled(bundleName, enable, asyncCall);
+      });
+    });
+  }
+
+  function acquireShareData(missionId: int, callback: AsyncCallback<Record<string, Object>>): void {
+    let asyncCall = new AsyncCallbackWrapper<Record<string, Object>>(callback);
+    taskpool.execute( (): void => {
+        abilityManager.nativeAcquireShareData(missionId, asyncCall);
+    });
+  }
+
+  function acquireShareData(missionId: int): Promise<Record<string, Object>> {
+    return new Promise<Record<string, Object>>((resolve: (data: Record<string, Object>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<Record<string, Object>>((err: BusinessError | null,
+        data: Record<string, Object> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Record<string, Object>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeAcquireShareData(missionId, asyncCall);
+      });
+    });
+  }
+
+  function updateConfiguration(config: Configuration, callback: AsyncCallback<void>): void {
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    abilityManager.nativeUpdateConfiguration(config, asyncCall);
+  }
+
+  function updateConfiguration(config: Configuration): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      abilityManager.nativeUpdateConfiguration(config, asyncCall);
+    });
+  }
+
+  export function onAbilityForegroundState(observer: AbilityForegroundStateObserver): void {
     abilityManager.nativeOn('abilityForegroundState', observer);
   }
 
-  export function off(type: 'abilityForegroundState', observer?: AbilityForegroundStateObserver): void {
+  export function offAbilityForegroundState(observer?: AbilityForegroundStateObserver): void {
     abilityManager.nativeOff('abilityForegroundState', observer);
+  }
+
+  function queryAtomicServiceStartupRule(context: Context, appId: string): Promise<AtomicServiceStartupRule> {
+    abilityManager.nativeQueryAtomicServiceStartupRuleCheck(context);
+    return new Promise<AtomicServiceStartupRule>((resolve:(data:AtomicServiceStartupRule)=>void, reject:(err: BusinessError | null)=>void):void => {
+      let asyncCall = new AsyncCallbackWrapper<AtomicServiceStartupRule>((err: BusinessError | null, data: AtomicServiceStartupRule | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as AtomicServiceStartupRule);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeQueryAtomicServiceStartupRule(context, appId, asyncCall);
+      })
+    });
   }
 
   export function getExtensionRunningInfos(upperLimit: int): Promise<Array<ExtensionRunningInfo>> {
@@ -156,7 +261,6 @@ export default namespace abilityManager {
     });
   }
 
-
   export enum AbilityState {
     INITIAL = 0,
     FOCUS = 2,
@@ -172,9 +276,21 @@ export default namespace abilityManager {
     ASSERT_RETRY = 2
   }
 
+  export interface AtomicServiceStartupRule {
+    isOpenAllowed: boolean;
+    isEmbeddedAllowed: boolean;
+  }
+
+  class AtomicServiceStartupRuleImpl implements AtomicServiceStartupRule {
+    isOpenAllowed: boolean;
+    isEmbeddedAllowed: boolean;
+  }
+
   export type AbilityRunningInfo = _AbilityRunningInfo;
 
   export type AbilityStateData = _AbilityStateData;
 
   export type AbilityForegroundStateObserver = _AbilityForegroundStateObserver;
+
+  export type ExtensionRunningInfo = _ExtensionRunningInfo;
 }
