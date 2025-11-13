@@ -18,7 +18,7 @@
 #include "connection_state_manager.h"
 #undef private
 #include "ability_connection.h"
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "connection_observer_errors.h"
 #include "data_ability_record.h"
 #ifdef WITH_DLP
@@ -38,7 +38,7 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<ConnectionStateManager> manager_ {nullptr};
-    std::shared_ptr<AbilityRecord> abilityRecord_ {nullptr};
+    std::shared_ptr<BaseExtensionRecord> abilityRecord_ {nullptr};
     std::shared_ptr<DataAbilityRecord> dataAbilityRecord_ {nullptr};
     sptr<IAbilityConnection> callback_ {nullptr};
 
@@ -70,7 +70,7 @@ void ConnectionStateManagerTest::SetUp()
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     AbilityRequest abilityRequest;
-    abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_ = std::make_shared<BaseExtensionRecord>(want, abilityInfo, applicationInfo);
     dataAbilityRecord_ = std::make_shared<DataAbilityRecord>(abilityRequest);
     manager_ = std::make_shared<ConnectionStateManager>();
     callback_ = new AbilityConnectionMock();

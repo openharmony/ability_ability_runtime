@@ -60,7 +60,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
     factory->CreateRecord(abilityRequest, extensionRecord);
     factory->NeedReuse(abilityRequest, int32Param);
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord;
     factory->CreateDebugRecord(abilityRequest, abilityRecord);
 
     abilityRequest.appInfo.bundleName = "com.example.unittest";

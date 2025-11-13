@@ -60,8 +60,8 @@ HWTEST_F(PreloadUIextStateObserverTest, OnProcessDied_001, Function | MediumTest
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord =
-        std::make_shared<AAFwk::AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord =
+        std::make_shared<AAFwk::BaseExtensionRecord>(want, abilityInfo, applicationInfo);
     auto extensionRecordSharedPtr = std::make_shared<AbilityRuntime::ExtensionRecord>(abilityRecord);
     auto hostPid = extensionRecordSharedPtr->hostPid_ = 10;
     std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord = extensionRecordSharedPtr;
@@ -124,8 +124,8 @@ HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_002, Function | M
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord =
-        std::make_shared<AAFwk::AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord =
+        std::make_shared<AAFwk::BaseExtensionRecord>(want, abilityInfo, applicationInfo);
     auto extensionRecordSharedPtr = std::make_shared<AbilityRuntime::ExtensionRecord>(abilityRecord);
     auto hostPid = extensionRecordSharedPtr->hostPid_ = 10;
     std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord = extensionRecordSharedPtr;
@@ -151,8 +151,8 @@ HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_003, Function | M
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord =
-        std::make_shared<AAFwk::AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord =
+        std::make_shared<AAFwk::BaseExtensionRecord>(want, abilityInfo, applicationInfo);
     auto extensionRecordSharedPtr = std::make_shared<AbilityRuntime::ExtensionRecord>(abilityRecord);
     std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord = extensionRecordSharedPtr;
     PreLoadUIExtStateObserver preLoadUIExtStateObserver(extensionRecord);

@@ -17,6 +17,7 @@
 
 #include "ability_util.h"
 #include "app_utils.h"
+#include "base_extension_record.h"
 #include "multi_instance_utils.h"
 
 namespace OHOS {
@@ -138,7 +139,7 @@ uint32_t ExtensionRecordFactory::GetExtensionProcessMode(
 int32_t ExtensionRecordFactory::CreateRecord(
     const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &extensionRecord)
 {
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord create failed");
         return ERR_NULL_OBJECT;

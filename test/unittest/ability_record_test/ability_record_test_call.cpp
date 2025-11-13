@@ -823,24 +823,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddSystemAbilityCallerRecord_002, Test
 
 /*
  * Feature: AbilityRecord
- * Function: ConnectAbility
- * SubFunction: ConnectAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ConnectAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->lifecycleDeal_ = nullptr;
-    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    bool isConnected = true;
-    abilityRecord->ConnectAbility();
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
  * Function: CommandAbility
  * SubFunction: CommandAbility
  * FunctionPoints: NA

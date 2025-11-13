@@ -57,14 +57,15 @@ uint32_t GetU32Data(const char* ptr)
         ptr[INPUT_THREE];
 }
 
-std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
+std::shared_ptr<BaseExtensionRecord> GetFuzzAbilityRecord()
 {
     sptr<Token> token = nullptr;
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
     if (!abilityRecord) {
         return nullptr;
     }
@@ -74,7 +75,7 @@ std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
 sptr<Token> GetFuzzAbilityToken()
 {
     sptr<Token> token = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = GetFuzzAbilityRecord();
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
@@ -94,7 +95,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->TerminateAbilityLocked(token);
     abilityConnectManager->StopServiceAbilityLocked(abilityRequest);
     bool boolParam = *data % ENABLE;
-    std::shared_ptr<AbilityRecord> targetService = GetFuzzAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> targetService = GetFuzzAbilityRecord();
     abilityConnectManager->GetOrCreateServiceRecord(abilityRequest, boolParam, targetService, boolParam);
     const sptr<IAbilityConnection> connect = new AbilityConnectCallback();
     std::list<std::shared_ptr<ConnectionRecord>> connectRecordList;
@@ -111,7 +112,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->ScheduleConnectAbilityDoneLocked(token, remoteObject);
     abilityConnectManager->ScheduleDisconnectAbilityDoneLocked(token);
     abilityConnectManager->ScheduleCommandAbilityDoneLocked(token);
-    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = GetFuzzAbilityRecord();
     abilityConnectManager->CompleteCommandAbility(abilityRecord);
     std::string stringParam(data, size);
     abilityConnectManager->GetServiceRecordByElementName(stringParam);

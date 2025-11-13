@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "preload_uiext_state_observer.h"
 
 namespace OHOS {
@@ -31,7 +31,7 @@ constexpr int32_t INVALID_EXTENSION_RECORD_ID = 0;
 }
 class ExtensionRecord : public std::enable_shared_from_this<ExtensionRecord> {
 public:
-    ExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
+    ExtensionRecord(const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord);
 
     virtual ~ExtensionRecord();
 
@@ -57,7 +57,7 @@ public:
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
     uint32_t processMode_ = 0;
     pid_t hostPid_ = 0;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord_ = nullptr;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord_ = nullptr;
     std::string hostBundleName_;
     int32_t requestCode_ = -1;
 private:

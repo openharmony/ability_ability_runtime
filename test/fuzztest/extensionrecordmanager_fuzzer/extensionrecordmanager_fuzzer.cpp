@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "extension_record_factory.h"
 #define private public
 #define inline
@@ -48,7 +48,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     int32_t recordNum;
     std::shared_ptr<AbilityRuntime::ExtensionRecord> record;
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord;
     std::list<sptr<IRemoteObject>> callerList;
     std::string hostBundleName;
     std::string bundleName;

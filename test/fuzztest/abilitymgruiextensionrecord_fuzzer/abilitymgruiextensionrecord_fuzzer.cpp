@@ -32,7 +32,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
 {
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord;
     AbilityRuntime::UIExtensionRecord infos(abilityRecord);
     infos.ContinueToGetCallerToken();
     AAFwk::AbilityRequest abilityRequest;

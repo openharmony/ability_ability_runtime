@@ -58,7 +58,6 @@ namespace AAFwk {
 using Closure = std::function<void()>;
 
 class AbilityRecord;
-class ConnectionRecord;
 class CallContainer;
 struct EventInfo;
 
@@ -123,8 +122,6 @@ public:
     void RemoveForegroundTimeoutTask();
 
     void RemoveLoadTimeoutTask();
-
-    void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
     /**
      * move the ability to back ground.
@@ -389,30 +386,6 @@ public:
     void Terminate(const Closure &task);
 
     /**
-     * connect the ability.
-     *
-     */
-    void ConnectAbility();
-
-    /**
-     * connect the ability with want.
-     *
-     */
-    void ConnectAbilityWithWant(const Want &want);
-
-    /**
-     * disconnect the ability.
-     *
-     */
-    void DisconnectAbility();
-
-    /**
-     * disconnect the ability with want
-     *
-     */
-    void DisconnectAbilityWithWant(const Want &want);
-
-    /**
      * Command the ability.
      *
      */
@@ -519,47 +492,6 @@ public:
      */
     void SaveResult(int resultCode, const Want *resultWant, std::shared_ptr<CallerRecord> caller);
 
-    bool NeedConnectAfterCommand();
-
-    /**
-     * add connect record to the list.
-     *
-     */
-    void AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord);
-
-    /**
-     * get the list of connect record.
-     *
-     */
-    std::list<std::shared_ptr<ConnectionRecord>> GetConnectRecordList() const;
-
-    /**
-     * get the list of connect record.
-     *
-     */
-    std::list<std::shared_ptr<ConnectionRecord>> GetConnectingRecordList();
-
-    /**
-     * get the count of In Progress record.
-     *
-     */
-    uint32_t GetInProgressRecordCount();
-    /**
-     * remove the connect record from list.
-     *
-     */
-    void RemoveConnectRecordFromList(const std::shared_ptr<ConnectionRecord> &connRecord);
-
-    /**
-     * check whether connect list is empty.
-     *
-     */
-    bool IsConnectListEmpty();
-
-    size_t GetConnectedListSize();
-
-    size_t GetConnectingListSize();
-
     void RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> callerAbilityRecord, int32_t requestCode);
 
     /**
@@ -577,18 +509,6 @@ public:
     std::shared_ptr<AbilityRecord> GetCallerRecord() const;
 
     std::shared_ptr<CallerAbilityInfo> GetCallerInfo() const;
-
-    /**
-     * get connecting record from list.
-     *
-     */
-    std::shared_ptr<ConnectionRecord> GetConnectingRecord() const;
-
-    /**
-     * get disconnecting record from list.
-     *
-     */
-    std::shared_ptr<ConnectionRecord> GetDisconnectingRecord() const;
 
     /**
      * convert ability state (enum type to string type).
@@ -638,30 +558,6 @@ public:
     void SetStartTime();
 
     int64_t GetStartTime() const;
-
-    /**
-     * dump service info.
-     *
-     */
-    void DumpService(std::vector<std::string> &info, bool isClient = false) const;
-
-    /**
-     * dump service info.
-     *
-     */
-    void DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient = false) const;
-
-    /**
-     * set connect remote object.
-     *
-     */
-    void SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject);
-
-    /**
-     * get connect remote object.
-     *
-     */
-    sptr<IRemoteObject> GetConnRemoteObject() const;
 
     /**
      * check whether the ability is never started.
@@ -1058,10 +954,6 @@ private:
 
     void NotifyMissionBindPid();
 
-    void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
-
-    void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
-
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
 
@@ -1144,7 +1036,6 @@ private:
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;
     bool isAppAutoStartup_ = false;
-    bool isConnected = false;
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
@@ -1185,12 +1076,6 @@ private:
      * Now we assume only one result generate when terminate.
      */
     std::shared_ptr<AbilityResult> result_ = {};
-
-    // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
-    mutable ffrt::mutex connRecordListMutex_;
-    std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
-    // service(ability) onConnect() return proxy of service ability
-    sptr<IRemoteObject> connRemoteObject_ = {};
 
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};

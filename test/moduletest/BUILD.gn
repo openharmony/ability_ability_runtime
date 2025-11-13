@@ -55,6 +55,7 @@ group("moduletest") {
       "app_mgr_client_test:moduletest",
       "call_module_test:moduletest",
       "common/ams:moduletest",
+      "extension_record_base_module_test:moduletest",
       "ipc_ability_connect_test:moduletest",
       "ipc_ability_mgr_test:moduletest",
       "ipc_ability_scheduler_test:moduletest",

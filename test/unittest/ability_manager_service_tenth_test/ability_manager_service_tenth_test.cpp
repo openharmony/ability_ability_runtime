@@ -190,7 +190,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleConnectAbilityDone_001, TestSiz
     auto connectManager = std::make_shared<AbilityConnectManager>(0);
     abilityMs_->subManagersHelper_->connectManagers_[2000 / BASE_USER_RANGE] = connectManager;
     ret = abilityMs_->ScheduleConnectAbilityDone(callerToken, token);
-    ASSERT_NE(ret, ERR_INVALID_VALUE);
+    ASSERT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -283,7 +283,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleCommandAbilityDone_001, TestSiz
     auto connectManager = std::make_shared<AbilityConnectManager>(0);
     abilityMs_->subManagersHelper_->connectManagers_[2000 / BASE_USER_RANGE] = connectManager;
     ret = abilityMs_->ScheduleCommandAbilityDone(callerToken);
-    ASSERT_NE(ret, ERR_INVALID_VALUE);
+    ASSERT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
