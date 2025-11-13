@@ -3505,7 +3505,7 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
                 abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()) {
                 isColdStart = info.isExiting ? true : info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
                 pid = info.isExiting ? 0 : info.pid_;
-                preloadMode = static_cast<int32_t>info.preloadMode_;
+                preloadMode = static_cast<int32_t>(info.preloadMode_);
                 bool isSuggestCache = info.isCached;
                 bool supportWarmSmartGC = (isSuggestCache ||
                     info.preloadMode_ == AppExecFwk::PreloadMode::PRE_MAKE ||
