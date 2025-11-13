@@ -348,16 +348,25 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
         if (result == Security::AccessToken::RET_SUCCESS) {
             callingName = tokenInfo.processName;
         }
-    }
-    else {
+    } else {
         LOG_ERROR("tokenType is invalid, tokenType:%{public}d", tokenType);
     }
     return callingName;
 }
+
+void DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
+    const uint32_t userId, const std::string &method)
+{
+    if (uri.GetScheme() == SCHEME_RDB) {
+        VerifyUriPermission(uri, tokenId, userId, SCHEME_RDB + method);
+    } else if (uri.GetScheme() == SCHEME_SP) {
+        VerifyUriPermission(uri, tokenId, userId, SCHEME_RDB + method);
+    }
+}
+
 std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
     const uint32_t userId)
 {
-    std::lock_guard<std::mutex> lock(groupsIdMutex_);
     auto key = bundleName + ":" + std::to_string(userId);
     auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
         [&key](const auto& pair) { return pair.first == key; });
@@ -366,10 +375,10 @@ std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::
         auto bmsHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
         bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
         if (!res) {
-            LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d",
-                bundleName.c_str(), userId);
+            LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
             return infos;
         }
+        std::lock_guard<std::mutex> lock(groupsIdMutex_);
         if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
             LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
             groupsIdCache_.pop_front();
@@ -377,7 +386,6 @@ std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::
         groupsIdCache_.emplace_back(key, infos);
         return infos;
     }
-    LOG_DEBUG("Cache hit for %{public}s", key.c_str());
     return it->second;
 }
 
@@ -463,11 +471,7 @@ int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbili
             return status;
         }
     }
-    if (uriInner.GetScheme() == SCHEME_RDB) {
-        VerifyUriPermission(uriInner, callingToken, callingUserId, "RelationalDatabase:Register");
-    } else if (uriInner.GetScheme() == SCHEME_SP) {
-        VerifyUriPermission(uriInner, callingToken, callingUserId, "Preferences:Register");
-    }
+    CheckSchemePermission(uriInner, callingToken, callingUserId, "Register");
     status = ConstructRegisterObserver(uri, dataObserver, token, userId, pid);
     if (status != NO_ERROR) {
         LOG_ERROR("register failed:%{public}d,uri:%{public}s", status, CommonUtils::Anonymous(uri.ToString()).c_str());
@@ -502,11 +506,7 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
 
     auto tokenId = IPCSkeleton::GetCallingTokenID();
     int32_t callingUserId = GetCallingUserId(tokenId);
-    if (uriInner.GetScheme() == SCHEME_RDB) {
-        VerifyUriPermission(uriInner, tokenId, callingUserId, "RelationalDatabase:Unregister");
-    } else if (uriInner.GetScheme() == SCHEME_SP) {
-        VerifyUriPermission(uriInner, tokenId, callingUserId, "Preferences:Unregister");
-    }
+    CheckSchemePermission(uriInner, tokenId, callingUserId, "Unregister");
     auto [success, observerNode] = ConstructObserverNode(dataObserver, userId, tokenId, 0);
     if (!success) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "ConstructObserverNode fail, uri:%{public}s, userId:%{public}d",
@@ -617,11 +617,7 @@ int32_t DataObsMgrService::NotifyChangeInner(Uri &uri, int32_t userId, DataObsOp
         }
     }
     Uri uriStr = uri;
-    if (uriStr.GetScheme() == SCHEME_RDB) {
-        VerifyUriPermission(uriStr, tokenId, callingUserId, "RelationalDatabase:Notify");
-    } else if (uriStr.GetScheme() == SCHEME_SP) {
-        VerifyUriPermission(uriStr, tokenId, callingUserId, "Preferences:Notify");
-    }
+    CheckSchemePermission(uriStr, tokenId, callingUserId, "Notify");
     std::string readPermission = DataSharePermission::NO_PERMISSION;
     if (checkPermission) {
         std::tie(ret, readPermission) = GetUriPermission(uri, true, info);
