@@ -31,7 +31,7 @@ int ForegroundAppConnectionStub::OnRemoteRequest(
         TAG_LOGI(AAFwkTag::CONNECTION, "invalid descriptor");
         return ERR_INVALID_STATE;
     }
-    if (code < IForegroundAppConnection::CMD_MAX && code >= 0) {
+    if (code < IForegroundAppConnection::CMD_MAX) {
         switch (code) {
             case ON_FOREGROUND_APP_CONNECTED:
                 return OnForegroundAppConnectedInner(data, reply);

@@ -18,7 +18,7 @@
 #define private public
 #include "foreground_app_connection_manager.h"
 #undef private
-#include "foreground_app_connection_errors.h"
+#include "connection_observer_errors.h"
 #include "hilog_tag_wrapper.h"
 
 using namespace testing::ext;
