@@ -999,6 +999,7 @@ ProcessData AppStateObserverManager::WrapProcessData(
     processData.callerUid = appRecord->GetCallerUid();
     processData.killReason = appRecord->GetKillReason();
     processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
+    processData.preloadMode = appRecord->GetPreloadMode();
     return processData;
 }
 

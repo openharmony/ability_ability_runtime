@@ -98,6 +98,9 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteString(hostBundleName)) {
         return false;
     }
+    if (!parcel.WriteInt32(preloadMode)) {
+        return false;
+    }
     return true;
 }
 
@@ -136,6 +139,7 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     callerPid = parcel.ReadInt32();
     hostPid = parcel.ReadInt32();
     hostBundleName = parcel.ReadString();
+    preloadMode = parcel.ReadInt32();
     return true;
 }
 
