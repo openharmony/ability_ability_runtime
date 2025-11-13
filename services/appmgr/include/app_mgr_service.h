@@ -891,8 +891,6 @@ public:
         const std::string& reason) override;
     int32_t KillProcessByPidForExit(int32_t pid, const std::string &reason) override;
 
-    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
-
     /**
      * Get if the specified module has been loaded.
      * @param want info to query module.

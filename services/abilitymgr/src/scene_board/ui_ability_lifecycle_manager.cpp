@@ -337,15 +337,41 @@ bool UIAbilityLifecycleManager::HandleRestartUIAbility(sptr<SessionInfo> session
     return true;
 }
 
+std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::HandleAbilityRecordReused(
+    std::shared_ptr<AbilityRecord> uiAbilityRecord, SessionInfo &sessionInfo, AbilityRequest &abilityRequest)
+{
+    if (uiAbilityRecord == nullptr || uiAbilityRecord->GetSessionInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord invalid");
+        return nullptr;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo.isNewWant);
+    uiAbilityRecord->SetPrelaunchFlag(false);
+    if (sessionInfo.sessionToken != uiAbilityRecord->GetSessionInfo()->sessionToken) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
+        return nullptr;
+    }
+    abilityRequest.want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr != nullptr && sessionInfo.reuseDelegatorWindow) {
+        auto ret = IN_PROCESS_CALL(appMgr->LaunchAbility(uiAbilityRecord->GetToken()));
+        sessionInfo.want.CloseAllFd();
+        if (ret == ERR_OK) {
+            uiAbilityRecord->SetIsNewWant(false);
+            return uiAbilityRecord;
+        }
+        return nullptr;
+    }
+    return uiAbilityRecord;
+}
+
 std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(AbilityRequest &abilityRequest,
     sptr<SessionInfo> sessionInfo, bool &isColdStart)
 {
-    std::shared_ptr<AbilityRecord> uiAbilityRecord = nullptr;
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
     bool isLowMemKill = (iter != sessionAbilityMap_.end()) &&
         (iter->second != nullptr) && (iter->second->IsKillPrecedeStart());
     if (iter == sessionAbilityMap_.end() || isLowMemKill) {
-        uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
+        auto uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
         auto abilityInfo = abilityRequest.abilityInfo;
         if (uiAbilityRecord == nullptr) {
             uiAbilityRecord = CreateAbilityRecord(abilityRequest, sessionInfo);
@@ -369,16 +395,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         if (isSCBRecovery_) {
             coldStartInSCBRecovery_.insert(sessionInfo->persistentId);
         }
-        if (abilityInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE &&
-            abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
-            auto appMgr = AppMgrUtil::GetAppMgr();
-            if (appMgr == nullptr) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
-                return uiAbilityRecord;
-            }
-            IN_PROCESS_CALL_WITHOUT_RET(
-                appMgr->UpdateInstanceKeyBySpecifiedId(sessionInfo->requestId, sessionInfo->instanceKey));
-        }
         MoreAbilityNumbersSendEventInfo(
             abilityRequest.userId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
         if (!abilityRequest.startOptions.GetCurrentProcessName().empty()) {
@@ -387,39 +403,16 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         }
         if (isLowMemKill) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
-                "replacing old record id=%{public}s, new record id=%{public}s",
-                std::to_string(sessionAbilityMap_[sessionInfo->persistentId]->GetAbilityRecordId()).c_str(),
-                std::to_string(uiAbilityRecord->GetAbilityRecordId()).c_str());
-            lowMemKillAbilityMap_.emplace(sessionInfo->persistentId, sessionAbilityMap_[sessionInfo->persistentId]);
+                "replacing old record id=%{public}" PRId64 ", new record id=%{public}" PRId64,
+                iter->second->GetAbilityRecordId(), uiAbilityRecord->GetAbilityRecordId());
+            lowMemKillAbilityMap_.emplace(sessionInfo->persistentId, iter->second);
             sessionAbilityMap_[sessionInfo->persistentId] = uiAbilityRecord;
         } else {
             sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
         }
-    } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo->isNewWant);
-        uiAbilityRecord = iter->second;
-        if (uiAbilityRecord == nullptr || uiAbilityRecord->GetSessionInfo() == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord invalid");
-            return nullptr;
-        }
-        uiAbilityRecord->SetPrelaunchFlag(false);
-        if (sessionInfo->sessionToken != uiAbilityRecord->GetSessionInfo()->sessionToken) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
-            return nullptr;
-        }
-        abilityRequest.want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
-        auto appMgr = AppMgrUtil::GetAppMgr();
-        if (appMgr != nullptr && sessionInfo->reuseDelegatorWindow) {
-            auto ret = IN_PROCESS_CALL(appMgr->LaunchAbility(uiAbilityRecord->GetToken()));
-            sessionInfo->want.CloseAllFd();
-            if (ret == ERR_OK) {
-                uiAbilityRecord->SetIsNewWant(false);
-                return uiAbilityRecord;
-            }
-            return nullptr;
-        }
+        return uiAbilityRecord;
     }
-    return uiAbilityRecord;
+    return HandleAbilityRecordReused(iter->second, *sessionInfo, abilityRequest);
 }
 
 std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromTmpMap(

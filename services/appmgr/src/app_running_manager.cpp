@@ -2263,18 +2263,6 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
     return true;
 }
 
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    auto appRunningMap = GetAppRunningRecordMap();
-    for (const auto& item : appRunningMap) {
-        const auto& appRecord = item.second;
-        if (appRecord && appRecord->GetSpecifiedRequestId() == specifiedId) {
-            TAG_LOGI(AAFwkTag::APPMGR, "set instanceKey:%{public}s", instanceKey.c_str());
-            appRecord->SetInstanceKey(instanceKey);
-        }
-    }
-}
-
 int32_t AppRunningManager::AddUIExtensionBindItem(
     int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo)
 {

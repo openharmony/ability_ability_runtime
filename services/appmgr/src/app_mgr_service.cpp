@@ -1918,19 +1918,6 @@ int32_t AppMgrService::KillProcessByPidForExit(int32_t pid, const std::string &r
     return appMgrServiceInner_->KillProcessByPidForExit(pid, reason);
 }
 
-void AppMgrService::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
-        return;
-    }
-    if (!appMgrServiceInner_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
-        return;
-    }
-    appMgrServiceInner_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
-}
-
 int32_t AppMgrService::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
     bool &isDebug)
 {

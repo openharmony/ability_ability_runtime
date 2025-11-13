@@ -1015,8 +1015,6 @@ public:
         return 0;
     }
 
-    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) {}
-
     /**
      * Get if the specified module has been loaded.
      * @param want info to query module.
