@@ -1263,7 +1263,7 @@ private:
     std::atomic<bool> isPreForeground_ = false;
 
     int32_t appRecordId_ = 0;
-    int32_t mainUid_;
+    int32_t mainUid_ = -1;
     int restartResidentProcCount_ = 0;
     int32_t exitReason_ = 0;
     int32_t appIndex_ = 0; // render record
