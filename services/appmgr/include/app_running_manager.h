@@ -436,7 +436,6 @@ public:
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);

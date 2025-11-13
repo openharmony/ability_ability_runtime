@@ -480,9 +480,5 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
 {
     return true;
 }
-
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS

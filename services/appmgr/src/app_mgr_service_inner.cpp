@@ -10470,15 +10470,6 @@ int32_t AppMgrServiceInner::CheckIsKiaProcess(pid_t pid, bool &isKia)
     return appRunningManager_->CheckIsKiaProcess(pid, isKia);
 }
 
-void AppMgrServiceInner::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
-        return;
-    }
-    appRunningManager_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
-}
-
 void AppMgrServiceInner::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
 {
     if (remoteClientManager_ == nullptr) {

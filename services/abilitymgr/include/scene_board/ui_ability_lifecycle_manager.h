@@ -1042,6 +1042,8 @@ private:
      */
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
+    std::shared_ptr<AbilityRecord> HandleAbilityRecordReused(std::shared_ptr<AbilityRecord> uiAbilityRecord,
+        SessionInfo &sessionInfo, AbilityRequest &abilityRequest);
 
     /**
      * @brief Find ability record from temporary map
