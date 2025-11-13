@@ -498,11 +498,6 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
     return true;
 }
 
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    AAFwk::MyStatus::GetInstance().updateInstanceKeyBySpecifiedIdCalled_ = true;
-}
-
 int32_t AppRunningManager::RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId)
 {
     AAFwk::MyStatus::GetInstance().removeUIExtensionBindItemByIdCalled_ = true;

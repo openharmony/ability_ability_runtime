@@ -2447,21 +2447,6 @@ int32_t AppMgrProxy::KillProcessByPidForExit(int32_t pid, const std::string &rea
     return reply.ReadInt32();
 }
 
-void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return;
-    }
-    PARCEL_UTIL_WRITE_NORET(data, Int32, specifiedId);
-    PARCEL_UTIL_WRITE_NORET(data, String, instanceKey);
-
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
-}
-
 int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
     bool &isDebug)
 {
