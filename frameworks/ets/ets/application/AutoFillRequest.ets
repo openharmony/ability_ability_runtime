@@ -17,12 +17,14 @@ import { AutoFillType } from 'application.AutoFillType';
 import CustomData from 'application.CustomData';
 import AutoFillPopupConfig from 'application.AutoFillPopupConfig';
 import ViewData from 'application.ViewData';
+import { AutoFillTriggerType } from 'application.AutoFillTriggerType';
 
 export interface FillRequest {
   type: AutoFillType;
   viewData: ViewData;
   customData: CustomData;
   isPopup: boolean;
+  triggerType?: AutoFillTriggerType;
 }
 export interface SaveRequest {
   viewData: ViewData;
@@ -49,6 +51,7 @@ class FillRequestInner implements FillRequest {
   public viewData!: ViewData;
   public customData: CustomData = {data: {}};
   public isPopup: boolean;
+  public triggerType?: AutoFillTriggerType;
 }
 class SaveRequestInner implements SaveRequest {
   public viewData!: ViewData;
