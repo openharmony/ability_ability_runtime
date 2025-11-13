@@ -14,6 +14,7 @@
  */
 
 #include "foreground_app_connection_data.h"
+#include "hilog_tag_wrapper.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -74,7 +75,11 @@ bool ForegroundAppConnectionData::ReadFromParcel(Parcel &parcel)
 
 ForegroundAppConnectionData *ForegroundAppConnectionData::Unmarshalling(Parcel &parcel)
 {
-    ForegroundAppConnectionData *data = new ForegroundAppConnectionData();
+    ForegroundAppConnectionData *data = new (std::nothrow) ForegroundAppConnectionData();
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "data nullptr");
+        return nullptr;
+    }
     if (!data->ReadFromParcel(parcel)) {
         delete data;
         data = nullptr;
