@@ -24,6 +24,7 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "appfreeze_inner.h"
+#include <charconv>
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -62,7 +63,14 @@ bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &app
     if (getParamHeapSizeStr == "-1") {
         return false;
     }
-    size_t getParamHeapSize = std::stoull(getParamHeapSizeStr) * APP_SAVE_HEAP_SIZE_M;
+    size_t getParamHeapSize;
+    auto fromCharsResult = std::from_chars(getParamHeapSizeStr.data(),
+        getParamHeapSizeStr.data() + getParamHeapSizeStr.size(), getParamHeapSize);
+    if (fromCharsResult.ec == std::errc()) {
+        getParamHeapSize *= APP_SAVE_HEAP_SIZE_M;
+    } else {
+        return false;
+    }
     auto appHeapTotalSize = GetHeapSize(application);
     TAG_LOGI(AAFwkTag::APPDFR, "SLEEPCLEAN_%{public}s, HEAP_TOTAL_SIZE is %{public}zu",
         AppfreezeInner::GetInstance()->GetProcessLifeCycle().c_str(), appHeapTotalSize);
