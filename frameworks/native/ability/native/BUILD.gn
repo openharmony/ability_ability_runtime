@@ -2559,6 +2559,7 @@ ohos_shared_library("ui_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
