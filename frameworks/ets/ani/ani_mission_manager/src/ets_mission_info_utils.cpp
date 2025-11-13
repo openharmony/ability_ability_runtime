@@ -38,6 +38,7 @@ constexpr const char* KEY_ABILITY_STATE = "abilityState";
 constexpr const char* KEY_UNCLEARABLE = "unclearable";
 constexpr const char* KEY_WANT = "want";
 constexpr const char *WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "ILstd/core/Object;:V";
 }
 
 bool InnerCreateEtsWantParams(ani_env *env, ani_class wantCls, ani_object wantObject,
@@ -180,6 +181,51 @@ ani_object CreateEtsMissionInfo(ani_env *env, const AAFwk::MissionInfo &missionI
         return nullptr;
     }
     return object;
+}
+
+ani_object CreateEtsMissionInfos(ani_env *env, const std::vector<AAFwk::MissionInfo> &missionInfos)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "env is null");
+        return nullptr;
+    }
+    ani_class arrayCls = nullptr;
+    ani_status status = ANI_ERROR;
+    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    if (status != ANI_OK || arrayCls == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "FindClass failed, status : %{public}d", status);
+        return nullptr;
+    }
+
+    ani_method arrayCtor = nullptr;
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    if (status != ANI_OK || arrayCtor == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "Class_FindMethod failed, status : %{public}d", status);
+        return nullptr;
+    }
+
+    ani_object arrayObj = nullptr;
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, missionInfos.size());
+    if (status != ANI_OK || arrayObj == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "Object_New failed, status : %{public}d", status);
+        return arrayObj;
+    }
+
+    ani_size index = 0;
+    for (auto &missionInfo : missionInfos) {
+        ani_object object = CreateEtsMissionInfo(env, missionInfo);
+        if (object == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "CreateEtsMissionInfo failed");
+            return nullptr;
+        }
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, index, object);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::MISSION, "Object_CallMethodByName_Void failed, status : %{public}d", status);
+            return nullptr;
+        }
+        index++;
+    }
+    return arrayObj;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -148,18 +148,62 @@ std::shared_ptr<Context> GetContextByStageMode(ani_env *env, ani_object &context
     ani_status status = IsStageContext(env, contextObj, stageMode);
     if (status != ANI_OK || !stageMode) {
         TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
-        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
-            "Parse param context failed, must be a context of stageMode."), emptyObject);
         return nullptr;
     }
     auto context = GetStageModeContext(env, contextObj);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
-            "Parse param context failed, must not be nullptr."), emptyObject);
         return nullptr;
     }
     return context;
+}
+
+void EtsApplication::CreateModuleContextCheck(ani_env *env,
+    ani_object contextObj, ani_string moduleName, ani_object bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CreateModuleContextCheck Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_boolean stageMode = false;
+    ani_status status = IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must be a context of stageMode.");
+        return;
+    }
+    auto context = GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must not be nullptr.");
+        return;
+    }
+    auto inputContextPtr = Context::ConvertTo<Context>(context);
+    if (inputContextPtr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Convert to context failed");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must be a context.");
+        return;
+    }
+    ani_boolean isUndefined = false;
+    if ((status = env->Reference_IsUndefined(bundleName, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to check undefined status : %{public}d", status);
+        return;
+    }
+    if (!isUndefined) {
+        if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "no system app");
+            EtsErrorUtil::ThrowNotSystemAppError(env);
+            return;
+        }
+        if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "no permission");
+            EtsErrorUtil::ThrowNoPermissionError(env, PERMISSION_GET_BUNDLE_INFO);
+            return;
+        }
+    }
 }
 
 void EtsApplication::CreateModuleContext(ani_env *env,
@@ -182,8 +226,6 @@ void EtsApplication::CreateModuleContext(ani_env *env,
     auto inputContextPtr = Context::ConvertTo<Context>(context);
     if (inputContextPtr == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Convert to context failed");
-        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
-            "Parse param context failed, must be a context."), emptyObject);
         return;
     }
     std::shared_ptr<std::shared_ptr<Context>> moduleContext = std::make_shared<std::shared_ptr<Context>>();
@@ -204,6 +246,43 @@ void EtsApplication::CreateModuleContext(ani_env *env,
         *moduleContext = contextImpl->CreateModuleContext(stdBundleName, stdModuleName, inputContextPtr);
     }
     SetCreateCompleteCallback(env, moduleContext, callback);
+}
+
+void EtsApplication::CreateBundleContextCheck(ani_env *env,
+    ani_object contextObj, ani_string bundleName)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "no system app");
+        EtsErrorUtil::ThrowNotSystemAppError(env);
+        return;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "no permission");
+        EtsErrorUtil::ThrowNoPermissionError(env, PERMISSION_GET_BUNDLE_INFO);
+        return;
+    }
+    ani_boolean stageMode = false;
+    ani_status status = IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must be a context of stageMode.");
+        return;
+    }
+    auto context = GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must not be nullptr.");
+        return;
+    }
+    auto inputContextPtr = Context::ConvertTo<Context>(context);
+    if (inputContextPtr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Convert to context failed");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param context failed, must be a context.");
+        return;
+    }
 }
 
 void EtsApplication::CreateBundleContext(ani_env *env,
@@ -243,6 +322,87 @@ void EtsApplication::CreateBundleContext(ani_env *env,
     contextImpl->SetProcessName(context->GetProcessName());
     contextImpl->CreateBundleContext(*bundleContext, stdBundleName, inputContextPtr);
     SetCreateCompleteCallback(env, bundleContext, callback);
+}
+
+void EtsApplication::CreatePluginModuleContextCheck(ani_env *env,
+    ani_object contextObj, ani_string pluginBundleName, ani_string pluginModuleName)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CreatePluginModuleContextCheck Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_boolean stageMode = false;
+    ani_status status = OHOS::AbilityRuntime::IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param context failed, must be a context of stageMode.");
+        return;
+    }
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param context failed, must not be nullptr.");
+        return;
+    }
+    auto inputContextPtr = Context::ConvertTo<Context>(context);
+    if (inputContextPtr == nullptr) {
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param context failed, must be a context.");
+        return;
+    }
+}
+
+void EtsApplication::CreatePluginModuleContext(ani_env *env,
+    ani_object contextObj, ani_string pluginBundleName, ani_string pluginModuleName, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CreatePluginModuleContext Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_boolean stageMode = false;
+    ani_status status = OHOS::AbilityRuntime::IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parse param context failed, must be a context of stageMode."),
+            nullptr);
+        return;
+    }
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parse param context failed, must not be nullptr."), nullptr);
+        return;
+    }
+    auto inputContextPtr = Context::ConvertTo<Context>(context);
+    if (inputContextPtr == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parse param context failed, must be a context."), nullptr);
+        return;
+    }
+    std::string stdPluginBundleName = "";
+    std::string stdModuleName = "";
+    AppExecFwk::GetStdString(env, pluginBundleName, stdPluginBundleName);
+    AppExecFwk::GetStdString(env, pluginModuleName, stdModuleName);
+    TAG_LOGD(AAFwkTag::APPKIT, "pluginModuleName: %{public}s, pluginBundleName: %{public}s",
+        stdModuleName.c_str(), stdPluginBundleName.c_str());
+    if (stdPluginBundleName.empty() || stdModuleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Empty pluginBundleName or moduleName");
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Empty pluginBundleName or moduleName"), nullptr);
+        return;
+    }
+    auto moduleContext = std::make_shared<std::shared_ptr<Context>>();
+    auto contextImpl = std::make_shared<ContextImpl>();
+    if (contextImpl == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateInvalidParamError(env, "create context failed."), nullptr);
+        return;
+    }
+    contextImpl->SetProcessName(context->GetProcessName());
+    *moduleContext = contextImpl->CreatePluginContext(stdPluginBundleName, stdModuleName, inputContextPtr);
+    SetCreateCompleteCallback(env, moduleContext, callback);
 }
 
 ani_object GetApplicationContextInstance(ani_env *env)
@@ -327,10 +487,31 @@ void ApplicationInit(ani_env *env)
             reinterpret_cast<void *>(EtsApplication::CreateModuleContext)
         },
         ani_native_function {
+            "nativeCreateModuleContextCheck",
+            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;:V",
+            reinterpret_cast<void *>(EtsApplication::CreateModuleContextCheck)
+        },
+        ani_native_function {
             "nativeCreateBundleContext",
             "Lapplication/Context/Context;Lstd/core/String;"
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsApplication::CreateBundleContext)
+        },
+        ani_native_function {
+            "nativeCreateBundleContextCheck",
+            "Lapplication/Context/Context;Lstd/core/String;:V",
+            reinterpret_cast<void *>(EtsApplication::CreateBundleContextCheck)
+        },
+        ani_native_function {
+            "nativeCreatePluginModuleContext",
+            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;"
+            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContext)
+        },
+        ani_native_function {
+            "nativeCreatePluginModuleContextCheck",
+            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;:V",
+            reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContextCheck)
         },
         ani_native_function {
             "nativeGetApplicationContext",

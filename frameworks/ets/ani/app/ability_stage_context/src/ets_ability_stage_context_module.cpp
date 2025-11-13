@@ -191,7 +191,7 @@ napi_value EtsAbilityStageContextModule::GetOrCreateDynamicObject(napi_env napiE
     // if main-thread bindingObj exist, return it directly
     auto dynamicContext = bindingObj->Get<NativeReference>();
     if (dynamicContext != nullptr) {
-        TAG_LOGI(AAFwkTag::UIABILITY, "there exist a dynamicContext");
+        TAG_LOGI(AAFwkTag::CONTEXT, "there exist a dynamicContext");
         return dynamicContext->Get();
     }
 

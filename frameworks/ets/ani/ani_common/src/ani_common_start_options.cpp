@@ -24,6 +24,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+const std::string APP_LINKING_ONLY = "appLinkingOnly";
+}
 
 bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions)
 {
@@ -166,6 +169,12 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
     if (GetFieldBoolByName(env, param, "windowFocused", windowFocused)) {
         TAG_LOGD(AAFwkTag::ANI, "windowFocused:%{public}hhu", windowFocused);
         startOptions.SetWindowFocused(windowFocused);
+    }
+
+    bool hideStartWindow = true;
+    if (GetFieldBoolByName(env, param, "hideStartWindow", hideStartWindow)) {
+        TAG_LOGD(AAFwkTag::ANI, "hideStartWindow:%{public}d", hideStartWindow);
+        startOptions.SetHideStartWindow(hideStartWindow);
     }
 
     if (!SetSupportWindowModes(env, param, startOptions)) {
@@ -314,6 +323,35 @@ bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want
         want.SetFlags(flags);
     }
     return true;
+}
+
+void UnWrapOpenLinkOptions(
+    ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::ANI, "UnWrapOpenLinkOptions");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "env is null");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref paramRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &paramRef)) == ANI_OK) {
+        AAFwk::WantParams wantParam;
+        if (AppExecFwk::UnwrapWantParams(env, paramRef, wantParam)) {
+            want.SetParams(wantParam);
+        } else {
+            TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
+        }
+    }
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, APP_LINKING_ONLY.c_str(), &paramRef)) == ANI_OK) {
+        bool appLinkingOnly = false;
+        AppExecFwk::GetBooleanPropertyObject(env, optionsObj, "appLinkingOnly", appLinkingOnly);
+        openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
+        want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
+    }
+    if (!want.HasParameter(APP_LINKING_ONLY)) {
+        want.SetParam(APP_LINKING_ONLY, false);
+    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS
