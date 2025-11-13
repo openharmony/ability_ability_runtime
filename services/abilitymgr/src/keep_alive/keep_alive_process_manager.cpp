@@ -163,6 +163,13 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const std::string &bundleNa
             TAG_LOGI(AAFwkTag::KEEP_ALIVE, "status bar is created");
             return;
         }
+        bool isRunning = false;
+        bool result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
+            IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
+        if (result == ERR_OK && !isRunning) {
+            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "keepAliveApp is not running");
+            return;
+        }
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "timeout, status bar not created, unsetting keep-alive");
         KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true, true);
         (void)DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplication(bundleName);
