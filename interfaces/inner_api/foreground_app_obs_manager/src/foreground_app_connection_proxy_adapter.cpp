@@ -15,7 +15,7 @@
 
 #include "foreground_app_connection_proxy_adapter.h"
 
-#include "foreground_app_connection_errors.h"
+#include "connection_observer_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "string_ex.h"
 

@@ -13161,18 +13161,15 @@ void AbilityManagerService::NotifyAppPreCache(int32_t pid, int32_t userId)
 void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     std::shared_ptr<AbilityRecord> abilityRecord;
-    int32_t diedPid;
     for (auto &token : abilityTokens) {
         abilityRecord = Token::GetAbilityRecordByToken(token);
         if (abilityRecord == nullptr) {
             continue;
         }
-        diedPid = abilityRecord->GetPid();
         TAG_LOGI(AAFwkTag::ABILITYMGR, "app onRemoteDied, ability:%{public}s, app:%{public}s",
             abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
         abilityRecord->OnProcessDied();
     }
-    DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->ProcessRemovePidConnection(diedPid);
 }
 
 void AbilityManagerService::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)

@@ -15,7 +15,7 @@
 
 #include "foreground_app_connection_client_impl.h"
 
-#include "foreground_app_connection_errors.h"
+#include "connection_observer_errors.h"
 #include "foreground_app_connection_stub_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "iservice_registry.h"
@@ -109,8 +109,7 @@ bool ForegroundAppConnectionClientImpl::RegisterObserverToServiceLocked(
     }
 
     if (!observer_) {
-        observer_ = sptr<IForegroundAppConnection>(
-            new (std::nothrow) ForegroundAppConnectionStubImpl(shared_from_this()));
+        observer_ = sptr<ForegroundAppConnectionStubImpl>::MakeSptr(shared_from_this());
     }
 
     if (proxy->RegisterObserver(observer_) != ERR_OK) {
