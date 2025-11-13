@@ -24,8 +24,6 @@
 #undef protected
 #undef private
 
-#include "ability_record.h"
-
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AbilityRuntime;
@@ -56,7 +54,8 @@ sptr<Token> GetFuzzAbilityToken()
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
@@ -72,13 +71,15 @@ void AbilityCacheManagerFuzztest1(bool boolParam, std::string &stringParam, int3
 {
     AbilityCacheManager& mgr = AbilityCacheManager::GetInstance();
     mgr.Init(int32Param, int32Param);
-    std::shared_ptr<AbilityRecord> abilityRecord1;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord1;
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord2 = std::make_shared<BaseExtensionRecord>(want,
+        abilityInfo, applicationInfo);
     abilityRecord2->recordId_ = 2; // 2 means recordId
-    std::shared_ptr<AbilityRecord> abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord3 = std::make_shared<BaseExtensionRecord>(want,
+        abilityInfo, applicationInfo);
     abilityRecord3->recordId_ = 3; // 3 means recordId
     mgr.AddToProcLru(abilityRecord2);
     mgr.AddToDevLru(abilityRecord2, abilityRecord2);
@@ -94,7 +95,8 @@ void AbilityCacheManagerFuzztest1(bool boolParam, std::string &stringParam, int3
     abilityInfo.moduleName = "moduleName";
     abilityRequest.abilityInfo.moduleName = abilityInfo.moduleName;
     SetElement(want);
-    std::shared_ptr<AbilityRecord> abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord4 = std::make_shared<BaseExtensionRecord>(want,
+        abilityInfo, applicationInfo);
     ret = mgr.IsRecInfoSame(abilityRequest, abilityRecord4);
     abilityInfo.moduleName = "moduleName1";
     mgr.IsRecInfoSame(abilityRequest, abilityRecord4);

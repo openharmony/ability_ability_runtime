@@ -31,7 +31,7 @@ const int DISCONNECT_TIMEOUT_MULTIPLE = 1;
 #endif
 
 ConnectionRecord::ConnectionRecord(const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
+    const std::shared_ptr<BaseExtensionRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
     std::shared_ptr<AbilityConnectManager> abilityConnectManager)
     : state_(ConnectionState::INIT),
       callerToken_(callerToken),
@@ -46,7 +46,7 @@ ConnectionRecord::~ConnectionRecord()
 {}
 
 std::shared_ptr<ConnectionRecord> ConnectionRecord::CreateConnectionRecord(const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
+    const std::shared_ptr<BaseExtensionRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
     std::shared_ptr<AbilityConnectManager> abilityConnectManager)
 {
     auto connRecord = std::make_shared<ConnectionRecord>(
@@ -71,7 +71,7 @@ sptr<IRemoteObject> ConnectionRecord::GetToken() const
     return callerToken_;
 }
 
-std::shared_ptr<AbilityRecord> ConnectionRecord::GetAbilityRecord() const
+std::shared_ptr<BaseExtensionRecord> ConnectionRecord::GetAbilityRecord() const
 {
     return targetService_;
 }

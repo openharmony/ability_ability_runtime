@@ -20,7 +20,7 @@
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
-#include "ability_record.h"
+#include "base_extension_record.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -39,7 +39,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     abilityRequest.appInfo.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     abilityRequest.abilityInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extRecord;
     std::weak_ptr<AbilityRuntime::ExtensionRecord> weakExtRecord = extRecord;
     std::shared_ptr<AAFwk::PreLoadUIExtStateObserver> preLoad =

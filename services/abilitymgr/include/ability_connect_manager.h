@@ -28,8 +28,8 @@
 #include "ability_connect_callback_interface.h"
 #include "task_handler_wrap.h"
 #include "event_handler_wrap.h"
-#include "ability_record.h"
 #include "ability_running_info.h"
+#include "base_extension_record.h"
 #include "event_report.h"
 #include "extension_config.h"
 #include "extension_running_info.h"
@@ -54,10 +54,10 @@ using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
 class AbilityConnectManager : public std::enable_shared_from_this<AbilityConnectManager> {
 public:
     using ConnectMapType = std::map<sptr<IRemoteObject>, std::list<std::shared_ptr<ConnectionRecord>>>;
-    using ServiceMapType = std::map<std::string, std::shared_ptr<AbilityRecord>>;
+    using ServiceMapType = std::map<std::string, std::shared_ptr<BaseExtensionRecord>>;
     using ConnectListType = std::list<std::shared_ptr<ConnectionRecord>>;
     using RecipientMapType = std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>>;
-    using UIExtWindowMapValType = std::pair<std::weak_ptr<AbilityRecord>, sptr<SessionInfo>>;
+    using UIExtWindowMapValType = std::pair<std::weak_ptr<BaseExtensionRecord>, sptr<SessionInfo>>;
     using UIExtensionMapType = std::map<sptr<IRemoteObject>, UIExtWindowMapValType>;
     using WindowExtMapValType = std::pair<uint32_t, sptr<SessionInfo>>;
     using WindowExtensionMapType = std::map<sptr<IRemoteObject>, WindowExtMapValType>;
@@ -153,14 +153,14 @@ public:
      * @param hostBundleName, the caller application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * ClearPreloadUIExtensionRecord, clear preload uiextension record.
      *
      * @param abilityRecord, uiextension ability record.
      */
-    void ClearPreloadUIExtensionRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void ClearPreloadUIExtensionRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     /**
      * DisconnectAbilityLocked, disconnect session with callback.
@@ -255,13 +255,13 @@ public:
      * @param sessionToken, service ability's session token.
      * @return Returns AbilityRecord shared_ptr.
      */
-    std::shared_ptr<AbilityRecord> GetUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<BaseExtensionRecord> GetUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
-    std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityRecord> GetExtensionByTokenFromTerminatingMap(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(const int64_t &abilityRecordId);
-    std::shared_ptr<AbilityRecord> GetExtensionByIdFromTerminatingMap(const int64_t &abilityRecordId);
-    std::shared_ptr<AbilityRecord> GetUIExtensionBySessionFromServiceMap(const sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<BaseExtensionRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
+    std::shared_ptr<BaseExtensionRecord> GetExtensionByTokenFromTerminatingMap(const sptr<IRemoteObject> &token);
+    std::shared_ptr<BaseExtensionRecord> GetExtensionByIdFromServiceMap(const int64_t &abilityRecordId);
+    std::shared_ptr<BaseExtensionRecord> GetExtensionByIdFromTerminatingMap(const int64_t &abilityRecordId);
+    std::shared_ptr<BaseExtensionRecord> GetUIExtensionBySessionFromServiceMap(const sptr<SessionInfo> &sessionInfo);
     ConnectListType GetConnectRecordListByCallback(sptr<IAbilityConnection> callback);
 
     void GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info,
@@ -269,7 +269,7 @@ public:
 
     void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm);
 
-    void GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord, const int32_t userId,
+    void GetExtensionRunningInfo(std::shared_ptr<BaseExtensionRecord> &abilityRecord, const int32_t userId,
         std::vector<ExtensionRunningInfo> &info);
 
     /**
@@ -308,14 +308,14 @@ public:
      */
     int32_t GetActiveUIExtensionList(const std::string &bundleName, std::vector<std::string> &extensionList);
 
-    void OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> abilityRecord);
+    void OnLoadAbilityFailed(std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * OnAbilityDied.
      *
      * @param abilityRecord, service ability record.
      */
-    void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void OnAbilityDied(const std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * DisconnectBeforeCleanup.
@@ -337,9 +337,9 @@ public:
      *
      * @param abilityRecord the ability to move
      */
-    void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void MoveToBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    void CommandAbilityWindow(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void CommandAbilityWindow(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
 
     bool IsUIExtensionFocused(uint32_t uiExtensionTokenId, const sptr<IRemoteObject>& focusToken);
@@ -350,13 +350,13 @@ public:
 
     void HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid);
 
-    void ForegroundAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void ForegroundAbilityWindowLocked(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
-    void BackgroundAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void BackgroundAbilityWindowLocked(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
-    void TerminateAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void TerminateAbilityWindowLocked(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
     void RemoveLauncherDeathRecipient();
@@ -394,14 +394,15 @@ public:
      * GetServiceRecordByAbilityRequest.
      *
      * @param abilityRequest, the request of the service ability to start.
-     * @return Returns AbilityRecord shared_ptr.
+     * @return Returns BaseExtensionRecord shared_ptr.
      */
-    std::shared_ptr<AbilityRecord> GetServiceRecordByAbilityRequest(const AbilityRequest &abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> GetServiceRecordByAbilityRequest(const AbilityRequest &abilityRequest);
 
     bool HasRequestIdInLoadAbilityQueue(int32_t requestId);
     void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
     void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
-    void StartSpecifiedProcess(const LoadAbilityContext &context, const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void StartSpecifiedProcess(const LoadAbilityContext &context,
+        const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     int UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId);
     int UnPreloadUIExtensionAbilityInner(int32_t extensionAbilityId);
     int ClearAllPreloadUIExtensionAbilityLocked();
@@ -450,23 +451,23 @@ private:
      *
      * @param abilityRecord, the ptr of the ability to load.
      */
-    void LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        std::function<void(const std::shared_ptr<AbilityRecord> &)> updateRecordCallback = nullptr);
+    void LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
+        std::function<void(const std::shared_ptr<BaseExtensionRecord> &)> updateRecordCallback = nullptr);
     void HandleLoadAbilityOrStartSpecifiedProcess(
-        const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<AbilityRecord> &abilityRecord);
+        const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     /**
      * ConnectAbility.Schedule connect ability
      *
      * @param abilityRecord, the ptr of the ability to connect.
      */
-    void ConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void ConnectAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     /**
      * ConnectAbility.Schedule connect ability
      *
      * @param abilityRecord, the ptr of the ability to connect.
      */
-    void ConnectUIServiceExtAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void ConnectUIServiceExtAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         int connectRecordId, const Want &want);
 
     /**
@@ -474,36 +475,36 @@ private:
      *
      * @param abilityRecord, the ptr of the ability to connect.
      */
-    void ResumeConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void ResumeConnectAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     /**
      * CommandAbility. Schedule command ability
      *
      * @param abilityRecord, the ptr of the ability to command.
      */
-    void CommandAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void CommandAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     /**
      * CompleteCommandAbility. complete command ability
      *
      * @param abilityRecord, the ptr of the ability to command.
      */
-    void CompleteCommandAbility(std::shared_ptr<AbilityRecord> abilityRecord);
+    void CompleteCommandAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * TerminateDone.
      *
      * @param abilityRecord, the ptr of the ability to terminate.
      */
-    void TerminateDone(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void TerminateDone(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     /**
      * GetServiceRecordByElementName.
      *
      * @param element, service ability's element.
-     * @return Returns AbilityRecord shared_ptr.
+     * @return Returns BaseExtensionRecord shared_ptr.
      */
-    std::shared_ptr<AbilityRecord> GetServiceRecordByElementName(const std::string &element);
+    std::shared_ptr<BaseExtensionRecord> GetServiceRecordByElementName(const std::string &element);
 
     /**
      * GetAbilityConnectedRecordFromRecordList.
@@ -513,7 +514,7 @@ private:
      * @return Returns ConnectionRecord shared_ptr.
      */
     std::shared_ptr<ConnectionRecord> GetAbilityConnectedRecordFromRecordList(
-        const std::shared_ptr<AbilityRecord> &targetService,
+        const std::shared_ptr<BaseExtensionRecord> &targetService,
         std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList);
 
     /**
@@ -522,24 +523,24 @@ private:
      * @param abilityRecord.
      * @param state.
      */
-    int DispatchInactive(const std::shared_ptr<AbilityRecord> &abilityRecord, int state);
-    int DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    int DispatchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    int DispatchTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int DispatchInactive(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int state);
+    int DispatchForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    int DispatchBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    int DispatchTerminate(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    void HandleStartTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void HandleStopTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void HandleStartTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void HandleStopTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     void HandleTerminateDisconnectTask(const ConnectListType& connectlist);
-    void HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void HandleCommandWindowTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void HandleCommandTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void HandleCommandWindowTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
-    void HandleForegroundTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void HandleConnectTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
+    void HandleForegroundTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void HandleConnectTimeoutTask(std::shared_ptr<BaseExtensionRecord> abilityRecord);
     void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
-    void HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
+    void HandleActiveAbility(std::shared_ptr<BaseExtensionRecord> &targetService,
         std::shared_ptr<ConnectionRecord> &connectRecord);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
-    void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
+    void TerminateOrCacheAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * RemoveConnectionRecordFromMap.
@@ -553,7 +554,7 @@ private:
      *
      * @param service, the ptr of the ability record.
      */
-    void RemoveServiceAbility(const std::shared_ptr<AbilityRecord> &service);
+    void RemoveServiceAbility(const std::shared_ptr<BaseExtensionRecord> &service);
 
     /**
      * GetOrCreateServiceRecord.
@@ -564,8 +565,8 @@ private:
      * @param isLoadedAbility, whether the target ability has been loaded.
      */
     void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
-        std::shared_ptr<AbilityRecord> &targetAbilityRecord, bool &isLoadedAbility);
-    void SetServiceAfterNewCreate(const AbilityRequest &abilityRequest, AbilityRecord &targetService);
+        std::shared_ptr<BaseExtensionRecord> &targetAbilityRecord, bool &isLoadedAbility);
+    void SetServiceAfterNewCreate(const AbilityRequest &abilityRequest, BaseExtensionRecord &targetService);
 
     void RemoveServiceFromMapSafe(const std::string &serviceKey);
 
@@ -613,11 +614,11 @@ private:
      *
      * @param abilityRecord, died ability.
      */
-    void HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void HandleAbilityDiedTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    void HandleUIExtensionDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void HandleUIExtensionDied(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    void RestartAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+    void RestartAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int32_t currentUserId);
 
     /**
      * PostTimeOutTask.
@@ -625,25 +626,27 @@ private:
      * @param abilityRecord, ability.
      * @param messageId, message id.
      */
-    void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t messageId);
-    void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int connectRecordId, uint32_t messageId);
+    void PostTimeOutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, uint32_t messageId);
+    void PostTimeOutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int connectRecordId,
+        uint32_t messageId);
 
-    void CompleteForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId, bool isHalf = false);
+    void CompleteForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void PrintTimeOutLog(const std::shared_ptr<BaseExtensionRecord> &ability, uint32_t msgId, bool isHalf = false);
 
     void PostRestartResidentTask(const AbilityRequest &abilityRequest);
 
-    bool IsAbilityNeedKeepAlive(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    bool IsAbilityNeedKeepAlive(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
+    void ProcessPreload(const std::shared_ptr<BaseExtensionRecord> &record) const;
 
-    void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
-    void CleanActivatingTimeoutAbility(std::shared_ptr<AbilityRecord> abilityRecord);
-    void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
+    void HandleInactiveTimeout(const std::shared_ptr<BaseExtensionRecord> &ability);
+    void CleanActivatingTimeoutAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord);
+    void MoveToTerminatingMap(const std::shared_ptr<BaseExtensionRecord>& abilityRecord);
 
-    void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
-    void DoBackgroundAbilityWindow(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    void DoForegroundUIExtension(std::shared_ptr<BaseExtensionRecord> abilityRecord,
+        const AbilityRequest &abilityRequest);
+    void DoBackgroundAbilityWindow(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
     /**
@@ -671,57 +674,58 @@ private:
     void RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
 private:
-    bool IsNeedToRestart(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    bool IsNeedToRestart(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const std::string &bundleName, const std::string &abilityName);
-    void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
+    void TerminateRecord(std::shared_ptr<BaseExtensionRecord> abilityRecord);
     int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord,
         bool callerDied) const;
     void DisconnectRecordForce(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
-    bool IsLauncher(std::shared_ptr<AbilityRecord> serviceExtension) const;
+    bool IsLauncher(std::shared_ptr<BaseExtensionRecord> serviceExtension) const;
     void KillProcessesByUserId() const;
-    void SetLastExitReason(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetService);
-    inline bool IsUIExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void SetLastExitReason(const AbilityRequest &abilityRequest, std::shared_ptr<BaseExtensionRecord> &targetService);
+    inline bool IsUIExtensionAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     inline bool IsCacheExtensionAbilityByInfo(const AppExecFwk::AbilityInfo &abilityInfo);
-    inline bool IsCacheExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    inline bool IsCacheExtensionAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     inline bool CheckUIExtensionAbilityLoaded(const AbilityRequest &abilityRequest);
-    inline bool CheckUIExtensionAbilitySessionExist(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    inline void AddUIExtensionAbilityRecordToTerminatedList(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    inline bool IsCallerValid(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    inline bool CheckUIExtensionAbilitySessionExist(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    inline void AddUIExtensionAbilityRecordToTerminatedList(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    inline bool IsCallerValid(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, bool isCreatedByConnect,
-        const std::string &hostBundleName, std::shared_ptr<AbilityRecord> &extensionRecord, bool &isLoaded);
+        const std::string &hostBundleName, std::shared_ptr<BaseExtensionRecord> &extensionRecord, bool &isLoaded);
     int32_t GetOrCreateTargetServiceRecord(
         const AbilityRequest &abilityRequest, const sptr<UIExtensionAbilityConnectInfo> &connectInfo,
-        std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility);
-    void HandleNotifyAssertFaultDialogDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    EventInfo BuildEventInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility);
+    void HandleNotifyAssertFaultDialogDied(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    EventInfo BuildEventInfo(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void UpdateUIExtensionInfo(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
     std::string GenerateBundleName(const AbilityRequest &abilityRequest) const;
 
-    bool AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord);
+    bool AddToServiceMap(const std::string &key, std::shared_ptr<BaseExtensionRecord> abilityRecord);
     ServiceMapType GetServiceMap();
 
     void AddConnectObjectToMap(sptr<IRemoteObject> connectObject, const ConnectListType &connectRecordList,
         bool updateOnly);
 
-    void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
-    std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
+    void KeepAbilityAlive(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+    void ProcessEliminateAbilityRecord(std::shared_ptr<BaseExtensionRecord> eliminateRecord);
+    std::string GetServiceKey(const std::shared_ptr<BaseExtensionRecord> &service);
 
     int32_t ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo);
     int32_t ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
-        const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken);
+        const std::shared_ptr<BaseExtensionRecord> abilityRecord, sptr<IRemoteObject> callerToken);
 
-    void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam, std::shared_ptr<AbilityRecord> abilityRecord);
-    bool IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord);
-    bool NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord);
+    void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam,
+        std::shared_ptr<BaseExtensionRecord> abilityRecord);
+    bool IsStrictMode(std::shared_ptr<BaseExtensionRecord> abilityRecord);
+    bool NeedExtensionControl(std::shared_ptr<BaseExtensionRecord> abilityRecord);
     bool GetTimeoutMsgContent(uint32_t msgId, std::string &msgContent, int &typeId);
 
-    void UpdateUIExtensionBindInfo(
-        const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind);
+    void UpdateUIExtensionBindInfo(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
+        std::string callerBundleName, int32_t notifyProcessBind);
 
     void HandleConnectionCountIncrement(int32_t pid, const std::string &callerBundleName,
         const std::string &targetName);
@@ -752,7 +756,7 @@ private:
     WindowExtensionMapType windowExtensionMap_;
     std::map<int32_t, int32_t> callerPidConnectionCountMap_;
 
-    std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
+    std::list<std::shared_ptr<BaseExtensionRecord>> terminatingExtensionList_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<EventHandlerWrap> eventHandler_;
     std::vector<AbilityRequest> restartResidentTaskList_;

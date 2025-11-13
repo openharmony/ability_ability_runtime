@@ -52,7 +52,7 @@ void UIExtensionRecordTest::TearDown()
  */
 HWTEST_F(UIExtensionRecordTest, Update_0100, TestSize.Level0)
 {
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = nullptr;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord = nullptr;
     auto extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     AAFwk::AbilityRequest abilityRequest;
     extRecord->Update(abilityRequest);
@@ -71,7 +71,7 @@ HWTEST_F(UIExtensionRecordTest, Update_0200, TestSize.Level0)
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
 
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     auto extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     extRecord->Update(abilityRequest);
     EXPECT_NE(abilityRecord, nullptr);
@@ -84,7 +84,7 @@ HWTEST_F(UIExtensionRecordTest, Update_0200, TestSize.Level0)
  */
 HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Level1)
 {
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = nullptr;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord = nullptr;
     auto extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     extRecord->HandleNotifyUIExtensionTimeout(AbilityRuntime::UIExtensionRecord::TERMINATE_TIMEOUT);
     EXPECT_EQ(abilityRecord, nullptr);
@@ -94,7 +94,7 @@ HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Le
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
 
-    abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     extRecord->HandleNotifyUIExtensionTimeout(AbilityRuntime::UIExtensionRecord::TERMINATE_TIMEOUT);
     EXPECT_NE(extRecord->abilityRecord_, nullptr);
@@ -103,7 +103,7 @@ HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Le
     sessionInfo->uiExtensionComponentId = 10;
     sessionInfo->sessionToken = nullptr;
     abilityRequest.sessionInfo = sessionInfo;
-    abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     extRecord->HandleNotifyUIExtensionTimeout(AbilityRuntime::UIExtensionRecord::TERMINATE_TIMEOUT);
     EXPECT_NE(extRecord->abilityRecord_->GetSessionInfo(), nullptr);
@@ -111,7 +111,7 @@ HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Le
     Rosen::SessionInfo info;
     sessionInfo->sessionToken = new Rosen::Session(info);
     abilityRequest.sessionInfo = sessionInfo;
-    abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);
     extRecord->HandleNotifyUIExtensionTimeout(AbilityRuntime::UIExtensionRecord::TERMINATE_TIMEOUT);
     EXPECT_NE(sessionInfo->sessionToken, nullptr);

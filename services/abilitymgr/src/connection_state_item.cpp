@@ -45,7 +45,7 @@ public:
         extensionType_ = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     }
 
-    explicit ConnectedExtension(std::shared_ptr<AbilityRecord> target)
+    explicit ConnectedExtension(std::shared_ptr<BaseExtensionRecord> target)
     {
         if (!target) {
             return;

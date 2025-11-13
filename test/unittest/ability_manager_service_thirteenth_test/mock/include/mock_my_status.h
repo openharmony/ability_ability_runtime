@@ -17,6 +17,7 @@
 #define MOCK_MY_STATUS_H
 
 #include "scene_board/ui_ability_record.h"
+#include "base_extension_record.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -50,8 +51,8 @@ public:
     int permPermission_ = 1;
     bool perJudgeCallerIsAllowedToUseSystemAPI_ = true;
     bool paramGetBoolParameter_ = true;
-    std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionInfo_ = nullptr;
-    std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionFromServiceMap_ = nullptr;
+    std::shared_ptr<BaseExtensionRecord> acmGetUIExtensionBySessionInfo_ = nullptr;
+    std::shared_ptr<BaseExtensionRecord> acmGetUIExtensionBySessionFromServiceMap_ = nullptr;
     bool isSupportStartAbilities_ = true;
     bool isSupportMultiInstance_ = true;
     bool isSystemAppCall_ = true;

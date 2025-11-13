@@ -27,7 +27,7 @@
 #undef protected
 #undef private
 
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "continuous_task_callback_info.h"
 
 using namespace OHOS::AAFwk;
@@ -81,6 +81,21 @@ uint32_t GetU32Data(const char* ptr)
 {
     // convert fuzz input data to an integer
     return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+}
+
+std::shared_ptr<BaseExtensionRecord> GetFuzzExtensionRecord()
+{
+    sptr<Token> token = nullptr;
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
+    if (!abilityRecord) {
+        return nullptr;
+    }
+    return abilityRecord;
 }
 
 std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
@@ -148,7 +163,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     observerDeathRecipient->OnRemoteDied(remote);
 
     // fuzz for ConnectionRecord
-    std::shared_ptr<AbilityRecord> targetService = GetFuzzAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> targetService = GetFuzzExtensionRecord();
     auto connectionRecord = std::make_shared<ConnectionRecord>(token, targetService, connect, nullptr);
     connectionRecord->CreateConnectionRecord(token, targetService, connect, nullptr);
     ConnectionState state = ConnectionState::CONNECTED;
