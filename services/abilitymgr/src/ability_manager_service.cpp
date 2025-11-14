@@ -2221,10 +2221,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "checkStaticCfgPermission error");
         return ERR_STATIC_CFG_PERMISSION;
     }
-    result = CheckCallAbilityPermission(abilityRequest, false, 0, isCallByShortcut);
+    result = StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken) ?
+        CheckBrokerCallPermission(abilityRequest, abilityInfo) :
+        CheckCallAbilityPermission(abilityRequest, false, 0, isCallByShortcut);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s CheckCallAbilityPermission error:%{public}d",
-            __func__, result);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startoption permission error:%{public}d", result);
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "CheckCallAbilityPermission error");
         return AbilityErrorUtil::ConvertToOriginErrorCode(result);
     }
