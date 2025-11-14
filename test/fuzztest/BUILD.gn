@@ -16,9 +16,9 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 group("fuzztest") {
   testonly = true
 
-  external_deps = [ "json:nlohmann_json_static" ]
+  deps = [ "json:nlohmann_json_static" ]
  
-  deps = [
+  deps += [
     "abilityappdebuginfo_fuzzer:fuzztest",
     "abilityappdebugmanager_fuzzer:fuzztest",
     "abilityappdebugmanagerfirst_fuzzer:fuzztest",
