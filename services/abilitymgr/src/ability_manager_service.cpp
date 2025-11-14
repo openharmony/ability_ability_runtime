@@ -8040,7 +8040,8 @@ bool AbilityManagerService::CheckPermissionForKillCollaborator()
     return true;
 }
 
-int AbilityManagerService::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
+int AbilityManagerService::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
         bundleName.c_str(), clearPageStack);
@@ -8079,7 +8080,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
         return KILL_PROCESS_KEEP_ALIVE;
     }
 
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack, appIndex);
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack, appIndex, reason);
     return ret == ERR_OK ? ERR_OK : KILL_PROCESS_FAILED;
 }
 

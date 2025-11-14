@@ -341,7 +341,8 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillApplication");
 
     /**
      * ForceKillApplication, force kill the application.
