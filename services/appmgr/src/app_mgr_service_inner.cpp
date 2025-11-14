@@ -4488,7 +4488,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     }
     bool isCJApp = IsCjApplication(bundleInfo);
     if (!remoteClientManager_ || !remoteClientManager_->GetSpawnClient()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appSpawnClient null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appSpawnClient null:%{public}d", ret);
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         if (!isCJApp) {
             SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::GET_SPAWN_CLIENT_FAILED,
@@ -4726,7 +4726,7 @@ bool AppMgrServiceInner::SendProcessStartFailedEvent(std::shared_ptr<AppRunningR
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "pname:%{public}s, reason:%{public}d, subReason:%{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "pname:%{public}s, reason:%{public}d, subReason:%{public}d",
         appRecord->GetProcessName().c_str(), reason, subReason);
     AAFwk::EventInfo eventInfo;
     eventInfo.reason = static_cast<int32_t>(reason);
@@ -6831,9 +6831,9 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     }
     int32_t renderUid = Constants::INVALID_UID;
     if (!GenerateRenderUid(renderUid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "generate renderUid fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "generate renderUid fail:%{public}d", ERR_INVALID_OPERATION);
         AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
-            ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
+            ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, AAFwk::ERR_GENERATE_UID_FAILED);
         return ERR_INVALID_OPERATION;
     }
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
@@ -8888,8 +8888,9 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
         return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
     }
     if (!args.CheckFdsSize() || !args.CheckFdsKeyLength()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "args fd invalid");
         AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
-            ProcessStartFailedReason::CHECK_CHILD_FDS_FAILED, ERR_INVALID_VALUE);
+            ProcessStartFailedReason::CHECK_CHILD_FDS_FAILED, AAFwk::ERR_INVALID_FD);
         return ERR_INVALID_VALUE;
     }
 
@@ -8919,7 +8920,7 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
                 END_ID_FOR_CHILD_PROCESS_ISOLATION, userId, uid, lastChildProcessIsolationIdMap_)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "generate uid fail");
                 AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
-                    ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
+                    ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, AAFwk::ERR_GENERATE_UID_FAILED);
                 return ERR_INVALID_OPERATION;
             }
         }

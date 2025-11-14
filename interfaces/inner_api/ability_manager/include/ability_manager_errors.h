@@ -1005,6 +1005,16 @@ enum {
     ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE = 2097401,
 
     /**
+     * Result (2097402) Generate uid failed.
+     */
+    ERR_GENERATE_UID_FAILED = 2097402,
+
+    /**
+     * Result (2097403) The args of fd is invalid.
+     */
+    ERR_INVALID_FD = 2097403,
+
+    /**
      * Result (2098000-2098049) Error code refinement INVALID_VALUE.
      */
     ERR_REFINEMENT_INVALID_VALUE_BEGIN = 2098000,
