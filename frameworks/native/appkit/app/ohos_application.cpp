@@ -1260,8 +1260,8 @@ bool OHOSApplication::GetDisplayConfig(uint64_t displayId, float &density, std::
 
 bool OHOSApplication::UpdateETSRuntime(AbilityRuntime::Runtime::Options &option)
 {
-    if (runtime_->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "language error");
+    if (runtime_ == nullptr || runtime_->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime or wrong language");
         return false;
     }
     option.lang = AbilityRuntime::Runtime::Language::ETS;
