@@ -174,7 +174,8 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) = 0;
+    virtual int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillApplication") = 0;
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.

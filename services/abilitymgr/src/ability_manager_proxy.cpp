@@ -2150,7 +2150,8 @@ void AbilityManagerProxy::SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& toke
     return;
 }
 
-int AbilityManagerProxy::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
+int AbilityManagerProxy::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string& reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2169,6 +2170,10 @@ int AbilityManagerProxy::KillProcess(const std::string &bundleName, bool clearPa
     }
     if (!data.WriteInt32(appIndex)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appIndex write fail");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteString16(Str8ToStr16(reason))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reason write fail");
         return ERR_INVALID_VALUE;
     }
     int error = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS, data, reply, option);
