@@ -60,7 +60,8 @@ bool StartupUtil::IsSupportAppClone(AppExecFwk::ExtensionAbilityType type)
         type == AppExecFwk::ExtensionAbilityType::REMOTE_LOCATION ||
         type == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION ||
         type == AppExecFwk::ExtensionAbilityType::VOIP ||
-        type == AppExecFwk::ExtensionAbilityType::FAULT_LOG;
+        type == AppExecFwk::ExtensionAbilityType::FAULT_LOG ||
+        type == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
 }
 
 void StartupUtil::InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
