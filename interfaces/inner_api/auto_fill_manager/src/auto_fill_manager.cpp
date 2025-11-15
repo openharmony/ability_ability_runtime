@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ constexpr static char AUTO_FILL_MANAGER_THREAD[] = "AutoFillManager";
 constexpr static uint32_t AUTO_FILL_REQUEST_TIME_OUT_VALUE = 1000;
 constexpr static uint32_t AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID = 0;
 constexpr static uint32_t MILL_TO_MICRO = 1000;
+constexpr static char WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY[] = "ability.want.params.AutoFillTriggerType";
 #endif //SUPPORT_GRAPHICS
 } // namespace
 #ifdef SUPPORT_GRAPHICS
@@ -61,7 +62,8 @@ int32_t AutoFillManager::RequestAutoFill(Ace::UIContent *uiContent, const AutoFi
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
     }
 
-    if (request.autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
+    if (request.autoFillType == AbilityBase::AutoFillType::UNSPECIFIED &&
+        request.autoFillTriggerType == AutoFill::AutoFillTriggerType::UNSPECIFIED) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "autoFillType invalid");
         return AutoFill::AUTO_FILL_TYPE_INVALID;
     }
@@ -195,6 +197,9 @@ int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     want.SetParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, static_cast<int32_t>(request.autoFillCommand));
     want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(request.autoFillType));
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, request.viewData.ToJsonString());
+    if (request.autoFillTriggerType != AutoFill::AutoFillTriggerType::UNSPECIFIED) {
+        want.SetParam(WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY, static_cast<int32_t>(request.autoFillTriggerType));
+    }
     isSmartAutoFill ? want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_SMART_EXTENSION_TYPE) :
         want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
 
