@@ -52,10 +52,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<OHOSApplication> application,
-        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
+        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc) override;
 
     /**
      * @brief OnStart,Start EtssUIability
