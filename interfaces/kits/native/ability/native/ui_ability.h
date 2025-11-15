@@ -117,10 +117,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     virtual void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<AppExecFwk::OHOSApplication> application,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token);
+        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc);
 
     /**
      * @brief Attach Ability Context

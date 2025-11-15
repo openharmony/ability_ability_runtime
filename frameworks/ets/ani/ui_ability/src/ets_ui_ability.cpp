@@ -167,7 +167,7 @@ EtsUIAbility::~EtsUIAbility()
 
 void EtsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
-    const sptr<IRemoteObject> &token)
+    const sptr<IRemoteObject> &token, bool &createObjSuc)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (record == nullptr) {
@@ -179,7 +179,7 @@ void EtsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
         return;
     }
-    UIAbility::Init(record, application, handler, token);
+    UIAbility::Init(record, application, handler, token, createObjSuc);
 #ifdef SUPPORT_GRAPHICS
     if (abilityContext_ != nullptr) {
         AppExecFwk::AppRecovery::GetInstance().AddAbility(
