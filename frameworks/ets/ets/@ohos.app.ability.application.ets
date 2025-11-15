@@ -39,6 +39,8 @@ export default namespace application {
 
   export native function nativeGetApplicationContext(): ApplicationContext;
 
+  export native function nativeGetApplicationContextInstance(): ApplicationContext;
+
   export native function nativeGetAppPreloadType(): AppPreloadType;
 
   export native function nativeCreateModuleContextCheck(context: Context, moduleName: string, bundleName?: string): void;
@@ -120,6 +122,10 @@ export default namespace application {
 
   export function getApplicationContext(): ApplicationContext {
     return nativeGetApplicationContext();
+  }
+
+  export function getApplicationContextInstance(): ApplicationContext {
+    return nativeGetApplicationContextInstance();
   }
 
   export function getAppPreloadType(): AppPreloadType {
