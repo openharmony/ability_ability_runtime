@@ -152,6 +152,17 @@ namespace {
         return ERR_NOT_SYSTEM_APP;                                                             \
     }
 
+#define OPEN_LINK_START_ABILITY(want, callerToken, userId, requestCode, removeInsightIntentFlag, hideFailureTipDialog)\
+    do {                                                                                                            \
+        int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode,                      \
+                removeInsightIntentFlag, hideFailureTipDialog);                                                     \
+        CHECK_RET_RETURN_RET(retCode, "startAbility failed");                                                       \
+        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;                                                              \
+    } while (0)
+
+#define IS_FOUNDATION_CALL  \
+    PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)
+
 constexpr const char* ARGS_USER_ID = "-u";
 constexpr const char* ARGS_CLIENT = "-c";
 constexpr const char* ILLEGAL_INFOMATION = "The arguments are illegal and you can enter '-h' for help.";
@@ -2833,12 +2844,6 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
 int32_t AbilityManagerService::OpenAtomicService(AAFwk::Want& want, const StartOptions &options,
     sptr<IRemoteObject> callerToken, int32_t requestCode, int32_t userId)
 {
-    auto accessTokenId = IPCSkeleton::GetCallingTokenID();
-    auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    if (type != Security::AccessToken::TypeATokenTypeEnum::TOKEN_HAP) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not hap");
-        return CHECK_PERMISSION_FAILED;
-    }
     want.SetParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::JUMP_SCREEN_MODE);
     return StartUIAbilityForOptionWrap(want, options, callerToken, false, userId, requestCode);
 }
@@ -9601,7 +9606,7 @@ int32_t AbilityManagerService::GetMissionSnapshot(const std::string& deviceId, i
 void AbilityManagerService::UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
-    if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)) {
+    if (!IS_FOUNDATION_CALL) {
         return;
     }
     auto missionListManager = GetCurrentMissionListManager();
@@ -14721,31 +14726,24 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call OpenLink");
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
-    std::string callerBundleName;
+    std::string callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     Want convertedWant = want;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "hideFailureTipDialog: %{public}d", hideFailureTipDialog);
-    if (!WantUtils::IsShortUrl(want) || WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK) {
+    if (!WantUtils::IsShortUrl(want) || ((!IS_FOUNDATION_CALL || callerBundleName.empty()) &&
+        WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
-        int retCode = StartAbilityWithRemoveIntentFlag(
-            want, callerToken, userId, requestCode, removeInsightIntentFlag, hideFailureTipDialog);
-        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
-        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+        OPEN_LINK_START_ABILITY(want, callerToken, userId, requestCode, removeInsightIntentFlag, hideFailureTipDialog);
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "callerBundleName=%{public}s", callerBundleName.c_str());
     convertedWant.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     uint32_t targetType = TARGET_TYPE_INIT;
     if (WantUtils::ConvertToExplicitWant(convertedWant, targetType) != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertToExplicitWant fail. start ability by default");
-        int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
-        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
-        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+        OPEN_LINK_START_ABILITY(want, callerToken, userId, requestCode, removeInsightIntentFlag, hideFailureTipDialog);
     }
     if (WantUtils::IsNormalApp(targetType)) {
-        int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
-        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
-        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+        OPEN_LINK_START_ABILITY(convertedWant, callerToken, userId, requestCode, removeInsightIntentFlag,
+            hideFailureTipDialog);
     }
     if (WantUtils::IsAtomicService(targetType)) {
         return OpenLinkFreeInstallAtomicService(convertedWant, want, callerToken, userId, requestCode,
@@ -14757,10 +14755,8 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
     if (curAppLinkingOnlyFlag) {
         return RESOLVE_ABILITY_ERR;
     }
-    int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
-        removeInsightIntentFlag, hideFailureTipDialog);
-    CHECK_RET_RETURN_RET(retCode, "startAbility failed");
-    return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+    OPEN_LINK_START_ABILITY(convertedWant, callerToken, userId, requestCode, removeInsightIntentFlag,
+        hideFailureTipDialog);
 }
 
 int32_t AbilityManagerService::OpenLinkFreeInstallAtomicService(Want &convertedWant,
