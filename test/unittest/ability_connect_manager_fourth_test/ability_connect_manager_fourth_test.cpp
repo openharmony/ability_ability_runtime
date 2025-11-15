@@ -943,16 +943,16 @@ HWTEST_F(AbilityConnectManagerFourthTest, QueryPreLoadUIExtensionRecordInner_001
 
     AppExecFwk::ElementName element("deviceId", "bundleName", "abilityName", "moduleName");
     std::string moduleName = "testModule";
-    std::string hostBundleName = "testHostBundle";
+    int32_t hostPid = 0;
     int32_t recordNum = 0;
 
     int32_t result =
-        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_OK);
 
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
     result =
-        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     TAG_LOGI(AAFwkTag::TEST, "QueryPreLoadUIExtensionRecordInner_001 end");
 }
@@ -969,11 +969,11 @@ HWTEST_F(AbilityConnectManagerFourthTest, QueryPreLoadUIExtensionRecordInner_002
 
     AppExecFwk::ElementName element("deviceId", "bundleName", "abilityName", "moduleName");
     std::string moduleName = "testModule";
-    std::string hostBundleName = "testHostBundle";
+    int32_t hostPid = 0;
     int32_t recordNum = 0;
 
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
-    int result = connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+    int result = connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     TAG_LOGI(AAFwkTag::TEST, "QueryPreLoadUIExtensionRecordInner_002 end");
 }

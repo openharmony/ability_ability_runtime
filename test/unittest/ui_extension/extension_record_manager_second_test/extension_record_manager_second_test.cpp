@@ -219,7 +219,7 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecordById_01
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey;
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey;
     int32_t extensionRecordId = 0;
     EXPECT_FALSE(extRecordMgr->RemovePreloadUIExtensionRecordById(extensionRecordMapKey, extensionRecordId));
 
@@ -257,9 +257,9 @@ HWTEST_F(ExtensionRecordManagerSecondTest, GetHostBundleNameForExtensionId_0100,
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
     extRecordMgr->extensionRecords_.clear();
-    std::string hostBundleName = "";
+    int32_t hostPid = 0;
 
-    auto ret = extRecordMgr->GetHostBundleNameForExtensionId(1, hostBundleName);
+    auto ret = extRecordMgr->GetHostPidForExtensionId(1, hostPid);
 
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -273,7 +273,7 @@ HWTEST_F(ExtensionRecordManagerSecondTest, GetHostBundleNameForExtensionId_0100,
 HWTEST_F(ExtensionRecordManagerSecondTest, RemoveAllPreloadUIExtensionRecord_0100, TestSize.Level1)
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo("1", "2", "3", "4");
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo("1", "2", "3", 4);
     extRecordMgr->preloadUIExtensionMap_ = {
         {preLoadUIExtensionInfo, {}}
     };
@@ -292,8 +292,8 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemoveAllPreloadUIExtensionRecord_010
 HWTEST_F(ExtensionRecordManagerSecondTest, RemoveAllPreloadUIExtensionRecord_0200, TestSize.Level1)
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", "4");
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", "8");
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", 4);
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", 8);
     extRecordMgr->preloadUIExtensionMap_ = {
         {preLoadUIExtensionInfo1, {}}
     };
@@ -312,12 +312,12 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemoveAllPreloadUIExtensionRecord_020
 HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecordById_0300, TestSize.Level1)
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey = {
-        "1", "2", "3", "4"
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey = {
+        "1", "2", "3", 4
     };
     int32_t extensionRecordId = 1;
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", "4");
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", "8");
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", 4);
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", 8);
     AAFwk::AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
@@ -349,13 +349,13 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecordById_03
 HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecordById_0400, TestSize.Level1)
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey = {
-        "1", "2", "3", "4"
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey = {
+        "1", "2", "3", 4
     };
     int32_t extensionRecordId = 1;
     int32_t extensionRecordId2 = 2;
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", "4");
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", "8");
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", 4);
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", 8);
     AAFwk::AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
@@ -389,14 +389,14 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecordById_05
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
 
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey = {
-        "1", "2", "3", "4"
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey = {
+        "1", "2", "3", 4
     };
     int32_t extensionRecordId = 1;
     int32_t extensionRecordId2 = 2;
     int32_t extensionRecordId3 = 3;
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", "4");
-    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", "8");
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo1("1", "2", "3", 4);
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo2("5", "6", "7", 8);
     AAFwk::AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
@@ -430,8 +430,8 @@ HWTEST_F(ExtensionRecordManagerSecondTest, RemovePreloadUIExtensionRecord_0200, 
 {
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
 
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey = {
-        "1", "2", "3", "4"
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey = {
+        "1", "2", "3", 4
     };
     extRecordMgr->preloadUIExtensionMap_.clear();
 
@@ -595,11 +595,11 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0100, T
     element.SetAbilityName("");
     element.SetBundleName("HeavenlyMe");
     std::string moduleName = "HeavenlyMe";
-    std::string hostBundleName = "HeavenlyMe";
+    int32_t hostPid = 0;
     int32_t recordNum = 1;
 
     auto ret = extRecordMgr->QueryPreLoadUIExtensionRecord(
-        element, moduleName, hostBundleName, recordNum);
+        element, moduleName, hostPid, recordNum);
 
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -618,12 +618,12 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0200, T
     element.SetAbilityName("HeavenlyMe");
     element.SetBundleName("HeavenlyMe");
     std::string moduleName = "HeavenlyMe";
-    std::string hostBundleName = "HeavenlyMe";
+    int32_t hostPid = 0;
     int32_t recordNum = 1;
     extRecordMgr->preloadUIExtensionMap_.clear();
 
     auto ret = extRecordMgr->QueryPreLoadUIExtensionRecord(
-        element, moduleName, hostBundleName, recordNum);
+        element, moduleName, hostPid, recordNum);
 
     EXPECT_EQ(recordNum, 0);
     EXPECT_EQ(ret, ERR_OK);
@@ -643,16 +643,16 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0300, T
     element.SetAbilityName("HeavenlyMeAbility");
     element.SetBundleName("HeavenlyMeBundle");
     std::string moduleName = "HeavenlyMeMoudle";
-    std::string hostBundleName = "HeavenlyMeHostBundle";
+    int32_t hostPid = 0;
     int32_t recordNum = 1;
     ExtensionRecordManager::PreLoadUIExtensionMapKey extensionMapKey(
-        "HeavenlyMeAbility", "HeavenlyMeBundle", "HeavenlyMeMoudle", "HeavenlyMeHostBundle");
+        "HeavenlyMeAbility", "HeavenlyMeBundle", "HeavenlyMeMoudle", hostPid);
     extRecordMgr->preloadUIExtensionMap_ = {
         {extensionMapKey, {}}
     };
 
     auto ret = extRecordMgr->QueryPreLoadUIExtensionRecord(
-        element, moduleName, hostBundleName, recordNum);
+        element, moduleName, hostPid, recordNum);
 
     EXPECT_EQ(recordNum, 0);
     EXPECT_EQ(ret, ERR_OK);
@@ -672,10 +672,10 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0400, T
     element.SetAbilityName("HeavenlyMeAbility");
     element.SetBundleName("HeavenlyMeBundle");
     std::string moduleName = "HeavenlyMeMoudle";
-    std::string hostBundleName = "HeavenlyMeHostBundle";
+    int32_t hostPid = 100;
     int32_t recordNum = 1;
     ExtensionRecordManager::PreLoadUIExtensionMapKey extensionMapKey(
-        "HeavenlyMeAbility", "HeavenlyMeBundle", "HeavenlyMeMoudle", "HeavenlyMeHostBundle");
+        "HeavenlyMeAbility", "HeavenlyMeBundle", "HeavenlyMeMoudle", hostPid);
     AAFwk::AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
@@ -688,7 +688,7 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0400, T
     };
 
     auto ret = extRecordMgr->QueryPreLoadUIExtensionRecord(
-        element, moduleName, hostBundleName, recordNum);
+        element, moduleName, hostPid, recordNum);
 
     EXPECT_EQ(recordNum, 1);
     EXPECT_EQ(ret, ERR_OK);
@@ -764,7 +764,7 @@ HWTEST_F(ExtensionRecordManagerSecondTest, GetHostBundleNameForExtensionId_0200,
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
     int32_t extensionRecordId = 0;
-    std::string hostBundleName = "com.example.unittest";
+    int32_t hostPid = 0;
     std::string bundleName = "com.example.unittest";
 
     AAFwk::AbilityRequest abilityRequest;
@@ -775,11 +775,11 @@ HWTEST_F(ExtensionRecordManagerSecondTest, GetHostBundleNameForExtensionId_0200,
     std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
     
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
-    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_INVALID_VALUE);
+    EXPECT_EQ(extRecordMgr->GetHostPidForExtensionId(extensionRecordId, hostPid), ERR_INVALID_VALUE);
     extRecordMgr->extensionRecords_[extensionRecordId] = nullptr;
-    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_INVALID_VALUE);
+    EXPECT_EQ(extRecordMgr->GetHostPidForExtensionId(extensionRecordId, hostPid), ERR_INVALID_VALUE);
     extRecordMgr->extensionRecords_[extensionRecordId] = extRecord;
-    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_OK);
+    EXPECT_EQ(extRecordMgr->GetHostPidForExtensionId(extensionRecordId, hostPid), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
 } // namespace AbilityRuntime

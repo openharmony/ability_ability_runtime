@@ -3457,8 +3457,8 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Leve
     AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
     abilityRequest.want.SetElement(providerElement);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
+    int32_t hostPid = 0;
+    auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostPid);
     EXPECT_EQ(ret, ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD);
 }
 

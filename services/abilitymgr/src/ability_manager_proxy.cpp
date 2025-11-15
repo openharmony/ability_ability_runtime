@@ -6710,7 +6710,7 @@ int32_t AbilityManagerProxy::UnregisterHiddenStartObserver(const sptr<IHiddenSta
 
 int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                            const std::string &moduleName,
-                                                           const std::string &hostBundleName,
+                                                           const int32_t hostPid,
                                                            int32_t &recordNum,
                                                            int32_t userId)
 {
@@ -6733,8 +6733,8 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
         return ERR_INVALID_VALUE;
     }
 
-    if (!data.WriteString(hostBundleName)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "write hostBundleName fail");
+    if (!data.WriteInt32(hostPid)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "write hostPid fail");
         return INNER_ERR;
     }
 

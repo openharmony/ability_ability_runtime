@@ -3693,7 +3693,7 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std:
 }
 
 int AbilityManagerService::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
-    std::string &hostBundleName)
+    pid_t &hostPid)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
@@ -3702,7 +3702,7 @@ int AbilityManagerService::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk:
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null");
         return ERR_INVALID_VALUE;
     }
-    return connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
+    return connectManager->UnloadUIExtensionAbility(abilityRecord, hostPid);
 }
 
 int AbilityManagerService::RequestModalUIExtension(const Want &want)
@@ -15258,7 +15258,7 @@ int32_t AbilityManagerService::UnregisterHiddenStartObserver(const sptr<IHiddenS
 
 int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                              const std::string &moduleName,
-                                                             const std::string &hostBundleName,
+                                                             const int32_t hostPid,
                                                              int32_t &recordNum,
                                                              int32_t userId)
 {
@@ -15277,7 +15277,7 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
       return ERR_INVALID_VALUE;
   }
   return connectManager->QueryPreLoadUIExtensionRecordInner(
-      element, moduleName, hostBundleName, recordNum);
+      element, moduleName, hostPid, recordNum);
 }
 
 int32_t AbilityManagerService::RevokeDelegator(sptr<IRemoteObject> token)
