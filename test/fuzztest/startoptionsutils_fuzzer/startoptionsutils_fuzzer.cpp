@@ -39,7 +39,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityFuzzUtil::GetRandomStartOptions(fdp, startOptions);
     
     int32_t userId = fdp.ConsumeIntegral<int32_t>();
-    StartOptionsUtils::CheckProcessOptions(want, startOptions, userId);
+    StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, userId);
     return true;
 }
 } // namespace OHOS

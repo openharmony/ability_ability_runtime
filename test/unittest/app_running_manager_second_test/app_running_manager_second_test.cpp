@@ -1057,7 +1057,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
      * @tc.steps: step1. Initialize AppRunningManager instance
      * @tc.expected: expect first Foreground
      */
-    AppRunningRecord foregroundingRecord(appInfo_, 1, PROCESS_NAME);
+    AppRunningRecord foregroundingRecord(appInfo_, 0, PROCESS_NAME);
     foregroundingRecord.SetAppIndex(1);
     foregroundingRecord.extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     auto ret = appRunningManager->IsApplicationFirstForeground(foregroundingRecord);

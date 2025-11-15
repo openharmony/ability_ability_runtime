@@ -3646,7 +3646,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_001, TestSize.Le
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element;
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element, appIndex);
     EXPECT_EQ(ret.empty(), true);
 }
 
@@ -3666,7 +3667,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_002, TestSize.Le
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element, appIndex);
     EXPECT_EQ(ret.empty(), false);
 }
 
@@ -3687,7 +3689,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_003, TestSize.Le
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element, appIndex);
     EXPECT_EQ(ret.empty(), false);
 }
 
@@ -3707,7 +3710,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_001, TestSi
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element;
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
     EXPECT_EQ(ret.empty(), true);
 }
 
@@ -3727,7 +3731,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_002, TestSi
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
     EXPECT_EQ(ret.empty(), false);
 }
 
@@ -3748,7 +3753,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_003, TestSi
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
     EXPECT_EQ(ret.empty(), false);
 }
 

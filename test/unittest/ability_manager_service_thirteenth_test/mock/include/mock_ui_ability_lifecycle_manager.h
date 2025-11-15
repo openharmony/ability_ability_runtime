@@ -258,12 +258,6 @@ public:
      */
     void CallRequestDone(const std::shared_ptr<AbilityRecord> &abilityRecord, const sptr<IRemoteObject> &callStub);
 
-    /**
-     * release the connection of this call.
-     *
-     * @param connect caller callback ipc.
-     * @param element target ability name.
-     */
     int ReleaseCallLocked(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
 
     /**
@@ -369,7 +363,8 @@ public:
 
     int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
 
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
 
@@ -452,7 +447,8 @@ private:
         const AbilityRequest &abilityRequest, std::string &errMsg);
     bool IsHookModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> abilityRecord);
 

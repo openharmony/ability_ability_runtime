@@ -284,6 +284,7 @@ constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnab
 constexpr const char* KILL_SUB_PROCESS_REASON_PREFIX = "Kill SubProcess Reason:";
 
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
+constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
 
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -472,7 +473,11 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
 
     int32_t appIndex = 0;
-    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    if (want.HasParameter(DLP_INDEX)) {
+        appIndex = want.GetIntParam(DLP_INDEX, 0);
+    } else {
+        appIndex = abilityInfo.appIndex;
+    }
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
         return;
     }
@@ -963,7 +968,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isProcCache = false;
     bool isExtensionSandBox = false;
     if (want != nullptr) {
-        (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
+        if (want->HasParameter(DLP_INDEX)) {
+            appIndex = want->GetIntParam(DLP_INDEX, 0);
+        } else {
+            appIndex = abilityInfo->appIndex;
+        }
         callerKey = want->GetStringParam(Want::PARAMS_REAL_CALLER_KEY);
         want->RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     }
@@ -1341,7 +1350,11 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     uint64_t startFlags = (want == nullptr) ? 0 : AppspawnUtil::BuildStartFlags(*want, *abilityInfo);
     int32_t bundleIndex = 0;
     if (want != nullptr) {
-        (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, bundleIndex);
+        if (want->HasParameter(DLP_INDEX)) {
+            bundleIndex = want->GetIntParam(DLP_INDEX, 0);
+        } else {
+            bundleIndex = abilityInfo->appIndex;
+        }
     } else {
         TAG_LOGE(AAFwkTag::APPMGR, "startFlags is default");
     }
@@ -3277,7 +3290,11 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         appRecord->SetErrorInfoEnhance(want->GetBoolParam(ERROR_INFO_ENHANCE, false));
         appRecord->SetMultiThread(want->GetBoolParam(MULTI_THREAD, false));
         int32_t appIndex = 0;
-        (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
+        if (want->HasParameter(DLP_INDEX)) {
+            appIndex = want->GetIntParam(DLP_INDEX, 0);
+        } else {
+            appIndex = abilityInfo->appIndex;
+        }
         appRecord->SetAppIndex(appIndex);
 #ifdef WITH_DLP
         appRecord->SetSecurityFlag(want->GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
@@ -4488,7 +4505,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_INVALID_VALUE;
     }
-    auto ret = PreCheckStartProcess(bundleName, uid, want);
+    auto ret = PreCheckStartProcess(bundleName, uid, bundleIndex);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
@@ -5647,7 +5664,11 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     appRecord->SetUserTestInfo(testRecord);
 
     int32_t appIndex = 0;
-    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    if (want.HasParameter(DLP_INDEX)) {
+        appIndex = want.GetIntParam(DLP_INDEX, 0);
+    } else {
+        appIndex = appInfo->appIndex;
+    }
     uint64_t startFlags = AppspawnUtil::BuildStartFlags(want, info.applicationInfo);
     StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, info, appInfo->bundleName,
         appIndex, appExistFlag);
@@ -5752,7 +5773,11 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
 
     int32_t appIndex = 0;
-    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    if (want.HasParameter(DLP_INDEX)) {
+        appIndex = want.GetIntParam(DLP_INDEX, 0);
+    } else {
+        appIndex = abilityInfo.appIndex;
+    }
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
         return;
     }
@@ -10501,7 +10526,11 @@ bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const 
     }
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
     int32_t appIndex = 0;
-    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    if (want.HasParameter(DLP_INDEX)) {
+        appIndex = want.GetIntParam(DLP_INDEX, 0);
+    } else {
+        appIndex = abilityInfo.appIndex;
+    }
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
@@ -10905,8 +10934,7 @@ bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, 
     return false;
 }
 
-int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName, int32_t uid,
-    std::shared_ptr<AAFwk::Want> &want)
+int32_t AppMgrServiceInner::PreCheckStartProcess(const std::string &bundleName, int32_t uid, int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -10915,10 +10943,6 @@ int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName,
         return ERR_OK;
     }
     int32_t userId = uid / BASE_USER_RANGE;
-    int32_t appIndex = 0;
-    if (want != nullptr) {
-        (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
-    }
     if (IsBlockedByDisposeRules(bundleName, userId, appIndex)) {
         return AAFwk::ERR_UNINSTALLING_OR_UPGRADING_APP;
     }
