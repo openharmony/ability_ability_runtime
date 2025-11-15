@@ -43,8 +43,10 @@ ohos_shared_library("auto_startup_manager") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "runtime_core:ani",
   ]
 

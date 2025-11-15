@@ -49,8 +49,10 @@ ohos_shared_library("autostartupcallback_ani") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "runtime_core:ani",
   ]
 
