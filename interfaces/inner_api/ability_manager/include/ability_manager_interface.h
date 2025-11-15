@@ -2270,7 +2270,7 @@ public:
      */
     virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                   const std::string &moduleName,
-                                                  const std::string &hostBundleName,
+                                                  const int32_t hostPid,
                                                   int32_t &recordNum,
                                                   int32_t userId = DEFAULT_INVAL_VALUE)
     {

@@ -62,7 +62,7 @@ void ExtensionRecord::UnloadUIExtensionAbility()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "unRegisterObserver error");
     }
     auto result = DelayedSingleton<AAFwk::AbilityManagerService>::GetInstance()->UnloadUIExtensionAbility(
-        abilityRecord_, hostBundleName_);
+        abilityRecord_, hostPid_);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "UIExtension unload error");
     }

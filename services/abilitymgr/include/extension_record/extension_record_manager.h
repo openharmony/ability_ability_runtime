@@ -32,7 +32,7 @@ namespace AbilityRuntime {
 class ExtensionRecordManager : public std::enable_shared_from_this<ExtensionRecordManager> {
 public:
     using ExtensionAbilityRecordMap = std::map<int32_t, std::shared_ptr<ExtensionRecord>>;
-    using PreLoadUIExtensionMapKey = std::tuple<std::string, std::string, std::string, std::string>;
+    using PreLoadUIExtensionMapKey = std::tuple<std::string, std::string, std::string, pid_t>;
     using PreLoadUIExtensionMapType =
         std::map<PreLoadUIExtensionMapKey, std::vector<std::shared_ptr<ExtensionRecord>>>;
     explicit ExtensionRecordManager(const int32_t userId);
@@ -91,17 +91,17 @@ public:
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
 
     bool IsPreloadExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
-        const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
+        const pid_t &hostPid, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
 
     int32_t AddPreloadUIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> abilityRecord);
 
     void RemoveAllPreloadUIExtensionRecord(PreLoadUIExtensionMapKey &preLoadUIExtensionInfo);
 
     bool RemovePreloadUIExtensionRecord(
-        const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey);
+        const std::tuple<std::string, std::string, std::string, pid_t> extensionRecordMapKey);
 
     bool RemovePreloadUIExtensionRecordById(
-        const std::tuple<std::string, std::string, std::string, std::string> &extensionRecordMapKey,
+        const std::tuple<std::string, std::string, std::string, pid_t> &extensionRecordMapKey,
         int32_t extensionRecordId);
 
     int32_t GetOrCreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest, const std::string &hostBundleName,
@@ -121,7 +121,7 @@ public:
     void BackgroundTimeout(int32_t extensionRecordId);
     void TerminateTimeout(int32_t extensionRecordId);
 
-    int32_t GetHostBundleNameForExtensionId(int32_t extensionRecordId, std::string& hostBundleName);
+    int32_t GetHostPidForExtensionId(int32_t extensionRecordId, pid_t& hostPid);
     void GetCallerTokenList(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
         std::list<sptr<IRemoteObject>> &callerList);
 
@@ -136,7 +136,7 @@ public:
      */
     int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                           const std::string &moduleName,
-                                          const std::string &hostBundleName,
+                                          const int32_t hostPid,
                                           int32_t &recordNum);
 
 private:
