@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <set>
 #include <mutex>
 #include "cpp/mutex.h"
 
@@ -90,7 +91,7 @@ private:
     public:
         Node(const std::string &name);
         void GetObs(const std::vector<std::string> &path, uint32_t index, NotifyInfo &info,
-            int32_t userId, ObsMap &obsMap);
+            int32_t userId, ObsMap &obsMap, std::set<DataObsMgrInnerExt::Node *> &nodeLogSet);
         bool AddObserver(const std::vector<std::string> &path, uint32_t index, const Entry &entry);
         bool RemoveObserver(const std::vector<std::string> &path, uint32_t index,
             sptr<IDataAbilityObserver> dataObserver);
