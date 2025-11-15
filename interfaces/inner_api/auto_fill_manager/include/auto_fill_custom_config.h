@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,6 +93,13 @@ enum class AutoFillCommand {
     RELOAD_IN_MODAL
 };
 
+enum class AutoFillTriggerType {
+    AUTO_REQUEST,
+    MANUAL_REQUEST,
+    PASTE_REQUEST,
+    UNSPECIFIED
+};
+
 /**
  * @struct AutoFillRequest
  * AutoFillRequest is used to define the auto fill request parameter structure.
@@ -104,6 +111,7 @@ struct AutoFillRequest {
     AutoFillCustomConfig config;
     std::function<void()> doAfterAsyncModalBinding;
     std::function<void()> onUIExtensionProxyReady;
+    AutoFillTriggerType autoFillTriggerType = AutoFillTriggerType::UNSPECIFIED;
 };
 
 struct AutoFillResult {

@@ -79,6 +79,7 @@ private:
     static void UnwrapViewDataString(ani_env *env, const ani_object object, AbilityBase::ViewData &viewData);
     static void UnwrapViewDataBoolean(ani_env *env, const ani_object object, AbilityBase::ViewData &viewData);
     static void UnwrapPageNodeInfoString(ani_env *env, const ani_object object, AbilityBase::PageNodeInfo &node);
+    static bool SetCustomDataParam(ani_env *env, ani_object object, const AAFwk::Want &want);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
