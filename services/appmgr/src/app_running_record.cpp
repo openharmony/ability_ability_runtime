@@ -770,6 +770,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
         }
     }
     abilityStateData.processType = static_cast<int32_t>(processType_);
+    abilityStateData.preloadMode = static_cast<int32_t>(preloadMode_);
     BundleType bundleType = applicationInfo ? applicationInfo->bundleType : AppExecFwk::BundleType::APP;
     auto serviceInner = appMgrServiceInner_.lock();
     if (serviceInner) {
