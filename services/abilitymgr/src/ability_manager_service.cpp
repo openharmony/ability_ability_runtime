@@ -11365,7 +11365,7 @@ int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const Abil
     }
     if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(abilityRequest.appInfo.accessTokenId,
         PermissionConstants::PERMISSION_SUPPORT_APP_SERVICE_EXTENSION)) {
-        return CHECK_PERMISSION_FAILED;
+        return TARGET_ABILITY_NOT_SERVICE;
     }
     return ERR_OK;
 }
