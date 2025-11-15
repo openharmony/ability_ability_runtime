@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
-#include "ui_ability_lifecycle_manager.h"
+#ifndef OHOS_ABILITY_RUNTIME_START_ABILITY_UTILS_H
+#define OHOS_ABILITY_RUNTIME_START_ABILITY_UTILS_H
 
-#include "ability_record.h"
-#include "element_name.h"
-#include "mock_my_flag.h"
+#include "iremote_object.h"
+#include "refbase.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
-bool UIAbilityLifecycleManager::IsCallerInStatusBar(const std::string &instanceKey)
-{
-    return MyFlag::GetInstance().isCallerInStatusBar_;
+struct StartAbilityUtils {
+    static bool GetAppIndex(const Want &want, sptr<IRemoteObject> callerToken, int32_t &appIndex);
+};
 }
-
-std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByName(
-    const AppExecFwk::ElementName &element, int32_t appIndex)
-{
-    return MyFlag::GetInstance().abilityRecords_;
 }
-}  // namespace AAFwk
-}  // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_START_ABILITY_UTILS_H

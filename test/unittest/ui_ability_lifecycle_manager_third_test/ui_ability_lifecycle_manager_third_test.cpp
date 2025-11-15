@@ -215,8 +215,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_001, TestSize.
     abilityRequest.abilityInfo.name = "Name";
     abilityRequest.abilityInfo.bundleName = "BundleName";
     abilityRequest.abilityInfo.moduleName = "ModuleName";
+    abilityRequest.abilityInfo.appIndex = 5;
     abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, std::string("InstanceKey"));
-    abilityRequest.want.SetParam(ServerConstant::DLP_INDEX, 5);
     
     auto callerAbilityRecord = std::make_shared<AbilityRecord>(
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);

@@ -458,13 +458,13 @@ void UIAbilityLifecycleManager::OnCallConnectDied(const std::shared_ptr<CallReco
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByName(
-    const AppExecFwk::ElementName &element)
+    const AppExecFwk::ElementName &element, int32_t appIndex)
 {
     return {};
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByNameInner(
-    const AppExecFwk::ElementName &element)
+    const AppExecFwk::ElementName &element, int32_t appIndex)
 {
     return {};
 }
