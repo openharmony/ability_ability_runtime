@@ -377,7 +377,7 @@ private:
             status = env->Object_CallMethodByName_Int(
                 reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}d", i);
+                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
                 AsyncCallback(env, callback,
                     EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element must be int."),
                     nullptr);
@@ -428,7 +428,7 @@ private:
             status = env->Object_CallMethodByName_Int(
                 reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}d", i);
+                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
                 AsyncCallback(env, callback,
                     EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element must be int."),
                     nullptr);
