@@ -4792,12 +4792,12 @@ int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &da
         return ERR_INVALID_VALUE;
     }
     std::string moduleName = data.ReadString();
-    std::string hostBundleName = data.ReadString();
+    int32_t hostPid = data.ReadInt32();
     int32_t userId = data.ReadInt32();
 
     int32_t recordNum;
     int32_t result = QueryPreLoadUIExtensionRecord(
-        *element, moduleName, hostBundleName, recordNum, userId);
+        *element, moduleName, hostPid, recordNum, userId);
     if (!reply.WriteInt32(recordNum)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "reply write recordNum fail");
         return INNER_ERR;

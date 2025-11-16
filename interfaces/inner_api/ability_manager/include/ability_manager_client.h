@@ -1856,14 +1856,14 @@ public:
      *
      * @param element, The uiextension ElementName.
      * @param moduleName, The uiextension moduleName.
-     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param hostPid, The uiextension caller pid.
      * @param recordNum, The returned count of uiextension.
      * @param userId, The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                           const std::string &moduleName,
-                                          const std::string &hostBundleName,
+                                          const int32_t hostPid,
                                           int32_t &recordNum,
                                           int32_t userId = DEFAULT_INVAL_VALUE);
 

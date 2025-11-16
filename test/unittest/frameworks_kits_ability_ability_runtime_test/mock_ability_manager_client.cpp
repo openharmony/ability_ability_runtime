@@ -1080,7 +1080,7 @@ ErrCode AbilityManagerClient::UnregisterHiddenStartObserver(const sptr<IHiddenSt
 
 ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                             const std::string &moduleName,
-                                                            const std::string &hostBundleName,
+                                                            const int32_t hostPid,
                                                             int32_t &recordNum,
                                                             int32_t userId)
 {

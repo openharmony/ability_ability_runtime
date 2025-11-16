@@ -2285,7 +2285,7 @@ ErrCode AbilityManagerClient::UnregisterHiddenStartObserver(const sptr<IHiddenSt
 
 ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                             const std::string &moduleName,
-                                                            const std::string &hostBundleName,
+                                                            const int32_t hostPid,
                                                             int32_t &recordNum,
                                                             int32_t userId)
 {
@@ -2293,7 +2293,7 @@ ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::El
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->QueryPreLoadUIExtensionRecord(
-        element, moduleName, hostBundleName, recordNum, userId);
+        element, moduleName, hostPid, recordNum, userId);
 }
 
 ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)

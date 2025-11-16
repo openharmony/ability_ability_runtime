@@ -690,19 +690,19 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryPreLoadUIExtensi
 {
     AppExecFwk::ElementName element;
     std::string moduleName;
-    std::string hostBundleName;
+    int32_t hostPid = 0;
     int32_t recordNum = 0;
     int32_t userId = 100;
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Return(-1));
-    auto res = proxy_->QueryPreLoadUIExtensionRecord(element, moduleName, hostBundleName, recordNum, userId);
+    auto res = proxy_->QueryPreLoadUIExtensionRecord(element, moduleName, hostPid, recordNum, userId);
     EXPECT_EQ(res, -1);
 
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    res = proxy_->QueryPreLoadUIExtensionRecord(element, moduleName, hostBundleName, recordNum, userId);
+    res = proxy_->QueryPreLoadUIExtensionRecord(element, moduleName, hostPid, recordNum, userId);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_PRELOAD_UIEXTENSION_RECORD), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
