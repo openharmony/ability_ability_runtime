@@ -489,7 +489,7 @@ public:
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE) override;
 
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -2159,7 +2159,7 @@ public:
      */
     virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                   const std::string &moduleName,
-                                                  const std::string &hostBundleName,
+                                                  const int32_t hostPid,
                                                   int32_t &recordNum,
                                                   int32_t userId = DEFAULT_INVAL_VALUE) override;
 

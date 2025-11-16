@@ -132,7 +132,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
 }
 
 int AbilityConnectManager::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
-    std::string &hostBundleName)
+    int32_t &hostPid)
 {
     return ERR_OK;
 }
@@ -769,7 +769,7 @@ int32_t AbilityConnectManager::UpdateKeepAliveEnableState(const std::string &bun
 
 int32_t AbilityConnectManager::QueryPreLoadUIExtensionRecordInner(const AppExecFwk::ElementName &element,
                                                                   const std::string &moduleName,
-                                                                  const std::string &hostBundleName,
+                                                                  const int32_t hostPid,
                                                                   int32_t &recordNum)
 {
     return ERR_OK;
