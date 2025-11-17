@@ -126,7 +126,7 @@ export default class UIAbility extends Ability {
 
   onPrepareToTerminateAsync(): Promise<boolean> {
     return new Promise<boolean>((resolve: (a: boolean) => void,
-      reject: (err: Error) => void): boolean => {
+      reject: (err: Error) => void): void => {
     });
   }
 

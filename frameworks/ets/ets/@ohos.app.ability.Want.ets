@@ -224,7 +224,7 @@ class RecordWriter {
       wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Char) {
-      wantParams?.setParam(key, obj);
+      wantParams?.setParam(key, Char.toByte(obj));
       return true;
     } else if (obj instanceof Short) {
       wantParams?.setParam(key, obj);
@@ -781,12 +781,12 @@ class NativeWantParams {
     return NativeWantParams.nativeSetStringParam(this.nativeWantParams, key, value);
   }
 
-  public setParam(key: string, value: double): boolean {
+  public setParam(key: string, value: boolean): boolean {
     if (this.nativeWantParams == 0) {
       hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
       return false;
     }
-    return NativeWantParams.nativeSetDoubleParam(this.nativeWantParams, key, value);
+    return NativeWantParams.nativeSetBooleanParam(this.nativeWantParams, key, value);
   }
 
   public setParam(key: string, value: int): boolean {
@@ -805,12 +805,12 @@ class NativeWantParams {
     return NativeWantParams.nativeSetLongParam(this.nativeWantParams, key, value);
   }
 
-  public setParam(key: string, value: boolean): boolean {
+  public setParam(key: string, value: double): boolean {
     if (this.nativeWantParams == 0) {
       hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
       return false;
     }
-    return NativeWantParams.nativeSetBooleanParam(this.nativeWantParams, key, value);
+    return NativeWantParams.nativeSetDoubleParam(this.nativeWantParams, key, value);
   }
 
   public setParam(key: string, value: NativeWantParams): boolean {
