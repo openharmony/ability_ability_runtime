@@ -4284,7 +4284,7 @@ void MainThread::SleepCleanKill()
             return ;
         }
         AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_SIGNAL, "Sleep_Clean_Kill" });
-        appThread->HandleProcessSecurityExit();
+         _exit(0);
     };
     mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
 }
