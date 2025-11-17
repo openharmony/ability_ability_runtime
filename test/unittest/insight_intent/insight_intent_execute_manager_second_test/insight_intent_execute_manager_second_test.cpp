@@ -1118,5 +1118,29 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateEntryDecoratorParams_0200,
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
+
+/**
+ * @tc.name: OnInsightAppDied_001
+ * @tc.desc: OnInsightAppDied_001
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, OnInsightAppDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_001 start");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t key = 1;
+    sptr<IRemoteObject> callToken = new AppExecFwk::MockAbilityToken();
+    EXPECT_NE(callToken, nullptr);
+    std::string bundleName = "test.bundleName";
+    std::string callerBundleName = "test.callerBundleName";
+    uint64_t intentId = 1;
+    manager->AddRecord(key, callToken, bundleName, intentId, callerBundleName);
+    EXPECT_EQ(manager->records_.size(), 1);
+    manager->OnInsightAppDied(bundleName);
+    EXPECT_EQ(manager->records_.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -34,6 +34,7 @@
 #include "ets_ui_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
@@ -121,6 +122,7 @@ EtsUIExtension::~EtsUIExtension()
     if (shellContextRef_ && shellContextRef_->aniRef) {
         env->GlobalReference_Delete(shellContextRef_->aniRef);
     }
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
 }
 
 void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -464,11 +466,18 @@ bool EtsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo, arkTSMode)) {
         return false;
     }
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executorInfo.executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
+    RegisterUiExtensionDelayResultCallback(executorInfo.executeParam->insightIntentId_, sessionInfo, isDecorator);
     if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
         int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
             etsRuntime_, executorInfo, std::move(executorCallback));
         if (!ret) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+            InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+                executorInfo.executeParam->insightIntentId_);
+        } else {
+            intentId_ = executorInfo.executeParam->insightIntentId_;
         }
     } else {
         auto& jsRuntime = etsRuntime_.GetJsRuntime();
@@ -480,6 +489,10 @@ bool EtsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
             *jsRuntime, executorInfo, std::move(executorCallback));
         if (!ret) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+            InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+                executorInfo.executeParam->insightIntentId_);
+        } else {
+            intentId_ = executorInfo.executeParam->insightIntentId_;
         }
     }
     return true;

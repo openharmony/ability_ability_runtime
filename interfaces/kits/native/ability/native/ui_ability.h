@@ -362,6 +362,7 @@ protected:
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
     AAFwk::LaunchParam launchParam_;
     bool securityFlag_ = false;
+    uint64_t intentId_;
 
 private:
     friend class UIAbilityImpl;

@@ -25,6 +25,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr static char CONTEXT_MODULE_NAME[] = "InsightIntentContext";
+constexpr int32_t INDEX_ZERO = 0;
+constexpr size_t ARGC_ONE = 1;
 }
 
 void JsInsightIntentContext::Finalizer(napi_env env, void* data, void* hint)
@@ -37,6 +39,18 @@ napi_value JsInsightIntentContext::StartAbiity(napi_env env, napi_callback_info 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentContext, OnStartAbility);
+}
+
+napi_value JsInsightIntentContext::SetReturnModeForUiAbilityForeground(napi_env env, napi_callback_info info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentContext, OnSetReturnModeForUiAbilityForeground);
+}
+
+napi_value JsInsightIntentContext::SetReturnModeForUiExtensionAbility(napi_env env, napi_callback_info info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentContext, OnSetReturnModeForUiExtensionAbility);
 }
 
 napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo& info)
@@ -102,6 +116,71 @@ napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo
     return result;
 }
 
+napi_value JsInsightIntentContext::OnSetReturnModeForUiAbilityForeground(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGE(AAFwkTag::INTENT, "called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(context->GetExecuteMode());
+    if (mode != InsightIntentExecuteMode::UIABILITY_FOREGROUND) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+    int32_t returnMode;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], returnMode)) {
+        TAG_LOGE(AAFwkTag::INTENT, "convert returnMode failed");
+        ThrowInvalidParamError(env, "Parse param returnMode failed, must be a returnMode.");
+        return CreateJsUndefined(env);
+    }
+    context->SetDelayReturnMode(static_cast<InsightIntentReturnMode>(returnMode));
+    return CreateJsUndefined(env);
+}
+
+napi_value JsInsightIntentContext::OnSetReturnModeForUiExtensionAbility(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGE(AAFwkTag::INTENT, "called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(context->GetExecuteMode());
+    if (mode != InsightIntentExecuteMode::UIEXTENSION_ABILITY) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    int32_t returnMode;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], returnMode)) {
+        TAG_LOGE(AAFwkTag::INTENT, "convert returnMode failed");
+        ThrowInvalidParamError(env, "Parse param returnMode failed, must be a returnMode.");
+        return CreateJsUndefined(env);
+    }
+    context->SetDelayReturnMode(static_cast<InsightIntentReturnMode>(returnMode));
+    return CreateJsUndefined(env);
+}
+
 napi_value CreateJsInsightIntentContext(napi_env env, const std::shared_ptr<InsightIntentContext>& context)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
@@ -114,6 +193,10 @@ napi_value CreateJsInsightIntentContext(napi_env env, const std::shared_ptr<Insi
     std::string type = "InsightIntentContext";
     napi_set_named_property(env, contextObj, "contextType", CreateJsValue(env, type));
     BindNativeFunction(env, contextObj, "startAbility", CONTEXT_MODULE_NAME, JsInsightIntentContext::StartAbiity);
+    BindNativeFunction(env, contextObj, "setReturnModeForUIAbilityForeground", CONTEXT_MODULE_NAME,
+        JsInsightIntentContext::SetReturnModeForUiAbilityForeground);
+    BindNativeFunction(env, contextObj, "setReturnModeForUIExtensionAbility", CONTEXT_MODULE_NAME,
+        JsInsightIntentContext::SetReturnModeForUiExtensionAbility);
     TAG_LOGD(AAFwkTag::INTENT, "end");
     return contextObj;
 }
