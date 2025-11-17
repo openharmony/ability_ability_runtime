@@ -30,18 +30,16 @@ constexpr int32_t VALID_REQUEST_CODE_LENGTH = 49;
 }
 bool StartupUtil::GetAppIndex(const AAFwk::Want &want, int32_t &appIndex)
 {
-    appIndex = want.GetIntParam(ServerConstant::DLP_INDEX, 0);
-    if (appIndex > GlobalConstant::MAX_APP_CLONE_INDEX) {
-        return true;
+    if (want.HasParameter(ServerConstant::DLP_INDEX)) {
+        appIndex = want.GetIntParam(ServerConstant::DLP_INDEX, 0);
+        return appIndex > GlobalConstant::MAX_APP_CLONE_INDEX;
     }
-    if (appIndex == 0) {
+    if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
         appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
-        if (appIndex < 0 || appIndex > GlobalConstant::MAX_APP_CLONE_INDEX) {
-            return false;
-        }
-        return true;
+        return (appIndex >= 0 && appIndex <= GlobalConstant::MAX_APP_CLONE_INDEX);
     }
-    return false;
+    appIndex = 0;
+    return true;
 }
 
 int32_t StartupUtil::BuildAbilityInfoFlag()
@@ -100,6 +98,7 @@ void StartupUtil::InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo 
     abilityInfo.extensionTypeName = extensionInfo.extensionTypeName;
     abilityInfo.isolationProcess = extensionInfo.isolationProcess;
     abilityInfo.uid = extensionInfo.uid;
+    abilityInfo.appIndex = extensionInfo.appIndex;
     if (!extensionInfo.hapPath.empty()) {
         abilityInfo.hapPath = extensionInfo.hapPath;
     }
