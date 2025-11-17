@@ -163,6 +163,13 @@ public:
      */
     virtual void OnProcessPreForegroundChanged(const PreloadProcessData &preloadProcessData) override;
 
+    /**
+     * Will be called when process type to normal.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnProcessTypeChanged(const ProcessData &processData) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<ApplicationStateObserverProxy> delegator_;
