@@ -1260,6 +1260,7 @@ ohos_unittest("startup_manager_mock_test") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
