@@ -2614,8 +2614,8 @@ HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_001, TestSize.Level1
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::string bundleName = "test.bundle.name";
     int32_t uid = UID_ONE;
-    std::shared_ptr<AAFwk::Want> want = nullptr;
-    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    int32_t appIndex = 0;
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, appIndex);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_001 end");
 }
@@ -2631,11 +2631,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_002, TestSize.Level1
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::string bundleName = "test.bundle.name";
     int32_t uid = UID_ONE;
-    std::shared_ptr<AAFwk::Want> want = nullptr;
     appMgrServiceInner->InsertUninstallOrUpgradeUidSet(UID_ONE);
     bool flag = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
     EXPECT_EQ(flag, true);
-    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    int32_t appIndex = 0;
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, appIndex);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_002 end");
 }

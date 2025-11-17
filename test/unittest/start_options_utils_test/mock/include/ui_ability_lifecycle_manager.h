@@ -34,7 +34,8 @@ public:
     virtual ~UIAbilityLifecycleManager() = default;
 
     bool IsCallerInStatusBar(const std::string &instanceKey);
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

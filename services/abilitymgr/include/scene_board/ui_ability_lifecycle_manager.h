@@ -434,7 +434,8 @@ public:
      * @param element The element name to search for
      * @return Vector of matching ability records
      */
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 
     /**
      * @brief Get ability record by token
@@ -852,7 +853,8 @@ private:
      * @param element The element name
      * @return Vector of matching ability records
      */
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 
     /**
      * @brief Handle foreground collaboration

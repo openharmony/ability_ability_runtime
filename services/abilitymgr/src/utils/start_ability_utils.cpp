@@ -41,8 +41,9 @@ thread_local bool StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> callerToken, int32_t &appIndex)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
-        abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
+    if (abilityRecord && abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName() &&
+        (abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX ||
+        !want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY))) {
         appIndex = abilityRecord->GetAppIndex();
         return true;
     }
@@ -114,12 +115,12 @@ int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, 
     return ERR_OK;
 }
 
-int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId)
+int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId, sptr<IRemoteObject> callerToken)
 {
     auto abilityInfo = StartAbilityUtils::startAbilityInfo;
     if (!abilityInfo || abilityInfo->GetAppBundleName() != want.GetElement().GetBundleName()) {
         int32_t appIndex = 0;
-        if (!AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex)) {
+        if (!GetAppIndex(want, callerToken, appIndex)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
             return ERR_APP_CLONE_INDEX_INVALID;
         }

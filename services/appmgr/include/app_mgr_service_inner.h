@@ -2167,8 +2167,7 @@ private:
     void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
     bool IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId,
         int32_t appIndex);
-    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid,
-        std::shared_ptr<AAFwk::Want> &want);
+    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid, int32_t appIndex);
     void InsertUninstallOrUpgradeUidSet(int32_t uid);
     void RemoveUninstallOrUpgradeUidSet(int32_t uid);
     bool IsUninstallingOrUpgrading(int32_t uid);
