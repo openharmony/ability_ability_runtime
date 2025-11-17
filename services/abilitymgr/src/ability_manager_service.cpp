@@ -7641,6 +7641,9 @@ void AbilityManagerService::OnAppStateChanged(const AppInfo &info)
     if (userId == U0_USER_ID || userId == U1_USER_ID) {
         userId = AbilityRuntime::UserController::GetInstance().GetForegroundUserId(ServerConstant::DEFAULT_DISPLAY_ID);
     }
+    if (info.state == AppState::TERMINATED) {
+        DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->OnInsightAppDied(info.bundleName);
+    }
     auto connectManager = GetConnectManagerByUserId(userId);
     CHECK_POINTER_LOG(connectManager, "Connect manager not init.");
     connectManager->OnAppStateChanged(info);

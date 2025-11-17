@@ -104,6 +104,8 @@ public:
     static int32_t CheckCallerPermission();
 
     static int32_t CheckGetInsightIntenInfoPermission();
+
+    void OnInsightAppDied(const std::string &bundleName);
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;

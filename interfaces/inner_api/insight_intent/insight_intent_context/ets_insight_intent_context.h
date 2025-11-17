@@ -44,6 +44,8 @@ public:
      */
     static ani_object StartAbilitySync(ani_env *env, ani_object aniObj, ani_object wantObj);
     static void StartAbilitySyncCheck(ani_env *env, ani_object aniObj);
+    static void SetReturnModeForUIAbilityForeground(ani_env *env, ani_object aniObj, ani_enum_item aniMode);
+    static void SetReturnModeForUIExtensionAbility(ani_env *env, ani_object aniObj, ani_enum_item aniMode);
     static EtsInsightIntentContext *GetContext(ani_env *env, ani_object aniObj);
 
     std::shared_ptr<InsightIntentContext> GetNativeContext()
@@ -57,7 +59,7 @@ private:
 };
 
 std::unique_ptr<AppExecFwk::ETSNativeReference> CreateEtsInsightIntentContext(ani_env *env,
-    const EtsInsightIntentContext *context);
+    EtsInsightIntentContext *context);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_INSIGHT_INTENT_CONTEXT_H

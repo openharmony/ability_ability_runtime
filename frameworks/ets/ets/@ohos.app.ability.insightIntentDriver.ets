@@ -16,7 +16,7 @@
 import Want from '@ohos.app.ability.Want';
 import wantConstant from '@ohos.app.ability.wantConstant';
 import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
-import insightIntent from './@ohos.app.ability.insightIntent';
+import insightIntent from '@ohos.app.ability.insightIntent';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace insightIntentDriver {

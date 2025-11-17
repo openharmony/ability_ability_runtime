@@ -398,6 +398,7 @@ private:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
     void SetInsightIntentParam(const Want &want, bool coldStart);
+    void RegisterDelayResultCallback(const std::shared_ptr<InsightIntentExecuteParam> &executeParam);
 
     std::shared_ptr<NativeReference> jsWindowStageObj_;
     int32_t windowMode_ = 0;

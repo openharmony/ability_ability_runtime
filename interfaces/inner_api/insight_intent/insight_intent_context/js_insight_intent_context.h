@@ -18,6 +18,7 @@
 
 #include "native_engine/native_engine.h"
 #include "insight_intent_context.h"
+#include "insight_intent_constant.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
@@ -44,6 +45,10 @@ public:
      */
     static napi_value StartAbiity(napi_env env, napi_callback_info info);
 
+    static napi_value SetReturnModeForUiAbilityForeground(napi_env env, napi_callback_info info);
+
+    static napi_value SetReturnModeForUiExtensionAbility(napi_env env, napi_callback_info info);
+
     std::shared_ptr<InsightIntentContext> GetContext()
     {
         return context_.lock();
@@ -51,6 +56,8 @@ public:
 
 private:
     napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value OnSetReturnModeForUiAbilityForeground(napi_env env, NapiCallbackInfo& info);
+    napi_value OnSetReturnModeForUiExtensionAbility(napi_env env, NapiCallbackInfo& info);
 
     std::weak_ptr<InsightIntentContext> context_;
 };
