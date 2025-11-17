@@ -35,6 +35,7 @@ export default namespace abilityManager {
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
   export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
   export native function nativeCheckSystemApp() : void;
+  export native function nativeCheckPreloadUIExtensionAbilityPermission() : void;
   export native function nativeGetTopAbilityCheck() : void;
   export native function nativeGetAbilityRunningInfos(callback:AsyncCallbackWrapper<Array<AbilityRunningInfo>>) : void;
   export native function nativeIsEmbeddedOpenAllowed(context: Context, appId: string, callback:AsyncCallbackWrapper<boolean>) : void;
@@ -271,18 +272,26 @@ export default namespace abilityManager {
   }
 
   function onPreloadedUIExtensionAbilityLoaded(callback: PreloadedUIExtensionAbilityLoadedFn): void {
+    abilityManager.nativeCheckSystemApp();
+    abilityManager.nativeCheckPreloadUIExtensionAbilityPermission();
     abilityManager.nativeOnPreloadedUIExtensionAbilityLoaded(callback);
   }
 
   function offPreloadedUIExtensionAbilityLoaded(callback?: PreloadedUIExtensionAbilityLoadedFn): void {
+    abilityManager.nativeCheckSystemApp();
+    abilityManager.nativeCheckPreloadUIExtensionAbilityPermission();
     abilityManager.nativeOffPreloadedUIExtensionAbilityLoaded(callback);
   }
 
   function onPreloadedUIExtensionAbilityDestroyed(callback: PreloadedUIExtensionAbilityDestroyedFn): void {
+    abilityManager.nativeCheckSystemApp();
+    abilityManager.nativeCheckPreloadUIExtensionAbilityPermission();
     abilityManager.nativeOnPreloadedUIExtensionAbilityDestroyed(callback);
   }
 
   function offPreloadedUIExtensionAbilityDestroyed(callback?: PreloadedUIExtensionAbilityDestroyedFn): void {
+    abilityManager.nativeCheckSystemApp();
+    abilityManager.nativeCheckPreloadUIExtensionAbilityPermission();
     abilityManager.nativeOffPreloadedUIExtensionAbilityDestroyed(callback);
   }
 

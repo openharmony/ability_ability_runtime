@@ -173,7 +173,6 @@ public:
     void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration& configuration);
 
     void RegisterAbilityConfigUpdateCallback();
-    bool IsPreloadedSuccess() const override;
 
 protected:
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
@@ -196,7 +195,6 @@ protected:
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
     void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
-    void SetPreloadedSuccess(bool isPreloadedSuccess);
 
 protected:
     JsRuntime &jsRuntime_;
@@ -210,7 +208,6 @@ protected:
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
-    bool isPreloadedSuccess_ = false;
 
 private:
     sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo,

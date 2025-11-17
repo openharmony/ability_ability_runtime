@@ -875,9 +875,31 @@ private:
         return OnRestartSelfAtomicServiceInner(env, token);
     }
 
+    bool CheckPreloadUIExtensionAbilityPermission(napi_env env)
+    {
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Non-system app forbidden to call");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+            return false;
+        }
+        int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+            selfToken, AAFwk::PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+        if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "VerifyAccessToken fail");
+            ThrowNoPermissionError(env, AAFwk::PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+            return false;
+        }
+        return true;
+    }
+    
     napi_value OnOnPreloadedUIExtensionAbilityLoaded(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnOnPreloadedUIExtensionAbilityLoaded called");
+        if (!CheckPreloadUIExtensionAbilityPermission(env)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission");
+            return CreateJsUndefined(env);
+        }
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid argc");
             ThrowTooFewParametersError(env);
@@ -911,6 +933,10 @@ private:
     napi_value OnOffPreloadedUIExtensionAbilityLoaded(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnOffPreloadedUIExtensionAbilityLoaded called");
+        if (!CheckPreloadUIExtensionAbilityPermission(env)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission");
+            return CreateJsUndefined(env);
+        }
         if (info.argc == ARGC_ONE && !AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid param");
             ThrowInvalidParamError(env, "Parse param callback failed, must be a PreloadedUIExtensionAbilityLoadedFn.");
@@ -946,6 +972,10 @@ private:
     napi_value OnOnPreloadedUIExtensionAbilityDestroyed(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnOnPreloadedUIExtensionAbilityDestroyed called");
+        if (!CheckPreloadUIExtensionAbilityPermission(env)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission");
+            return CreateJsUndefined(env);
+        }
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid argc");
             ThrowTooFewParametersError(env);
@@ -980,6 +1010,10 @@ private:
     napi_value OnOffPreloadedUIExtensionAbilityDestroyed(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnOffPreloadedUIExtensionAbilityDestroyed called");
+        if (!CheckPreloadUIExtensionAbilityPermission(env)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission");
+            return CreateJsUndefined(env);
+        }
         if (info.argc == ARGC_ONE && !AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid param");
             ThrowInvalidParamError(env, "Parse param callback failed, must be a "
@@ -1090,14 +1124,7 @@ private:
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnClearPreloadedUIExtensionAbilities called");
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [innerErrCode]() {
-            auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
-            if (context == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
-                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
-                return;
-            }
-            std::string bundleName = context->GetBundleName();
-            *innerErrCode = AbilityManagerClient::GetInstance()->ClearPreloadedUIExtensionAbilities(bundleName);
+            *innerErrCode = AbilityManagerClient::GetInstance()->ClearPreloadedUIExtensionAbilities();
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
