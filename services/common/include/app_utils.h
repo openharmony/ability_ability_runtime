@@ -360,6 +360,10 @@ public:
     bool IsSupportAllowDebugPermission();
 
     bool IsStartUIAbilityInCurrentProcess();
+
+    void LoadAppTransferList();
+
+    bool InAppTransferList(const std::string &bundleName);
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -475,6 +479,8 @@ private:
     std::mutex residentWhiteListMutex_;
     DeviceConfiguration<std::vector<std::string>> onNewProcessEnableList_ = {false, {}};
     std::mutex onNewProcessEnableListMutex_;
+    DeviceConfiguration<std::vector<std::string>> appTransferList_ = {false, {}};
+    std::mutex appTransferListMutex_;
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
