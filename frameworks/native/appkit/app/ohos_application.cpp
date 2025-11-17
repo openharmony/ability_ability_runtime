@@ -1326,5 +1326,15 @@ void OHOSApplication::GetAllUIAbilities(std::vector<std::shared_ptr<AbilityRunti
     }
 }
 #endif
+
+bool OHOSApplication::GetAppCloneIndex(int32_t &index)
+{
+    if (abilityRuntimeContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRuntimeContext_");
+        return false;
+    }
+    index = abilityRuntimeContext_->GetCurrentAppCloneIndex();
+    return true;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
