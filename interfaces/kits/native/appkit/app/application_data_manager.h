@@ -34,12 +34,15 @@ public:
     bool NotifyExceptionObject(const AppExecFwk::ErrorObject &errorObj);
     bool NotifyCJExceptionObject(const AppExecFwk::ErrorObject &errorObj);
     bool NotifyETSExceptionObject(const AppExecFwk::ErrorObject &errorObj);
+    void SetIsUncatchable(bool isUncatchable);
+    bool GetIsUncatchable();
 
 private:
     ApplicationDataManager();
     ~ApplicationDataManager();
     DISALLOW_COPY_AND_MOVE(ApplicationDataManager);
     std::shared_ptr<IErrorObserver> errorObserver_;
+    std::atomic_bool isUncatchable_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -183,5 +183,22 @@ HWTEST_F(ApplicationDataManagerTest,
     EXPECT_FALSE(ApplicationDataManager::GetInstance().NotifyETSExceptionObject(errorObj));
     GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSExceptionObject_001 end";
 }
+
+/**
+ * @tc.number: ApplicationDataManager_IsUncatchable_001
+ * @tc.name: ApplicationDataManager IsUncatchable
+ * @tc.desc: Test whether IsUncatchable are called normally.
+ */
+HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_IsUncatchable_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationDataManager_IsUncatchable_001 start";
+    bool isUncatchable = true;
+    ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
+    EXPECT_TRUE(ApplicationDataManager::GetInstance().GetIsUncatchable());
+    isUncatchable = false;
+    ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
+    EXPECT_TRUE(!ApplicationDataManager::GetInstance().GetIsUncatchable());
+    GTEST_LOG_(INFO) << "ApplicationDataManager_IsUncatchable_001 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
