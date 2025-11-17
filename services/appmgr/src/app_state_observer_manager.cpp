@@ -346,15 +346,19 @@ void AppStateObserverManager::OnProcessStateChanged(
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
-
-    auto task = [weak = weak_from_this(), appRecord, isFromWindowFocusChanged]() {
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+        return;
+    }
+    auto state = static_cast<AppProcessState>(appRecord->GetState());
+    auto task = [weak = weak_from_this(), appRecord, isFromWindowFocusChanged, state]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessStateChanged come.");
-        self->HandleOnProcessStateChanged(appRecord, isFromWindowFocusChanged);
+        self->HandleOnProcessStateChanged(appRecord, isFromWindowFocusChanged, state);
     };
     handler_->SubmitTask(task);
 }
@@ -798,7 +802,7 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data, Bu
 }
 
 void AppStateObserverManager::HandleOnProcessStateChanged(
-    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged, AppProcessState state)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
@@ -806,6 +810,7 @@ void AppStateObserverManager::HandleOnProcessStateChanged(
         return;
     }
     ProcessData data = WrapProcessData(appRecord, isFromWindowFocusChanged);
+    data.state = state;
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
