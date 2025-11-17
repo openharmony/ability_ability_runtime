@@ -42,6 +42,29 @@ WantAgentInfo::WantAgentInfo(int requestCode, const WantAgentConstant::Operation
     }
 }
 
+WantAgentInfo::WantAgentInfo(int requestCode, int32_t appIndex,
+    const WantAgentConstant::OperationType &operationType, const std::vector<WantAgentConstant::Flags> &flags,
+    std::vector<std::shared_ptr<Want>> &wants, const std::shared_ptr<WantParams> &extraInfo, int userId)
+{
+    requestCode_ = requestCode;
+    operationType_ = operationType;
+    userId_ = userId;
+    appIndex_ = appIndex;
+    if (!flags.empty()) {
+        flags_.insert(flags_.end(), flags.begin(), flags.end());
+    }
+    if (!wants.empty()) {
+        for (auto want : wants) {
+            if (want != nullptr) {
+                wants_.push_back(std::make_shared<Want>(*want));
+            }
+        }
+    }
+    if (extraInfo != nullptr) {
+        extraInfo_ = std::make_shared<WantParams>(*extraInfo);
+    }
+}
+
 WantAgentInfo::WantAgentInfo(int requestCode, const WantAgentConstant::OperationType &operationType,
     const std::vector<WantAgentConstant::Flags> &flags, std::vector<std::shared_ptr<Want>> &wants,
     const std::shared_ptr<WantParams> &extraInfo, int userId)
@@ -95,6 +118,11 @@ WantAgentConstant::OperationType WantAgentInfo::GetOperationType() const
 std::vector<WantAgentConstant::Flags> WantAgentInfo::GetFlags() const
 {
     return flags_;
+}
+
+int32_t WantAgentInfo::GetAppIndex() const
+{
+    return appIndex_;
 }
 
 std::vector<std::shared_ptr<Want>> WantAgentInfo::GetWants() const

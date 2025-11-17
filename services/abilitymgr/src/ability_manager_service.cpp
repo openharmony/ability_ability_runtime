@@ -5958,6 +5958,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSenderByUserId(const WantSenderI
     if (isSACall || callerUserId == U0_USER_ID) {
         if (isSpecifyUserId) {
             userId = wantSenderInfo.userId;
+            appIndex = wantSenderInfo.appIndex;
             appUid = (uid >= 0) ? uid : GetUidByCloneBundleInfo(bundleName, callerUid, appIndex, userId);
         } else if (uid >= 0) {
             if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
@@ -6035,6 +6036,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
                 appUid = bundleInfo.uid;
             }
         } else {
+            appIndex = wantSenderInfo.appIndex;
             appUid = uid;
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR,
