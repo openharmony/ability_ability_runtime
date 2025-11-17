@@ -460,5 +460,28 @@ void ApplicationStateObserverProxy::OnProcessPreForegroundChanged(const PreloadP
             ret, preloadProcessData.pid);
     }
 }
+
+void ApplicationStateObserverProxy::OnProcessTypeChanged(const ProcessData &processData)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write interface token failed.");
+        return;
+    }
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write process data failed");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_TYPE_CHANGED),
+        data, reply, option);
+    if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is wrong, error code: %{public}d, bundleName:%{public}s.",
+            ret, processData.bundleName.c_str());
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

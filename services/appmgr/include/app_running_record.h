@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <shared_mutex>
 #include <unordered_set>
 
 #include "cpp/mutex.h"
@@ -796,6 +797,8 @@ public:
     ExtensionAbilityType GetExtensionType() const;
     ProcessType GetProcessType() const;
 
+    void SetProcessType(ProcessType processType);
+
     /**
      * Notify Fault Data
      *
@@ -1358,6 +1361,7 @@ private:
     std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
     ffrt::mutex startupTaskDataLock_;
     mutable ffrt::mutex killReasonLock_;
+    mutable std::shared_mutex processTypeLock_;
 
     bool isMasterProcess_ = false; // Only MasterProcess can be keepalive
     int64_t timeStamp_ = 0; // the flag of BackUpMainControlProcess
