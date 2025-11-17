@@ -2458,11 +2458,11 @@ ErrCode AbilityManagerClient::ClearPreloadedUIExtensionAbility(int32_t extension
     return abms->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
 }
 
-ErrCode AbilityManagerClient::ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId)
+ErrCode AbilityManagerClient::ClearPreloadedUIExtensionAbilities(int32_t userId)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    return abms->ClearPreloadedUIExtensionAbilities(userId);
 }
 
 ErrCode AbilityManagerClient::RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken)
@@ -2472,11 +2472,11 @@ ErrCode AbilityManagerClient::RegisterPreloadUIExtensionHostClient(const sptr<IR
     return abms->RegisterPreloadUIExtensionHostClient(callerToken);
 }
 
-ErrCode AbilityManagerClient::UnRegisterPreloadUIExtensionHostClient()
+ErrCode AbilityManagerClient::UnRegisterPreloadUIExtensionHostClient(int32_t callerPid)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->UnRegisterPreloadUIExtensionHostClient();
+    return abms->UnRegisterPreloadUIExtensionHostClient(callerPid);
 }
 } // namespace AAFwk
 } // namespace OHOS

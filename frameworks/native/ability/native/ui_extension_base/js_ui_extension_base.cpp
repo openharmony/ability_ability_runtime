@@ -56,7 +56,6 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_HIGH = "ohos.ability.params.uiExtensionLaunchTimestampHigh";
 constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_LOW = "ohos.ability.params.uiExtensionLaunchTimestampLow";
-constexpr const char* IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
 } // namespace
 napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
 {
@@ -306,7 +305,6 @@ void JsUIExtensionBase::OnStart(
         CreateJsLaunchParam(env, launchParam),
         napiWant
     };
-    SetPreloadedSuccess(want.GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false));
     CallObjectMethod("onCreate", argv, ARGC_TWO);
 }
 
@@ -917,14 +915,12 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
     TAG_LOGD(AAFwkTag::UI_EXT, "CallObjectMethod(%{public}s), begin", name);
     if (!jsObj_) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Not found .js file");
-        SetPreloadedSuccess(false);
         return nullptr;
     }
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
-        SetPreloadedSuccess(false);
         return nullptr;
     }
     HandleEscape handleEscape(jsRuntime_);
@@ -932,20 +928,17 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "get '%{public}s' object failed", name);
-        SetPreloadedSuccess(false);
         return nullptr;
     }
     if (withResult) {
         napi_value result = nullptr;
-        napi_status status = napi_call_function(env, obj, method, argc, argv, &result);
-        SetPreloadedSuccess(IsPreloadedSuccess() && status == napi_ok);
+        napi_call_function(env, obj, method, argc, argv, &result);
         return handleEscape.Escape(result);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "CallFunction(%{public}s), success", name);
     napi_value result = nullptr;
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    napi_status status = napi_call_function(env, obj, method, argc, argv, &result);
-    SetPreloadedSuccess(IsPreloadedSuccess() && status == napi_ok);
+    napi_call_function(env, obj, method, argc, argv, &result);
     return result;
 }
 
@@ -1172,15 +1165,5 @@ void JsUIExtensionBase::UnregisterDisplayInfoChangedListener()
         context_->GetToken(), jsUIExtensionBaseDisplayListener_);
 }
 #endif // SUPPORT_GRAPHICS
-
-bool JsUIExtensionBase::IsPreloadedSuccess() const
-{
-    return isPreloadedSuccess_;
-}
-
-void JsUIExtensionBase::SetPreloadedSuccess(bool isPreloadedSuccess)
-{
-    isPreloadedSuccess_ = isPreloadedSuccess;
-}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -143,22 +143,12 @@ public:
     void CheckIsPreloadUIExtensionDestroyedById(int32_t extensionRecordId);
     void CheckIsPreloadUIExtensionSuccess(int32_t extensionRecordId, bool isPreloadedSuccess);
     int32_t ClearPreloadedUIExtensionAbility(int32_t extensionRecordId);
-    int32_t ClearAllPreloadUIExtensionRecordForHost(std::string hostBundleName);
+    int32_t ClearAllPreloadUIExtensionRecordForHost();
     void RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
     void UnRegisterPreloadUIExtensionHostClient(int32_t key);
 
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
-    class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
-    public:
-        using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
-        explicit PreloadUIExtensionHostClientDeathRecipient(PreloadUIExtensionHostClientDiedHandler handler);
-        ~PreloadUIExtensionHostClientDeathRecipient() = default;
-        void OnRemoteDied(const wptr<IRemoteObject> &remote) final;
-
-    private:
-        PreloadUIExtensionHostClientDiedHandler diedHandler_;
-    };
 
 private:
     int32_t userId_;
@@ -171,8 +161,6 @@ private:
     ExtensionAbilityRecordMap terminateRecords_;
     PreLoadUIExtensionMapType preloadUIExtensionMap_;
     std::map<int32_t, sptr<IRemoteObject>> preloadUIExtensionHostClientCallerTokens_;
-    sptr<IRemoteObject::DeathRecipient> preloadUIExtensionHostClientDeathRecipient_ = nullptr;
-    static constexpr size_t HOST_BUNDLE_NAME_INDEX = 3;
 
     void SetCachedFocusedCallerToken(int32_t extensionRecordId, sptr<IRemoteObject> &focusedCallerToken);
     sptr<IRemoteObject> GetCachedFocusedCallerToken(int32_t extensionRecordId) const;
@@ -188,7 +176,7 @@ private:
     int32_t UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &record);
     int32_t SetAbilityProcessName(const AAFwk::AbilityRequest &abilityRequest,
         const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord);
-    void UnloadExtensionRecordsByPid(std::vector<std::shared_ptr<ExtensionRecord>> &records, int32_t callingPid,
+    void UnloadExtensionRecordsByPid(std::vector<std::shared_ptr<ExtensionRecord>> &records,
         std::vector<std::shared_ptr<ExtensionRecord>> &recordsToUnload);
     bool IsHostSpecifiedProcessValid(const AAFwk::AbilityRequest &abilityRequest,
         std::shared_ptr<ExtensionRecord> &record, const std::string &process);

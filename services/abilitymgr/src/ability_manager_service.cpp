@@ -7396,12 +7396,6 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
             TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
-        PacMap pacMap = saveData;        
-        bool isPreloadedSuccess = pacMap.GetBooleanValue(IS_PRELOADED_UI_EXTENSION_SUCCESS);
-        if (state == AbilityState::INACTIVE || isTerminate || state == AbilityState::INACTIVATING) {
-            connectManager->CheckIsPreloadUIExtensionRecordChangedById(
-                abilityRecord->GetUIExtensionAbilityId(), state, isPreloadedSuccess);
-        }
         return connectManager->AbilityTransitionDone(token, state);
     }
     if (type == AppExecFwk::AbilityType::DATA) {
@@ -15899,11 +15893,10 @@ int32_t AbilityManagerService::ClearPreloadedUIExtensionAbility(int32_t extensio
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId)
+int32_t AbilityManagerService::ClearPreloadedUIExtensionAbilities(int32_t userId)
 {
     TAG_LOGD(AAFwkTag::UI_EXT,
-        "ClearPreloadedUIExtensionAbilities called, hostBundleName: %{public}s, userId: %{public}d",
-        hostBundleName.c_str(), userId);
+        "ClearPreloadedUIExtensionAbilities called, userId: %{public}d", userId);
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
         PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
@@ -15911,21 +15904,16 @@ int32_t AbilityManagerService::ClearPreloadedUIExtensionAbilities(const std::str
             PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
         return ERR_PERMISSION_DENIED;
     }
-    if (hostBundleName.empty()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "hostBundleName is empty");
-        return ERR_INVALID_VALUE;
-    }
     int32_t validUserId = GetValidUserId(userId);
     auto connectManager = GetConnectManagerByUserId(validUserId);
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = connectManager->ClearAllPreloadUIExtensionAbilityLocked(hostBundleName);
+    int32_t ret = connectManager->ClearAllPreloadUIExtensionAbilityLocked();
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT,
-            "ClearAllPreloadUIExtensionAbilityLocked failed, hostBundleName: %{public}s, ret: %{public}d",
-            hostBundleName.c_str(), ret);
+            "ClearAllPreloadUIExtensionAbilityLocked failed, ret: %{public}d", ret);
         return ret;
     }
     return ERR_OK;
@@ -15954,7 +15942,7 @@ int32_t AbilityManagerService::RegisterPreloadUIExtensionHostClient(const sptr<I
     return connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
 }
 
-int32_t AbilityManagerService::UnRegisterPreloadUIExtensionHostClient()
+int32_t AbilityManagerService::UnRegisterPreloadUIExtensionHostClient(int32_t callerPid)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "UnRegisterPreloadUIExtensionHostClient called");
     CHECK_CALLER_IS_SYSTEM_APP;
@@ -15970,7 +15958,7 @@ int32_t AbilityManagerService::UnRegisterPreloadUIExtensionHostClient()
         TAG_LOGE(AAFwkTag::UI_EXT, "null connectManager");
         return ERR_INVALID_VALUE;
     }
-    return connectManager->UnRegisterPreloadUIExtensionHostClient();
+    return connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

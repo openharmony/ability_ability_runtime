@@ -5154,9 +5154,8 @@ int32_t AbilityManagerStub::UnPreloadUIExtensionAbilityInner(MessageParcel &data
 
 int32_t AbilityManagerStub::ClearAllPreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    std::string hostBundleName = data.ReadString();
     int32_t userId = data.ReadInt32();
-    int32_t result = ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
+    int32_t result = ClearPreloadedUIExtensionAbilities(userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -5175,7 +5174,8 @@ int32_t AbilityManagerStub::RegisterPreloadUIExtensionHostClientInner(MessagePar
 
 int32_t AbilityManagerStub::UnRegisterPreloadUIExtensionHostClientInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = UnRegisterPreloadUIExtensionHostClient();
+    int32_t callerPid = data.ReadInt32();
+    int32_t result = UnRegisterPreloadUIExtensionHostClient(callerPid);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

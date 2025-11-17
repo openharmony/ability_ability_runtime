@@ -7374,7 +7374,7 @@ int32_t AbilityManagerProxy::ClearPreloadedUIExtensionAbility(int32_t extensionA
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
     MessageParcel reply;
     MessageOption option;
-    int error = SendRequest(AbilityManagerInterfaceCode::UN_PRELOAD_UI_EXTENSION_ABILITY, data, reply, option);
+    auto error = SendRequest(AbilityManagerInterfaceCode::UN_PRELOAD_UI_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
@@ -7383,20 +7383,16 @@ int32_t AbilityManagerProxy::ClearPreloadedUIExtensionAbility(int32_t extensionA
     return result;
 }
 
-int32_t AbilityManagerProxy::ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId)
+int32_t AbilityManagerProxy::ClearPreloadedUIExtensionAbilities(int32_t userId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (!data.WriteString(hostBundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostBundleName write fail");
-        return ERR_INVALID_VALUE;
-    }
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
     MessageParcel reply;
     MessageOption option;
-    int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY, data, reply, option);
+    auto error = SendRequest(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
@@ -7418,7 +7414,7 @@ int32_t AbilityManagerProxy::RegisterPreloadUIExtensionHostClient(const sptr<IRe
     }
     MessageParcel reply;
     MessageOption option;
-    int error = SendRequest(
+    auto error = SendRequest(
         AbilityManagerInterfaceCode::REGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
@@ -7428,12 +7424,13 @@ int32_t AbilityManagerProxy::RegisterPreloadUIExtensionHostClient(const sptr<IRe
     return result;
 }
 
-int32_t AbilityManagerProxy::UnRegisterPreloadUIExtensionHostClient()
+int32_t AbilityManagerProxy::UnRegisterPreloadUIExtensionHostClient(int32_t callerPid)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    int error =
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, callerPid);
+    auto error =
         SendRequest(AbilityManagerInterfaceCode::UNREGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);

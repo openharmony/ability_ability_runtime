@@ -1979,8 +1979,8 @@ public:
     /**
      * UnPreload UIExtension with want, send want to ability manager service.
      *
-     * @param extensionAbilityId, the extension ability Id.
-     * @param userId, the extension runs in.
+     * @param extensionAbilityId The extension ability Id.
+     * @param userId The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ClearPreloadedUIExtensionAbility(int32_t extensionAbilityId, int32_t userId = DEFAULT_INVAL_VALUE);
@@ -1988,11 +1988,10 @@ public:
     /**
      * clear all Preload UIExtension with want, send want to ability manager service.
      *
-     * @param hostBundleName, the caller application bundle name.
-     * @param userId, the extension runs in.
+     * @param userId The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ClearPreloadedUIExtensionAbilities(const std::string &hostBundleName, int32_t userId = DEFAULT_INVAL_VALUE);
+    ErrCode ClearPreloadedUIExtensionAbilities(int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * @brief Register preload ui extension host client.
@@ -2007,7 +2006,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode UnRegisterPreloadUIExtensionHostClient();
+    ErrCode UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE);
 
 private:
     AbilityManagerClient();

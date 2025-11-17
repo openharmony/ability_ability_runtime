@@ -2373,8 +2373,8 @@ protected:
     /**
      * UnPreload UIExtension with want, send want to ability manager service.
      *
-     * @param extensionAbilityId, the extension ability Id.
-     * @param userId, the extension runs in.
+     * @param extensionAbilityId The extension ability Id.
+     * @param userId The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ClearPreloadedUIExtensionAbility(
@@ -2383,12 +2383,10 @@ protected:
     /**
      * clear all Preload UIExtension with want, send want to ability manager service.
      *
-     * @param hostBundleName, the caller application bundle name.
-     * @param userId, the extension runs in.
+     * @param userId The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ClearPreloadedUIExtensionAbilities(
-        const std::string &hostBundleName, int32_t userId = DEFAULT_INVAL_VALUE) override;
+    virtual int32_t ClearPreloadedUIExtensionAbilities(int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
      * @brief Register preload ui extension host client.
@@ -2403,7 +2401,7 @@ protected:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UnRegisterPreloadUIExtensionHostClient() override;
+    virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,

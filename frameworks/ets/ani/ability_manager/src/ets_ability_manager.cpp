@@ -143,6 +143,7 @@ public:
     static void NativePreloadUIExtensionAbility(ani_env *env, ani_object aniWant, ani_object callback);
     static void NativeClearPreloadedUIExtensionAbility(ani_env *env, ani_int preloadId, ani_object callback);
     static void NativeClearPreloadedUIExtensionAbilities(ani_env *env, ani_object callback);
+    static void CheckPreloadUIExtensionAbilityPermission(ani_env *env);
 
 private:
     static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
@@ -260,6 +261,21 @@ void EtsAbilityManager::CheckSystemApp(ani_env *env)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return;
+    }
+}
+
+void EtsAbilityManager::CheckPreloadUIExtensionAbilityPermission(ani_env *env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        selfToken, AAFwk::PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+    if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "VerifyAccessToken fail");
+        EtsErrorUtil::ThrowNoPermissionError(env, AAFwk::PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
     }
 }
 
@@ -1010,14 +1026,7 @@ void EtsAbilityManager::NativeClearPreloadedUIExtensionAbilities(ani_env *env, a
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
         return;
     }
-    auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
-        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
-        return;
-    }
-    std::string hostBundleName = context->GetBundleName();
-    ErrCode result = AAFwk::AbilityManagerClient::GetInstance()->ClearPreloadedUIExtensionAbilities(hostBundleName);
+    ErrCode result = AAFwk::AbilityManagerClient::GetInstance()->ClearPreloadedUIExtensionAbilities();
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ClearPreloadedUIExtensionAbilities failed, result: %{public}d", result);
         AppExecFwk::AsyncCallback(
@@ -1104,6 +1113,8 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         ani_native_function { "nativeClearPreloadedUIExtensionAbilities",
             CLEAR_PRELOAD_UI_EXTENSION_ABILITIES_SIGNATURE,
             reinterpret_cast<void *>(EtsAbilityManager::NativeClearPreloadedUIExtensionAbilities) },
+        ani_native_function { "nativeCheckPreloadUIExtensionAbilityPermission", ETS_ABILITY_MANAGER_SIGNATURE_VOID,
+            reinterpret_cast<void *>(EtsAbilityManager::CheckPreloadUIExtensionAbilityPermission) },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
