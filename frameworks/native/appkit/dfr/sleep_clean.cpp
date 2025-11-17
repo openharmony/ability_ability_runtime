@@ -58,7 +58,7 @@ bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &app
     if (appHeapTotalSize < getParamHeapSize) {
         return false;
     }
-    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::JS_ERROR);
     return true;
 }
 
@@ -67,7 +67,7 @@ bool SleepClean::HandleSleepClean(const FaultData &faultData, const std::shared_
     if (faultData.waitSaveState) {
         return HandleAppSaveIfHeap(application);
     }
-    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::JS_ERROR);
     return false;
 }
 
