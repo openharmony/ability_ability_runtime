@@ -2075,6 +2075,14 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
         AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObject.name };
         AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+        AppExecFwk::ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
+        if (NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, summary,
+            appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
+            TAG_LOGI(AAFwkTag::APPKIT, "Complete all callbacks");
+            if (!isUncatchable) {
+                return;
+            }
+        }
         if (!isUncatchable && NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, summary,
             appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
             return;

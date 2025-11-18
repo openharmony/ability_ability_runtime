@@ -498,7 +498,11 @@ static void DoWorkThreadCallback(napi_env env, napi_value exception)
 }
 static bool ErrorManagerWorkerCallback(napi_env env, napi_value exception, std::string instanceName, uint32_t type)
 {
-    DoGlobalCallback(env, exception, instanceName, type);
+    if (!AppExecFwk::ApplicationDataManager::GetInstance().GetIsUncatchable()) {
+        DoGlobalCallback(env, exception, instanceName, type);
+    } else {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Uncatchable exception, skip this step.");
+    }
     DoWorkThreadCallback(env, exception);
     return true;
 }
@@ -573,7 +577,11 @@ static bool ErrorManagerMainWorkerCallback(
     item.stack = stack;
     item.instanceName = "";
     item.instanceType = 0;
-    DoCallbackInRegesterThread(env, item);
+    if (!AppExecFwk::ApplicationDataManager::GetInstance().GetIsUncatchable()) {
+        DoCallbackInRegesterThread(env, item);
+    } else {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Uncatchable exception, skip this step.");
+    }
     return true;
 }
 
