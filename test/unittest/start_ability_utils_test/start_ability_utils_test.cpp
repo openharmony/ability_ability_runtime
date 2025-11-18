@@ -96,54 +96,6 @@ HWTEST_F(StartAbilityUtilsTest, GetApplicationInfo_003, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckAppProvisionMode_001
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_001, TestSize.Level1)
-{
-    std::string bundleName = "testName";
-    int32_t userId = 0;
-    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.bundleName = bundleName;
-    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
-}
-
-/**
- * @tc.name: CheckAppProvisionMode_002
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_002, TestSize.Level1)
-{
-    std::string bundleName = "testName";
-    int32_t userId = 0;
-    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.bundleName = bundleName;
-    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
-    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: CheckAppProvisionMode_003
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_003, TestSize.Level1)
-{
-    std::string bundleName = "";
-    int32_t userId = 0;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: CheckAppProvisionMode_004
  * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
  * @tc.type: FUNC

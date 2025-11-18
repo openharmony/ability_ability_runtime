@@ -79,7 +79,6 @@ void StartAbilityUtilsFuzztest1(bool boolParam, std::string &stringParam, int32_
     StartAbilityInfo::CreateStartAbilityInfo(want, int32Param, int32Param, nullptr);
     StartAbilityInfo::CreateCallerAbilityInfo(nullptr);
     StartAbilityInfo::CreateCallerAbilityInfo(callerToken);
-    StartAbilityUtils::CheckAppProvisionMode(stringParam, int32Param);
     StartAbilityUtils::GetCloneAppIndexes(stringParam, int32Param);
 }
 

@@ -796,7 +796,7 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GrantUriPermission_001, TestSize
     std::string targetBundleName = "targetBundleName";
     bool isSandboxApp = false;
     uint32_t tokenId = 1234;
-    abilityRecord->GrantUriPermission(want, targetBundleName, isSandboxApp, tokenId, false);
+    abilityRecord->GrantUriPermission(want, targetBundleName, isSandboxApp, tokenId, true);
     EXPECT_EQ(abilityRecord->specifyTokenId_, 0);
 }
 

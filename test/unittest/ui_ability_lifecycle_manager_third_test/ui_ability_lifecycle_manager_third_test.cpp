@@ -240,6 +240,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_002, TestSize.
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     
     AbilityRequest abilityRequest;
+    int32_t dlpIndex = 1001;
+    abilityRequest.want.SetParam(DLP_INDEX, dlpIndex);
     auto ret = mgr->FindRecordFromTmpMap(abilityRequest);
     EXPECT_EQ(ret, nullptr);
 }

@@ -432,7 +432,7 @@ bool UriUtils::GrantUriPermission(Want &want, const GrantUriPermissionInfo &gran
         return false;
     }
     // report open file event
-    PublishFileOpenEvent(want);
+    PublishFileOpenEvent(want, grantInfo);
     return true;
 }
 
@@ -480,20 +480,18 @@ bool UriUtils::GrantUriPermissionInner(const std::vector<std::string> &uriVec,
 }
 #endif // SUPPORT_UPMS
 
-void UriUtils::PublishFileOpenEvent(const Want &want)
+void UriUtils::PublishFileOpenEvent(const Want &want, const GrantUriPermissionInfo &grantInfo)
 {
     auto wangUri = want.GetUri();
     std::string uriStr = wangUri.ToString();
     if (!uriStr.empty() && wangUri.GetScheme() == "file") {
-        int32_t userId = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) / AppExecFwk::Constants::BASE_USER_RANGE;
-        OHOS::AppExecFwk::ElementName element = want.GetElement();
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record:%{private}s,ability:%{public}s_%{public}s,userId:%{public}d",
-            uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str(), userId);
+            uriStr.c_str(), grantInfo.targetBundleName.c_str(), grantInfo.targetAbilityName.c_str(), grantInfo.userId);
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
         msgWant.SetParam("uri", uriStr);
-        msgWant.SetParam("bundleName", element.GetBundleName());
-        msgWant.SetParam("abilityName", element.GetAbilityName());
+        msgWant.SetParam("bundleName", grantInfo.targetBundleName);
+        msgWant.SetParam("abilityName", grantInfo.targetAbilityName);
         auto timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         std::string currentTime = std::to_string(timeNow);
@@ -503,7 +501,7 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
         std::vector<std::string> subscriberPermissions = {"ohos.permission.MANAGE_LOCAL_ACCOUNTS"};
         commonEventPublishInfo.SetSubscriberPermissions(subscriberPermissions);
         IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, commonEventPublishInfo,
-            userId));
+            grantInfo.userId));
     }
 }
 
@@ -518,12 +516,13 @@ bool UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abili
         GrantUriPermissionInfo grantInfo;
         grantInfo.isNotifyCollaborator = false;
         grantInfo.targetBundleName = abilityInfo.bundleName;
+        grantInfo.targetAbilityName = abilityInfo.name;
         grantInfo.appIndex = abilityInfo.applicationInfo.appIndex;
         grantInfo.isSandboxApp = false;
         grantInfo.callerTokenId = callerTokenId;
         grantInfo.collaboratorType = abilityRequest.collaboratorType;
         grantInfo.flag = want.GetFlags();
-        grantInfo.userId = -1;
+        grantInfo.userId = abilityRequest.userId;
         GrantUriPermission(want, grantInfo);
         return true;
     }
@@ -541,12 +540,13 @@ bool UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &a
         GrantUriPermissionInfo grantInfo;
         grantInfo.isNotifyCollaborator = false;
         grantInfo.targetBundleName = abilityInfo.bundleName;
+        grantInfo.targetAbilityName = abilityInfo.name;
         grantInfo.appIndex = abilityInfo.applicationInfo.appIndex;
         grantInfo.isSandboxApp = false;
         grantInfo.callerTokenId = callerTokenId;
         grantInfo.collaboratorType = abilityRequest.collaboratorType;
         grantInfo.flag = want.GetFlags();
-        grantInfo.userId = -1;
+        grantInfo.userId = abilityRequest.userId;
         GrantUriPermission(want, grantInfo);
         return true;
     }
