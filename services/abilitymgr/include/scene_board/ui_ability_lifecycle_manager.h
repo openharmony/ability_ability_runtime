@@ -1109,7 +1109,8 @@ private:
      * @param sceneFlag The scene flag
      * @return true if handled, false otherwise
      */
-    bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
+    bool HandleStartSpecifiedCold(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        uint32_t sceneFlag, bool isRestart);
 
     /**
      * @brief Handle cold accept want completion
