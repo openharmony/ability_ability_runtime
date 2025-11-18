@@ -39,6 +39,11 @@ namespace insightIntent {
     uris?: Array<string>;
     flags?: int;
   }
+
+  export enum ReturnMode {  
+    CALLBACK = 0,
+    FUNCTION = 1
+  }
 }
 
 export default insightIntent;

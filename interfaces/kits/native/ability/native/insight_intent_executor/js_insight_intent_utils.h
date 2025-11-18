@@ -46,6 +46,8 @@ public:
 
     static napi_value ResolveCbCpp(napi_env env, napi_callback_info info);
 
+    static napi_value ResolveExecuteResultWithDelay(napi_env env, napi_callback_info info);
+
     static napi_value RejectCbCpp(napi_env env, napi_callback_info info);
 
     static void ReplyFailed(InsightIntentExecutorAsyncCallback* callback,

@@ -697,6 +697,7 @@ config("insight_intent_executor_public_config") {
 ohos_shared_library("insight_intent_executor") {
   sources = [
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor_instance.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_delay_result_callback_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_entry.cpp",
@@ -751,6 +752,8 @@ ohos_shared_library("insight_intent_executor_ani") {
     cfi_vcall_icall_only = true
     debug = false
   }
+
+  include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/enum_convert" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor.cpp",

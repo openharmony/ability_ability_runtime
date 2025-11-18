@@ -25,6 +25,7 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "js_ability_lifecycle_callback.h"
@@ -131,6 +132,7 @@ JsUIExtension::~JsUIExtension()
         jsRuntime_.FreeNativeReference(std::move(item.second));
     }
     contentSessions_.clear();
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
 }
 
 void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -515,12 +517,18 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
         return false;
     }
-
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executorInfo.executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
+    RegisterUiExtensionDelayResultCallback(executorInfo.executeParam->insightIntentId_, sessionInfo, isDecorator);
     int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
         // callback has removed, release in insight intent executor.
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+            executorInfo.executeParam->insightIntentId_);
+    } else {
+        intentId_ = executorInfo.executeParam->insightIntentId_;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;

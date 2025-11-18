@@ -19,6 +19,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_constant.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_execute_result.h"
 #include "js_insight_intent_context.h"
 #include "js_insight_intent_utils.h"
@@ -90,6 +91,9 @@ bool JsInsightIntentEntry::Init(const InsightIntentExecutorInfo& insightIntentIn
 
     auto executorNapiVal = jsObj_->GetNapiValue();
     auto contextNapiVal = contextObj_->GetNapiValue();
+    napi_value jsInstanceId = nullptr;
+    napi_create_int64(env, context->GetIntentId(), &jsInstanceId);
+    napi_set_named_property(env, contextNapiVal, "instanceId", jsInstanceId);
     if (!CheckTypeForNapiValue(env, executorNapiVal, napi_object) ||
         !CheckTypeForNapiValue(env, contextNapiVal, napi_object) ||
         napi_set_named_property(env, executorNapiVal, "context", contextNapiVal) != napi_ok) {
@@ -97,6 +101,7 @@ bool JsInsightIntentEntry::Init(const InsightIntentExecutorInfo& insightIntentIn
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
+    context->SetExecuteMode(insightIntentInfo.executeParam->executeMode_);
     return true;
 }
 
@@ -237,8 +242,19 @@ bool JsInsightIntentEntry::HandleResultReturnedFromJsFunc(napi_value resultJs)
     napi_value then = nullptr;
     NAPI_CALL_BASE(env, napi_get_named_property(env, resultJs, "then", &then), ExecuteIntentCheckError());
     napi_value resolveCbJs = nullptr;
-    NAPI_CALL_BASE(env, napi_create_function(env, TMP_NAPI_ANONYMOUS_FUNC, strlen(TMP_NAPI_ANONYMOUS_FUNC),
-        JsInsightIntentUtils::ResolveCbCpp, callback, &resolveCbJs), ExecuteIntentCheckError());
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
+        return ExecuteIntentCheckError();
+    }
+    if (context->GetDelayReturnMode() == InsightIntentReturnMode::CALLBACK) {
+        NAPI_CALL_BASE(env, napi_create_function(env, TMP_NAPI_ANONYMOUS_FUNC, strlen(TMP_NAPI_ANONYMOUS_FUNC),
+            JsInsightIntentUtils::ResolveCbCpp, callback, &resolveCbJs), ExecuteIntentCheckError());
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(context->GetIntentId());
+    } else {
+        NAPI_CALL_BASE(env, napi_create_function(env, TMP_NAPI_ANONYMOUS_FUNC, strlen(TMP_NAPI_ANONYMOUS_FUNC),
+            JsInsightIntentUtils::ResolveExecuteResultWithDelay, callback, &resolveCbJs), ExecuteIntentCheckError());
+    }
     constexpr size_t argcThen = 1;
     napi_value argvThen[argcThen] = { resolveCbJs };
     NAPI_CALL_BASE(env, napi_call_function(env, resultJs, then, argcThen, argvThen, nullptr),

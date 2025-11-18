@@ -50,6 +50,22 @@ napi_value ExecuteModeInit(napi_env env)
     return objValue;
 }
 
+napi_value ReturnModeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null env");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+
+    napi_set_named_property(env, objValue, "CALLBACK",
+        CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_ZERO)));
+    napi_set_named_property(env, objValue, "FUNCTION",
+        CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_ONE)));
+    return objValue;
+}
+
 napi_value JsInsightIntentInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
@@ -59,6 +75,7 @@ napi_value JsInsightIntentInit(napi_env env, napi_value exportObj)
     }
 
     napi_set_named_property(env, exportObj, "ExecuteMode", ExecuteModeInit(env));
+    napi_set_named_property(env, exportObj, "ReturnMode", ReturnModeInit(env));
     return exportObj;
 }
 } // namespace AbilityRuntime

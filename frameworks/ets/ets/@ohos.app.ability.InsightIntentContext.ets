@@ -14,12 +14,14 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import insightIntent from '@ohos.app.ability.insightIntent';
 import Want from '@ohos.app.ability.Want';
 
 export default class InsightIntentContext {
   static {
     loadLibrary("insight_intent_context_ani_kit.z");
   }
+  instanceId: int;
   nativeContext: long;
 
   private static native nativeTransferStatic(input: ESValue, type: string): Object;
@@ -46,6 +48,8 @@ export default class InsightIntentContext {
 
   public native nativeStartAbilitySync(want: Want): BusinessError;
   public native nativeStartAbilitySyncCheck(): void;
+  public native setReturnModeForUIAbilityForeground(returnMode: insightIntent.ReturnMode): void;
+  public native setReturnModeForUIExtensionAbility(returnMode: insightIntent.ReturnMode): void;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     this.nativeStartAbilitySyncCheck();

@@ -27,6 +27,16 @@ class InsightIntentContext {
     hilog.sLogI(domainID, TAG, 'startAbility');
     return this.__context_impl__.startAbility(want, callback);
   }
+
+  setReturnModeForUIAbilityForeground(returnMode) {
+    hilog.sLogI(domainID, TAG, 'setReturnModeForUIAbilityForeground');
+    return this.__context_impl__.setReturnModeForUIAbilityForeground(returnMode);
+  }
+
+  setReturnModeForUIExtensionAbility(returnMode) {
+    hilog.sLogI(domainID, TAG, 'setReturnModeForUIExtensionAbility');
+    return this.__context_impl__.setReturnModeForUIExtensionAbility(returnMode);
+  }
 }
 
 export default InsightIntentContext;
