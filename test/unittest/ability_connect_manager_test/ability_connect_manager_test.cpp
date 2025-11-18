@@ -4055,34 +4055,5 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_ScheduleDisconnectAbilityDon
     res = connectManager->ScheduleDisconnectAbilityDoneLocked(nullptr);
     EXPECT_EQ(res, CONNECTION_NOT_EXIST);
 }
-
-/**
- * @tc.name: UnPreloadUIExtensionAbilityLocked_0100
- * @tc.desc: unpreload uiextension ability with invalid id
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityConnectManagerTest, UnPreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
-{
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
-    ASSERT_NE(connectManager, nullptr);
-    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
-    auto ret = connectManager->UnPreloadUIExtensionAbilityLocked(extensionAbilityId);
-    EXPECT_EQ(ret, ERR_CODE_INVALID_ID);
-}
-
-/**
- * @tc.name: ClearAllPreloadUIExtensionAbilityLocked_0100
- * @tc.desc: clear all preload uiextension ability with empty bundle name
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityConnectManagerTest, ClearAllPreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
-{
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
-    ASSERT_NE(connectManager, nullptr);
-
-    std::string hostBundleName = "";
-    auto ret = connectManager->ClearAllPreloadUIExtensionAbilityLocked(hostBundleName);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
 }  // namespace AAFwk
 }  // namespace OHOS

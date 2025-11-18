@@ -1114,7 +1114,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
         abilityRecord = GetExtensionByTokenFromServiceMap(token);
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
         CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_INVALID_VALUE);
-        uiExtensionAbilityRecordMgr_->CheckIsPreloadUIExtensionSuccess(abilityRecord->GetUIExtensionAbilityId(), true);
+        uiExtensionAbilityRecordMgr_->HandlePreloadUIExtensionSuccess(abilityRecord->GetUIExtensionAbilityId(), true);
     } else if (targetState == AbilityState::FOREGROUND || targetState == AbilityState::BACKGROUND) {
         abilityRecord = GetExtensionByTokenFromServiceMap(token);
         if (abilityRecord == nullptr) {

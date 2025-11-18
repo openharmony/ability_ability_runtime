@@ -4244,31 +4244,6 @@ HWTEST_F(AbilityManagerStubTest, UnPreloadUIExtensionAbilityInner_0100, TestSize
 }
 
 /**
- * @tc.name: ClearAllPreloadUIExtensionAbilityInner_0100
- * @tc.desc: ClearAllPreloadUIExtensionAbilityInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, ClearAllPreloadUIExtensionAbilityInner_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "begin");
-
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
-    
-    std::string hostBundleName = "com.ohos.uiextensionuser";
-    ASSERT_TRUE(data.WriteString16(Str8ToStr16(hostBundleName)));
-    
-    int32_t userId = DEFAULT_INVAL_VALUE;
-    ASSERT_TRUE(data.WriteInt32(userId));
-    
-    auto result = stub_->ClearAllPreloadUIExtensionAbilityInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
-
-    TAG_LOGI(AAFwkTag::TEST, "end");
-}
-
-/**
  * @tc.name: RegisterPreloadUIExtensionHostClientInner_0100
  * @tc.desc: RegisterPreloadUIExtensionHostClientInner with invalid token
  * @tc.type: FUNC

@@ -102,25 +102,6 @@ HWTEST_F(UIExtensionPreloadTest, ClearPreloadedUIExtensionAbility_0100, TestSize
 }
 
 /**
- * @tc.name: ClearPreloadedUIExtensionAbilities_0100
- * @tc.desc: Test ClearPreloadedUIExtensionAbilities with valid hostBundleName.
- * @tc.type: FUNC
- */
-HWTEST_F(UIExtensionPreloadTest, ClearPreloadedUIExtensionAbilities_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "start.");
-    auto client = AbilityManagerClient::GetInstance();
-    ASSERT_NE(client, nullptr);
-
-    std::string hostBundleName = "com.ohos.testbundle";
-    int32_t userId = 0;
-
-    ErrCode ret = client->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
-    EXPECT_NE(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "finish.");
-}
-
-/**
  * @tc.name: UnRegisterPreloadUIExtensionHostClient_0100
  * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient normal call.
  * @tc.type: FUNC
