@@ -1410,46 +1410,6 @@ HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbility_4500, TestSiz
 }
 
 /**
- * @tc.name: ClearPreloadedUIExtensionAbilities_4600
- * @tc.desc: ClearPreloadedUIExtensionAbilities with SendRequest error
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbilities_4600, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_4600 start";
-
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
-    std::string hostBundleName = "com.example.test";
-    int32_t userId = 1;
-    int32_t result = proxy_->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY), mock_->code_);
-    EXPECT_NE(result, NO_ERROR);
-    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_4600 end";
-}
-
-/**
- * @tc.name: ClearPreloadedUIExtensionAbilities_4700
- * @tc.desc: ClearPreloadedUIExtensionAbilities with valid parameters
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbilities_4700, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_4700 start";
-
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    std::string hostBundleName = "com.example.test";
-    int32_t userId = 1;
-    int32_t result = proxy_->ClearPreloadedUIExtensionAbilities(hostBundleName, userId);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY), mock_->code_);
-    EXPECT_EQ(result, NO_ERROR);
-    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_4700 end";
-}
-
-/**
  * @tc.name: RegisterPreloadUIExtensionHostClient_4800
  * @tc.desc: RegisterPreloadUIExtensionHostClient with WriteRemoteObject fail, return INNER_ERR
  * @tc.type: FUNC

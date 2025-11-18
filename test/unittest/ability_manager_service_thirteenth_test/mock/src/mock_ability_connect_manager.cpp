@@ -786,17 +786,12 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
 {
 }
 
-void AbilityConnectManager::CheckIsPreloadUIExtensionRecordChangedById(
-    int32_t extensionRecordId, int32_t state, bool isPreloadedSuccess)
-{
-}
-
 int AbilityConnectManager::UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId)
 {
     return 0;
 }
 
-int AbilityConnectManager::ClearAllPreloadUIExtensionAbilityLocked(const std::string &hostBundleName)
+int AbilityConnectManager::ClearAllPreloadUIExtensionAbilityLocked()
 {
     return 0;
 }
