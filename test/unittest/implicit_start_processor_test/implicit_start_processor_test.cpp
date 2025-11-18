@@ -1206,6 +1206,7 @@ HWTEST_F(ImplicitStartProcessorTest, IsActionImplicitStart_001, TestSize.Level1)
     res = processor->IsActionImplicitStart(want, findDeafultApp);
     EXPECT_TRUE(res);
     TAG_LOGI(AAFwkTag::TEST, "IsActionImplicitStart_001 end");
+    system::SetParameter(SUPPORT_ACTION_START_SELECTOR, "false");
 }
 
 /*
