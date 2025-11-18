@@ -19,13 +19,13 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "local_pending_want.h"
+#include "multi_app_utils.h"
 #include "want_params_wrapper.h"
 #include "pending_want.h"
+#include "permission_verification.h"
 #include "want_agent_client.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
-#include "multi_app_utils.h"
-#include "permission_verification.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
