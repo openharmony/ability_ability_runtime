@@ -22,6 +22,7 @@
 #include "ets_ui_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "int_wrapper.h"
 #include "js_ui_extension.h"
 #include "runtime.h"
@@ -32,6 +33,59 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+namespace {
+    constexpr int ERROR_OK = 0;
+    constexpr int ERR_INVALID_VALUE = -1;
+
+    int32_t ProcessInsightIntentResult(const sptr<Rosen::Window>& window,
+        const AppExecFwk::InsightIntentExecuteResult& result)
+    {
+        if (window == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+            return ERR_INVALID_VALUE;
+        }
+
+        WantParams params;
+        params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT_CODE, AAFwk::Integer::Box(result.innerErr));
+
+        Rosen::WMError ret = Rosen::WMError::WM_OK;
+        if (result.isDecorator && result.result) {
+            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
+            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
+            ret = window->TransferExtensionData(params);
+        } else {
+            WantParams resultParams;
+            resultParams.SetParam("code", AAFwk::Integer::Box(result.code));
+            if (result.result != nullptr) {
+                sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
+                resultParams.SetParam("result", pWantParams);
+            }
+            auto size = result.uris.size();
+            sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
+            if (uriArray == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
+                return ERR_INVALID_VALUE;
+            }
+            for (std::size_t i = 0; i < size; i++) {
+                uriArray->Set(i, String::Box(result.uris[i]));
+            }
+            resultParams.SetParam("uris", uriArray);
+            resultParams.SetParam("flags", AAFwk::Integer::Box(result.flags));
+            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
+            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
+
+            ret = window->TransferExtensionData(params);
+        }
+        
+        if (ret == Rosen::WMError::WM_OK) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "TransferExtensionData success");
+            return ERROR_OK;
+        } else {
+            TAG_LOGE(AAFwkTag::UI_EXT, "TransferExtensionData failed, ret=%{public}d", ret);
+            return ERR_INVALID_VALUE;
+        }
+    }
+}
 UIExtension* UIExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
     if (!runtime) {
@@ -223,46 +277,28 @@ void UIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &ses
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto res = uiWindowMap_.find(componentId);
     if (res != uiWindowMap_.end() && res->second != nullptr) {
-        WantParams params;
-        params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT_CODE, AAFwk::Integer::Box(result.innerErr));
-
-        Rosen::WMError ret = Rosen::WMError::WM_OK;
-        if (result.isDecorator && result.result) {
-            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
-            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
-            ret = res->second->TransferExtensionData(params);
-        } else {
-            WantParams resultParams;
-            resultParams.SetParam("code", AAFwk::Integer::Box(result.code));
-            if (result.result != nullptr) {
-                sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
-                resultParams.SetParam("result", pWantParams);
-            }
-            auto size = result.uris.size();
-            sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
-            if (uriArray == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
-                return;
-            }
-            for (std::size_t i = 0; i < size; i++) {
-                uriArray->Set(i, String::Box(result.uris[i]));
-            }
-            resultParams.SetParam("uris", uriArray);
-            resultParams.SetParam("flags", AAFwk::Integer::Box(result.flags));
-            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
-            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
-
-            ret = res->second->TransferExtensionData(params);
-        }
-        if (ret == Rosen::WMError::WM_OK) {
-            TAG_LOGD(AAFwkTag::UI_EXT, "TransferExtensionData success");
-        } else {
-            TAG_LOGE(AAFwkTag::UI_EXT, "TransferExtensionData failed, ret=%{public}d", ret);
+        if (!result.isNeedDelayResult) {
+            ProcessInsightIntentResult(res->second, result);
         }
         res->second->Show();
         foregroundWindows_.emplace(componentId);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
+}
+
+void UIExtension::RegisterUiExtensionDelayResultCallback(uint64_t intentId, const sptr<AAFwk::SessionInfo> &sessionInfo,
+    bool isDecorator)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "intentId %{public}" PRIu64"", intentId);
+    std::lock_guard<std::mutex> lock(uiWindowMutex_);
+    auto componentId = sessionInfo->uiExtensionComponentId;
+    auto res = uiWindowMap_.find(componentId);
+    if (res != uiWindowMap_.end() && res->second != nullptr) {
+        auto callback = [res](AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
+            return ProcessInsightIntentResult(res->second, result);
+        };
+        InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(intentId, {callback, isDecorator});
+    }
 }
 
 void UIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)

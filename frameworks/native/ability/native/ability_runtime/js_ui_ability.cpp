@@ -31,6 +31,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
@@ -250,6 +251,7 @@ JsUIAbility::~JsUIAbility()
 #ifdef SUPPORT_SCREEN
     jsRuntime_.FreeNativeReference(std::move(jsWindowStageObj_));
 #endif
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
 }
 
 void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
@@ -1312,13 +1314,17 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-
+    RegisterDelayResultCallback(executeParam);
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
         // callback has removed, release in insight intent executor.
         TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+            executeParam->insightIntentId_);
+        return;
     }
+    intentId_ = executeParam->insightIntentId_;
 }
 
 void JsUIAbility::ExecuteInsightIntentPage(const Want &want,
@@ -2297,6 +2303,24 @@ void JsUIAbility::NotifyWindowDestroy()
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AAFwkTag::UIABILITY, "scene return error.");
     }
+}
+
+void JsUIAbility::RegisterDelayResultCallback(const std::shared_ptr<InsightIntentExecuteParam> &executeParam)
+{
+    auto delayResultCallback = [intentId = executeParam->insightIntentId_, token = token_]
+        (AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
+        TAG_LOGE(AAFwkTag::UIABILITY, "delayResultCallback start");
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "ExecuteInsightIntentDone ret : %{public}d", ret);
+        }
+        return ret;
+    };
+    
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
+    InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(
+        executeParam->insightIntentId_, {delayResultCallback, isDecorator});
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

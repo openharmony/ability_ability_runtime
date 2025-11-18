@@ -14,7 +14,7 @@
  */
 
 import window from '@ohos.window';
-import insightIntent from './@ohos.app.ability.insightIntent';
+import insightIntent from '@ohos.app.ability.insightIntent';
 import InsightIntentContext from '@ohos.app.ability.InsightIntentContext';
 import type UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import { RecordData } from '@ohos.base';
