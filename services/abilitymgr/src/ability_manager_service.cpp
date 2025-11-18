@@ -9930,6 +9930,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
 
     auto abilityInfo = abilityRequest.abilityInfo;
     auto startUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
+    abilityRequest.userId = startUserId;
     result = CheckOptExtensionAbility(want, abilityRequest, startUserId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check extensionAbility type error");

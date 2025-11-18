@@ -2786,8 +2786,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         .taskName_ = "OnSchedulerDied",
         .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
     });
-    auto resultTask = [ability = shared_from_this()]() {
-        Want want;
+    auto resultTask = [want = GetWant(), ability = shared_from_this()]() {
         ability->SaveResultToCallers(-1, &want);
         ability->SendResultToCallers(true);
     };
@@ -3598,6 +3597,9 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     grantInfo.userId = GetOwnerMissionUserId();
     grantInfo.flag = want.GetFlags();
     grantInfo.isNotifyCollaborator = isNotifyCollaborator;
+    if (!isNotifyCollaborator) {
+        grantInfo.targetAbilityName = abilityInfo_.name;
+    }
     UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
 }
 
