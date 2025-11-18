@@ -304,6 +304,7 @@ CJEnvironment* CJEnvironment::GetInstance()
     return instance_;
 }
 
+#ifdef __OHOS__
 bool CJEnvironment::RegisterCangjieCallback()
 {
     constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
@@ -349,6 +350,7 @@ void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
     auto dso = DynamicLoadLibrary(&sdk, runtimeLibName, 1);
     return dso;
 }
+#endif
 
 bool CJEnvironment::LoadRuntimeApis()
 {
@@ -713,7 +715,9 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         UnLoadCJLibrary(handle);
         return nullptr;
     }
+#ifdef __OHOS__
     CJEnvironment::RegisterCangjieCallback();
+#endif
     isLoadCJLibrary_ = true;
     return handle;
 }
