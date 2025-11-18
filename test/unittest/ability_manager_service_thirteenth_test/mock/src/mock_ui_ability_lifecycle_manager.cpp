@@ -720,8 +720,8 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     return true;
 }
 
-bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-    uint32_t sceneFlag)
+bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &abilityRequest,
+    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart)
 {
     return true;
 }
