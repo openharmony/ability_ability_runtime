@@ -192,11 +192,9 @@ HWTEST_F(ApplicationDataManagerTest,
 HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_IsUncatchable_001, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "ApplicationDataManager_IsUncatchable_001 start";
-    bool isUncatchable = true;
-    ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
+    ApplicationDataManager::GetInstance().SetIsUncatchable(true);
     EXPECT_TRUE(ApplicationDataManager::GetInstance().GetIsUncatchable());
-    isUncatchable = false;
-    ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
+    ApplicationDataManager::GetInstance().SetIsUncatchable(false);
     EXPECT_TRUE(!ApplicationDataManager::GetInstance().GetIsUncatchable());
     GTEST_LOG_(INFO) << "ApplicationDataManager_IsUncatchable_001 end";
 }
