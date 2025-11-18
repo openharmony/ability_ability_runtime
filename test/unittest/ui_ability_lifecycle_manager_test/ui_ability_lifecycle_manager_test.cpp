@@ -3749,11 +3749,54 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_003, TestSi
     abilityRequest.abilityInfo.deviceId = "100";
     abilityRequest.abilityInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
+    int32_t appIndex = -1;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0400
+ * @tc.desc: GetAbilityRecordsByNameInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.moduleName = "entry";
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
     int32_t appIndex = 0;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0500
+ * @tc.desc: GetAbilityRecordsByNameInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.moduleName = "entry";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
+    int32_t appIndex = -1;
     auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element, appIndex);
     EXPECT_EQ(ret.empty(), false);
 }

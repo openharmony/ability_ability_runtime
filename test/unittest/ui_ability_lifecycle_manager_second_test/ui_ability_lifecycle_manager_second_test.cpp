@@ -148,9 +148,12 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, FindRecordFromSessionMap_001, Test
     AbilityRequest abilityRequest;
     int32_t appIndex = 0;
     const int32_t sessionId = 100;
+    int32_t dlpIndex = 1001;
+    abilityRequest.want.SetParam(DLP_INDEX, dlpIndex);
 
     auto ret = mgr->FindRecordFromSessionMap(abilityRequest);
     EXPECT_EQ(ret, nullptr);
+    abilityRequest.want.RemoveParam(DLP_INDEX);
 
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
     auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
