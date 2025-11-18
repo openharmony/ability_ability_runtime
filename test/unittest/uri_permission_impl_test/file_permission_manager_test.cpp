@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#define private public
 #include "file_permission_manager.h"
+#undef private
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
 
@@ -163,6 +165,57 @@ HWTEST_F(FilePermissionManagerTest, GetPathPolicyInfoFromUri_001, TestSize.Level
         strRes = true;
     }
     EXPECT_EQ(strRes, true);
+}
+
+/*
+ * Feature: CheckDocsUriPermission
+ * Function: CheckDocsUriPermission
+ * SubFunction: NA
+ * FunctionPoints: CheckDocsUriPermission
+ */
+HWTEST_F(FilePermissionManagerTest, CheckDocsUriPermission_001, TestSize.Level1)
+{
+    uint32_t callerTokenId = 0;
+    bool hasFileManagerPerm = false;
+    bool hasSandboxManagerPerm = false;
+    std::string appDataPath = "/storage/Users/currentUser/appdata/test_A.txt";
+    bool ret = FilePermissionManager::CheckDocsUriPermission(callerTokenId, hasFileManagerPerm, hasSandboxManagerPerm,
+        appDataPath);
+    ASSERT_FALSE(ret);
+}
+
+/*
+ * Feature: CheckDocsUriPermission
+ * Function: CheckDocsUriPermission
+ * SubFunction: NA
+ * FunctionPoints: CheckDocsUriPermission
+ */
+HWTEST_F(FilePermissionManagerTest, CheckDocsUriPermission_002, TestSize.Level1)
+{
+    uint32_t callerTokenId = 0;
+    bool hasFileManagerPerm = false;
+    bool hasSandboxManagerPerm = false;
+    std::string appDataPath = "/storage/Users/currentUser/test/test_A.txt";
+    bool ret = FilePermissionManager::CheckDocsUriPermission(callerTokenId, hasFileManagerPerm, hasSandboxManagerPerm,
+        appDataPath);
+    ASSERT_FALSE(ret);
+}
+
+/*
+ * Feature: CheckDocsUriPermission
+ * Function: CheckDocsUriPermission
+ * SubFunction: NA
+ * FunctionPoints: CheckDocsUriPermission
+ */
+HWTEST_F(FilePermissionManagerTest, CheckDocsUriPermission_003, TestSize.Level1)
+{
+    uint32_t callerTokenId = 0;
+    bool hasFileManagerPerm = false;
+    bool hasSandboxManagerPerm = false;
+    std::string appDataPath = "/test/Users/currentUser/test/test_A.txt";
+    bool ret = FilePermissionManager::CheckDocsUriPermission(callerTokenId, hasFileManagerPerm, hasSandboxManagerPerm,
+        appDataPath);
+    ASSERT_FALSE(ret);
 }
 
 }
