@@ -1607,6 +1607,7 @@ ohos_shared_library("service_extension_ani") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/caller_complex:caller_complex_ani",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 

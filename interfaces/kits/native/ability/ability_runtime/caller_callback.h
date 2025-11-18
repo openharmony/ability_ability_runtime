@@ -99,6 +99,7 @@ struct StartAbilityByCallData {
     StartAbilityByCallData() = default;
     StartAbilityByCallData(StartAbilityByCallData &) = delete;
     void operator=(StartAbilityByCallData &) = delete;
+    int32_t err = 0;
     sptr<IRemoteObject> remoteCallee;
     std::mutex mutexlock;
     std::condition_variable condition;
@@ -108,6 +109,7 @@ class CallUtil {
 public:
     static void GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallData> calls,
         std::shared_ptr<CallerCallBack> callerCallBack);
+    static void SetOnReleaseOfCallerCallBack(std::shared_ptr<CallerCallBack> callerCallBack);
     static void WaitForCalleeObj(std::shared_ptr<StartAbilityByCallData> callData);
 };
 } // namespace AbilityRuntime
