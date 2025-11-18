@@ -153,12 +153,13 @@ bool EtsQueryERMSObserver::WrapAtomicServiceStartupRule(ani_env *env,
         TAG_LOGE(AAFwkTag::QUERY_ERMS, "status : %{public}d", status);
         return false;
     }
-    if (!env->Object_SetFieldByName_Boolean(ruleObj, "isOpenAllowed", rule.isOpenAllowed)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set isOpenAllowed failed");
+    if ((status = env->Object_SetPropertyByName_Boolean(ruleObj, "isOpenAllowed", rule.isOpenAllowed)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::QUERY_ERMS, "isOpenAllowed failed status:%{public}d", status);
         return false;
     }
-    if (!env->Object_SetFieldByName_Boolean(ruleObj, "isEmbeddedAllowed", rule.isEmbeddedAllowed)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set isEmbeddedAllowed failed");
+    if ((status = env->Object_SetPropertyByName_Boolean(ruleObj, "isEmbeddedAllowed",
+        rule.isEmbeddedAllowed)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::QUERY_ERMS, "isEmbeddedAllowed failed status:%{public}d", status);
         return false;
     }
     return true;
