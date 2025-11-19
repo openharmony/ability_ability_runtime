@@ -48,7 +48,6 @@ static uint64_t g_lastOOMDumpTime = 0;
 static constexpr const char* const EVENT_XATTR_NAME = "user.appevent";
 static constexpr const char* const OOM_QUOTA_XATTR_NAME = "user.oomdump.quota";
 static constexpr const char* const PROPERTY2C = "user.oomdumptelemetry.quota";
-static constexpr const char* const PROPERTY_RUNNING_ID = "user.running_id";
 static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cache/hiappevent";
 static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
 static constexpr const char* const JS_HEAP_LOGTYPE = "user.event_config.js_heap_logtype";
@@ -371,11 +370,7 @@ void DumpRuntimeHelper::CreateDirDelay(const std::string &path)
             TAG_LOGE(AAFwkTag::APPKIT, "failed to create %{public}s", path.c_str());
             return;
         }
-        if (!SetDirXattr(path, PROPERTY_RUNNING_ID, DFX_GetAppRunningUniqueId())) {
-            TAG_LOGE(AAFwkTag::APPKIT, "failed to SetDirXattr, path: %{public}s", path.c_str());
-            return;
-        }
-        TAG_LOGI(AAFwkTag::APPKIT, "success to SetDirXattr running_id, path: %{public}s", path.c_str());
+        TAG_LOGI(AAFwkTag::APPKIT, "success to create %{public}s", path.c_str());
         }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
 }
 
