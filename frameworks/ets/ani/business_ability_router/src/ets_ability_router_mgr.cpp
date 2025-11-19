@@ -125,7 +125,7 @@ void EtsBusinessAbilityRouterInit(ani_env *env)
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityRouterMgr::QueryBusinessAbilityInfos)},
         ani_native_function {"nativeBusinessAbilityFilterCheck",
-            "L@ohos/app/businessAbilityRouter/businessAbilityRouter/BusinessAbilityFilter;",
+            "L@ohos/app/businessAbilityRouter/businessAbilityRouter/BusinessAbilityFilter;:V",
             reinterpret_cast<void *>(EtsAbilityRouterMgr::BusinessAbilityFilterCheck)},
             
     };
