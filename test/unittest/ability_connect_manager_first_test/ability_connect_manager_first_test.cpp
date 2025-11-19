@@ -1067,5 +1067,48 @@ HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_003, TestSize.Level
     connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
     EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: SetServiceAfterNewCreate
+ */
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_004 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = AbilityConfig::SCENEBOARD_ABILITY_NAME;
+    std::string appName = "hiservcie";
+    std::string bundleName = AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    abilityRequest.restart = true;
+    auto targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRequest.appInfo.accessTokenId = FAKE_TOKENID;
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: SetServiceAfterNewCreate
+ */
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_005 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    abilityRequest.restart = true;
+    auto targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    targetService->SetKeepAliveBundle(true);
+
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_FALSE(targetService->IsLauncherRoot());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
