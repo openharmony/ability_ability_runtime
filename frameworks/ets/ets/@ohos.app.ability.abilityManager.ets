@@ -15,7 +15,7 @@
 
 import AbilityStateData from 'application.AbilityStateData';
 import { ElementName } from 'bundleManager.ElementName'
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 import { AbilityRunningInfo as _AbilityRunningInfo } from 'application.AbilityRunningInfo';
 import { ExtensionRunningInfo } from 'application.ExtensionRunningInfo';
@@ -46,7 +46,7 @@ export default namespace abilityManager {
   export native function nativeNotifyDebugAssertResultCheck(sessionId: string, status: UserStatus): void;
   export native function nativeSetResidentProcessEnabled(bundleName: string, enable: boolean, callback: AsyncCallbackWrapper<void>): void;
   export native function nativeSetResidentProcessEnabledCheck(bundleName: string): void;
-  export native function nativeAcquireShareData(missionId: int, callback: AsyncCallbackWrapper<Record<string, Object>>): void;
+  export native function nativeAcquireShareData(missionId: int, callback: AsyncCallbackWrapper<Record<string, RecordData>>): void;
   export native function nativeUpdateConfiguration(config: Configuration, callback: AsyncCallbackWrapper<void>): void;
   export native function nativeQueryAtomicServiceStartupRule(context: Context, appId: string, callback:AsyncCallbackWrapper<AtomicServiceStartupRule>) : void;
   export native function nativeQueryAtomicServiceStartupRuleCheck(context: Context): void;
@@ -179,20 +179,20 @@ export default namespace abilityManager {
     });
   }
 
-  function acquireShareData(missionId: int, callback: AsyncCallback<Record<string, Object>>): void {
-    let asyncCall = new AsyncCallbackWrapper<Record<string, Object>>(callback);
+  function acquireShareData(missionId: int, callback: AsyncCallback<Record<string, RecordData>>): void {
+    let asyncCall = new AsyncCallbackWrapper<Record<string, RecordData>>(callback);
     taskpool.execute( (): void => {
         abilityManager.nativeAcquireShareData(missionId, asyncCall);
     });
   }
 
-  function acquireShareData(missionId: int): Promise<Record<string, Object>> {
-    return new Promise<Record<string, Object>>((resolve: (data: Record<string, Object>) => void,
+  function acquireShareData(missionId: int): Promise<Record<string, RecordData>> {
+    return new Promise<Record<string, RecordData>>((resolve: (data: Record<string, RecordData>) => void,
       reject: (err: BusinessError) => void): void => {
-      let asyncCall = new AsyncCallbackWrapper<Record<string, Object>>((err: BusinessError | null,
-        data: Record<string, Object> | undefined) => {
+      let asyncCall = new AsyncCallbackWrapper<Record<string, RecordData>>((err: BusinessError | null,
+        data: Record<string, RecordData> | undefined) => {
         if (err == null || err.code == 0) {
-          resolve(data as Record<string, Object>);
+          resolve(data as Record<string, RecordData>);
         } else {
           reject(err);
         }

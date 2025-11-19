@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ import { RecordData } from '@ohos.base';
+
 export default interface UIServiceHostProxy {
-  sendData(data: Record<string, Object>): void;
+  sendData(data: Record<string, RecordData>): void;
 }
 
 export class UIServiceHostProxyImpl implements UIServiceHostProxy {
   nativeServiceHostProxy:long = 0;
-  native nativeSendData(data: Record<string, Object>): void;
-  sendData(data: Record<string, Object>): void {
+  native nativeSendData(data: Record<string, RecordData>): void;
+  sendData(data: Record<string, RecordData>): void {
     this.nativeSendData(data);
   }
 }
