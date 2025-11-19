@@ -32,6 +32,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
+    (void)data;
     FaultData faultData;
     OHOS::AppExecFwk::AppfreezeManager::AppInfo appInfo;
     AppfreezeManager::ParamInfo info;

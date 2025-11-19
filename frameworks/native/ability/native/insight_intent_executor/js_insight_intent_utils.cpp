@@ -80,6 +80,29 @@ napi_value JsInsightIntentUtils::ResolveCbCpp(napi_env env, napi_callback_info i
     return nullptr;
 }
 
+napi_value JsInsightIntentUtils::ResolveExecuteResultWithDelay(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "resolve function");
+    constexpr size_t argc = 1;
+    napi_value argv[argc] = {nullptr};
+    size_t actualArgc = argc;
+    void* data = nullptr;
+    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &actualArgc, argv, nullptr, &data), nullptr);
+
+    auto* callback = static_cast<InsightIntentExecutorAsyncCallback*>(data);
+    napi_value resultJs = argv[0];
+    if (resultJs == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "callback invalid");
+        JsInsightIntentUtils::ReplyFailed(callback);
+        return nullptr;
+    }
+
+    auto resultCpp = JsInsightIntentUtils::GetResultFromJs(env, resultJs);
+    resultCpp->isNeedDelayResult = true;
+    JsInsightIntentUtils::ReplySucceeded(callback, resultCpp);
+    return nullptr;
+}
+
 napi_value JsInsightIntentUtils::RejectCbCpp(napi_env env, napi_callback_info info)
 {
     TAG_LOGW(AAFwkTag::INTENT, "reject function");

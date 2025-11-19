@@ -110,6 +110,16 @@ public:
     void OnNewWant(const Want &want) override;
 
     /**
+     * @brief Prepare user data of local Ability.
+     * @param reason the reason why framework invoke this function
+     * @param wantParams Indicates the user data to be saved.
+     * @return result code defined in abilityConstants
+     */
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason) override;
+
+    /**
      * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an ability and the
      * result is returned. This method is called only on Page abilities. You can start a new ability to perform some
      * calculations and use setResult (int,ohos.aafwk.content.Want) to return the calculation result. Then the system
@@ -136,6 +146,13 @@ public:
      * @param info dump ability info
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
+
+    /**
+     * @brief Callback when the ability is shared.You can override this function to implement your own sharing logic.
+     * @param wantParams Indicates the user data to be saved.
+     * @return the result of OnShare
+     */
+    int32_t OnShare(WantParams &wantParams) override;
 
 #ifdef SUPPORT_SCREEN
 public:
@@ -219,6 +236,13 @@ public:
     bool OnBackPress() override;
 
     /**
+     * @brief Called when ability prepare terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     */
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
+
+    /**
      * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.
      *
      * @param want Want.
@@ -250,7 +274,32 @@ public:
     virtual void ExecuteInsightIntentBackground(const AAFwk::Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+    
+    /**
+     * @brief Called when startAbility request failed.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message, int32_t resultCode = 0) override;
 
+    /**
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
+     */
+    int32_t OnCollaborate(WantParams &wantParams) override;
+
+    /**
+     * @brief Called when startAbility request succeeded.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
@@ -272,6 +321,7 @@ private:
 #endif
 
 private:
+    void OnStartInner(ani_env *env, const Want &want);
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
@@ -281,6 +331,7 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
+    void RemoveShareRouterByBundleType(const Want &want);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_;

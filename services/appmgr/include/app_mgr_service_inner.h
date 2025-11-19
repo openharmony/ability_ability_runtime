@@ -341,7 +341,8 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillApplication");
 
     /**
      * ForceKillApplication, force kill the application.
@@ -387,6 +388,7 @@ public:
         const std::string& reason = "KillApplicationSelf");
 
     int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack, const std::string& reason);
+    int32_t KillProcessByPidForExit(int32_t pid, const std::string &reason);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -1429,6 +1431,10 @@ public:
      * Mark processes of the uid as the app is going to be restarted.
      */
     int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    /**
+     * Mark processes of the pid as the app is going to be restarted.
+     */
+    int32_t SignRestartProcess(int32_t pid);
 
     /**
      * Set application assertion pause state.
@@ -1594,8 +1600,6 @@ public:
      */
     virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
-    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
-
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &isDebug);
 
     std::shared_ptr<AAFwk::TaskHandlerWrap> GetTaskHandler() const
@@ -1615,6 +1619,10 @@ public:
     void SendProcessKillEvent(std::shared_ptr<AppRunningRecord> appRecord, const std::string &defaultReason);
 
     void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
+
+    void AllowScbProcessMoveToBackground();
+
+    int32_t KillChildProcessByPid(int32_t pid);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1713,7 +1721,7 @@ private:
      *
      * @return
      */
-    int32_t StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
+    int32_t StartProcess(const std::string &appName, const std::string &processName, uint64_t startFlags,
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false,  AppExecFwk::PreloadMode preloadMode = AppExecFwk::PreloadMode::PRE_MAKE,
@@ -2159,8 +2167,7 @@ private:
     void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
     bool IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId,
         int32_t appIndex);
-    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid,
-        std::shared_ptr<AAFwk::Want> &want);
+    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid, int32_t appIndex);
     void InsertUninstallOrUpgradeUidSet(int32_t uid);
     void RemoveUninstallOrUpgradeUidSet(int32_t uid);
     bool IsUninstallingOrUpgrading(int32_t uid);

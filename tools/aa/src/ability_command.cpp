@@ -756,7 +756,8 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
     std::string bundleName = argList_[0];
     TAG_LOGI(AAFwkTag::AA_TOOL, "Bundle name %{public}s", bundleName.c_str());
 
-    auto killReason = Reason::REASON_UNKNOWN;
+    auto reason = Reason::REASON_UNKNOWN;
+    std::string inputReason = "aa force-stop";
     pid_t pid = 0;
     for (auto index = INDEX_OFFSET; index < argc_; ++index) {
         TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
@@ -772,23 +773,23 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
             index++;
             if (index <= argc_) {
                 TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
-                std::string inputReason = argv_[index];
-                killReason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
+                inputReason = argv_[index];
+                reason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
             }
         }
     }
 
-    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}d", pid, killReason);
-    if (pid != 0 && killReason != Reason::REASON_UNKNOWN) {
-        ExitReason exitReason = {killReason, "aa force-stop"};
+    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}s", pid, inputReason.c_str());
+    if (pid != 0 && reason != Reason::REASON_UNKNOWN) {
+        ExitReason exitReason = {reason, "aa force-stop"};
         if (AbilityManagerClient::GetInstance()->RecordProcessExitReason(pid, exitReason) != ERR_OK) {
             TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s record reason %{public}d failed",
-                bundleName.c_str(), killReason);
+                bundleName.c_str(), reason);
         }
     }
 
     ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->KillProcess(bundleName);
+    result = AbilityManagerClient::GetInstance()->KillProcess(bundleName, false, 0, inputReason);
     if (result == OHOS::ERR_OK) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_FORCE_STOP_OK.c_str());
         resultReceiver_ = STRING_FORCE_STOP_OK + "\n";

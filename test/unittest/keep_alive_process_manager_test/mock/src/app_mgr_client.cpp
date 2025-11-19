@@ -28,7 +28,8 @@ AppMgrClient::AppMgrClient() {}
 
 AppMgrClient::~AppMgrClient() {}
 
-int32_t AppMgrClient::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
+int32_t AppMgrClient::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string& reason)
 {
     usedKillAppTimes++;
     return ERR_OK;

@@ -1174,5 +1174,44 @@ HWTEST_F(AppMgrProxyTest, GetConfiguration_002, TestSize.Level2)
     int32_t result = appMgrProxy_->GetConfiguration(config, USER_ID);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: SignRestartProcess.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, SignRestartProcess_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SignRestartProcess_001 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &, MessageParcel &reply, MessageOption &) {
+            reply.WriteInt32(ERR_OK);
+            return NO_ERROR;
+        }));
+    auto pid = 100;
+    int32_t result = appMgrProxy_->SignRestartProcess(pid);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: KillProcessByPidForExit_001
+ * @tc.desc: KillProcessByPidForExit.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, KillProcessByPidForExit_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidForExit_001 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &, MessageParcel &reply, MessageOption &) {
+            reply.WriteInt32(ERR_OK);
+            return NO_ERROR;
+        }));
+    auto pid = 100;
+    std::string reason = "AppMgrProxyTest";
+    int32_t result = appMgrProxy_->KillProcessByPidForExit(pid, reason);
+    EXPECT_EQ(result, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

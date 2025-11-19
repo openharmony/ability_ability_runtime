@@ -35,6 +35,8 @@ public:
     {
     }
     virtual ~EtsApplicationContextUtils() = default;
+    static void NativeOnInteropLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_object callback);
+    static void NativeOffInteropLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void RestartApp(ani_env *env, ani_object aniObj, ani_object wantObj);
     static void SetFont(ani_env *env, ani_object aniObj, ani_string font);
     static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
@@ -59,15 +61,19 @@ public:
         ani_object callback);
     static void NativeOffLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
         ani_int callbackId, ani_object callback);
+    static void NativeOffAbilityLifecycleCheck(ani_env *env, ani_object aniObj);
     static void NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_int callbackId, ani_object callback);
+    static void NativeOffEnvironmentCheck(ani_env *env, ani_object aniObj);
     static ani_int NativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
 private:
     ani_int RegisterAbilityLifecycleCallback(ani_env *env, ani_object callback);
     void UnregisterAbilityLifecycleCallback(ani_env *env, int32_t callbackId, ani_object callback);
+    void RegisterInteropAbilityLifecycleCallback(ani_env *env, ani_object callback);
+    void UnregisterInteropAbilityLifecycleCallback(ani_env *env, ani_object callback);
     void OnRestartApp(ani_env *env, ani_object aniObj, ani_object wantObj);
     void OnSetFont(ani_env *env, ani_object aniObj, ani_string font);
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);

@@ -13,8 +13,111 @@
  * limitations under the License.
  */
 
+import { AsyncCallback } from '@ohos.base';
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import { BusinessError } from '@ohos.base';
+import { ConnectOptions } from 'ability.connectOptions';
 import ExtensionContext from 'application.ExtensionContext';
+import Want from '@ohos.app.ability.Want';
+
+class Cleaner {
+  public ptr: long = 0;
+
+  constructor(ptr: long) {
+    this.ptr = ptr;
+  }
+
+  native clean(): void;
+}
+
+export function callback(cleaner: Cleaner): void {
+  cleaner.clean();
+}
+
+let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
+let unregisterToken = new object();
 
 export default class FormExtensionContext extends ExtensionContext {
+  constructor(context: long) {
+    if (this.nativeEtsContext == 0) {
+      this.nativeEtsContext = context;
+    }
+    this.registerCleaner(this.nativeEtsContext);
+  }
 
+  registerCleaner(ptr: long): void {
+    this.cleaner = new Cleaner(ptr);
+    destroyRegister.register(this, this.cleaner!, unregisterToken);
+  }
+
+  unregisterCleaner(): void {
+    destroyRegister.unregister(unregisterToken);
+  }
+
+  nativeEtsContext: long = 0;
+  private cleaner: Cleaner | null = null;
+
+  native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
+
+  native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
+
+  native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
+
+  native nativeCheckWant(want: Want): void;
+
+  native nativeCheckConnectionAbility(): void;
+
+  startAbility(want: Want, callback: AsyncCallback<void>): void {
+    this.nativeCheckWant(want);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbility(want, myCall);
+    });
+  }
+
+  startAbility(want: Want): Promise<void> {
+    this.nativeCheckWant(want);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartAbility(want, myCall);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
+    return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
+    this.nativeCheckConnectionAbility();
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
+    });
+  }
+
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
+    this.nativeCheckConnectionAbility();
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
+      })
+    });
+  }
 }

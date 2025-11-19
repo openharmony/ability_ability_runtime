@@ -57,10 +57,10 @@ void AppStartupTaskMatcherTest::TearDown(void)
 HWTEST_F(AppStartupTaskMatcherTest, MatchRulesStartupTaskMatcher_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MatchRulesStartupTaskMatcher_0100 start";
-    std::unique_ptr<NativeReference> startupJsRef = nullptr;
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
     JsRuntime jsRuntime;
-    JsStartupTask task("task1", jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskInfo startupTaskInfo;
+    startupTaskInfo.name = "task1";
+    JsStartupTask task(jsRuntime, startupTaskInfo, false);
     StartupTaskMatchRules matchRules;
     matchRules.actions.emplace_back("com.example.test.action1");
     task.SetModuleName("entry");
@@ -92,10 +92,10 @@ HWTEST_F(AppStartupTaskMatcherTest, MatchRulesStartupTaskMatcher_0100, Function 
 HWTEST_F(AppStartupTaskMatcherTest, MatchRulesStartupTaskMatcher_0200, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MatchRulesStartupTaskMatcher_0200 start";
-    std::unique_ptr<NativeReference> startupJsRef = nullptr;
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
     JsRuntime jsRuntime;
-    JsStartupTask task("task1", jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskInfo startupTaskInfo;
+    startupTaskInfo.name = "task1";
+    JsStartupTask task(jsRuntime, startupTaskInfo, false);
     StartupTaskMatchRules matchRules;
     matchRules.actions.emplace_back("com.example.test.action1");
     task.SetModuleName("entry");
@@ -117,10 +117,10 @@ HWTEST_F(AppStartupTaskMatcherTest, MatchRulesStartupTaskMatcher_0200, Function 
 HWTEST_F(AppStartupTaskMatcherTest, MatchRulesStartupTaskMatcher_0300, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MatchRulesStartupTaskMatcher_0300 start";
-    std::unique_ptr<NativeReference> startupJsRef = nullptr;
-    std::shared_ptr<NativeReference> contextJsRef = nullptr;
     JsRuntime jsRuntime;
-    JsStartupTask task("task1", jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskInfo startupTaskInfo;
+    startupTaskInfo.name = "task1";
+    JsStartupTask task(jsRuntime, startupTaskInfo, false);
     StartupTaskMatchRules matchRules;
     matchRules.actions.emplace_back("com.example.test.action1");
     matchRules.customization.emplace_back("custom1");

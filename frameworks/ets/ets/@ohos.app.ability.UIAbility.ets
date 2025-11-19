@@ -32,8 +32,8 @@ export interface Caller {
   onRelease(callback: OnReleaseCallback): void;
   onRemoteStateChange(callback: OnRemoteStateChangeCallback): void;
   on(type: string, callback: OnReleaseCallback): void;
-  off(type: string, callback: OnReleaseCallback): void;
-  off(type: string): void;
+  offRelease(callback: OnReleaseCallback): void;
+  offRelease(): void;
 }
 export interface Callee {
   on(method: string, callback: CalleeCallback): void;
@@ -42,25 +42,34 @@ export interface Callee {
 
 export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
+  private prepareToTerminateCallbackPointer: long;
 
   private native nativeOnDestroyCallback(): void;
+  private native nativeOnPrepareToTerminateCallback(prepareTermination: boolean): void;
 
   private callOnDestroy(): boolean {
+    let p = this.onDestroy();
+    if (p instanceof Promise) {
+      p.then(() => this.nativeOnDestroyCallback());
+      return true;
+    }
+    return false;
+  }
+
+  private callOnPrepareToTerminateAsync(): boolean {
     const derivedClassType = AbilityUtils.getClassType(this);
     if (derivedClassType === undefined) {
-      this.onDestroy();
       return false;
     }
     const uiAbilityClassType = AbilityUtils.getClassType(new UIAbility());
     if (uiAbilityClassType === undefined) {
-      this.onDestroy();
       return false;
     }
-    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", uiAbilityClassType)) {
-      this.onDestroyAsync().then(() => this.nativeOnDestroyCallback());
+    if (AbilityUtils.isOverride(derivedClassType, "onPrepareToTerminateAsync", uiAbilityClassType)) {
+      this.onPrepareToTerminateAsync()
+        .then((prepareTermination: boolean) => this.nativeOnPrepareToTerminateCallback(prepareTermination));
       return true;
     }
-    this.onDestroy();
     return false;
   }
 
@@ -84,12 +93,8 @@ export default class UIAbility extends Ability {
   onWindowStageRestore(windowStage: window.WindowStage): void {
   }
 
-  onDestroy(): void {
-  }
-
-  onDestroyAsync(): Promise<void> {
-    return new Promise<void>((resolve: (a: undefined) => void, reject: (err: Error) => void): void => {
-    });
+  onDestroy(): Promise<void> | undefined {
+    return undefined;
   }
 
   onForeground(): void {
@@ -112,5 +117,26 @@ export default class UIAbility extends Ability {
 
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+  }
+
+  onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, Object>): AbilityConstant.OnSaveResult {
+    return AbilityConstant.OnSaveResult.RECOVERY_AGREE;
+  }
+
+  onPrepareToTerminate(): boolean {
+    return false;
+  }
+
+  onPrepareToTerminateAsync(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (a: boolean) => void,
+      reject: (err: Error) => void): boolean => {
+    });
+  }
+
+  onShare(wantParam: Record<string, Object>): void {
+  }
+
+  onCollaborate(wantParams: Record<string, Object>): AbilityConstant.CollaborateResult {
+    return AbilityConstant.CollaborateResult.REJECT;
   }
 }

@@ -44,6 +44,7 @@ ohos_unittest("start_options_utils_test") {
     "mock/src/mock_hidden_start_utils.cpp",
     "mock/src/mock_permission_verification.cpp",
     "mock/src/mock_scene_board_judgement.cpp",
+    "mock/src/mock_start_ability_utils.cpp",
     "mock/src/mock_ui_ability_lifecycle_manager.cpp",
     "start_options_utils_test.cpp",
   ]

@@ -885,9 +885,9 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_001, TestSize.Level
     abilityRecord->abilityInfo_.type = AbilityType::PAGE;
     abilityRecord->SetAbilityState(AbilityState::INACTIVE);
     abilityRecord->connRecordList_.push_back(connection);
-    std::string hostBundName = "bundleName";
+    int32_t hostPid = 10;
 
-    int result = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundName);
+    int result = connectManager->UnloadUIExtensionAbility(abilityRecord, hostPid);
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "UnloadUIExtensionAbility_001 end");
 }
@@ -1095,7 +1095,7 @@ HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_004, TestSize.Level
  */
 HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_005, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_05 start");
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_005 start");
     auto connectManager = std::make_shared<AbilityConnectManager>(0);
     std::string deviceName = "device";
     std::string abilityName = "ServiceAbility";

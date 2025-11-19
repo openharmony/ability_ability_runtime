@@ -39,6 +39,7 @@ const std::string PARAM_FREEINSTALL_UID = "ohos.freeinstall.params.callingUid";
 constexpr uint32_t IDMS_CALLBACK_ON_FREE_INSTALL_DONE = 0;
 constexpr uint32_t UPDATE_ATOMOIC_SERVICE_TASK_TIMER = 24 * 60 * 60 * 1000; /* 24h */
 constexpr const char* KEY_IS_APP_RUNNING = "com.ohos.param.isAppRunning";
+constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 
 void HandleDMSCallback(int32_t resultCode, const FreeInstallInfo &info)
 {
@@ -126,8 +127,10 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), isAsync, recordId);
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
-    info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
-
+    if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)) {
+        TAG_LOGD(AAFwkTag::FREE_INSTALL, "not foundation call, callingUid=%{public}d", IPCSkeleton::GetCallingUid());
+        info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
+    }
     int result = SetAppRunningState(info.want);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "setAppRunningState failed");

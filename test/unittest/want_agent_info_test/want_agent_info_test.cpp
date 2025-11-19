@@ -182,10 +182,46 @@ HWTEST_F(WantAgentInfoTest, WantAgentInfo_0300, Function | MediumTest | Level1)
 
 /*
  * @tc.number    : WantAgentInfo_0400
+ * @tc.name      : WantAgentInfo Constructors
+ * @tc.desc      : 1.Constructors
+ */
+HWTEST_F(WantAgentInfoTest, WantAgentInfo_0400, Function | MediumTest | Level1)
+{
+    int requestCode = 11;
+    int32_t appIndex = 0;
+    WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
+    std::vector<WantAgentConstant::Flags> flags;
+    WantAgentConstant::Flags flag = WantAgentConstant::Flags::CONSTANT_FLAG;
+    flags.emplace_back(flag);
+    std::vector<std::shared_ptr<Want>> wants;
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    wants.emplace_back(want);
+    std::shared_ptr<WantParams> extraInfo = std::make_shared<WantParams>();
+    bool value = true;
+    std::string key = "key";
+    extraInfo->SetParam(key, Boolean::Box(value));
+    std::shared_ptr<WantAgentInfo> wantAgentInfo =
+        std::make_shared<WantAgentInfo>(requestCode, appIndex, operationType, flags, wants, extraInfo);
+    EXPECT_EQ(wantAgentInfo->GetRequestCode(), requestCode);
+    EXPECT_EQ(wantAgentInfo->GetAppIndex(), appIndex);
+    EXPECT_EQ(wantAgentInfo->GetOperationType(), operationType);
+    EXPECT_EQ(wantAgentInfo->GetFlags().at(0), flag);
+    EXPECT_NE(wantAgentInfo->GetWants().at(0), want);
+    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetBundleName(), want->GetElement().GetBundleName());
+    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetAbilityName(), want->GetElement().GetAbilityName());
+    EXPECT_NE(wantAgentInfo->GetExtraInfo(), extraInfo);
+    EXPECT_EQ(Boolean::Unbox(IBoolean::Query(wantAgentInfo->GetExtraInfo()->GetParam(key))),
+        Boolean::Unbox(IBoolean::Query(extraInfo->GetParam(key))));
+}
+
+/*
+ * @tc.number    : WantAgentInfo_0500
  * @tc.name      : WantAgentInfo GetRequestCode
  * @tc.desc      : 1.GetRequestCode
  */
-HWTEST_F(WantAgentInfoTest, WantAgentInfo_0400, Function | MediumTest | Level1)
+HWTEST_F(WantAgentInfoTest, WantAgentInfo_0500, Function | MediumTest | Level1)
 {
     int requestCode = 10;
     WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
@@ -207,11 +243,11 @@ HWTEST_F(WantAgentInfoTest, WantAgentInfo_0400, Function | MediumTest | Level1)
 }
 
 /*
- * @tc.number    : WantAgentInfo_0500
+ * @tc.number    : WantAgentInfo_0600
  * @tc.name      : WantAgentInfo GetOperationType
  * @tc.desc      : 1.GetOperationType
  */
-HWTEST_F(WantAgentInfoTest, WantAgentInfo_0500, Function | MediumTest | Level1)
+HWTEST_F(WantAgentInfoTest, WantAgentInfo_0600, Function | MediumTest | Level1)
 {
     int requestCode = 10;
     WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
@@ -233,35 +269,9 @@ HWTEST_F(WantAgentInfoTest, WantAgentInfo_0500, Function | MediumTest | Level1)
 }
 
 /*
- * @tc.number    : WantAgentInfo_0600
+ * @tc.number    : WantAgentInfo_0700
  * @tc.name      : WantAgentInfo GetFlags
  * @tc.desc      : 1.GetFlags
- */
-HWTEST_F(WantAgentInfoTest, WantAgentInfo_0600, Function | MediumTest | Level1)
-{
-    int requestCode = 10;
-    WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
-    std::vector<WantAgentConstant::Flags> flags;
-    WantAgentConstant::Flags flag = WantAgentConstant::Flags::CONSTANT_FLAG;
-    flags.emplace_back(flag);
-    std::vector<std::shared_ptr<Want>> wants;
-    std::shared_ptr<Want> want = std::make_shared<Want>();
-    ElementName element("device", "bundleName", "abilityName");
-    want->SetElement(element);
-    wants.emplace_back(want);
-    std::shared_ptr<WantParams> extraInfo = std::make_shared<WantParams>();
-    bool value = true;
-    std::string key = "key";
-    extraInfo->SetParam(key, Boolean::Box(value));
-    std::shared_ptr<WantAgentInfo> wantAgentInfo =
-        std::make_shared<WantAgentInfo>(requestCode, operationType, flags, wants, extraInfo);
-    EXPECT_EQ(wantAgentInfo->GetFlags().at(0), flag);
-}
-
-/*
- * @tc.number    : WantAgentInfo_0700
- * @tc.name      : WantAgentInfo GetWants
- * @tc.desc      : 1.GetWants
  */
 HWTEST_F(WantAgentInfoTest, WantAgentInfo_0700, Function | MediumTest | Level1)
 {
@@ -281,8 +291,7 @@ HWTEST_F(WantAgentInfoTest, WantAgentInfo_0700, Function | MediumTest | Level1)
     extraInfo->SetParam(key, Boolean::Box(value));
     std::shared_ptr<WantAgentInfo> wantAgentInfo =
         std::make_shared<WantAgentInfo>(requestCode, operationType, flags, wants, extraInfo);
-    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetBundleName(), want->GetElement().GetBundleName());
-    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetAbilityName(), want->GetElement().GetAbilityName());
+    EXPECT_EQ(wantAgentInfo->GetFlags().at(0), flag);
 }
 
 /*
@@ -308,8 +317,62 @@ HWTEST_F(WantAgentInfoTest, WantAgentInfo_0800, Function | MediumTest | Level1)
     extraInfo->SetParam(key, Boolean::Box(value));
     std::shared_ptr<WantAgentInfo> wantAgentInfo =
         std::make_shared<WantAgentInfo>(requestCode, operationType, flags, wants, extraInfo);
+    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetBundleName(), want->GetElement().GetBundleName());
+    EXPECT_EQ(wantAgentInfo->GetWants().at(0)->GetElement().GetAbilityName(), want->GetElement().GetAbilityName());
+}
+
+/*
+ * @tc.number    : WantAgentInfo_0900
+ * @tc.name      : WantAgentInfo GetWants
+ * @tc.desc      : 1.GetWants
+ */
+HWTEST_F(WantAgentInfoTest, WantAgentInfo_0900, Function | MediumTest | Level1)
+{
+    int requestCode = 10;
+    WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
+    std::vector<WantAgentConstant::Flags> flags;
+    WantAgentConstant::Flags flag = WantAgentConstant::Flags::CONSTANT_FLAG;
+    flags.emplace_back(flag);
+    std::vector<std::shared_ptr<Want>> wants;
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    wants.emplace_back(want);
+    std::shared_ptr<WantParams> extraInfo = std::make_shared<WantParams>();
+    bool value = true;
+    std::string key = "key";
+    extraInfo->SetParam(key, Boolean::Box(value));
+    std::shared_ptr<WantAgentInfo> wantAgentInfo =
+        std::make_shared<WantAgentInfo>(requestCode, operationType, flags, wants, extraInfo);
     EXPECT_NE(wantAgentInfo->GetExtraInfo(), extraInfo);
     EXPECT_EQ(Boolean::Unbox(IBoolean::Query(wantAgentInfo->GetExtraInfo()->GetParam(key))),
         Boolean::Unbox(IBoolean::Query(extraInfo->GetParam(key))));
+}
+
+/*
+ * @tc.number    : WantAgentInfo_1000
+ * @tc.name      : WantAgentInfo GetAppIndex
+ * @tc.desc      : 1.GetRequestCode
+ */
+HWTEST_F(WantAgentInfoTest, WantAgentInfo_1000, Function | MediumTest | Level1)
+{
+    int requestCode = 10;
+    int32_t appIndex = 1;
+    WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::START_ABILITY;
+    std::vector<WantAgentConstant::Flags> flags;
+    WantAgentConstant::Flags flag = WantAgentConstant::Flags::CONSTANT_FLAG;
+    flags.emplace_back(flag);
+    std::vector<std::shared_ptr<Want>> wants;
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    wants.emplace_back(want);
+    std::shared_ptr<WantParams> extraInfo = std::make_shared<WantParams>();
+    bool value = true;
+    std::string key = "key";
+    extraInfo->SetParam(key, Boolean::Box(value));
+    std::shared_ptr<WantAgentInfo> wantAgentInfo =
+        std::make_shared<WantAgentInfo>(requestCode, appIndex, operationType, flags, wants, extraInfo);
+    EXPECT_EQ(wantAgentInfo->GetAppIndex(), appIndex);
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent

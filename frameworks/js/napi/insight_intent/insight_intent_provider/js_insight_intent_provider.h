@@ -13,27 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_OHOS_ABILITY_RUNTIME_NATIVE_MODULE_MANAGER_H
-#define MOCK_OHOS_ABILITY_RUNTIME_NATIVE_MODULE_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_PROVIDER_H
+#define OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_PROVIDER_H
 
-#include <cstdint>
-#include <map>
-#include <mutex>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-#include <string>
-#include <pthread.h>
+#include "native_engine/native_engine.h"
 
-struct NativeModule {
-};
- 
-class NativeModuleManager {
-public:
-    static NativeModuleManager* GetInstance();
-    NativeModule* LoadNativeModule(const char* moduleName, const char* path, bool isAppModule,
-        std::string& errInfo, bool internal = false, const char* relativePath = "");
-};
-
-#endif
- 
+namespace OHOS {
+namespace AbilityRuntime {
+napi_value CreateJsInsightIntentProvider(napi_env env, napi_value exportObj);
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_PROVIDER_H

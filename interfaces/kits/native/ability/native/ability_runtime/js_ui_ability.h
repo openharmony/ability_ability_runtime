@@ -359,10 +359,12 @@ public:
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
     /**
-     * @brief Called when distributed system trying to collaborate remote ability.
-     * @param want want with collaborative info.
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
      */
-    void HandleCollaboration(const Want &want) override;
+    int32_t OnCollaborate(WantParams &wantParams) override;
 
     /**
      * @brief Called when startAbility request failed.
@@ -395,8 +397,8 @@ private:
     inline bool GetInsightIntentExecutorInfo(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
-    int32_t OnCollaborate(WantParams &wantParams);
     void SetInsightIntentParam(const Want &want, bool coldStart);
+    void RegisterDelayResultCallback(const std::shared_ptr<InsightIntentExecuteParam> &executeParam);
 
     std::shared_ptr<NativeReference> jsWindowStageObj_;
     int32_t windowMode_ = 0;

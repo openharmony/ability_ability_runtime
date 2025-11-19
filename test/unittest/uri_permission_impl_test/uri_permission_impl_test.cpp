@@ -1358,6 +1358,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_011, TestSize.Level
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     StorageManager::StorageManagerServiceMock::isZero = false;
     int32_t funcResult = -1;
+    
     upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, -1, funcResult);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(funcResult, INNER_ERR);

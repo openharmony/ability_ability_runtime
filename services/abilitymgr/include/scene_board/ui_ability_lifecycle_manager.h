@@ -72,6 +72,7 @@ public:
     virtual ~UIAbilityLifecycleManager() = default;
 
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey, bool isAppRecovery = false);
+    void SignRestartProcess(int32_t pid);
 
     /**
      * StartUIAbility with request.
@@ -433,7 +434,8 @@ public:
      * @param element The element name to search for
      * @return Vector of matching ability records
      */
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 
     /**
      * @brief Get ability record by token
@@ -674,6 +676,12 @@ private:
      */
     void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
         AbilityState state = AbilityState::INITIAL);
+    
+     /**
+     * @brief Handle background for prelaunch
+     * @param abilityRecordabilityRecord The ability record that prelaunch
+     */
+    void HandlePrelaunchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * @brief Handle foreground timeout for ability
@@ -722,12 +730,6 @@ private:
      * @param abilityRecord The ability record to terminate
      */
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
-    /**
-     * @brief Complete terminate operation with lock
-     * @param abilityRecord The ability record to terminate
-     */
-    void CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * @brief Check if token is contained in internal storage
@@ -851,7 +853,8 @@ private:
      * @param element The element name
      * @return Vector of matching ability records
      */
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element,
+        int32_t appIndex);
 
     /**
      * @brief Handle foreground collaboration
@@ -1041,6 +1044,8 @@ private:
      */
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
+    std::shared_ptr<AbilityRecord> HandleAbilityRecordReused(std::shared_ptr<AbilityRecord> uiAbilityRecord,
+        SessionInfo &sessionInfo, AbilityRequest &abilityRequest);
 
     /**
      * @brief Find ability record from temporary map
@@ -1104,7 +1109,8 @@ private:
      * @param sceneFlag The scene flag
      * @return true if handled, false otherwise
      */
-    bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
+    bool HandleStartSpecifiedCold(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        uint32_t sceneFlag, bool isRestart);
 
     /**
      * @brief Handle cold accept want completion

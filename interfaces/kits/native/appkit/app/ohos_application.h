@@ -240,6 +240,8 @@ public:
 
     void CleanEmptyAbilityStage();
 
+    bool UpdateETSRuntime(AbilityRuntime::Runtime::Options &option);
+
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif

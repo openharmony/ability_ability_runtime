@@ -352,7 +352,7 @@ bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focuse
     return true;
 }
 
-bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
+bool AppRunningManager::IsApplicationUnfocused(const int32_t uid)
 {
     return true;
 }
@@ -498,11 +498,6 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
     return true;
 }
 
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    AAFwk::MyStatus::GetInstance().updateInstanceKeyBySpecifiedIdCalled_ = true;
-}
-
 int32_t AppRunningManager::RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId)
 {
     AAFwk::MyStatus::GetInstance().removeUIExtensionBindItemByIdCalled_ = true;
@@ -554,6 +549,16 @@ bool AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(
     const std::string &appName, const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
 {
     return false;
+}
+
+bool AppRunningManager::ProcessExitByPid(int32_t, const KillProcessConfig &)
+{
+    return AAFwk::MyStatus::GetInstance().exitByPidstatus_;
+}
+
+int32_t AppRunningManager::SignRestartProcess(int32_t)
+{
+    return AAFwk::MyStatus::GetInstance().signRestartProcessStatus_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

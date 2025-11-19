@@ -3282,7 +3282,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_003, TestSize
     abilityRecord_->currentState_ = AbilityState::FOREGROUND;
     abilityRecord_->pid_ = pid_;
     abilityRecord_->SetFrozenByPreload(true);
-    abilityRecord_->ProcessForegroundAbility(tokenId);
+    ForegroundOptions options;
+    options.targetGrantBundleName = "com.ohos.demo";
+    abilityRecord_->ProcessForegroundAbility(tokenId, options);
     EXPECT_EQ(abilityRecord_->IsFrozenByPreload(), false);
 }
 
@@ -3336,6 +3338,21 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_002, Tes
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
  */
+HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_003, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveUIExtensionLaunchTimestamp
+ * SubFunction: RemoveUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
+ */
 HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
@@ -3349,6 +3366,205 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, 
     EXPECT_NE(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
     abilityRecord_->RemoveUIExtensionLaunchTimestamp();
     EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetConnectionReported/IsConnectionReported
+ * SubFunction: SetConnectionReported/IsConnectionReported
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetConnectionReported/IsConnectionReported
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectionReported_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_EQ(abilityRecord_->IsConnectionReported(), false);
+    abilityRecord_->SetConnectionReported(true);
+    EXPECT_EQ(abilityRecord_->IsConnectionReported(), true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ReportAbilityConnectionRelations
+ * SubFunction: ReportAbilityConnectionRelations
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ReportAbilityConnectionRelations
+ */
+HWTEST_F(AbilityRecordTest, ReportAbilityConnectionRelations_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord_->abilityInfo_.applicationInfo.name = "app";
+    int32_t requestCode = 0;
+    //caller is null
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->callerList_.push_back(nullptr);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
+    //caller is not null :0,0,0,0
+    requestCode = 1;
+    abilityRecord_->SetConnectionReported(false);
+    auto callerRecord_1 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    abilityRecord_->callerList_.push_back(callerRecord_1);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+
+    //caller is not null :1,0,0,0
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->SetPid(1);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+    
+    //caller is not null :1,1,0,0
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(1);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+    //caller is not null :1,1,1,0
+    requestCode = 2;
+    abilityRecord_->SetConnectionReported(false);
+    callerAbilityRecord->SetPid(1);
+    auto callerRecord_2 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    EXPECT_NE(callerRecord_1, nullptr);
+    abilityRecord_->callerList_.push_back(callerRecord_2);
+    //caller is not null :1,1,1,1
+    requestCode = 3;
+    abilityRecord_->SetConnectionReported(false);
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_3 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    abilityRecord_->callerList_.push_back(callerRecord_3);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), true);
+
+    //caller is not null :1,0,1,0
+    requestCode = 4;
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(0);
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(0);
+    auto callerRecord_4 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    abilityRecord_->callerList_.push_back(callerRecord_4);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ReportAbilityConnectionRelations
+ * SubFunction: ReportAbilityConnectionRelations
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ReportAbilityConnectionRelations
+ */
+HWTEST_F(AbilityRecordTest, ReportAbilityConnectionRelations_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord_->abilityInfo_.applicationInfo.name = "app";
+    int32_t requestCode = 0;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
+    //caller is not null :1,0,1,1
+    requestCode = 5;
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(0);
+    callerAbilityRecord->SetPid(1);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_5 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    abilityRecord_->callerList_.push_back(callerRecord_5);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+
+    //caller is not null :1,1,0,1
+    requestCode = 6;
+    abilityRecord_->SetConnectionReported(false);
+    abilityRecord_->SetPid(1);
+    abilityRecord_->SetUid(1);
+    callerAbilityRecord->SetPid(0);
+    callerAbilityRecord->SetUid(1);
+    auto callerRecord_6 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    abilityRecord_->callerList_.push_back(callerRecord_6);
+    EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetPromotePriority
+ * SubFunction: SetPromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetPromotePriority
+ */
+HWTEST_F(AbilityRecordTest, SetPromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetPromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    abilityRecord_->SetPromotePriority(true);
+    EXPECT_NE(abilityRecord_->uiAbilityProperty_, nullptr);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->promotePriority);
+
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    abilityRecord_->SetPromotePriority(false);
+    EXPECT_NE(abilityRecord_->uiAbilityProperty_, nullptr);
+    EXPECT_FALSE(abilityRecord_->uiAbilityProperty_->promotePriority);
+    GTEST_LOG_(INFO) << "SetPromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetPromotePriority
+ * SubFunction: GetPromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPromotePriority
+ */
+HWTEST_F(AbilityRecordTest, ShouldPromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ShouldPromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->pid_ = -1;
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+    GTEST_LOG_(INFO) << "ShouldPromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PromotePriority
+ * SubFunction: PromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PromotePriority
+ */
+HWTEST_F(AbilityRecordTest, PromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->isStartedByCall_ = true;
+    EXPECT_TRUE(abilityRecord_->IsStartedByCall());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->callerList_.clear();
+    auto callerInfo = std::make_shared<CallerRecord>(100, abilityRecord_);
+    abilityRecord_->callerList_.emplace_back(callerInfo);
+    EXPECT_NE(abilityRecord_->GetCallerInfo(), nullptr);
+
+    abilityRecord_->PromotePriority();
+    GTEST_LOG_(INFO) << "PromotePriority_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

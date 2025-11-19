@@ -26,14 +26,11 @@ namespace OHOS {
 namespace AAFwk {
 class AbilityEventUtil {
 public:
-
-    AbilityEventUtil() = default;
-
-    void HandleModuleInfoUpdated(const std::string &bundleName, const int uid, const std::string &moduleName,
+    static void HandleModuleInfoUpdated(const std::string &bundleName, const int uid, const std::string &moduleName,
         bool isPlugin);
-    void SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
+    static void SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
         bool isSystemError = false);
-    void SendKillProcessWithReasonEvent(int32_t errCode, const std::string &errMsg, EventInfo &eventInfo);
+    static void SendKillProcessWithReasonEvent(int32_t errCode, const std::string &errMsg, EventInfo &eventInfo);
 };
 
 } // namespace AAFwk

@@ -141,7 +141,7 @@ public:
      */
     int QueryPreLoadUIExtensionRecordInner(const AppExecFwk::ElementName &element,
                                            const std::string &moduleName,
-                                           const std::string &hostBundleName,
+                                           const int32_t hostPid,
                                            int32_t &recordNum);
 
     /**
@@ -151,7 +151,7 @@ public:
      * @param hostBundleName, the caller application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * ClearPreloadUIExtensionRecord, clear preload uiextension record.
@@ -375,6 +375,7 @@ public:
     void CloseAssertDialog(const std::string &assertSessionId);
 
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    void SignRestartProcess(int32_t pid);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
     void UninstallApp(const std::string &bundleName, int32_t uid);

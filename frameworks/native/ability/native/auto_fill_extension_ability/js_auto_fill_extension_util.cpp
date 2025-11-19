@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,8 @@ constexpr const char *RECT_POSITION_TOP = "top";
 constexpr const char *RECT_WIDTH = "width";
 constexpr const char *RECT_HEIGHT = "height";
 constexpr uint32_t PAGE_NODE_COUNT_MAX = 100;
+constexpr const char *WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY = "ability.want.params.AutoFillTriggerType";
+constexpr const char *TRIGGER_TYPE = "triggerType";
 } // namespace
 
 napi_value JsAutoFillExtensionUtil::WrapViewData(const napi_env env, const AbilityBase::ViewData &viewData)
@@ -254,6 +256,20 @@ void JsAutoFillExtensionUtil::UnwrapRectData(
     rect.height = position;
 }
 
+void JsAutoFillExtensionUtil::SetTriggerTypeParam(const napi_env env, napi_value jsObject, const AAFwk::Want &want)
+{
+    if (env == nullptr || jsObject == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "env or jsObject is null");
+        return;
+    }
+    if (want.HasParameter(WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY)) {
+        auto type = want.GetIntParam(WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY, -1);
+        TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Auto fill Trigger type: %{public}d", type);
+        napi_value jsValue = AppExecFwk::WrapInt32ToJS(env, type);
+        SetPropertyValueByPropertyName(env, jsObject, TRIGGER_TYPE, jsValue);
+    }
+}
+
 napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, const napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
@@ -263,7 +279,6 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null jsObject");
         return nullptr;
     }
-
     if (want.HasParameter(WANT_PARAMS_AUTO_FILL_TYPE_KEY)) {
         auto type = want.GetIntParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, -1);
         TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Auto fill request type: %{public}d", type);
@@ -271,27 +286,23 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
         napi_value jsValue = AppExecFwk::WrapInt32ToJS(env, type);
         SetPropertyValueByPropertyName(env, jsObject, VIEW_DATA_TYPE, jsValue);
     }
-
     if (want.HasParameter(WANT_PARAMS_VIEW_DATA)) {
         std::string viewDataString = want.GetStringParam(WANT_PARAMS_VIEW_DATA);
         if (viewDataString.empty()) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty view data");
             return jsObject;
         }
-
         AbilityBase::ViewData viewData;
         viewData.FromJsonString(viewDataString);
         napi_value viewDataValue = WrapViewData(env, viewData);
         SetPropertyValueByPropertyName(env, jsObject, VIEW_DATA_VIEW_DATA, viewDataValue);
     }
-
     if (want.HasParameter(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY)) {
         auto isPopup = want.GetBoolParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
 
         napi_value jsValue = AppExecFwk::WrapBoolToJS(env, isPopup);
         SetPropertyValueByPropertyName(env, jsObject, WANT_PARAMS_IS_POPUP, jsValue);
     }
-
     if (want.HasParameter(WANT_PARAMS_CUSTOM_DATA)) {
         std::string customDataString = want.GetStringParam(WANT_PARAMS_CUSTOM_DATA);
         if (customDataString.empty()) {
@@ -307,6 +318,7 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
         customValue = WrapCustomData(env, param);
         SetPropertyValueByPropertyName(env, jsObject, CUSTOM_DATA_CUSTOM_DATA, customValue);
     }
+    SetTriggerTypeParam(env, jsObject, want);
     return jsObject;
 }
 

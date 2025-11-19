@@ -279,7 +279,7 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-pid_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid() const
 {
     return pid_;
 }
@@ -2023,6 +2023,24 @@ void AbilityRecord::AddUIExtensionLaunchTimestamp()
 }
 
 void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
+{
+}
+
+bool AbilityRecord::ReportAbilityConnectionRelations()
+{
+    return true;
+}
+
+void AbilityRecord::SetPromotePriority(bool promotePriority)
+{
+}
+
+bool AbilityRecord::GetPromotePriority()
+{
+    return false;
+}
+
+void AbilityRecord::PromotePriority()
 {
 }
 }  // namespace AAFwk

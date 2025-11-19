@@ -1137,5 +1137,32 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerDeleteInvalidRecord_001, Te
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
     EXPECT_EQ(rec, nullptr);
 }
+
+/**
+ * @tc.name: AbilityCacheManagerSignRestartProcess_001
+ * @tc.desc: Put a single ability record into cache and sign restart app flag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartProcess_001, TestSize.Level2)
+{
+    AbilityCacheManager abilityRecMgr;
+    auto pid = 100;
+    abilityRecMgr.devRecLru_.push_back(nullptr);
+    abilityRecMgr.SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecMgr.devRecLru_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecMgr.devRecLru_.push_back(abilityRecord);
+    abilityRecMgr.SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecord->GetRestartAppFlag());
+
+    abilityRecord->SetPid(pid);
+    abilityRecMgr.SignRestartProcess(pid);
+    EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

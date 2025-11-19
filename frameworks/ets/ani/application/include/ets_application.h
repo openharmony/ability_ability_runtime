@@ -24,9 +24,18 @@ class EtsApplication {
 public:
     static void CreateModuleContext(ani_env *env,
         ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback);
+    static void CreateModuleContextCheck(ani_env *env,
+        ani_object contextObj, ani_string moduleName, ani_object bundleName);
     static void CreateBundleContext(ani_env *env,
         ani_object contextObj, ani_string bundleName, ani_object callback);
+    static void CreateBundleContextCheck(ani_env *env,
+        ani_object contextObj, ani_string bundleName);
+    static void CreatePluginModuleContext(ani_env *env,
+        ani_object contextObj, ani_string pluginBundleName, ani_string pluginModuleName, ani_object callback);
+    static void CreatePluginModuleContextCheck(ani_env *env,
+        ani_object contextObj, ani_string pluginBundleName, ani_string pluginModuleName);
     static ani_object GetApplicationContext(ani_env *env);
+    static ani_object GetApplicationContextInstance(ani_env *env);
     static ani_enum_item GetAppPreloadType(ani_env *env);
 };
 void ApplicationInit(ani_env *env);

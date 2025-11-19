@@ -365,7 +365,8 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
     return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, isPlugin);
 }
 
-int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
+int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string &reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
         bundleName.c_str(), clearPageStack);
@@ -373,7 +374,7 @@ int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool cle
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack, appIndex);
+    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack, appIndex, reason);
 }
 
 int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,

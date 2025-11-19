@@ -61,6 +61,7 @@ ohos_unittest("js_insight_intent_func_second_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 

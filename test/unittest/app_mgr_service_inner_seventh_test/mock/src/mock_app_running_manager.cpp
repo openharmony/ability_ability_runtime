@@ -343,7 +343,7 @@ bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focuse
     return true;
 }
 
-bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
+bool AppRunningManager::IsApplicationUnfocused(const int32_t uid)
 {
     return true;
 }
@@ -476,10 +476,6 @@ int32_t AppRunningManager::CheckIsKiaProcess(pid_t pid, bool &isKia)
 bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     return true;
-}
-
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

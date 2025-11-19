@@ -17,11 +17,19 @@
 
 #include "ability_manager_client.h"
 #include "ani.h"
+#include "ani_common_start_options.h"
 #include "ani_common_util.h"
+#include "ani_common_want.h"
 #include "ets_error_utils.h"
 #include "ets_mission_info_utils.h"
+#include "ets_mission_listener.h"
 #include "hilog_tag_wrapper.h"
+#include "mission_snapshot.h"
 #include "permission_constants.h"
+#include "start_options.h"
+#ifdef SUPPORT_GRAPHICS
+#include "pixel_map_taihe_ani.h"
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -29,6 +37,8 @@ using namespace OHOS::AppExecFwk;
 using AbilityManagerClient = AAFwk::AbilityManagerClient;
 namespace {
 constexpr const char* ETS_MISSION_MANAGER_NAME = "L@ohos/app/ability/missionManager/missionManager;";
+constexpr const char* ON_OFF_TYPE = "mission";
+constexpr const char* ON_OFF_TYPE_SYNC = "missionEvent";
 }
 class EtsMissionManager {
 public:
@@ -49,6 +59,73 @@ public:
     {
         instance.OnGetMissionInfo(env, deviceId, missionId, callback);
     }
+
+     static void GetMissionInfos(ani_env *env, ani_string deviceId, ani_int numMax, ani_object callback)
+    {
+        instance.OnGetMissionInfos(env, deviceId, numMax, callback);
+    }
+
+    static void ClearMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        instance.OnClearMission(env, missionId, callback);
+    }
+
+    static void LockMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        instance.OnLockMission(env, missionId, callback);
+    }
+
+    static void UnlockMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        instance.OnUnlockMission(env, missionId, callback);
+    }
+
+    static void GetMissionSnapShot(ani_env *env, ani_string deviceId, ani_int missionId, ani_object callback)
+    {
+        instance.OnGetMissionSnapShot(env, deviceId, missionId, callback, false);
+    }
+
+    static void GetLowResolutionMissionSnapShot(ani_env *env,
+        ani_string deviceId, ani_int missionId, ani_object callback)
+    {
+        instance.OnGetMissionSnapShot(env, deviceId, missionId, callback, true);
+    }
+
+    static void ArrayLengthCheck(ani_env *env, ani_object missionIds)
+    {
+        instance.OnArrayLengthCheck(env, missionIds);
+    }
+
+    static void MoveMissionsToBackground(ani_env *env, ani_object missionIds, ani_object callback)
+    {
+        instance.OnMoveMissionsToBackground(env, missionIds, callback);
+    }
+
+    static void MoveMissionsToForeground(ani_env *env, ani_object missionIds, ani_int topMission, ani_object callback)
+    {
+        instance.OnMoveMissionsToForeground(env, missionIds, topMission, callback);
+    }
+
+    static void MoveMissionToFront(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        instance.OnMoveMissionToFront(env, missionId, nullptr, callback);
+    }
+
+    static void MoveMissionToFrontWithOptions(ani_env *env, ani_int missionId, ani_object options, ani_object callback)
+    {
+        instance.OnMoveMissionToFront(env, missionId, options, callback);
+    }
+
+    static ani_long On(ani_env *env, ani_string type, ani_object listener)
+    {
+        return instance.OnOn(env, type, listener);
+    }
+
+    static void Off(ani_env *env, ani_string type, ani_long listenerId, ani_object callback)
+    {
+        instance.OnOff(env, type, listenerId, callback);
+    }
+
 private:
     EtsMissionManager() = default;
     ~EtsMissionManager() = default;
@@ -98,6 +175,482 @@ private:
         auto aniMissionInfo = CreateEtsMissionInfo(env, missionInfo);
         AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), aniMissionInfo);
     }
+
+    void OnGetMissionInfos(ani_env *env, ani_string deviceId, ani_int numMax, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnGetMissionInfos Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::string stdDeviceId = "";
+        if (!GetStdString(env, deviceId, stdDeviceId)) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param deviceId failed, must be a string."), nullptr);
+            return;
+        }
+        std::vector<AAFwk::MissionInfo> missionInfos;
+        auto ret = AbilityManagerClient::GetInstance()->GetMissionInfos(stdDeviceId,
+            numMax, missionInfos);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetMissionInfos is failed. ret = %{public}d.", ret);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
+                ret, PermissionConstants::PERMISSION_MANAGE_MISSION), nullptr);
+            return;
+        }
+        auto aniMissionInfos = CreateEtsMissionInfos(env, missionInfos);
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), aniMissionInfos);
+    }
+
+    void OnClearMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnClearMission Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+
+        auto ret = AbilityManagerClient::GetInstance()->CleanMission(missionId);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "OnClearMission is failed. ret = %{public}d.", ret);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
+                ret, PermissionConstants::PERMISSION_MANAGE_MISSION), nullptr);
+            return;
+        }
+
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+    }
+    
+    void OnLockMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnLockMission Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        auto ret = AbilityManagerClient::GetInstance()->LockMissionForCleanup(missionId);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "OnLockMission is failed. ret = %{public}d.", ret);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
+                ret, PermissionConstants::PERMISSION_MANAGE_MISSION), nullptr);
+            return;
+        }
+
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+    }
+
+    void OnUnlockMission(ani_env *env, ani_int missionId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnUnlockMission Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+
+        auto ret = AbilityManagerClient::GetInstance()->UnlockMissionForCleanup(missionId);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "OnUnlockMission is failed. ret = %{public}d.", ret);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
+                ret, PermissionConstants::PERMISSION_MANAGE_MISSION), nullptr);
+            return;
+        }
+
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+    }
+
+    void OnGetMissionSnapShot(ani_env *env,
+        ani_string deviceId, ani_int missionId, ani_object callback, bool isLowResolution)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnGetMissionSnapShot Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+
+        std::string stdDeviceId = "";
+        if (!GetStdString(env, deviceId, stdDeviceId)) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param deviceId failed, must be a string."), nullptr);
+            return;
+        }
+        AAFwk::MissionSnapshot missionSnapShot;
+        auto ret = AbilityManagerClient::GetInstance()->GetMissionSnapshot(stdDeviceId,
+            missionId, missionSnapShot, isLowResolution);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "OnGetMissionSnapShot is failed. ret = %{public}d.", ret);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
+                ret, PermissionConstants::PERMISSION_MANAGE_MISSION), nullptr);
+            return;
+        }
+        auto aniMissionSnapShot = CreateEtsMissionSnapShot(env, missionSnapShot);
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), aniMissionSnapShot);
+    }
+    
+    ani_object CreateEtsMissionSnapShot(ani_env *env, const AAFwk::MissionSnapshot &missionSnapShot)
+    {
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "env is null");
+            return nullptr;
+        }
+        ani_class cls = nullptr;
+        ani_status status = ANI_ERROR;
+        status = env->FindClass("Lapplication/MissionSnapshot/MissionSnapshotImpl;", &cls);
+        if (status != ANI_OK || cls == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "FindClass failed status = %{public}d", status);
+            return nullptr;
+        }
+        ani_method method = nullptr;
+        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+        if (status != ANI_OK || method == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "Class_FindMethod failed status = %{public}d", status);
+            return nullptr;
+        }
+        ani_object object = nullptr;
+        status = env->Object_New(cls, method, &object);
+        if (status != ANI_OK || object == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "Object_New failed status = %{public}d", status);
+            return nullptr;
+        }
+        ani_object abilityObj = WrapElementName(env, missionSnapShot.topAbility);
+        if (!SetRefProperty(env, object, "ability", abilityObj)) {
+            TAG_LOGE(AAFwkTag::MISSION, "Set ability failed");
+            return nullptr;
+        }
+#ifdef SUPPORT_SCREEN
+        auto snapshotValue =
+            OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, missionSnapShot.snapshot);
+        if (!SetRefProperty(env, object, "snapshot", snapshotValue)) {
+            TAG_LOGE(AAFwkTag::MISSION, "Set snapshot failed");
+            return nullptr;
+        }
+#endif
+        return object;
+    }
+
+    void OnArrayLengthCheck(ani_env *env, ani_object missionIds)
+    {
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::vector<int32_t> missionIdList;
+        ani_size arrayLen = 0;
+        ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(missionIds), &arrayLen);
+        if (status != ANI_OK || arrayLen == 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "missionIds is not a valid array or empty");
+            EtsErrorUtil::ThrowInvalidParamError(
+                env, "Parse param missionIds failed, the size of missionIds must above zero.");
+            return;
+        }
+    }
+
+    void OnMoveMissionsToBackground(ani_env *env, ani_object missionIds, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnMoveMissionsToBackground Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::vector<int32_t> missionIdList;
+        ani_size arrayLen = 0;
+        ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(missionIds), &arrayLen);
+        if (status != ANI_OK || arrayLen == 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "missionIds is not a valid array or empty");
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateInvalidParamError(
+                    env, "Parse param missionIds failed, must be Array<int> and not empty."), nullptr);
+            return;
+        }
+        ani_ref ref = nullptr;
+        for (ani_size i = 0; i < arrayLen; ++i) {
+            status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(missionIds), i, &ref);
+            if (status != ANI_OK || ref == nullptr) {
+                TAG_LOGE(AAFwkTag::MISSION, "Array_GetElement failed at index %{public}zu", i);
+                AsyncCallback(env, callback,
+                    EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element is invalid."),
+                    nullptr);
+                return;
+            }
+            int32_t missionId = 0;
+            status = env->Object_CallMethodByName_Int(
+                reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
+                AsyncCallback(env, callback,
+                    EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element must be int."),
+                    nullptr);
+                return;
+            }
+            missionIdList.push_back(missionId);
+        }
+        std::vector<int32_t> resultMissionIds;
+        auto ret = AbilityManagerClient::GetInstance()->MoveMissionsToBackground(missionIdList, resultMissionIds);
+        if (ret == 0) {
+            ani_object arrayValue = CreateIntAniArray(env, resultMissionIds);
+            AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), arrayValue);
+        } else {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION),
+                nullptr);
+        }
+    }
+
+    void OnMoveMissionsToForeground(ani_env *env, ani_object missionIds, ani_int topMission, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnMoveMissionsToForeground Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::vector<int32_t> missionIdList;
+        ani_size arrayLen = 0;
+        ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(missionIds), &arrayLen);
+        if (status != ANI_OK || arrayLen == 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "missionIds is not a valid array or empty");
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateInvalidParamError(env,
+                    "Parse param missionIds failed, must be Array<int> and not empty."), nullptr);
+            return;
+        }
+        ani_ref ref = nullptr;
+        for (ani_size i = 0; i < arrayLen; ++i) {
+            status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(missionIds), i, &ref);
+            if (status != ANI_OK || ref == nullptr) {
+                TAG_LOGE(AAFwkTag::MISSION, "Array_GetElement failed at index %{public}zu", i);
+                AsyncCallback(env, callback,
+                    EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element is invalid."),
+                    nullptr);
+                return;
+            }
+            int32_t missionId = 0;
+            status = env->Object_CallMethodByName_Int(
+                reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
+                AsyncCallback(env, callback,
+                    EtsErrorUtil::CreateInvalidParamError(env, "Parse param missionIds failed, element must be int."),
+                    nullptr);
+                return;
+            }
+            missionIdList.push_back(missionId);
+        }
+
+        auto ret = AbilityManagerClient::GetInstance()->MoveMissionsToForeground(missionIdList, topMission);
+        if (ret == 0) {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+        } else {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION),
+                nullptr);
+        }
+    }
+
+    void OnMoveMissionToFront(ani_env *env, ani_int missionId, ani_object options, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnMoveMissionToFront Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        AAFwk::StartOptions startOptions;
+        if (options != nullptr) {
+            AppExecFwk::UnwrapStartOptions(env, options, startOptions);
+        }
+        auto ret = (options == nullptr) ? AbilityManagerClient::GetInstance()->MoveMissionToFront(missionId) :
+            AbilityManagerClient::GetInstance()->MoveMissionToFront(missionId, startOptions);
+        if (ret == 0) {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+        } else {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION),
+                nullptr);
+        }
+    }
+
+    ani_long OnOn(ani_env *env, ani_string type, ani_object listener)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOn Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return ANI_ERROR;
+        }
+        std::string stdType = "";
+        if (!GetStdString(env, type, stdType) || stdType.empty()) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param type failed.");
+            return ANI_ERROR;
+        }
+        if (stdType == ON_OFF_TYPE_SYNC) {
+            return OnOnNew(env, type, listener);
+        }
+        return OnOnOld(env, type, listener);
+    }
+
+    ani_long OnOnOld(ani_env *env, ani_string type, ani_object listener)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOnOld called");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return ANI_ERROR;
+        }
+        std::string stdType = "";
+        if (!GetStdString(env, type, stdType) || stdType.empty() || stdType != ON_OFF_TYPE) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(
+                env, "Parse param type failed, must be a string, value must be mission.");
+            return ANI_ERROR;
+        }
+        missionListenerId_++;
+        if (missionListener_ != nullptr) {
+            missionListener_->AddEtsListenerObject(env, missionListenerId_, listener);
+            return missionListenerId_;
+        }
+        ani_vm *vm = nullptr;
+        if (env->GetVM(&vm) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "get vm failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "get vm failed.");
+            return ANI_ERROR;
+        }
+        missionListener_ = new EtsMissionListener(vm);
+        auto ret = AbilityManagerClient::GetInstance()->RegisterMissionListener(missionListener_);
+        if (ret == 0) {
+            missionListener_->AddEtsListenerObject(env, missionListenerId_, listener);
+            return missionListenerId_;
+        } else {
+            TAG_LOGE(AAFwkTag::MISSION, "RegisterMissionListener failed, ret:%{public}d", ret);
+            missionListener_ = nullptr;
+            if (ret == CHECK_PERMISSION_FAILED) {
+                EtsErrorUtil::ThrowNoPermissionError(env, PermissionConstants::PERMISSION_MANAGE_MISSION);
+            } else {
+                EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateErrorByNativeErr(env, ret));
+            }
+            return ANI_ERROR;
+        }
+    }
+
+    ani_long OnOnNew(ani_env *env, ani_string type, ani_object listener)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOnNew called");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return ANI_ERROR;
+        }
+        missionListenerId_++;
+        if (missionListener_ != nullptr) {
+            missionListener_->AddEtsListenerObject(env, missionListenerId_, listener);
+            return missionListenerId_;
+        }
+        ani_vm *vm = nullptr;
+        if (env->GetVM(&vm) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "get vm failed");
+            AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "get vm failed.");
+            return ANI_ERROR;
+        }
+        missionListener_ = new EtsMissionListener(vm);
+        auto ret = AbilityManagerClient::GetInstance()->RegisterMissionListener(missionListener_);
+        if (ret == 0) {
+            missionListener_->AddEtsListenerObject(env, missionListenerId_, listener, true);
+            return missionListenerId_;
+        } else {
+            TAG_LOGE(AAFwkTag::MISSION, "RegisterMissionListener failed, ret:%{public}d", ret);
+            missionListener_ = nullptr;
+            if (ret == CHECK_PERMISSION_FAILED) {
+                EtsErrorUtil::ThrowNoPermissionError(env, PermissionConstants::PERMISSION_MANAGE_MISSION);
+            } else {
+                EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateErrorByNativeErr(env, ret));
+            }
+            return ANI_ERROR;
+        }
+    }
+
+    void OnOff(ani_env *env, ani_string type, ani_long listenerId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOff Call");
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::string stdType = "";
+        if (!GetStdString(env, type, stdType) || stdType.empty()) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param type failed.");
+            return;
+        }
+        if (stdType == ON_OFF_TYPE_SYNC) {
+            return OnOffNew(env, type, listenerId, callback);
+        }
+        return OnOffOld(env, type, listenerId, callback);
+    }
+
+    void OnOffOld(ani_env *env, ani_string type, ani_long listenerId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOffOld called");
+        std::string stdType = "";
+        if (!GetStdString(env, type, stdType) || stdType.empty() || stdType != ON_OFF_TYPE) {
+            TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
+            AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(
+                env, "Parse param type failed, must be a string, value must be mission.");
+            return;
+        }
+        if (!missionListener_ || !missionListener_->RemoveEtsListenerObject(listenerId)) {
+            AsyncCallback(env,
+                callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NO_MISSION_LISTENER), nullptr);
+            return;
+        }
+        if (!missionListener_->IsEmpty()) {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+            return;
+        }
+        auto ret = AbilityManagerClient::GetInstance()->UnRegisterMissionListener(missionListener_);
+        if (ret == 0) {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+            missionListener_ = nullptr;
+        } else {
+            AsyncCallback(env, callback,
+                EtsErrorUtil::CreateErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION),
+                nullptr);
+        }
+    }
+    void OnOffNew(ani_env *env, ani_string type, ani_long listenerId, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::MISSION, "OnOffNew called");
+        if (missionListener_ == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null missionListener_");
+            EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        if (!missionListener_->RemoveEtsListenerObject(listenerId, true)) {
+            TAG_LOGE(AAFwkTag::MISSION, "missionListenerId not found");
+            EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NO_MISSION_LISTENER);
+            return;
+        }
+        if (!missionListener_->IsEmpty()) {
+            TAG_LOGD(AAFwkTag::MISSION, "Off success, missionListener not empty");
+            return;
+        }
+        auto ret = AbilityManagerClient::GetInstance()->UnRegisterMissionListener(missionListener_);
+        if (ret == 0) {
+            TAG_LOGD(AAFwkTag::MISSION, "UnRegisterMissionListener success");
+            missionListener_ = nullptr;
+        } else {
+            TAG_LOGE(AAFwkTag::MISSION, "UnRegisterMissionListener failed");
+            if (ret == CHECK_PERMISSION_FAILED) {
+                EtsErrorUtil::ThrowNoPermissionError(env, PermissionConstants::PERMISSION_MANAGE_MISSION);
+            } else {
+                EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateErrorByNativeErr(env, ret));
+            }
+            return;
+        }
+    }
+private:
+    sptr<EtsMissionListener> missionListener_ = nullptr;
+    uint32_t missionListenerId_ = 0;
 };
 
 EtsMissionManager EtsMissionManager::instance;
@@ -126,6 +679,68 @@ void EtsMissionManagerInit(ani_env *env)
             "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsMissionManager::GetMissionInfo)
         },
+        ani_native_function {
+            "nativeGetMissionInfos",
+            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::GetMissionInfos)
+        },
+        ani_native_function {
+            "nativeClearMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::ClearMission)
+        },
+        ani_native_function {
+            "nativeLockMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::LockMission)
+        },
+        ani_native_function {
+            "nativeUnlockMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::UnlockMission)
+        },
+        ani_native_function {
+            "nativeGetMissionSnapShot",
+            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::GetMissionSnapShot)
+        },
+        ani_native_function {
+            "nativeGetLowResolutionMissionSnapShot",
+            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::GetLowResolutionMissionSnapShot)
+        },
+        ani_native_function {
+            "nativeArrayLengthCheck",
+            "Lescompat/Array;:V",
+            reinterpret_cast<void *>(EtsMissionManager::ArrayLengthCheck)
+        },
+        ani_native_function {
+            "nativeMoveMissionsToBackground",
+            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToBackground)
+        },
+        ani_native_function {
+            "nativeMoveMissionsToForeground",
+            "Lescompat/Array;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToForeground)
+        },
+        ani_native_function {
+            "nativeMoveMissionToFront",
+            "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::MoveMissionToFront)
+        },
+        ani_native_function {
+            "nativeMoveMissionToFront",
+            "IL@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::MoveMissionToFrontWithOptions)
+        },
+        ani_native_function {
+            "nativeOn",
+            "Lstd/core/String;Lapplication/MissionListener/MissionListener;:J",
+            reinterpret_cast<void *>(EtsMissionManager::On)
+        },
+        ani_native_function {
+            "nativeOff",
+            "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsMissionManager::Off)
+        }
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {

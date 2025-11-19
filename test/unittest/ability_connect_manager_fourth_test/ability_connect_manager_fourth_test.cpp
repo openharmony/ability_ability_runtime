@@ -943,16 +943,16 @@ HWTEST_F(AbilityConnectManagerFourthTest, QueryPreLoadUIExtensionRecordInner_001
 
     AppExecFwk::ElementName element("deviceId", "bundleName", "abilityName", "moduleName");
     std::string moduleName = "testModule";
-    std::string hostBundleName = "testHostBundle";
+    int32_t hostPid = 0;
     int32_t recordNum = 0;
 
     int32_t result =
-        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_OK);
 
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
     result =
-        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+        connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     TAG_LOGI(AAFwkTag::TEST, "QueryPreLoadUIExtensionRecordInner_001 end");
 }
@@ -969,11 +969,11 @@ HWTEST_F(AbilityConnectManagerFourthTest, QueryPreLoadUIExtensionRecordInner_002
 
     AppExecFwk::ElementName element("deviceId", "bundleName", "abilityName", "moduleName");
     std::string moduleName = "testModule";
-    std::string hostBundleName = "testHostBundle";
+    int32_t hostPid = 0;
     int32_t recordNum = 0;
 
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
-    int result = connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostBundleName, recordNum);
+    int result = connectManager->QueryPreLoadUIExtensionRecordInner(element, moduleName, hostPid, recordNum);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     TAG_LOGI(AAFwkTag::TEST, "QueryPreLoadUIExtensionRecordInner_002 end");
 }
@@ -1051,5 +1051,31 @@ HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_ResumeExtensionAbilityLocked
     EXPECT_EQ(result3, OHOS::ERR_OK);
 }
 
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: Put a single ability record into map and sign restart app flag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, SignRestartProcess_001, TestSize.Level2)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    auto pid = 100;
+    connectManager->serviceMap_.emplace("", nullptr);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_FALSE(connectManager->serviceMap_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    connectManager->serviceMap_.emplace("TestKey", abilityRecord);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecord->GetRestartAppFlag());
+
+    abilityRecord->SetPid(pid);
+    connectManager->SignRestartProcess(pid);
+    EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

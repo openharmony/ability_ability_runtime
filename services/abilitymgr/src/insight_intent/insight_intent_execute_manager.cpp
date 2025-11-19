@@ -626,5 +626,37 @@ void InsightIntentExecuteManager::SendIntentReport(EventInfo &eventInfo, int32_t
     eventInfo.errCode = errCode;
     EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
 }
+
+void InsightIntentExecuteManager::OnInsightAppDied(const std::string &bundleName)
+{
+    TAG_LOGI(AAFwkTag::INTENT, "app died: %{public}s", bundleName.c_str());
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    AppExecFwk::InsightIntentExecuteResult errorResult{};
+    errorResult.innerErr = AbilityRuntime::InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED;
+
+    std::vector<uint64_t> toRemove;
+    for (const auto &[intentId, record] : records_) {
+        if (record == nullptr || bundleName != record->bundleName) {
+            continue;
+        }
+        toRemove.push_back(intentId);
+        sptr<IInsightIntentExecuteCallback> remoteCallback =
+            iface_cast<IInsightIntentExecuteCallback>(record->callerToken);
+        if (remoteCallback != nullptr) {
+            TAG_LOGD(AAFwkTag::INTENT, "notify caller, intentId: %{public}" PRIu64, intentId);
+            remoteCallback->OnExecuteDone(record->key, errorResult.innerErr, errorResult);
+        }
+
+        if (record->callerToken != nullptr && record->deathRecipient != nullptr) {
+            record->callerToken->RemoveDeathRecipient(record->deathRecipient);
+        }
+    }
+
+    for (uint64_t intentId : toRemove) {
+        records_.erase(intentId);
+    }
+    TAG_LOGI(AAFwkTag::INTENT, "removed %{public}zu records, remaining: %{public}zu",
+        toRemove.size(), records_.size());
+}
 } // namespace AAFwk
 } // namespace OHOS

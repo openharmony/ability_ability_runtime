@@ -230,7 +230,6 @@ public:
     bool isKeepAliveApp_ = false;
     bool getUidCalled_ = false;
     bool queryExitBundleInfos_called_ = false;
-    bool updateInstanceKeyBySpecifiedIdCalled_ = false;
     bool addUIExtensionBindItemCalled_ = false;
     bool killProcessByPidCalled_ = false;
     pid_t killProcessByPid_pid_ = 0;
@@ -298,7 +297,6 @@ public:
         isKeepAliveApp_ = false;
         getUidCalled_ = false;
         queryExitBundleInfos_called_ = false;
-        updateInstanceKeyBySpecifiedIdCalled_ = false;
         addUIExtensionBindItemCalled_ = false;
         killProcessByPidCalled_ = false;
         killProcessByPid_pid_ = 0;
@@ -362,6 +360,9 @@ public:
     }
     std::shared_ptr<AppExecFwk::AppRunningRecord> masterProcessRunningRecord_ = nullptr;
     std::shared_ptr<AppExecFwk::AppRunningRecord> appRecordForSpecifiedProcess_ = nullptr;
+
+    bool exitByPidstatus_ = false;
+    int32_t signRestartProcessStatus_ = ERR_OK;
 private:
     MyStatus() = default;
     bool isLogoutUserCalled_ = false;

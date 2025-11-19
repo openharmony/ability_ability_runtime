@@ -108,17 +108,6 @@ static ani_object EnableAppRecovery(ani_env *env, ani_enum_item restart, ani_enu
     return resultsObj;
 }
 
-static ani_boolean SaveAppState(ani_env *env)
-{
-    ani_boolean boolValue = ANI_FALSE;
-
-    uintptr_t ability = 0;
-    if (AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::DEVELOPER_REQUEST, ability)) {
-        boolValue = ANI_TRUE;
-    }
-    return boolValue;
-}
-
 static ani_boolean SaveAppStateWithParam(ani_env *env, ani_object context)
 {
     ani_boolean boolValue = ANI_FALSE;
@@ -149,7 +138,7 @@ static ani_object SetRestartWant(ani_env *env, ani_object wantObj)
 {
     ani_object resultsObj{};
     if (IsRefUndefined(env, wantObj)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "get want param  failed.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "get want param failed.");
         return resultsObj;
     }
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
@@ -174,7 +163,7 @@ static void EtsAppRecoveryInit(ani_env *env)
     }
 
     ani_namespace ns;
-    status = env->FindNamespace("L@ohos/app/ability/appRecovery/appRecovery;", &ns);
+    status = env->FindNamespace("@ohos.app.ability.appRecovery.appRecovery", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::RECOVERY, "FindNamespace appRecovery failed status: %{public}d", status);
         return;
@@ -183,8 +172,7 @@ static void EtsAppRecoveryInit(ani_env *env)
     std::array kitFunctions = {
         ani_native_function {"enableAppRecovery", nullptr, reinterpret_cast<void *>(EnableAppRecovery)},
         ani_native_function {"restartApp", nullptr, reinterpret_cast<void *>(RestartApp)},
-        ani_native_function {"saveAppState", ":Z", reinterpret_cast<void *>(SaveAppState)},
-        ani_native_function {"saveAppState", "Lapplication/UIAbilityContext/UIAbilityContext;:Z",
+        ani_native_function {"saveAppState", "C{application.UIAbilityContext.UIAbilityContext}:z",
             reinterpret_cast<void *>(SaveAppStateWithParam)},
         ani_native_function {"setRestartWant", nullptr, reinterpret_cast<void *>(SetRestartWant)},
     };

@@ -215,8 +215,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_001, TestSize.
     abilityRequest.abilityInfo.name = "Name";
     abilityRequest.abilityInfo.bundleName = "BundleName";
     abilityRequest.abilityInfo.moduleName = "ModuleName";
+    abilityRequest.abilityInfo.appIndex = 5;
     abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, std::string("InstanceKey"));
-    abilityRequest.want.SetParam(ServerConstant::DLP_INDEX, 5);
     
     auto callerAbilityRecord = std::make_shared<AbilityRecord>(
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
@@ -240,6 +240,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_002, TestSize.
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     
     AbilityRequest abilityRequest;
+    int32_t dlpIndex = 1001;
+    abilityRequest.want.SetParam(DLP_INDEX, dlpIndex);
     auto ret = mgr->FindRecordFromTmpMap(abilityRequest);
     EXPECT_EQ(ret, nullptr);
 }
@@ -1550,6 +1552,146 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleRestartUIAbility_0100, TestSi
     sessionInfo->callerSession = sessionInfo->sessionToken;
     sessionInfo2->sessionToken = sessionInfo->sessionToken;
     EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+}
+
+/**
+ * @tc.name: SignRestartProcess_001
+ * @tc.desc: Put a single ability record into map and sign restart app flag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SignRestartProcess_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    auto pid = 100;
+    mgr->sessionAbilityMap_.emplace(0, nullptr);
+    mgr->SignRestartProcess(pid);
+    EXPECT_FALSE(mgr->sessionAbilityMap_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_.emplace(pid, abilityRecord);
+    mgr->SignRestartProcess(pid);
+    EXPECT_FALSE(abilityRecord->GetRestartAppFlag());
+
+    abilityRecord->SetPid(pid);
+    mgr->SignRestartProcess(pid);
+    EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
+}
+
+/**
+ * @tc.name: HandleAbilityRecordReused_001
+ * @tc.desc: HandleAbilityRecordReused null abilityRecord
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    SessionInfo sessionInfo;
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(nullptr, sessionInfo, abilityRequest), nullptr);
+}
+
+/**
+ * @tc.name: HandleAbilityRecordReused_002
+ * @tc.desc: HandleAbilityRecordReused null sessionInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_002, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    SessionInfo sessionInfo;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->sessionInfo_ = nullptr;
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(abilityRecord, sessionInfo, abilityRequest), nullptr);
+}
+
+/**
+ * @tc.name: HandleAbilityRecordReused_003
+ * @tc.desc: HandleAbilityRecordReused sessionToken not same
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_003, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    SessionInfo sessionInfo;
+    auto session = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo.sessionToken = session->AsObject();
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto sessionInfo2 = sptr<SessionInfo>::MakeSptr();
+    auto session2 = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo2->sessionToken = session2->AsObject();
+    abilityRecord->sessionInfo_ = sessionInfo2;
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(abilityRecord, sessionInfo, abilityRequest), nullptr);
+}
+
+/**
+ * @tc.name: HandleAbilityRecordReused_004
+ * @tc.desc: HandleAbilityRecordReused ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_004, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    SessionInfo sessionInfo;
+    auto session = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo.sessionToken = session->AsObject();
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto sessionInfo2 = sptr<SessionInfo>::MakeSptr();
+    sessionInfo2->sessionToken = session->AsObject();
+    abilityRecord->sessionInfo_ = sessionInfo2;
+    sessionInfo.reuseDelegatorWindow = false;
+
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(abilityRecord, sessionInfo, abilityRequest), abilityRecord);
+}
+
+/**
+ * @tc.name: HandleAbilityRecordReused_005
+ * @tc.desc: HandleAbilityRecordReused reuseDelegatorWindow true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_005, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    SessionInfo sessionInfo;
+    auto session = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo.sessionToken = session->AsObject();
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto sessionInfo2 = sptr<SessionInfo>::MakeSptr();
+    sessionInfo2->sessionToken = session->AsObject();
+    abilityRecord->sessionInfo_ = sessionInfo2;
+
+    auto originAppMgr = AppMgrUtil::appMgr_;
+    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
+    EXPECT_CALL(*appmgr, LaunchAbility).Times(1).WillOnce(Return(ERR_OK));
+    AppMgrUtil::appMgr_ = appmgr;
+
+    sessionInfo.reuseDelegatorWindow = true;
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(abilityRecord, sessionInfo, abilityRequest), abilityRecord);
+
+    EXPECT_CALL(*appmgr, LaunchAbility).Times(1).WillOnce(Return(-1));
+    EXPECT_EQ(mgr->HandleAbilityRecordReused(abilityRecord, sessionInfo, abilityRequest), nullptr);
+
+    AppMgrUtil::appMgr_ = originAppMgr;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

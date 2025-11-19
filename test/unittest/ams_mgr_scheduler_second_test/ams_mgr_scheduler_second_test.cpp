@@ -2273,6 +2273,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_SetKeepAliveAppSer
     appInfo->bundleName = SCENE_BOARD_BUNDLE_NAME;
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, 0, "foundation");
     ASSERT_NE(appRecord, nullptr);
+    appRecord->SetUid(0);
     appMgrServiceInner->appRunningManager_->appRunningRecordMap_.emplace(1, appRecord);
     /**
      * @tc.steps: step1. amsMgrScheduler isReady false

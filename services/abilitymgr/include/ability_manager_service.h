@@ -489,7 +489,7 @@ public:
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE) override;
 
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -950,7 +950,8 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) override;
+    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "Abilityms::KillProcess") override;
 
     /**
      * Uninstall app
@@ -1072,11 +1073,12 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
 
     /**
      * Start Ability, connect session with common ability.
@@ -1087,11 +1089,12 @@ public:
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
 
     /**
      * Start Ability for prelauch.
@@ -1524,6 +1527,9 @@ public:
      */
     virtual int AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
         const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
+
+    virtual int32_t RegisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer) override;
+    virtual int32_t UnregisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer) override;
 
     /**
      * Check the uid is background task uid.
@@ -2153,7 +2159,7 @@ public:
      */
     virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                   const std::string &moduleName,
-                                                  const std::string &hostBundleName,
+                                                  const int32_t hostPid,
                                                   int32_t &recordNum,
                                                   int32_t userId = DEFAULT_INVAL_VALUE) override;
 
@@ -2253,6 +2259,7 @@ public:
      * @return Returns true on being limited.
      */
     bool IsRestartAppLimit() override;
+    int32_t SignRestartProcess(int32_t pid, int32_t userId);
 
     /**
      * Preload application.
@@ -2818,7 +2825,7 @@ private:
     bool CheckCallerIsDmsProcess();
 
     void WaitBootAnimationStart();
-public:
+
     struct SignRestartAppFlagParam {
         int32_t userId;
         int32_t uid;
@@ -2826,11 +2833,9 @@ public:
         AppExecFwk::MultiAppModeType type;
         bool isAppRecovery = false;
         bool isAtomicService = false;
-        bool isRestartUIAbility = false;
-        std::string bundleName;
     };
     int32_t SignRestartAppFlag(const SignRestartAppFlagParam &param);
-private:
+
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();
@@ -3053,7 +3058,6 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    AbilityEventUtil eventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

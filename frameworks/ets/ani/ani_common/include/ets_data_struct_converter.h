@@ -21,6 +21,13 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+enum EtsAppProcessState {
+    STATE_CREATE,
+    STATE_FOREGROUND,
+    STATE_ACTIVE,
+    STATE_BACKGROUND,
+    STATE_DESTROY
+};
 bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_object &object);
 } // namespace AbilityRuntime
 } // namespace OHOS

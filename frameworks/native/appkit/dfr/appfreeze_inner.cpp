@@ -35,6 +35,7 @@
 #include "time_util.h"
 #include "parameters.h"
 #include "unique_fd.h"
+#include "input_manager.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -165,7 +166,11 @@ bool AppfreezeInner::GetProcessStartTime(pid_t tid, unsigned long long &startTim
         return false;
     }
 
-    std::string eoc = statStr.substr(statStr.find_last_of(")"));
+    auto lastParenPos = statStr.find_last_of(")");
+    if (lastParenPos == std::string::npos) {
+        return false;
+    }
+    std::string eoc = statStr.substr(lastParenPos);
     std::istringstream is(eoc);
     constexpr int startTimePos = 21;
     constexpr int base = 10;
@@ -264,6 +269,10 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.waitSaveState = false;
     faultData.forceExit = false;
     GetApplicationInfo(faultData);
+    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
+        MMI::InputManager::GetInstance()->GetLastEventIds(faultData.markedId,
+            faultData.processedId, faultData.dispatchedEventId);
+    }
     int32_t pid = IPCSkeleton::GetCallingPid();
     faultData.errorObject.stack = "\nDump tid stack start time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";

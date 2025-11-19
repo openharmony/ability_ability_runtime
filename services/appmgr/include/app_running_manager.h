@@ -333,6 +333,7 @@ public:
         bool clearPageStack);
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
         bool clearPageStack);
+    bool ProcessExitByPid(int32_t pid, const KillProcessConfig &config);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
     bool GetProcessInfosByUserId(int32_t userId, std::list<SimpleProcessInfo> &processInfos);
 
@@ -355,7 +356,7 @@ public:
     bool IsApplicationBackground(const AppRunningRecord &backgroundingRecord);
     bool NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<AppRunningRecord> currentAppRecord);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
-    bool IsApplicationUnfocused(const std::string &bundleName);
+    bool IsApplicationUnfocused(int32_t uid);
 #ifdef SUPPORT_SCREEN
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 #endif //SUPPORT_SCREEN
@@ -395,6 +396,7 @@ public:
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
     int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
+    int32_t SignRestartProcess(int32_t pid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -434,7 +436,6 @@ public:
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);

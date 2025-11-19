@@ -369,6 +369,24 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_004,
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 
+/**
+ * @tc.name: CheckCallOtherExtensionPermission_005
+ * @tc.desc: Check can't start non-system app when extension type is some specified uiextension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_005, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.visible = true;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::ADS_SERVICE;
+    abilityRequest.appInfo.isSystemApp = false;
+    abilityRequest.appInfo.bundleName = "test.bundleName";
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest), CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "testcase end.");
+}
+
 /*
  * Feature: AbilityManagerService
  * Function: CheckStartByCallPermission

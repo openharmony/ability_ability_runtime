@@ -152,11 +152,14 @@ void EtsFreeInstallObserver::CallCallback(ani_object callback, int32_t resultCod
     ani_status status = ANI_ERROR;
     ani_option interopEnabled { "--interop=disable", nullptr };
     ani_options aniArgs { 1, &interopEnabled };
+    bool attachFlag = true;
     if ((status = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        attachFlag = false;
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to getEnv, status: %{public}d", status);
-    } else if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to getEnv, status: %{public}d", status);
-        return;
+        if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to getEnv, status: %{public}d", status);
+            return;
+        }
     }
     ani_object aniObject = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     if (resultCode != ERR_OK) {
@@ -164,7 +167,7 @@ void EtsFreeInstallObserver::CallCallback(ani_object callback, int32_t resultCod
     }
     AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
     env->GlobalReference_Delete(callback);
-    if ((status = etsVm_->DetachCurrentThread()) != ANI_OK) {
+    if (attachFlag && (status = etsVm_->DetachCurrentThread()) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "status: %{public}d", status);
     }
 }

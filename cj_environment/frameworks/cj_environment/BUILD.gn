@@ -22,7 +22,7 @@ config("cj_rt_public_config") {
   ]
   defines = cj_config.common_defines
 
-  if (target_cpu == "arm64") {
+  if (!use_mingw_win && !use_mac && target_cpu == "arm64") {
     defines += [ "_ARM64_" ]
   }
 
@@ -58,13 +58,15 @@ ohos_shared_library("cj_environment") {
   defines = []
 
   external_deps = [
-    "c_utils:utils",
     "hilog:libhilog",
   ]
 
   if (current_os == "ohos") {
     sources += [ "src/dynamic_loader_ohos.cpp" ]
-    external_deps += [ "eventhandler:libeventhandler" ]
+    external_deps += [
+      "c_utils:utils",
+      "eventhandler:libeventhandler"
+    ]
     defines += [ "WITH_EVENT_HANDLER" ]
   } else if (current_os == "linux") {
     sources += [ "src/dynamic_loader_linux.cpp" ]

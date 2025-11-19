@@ -372,5 +372,22 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreeze_001, TestSize.Level1)
     ret = appfreezeInner->IsAppFreeze(AppFreezeType::THREAD_BLOCK_6S);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.number: AppfreezeInner_ChangeFaultDateInfo_001
+ * @tc.name: ChangeFaultDateInfo
+ * @tc.desc: Verify that function ChangeFaultDateInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_001, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string msgContent = "AppfreezeInner_ChangeFaultDateInfo_001";
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    EXPECT_EQ(faultData.errorObject.message, msgContent);
+    faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    std::string ret = "AppfreezeInner_ChangeFaultDateInfo_001AppfreezeInner_ChangeFaultDateInfo_001";
+    EXPECT_EQ(faultData.errorObject.message, ret);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
