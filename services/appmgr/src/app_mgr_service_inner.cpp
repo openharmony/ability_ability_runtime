@@ -1892,7 +1892,10 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     ApplicationTerminatedSendProcessEvent(appRecord);
     taskHandler_->CancelTask("DELAY_KILL_PROCESS_" + std::to_string(recordId));
     auto uid = appRecord->GetUid();
-    SendProcessKillEvent(appRecord, "Kill Reason:app exit");
+    if (appRecord->GetExtensionType() == ExtensionAbilityType::UNSPECIFIED ||
+        AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        SendProcessKillEvent(appRecord, "Kill Reason:app exit");
+    }
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
