@@ -1068,6 +1068,10 @@ HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_003, TestSize.Level
     EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
 }
 
+/*
+ * Feature: AbilityConnectManager
+ * Function: SetServiceAfterNewCreate
+ */
 HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_004, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_004 start");
@@ -1085,6 +1089,10 @@ HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_004, TestSize.Level
     EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
 }
 
+/*
+ * Feature: AbilityConnectManager
+ * Function: SetServiceAfterNewCreate
+ */
 HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_005, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_05 start");
