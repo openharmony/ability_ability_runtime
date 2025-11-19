@@ -36,6 +36,7 @@ struct GrantUriPermissionInfo {
     uint32_t flag = 0;
     int32_t collaboratorType = 0;
     bool isNotifyCollaborator = false;
+    std::string targetAbilityName = "";
 };
 
 class UriUtils {
@@ -178,8 +179,9 @@ private:
     /**
      * @brief Publish file open event
      * @param want The Want object containing file information
+     * @param grantInfo The param for grant uri permission
      */
-    void PublishFileOpenEvent(const Want &want);
+    void PublishFileOpenEvent(const Want &want, const GrantUriPermissionInfo &grantInfo);
 
     /**
      * @brief Check if bundle is in Anco app identifier

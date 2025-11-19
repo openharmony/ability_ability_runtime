@@ -307,6 +307,19 @@ void AbilityCacheManager::SignRestartAppFlag(int32_t uid, const std::string &ins
     }
 }
 
+void AbilityCacheManager::SignRestartProcess(int32_t pid)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = devRecLru_.begin();
+    while (it != devRecLru_.end()) {
+        auto abilityRecord = *it;
+        if (abilityRecord != nullptr && abilityRecord->GetPid() == pid) {
+            abilityRecord->SetRestartAppFlag(true);
+        }
+        it++;
+    }
+}
+
 void AbilityCacheManager::DeleteInvalidServiceRecord(const std::string &bundleName)
 {
     std::lock_guard<std::mutex> lock(mutex_);

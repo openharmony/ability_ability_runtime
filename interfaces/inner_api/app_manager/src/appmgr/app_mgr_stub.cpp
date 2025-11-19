@@ -252,6 +252,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleIsTerminatingByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED):
             return HandleIsSpecifiedModuleLoaded(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SIGN_RESTART_PROCESS):
+            return HandleSignRestartProcess(data, reply);
     }
     return INVALID_FD;
 }
@@ -400,8 +402,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
-        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID):
-            return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
             return HandleUpdateProcessMemoryState(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
@@ -418,6 +418,12 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleQueryRunningSharedBundles(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SPECIFIED_PROCESS_REQUEST_ID):
             return HandleSetSpecifiedProcessRequestId(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::ALLOW_SCB_PROCESS_MOVE_TO_BACKGROUND):
+            return HandleAllowScbProcessMoveToBackground(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_PROCESS_BY_PID_FOR_EXIT):
+            return HandleKillProcessByPidForExit(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID):
+            return HandleKillChildProcessByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -1761,6 +1767,17 @@ int32_t AppMgrStub::HandleSignRestartAppFlag(MessageParcel &data, MessageParcel 
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleSignRestartProcess(MessageParcel &data, MessageParcel &reply)
+{
+    auto uid = data.ReadInt32();
+    auto ret = SignRestartProcess(uid);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleGetAppRunningUniqueIdByPid(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -2025,11 +2042,15 @@ int32_t AppMgrStub::HandleKillAppSelfWithInstanceKey(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleKillProcessByPidForExit(MessageParcel &data, MessageParcel &reply)
 {
-    auto specifiedId = data.ReadInt32();
-    auto instanceKey = data.ReadString();
-    UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
+    auto pid = data.ReadInt32();
+    auto reason = data.ReadString();
+    auto result = KillProcessByPidForExit(pid, reason);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 
@@ -2184,6 +2205,26 @@ int32_t AppMgrStub::HandleRegisterApplicationStateObserverWithFilter(MessageParc
     int32_t result = RegisterApplicationStateObserverWithFilter(callback,
         bundleNameList, *appStateFilter, isUsingFilter);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleAllowScbProcessMoveToBackground(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    AllowScbProcessMoveToBackground();
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleKillChildProcessByPid(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleKillChildProcessByPid call");
+    pid_t pid = data.ReadInt32();
+
+    int32_t result = KillChildProcessByPid(pid);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result fail");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

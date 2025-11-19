@@ -96,54 +96,6 @@ HWTEST_F(StartAbilityUtilsTest, GetApplicationInfo_003, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckAppProvisionMode_001
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_001, TestSize.Level1)
-{
-    std::string bundleName = "testName";
-    int32_t userId = 0;
-    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.bundleName = bundleName;
-    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
-}
-
-/**
- * @tc.name: CheckAppProvisionMode_002
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_002, TestSize.Level1)
-{
-    std::string bundleName = "testName";
-    int32_t userId = 0;
-    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.bundleName = bundleName;
-    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
-    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: CheckAppProvisionMode_003
- * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
- * @tc.type: FUNC
- */
-HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_003, TestSize.Level1)
-{
-    std::string bundleName = "";
-    int32_t userId = 0;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: CheckAppProvisionMode_004
  * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
  * @tc.type: FUNC
@@ -153,7 +105,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_004, TestSize.Level1)
     Want want;
     int32_t userId = 1001;
     StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
 }
 
@@ -170,7 +122,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_005, TestSize.Level1)
     StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName = "bundleName";
     StartAbilityUtils::startAbilityInfo->abilityInfo.name = "name";
     StartAbilityUtils::startAbilityInfo->status = 1;
-    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, StartAbilityUtils::startAbilityInfo->status);
 }
 
@@ -189,7 +141,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_006, TestSize.Level1)
     AppExecFwk::ApplicationInfo applicationInfo;
     applicationInfo.bundleName = bundleName;
     StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
 }
 
@@ -208,7 +160,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_007, TestSize.Level1)
     AppExecFwk::ApplicationInfo applicationInfo;
     applicationInfo.bundleName = bundleName;
     StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, ERR_APP_CLONE_INDEX_INVALID);
 }
 
@@ -228,7 +180,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_008, TestSize.Level1)
     applicationInfo.bundleName = bundleName;
     applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
     StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -241,7 +193,8 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_009, TestSize.Level1)
 {
     std::string bundleName = "testName";
     Want want;
-    want.SetParam("ohos.dlp.params.index", 0);
+    int32_t dlpIndex = 1001;
+    want.SetParam("ohos.dlp.params.index", dlpIndex);
     want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t userId = 0;
@@ -249,7 +202,7 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_009, TestSize.Level1)
     AppExecFwk::ApplicationInfo applicationInfo;
     applicationInfo.bundleName = bundleName;
     StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
-    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId, nullptr);
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
 }
 

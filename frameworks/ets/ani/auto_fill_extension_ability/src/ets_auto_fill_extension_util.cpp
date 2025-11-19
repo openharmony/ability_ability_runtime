@@ -25,6 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *FILL_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/FillRequestInner;";
+constexpr const char *SAVE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/SaveRequestInner;";
 constexpr const char *UPDATE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/UpdateRequestInner;";
 constexpr const char *VIEW_DATA_CLASS_NAME = "Lapplication/ViewData/ViewDataImpl;";
 constexpr const char *ARRAY_CLASS_NAME = "Lescompat/Array;";
@@ -65,6 +66,9 @@ constexpr const char *RECT_POSITION_TOP = "top";
 constexpr const char *RECT_WIDTH = "width";
 constexpr const char *RECT_HEIGHT = "height";
 constexpr uint32_t PAGE_NODE_COUNT_MAX = 100;
+constexpr const char *WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY = "ability.want.params.AutoFillTriggerType";
+constexpr const char *TRIGGER_TYPE = "triggerType";
+constexpr const char *AUTO_FILL_TRIGGER_TYPE_ENUM_NAME = "Lapplication/AutoFillTriggerType/AutoFillTriggerType;";
 } // namespace
 
 ani_object EtsAutoFillExtensionUtil::WrapFillRequest(ani_env *env, const AAFwk::Want &want)
@@ -74,6 +78,15 @@ ani_object EtsAutoFillExtensionUtil::WrapFillRequest(ani_env *env, const AAFwk::
         return nullptr;
     }
     return SetFillRequest(env, etsObject, want);
+}
+
+ani_object EtsAutoFillExtensionUtil::WrapSaveRequest(ani_env *env, const AAFwk::Want &want)
+{
+    ani_object etsObject = nullptr;
+    if (!CreateObject(env, etsObject, SAVE_REQUEST_CLASS_NAME)) {
+        return nullptr;
+    }
+    return SetSaveRequest(env, etsObject, want);
 }
 
 ani_object EtsAutoFillExtensionUtil::WrapUpdateRequest(ani_env *env, const AAFwk::WantParams &wantParams)
@@ -334,6 +347,33 @@ bool EtsAutoFillExtensionUtil::CreateObject(ani_env *env, ani_object &object, co
     return true;
 }
 
+bool EtsAutoFillExtensionUtil::SetCustomDataParam(ani_env *env, ani_object object, const AAFwk::Want &want)
+{
+    if (env == nullptr || object == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "env or aniObject is null");
+        return false;
+    }
+    if (want.HasParameter(WANT_PARAMS_CUSTOM_DATA)) {
+        std::string customDataString = want.GetStringParam(WANT_PARAMS_CUSTOM_DATA);
+        if (customDataString.empty()) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty custom data");
+            return false;
+        }
+        if (!AAFwk::WantParamWrapper::ValidateStr(customDataString)) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "invalid Custom data string");
+            return false;
+        }
+        AAFwk::WantParams param = AAFwk::WantParamWrapper::ParseWantParams(customDataString);
+        ani_object customValue = WrapCustomData(env, param);
+        ani_status status = ANI_ERROR;
+        if ((status = env->Object_SetPropertyByName_Ref(object, CUSTOM_DATA_CUSTOM_DATA, customValue)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
+            return false;
+        }
+    }
+    return true;
+}
+
 ani_object EtsAutoFillExtensionUtil::SetFillRequest(ani_env *env, ani_object object, const AAFwk::Want &want)
 {
     ani_status status = ANI_ERROR;
@@ -367,20 +407,36 @@ ani_object EtsAutoFillExtensionUtil::SetFillRequest(ani_env *env, ani_object obj
             return object;
         }
     }
-    if (want.HasParameter(WANT_PARAMS_CUSTOM_DATA)) {
-        std::string customDataString = want.GetStringParam(WANT_PARAMS_CUSTOM_DATA);
-        if (customDataString.empty()) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty custom data");
-            return object;
-        }
-        if (!AAFwk::WantParamWrapper::ValidateStr(customDataString)) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "invalid Custom data string");
-            return object;
-        }
-        AAFwk::WantParams param = AAFwk::WantParamWrapper::ParseWantParams(customDataString);
-        ani_object customValue = WrapCustomData(env, param);
-        if ((status = env->Object_SetPropertyByName_Ref(object, CUSTOM_DATA_CUSTOM_DATA, customValue)) != ANI_OK) {
+    if (!SetCustomDataParam(env, object, want)) {
+        return object;
+    }
+    if (want.HasParameter(WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY)) {
+        auto type = want.GetIntParam(WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY, -1);
+        ani_enum_item typeItem = nullptr;
+        AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env, AUTO_FILL_TRIGGER_TYPE_ENUM_NAME, type, typeItem);
+        if ((status = env->Object_SetPropertyByName_Ref(object, TRIGGER_TYPE, typeItem)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
+            return object;
+        }
+    }
+    return object;
+}
+
+ani_object EtsAutoFillExtensionUtil::SetSaveRequest(ani_env *env, ani_object object, const AAFwk::Want &want)
+{
+    ani_status status = ANI_ERROR;
+    if (want.HasParameter(WANT_PARAMS_VIEW_DATA)) {
+        std::string viewDataString = want.GetStringParam(WANT_PARAMS_VIEW_DATA);
+        if (viewDataString.empty()) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty view data");
+            return object;
+        }
+        AbilityBase::ViewData viewData;
+        viewData.FromJsonString(viewDataString);
+        ani_object viewDataValue = WrapViewData(env, viewData);
+        if ((status = env->Object_SetPropertyByName_Ref(object, VIEW_DATA_VIEW_DATA, viewDataValue)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
+            return object;
         }
     }
     return object;

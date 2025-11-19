@@ -51,6 +51,7 @@ constexpr int MAX_LAYER = 8;
 constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
 constexpr int FREEZE_EVENT_MAX_SIZE = 200;
+constexpr int64_t FREEZE_KILL_LIMIT = 60000;
 static constexpr uint8_t ARR_SIZE = 7;
 static constexpr uint8_t DECIMAL = 10;
 static constexpr uint8_t FREE_ASYNC_INDEX = 6;
@@ -253,6 +254,9 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     faultNotifyData.applicationHeapInfo = faultData.applicationHeapInfo;
     faultNotifyData.processLifeTime = faultData.processLifeTime;
+    faultNotifyData.markedId = faultData.markedId;
+    faultNotifyData.processedId = faultData.processedId;
+    faultNotifyData.dispatchedEventId = faultData.dispatchedEventId;
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%{public}d-name:%{public}s",
         appInfo.pid, faultData.errorObject.name.c_str());
     return MergeNotifyInfo(faultNotifyData, appInfo);
@@ -348,6 +352,9 @@ FaultData AppfreezeManager::GetFaultNotifyData(const FaultData& faultData, int p
     faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     faultNotifyData.applicationHeapInfo = faultData.applicationHeapInfo;
     faultNotifyData.processLifeTime = faultData.processLifeTime;
+    faultNotifyData.markedId = faultData.markedId;
+    faultNotifyData.processedId = faultData.processedId;
+    faultNotifyData.dispatchedEventId = faultData.dispatchedEventId;
     return faultNotifyData;
 }
 
@@ -492,6 +499,9 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     eventInfo.enableFreeze = faultData.isEnableMainThreadSample;
     eventInfo.applicationHeapInfo = faultData.applicationHeapInfo;
     eventInfo.processLifeTime = faultData.processLifeTime;
+    eventInfo.markedId = faultData.markedId;
+    eventInfo.processedId = faultData.processedId;
+    eventInfo.dispatchedEventId = faultData.dispatchedEventId;
 
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
@@ -1024,6 +1034,84 @@ bool AppfreezeManager::CheckAppfreezeHappend(int32_t pid, const std::string& eve
                 pid, eventName.c_str());
             return true;
         }
+    }
+    return false;
+}
+
+bool AppfreezeManager::IsBetaVersion()
+{
+    return g_betaVersion;
+}
+
+bool AppfreezeManager::RemoveOldKillInfo()
+{
+    std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
+    if (freezeKillThreadMap_.size() < AppfreezeUtil::MAX_MAP_SIZE) {
+        return true;
+    }
+    int removeCount = 0;
+    int64_t curTime = GetFreezeCurrentTime();
+    for (auto it = freezeKillThreadMap_.begin(); it != freezeKillThreadMap_.end();) {
+        auto interval = curTime - it->second.occurTime;
+        if (interval > FREEZE_KILL_LIMIT || interval < 0) {
+            it = freezeKillThreadMap_.erase(it);
+            removeCount++;
+        } else {
+            ++it;
+        }
+    }
+    TAG_LOGI(AAFwkTag::APPDFR, "remove old tasks count: %{public}d, "
+        "current tasks count: %{public}zu", removeCount, freezeKillThreadMap_.size());
+    return removeCount != 0;
+}
+
+void AppfreezeManager::InsertKillThread(int32_t killState, int32_t pid, int32_t uid, const std::string& bundleName)
+{
+    if (!RemoveOldKillInfo()) {
+        return;
+    }
+    std::string key = bundleName + AppfreezeUtil::KEY_SEPARATOR + std::to_string(pid) +
+        AppfreezeUtil::KEY_SEPARATOR + std::to_string(uid);
+    std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
+    if (freezeKillThreadMap_.find(key) != freezeKillThreadMap_.end()) {
+        freezeKillThreadMap_[key].killState = killState;
+        freezeKillThreadMap_[key].occurTime = GetFreezeCurrentTime();
+    } else {
+        AppFreezeKillInfo info;
+        info.killState = killState;
+        info.occurTime = GetFreezeCurrentTime();
+        freezeKillThreadMap_[key] = info;
+    }
+    TAG_LOGI(AAFwkTag::APPDFR, "insert or update key: %{public}s", key.c_str());
+}
+
+bool AppfreezeManager::CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName)
+{
+    std::string key = bundleName + AppfreezeUtil::KEY_SEPARATOR + std::to_string(pid) +
+        AppfreezeUtil::KEY_SEPARATOR + std::to_string(uid);
+    std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
+    if (freezeKillThreadMap_.empty()) {
+        return false;
+    }
+    auto it = freezeKillThreadMap_.find(key);
+    if (it != freezeKillThreadMap_.end()) {
+        return it->second.killState >= 0;
+    }
+    return false;
+}
+
+bool AppfreezeManager::IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,
+    const std::string& eventName)
+{
+    if (CheckThreadKilled(pid, uid, bundleName)) {
+        TAG_LOGW(AAFwkTag::APPDFR, "bundleName: %{public}s has been killed, pid: %{public}d",
+            bundleName.c_str(), pid);
+        return true;
+    }
+    if (IsProcessDebug(pid, bundleName)) {
+        TAG_LOGW(AAFwkTag::APPDFR, "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
+            eventName.c_str(), pid, bundleName.c_str());
+        return true;
     }
     return false;
 }

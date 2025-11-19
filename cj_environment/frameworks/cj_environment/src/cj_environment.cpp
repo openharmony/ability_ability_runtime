@@ -45,9 +45,15 @@ namespace {
 const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NAME;
 const std::string CJ_COMPATIBILITY_PATH = SANDBOX_LIB_PATH + "/runtime";
 const std::string CJ_MOCK_PATH = SANDBOX_LIB_PATH + "/ohos";
-const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk:/system/lib64/chipset-sdk";
+#ifdef APP_USE_ARM
+const std::string CJ_CHIPSDK_PATH = "/system/lib/chipset-sdk-sp:/system/lib/chipset-sdk";
+const std::string CJ_SDK_PATH = "/system/lib/platformsdk/cjsdk";
+const std::string CJ_RUNTIME_PATH = "/system/lib/platformsdk/cjsdk/runtime";
+#else
+const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-sdk-sp:/system/lib64/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib64/platformsdk/cjsdk";
 const std::string CJ_RUNTIME_PATH = "/system/lib64/platformsdk/cjsdk/runtime";
+#endif
 const std::string CJ_ASAN_PATH = SANDBOX_LIB_PATH + "/asan";
 } // namespace
 
@@ -298,6 +304,7 @@ CJEnvironment* CJEnvironment::GetInstance()
     return instance_;
 }
 
+#ifdef __OHOS__
 bool CJEnvironment::RegisterCangjieCallback()
 {
     constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
@@ -343,6 +350,7 @@ void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
     auto dso = DynamicLoadLibrary(&sdk, runtimeLibName, 1);
     return dso;
 }
+#endif
 
 bool CJEnvironment::LoadRuntimeApis()
 {
@@ -420,6 +428,26 @@ void CJEnvironment::RegisterEventHandlerCallbacks()
         return;
     }
     lazyApis_->RegisterEventHandlerCallbacks(PostTaskWrapper, HasHigherPriorityTaskWrapper);
+}
+
+void CJEnvironment::DumpCjHeap(int fd)
+{
+    auto instance = CJEnvironment::GetInstance();
+    if (instance == nullptr) {
+        LOGE("cjEnv instance is null.");
+        return;
+    }
+    instance->DumpHeapSnapshot(fd);
+}
+
+void CJEnvironment::GC()
+{
+    auto instance = CJEnvironment::GetInstance();
+    if (instance == nullptr) {
+        LOGE("cjEnv instance is null.");
+        return;
+    }
+    instance->ForceFullGC();
 }
 
 int CJEnvironment::InitCJRuntime()
@@ -687,7 +715,9 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         UnLoadCJLibrary(handle);
         return nullptr;
     }
+#ifdef __OHOS__
     CJEnvironment::RegisterCangjieCallback();
+#endif
     isLoadCJLibrary_ = true;
     return handle;
 }
@@ -897,10 +927,10 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
             CJEnvironment::SetAppVersion(version);
         },
         .dumpHeapSnapshot = [](int fd) {
-            CJEnvironment::GetInstance()->DumpHeapSnapshot(fd);
+            CJEnvironment::DumpCjHeap(fd);
         },
         .forceFullGC = []() {
-            CJEnvironment::GetInstance()->ForceFullGC();
+            CJEnvironment::GC();
         }
     };
     return &gCJEnvMethods;

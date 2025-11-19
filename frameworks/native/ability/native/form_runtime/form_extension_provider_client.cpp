@@ -30,6 +30,21 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+namespace {
+    const std::vector<const std::string> REMOVE_PARAMS = {
+        Constants::FORM_CONNECT_ID,
+        Constants::ACQUIRE_TYPE,
+        Constants::FORM_SUPPLY_INFO,
+        Constants::PARAM_FORM_HOST_TOKEN,
+        Constants::FORM_COMP_ID,
+        Constants::FORM_DENSITY,
+        Constants::FORM_PROCESS_ON_ADD_SURFACE,
+        Constants::FORM_ALLOW_UPDATE,
+        Constants::PARAM_LAYOUT_WIDTH_KEY,
+        Constants::PARAM_LAYOUT_HEIGHT_KEY,
+        Constants::PARAM_FORM_VIEW_SCALE
+    };
+}
 
 int FormExtensionProviderClient::AcquireProviderFormInfo(const AppExecFwk::FormJsInfo &formJsInfo, const Want &want,
     const sptr<IRemoteObject> &callerToken)
@@ -87,14 +102,9 @@ void FormExtensionProviderClient::AcquireFormExtensionProviderInfo(const AppExec
     } else {
         Want createWant(want);
         createWant.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo.formId));
-        createWant.RemoveParam(Constants::FORM_CONNECT_ID);
-        createWant.RemoveParam(Constants::ACQUIRE_TYPE);
-        createWant.RemoveParam(Constants::FORM_SUPPLY_INFO);
-        createWant.RemoveParam(Constants::PARAM_FORM_HOST_TOKEN);
-        createWant.RemoveParam(Constants::FORM_COMP_ID);
-        createWant.RemoveParam(Constants::FORM_DENSITY);
-        createWant.RemoveParam(Constants::FORM_PROCESS_ON_ADD_SURFACE);
-        createWant.RemoveParam(Constants::FORM_ALLOW_UPDATE);
+        for (const std::string &param : REMOVE_PARAMS) {
+            createWant.RemoveParam(param);
+        }
         createWant.SetElement(want.GetElement());
         if (!createWant.HasParameter(Constants::LAUNCH_REASON_KEY)) {
             createWant.SetParam(Constants::LAUNCH_REASON_KEY, Constants::FORM_DEFAULT);

@@ -545,11 +545,11 @@ HWTEST_F(AbilityManagerClientTest, QueryPreLoadUIExtensionRecord_0100, TestSize.
 {
     OHOS::AppExecFwk::ElementName elementName;
     std::string moduleName {};
-    std::string hostBundleName {};
+    int32_t hostPid = 1;
     int32_t recordNum = 1;
     int32_t userId = 1;
     auto result = AbilityManagerClient::GetInstance()->QueryPreLoadUIExtensionRecord(elementName,
-        moduleName, hostBundleName, recordNum, userId);
+        moduleName, hostPid, recordNum, userId);
     EXPECT_EQ(result, ERR_OK);
 }
 

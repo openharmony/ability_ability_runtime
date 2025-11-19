@@ -235,7 +235,7 @@ int32_t AppSpawnClient::SetMountPermission(const AppSpawnStartMsg &startMsg, App
 int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)
 {
     int32_t ret = 0;
-    uint32_t startFlagTmp = startMsg.flags;
+    uint64_t startFlagTmp = startMsg.flags;
     int flagIndex = 0;
     while (startFlagTmp > 0) {
         if (startFlagTmp & START_FLAG_TEST_NUM) {
@@ -263,13 +263,6 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
     }
     if (startMsg.isolatedExtension) {
         ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_EXTENSION_SANDBOX);
-        if (ret != 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
-            return ret;
-        }
-    }
-    if (startMsg.flags & APP_FLAGS_CLONE_ENABLE) {
-        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_CLONE_ENABLE);
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;

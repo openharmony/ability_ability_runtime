@@ -14,10 +14,14 @@
  */
 #include "ets_application_context_utils.h"
 
+#include <mutex>
+
+#include "ability_runtime_error_util.h"
 #include "ani_enum_convert.h"
 #include "application_context_manager.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
+#include "ets_interop_ability_lifecycle_callback.h"
 #include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 
@@ -39,6 +43,10 @@ const std::string TYPE_ABILITY_LIFECYCLE = "abilityLifecycle";
 
 std::mutex EtsApplicationContextUtils::abilityLifecycleCallbackLock_;
 std::shared_ptr<EtsAbilityLifecycleCallback> EtsApplicationContextUtils::abilityLifecycleCallback_ = nullptr;
+
+
+std::mutex g_interopAbilityLifecycleCallbackLock;
+std::shared_ptr<EtsInteropAbilityLifecycleCallback> interopAbilityLifecycleCallback_ = nullptr;
 
 void EtsApplicationContextUtils::Clean(ani_env *env, ani_object object)
 {
@@ -246,6 +254,100 @@ void EtsApplicationContextUtils::OnGetAllRunningInstanceKeys(ani_env *env, ani_o
     ani_object stringArray;
     AppExecFwk::WrapArrayString(env, stringArray, instanceKeys);
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), stringArray);
+}
+
+void EtsApplicationContextUtils::NativeOnInteropLifecycleCallbackSync(ani_env *env,
+    ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnInteropLifecycleCallbackSync Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    etsContext->RegisterInteropAbilityLifecycleCallback(env, callback);
+}
+
+void EtsApplicationContextUtils::RegisterInteropAbilityLifecycleCallback(ani_env *env, ani_object callback)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "call RegisterInteropAbilityLifecycleCallback");
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is null");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    std::lock_guard<std::mutex> lock(g_interopAbilityLifecycleCallbackLock);
+    if (interopAbilityLifecycleCallback_ != nullptr) {
+        auto result = interopAbilityLifecycleCallback_->Register(callback);
+        if (result < 0) {
+            TAG_LOGE(AAFwkTag::APPKIT, "register failed: %{public}d", result);
+            EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        }
+        return;
+    }
+
+    interopAbilityLifecycleCallback_ = std::make_shared<EtsInteropAbilityLifecycleCallback>(env);
+    auto result = interopAbilityLifecycleCallback_->Register(callback);
+    if (result < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "register failed: %{public}d", result);
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    applicationContext->RegisterInteropAbilityLifecycleCallback(interopAbilityLifecycleCallback_);
+}
+
+void EtsApplicationContextUtils::NativeOffInteropLifecycleCallbackSync(ani_env *env,
+    ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffInteropLifecycleCallbackSync Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is null");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    etsContext->UnregisterInteropAbilityLifecycleCallback(env, callback);
+}
+
+void EtsApplicationContextUtils::UnregisterInteropAbilityLifecycleCallback(ani_env *env, ani_object callback)
+{
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is null");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(g_interopAbilityLifecycleCallbackLock);
+    if (interopAbilityLifecycleCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "interopAbilityLifecycleCallback_ is null");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+
+    ani_boolean isUndefined = true;
+    env->Reference_IsUndefined(callback, &isUndefined);
+    if (isUndefined) {
+        interopAbilityLifecycleCallback_->Unregister();
+    } else if (!interopAbilityLifecycleCallback_->Unregister(callback)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Unregister failed");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+
+    applicationContext->UnregisterInteropAbilityLifecycleCallback(interopAbilityLifecycleCallback_);
+    if (interopAbilityLifecycleCallback_->Empty()) {
+        interopAbilityLifecycleCallback_.reset();
+    }
 }
 
 void EtsApplicationContextUtils::OnRestartApp(ani_env *env, ani_object aniObj, ani_object wantObj)
@@ -637,6 +739,25 @@ ani_int EtsApplicationContextUtils::RegisterAbilityLifecycleCallback(ani_env *en
     return ani_int(ERROR_CODE_INVALID_PARAM);
 }
 
+void EtsApplicationContextUtils::NativeOffAbilityLifecycleCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffAbilityLifecycleCheck Call");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return;
+    }
+    auto applicationContext = etsContext->applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    }
+}
+
 void EtsApplicationContextUtils::NativeOffLifecycleCallbackSync(ani_env *env,
     ani_object aniObj, ani_string type, ani_int callbackId, ani_object callback)
 {
@@ -743,6 +864,26 @@ ani_int EtsApplicationContextUtils::NativeOnEnvironmentSync(ani_env *env, ani_ob
         return ANI_ERROR;
     }
     return etsContext->OnNativeOnEnvironmentSync(env, aniObj, envCallback);
+}
+
+void EtsApplicationContextUtils::NativeOffEnvironmentCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffEnvironmentCheck Call");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsContext");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return;
+    }
+    auto applicationContext = etsContext->applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    }
 }
 
 void EtsApplicationContextUtils::NativeOffEnvironmentSync(ani_env *env, ani_object aniObj,
@@ -907,6 +1048,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env *aniEnv)
             ani_native_function {"nativeOffLifecycleCallbackSync",
                 "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffLifecycleCallbackSync)},
+            ani_native_function {"nativeOffAbilityLifecycleCheck", ":V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffAbilityLifecycleCheck)},
             ani_native_function {"nativegetRunningProcessInformation",
                 "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetRunningProcessInformation)},
@@ -929,6 +1072,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env *aniEnv)
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOnEnvironmentSync)},
             ani_native_function {"nativeOffEnvironmentSync", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffEnvironmentSync)},
+            ani_native_function {"nativeOffEnvironmentCheck", ":V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffEnvironmentCheck)},
             ani_native_function {"nativeOnApplicationStateChangeSync",
                 "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback;:V",
                 reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOnApplicationStateChangeSync)},
@@ -941,6 +1086,12 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env *aniEnv)
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentInstanceKey)},
             ani_native_function {"nativegetCurrentAppCloneIndex", ":I",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentAppCloneIndex)},
+            ani_native_function {"nativeOnInteropLifecycleCallbackSync",
+                "L@ohos/app/ability/InteropAbilityLifecycleCallback/InteropAbilityLifecycleCallback;:V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOnInteropLifecycleCallbackSync)},
+            ani_native_function {"nativeOffInteropLifecycleCallbackSync",
+                "L@ohos/app/ability/InteropAbilityLifecycleCallback/InteropAbilityLifecycleCallback;:V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffInteropLifecycleCallbackSync)},
         };
         if ((status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
             applicationContextFunctions.size())) != ANI_OK) {

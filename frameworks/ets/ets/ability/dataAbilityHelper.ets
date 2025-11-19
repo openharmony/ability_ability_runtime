@@ -13,4 +13,4 @@
  * limitations under the License.
 */
 
-type PacMap = Record<string, number | string | boolean | Array<string | number | boolean> | null>;
+export type PacMap = Record<string, int | double | string | boolean | Array<string | int | double | boolean> | null>;

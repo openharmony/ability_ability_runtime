@@ -19,6 +19,7 @@
 #include "start_options.h"
 #include "ani_common_util.h"
 #include "ani_common_want.h"
+#include "open_link_options.h"
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixel_map_ani.h"
 #include "image_ani_utils.h"
@@ -39,6 +40,8 @@ bool UnwrapStartWindowOption(ani_env *env, ani_object param,
     std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption);
 bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want &want,
     AAFwk::StartOptions &startOptions);
+void UnWrapOpenLinkOptions(
+    ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H

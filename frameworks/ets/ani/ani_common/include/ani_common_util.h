@@ -56,6 +56,7 @@ ani_object CreateDouble(ani_env *env, ani_double value);
 ani_object CreateBoolean(ani_env *env, ani_boolean value);
 ani_object CreateLong(ani_env *env, ani_long value);
 ani_object CreateInt(ani_env *env, ani_int value);
+ani_object CreateEtsNull(ani_env *env);
 
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined);
@@ -90,6 +91,8 @@ ani_env *AttachAniEnv(ani_vm * etsVm, bool &isAttachThread);
 void DetachAniEnv(ani_vm * etsVm, bool &isAttachThread);
 bool IsValidProperty(ani_env *env, ani_ref param);
 bool CheckCallerIsSystemApp();
+ani_object WrapLocale(ani_env *env, const std::string &locale);
+ani_object CreateIntAniArray(ani_env *env, const std::vector<int32_t> &dataArry);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H

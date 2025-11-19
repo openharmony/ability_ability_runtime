@@ -13,15 +13,23 @@
  * limitations under the License.
  */
 
-#include "native_module_manager.h"
+#include "native_engine/native_engine.h"
+#include "js_insight_intent_provider.h"
 
-NativeModuleManager* NativeModuleManager::GetInstance()
-{
-    return nullptr;
-}
+/*
+ * The module definition.
+ */
+static napi_module _module = {
+    .nm_version = 0,
+    .nm_filename = nullptr,
+    .nm_register_func = OHOS::AbilityRuntime::CreateJsInsightIntentProvider,
+    .nm_modname = "app.ability.insightIntentProvider",
+};
 
-NativeModule* LoadNativeModule(const char* moduleName, const char* path, bool isAppModule,
-    std::string& errInfo, bool internal = false, const char* relativePath = "")
+/*
+ * The module registration.
+ */
+extern "C" __attribute__((constructor)) void NAPI_application_InsightIntentProvider_AutoRegister(void)
 {
-    return nullptr;
+    napi_module_register(&_module);
 }

@@ -728,7 +728,8 @@ public:
      * @param clearPageStack.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    ErrCode KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "Abilityms::KillProcess");
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -977,10 +978,12 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false);
+        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false,
+        bool promotePriority = false);
 
     /**
      * Start Ability, connect session with common ability.
@@ -991,10 +994,12 @@ public:
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
+        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false,
+        bool promotePriority = false);
 
     /**
      * Start Ability for prelaunch
@@ -1851,14 +1856,14 @@ public:
      *
      * @param element, The uiextension ElementName.
      * @param moduleName, The uiextension moduleName.
-     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param hostPid, The uiextension caller pid.
      * @param recordNum, The returned count of uiextension.
      * @param userId, The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                           const std::string &moduleName,
-                                          const std::string &hostBundleName,
+                                          const int32_t hostPid,
                                           int32_t &recordNum,
                                           int32_t userId = DEFAULT_INVAL_VALUE);
 

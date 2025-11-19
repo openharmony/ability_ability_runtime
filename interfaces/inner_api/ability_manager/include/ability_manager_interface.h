@@ -888,7 +888,8 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) = 0;
+    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "Abilityms::KillProcess") = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1111,10 +1112,12 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false) = 0;
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false,
+        bool promotePriority = false) = 0;
 
     /**
      * Start Ability, connect session with common ability.
@@ -1125,10 +1128,12 @@ public:
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent = false)
+        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent = false,
+        bool promotePriority = false)
     {
         return 0;
     };
@@ -2265,7 +2270,7 @@ public:
      */
     virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                   const std::string &moduleName,
-                                                  const std::string &hostBundleName,
+                                                  const int32_t hostPid,
                                                   int32_t &recordNum,
                                                   int32_t userId = DEFAULT_INVAL_VALUE)
     {

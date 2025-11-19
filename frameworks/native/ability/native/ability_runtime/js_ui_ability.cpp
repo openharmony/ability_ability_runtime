@@ -31,6 +31,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
@@ -42,7 +43,6 @@
 #include "js_runtime_utils.h"
 #include "js_utils.h"
 #ifdef SUPPORT_SCREEN
-#include "distributed_client.h"
 #include "js_window_stage.h"
 #include "scene_board_judgement.h"
 #endif
@@ -65,15 +65,6 @@ const std::string METHOD_NAME = "WindowScene::GoForeground";
 // Numerical base (radix) that determines the valid characters and their interpretation.
 #ifdef SUPPORT_SCREEN
 const int32_t BASE_DISPLAY_ID_NUM (10);
-constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
-constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
-constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
-enum CollaborateResult {
-    ACCEPT = 0,
-    REJECT = 1,
-    ON_COLLABORATE_NOT_IMPLEMENTED = 10,
-    ON_COLLABORATE_ERR = 11,
-};
 #endif
 constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const int32_t API12 = 12;
@@ -260,6 +251,7 @@ JsUIAbility::~JsUIAbility()
 #ifdef SUPPORT_SCREEN
     jsRuntime_.FreeNativeReference(std::move(jsWindowStageObj_));
 #endif
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
 }
 
 void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
@@ -482,6 +474,9 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     if (applicationContext != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityCreate(ability);
+        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
+            jsAbilityObj_->GetNapiValue());
+        applicationContext->DispatchOnAbilityCreate(interopObject);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -619,9 +614,12 @@ void JsUIAbility::OnStopCallback()
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityDestroy(ability);
+        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
+        applicationContext->DispatchOnAbilityDestroy(interopObject);
     }
 }
 
@@ -664,10 +662,15 @@ void JsUIAbility::OnSceneCreated()
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr && jsWindowStageObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
         applicationContext->DispatchOnWindowStageCreate(ability, stage);
+        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
+        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsWindowStageObj_->GetNapiValue());
+        applicationContext->DispatchOnWindowStageCreate(interopAbility, interopWindowStage);
     }
 
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -755,10 +758,15 @@ void JsUIAbility::onSceneDestroyed()
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr && jsWindowStageObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
         applicationContext->DispatchOnWindowStageDestroy(ability, stage);
+        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
+        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsWindowStageObj_->GetNapiValue());
+        applicationContext->DispatchOnWindowStageDestroy(interopAbility, interopWindowStage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -825,6 +833,9 @@ void JsUIAbility::CallOnForegroundFunc(const Want &want)
     if (applicationContext != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityForeground(ability);
+        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
+            jsAbilityObj_->GetNapiValue());
+        applicationContext->DispatchOnAbilityForeground(interopObject);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -855,9 +866,12 @@ void JsUIAbility::OnBackground()
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityBackground(ability);
+        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
+            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
+        applicationContext->DispatchOnAbilityBackground(interopObject);
     }
     auto want = GetWant();
     if (want != nullptr) {
@@ -1300,13 +1314,17 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-
+    RegisterDelayResultCallback(executeParam);
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
         // callback has removed, release in insight intent executor.
         TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+            executeParam->insightIntentId_);
+        return;
     }
+    intentId_ = executeParam->insightIntentId_;
 }
 
 void JsUIAbility::ExecuteInsightIntentPage(const Want &want,
@@ -1453,34 +1471,6 @@ int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
     }
     ret = (ret == CollaborateResult::ACCEPT) ? CollaborateResult::ACCEPT : CollaborateResult::REJECT;
     return ret;
-}
-
-void JsUIAbility::HandleCollaboration(const Want &want)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
-        return;
-    }
-    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
-        (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
-        (const_cast<Want &>(want)).RemoveParam(IS_CALLING_FROM_DMS);
-        SetWant(want);
-        OHOS::AAFwk::WantParams wantParams = want.GetParams();
-        int32_t resultCode = OnCollaborate(wantParams);
-        auto abilityContext = GetAbilityContext();
-        if (abilityContext == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
-            return;
-        }
-        OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
-        auto collabToken = param.GetStringParam(COLLABORATE_KEY);
-        auto uid = abilityInfo_->uid;
-        auto callerPid = getpid();
-        auto accessTokenId = abilityInfo_->applicationInfo.accessTokenId;
-        AAFwk::DistributedClient dmsClient;
-        dmsClient.OnCollaborateDone(collabToken, resultCode, callerPid, uid, accessTokenId);
-    }
 }
 #endif
 
@@ -1861,6 +1851,7 @@ sptr<IRemoteObject> JsUIAbility::CallRequest()
         return nullptr;
     }
 
+    FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, "JsUIAbility::CallRequest");
     if (remoteCallee_ != nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "remoteCallee_ is exist");
         return remoteCallee_;
@@ -2312,6 +2303,24 @@ void JsUIAbility::NotifyWindowDestroy()
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AAFwkTag::UIABILITY, "scene return error.");
     }
+}
+
+void JsUIAbility::RegisterDelayResultCallback(const std::shared_ptr<InsightIntentExecuteParam> &executeParam)
+{
+    auto delayResultCallback = [intentId = executeParam->insightIntentId_, token = token_]
+        (AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
+        TAG_LOGE(AAFwkTag::UIABILITY, "delayResultCallback start");
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "ExecuteInsightIntentDone ret : %{public}d", ret);
+        }
+        return ret;
+    };
+    
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
+    InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(
+        executeParam->insightIntentId_, {delayResultCallback, isDecorator});
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -47,5 +47,11 @@ const std::string &StartupConfig::GetCustomization() const
 {
     return customization_;
 }
+
+int32_t StartupConfig::Init(Runtime &runtime, std::shared_ptr<Context> context, const std::string &srcEntry,
+    std::shared_ptr<AAFwk::Want> want)
+{
+    return ERR_OK;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

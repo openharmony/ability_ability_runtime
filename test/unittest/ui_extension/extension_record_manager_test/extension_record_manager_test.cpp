@@ -255,8 +255,8 @@ HWTEST_F(ExtensionRecordManagerTest, GetAbilityRecordBySessionInfo_0100, TestSiz
     std::string  bundleName = "";
     extRecordMgr->GetOrCreateExtensionRecord(abilityRequest, bundleName, abilityRecord2, bLoaded);
     extRecordMgr->GetOrCreateExtensionRecord(abilityRequest2, bundleName, abilityRecord2, bLoaded);
-    bundleName = "";
-    extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, bundleName);
+    int32_t hostPid = 0;
+    extRecordMgr->GetHostPidForExtensionId(extensionRecordId, hostPid);
 }
 
 /**
@@ -450,8 +450,9 @@ HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Lev
     std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
     std::string hostBundleName = "testHostBundleName";
     bool isLoaded = false;
+    int32_t hostPid = 0;
 
-    bool result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    bool result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 
     std::string deviceId = "testDeviceId";
@@ -459,23 +460,23 @@ HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Lev
     std::string abilityName = "testAbilityName";
     std::string moduleName = "testModuleName";
     abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
-    auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostBundleName);
+    auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostPid);
     std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
     std::vector<std::shared_ptr<ExtensionRecord>> extensions;
 
     extensions.push_back(extRecord);
     extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_TRUE(isLoaded);
     EXPECT_TRUE(result);
 
     extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 
     nullExtensions.push_back(nullptr);
     extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 }
 
@@ -510,6 +511,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     std::shared_ptr<ExtensionRecord> extRecord =
         std::make_shared<ExtensionRecord>(abilityRecord);
     extRecord->abilityRecord_ = abilityRecord;
+    int32_t hostPid = 0;
     std::string hostBundleName = "testHostBundleName";
     bool isLoaded = false;
 
@@ -519,7 +521,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     std::string moduleName = "testModuleName";
     abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     auto extensionRecordMapKey = std::make_tuple(abilityName,
-        bundleName, moduleName, hostBundleName);
+        bundleName, moduleName, hostPid);
     std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
     std::vector<std::shared_ptr<ExtensionRecord>> extensions;
 
@@ -527,7 +529,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
     auto ret = extRecordMgr->GetOrCreateExtensionRecord(abilityRequest,
         hostBundleName, abilityRecord, isLoaded);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**

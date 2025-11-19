@@ -1756,7 +1756,11 @@ void JSUIExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::Eleme
         TAG_LOGE(AAFwkTag::UI_EXT, "null methodOnConnect");
         return;
     }
-    napi_call_function(env_, obj, methodOnConnect, ARGC_TWO, argv, nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "Call onConnect");
+    napi_status status = napi_call_function(env_, obj, methodOnConnect, ARGC_TWO, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 void JSUIExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
@@ -1802,7 +1806,11 @@ void JSUIExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::El
 
     // release connect
     RemoveConnection(connectionId_);
-    napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "Call onDisconnect");
+    napi_status status = napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 void JSUIExtensionConnection::SetJsConnectionObject(napi_value jsConnectionObject)

@@ -2185,7 +2185,10 @@ napi_value JsAbilityContext::OnStartSelfUIAbilityInCurrentProcess(napi_env env, 
         return CreateJsUndefined(env);
     }
     AAFwk::Want want;
-    AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
+    if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+        ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return CreateJsUndefined(env);
+    }
 
     std::string specifiedFlag;
     if (!ConvertFromJsValue(env, info.argv[INDEX_ONE], specifiedFlag)) {
@@ -3352,7 +3355,7 @@ napi_value JsAbilityContext::OnRestartAppWithWindow(napi_env env, NapiCallbackIn
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
-
+    InheritWindowMode(want);
     auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, innerErrCode, want] {

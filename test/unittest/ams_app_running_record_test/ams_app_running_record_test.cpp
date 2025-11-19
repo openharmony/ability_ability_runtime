@@ -2744,7 +2744,7 @@ HWTEST_F(AmsAppRunningRecordTest, CanRestartResidentProc_002, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest CanRestartResidentProc_002 start");
     std::shared_ptr<AppRunningRecord> record = GetTestAppRunningRecord();
     record->restartResidentProcCount_ = -1;
-    record->restartTimeMillis_ = 0;
+    record->restartTimeMillis_ = -120001;
     EXPECT_TRUE(record->CanRestartResidentProc());
 
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest CanRestartResidentProc_002 end");
@@ -2816,6 +2816,9 @@ HWTEST_F(AmsAppRunningRecordTest, CanRestartResidentProc_003, TestSize.Level1)
     record4->AbilityBackground(abilityRecord4);
 
     abilityRecord4->SetState(AbilityState::ABILITY_STATE_BACKGROUND);
+    record4->AbilityBackground(abilityRecord4);
+
+    abilityRecord4->SetState(AbilityState::ABILITY_STATE_READY);
     record4->AbilityBackground(abilityRecord4);
 
     auto abilityInfo5 = std::make_shared<AbilityInfo>();

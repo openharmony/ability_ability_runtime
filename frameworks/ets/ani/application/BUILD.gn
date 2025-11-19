@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("application_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -43,10 +44,11 @@ ohos_shared_library("application_ani") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_native_path}/appkit:application_context_manager",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${ability_runtime_services_path}/common:perm_verification",
-    "${ability_runtime_native_path}/appkit:appkit_native",
   ]
 
   external_deps = [

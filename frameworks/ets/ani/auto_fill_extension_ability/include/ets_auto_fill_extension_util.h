@@ -48,6 +48,7 @@ struct CustomData {
 class EtsAutoFillExtensionUtil {
 public:
     static ani_object WrapFillRequest(ani_env *env, const AAFwk::Want &want);
+    static ani_object WrapSaveRequest(ani_env *env, const AAFwk::Want &want);
     static ani_object WrapUpdateRequest(ani_env *env, const AAFwk::WantParams &wantParams);
     static ani_object WrapViewData(ani_env *env, const AbilityBase::ViewData &viewData);
     static ani_object WrapPageNodeInfo(ani_env *env, const AbilityBase::PageNodeInfo &pageNodeInfo);
@@ -70,6 +71,7 @@ public:
 private:
     static bool CreateObject(ani_env *env, ani_object &object, const std::string &className);
     static ani_object SetFillRequest(ani_env *env, ani_object object, const AAFwk::Want &want);
+    static ani_object SetSaveRequest(ani_env *env, ani_object object, const AAFwk::Want &want);
     static ani_object SetViewData(ani_env *env, ani_object object, const AbilityBase::ViewData &viewData);
     static void SetViewDataArray(ani_env *env, ani_object &object, const AbilityBase::ViewData &viewData);
     static ani_object SetPageNodeInfo(ani_env *env, ani_object object, const AbilityBase::PageNodeInfo &pageNodeInfo);
@@ -77,6 +79,7 @@ private:
     static void UnwrapViewDataString(ani_env *env, const ani_object object, AbilityBase::ViewData &viewData);
     static void UnwrapViewDataBoolean(ani_env *env, const ani_object object, AbilityBase::ViewData &viewData);
     static void UnwrapPageNodeInfoString(ani_env *env, const ani_object object, AbilityBase::PageNodeInfo &node);
+    static bool SetCustomDataParam(ani_env *env, ani_object object, const AAFwk::Want &want);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

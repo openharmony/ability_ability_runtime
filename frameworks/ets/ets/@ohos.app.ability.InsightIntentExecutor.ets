@@ -14,9 +14,10 @@
  */
 
 import window from '@ohos.window';
-import insightIntent from './@ohos.app.ability.insightIntent';
+import insightIntent from '@ohos.app.ability.insightIntent';
 import InsightIntentContext from '@ohos.app.ability.InsightIntentContext';
 import type UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
+import { RecordData } from '@ohos.base';
 
 export default class InsightIntentExecutor {
   context: InsightIntentContext = {};
@@ -28,7 +29,7 @@ export default class InsightIntentExecutor {
 
   public native nativeOnExecuteResult(data: insightIntent.ExecuteResult): void;
 
-  public callOnExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>,
+  public callOnExecuteInUIAbilityForegroundMode(name: string, param: Record<string, RecordData>,
     pageLoader: window.WindowStage): insightIntent.ExecuteResult {
     let p = this.onExecuteInUIAbilityForegroundMode(name, param, pageLoader);
     if (p instanceof Promise) {
@@ -44,7 +45,7 @@ export default class InsightIntentExecutor {
     }
   }
 
-  public callOnExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
+  public callOnExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult {
     let p = this.onExecuteInUIAbilityBackgroundMode(name, param);
     if (p instanceof Promise) {
@@ -60,7 +61,7 @@ export default class InsightIntentExecutor {
     }
   }
 
-  public callOnExecuteInUIExtensionAbility(name: string, param: Record<string, Object>,
+  public callOnExecuteInUIExtensionAbility(name: string, param: Record<string, RecordData>,
     pageLoader: UIExtensionContentSession): insightIntent.ExecuteResult {
     let p = this.onExecuteInUIExtensionAbility(name, param, pageLoader);
     if (p instanceof Promise) {
@@ -76,7 +77,7 @@ export default class InsightIntentExecutor {
     }
   }
 
-  public callOnExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
+  public callOnExecuteInServiceExtensionAbility(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult {
     let p = this.onExecuteInServiceExtensionAbility(name, param);
     if (p instanceof Promise) {
@@ -92,25 +93,25 @@ export default class InsightIntentExecutor {
     }
   }
 
-  onExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>, pageLoader: window.WindowStage):
+  onExecuteInUIAbilityForegroundMode(name: string, param: Record<string, RecordData>, pageLoader: window.WindowStage):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
-  onExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
+  onExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
-  onExecuteInUIExtensionAbility(name: string, param: Record<string, Object>, pageLoader: UIExtensionContentSession):
+  onExecuteInUIExtensionAbility(name: string, param: Record<string, RecordData>, pageLoader: UIExtensionContentSession):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
-  onExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
+  onExecuteInServiceExtensionAbility(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;

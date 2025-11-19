@@ -2008,6 +2008,21 @@ int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid, const std::string &instance
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::SignRestartProcess(int32_t pid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SIGN_RESTART_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -2416,19 +2431,20 @@ int32_t AppMgrProxy::KillAppSelfWithInstanceKey(const std::string &instanceKey, 
     return reply.ReadInt32();
 }
 
-void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
+int32_t AppMgrProxy::KillProcessByPidForExit(int32_t pid, const std::string &reason)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return;
+        return ERR_INVALID_VALUE;
     }
-    PARCEL_UTIL_WRITE_NORET(data, Int32, specifiedId);
-    PARCEL_UTIL_WRITE_NORET(data, String, instanceKey);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, reason);
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_PROCESS_BY_PID_FOR_EXIT, data, reply, option);
+    return reply.ReadInt32();
 }
 
 int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
@@ -2528,7 +2544,7 @@ int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
         return ERR_INVALID_DATA;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
 
@@ -2544,7 +2560,7 @@ int32_t AppMgrProxy::ExitMasterProcessRole()
         return ERR_INVALID_DATA;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE, data, reply, option);
     return reply.ReadInt32();
 }
 
@@ -2636,6 +2652,36 @@ int32_t AppMgrProxy::RegisterApplicationStateObserverWithFilter(sptr<IApplicatio
         TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
         return error;
     }
+    return reply.ReadInt32();
+}
+
+void AppMgrProxy::AllowScbProcessMoveToBackground()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::ALLOW_SCB_PROCESS_MOVE_TO_BACKGROUND, data, reply, option);
+}
+
+int32_t AppMgrProxy::KillChildProcessByPid(int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID, data, reply, option);
     return reply.ReadInt32();
 }
 }  // namespace AppExecFwk

@@ -921,6 +921,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::START_PRELAUNCH_ABILITY) {
         return StartAbilityForPrelaunchInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
+        return RegisterForegroundAppObserverInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
+        return UnregisterForegroundAppObserverInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -1368,7 +1374,8 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
     std::string bundleName = Str16ToStr8(data.ReadString16());
     bool clearPageStack = data.ReadBool();
     auto appIndex = data.ReadInt32();
-    int result = KillProcess(bundleName, clearPageStack, appIndex);
+    std::string reason = Str16ToStr8(data.ReadString16());
+    int result = KillProcess(bundleName, clearPageStack, appIndex, reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
         return ERR_INVALID_VALUE;
@@ -2504,8 +2511,10 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
 
     int32_t accountId = data.ReadInt32();
     bool isSilent = data.ReadBool();
+    bool promotePriority = data.ReadBool();
     std::string errMsg = "";
-    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent);
+    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent,
+        promotePriority);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteString(errMsg);
@@ -2988,6 +2997,50 @@ int AbilityManagerStub::ForceTimeoutForTestInner(MessageParcel &data, MessagePar
     return NO_ERROR;
 }
 #endif
+
+int AbilityManagerStub::RegisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer)
+{
+    // implement in child.
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::UnregisterForegroundAppObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer)
+{
+    // implement in child.
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterForegroundAppObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AbilityRuntime::IForegroundAppConnection> observer =
+        iface_cast<AbilityRuntime::IForegroundAppConnection>(data.ReadRemoteObject());
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterForegroundAppObserver(observer);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::UnregisterForegroundAppObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AbilityRuntime::IForegroundAppConnection> observer =
+        iface_cast<AbilityRuntime::IForegroundAppConnection>(data.ReadRemoteObject());
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterForegroundAppObserver(observer);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 
 int AbilityManagerStub::FreeInstallAbilityFromRemoteInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -4739,12 +4792,12 @@ int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &da
         return ERR_INVALID_VALUE;
     }
     std::string moduleName = data.ReadString();
-    std::string hostBundleName = data.ReadString();
+    int32_t hostPid = data.ReadInt32();
     int32_t userId = data.ReadInt32();
 
     int32_t recordNum;
     int32_t result = QueryPreLoadUIExtensionRecord(
-        *element, moduleName, hostBundleName, recordNum, userId);
+        *element, moduleName, hostPid, recordNum, userId);
     if (!reply.WriteInt32(recordNum)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "reply write recordNum fail");
         return INNER_ERR;

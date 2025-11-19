@@ -20,6 +20,9 @@
 #include "configuration_convertor.h"
 #include "display_util.h"
 #include "display_info.h"
+#ifdef SUPPORT_SCREEN
+#include "distributed_client.h"
+#endif
 #include "ets_runtime.h"
 #include "ets_ui_ability_instance.h"
 #include "event_report.h"
@@ -57,6 +60,9 @@ constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
+constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
+constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
+constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
 #endif
 }
 UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
@@ -922,7 +928,37 @@ void UIAbility::OnLeaveForeground()
 
 void UIAbility::HandleCollaboration(const AAFwk::Want &want)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "HandleCollaboration called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
+        return;
+    }
+    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
+        (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
+        (const_cast<Want &>(want)).RemoveParam(IS_CALLING_FROM_DMS);
+        SetWant(want);
+        OHOS::AAFwk::WantParams wantParams = want.GetParams();
+        int32_t resultCode = OnCollaborate(wantParams);
+        auto abilityContext = GetAbilityContext();
+        if (abilityContext == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+            return;
+        }
+        OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
+        auto collabToken = param.GetStringParam(COLLABORATE_KEY);
+        auto uid = abilityInfo_->uid;
+        auto callerPid = getpid();
+        auto accessTokenId = abilityInfo_->applicationInfo.accessTokenId;
+        AAFwk::DistributedClient dmsClient;
+        dmsClient.OnCollaborateDone(collabToken, resultCode, callerPid, uid, accessTokenId);
+    }
+}
+
+int32_t UIAbility::OnCollaborate(WantParams &wantParams)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnCollaborate called");
+    return CollaborateResult::REJECT;
 }
 
 void UIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,

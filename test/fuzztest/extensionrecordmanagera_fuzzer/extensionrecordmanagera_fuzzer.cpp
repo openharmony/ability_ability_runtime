@@ -122,18 +122,18 @@ void FuzztestExtensionRecordManagerFunc2(std::shared_ptr<ExtensionRecordManager>
     mgr->UpdateProcessName(abilityRequest, record);
     record->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
     mgr->UpdateProcessName(abilityRequest, record);
-    std::string bundleName = "bundleName";
-    mgr->GetHostBundleNameForExtensionId(1, bundleName); // 1 means id
+    int32_t hostPid = 0;
+    mgr->GetHostPidForExtensionId(1, hostPid); // 1 means id
     mgr->AddExtensionRecord(1, record); // 1 means id
-    mgr->GetHostBundleNameForExtensionId(1, bundleName); // 1 means id, exist.
-    mgr->GetHostBundleNameForExtensionId(int32Param, bundleName); // 1 means id, exist.
+    mgr->GetHostPidForExtensionId(1, hostPid); // 1 means id, exist.
+    mgr->GetHostPidForExtensionId(int32Param, hostPid); // 1 means id, exist.
     abilityRecord->SetUIExtensionAbilityId(-1);
     mgr->AddExtensionRecord(1, record); // 1 means id
     abilityRecord->SetUIExtensionAbilityId(1);
     mgr->AddPreloadUIExtensionRecord(abilityRecord);
     ExtensionRecordManager::PreLoadUIExtensionMapKey key;
     mgr->RemoveAllPreloadUIExtensionRecord(key); // called
-    mgr->IsPreloadExtensionRecord(abilityRequest, stringParam, record, boolParam);  // called
+    mgr->IsPreloadExtensionRecord(abilityRequest, hostPid, record, boolParam);  // called
     mgr->RemovePreloadUIExtensionRecordById(key, int32Param);  // called
     mgr->RemovePreloadUIExtensionRecord(key);  // called
     mgr->GetOrCreateExtensionRecordInner(abilityRequest, stringParam, record, boolParam);  // called

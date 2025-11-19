@@ -42,6 +42,10 @@ namespace wantConstant {
     CREATE_APP_INSTANCE_KEY = 'ohos.extra.param.key.createAppInstance',
     CALLER_APP_CLONE_INDEX = 'ohos.param.callerAppCloneIndex',
     LAUNCH_REASON_MESSAGE = 'ohos.params.launchReasonMessage',
+    ATOMIC_SERVICE_SHARE_ROUTER = 'ohos.params.atomicservice.shareRouter',
+    DESTINATION_PLUGIN_ABILITY = 'ohos.params.pluginAbility',
+    APP_LAUNCH_TRUSTLIST = 'ohos.params.appLaunchTrustList',
+    ABILITY_UNIFIED_DATA_KEY = 'ohos.param.ability.udKey',
   }
 
   export enum Flags {

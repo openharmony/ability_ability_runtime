@@ -90,6 +90,11 @@ namespace OHOS::AbilityRuntime {
         DECOR_FORM = 4,
         DECOR_ENTRY = 5,
     };
+
+    enum InsightIntentReturnMode {
+        CALLBACK = 0,
+        FUNCTION = 1,
+    };
 } // namespace OHOS::AbilityRuntime
 
 #endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONSTANT_H

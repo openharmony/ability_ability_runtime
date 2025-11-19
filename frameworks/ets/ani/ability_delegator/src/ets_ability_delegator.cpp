@@ -195,7 +195,7 @@ ani_object EtsAbilityDelegator::GetAppContext(ani_env *env, [[maybe_unused]]ani_
 }
 
 void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
-    ani_string cmd, ani_double timeoutSecs, ani_object callback)
+    ani_string cmd, ani_long timeoutSecs, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     if (env == nullptr) {
@@ -282,6 +282,20 @@ void EtsAbilityDelegator::PrintSync(ani_env *env, [[maybe_unused]]ani_class aniC
     return;
 }
 
+void EtsAbilityDelegator::AddAbilityMonitorCheck(ani_env *env, ani_object aniObj, ani_object monitorObj)
+{
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env or aniObj");
+        return;
+    }
+    std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
+    if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param monitor failed, monitor must be Monitor.");
+    }
+}
+
 void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
     ani_object monitorObj, ani_object callback)
 {
@@ -292,9 +306,6 @@ void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_cl
     std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
     if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "ParseMonitorPara failed");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse param monitor failed, monitor must be Monitor.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -335,6 +346,7 @@ void EtsAbilityDelegator::AddAbilityMonitorSync(ani_env *env, [[maybe_unused]]an
     }
     return;
 }
+
 void EtsAbilityDelegator::StartAbility(ani_env *env, [[maybe_unused]]ani_object object,
     ani_object wantObj, ani_object callback)
 {
@@ -415,6 +427,20 @@ ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, [[maybe_unused]]
     return objValue;
 }
 
+void EtsAbilityDelegator::RemoveAbilityMonitorCheck(ani_env *env, ani_object aniObj, ani_object monitorObj)
+{
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env or aniObj");
+        return;
+    }
+    std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
+    if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
+    }
+}
+
 void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
     ani_object monitorObj, ani_object callback)
 {
@@ -426,9 +452,6 @@ void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env *env, [[maybe_unused]]ani
     std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
     if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "ParseMonitorPara failed");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -485,9 +508,6 @@ void EtsAbilityDelegator::WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_c
     std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
     if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse monitor want failed, WaitAbilityMonitor must be Monitor.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -535,9 +555,6 @@ void EtsAbilityDelegator::AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]a
     std::shared_ptr<EtsAbilityStageMonitor> stageMonitor = nullptr;
     if (!ParseStageMonitorPara(env, stageMonitorObj, stageMonitor, isExisted)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse parameters failed, monitor must be Monitor and isExited must be boolean.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -556,6 +573,22 @@ void EtsAbilityDelegator::AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]a
         AbilityRuntime::EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK),
         nullptr);
     return;
+}
+
+void EtsAbilityDelegator::AddAbilityStageMonitorCheck(ani_env *env, ani_object aniObj, ani_object stageMonitorObj)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "AddAbilityStageMonitorCheck");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env or aniObj");
+        return;
+    }
+    bool isExisted = false;
+    std::shared_ptr<EtsAbilityStageMonitor> stageMonitor = nullptr;
+    if (!ParseStageMonitorPara(env, stageMonitorObj, stageMonitor, isExisted)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse parameters failed, monitor must be Monitor and isExited must be boolean.");
+    }
 }
 
 void EtsAbilityDelegator::AddAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
@@ -600,9 +633,6 @@ void EtsAbilityDelegator::RemoveAbilityStageMonitor(ani_env *env, [[maybe_unused
     std::shared_ptr<EtsAbilityStageMonitor> stageMonitor = nullptr;
     if (!ParseStageMonitorPara(env, stageMonitorObj, stageMonitor, isExisted)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -621,6 +651,23 @@ void EtsAbilityDelegator::RemoveAbilityStageMonitor(ani_env *env, [[maybe_unused
     }
     return;
 }
+
+void EtsAbilityDelegator::RemoveAbilityStageMonitorCheck(ani_env *env, ani_object aniObj, ani_object stageMonitorObj)
+{
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env or aniObj");
+        return;
+    }
+    bool isExisted = false;
+    std::shared_ptr<EtsAbilityStageMonitor> stageMonitor = nullptr;
+    if (!ParseStageMonitorPara(env, stageMonitorObj, stageMonitor, isExisted)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
+    }
+}
+
 
 void EtsAbilityDelegator::RemoveAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
     ani_object stageMonitorObj)
@@ -659,14 +706,14 @@ void EtsAbilityDelegator::WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]
     TAG_LOGI(AAFwkTag::DELEGATOR, "WaitAbilityStageMonitor called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
+            "Parse remoteObject failed, remoteObject must be RemoteObject.");
         return;
     }
     std::shared_ptr<EtsAbilityStageMonitor> stageMonitor = nullptr;
     if (!ParseWaitAbilityStageMonitorPara(env, stageMonitorObj, stageMonitor)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -693,6 +740,24 @@ void EtsAbilityDelegator::WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]
     AppExecFwk::AsyncCallback(env, callback, AbilityRuntime::EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK),
         resultAniOj);
     return;
+}
+
+void EtsAbilityDelegator::DoAbilityForegroundOrBackgroundCheck(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_object abilityObj)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "DoAbilityForegroundCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+        return;
+    }
+    sptr<OHOS::IRemoteObject> remoteObject = nullptr;
+    if (!ParseAbilityCommonPara(env, abilityObj, remoteObject)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
+            "Parse remoteObject failed, remoteObject must be RemoteObject.");
+        return;
+    }
 }
 
 void EtsAbilityDelegator::DoAbilityForeground(ani_env *env, [[maybe_unused]]ani_object object,
@@ -740,9 +805,6 @@ void EtsAbilityDelegator::DoAbilityBackground(ani_env *env, [[maybe_unused]]ani_
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
     if (!ParseAbilityCommonPara(env, abilityObj, remoteObject)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse remoteObject failed, remoteObject must be RemoteObject.");
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);

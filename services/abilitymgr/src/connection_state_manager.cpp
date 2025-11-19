@@ -16,6 +16,7 @@
 #include "connection_state_manager.h"
 
 #include "connection_observer_errors.h"
+#include "foreground_app_connection_manager.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -557,6 +558,7 @@ void ConnectionStateManager::InitAppStateObserver()
 
     appStateObserver_ = new (std::nothrow)InnerAppStateObserver([](int32_t pid) {
         DelayedSingleton<ConnectionStateManager>::GetInstance()->HandleAppDied(pid);
+        DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->ProcessRemovePidConnection(pid);
     });
     if (!appStateObserver_) {
         TAG_LOGE(AAFwkTag::CONNECTION, "init app state observer err");

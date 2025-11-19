@@ -236,6 +236,10 @@ void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
 void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "intentId %{public}" PRIu64"", intentId);
+    if (result.isNeedDelayResult) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "intent execute result need delay");
+        return;
+    }
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done failed");

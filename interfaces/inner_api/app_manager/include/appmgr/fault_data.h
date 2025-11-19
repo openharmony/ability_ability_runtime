@@ -36,6 +36,7 @@ enum class FaultDataType {
     CJ_ERROR,
     APP_FREEZE,
     CPU_LOAD,
+    SLEEP_CLEAN,
     PERFORMANCE_CONTROL,
     RESOURCE_CONTROL,
     BACKGROUND_WARNING
@@ -98,6 +99,9 @@ struct FaultData : public Parcelable {
     bool isEnableMainThreadSample;
     std::string applicationHeapInfo;
     std::string processLifeTime;
+    int32_t markedId = 0;
+    int32_t processedId = 0;
+    int32_t dispatchedEventId = 0;
 };
 
 /**

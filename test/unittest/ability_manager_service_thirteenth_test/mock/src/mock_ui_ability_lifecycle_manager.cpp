@@ -337,10 +337,6 @@ void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityR
 {
 }
 
-void UIAbilityLifecycleManager::CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-}
-
 int32_t UIAbilityLifecycleManager::GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest,
     bool &reuse) const
 {
@@ -462,13 +458,13 @@ void UIAbilityLifecycleManager::OnCallConnectDied(const std::shared_ptr<CallReco
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByName(
-    const AppExecFwk::ElementName &element)
+    const AppExecFwk::ElementName &element, int32_t appIndex)
 {
     return {};
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByNameInner(
-    const AppExecFwk::ElementName &element)
+    const AppExecFwk::ElementName &element, int32_t appIndex)
 {
     return {};
 }
@@ -724,8 +720,8 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     return true;
 }
 
-bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-    uint32_t sceneFlag)
+bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &abilityRequest,
+    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart)
 {
     return true;
 }
