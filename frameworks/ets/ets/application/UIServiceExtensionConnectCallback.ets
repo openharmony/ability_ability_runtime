@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+import { RecordData } from '@ohos.base';
+
 export default interface UIServiceExtensionConnectCallback {
-  onData(data: Record<string, Object>): void;
+  onData(data: Record<string, RecordData>): void;
   onDisconnect(): void;
 }
 
 export class UIServiceExtensionConnectCallbackImpl implements UIServiceExtensionConnectCallback {
-  onData(data: Record<string, Object>): void {}
+  onData(data: Record<string, RecordData>): void {}
   onDisconnect(): void {}
 }

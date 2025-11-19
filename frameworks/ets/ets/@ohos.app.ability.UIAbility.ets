@@ -21,6 +21,7 @@ import window from '@ohos.window';
 import rpc from '@ohos.rpc';
 import { AbilityUtils } from './utils/AbilityUtils';
 import { CalleeImpl } from './application/Callee';
+import { RecordData } from '@ohos.base';
 
 export type OnReleaseCallback = (msg: string) => void;
 export type OnRemoteStateChangeCallback = (msg: string) => void;
@@ -119,7 +120,7 @@ export default class UIAbility extends Ability {
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
   }
 
-  onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, Object>): AbilityConstant.OnSaveResult {
+  onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, RecordData>): AbilityConstant.OnSaveResult {
     return AbilityConstant.OnSaveResult.RECOVERY_AGREE;
   }
 
@@ -133,10 +134,10 @@ export default class UIAbility extends Ability {
     });
   }
 
-  onShare(wantParam: Record<string, Object>): void {
+  onShare(wantParam: Record<string, RecordData>): void {
   }
 
-  onCollaborate(wantParams: Record<string, Object>): AbilityConstant.CollaborateResult {
+  onCollaborate(wantParams: Record<string, RecordData>): AbilityConstant.CollaborateResult {
     return AbilityConstant.CollaborateResult.REJECT;
   }
 }

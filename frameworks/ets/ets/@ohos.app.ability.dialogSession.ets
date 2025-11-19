@@ -14,7 +14,7 @@
  */
 
 import AsyncCallbackWrapper from './utils/AbilityUtils';
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import { MultiAppMode } from 'bundleManager.ApplicationInfo';
 import { MultiAppModeInner } from 'bundleManager.ApplicationInfoInner';
 import Want from '@ohos.app.ability.Want';
@@ -41,7 +41,7 @@ export default namespace dialogSession {
   export interface DialogSessionInfo {
     callerAbilityInfo: DialogAbilityInfo;
     targetAbilityInfos: Array<DialogAbilityInfo>;
-    parameters?: Record<string, Object>;
+    parameters?: Record<string, RecordData>;
   }
 
   export class DialogAbilityInfoInner implements DialogAbilityInfo {
@@ -60,7 +60,7 @@ export default namespace dialogSession {
   export class DialogSessionInfoInner implements DialogSessionInfo {
     callerAbilityInfo: DialogAbilityInfo;
     targetAbilityInfos: Array<DialogAbilityInfo>;
-    parameters?: Record<string, Object>;
+    parameters?: Record<string, RecordData>;
   }
 
   export function sendDialogResult(dialogSessionId: string, targetWant: Want, isAllowed: boolean): Promise<void> {
