@@ -47,7 +47,7 @@ void CallUtil::GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallData> ca
 void CallUtil::SetOnReleaseOfCallerCallBack(std::shared_ptr<CallerCallBack> callerCallBack)
 {
     if (callerCallBack == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "callerCallBack");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null callerCallBack");
         return;
     }
     auto releaseListen = [](const std::string &str) {
