@@ -24,6 +24,7 @@
 
 #include "ability_record.h"
 #include "extension_record.h"
+#include "preload_ui_extension_execute_callback_interface.h"
 #include "ui_extension/ui_extension_host_info.h"
 #include "ui_extension/ui_extension_session_info.h"
 
@@ -139,6 +140,14 @@ public:
                                           const int32_t hostPid,
                                           int32_t &recordNum);
 
+    void HandlePreloadUIExtensionLoadedById(int32_t extensionRecordId);
+    void HandlePreloadUIExtensionDestroyedById(int32_t extensionRecordId);
+    void HandlePreloadUIExtensionSuccess(int32_t extensionRecordId, bool isPreloadedSuccess);
+    int32_t ClearPreloadedUIExtensionAbility(int32_t extensionRecordId);
+    int32_t ClearAllPreloadUIExtensionRecordForHost();
+    void RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
+    void UnRegisterPreloadUIExtensionHostClient(int32_t key);
+
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
 
@@ -148,9 +157,11 @@ private:
     std::set<int32_t> extensionRecordIdSet_;
     std::mutex mutex_;
     std::mutex preloadUIExtensionMapMutex_;
+    std::mutex preloadUIExtensionHostClientMutex_;
     ExtensionAbilityRecordMap extensionRecords_;
     ExtensionAbilityRecordMap terminateRecords_;
     PreLoadUIExtensionMapType preloadUIExtensionMap_;
+    std::map<int32_t, sptr<IRemoteObject>> preloadUIExtensionHostClientCallerTokens_;
 
     void SetCachedFocusedCallerToken(int32_t extensionRecordId, sptr<IRemoteObject> &focusedCallerToken);
     sptr<IRemoteObject> GetCachedFocusedCallerToken(int32_t extensionRecordId) const;
@@ -166,8 +177,12 @@ private:
     int32_t UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &record);
     int32_t SetAbilityProcessName(const AAFwk::AbilityRequest &abilityRequest,
         const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord);
+    void ConvertToUnloadExtensionRecords(std::vector<std::shared_ptr<ExtensionRecord>> &records,
+        std::vector<std::shared_ptr<ExtensionRecord>> &recordsToUnload);
     bool IsHostSpecifiedProcessValid(const AAFwk::AbilityRequest &abilityRequest,
         std::shared_ptr<ExtensionRecord> &record, const std::string &process);
+    sptr<AAFwk::IPreloadUIExtensionExecuteCallback> GetRemoteCallback(
+        std::shared_ptr<ExtensionRecord> uiExtensionRecord);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1134,7 +1134,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreloadUIExtensionAbilityInner_001, Tes
     AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
     providerWant.SetElement(providerElement);
     std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, DEFAULT_INVAL_VALUE);
+    int32_t preloadId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, preloadId);
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "finish.");
 }

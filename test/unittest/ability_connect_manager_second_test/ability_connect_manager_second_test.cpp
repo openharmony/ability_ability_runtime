@@ -624,6 +624,5 @@ HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_StartButIsActive
 
     TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButIsActiveStatus_001 end");
 }
-
 }  // namespace AAFwk
 }  // namespace OHOS

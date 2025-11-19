@@ -28,6 +28,7 @@ template("abilitymanager") {
       "js_ability_foreground_state_observer.cpp",
       "js_ability_manager.cpp",
       "js_ability_manager_utils.cpp",
+      "js_preload_ui_extension_callback_client.cpp",
     ]
 
     include_dirs = [ "./" ]
@@ -42,12 +43,14 @@ template("abilitymanager") {
       "${ability_runtime_native_path}/ability:ability_context_native",
       "${ability_runtime_native_path}/ability/native:ability_business_error",
       "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/appkit:app_context",
     ]
 
     external_deps = [
       "ability_base:base",
       "ability_base:configuration",
       "ability_base:want",
+      "access_token:libaccesstoken_sdk",
       "access_token:libtokenid_sdk",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
