@@ -176,7 +176,7 @@ ErrCode AbilityManagerClient::RequestModalUIExtension(const Want &want)
 }
 
 ErrCode AbilityManagerClient::PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-    int32_t userId, int32_t hostPid)
+    int32_t requestCode, int32_t userId, int32_t hostPid)
 {
     return ERR_OK;
 }

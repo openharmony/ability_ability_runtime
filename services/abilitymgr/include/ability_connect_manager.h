@@ -115,6 +115,7 @@ public:
      *
      * @param abilityRequest, Special want for service type's ability.
      * @param hostBundleName, the caller application bundle name.
+     * @param hostPid, the caller hostPid.
      * @return Returns ERR_OK on success, others on failure.
      */
     int PreloadUIExtensionAbilityInner(const AbilityRequest &abilityRequest, std::string &hostBundleName,
@@ -125,6 +126,7 @@ public:
      *
      * @param abilityRequest, Special want for service type's ability.
      * @param hostBundleName, the caller application bundle name.
+     * @param hostPid, the caller hostPid.
      * @return Returns ERR_OK on success, others on failure.
      */
     int PreloadUIExtensionAbilityLocked(const AbilityRequest &abilityRequest, std::string &hostBundleName,
@@ -400,6 +402,12 @@ public:
     void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
     void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
     void StartSpecifiedProcess(const LoadAbilityContext &context, const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId);
+    int UnPreloadUIExtensionAbilityInner(int32_t extensionAbilityId);
+    int ClearAllPreloadUIExtensionAbilityLocked();
+    int ClearAllPreloadUIExtensionAbilityInner();
+    int32_t RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
+    int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid);
 
 private:
     /**
@@ -744,6 +752,7 @@ private:
     std::mutex windowExtensionMapMutex_;
     std::mutex startServiceReqListLock_;
     std::mutex loadAbilityQueueLock_;
+    std::mutex preloadUIExtRecipientMapMutex_;
     std::deque<std::map<int32_t, LoadAbilityContext>> loadAbilityQueue_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);

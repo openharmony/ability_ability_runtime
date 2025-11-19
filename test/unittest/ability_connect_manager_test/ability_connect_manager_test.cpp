@@ -3439,7 +3439,11 @@ HWTEST_F(AbilityConnectManagerTest, PreloadUIExtensionAbilityLocked_0100, TestSi
     abilityRequest.want.SetElement(providerElement);
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto ret = connectManager->PreloadUIExtensionAbilityLocked(abilityRequest, hostBundleName);
+
+    int32_t preloadId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;;
+    int32_t hostPid = DEFAULT_INVAL_VALUE;
+    auto ret = connectManager->PreloadUIExtensionAbilityLocked(
+        abilityRequest, hostBundleName, ERR_PRELOAD_APP_DATA_ABILITIES_FAILED);
     EXPECT_NE(ret, ERR_OK);
 }
 
