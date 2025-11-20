@@ -42,8 +42,8 @@ private:
     const std::map<std::string, std::shared_ptr<StartupTask>> &tasks_;
     std::shared_ptr<StartupSortResult> sortResult_;
     std::map<std::string, std::uint32_t> inDegreeMap_;
-    uint32_t mainThreadAwaitCount_ = 0;
-    uint32_t tasksCount_ = 0;
+    std::atomic<uint32_t> mainThreadAwaitCount_ = 0;
+    std::atomic<uint32_t> tasksCount_ = 0;
     std::shared_ptr<OnCompletedCallback> completedCallback_;
     std::shared_ptr<OnCompletedCallback> mainThreadAwaitCallback_;
     std::atomic<bool> isTimeoutStopped_ = false;
