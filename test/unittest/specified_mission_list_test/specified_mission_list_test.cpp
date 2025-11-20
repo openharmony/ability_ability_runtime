@@ -77,7 +77,7 @@ HWTEST_F(SpecifiedMissionListTest, mission_list_GetMissionBySpecifiedFlag_002, T
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     abilityRecord->SetLauncherRoot();
     std::shared_ptr<Mission> mission = nullptr;
 
@@ -103,7 +103,7 @@ HWTEST_F(SpecifiedMissionListTest, mission_list_GetMissionBySpecifiedFlag_003, T
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     abilityRecord->SetLauncherRoot();
     abilityRecord = nullptr;
     std::shared_ptr<Mission> mission;
@@ -130,7 +130,7 @@ HWTEST_F(SpecifiedMissionListTest, mission_list_GetMissionBySpecifiedFlag_004, T
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     abilityRecord->SetLauncherRoot();
     abilityRecord->SetSpecifiedFlag("flag");
     std::shared_ptr<Mission> mission;

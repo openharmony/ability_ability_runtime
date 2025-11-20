@@ -100,7 +100,7 @@ void AbilityRecordTest::SetUp(void)
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     abilityResult_ = std::make_shared<AbilityResult>(-1, -1, want);
     abilityRequest_ = std::make_shared<AbilityRequest>();
-    abilityRecord_->Init();
+    abilityRecord_->Init(*abilityRequest_);
 }
 
 void AbilityRecordTest::TearDown(void)
@@ -321,7 +321,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_IsLauncherAbility, TestSize.Level1)
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     std::unique_ptr<AbilityRecord> launcherAbilityRecord =
         std::make_unique<AbilityRecord>(launcherWant, abilityInfo, applicationInfo);
-    launcherAbilityRecord->Init();
+    launcherAbilityRecord->Init(AbilityRequest());
     EXPECT_EQ(false, launcherAbilityRecord->IsLauncherAbility());
 }
 
@@ -1581,7 +1581,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddCallerRecord_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
-    callerAbilityRecord->Init();
+    callerAbilityRecord->Init(AbilityRequest());
     sptr<IRemoteObject> callerToken = callerAbilityRecord->GetToken();
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(0, callerAbilityRecord);
     abilityRecord->callerList_.push_back(caller);
@@ -1609,7 +1609,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_IsSystemAbilityCall_001, TestSize.Leve
     sptr<IRemoteObject> callerToken = callerAbilityRecord->GetToken();
     bool res2 = abilityRecord->IsSystemAbilityCall(callerToken);
     EXPECT_FALSE(res2);
-    callerAbilityRecord->Init();
+    callerAbilityRecord->Init(AbilityRequest());
     callerToken = callerAbilityRecord->GetToken();
     bool res3 = abilityRecord->IsSystemAbilityCall(callerToken);
     EXPECT_FALSE(res3);
@@ -1795,7 +1795,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_CallRequestDone_001, TestSize.Level1)
     bool res1 = abilityRecord->CallRequestDone(nullptr);
     EXPECT_FALSE(res1);
     abilityRecord->callContainer_ = std::make_shared<CallContainer>();
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     sptr<IRemoteObject> callStub = abilityRecord->GetToken();
     bool res2 = abilityRecord->CallRequestDone(callStub);
     EXPECT_TRUE(res2);
