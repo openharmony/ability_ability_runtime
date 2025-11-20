@@ -62,7 +62,37 @@ void ScreenUnlockInterceptorTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI5I0DY
  */
-HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_001, TestSize.Level1)
+HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_WhenScreenLocked_001, TestSize.Level1)
+{
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    Want want;
+    int requestCode = 123;
+    int32_t userId = 1001;
+    bool isWithUI = true;
+    sptr<IRemoteObject> callerToken;
+    std::function<bool(void)> shouldBlockAllAppStartFunc = []() -> bool {
+        return false;
+    };
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+        EXPECT_NE(screenLockManager, nullptr);
+        screenLockManager->SetScreenLockedState(true);
+        auto ret = screenUnlockInterceptor.DoProcess(param);
+        bool isLocked = screenLockManager->IsScreenLocked();
+        EXPECT_TRUE(isLocked);
+        EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    }
+}
+
+/**
+ * @tc.name: ScreenUnlockInterceptorTest_DoProcess_001
+ * @tc.desc: DoProcess
+ * @tc.type: FUNC
+ * @tc.require: issueI5I0DY
+ */
+HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_WhenScreenUnLocked_001, TestSize.Level1)
 {
     ScreenUnlockInterceptor screenUnlockInterceptor;
     Want want;
@@ -77,12 +107,13 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_001, TestSize.Level1)
     AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
     auto ret = screenUnlockInterceptor.DoProcess(param);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        bool isLocked = OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
-        if (isLocked) {
-            EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
-        } else {
-            EXPECT_EQ(ret, ERR_OK);
-        }
+        auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+        EXPECT_NE(screenLockManager, nullptr);
+        screenLockManager->SetScreenLockedState(false);
+        auto ret = screenUnlockInterceptor.DoProcess(param);
+        bool isLocked = screenLockManager->IsScreenLocked();
+        EXPECT_FALSE(isLocked);
+        EXPECT_EQ(ret, ERR_OK);
     }
 }
 
@@ -182,6 +213,86 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_005, TestSize.Level1)
     auto ret = screenUnlockInterceptor.DoProcess(param);
     EXPECT_EQ(ret, ERR_OK);
     GTEST_LOG_(INFO) << "DoProcess_005 end";
+}
+
+/**
+ * @tc.name: ScreenUnlockInterceptorTest_DoProcess_003
+ * @tc.desc: DoProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorTest, RecordExtensionEventWhenScreenUnlock_ScreenUnlocked, TestSize.Level1)
+{
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    Want want;
+    int requestCode = 123;
+    int32_t userId = 1001;
+    bool isWithUI = true;
+    sptr<IRemoteObject> callerToken;
+    std::function<bool(void)> shouldBlockAllAppStartFunc = []() -> bool {
+        return false;
+    };
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked = false;
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.isSystemApp = true;
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
+    auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    EXPECT_NE(screenLockManager, nullptr);
+    screenLockManager->SetScreenLockedState(false);
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RecordExtensionEventWhenScreenlock_BundleNameIsEmpty
+ * @tc.desc: DoProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorTest, RecordExtensionEventWhenScreenlock_BundleNameIsEmpty, TestSize.Level1)
+{
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    Want want;
+    int requestCode = 123;
+    int32_t userId = 1001;
+    bool isWithUI = true;
+    sptr<IRemoteObject> callerToken;
+    std::function<bool(void)> shouldBlockAllAppStartFunc = []() -> bool {
+        return false;
+    };
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked = false;
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.isSystemApp = true;
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
+    auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    EXPECT_NE(screenLockManager, nullptr);
+    screenLockManager->SetScreenLockedState(true);
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RecordExtensionEventWhenScreenlock_BundleNameNotEmpty
+ * @tc.desc: DoProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorTest, RecordExtensionEventWhenScreenlock_BundleNameNotEmpty, TestSize.Level1)
+{
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    Want want;
+    int requestCode = 123;
+    int32_t userId = 1001;
+    bool isWithUI = true;
+    sptr<IRemoteObject> callerToken;
+    std::function<bool(void)> shouldBlockAllAppStartFunc = []() -> bool {
+        return false;
+    };
+    want.GetElement().SetBundleName("com.ohos.testapp");
+    want.GetElement().SetAbilityName("testAbility");
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked = false;
+    StartAbilityUtils::startAbilityInfo ->abilityInfo.applicationInfo.isSystemApp = true;
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
+    auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    EXPECT_NE(screenLockManager, nullptr);
+    screenLockManager->SetScreenLockedState(true);
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS

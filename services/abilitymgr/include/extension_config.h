@@ -46,6 +46,7 @@ struct ScreenUnlockAccessItem {
     bool intercept = false;
     bool interceptExcludeSystemApp = false;
     std::unordered_set<std::string> blockList;
+    std::unordered_set<std::string> allowList;
 };
 
 struct ExtensionConfigItem {
@@ -79,6 +80,8 @@ public:
     bool IsExtensionSAEnable(const std::string &extensionTypeName);
     bool IsScreenUnlockIntercept(const std::string &extensionTypeName, bool isSystemApp,
         const std::string &bundleName);
+    bool IsScreenUnlockAllowAbility(const std::string &extensionTypeName, const std::string &bundleName,
+        const std::string &abilityName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
