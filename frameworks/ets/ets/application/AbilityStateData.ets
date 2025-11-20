@@ -23,4 +23,5 @@ export default class AbilityStateData {
   readonly abilityType: int;
   readonly isAtomicService: boolean;
   readonly appCloneIndex?: int;
+  readonly callerBundleName?: string = '';
 }

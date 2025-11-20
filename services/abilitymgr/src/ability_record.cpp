@@ -375,6 +375,7 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     want_.SetParam(IS_HOOK, isHook_);
+    firstCallerBundleName_ = want_.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     AbilityRuntime::LoadParam loadParam;
     loadParam.abilityRecordId = recordId_;
     loadParam.isShellCall = Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ? isShellCall

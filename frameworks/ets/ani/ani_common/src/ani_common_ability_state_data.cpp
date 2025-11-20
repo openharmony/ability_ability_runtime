@@ -71,6 +71,11 @@ ani_object WrapAbilityStateDataInner(ani_env *env, ani_class cls, ani_object obj
         return nullptr;
     }
 
+    if (!SetFieldStringByName(env, cls, object, "callerBundleName", data.callerBundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set callerBundleName failed");
+        return nullptr;
+    }
+
     return object;
 }
 
