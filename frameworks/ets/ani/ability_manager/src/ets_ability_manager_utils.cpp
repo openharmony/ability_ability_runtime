@@ -376,6 +376,11 @@ bool SetAbilityStateData(ani_env *env, ani_object object, const AbilityStateData
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appCloneIndex failed status:%{public}d", status);
         return false;
     }
+    if ((status = env->Object_SetFieldByName_Ref(object, "callerBundleName",
+        OHOS::AppExecFwk::GetAniString(env, abilityStateData.callerBundleName))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerBundleName failed status:%{public}d", status);
+        return false;
+    }
     return true;
 }
 
