@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hisysevent.h"
 #include "parameters.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -36,13 +37,11 @@ ApplicationAnrListener::~ApplicationAnrListener() {}
 
 void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
 {
-    TAG_LOGI(AAFwkTag::APPDFR, "OnAnr called, eventId:%{public}d", eventId);
-    if (!BETA_VERSION) {
-        int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "HIVIEW_HALF_FREEZE_LOG",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
-        TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write HIVIEW_HALF_FREEZE_LOG, pid:%{public}d, packageName:,"
-            " ret:%{public}d", pid, ret);
-    }
+    std::string faultTimeStr = "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
+        HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+    TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:, ret:%{public}d",
+        pid, ret);
     AppExecFwk::AppFaultDataBySA faultData;
     std::ifstream statmStream("/proc/" + std::to_string(pid) + "/statm");
     if (statmStream) {
@@ -53,7 +52,8 @@ void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
     }
     faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
     faultData.pid = pid;
-    faultData.errorObject.message = "User input does not respond!";
+    faultData.errorObject.message = faultTimeStr + "User input does not respond!";
+    faultData.errorObject.message += (ret == 0) ? "FREEZE_HALF_HIVIEW_LOG write success" : "";
     faultData.errorObject.name = AppExecFwk::AppFreezeType::APP_INPUT_BLOCK;
     faultData.waitSaveState = false;
     faultData.notifyApp = false;
