@@ -562,5 +562,44 @@ HWTEST_F(UIExtensionPreloadTest, OnPreloadSuccess_0300, TestSize.Level1)
     EXPECT_NE(hostClient, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "finish.");
 }
+
+/**
+ * @tc.name: GenerateRequestCode_0100
+ * @tc.desc: Test GenerateRequestCode functionality to ensure it increments correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionPreloadTest, GenerateRequestCode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GenerateRequestCode_0100 start.");
+    
+    auto client = std::make_shared<PreloadUIExtensionHostClient>();
+    ASSERT_NE(client, nullptr);
+    int32_t code1 = client->GenerateRequestCode();
+    int32_t code2 = client->GenerateRequestCode();
+    if (code1 == INT32_MAX) {
+        EXPECT_EQ(code2, 0);
+    } else {
+        EXPECT_EQ(code2, code1 + 1);
+    }
+
+    TAG_LOGI(AAFwkTag::TEST, "GenerateRequestCode_0100 finish.");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_0100
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities normal call.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionPreloadTest, ClearPreloadedUIExtensionAbilities_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start.");
+    auto client = AbilityManagerClient::GetInstance();
+    ASSERT_NE(client, nullptr);
+
+    int32_t userId = 100;
+    ErrCode ret = client->ClearPreloadedUIExtensionAbilities(userId);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "finish.");
+}
 } // namespace AAFwk
 } // namespace OHOS
