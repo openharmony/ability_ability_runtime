@@ -437,8 +437,8 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_token_002, TestSize
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     std::shared_ptr<AbilityRecord> abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
-    abilityRecord2->Init();
+    abilityRecord->Init(AbilityRequest());
+    abilityRecord2->Init(AbilityRequest());
     auto mission1 = std::make_shared<Mission>(1, abilityRecord, "name");
     auto mission2 = std::make_shared<Mission>(1, abilityRecord2, "name");
     auto mission3 = std::make_shared<Mission>(1, nullptr, "name");
@@ -469,7 +469,7 @@ HWTEST_F(MissionListTest, mission_list_remove_ability_record_by_token_001, TestS
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
 
     auto missionList = std::make_shared<MissionList>(MissionListType::CURRENT);
@@ -495,7 +495,7 @@ HWTEST_F(MissionListTest, mission_list_get_mission_by_id_001, TestSize.Level1)
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
     missionList->missions_.push_back(mission);
     missionList->missions_.push_back(nullptr);
@@ -523,7 +523,7 @@ HWTEST_F(MissionListTest, mission_list_get_mission_by_specified_flag_001, TestSi
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     want.SetElementName("ability", "bundle");
     abilityRecord->abilityInfo_.name = "ability";
     abilityRecord->abilityInfo_.applicationInfo.bundleName = "bundle";
@@ -576,7 +576,7 @@ HWTEST_F(MissionListTest, mission_list_is_empty_002, TestSize.Level1)
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
 
     auto missionList = std::make_shared<MissionList>(MissionListType::CURRENT);
@@ -686,7 +686,7 @@ HWTEST_F(MissionListTest, mission_list_get_launcher_root_001, TestSize.Level1)
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     abilityRecord->SetLauncherRoot();
     auto mission1 = std::make_shared<Mission>(1, abilityRecord, "launcher");
 
@@ -696,7 +696,7 @@ HWTEST_F(MissionListTest, mission_list_get_launcher_root_001, TestSize.Level1)
     AppExecFwk::ApplicationInfo applicationInfo1;
     std::shared_ptr<AbilityRecord> abilityRecord1
         = std::make_shared<AbilityRecord>(want1, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     abilityRecord1->isLauncherRoot_ = false;
     auto mission2 = std::make_shared<Mission>(1, abilityRecord1, "launcher");
 
@@ -726,7 +726,7 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_id_001, TestSize.Le
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
     auto missionList = std::make_shared<MissionList>();
     missionList->missions_.push_front(mission);
@@ -749,7 +749,7 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_caller_001, TestSiz
     Want want;
     AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<AbilityRecord> abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<CallerRecord> callerRecord1 = std::make_shared<CallerRecord>(0, abilityRecord1);
     std::shared_ptr<CallerRecord> callerRecord2 = std::make_shared<CallerRecord>(1, abilityRecord1);
     std::shared_ptr<CallerRecord> callerRecord3 = std::make_shared<CallerRecord>(1, nullptr);
@@ -759,7 +759,7 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_caller_001, TestSiz
     auto mission1 = std::make_shared<Mission>(1, abilityRecord1, "name");
 
     std::shared_ptr<AbilityRecord> abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     abilityRecord2->callerList_.clear();
     auto mission2 = std::make_shared<Mission>(2, abilityRecord2, "name");
 
@@ -788,7 +788,7 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_001, TestSize.
     abilityInfo.name = "name";
     abilityInfo.moduleName = "bundle";
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
     auto missionList = std::make_shared<MissionList>();
     ElementName element("", "", "");
@@ -996,7 +996,7 @@ HWTEST_F(MissionListTest, mission_list_get_ability_records_by_name_001, TestSize
     abilityInfo.name = "name";
     abilityInfo.moduleName = "bundle";
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, abilityRecord, "name");
     auto missionList = std::make_shared<MissionList>();
     ElementName elementEmpty("", "", "");
@@ -1031,7 +1031,7 @@ HWTEST_F(MissionListTest, GetActiveAbilityList_0100, TestSize.Level1)
     abilityInfo.name = "name";
     abilityInfo.moduleName = "bundle";
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, nullptr, "name");
     auto missionList = std::make_shared<MissionList>();
     missionList->missions_.push_back(nullptr);
@@ -1090,7 +1090,7 @@ HWTEST_F(MissionListTest, SignRestartAppFlag_0100, TestSize.Level1)
     abilityInfo.name = "name";
     abilityInfo.moduleName = "bundle";
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto mission = std::make_shared<Mission>(1, nullptr, "name");
     auto missionList = std::make_shared<MissionList>();
     missionList->missions_.push_back(nullptr);

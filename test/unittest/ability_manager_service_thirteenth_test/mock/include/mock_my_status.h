@@ -16,7 +16,7 @@
 #ifndef MOCK_MY_STATUS_H
 #define MOCK_MY_STATUS_H
 
-#include "ability_record.h"
+#include "scene_board/ui_ability_record.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -36,7 +36,7 @@ public:
     bool smhGetCurrentDataAbilityManager_ = true;
     bool smhGetConnectManagerByToken_ = true;
     bool smhVerificationAllToken_ = true;
-    std::shared_ptr<AbilityRecord> ualmGetAbilityRecordByToken_ = nullptr;
+    std::shared_ptr<UIAbilityRecord> ualmGetAbilityRecordByToken_ = nullptr;
     int ualmGetSessionIdByAbilityToken_ = 0;
     int fimStartFreeInstall_ = ERR_OK;
     int eriQueryAtomicServiceStartupRule_ = ERR_OK;

@@ -61,7 +61,7 @@ void AbilityRecordFirstTest::SetUp(void)
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
 }
 
 void AbilityRecordFirstTest::TearDown(void)

@@ -84,7 +84,7 @@ void DataAbilityManagerTest::SetUp(void)
         applicationInfo.name = "com.test.request";
         const Want want;
         abilityRecordClient_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-        abilityRecordClient_->Init();
+        abilityRecordClient_->Init(AbilityRequest());
     }
     abilityState_ = INITIAL;
 }
@@ -271,7 +271,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_Acquire_005, TestSize.
     applicationInfo.name = abilityRequest_.appInfo.name;
     const Want want;
     std::shared_ptr abilityRecordClient = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecordClient->Init();
+    abilityRecordClient->Init(AbilityRequest());
 
     EXPECT_EQ(dataAbilityManager->Acquire(abilityRequest_, true, abilityRecordClient->GetToken(), false), nullptr);
 

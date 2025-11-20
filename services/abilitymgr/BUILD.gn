@@ -438,6 +438,7 @@ ohos_shared_library("mission_list") {
 
   sources = [
     "src/mission/mission.cpp",
+    "src/mission/mission_ability_record.cpp",
     "src/mission/mission_data_storage.cpp",
     "src/mission/mission_info_mgr.cpp",
     "src/mission/mission_list.cpp",

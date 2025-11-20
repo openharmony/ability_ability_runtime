@@ -28,6 +28,7 @@
       *AbilityManagerStub*;
       *AbilityPermissionUtil*;
       *AbilityRecord*;
+      *AbilityRequest*;
       *AbilityRunningInfo*;
       *AbilitySchedulerProxy*;
       *AbilitySchedulerStub*;

@@ -70,7 +70,7 @@ void AbilityRecordSecondTest::SetUp(void)
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
 }
 
 void AbilityRecordSecondTest::TearDown(void)
@@ -138,7 +138,7 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_IsSystemAbilityCall_001, TestSiz
     auto instanceKey = abilityRecord->IsSystemAbilityCall(callerToken, callingTokenId);
     EXPECT_EQ(instanceKey, false);
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
-    callerAbilityRecord->Init();
+    callerAbilityRecord->Init(AbilityRequest());
     callerToken = callerAbilityRecord->GetToken();
     instanceKey = abilityRecord->IsSystemAbilityCall(callerToken, callingTokenId);
     EXPECT_EQ(instanceKey, false);
@@ -244,7 +244,7 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_CallRequestDone_001, TestSize.Le
     callStub = nullptr;
     res = abilityRecord->CallRequestDone(callStub);
     EXPECT_EQ(res, false);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     sptr<IRemoteObject> callStubs = abilityRecord->GetToken();
     res = abilityRecord->CallRequestDone(callStubs);
     EXPECT_EQ(res, true);
