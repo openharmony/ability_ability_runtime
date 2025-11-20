@@ -143,6 +143,9 @@ void DoSomethingInterestingWithMyAPI2(AbilityManagerService &abilityms, Want& wa
     sptr<SessionInfo> extensionSessionInfo;
     abilityms.StartUIExtensionAbility(extensionSessionInfo, int32Param);
     extensionSessionInfo = sptr<SessionInfo>(new (std::nothrow) SessionInfo());
+    if (extensionSessionInfo == nullptr) {
+        return;
+    }
     extensionSessionInfo->sessionToken = token;
     extensionSessionInfo->callerToken = token;
     extensionSessionInfo->persistentId = int32Param;
