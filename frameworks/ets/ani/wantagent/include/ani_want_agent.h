@@ -71,10 +71,18 @@ public:
     static void Clean(ani_env *env, ani_object object);
     static ani_object CreateLocalWantAgent(ani_env *env, ani_object info);
     static ani_boolean IsLocalWantAgent(ani_env *env, ani_object info);
+    static void TriggerAsyncCheck(
+        ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object contextObj);
+    static void TriggerAsync(
+        ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object contextObj, ani_object call);
     static void TriggerCheck(ani_env *env, ani_object agent, ani_object triggerInfoObj);
 
 private:
     void OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);
+    void OnTriggerAsync(
+        ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object contextObj, ani_object call);
+    void OnTriggerAsyncCheck(
+        ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object contextObj);
     void OnGetWant(ani_env *env, ani_object agent, ani_object call);
     void OnGetOperationType(ani_env *env, ani_object agent, ani_object call);
     void OnGetBundleName(ani_env *env, ani_object agent, ani_object call);
@@ -84,8 +92,10 @@ private:
     void OnGetWantAgent(ani_env *env, ani_object info, ani_object call);
     ani_object OnCreateLocalWantAgent(ani_env *env, ani_object info);
     ani_boolean OnIsLocalWantAgent(ani_env *env, ani_object info);
+    ani_object CreateEtsCompletedData(ani_env *env, const CompletedDispatcher &data);
     int32_t GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, TriggerInfo &triggerInfo);
     int32_t GetWantAgentParam(ani_env *env, ani_object info, WantAgentParams &params);
+    std::shared_ptr<AbilityRuntime::Context> ConvertToContext(std::shared_ptr<AbilityRuntime::Context> context);
 };
 
 class TriggerCompleteCallBack : public CompletedCallback {

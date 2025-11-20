@@ -300,6 +300,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_loader.cpp",
     "${ability_runtime_native_path}/ability/native/ability_post_event_timeout.cpp",
     "${ability_runtime_native_path}/ability/native/ability_process.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/ets_observer_instance.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
@@ -323,6 +324,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/query_erms_observer_proxy.cpp",
     "${ability_runtime_native_path}/ability/native/query_erms_observer_stub.cpp",
     "${ability_runtime_native_path}/ability/native/service_ability_impl.cpp",
+    "${ability_runtime_native_path}/ability/native/start_abilities_observer.cpp",
     "${ability_runtime_native_path}/appkit/app/app_context.cpp",
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
     "${ability_runtime_native_path}/appkit/app/context_deal.cpp",
@@ -772,6 +774,7 @@ ohos_shared_library("insight_intent_executor_ani") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer:ani_observer",
     "${ability_runtime_services_path}/common:app_util",
   ]
 
@@ -891,6 +894,7 @@ ohos_shared_library("ui_ability_ani") {
   }
 
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer/include",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_path}/frameworks/ets/ani/ui_ability/include",
@@ -1131,6 +1135,7 @@ ohos_shared_library("uiabilitykit_native") {
 ohos_shared_library("ability_thread") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/utils/global/time/include",
   ]
 
@@ -1581,6 +1586,7 @@ ohos_shared_library("service_extension_ani") {
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer/include",
     "${ability_runtime_path}/frameworks/ets/ani/service_extension_ability/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1608,6 +1614,7 @@ ohos_shared_library("service_extension_ani") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer:ani_observer",
     "${ability_runtime_path}/frameworks/ets/ani/caller_complex:caller_complex_ani",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
@@ -2413,28 +2420,34 @@ ohos_shared_library("photo_editor_extension_ani") {
 
   deps = [
     ":abilitykit_native",
+    ":extensionkit_native",
     ":photo_editor_extension",
     ":ui_extension",
     ":ui_extension_ani",
+    ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
-    "${ability_runtime_native_path}/appkit:app_context",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
-    ":extensionkit_native",
-    ":ui_service_extension_connection",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
+    "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
     "app_file_service:fileuri_native",
+    "bundle_framework:bms_ani_common",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
@@ -2442,16 +2455,10 @@ ohos_shared_library("photo_editor_extension_ani") {
     "image_framework:image",
     "image_framework:image_native",
     "image_framework:image_taihe",
+    "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "ability_base:base",
-    "access_token:libaccesstoken_sdk",
-    "access_token:libtokenid_sdk",
-    "ace_engine:ace_uicontent",
-    "bundle_framework:bms_ani_common",
-    "bundle_framework:libappexecfwk_common",
-    "ipc:ipc_core",
     "window_manager:embeddablewindowstage_kit",
     "window_manager:embeddablewindowstageani_kit",
     "window_manager:extensionwindow_napi",
@@ -2486,6 +2493,7 @@ ohos_shared_library("ui_extension_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_base/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_callback/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_service_extension_ability/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_service_extension_ability/connection",
@@ -2526,6 +2534,7 @@ ohos_shared_library("ui_extension_ani") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_observer:ani_observer",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_callback:ani_ui_extension_callback",
   ]
 
@@ -3460,9 +3469,7 @@ ohos_shared_library("photo_editor_extension") {
   }
   configs = [ ":photo_editor_extension_config" ]
 
-  include_dirs = [
-    "${ability_runtime_path}/frameworks/ets/ani/photo_editor_extension_ability/include",
-  ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/photo_editor_extension_ability/include" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/js_photo_editor_extension.cpp",
