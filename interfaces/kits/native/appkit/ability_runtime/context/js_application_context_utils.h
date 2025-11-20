@@ -23,7 +23,6 @@
 #include "application_state_change_callback.h"
 #include "js_ability_auto_startup_callback.h"
 #include "js_ability_lifecycle_callback.h"
-#include "js_interop_ability_lifecycle_callback.h"
 #include "native_engine/native_engine.h"
 #include "running_process_info.h"
 
@@ -64,8 +63,6 @@ public:
     napi_value OnOff(napi_env env, NapiCallbackInfo& info);
     napi_value OnOnAbilityLifecycle(napi_env env, NapiCallbackInfo& info, bool isSync);
     napi_value OnOffAbilityLifecycle(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
-    napi_value OnOnInteropAbilityLifecycle(napi_env env, NapiCallbackInfo& info);
-    napi_value OnOffInteropAbilityLifecycle(napi_env env, NapiCallbackInfo& info);
     napi_value OnOffAbilityLifecycleEventSync(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
     napi_value OnOnEnvironment(napi_env env, NapiCallbackInfo& info, bool isSync);
     napi_value OnOffEnvironment(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
@@ -149,7 +146,6 @@ private:
     static void BindNativeApplicationContextOne(napi_env env, napi_value object);
     static void BindNativeApplicationContextTwo(napi_env env, napi_value object);
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
-    std::shared_ptr<JsInteropAbilityLifecycleCallback> interopCallback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
     std::shared_ptr<JsApplicationStateChangeCallback> applicationStateCallback_;
     std::mutex applicationStateCallbackLock_;

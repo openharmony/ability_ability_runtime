@@ -106,6 +106,12 @@ bool ApplicationContext::IsAbilityLifecycleCallbackEmpty()
     return callbacks_.empty();
 }
 
+bool ApplicationContext::IsInteropAbilityLifecycleCallbackEmpty()
+{
+    std::lock_guard<std::mutex> lock(interopCallbackLock_);
+    return interopCallbacks_.empty();
+}
+
 void ApplicationContext::RegisterEnvironmentCallback(
     const std::shared_ptr<EnvironmentCallback> &environmentCallback)
 {

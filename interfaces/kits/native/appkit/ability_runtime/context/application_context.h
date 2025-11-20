@@ -44,6 +44,7 @@ public:
     void RegisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
     void UnregisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
     bool IsAbilityLifecycleCallbackEmpty();
+    bool IsInteropAbilityLifecycleCallbackEmpty();
     void RegisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void RegisterApplicationStateChangeCallback(
