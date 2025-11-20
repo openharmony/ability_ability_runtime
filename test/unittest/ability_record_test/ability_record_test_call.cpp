@@ -61,7 +61,7 @@ void AbilityRecordTest::SetUp(void)
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     abilityResult_ = std::make_shared<AbilityResult>(-1, -1, want);
     abilityRequest_ = std::make_shared<AbilityRequest>();
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
 }
 
 void AbilityRecordTest::TearDown(void)

@@ -76,7 +76,7 @@ void DoSomethingInterestingWithMyAPI1(const char *data, size_t size)
     uIAbilityLifecycleManager->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
     sptr<IRemoteObject> callStub;
-    std::shared_ptr<AbilityRecord> abilityRecord4;
+    std::shared_ptr<UIAbilityRecord> abilityRecord4;
     uIAbilityLifecycleManager->CallRequestDone(abilityRecord4, callStub);
     sptr<IAbilityConnection> connect;
     AppExecFwk::ElementName element;
@@ -121,12 +121,12 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->OnAbilityRequestDone(token, int32Param);
     uIAbilityLifecycleManager->IsContainsAbility(token);
     uIAbilityLifecycleManager->NotifySCBToMinimizeUIAbility(token);
-    std::shared_ptr<AbilityRecord> abilityRecord1;
+    std::shared_ptr<UIAbilityRecord> abilityRecord1;
     uIAbilityLifecycleManager->MinimizeUIAbility(abilityRecord1, boolParam, sceneFlag);
     sptr<SessionInfo> sessionInfo1;
     uIAbilityLifecycleManager->GetUIAbilityRecordBySessionInfo(sessionInfo1);
     Want *want;
-    std::shared_ptr<AbilityRecord> abilityRecord2;
+    std::shared_ptr<UIAbilityRecord> abilityRecord2;
     uIAbilityLifecycleManager->CloseUIAbility(abilityRecord2, intParam, want, boolParam, boolParam);
     sptr<IRemoteObject> rootSceneSession;
     uIAbilityLifecycleManager->SetRootSceneSession(rootSceneSession);
@@ -138,7 +138,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uint32_t msgId = static_cast<uint32_t>(GetU32Data(data));
     int64_t abilityRecordId = static_cast<int64_t>(GetU32Data(data));
     uIAbilityLifecycleManager->OnTimeOut(msgId, abilityRecordId, boolParam);
-    std::shared_ptr<AbilityRecord> abilityRecord3;
+    std::shared_ptr<UIAbilityRecord> abilityRecord3;
     AbilityRequest abilityRequest3;
     uIAbilityLifecycleManager->OnAbilityDied(abilityRecord3);
     std::string errMsg;
