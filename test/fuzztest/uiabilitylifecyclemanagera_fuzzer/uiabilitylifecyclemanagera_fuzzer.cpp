@@ -130,8 +130,6 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->CloseUIAbility(abilityRecord2, intParam, want, boolParam, boolParam);
     sptr<IRemoteObject> rootSceneSession;
     uIAbilityLifecycleManager->SetRootSceneSession(rootSceneSession);
-    AbilityRequest abilityRequest1;
-    uIAbilityLifecycleManager->NotifySCBToStartUIAbility(abilityRequest1);
     sptr<SessionInfo> sessionInfo2;
     AbilityRequest abilityRequest2;
     uIAbilityLifecycleManager->NotifySCBToPreStartUIAbility(abilityRequest2, sessionInfo2);

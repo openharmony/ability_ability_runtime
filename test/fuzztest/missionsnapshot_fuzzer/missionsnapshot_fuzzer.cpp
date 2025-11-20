@@ -36,7 +36,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     parcel.WriteString(fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
     missionSnapshot.ReadFromParcel(parcel);
     missionSnapshot.Marshalling(parcel);
-    missionSnapshot.Unmarshalling(parcel);
+    if (missionSnapshot.Unmarshalling(parcel) == nullptr) {
+        return false;
+    }
     return true;
 }
 }
