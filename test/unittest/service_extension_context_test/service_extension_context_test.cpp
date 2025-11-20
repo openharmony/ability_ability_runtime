@@ -509,8 +509,8 @@ HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestSuccess_0001, TestSize.Le
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -534,8 +534,8 @@ HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestSuccess_0002, TestSize.Le
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -559,8 +559,8 @@ HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0001, TestSize.Le
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -584,8 +584,8 @@ HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0002, TestSize.Le
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -609,8 +609,8 @@ HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0003, TestSize.Le
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -634,8 +634,8 @@ HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0001, Test
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, nullptr, onRequestFail);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -655,8 +655,8 @@ HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0002, Test
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, nullptr);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -676,8 +676,8 @@ HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0003, Test
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, nullptr, nullptr);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -697,8 +697,8 @@ HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0004, Test
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
         requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
@@ -718,8 +718,8 @@ HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0005, Test
     std::string requestId = "1234567890";
     AAFwk::Want want;
     std::string message = "message";
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
     auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
     EXPECT_EQ(result, ERR_OK);
     result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(

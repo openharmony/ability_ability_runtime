@@ -185,10 +185,10 @@ private:
     static int32_t GenerateRequestCode();
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
-    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
-    void AddCompletionHandlerForOpenLink(AAFwk::Want& want, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
+    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, OnRequestResult &onRequestSucc,
+    OnRequestResult &onRequestFail);
+    void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
+    OnRequestResult &onRequestFail);
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
 

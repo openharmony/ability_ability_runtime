@@ -408,7 +408,7 @@ public:
         OnAtomicRequestFailure onRequestFail, const std::string &appId) override;
 
     ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) override;
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail) override;
 
     ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions) override;

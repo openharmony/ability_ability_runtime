@@ -58,7 +58,7 @@ public:
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId);
 
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail);
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail);
 
     /**
      * @brief Callback on request success.
