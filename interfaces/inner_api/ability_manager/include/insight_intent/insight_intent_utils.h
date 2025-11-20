@@ -23,6 +23,7 @@
 #include "insight_intent_execute_param.h"
 #include "insight_intent_info_for_query.h"
 #include "extract_insight_intent_profile.h"
+#include "insight_intent_profile.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -34,6 +35,8 @@ public:
         ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForQuery &queryInfo);
     static uint32_t ConvertExtractInsightIntentInfo(
         ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo, bool getEntity);
+    static uint32_t ConvertConfigInsightIntentInfo(
+        InsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo, bool getEntity);
     static uint32_t ConvertExtractInsightIntentEntityInfo(
         ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo);
 };
