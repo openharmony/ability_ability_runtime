@@ -1943,5 +1943,63 @@ HWTEST_F(ApplicationContextTest, UnregisterInteropAbilityLifecycleCallback_0200,
     EXPECT_TRUE(context_->interopCallbacks_.empty());
     GTEST_LOG_(INFO) << "UnregisterInteropAbilityLifecycleCallback_0200 end";
 }
+
+/**
+ * @tc.number: IsInteropAbilityLifecycleCallbackEmpty_0100
+ * @tc.name: IsInteropAbilityLifecycleCallbackEmpty
+ * @tc.desc: IsInteropAbilityLifecycleCallbackEmpty
+ */
+HWTEST_F(ApplicationContextTest, IsInteropAbilityLifecycleCallbackEmpty_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsInteropAbilityLifecycleCallbackEmpty_0100 start";
+    context_->interopCallbacks_.clear();
+    EXPECT_TRUE(context_->IsInteropAbilityLifecycleCallbackEmpty());
+    GTEST_LOG_(INFO) << "IsInteropAbilityLifecycleCallbackEmpty_0100 end";
+}
+
+/**
+ * @tc.number: IsInteropAbilityLifecycleCallbackEmpty_0200
+ * @tc.name: IsInteropAbilityLifecycleCallbackEmpty
+ * @tc.desc: IsInteropAbilityLifecycleCallbackEmpty
+ */
+HWTEST_F(ApplicationContextTest, IsInteropAbilityLifecycleCallbackEmpty_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsInteropAbilityLifecycleCallbackEmpty_0200 start";
+    context_->interopCallbacks_.clear();
+    std::shared_ptr<InteropAbilityLifecycleCallback> interopAbilityLifecycleCallback =
+        std::make_shared<MockInteropAbilityLifecycleCallback>();
+    context_->RegisterInteropAbilityLifecycleCallback(interopAbilityLifecycleCallback);
+    EXPECT_FALSE(context_->IsInteropAbilityLifecycleCallbackEmpty());
+    GTEST_LOG_(INFO) << "IsInteropAbilityLifecycleCallbackEmpty_0200 end";
+}
+
+/**
+ * @tc.number: GetInteropCallbacks_0100
+ * @tc.name: GetInteropCallbacks
+ * @tc.desc: GetInteropCallbacks
+ */
+HWTEST_F(ApplicationContextTest, GetInteropCallbacks_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetInteropCallbacks_0100 start";
+    context_->interopCallbacks_.clear();
+    EXPECT_TRUE(context_->GetInteropCallbacks().empty());
+    GTEST_LOG_(INFO) << "GetInteropCallbacks_0100 end";
+}
+
+/**
+ * @tc.number: GetInteropCallbacks_0200
+ * @tc.name: GetInteropCallbacks
+ * @tc.desc: GetInteropCallbacks
+ */
+HWTEST_F(ApplicationContextTest, GetInteropCallbacks_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetInteropCallbacks_0200 start";
+    context_->interopCallbacks_.clear();
+    std::shared_ptr<InteropAbilityLifecycleCallback> interopAbilityLifecycleCallback =
+        std::make_shared<MockInteropAbilityLifecycleCallback>();
+    context_->RegisterInteropAbilityLifecycleCallback(interopAbilityLifecycleCallback);
+    EXPECT_FALSE(context_->GetInteropCallbacks().empty());
+    GTEST_LOG_(INFO) << "GetInteropCallbacks_0200 end";
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

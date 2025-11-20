@@ -398,9 +398,6 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityCreate");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityCreate(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
-            etsAbilityObj_->aniRef);
-        applicationContext->DispatchOnAbilityCreate(interopObject);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
@@ -516,9 +513,6 @@ void EtsUIAbility::OnStopCallback()
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityDestroy");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityDestroy(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
-            etsRuntime_.GetAniEnv(), etsAbilityObj_->aniRef);
-        applicationContext->DispatchOnAbilityDestroy(interopObject);
     }
 }
 
@@ -566,11 +560,6 @@ void EtsUIAbility::OnSceneCreated()
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
         applicationContext->DispatchOnWindowStageCreate(ability, stage);
-        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
-            etsRuntime_.GetAniEnv(), etsAbilityObj_->aniRef);
-        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
-            etsRuntime_.GetAniEnv(), etsWindowStageObj_->aniRef);
-        applicationContext->DispatchOnWindowStageCreate(interopAbility, interopWindowStage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
@@ -657,12 +646,6 @@ void EtsUIAbility::onSceneDestroyed()
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
         applicationContext->DispatchOnWindowStageDestroy(ability, stage);
-        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
-            etsRuntime_.GetAniEnv(), etsAbilityObj_->aniRef);
-        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
-            etsRuntime_.GetAniEnv(), etsWindowStageObj_->aniRef);
-
-        applicationContext->DispatchOnWindowStageDestroy(interopAbility, interopWindowStage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed end");
 }
@@ -721,9 +704,6 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityForeground");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityForeground(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
-            etsAbilityObj_->aniRef);
-        applicationContext->DispatchOnAbilityForeground(interopObject);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "CallOnForegroundFunc end");
 }
@@ -758,9 +738,6 @@ void EtsUIAbility::OnBackground()
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityBackground");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityBackground(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
-            etsAbilityObj_->aniRef);
-        applicationContext->DispatchOnAbilityBackground(interopObject);
     }
     auto want = GetWant();
     if (want != nullptr) {

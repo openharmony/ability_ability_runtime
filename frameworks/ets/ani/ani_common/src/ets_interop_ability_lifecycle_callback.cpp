@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include "ets_exception_callback.h"
+#include "ets_interop_object.h"
 #include "ets_runtime.h"
 #include "hilog_tag_wrapper.h"
 
@@ -76,7 +77,7 @@ bool EtsInteropAbilityLifecycleCallback::GetAniValueFromInteropObject(ani_env *e
         TAG_LOGI(AAFwkTag::APPKIT, "null env or interop object");
         return false;
     }
-    ani_ref esValue = interopObject->GetAniValue(env);
+    ani_ref esValue = std::static_pointer_cast<EtsInteropObject>(interopObject)->GetAniValue(env);
     if (esValue == nullptr) {
         TAG_LOGI(AAFwkTag::APPKIT, "null esvalue");
         return false;
