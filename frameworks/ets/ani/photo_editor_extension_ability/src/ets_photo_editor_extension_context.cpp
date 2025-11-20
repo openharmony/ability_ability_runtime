@@ -375,7 +375,7 @@ bool EtsPhotoEditorExtensionContext::UnwrapPackOption(ani_env* aniEnv, ani_objec
         return false;
     }
     if (format == "") {
-        TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
+        TAG_LOGE(AAFwkTag::UI_EXT, "format is empty");
         return false;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "Unwrap pack option result, format=%{public}s", format.c_str());
