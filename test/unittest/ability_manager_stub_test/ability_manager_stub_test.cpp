@@ -4292,5 +4292,25 @@ HWTEST_F(AbilityManagerStubTest, UnRegisterPreloadUIExtensionHostClientInner_010
 
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/**
+ * @tc.name: ClearAllPreloadUIExtensionAbilityInner_0100
+ * @tc.desc: ClearAllPreloadUIExtensionAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ClearAllPreloadUIExtensionAbilityInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+    auto result = stub_->ClearAllPreloadUIExtensionAbilityInner(data, reply);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
 } // namespace AAFwk
 } // namespace OHOS

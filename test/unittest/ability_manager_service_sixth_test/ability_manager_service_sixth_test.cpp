@@ -2313,5 +2313,67 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_003, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_003 end");
 }
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_ConnectManagerNull_0100
+ * @tc.desc: Test ClearPreloadedUIExtensionAbility when connectManager is nullptr
+ *           Covers the branch: connectManager == nullptr, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ClearPreloadedUIExtensionAbility_ConnectManagerNull_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ClearPreloadedUIExtensionAbilities start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto ret = abilityMs->ClearPreloadedUIExtensionAbility(DEFAULT_INVALID_USER_ID);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_PermissionDenied_0100
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities when permission verification failed
+ *           Covers the branch: VerifyCallingPermission returns false, return ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ClearPreloadedUIExtensionAbilities_PermissionDenied_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ClearPreloadedUIExtensionAbilities start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto ret = abilityMs->ClearPreloadedUIExtensionAbilities(DEFAULT_INVALID_USER_ID);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_0100
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient when callerToken is nullptr
+ *           Covers the branch: callerToken == nullptr, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, RegisterPreloadUIExtensionHostClient_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest RegisterPreloadUIExtensionHostClient_0100 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto ret = abilityMs->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_0100
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient when callerToken is nullptr
+ *           Covers the branch: callerToken == nullptr, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, UnRegisterPreloadUIExtensionHostClient_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest UnRegisterPreloadUIExtensionHostClient start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto ret = abilityMs->UnRegisterPreloadUIExtensionHostClient(DEFAULT_INVALID_USER_ID);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
