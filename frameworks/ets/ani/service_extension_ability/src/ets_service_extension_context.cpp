@@ -1601,8 +1601,8 @@ void EtsServiceExtensionContext::UnwrapCompletionHandlerForOpenLink(ani_env *env
         return;
     }
 
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc;
-    AAFwk::OnOpenLinkRequestFunc onRequestFail;
+    OnRequestResult onRequestSucc;
+    OnRequestResult onRequestFail;
     CreateOnRequestResultCallback(env, refCompletionHandler, onRequestSucc, "onRequestSuccess");
     CreateOnRequestResultCallback(env, refCompletionHandler, onRequestFail, "onRequestFailure");
     std::string requestId =
@@ -1617,7 +1617,7 @@ void EtsServiceExtensionContext::UnwrapCompletionHandlerForOpenLink(ani_env *env
 }
 
 void EtsServiceExtensionContext::CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
-    AAFwk::OnOpenLinkRequestFunc &onRequestCallback, const char *callbackName)
+    OnRequestResult &onRequestCallback, const char *callbackName)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "CreateOnRequestResultCallback called");
     ani_vm *etsVm = nullptr;

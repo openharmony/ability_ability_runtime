@@ -550,7 +550,7 @@ public:
     }
 
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
     {
         return 0;
     }

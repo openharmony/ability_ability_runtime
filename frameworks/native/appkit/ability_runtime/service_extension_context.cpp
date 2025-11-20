@@ -307,7 +307,7 @@ ErrCode ServiceExtensionContext::AddCompletionHandlerForAtomicService(const std:
 }
 
 ErrCode ServiceExtensionContext::AddCompletionHandlerForOpenLink(const std::string &requestId,
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
 {
     if (onRequestSucc == nullptr || onRequestFail == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "either func is null");

@@ -526,7 +526,7 @@ public:
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) = 0;
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail) = 0;
 
     virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions) = 0;
