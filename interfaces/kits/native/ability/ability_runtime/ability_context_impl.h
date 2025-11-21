@@ -64,6 +64,8 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const override;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config) override;
     void SetAbilityColorMode(int32_t colorMode) override;
+    void RegisterBindingObjectConfigUpdateCallback(BindingObjectConfigUpdateCallback callback) override;
+    void NotifyBindingObjectConfigUpdate() override;
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
@@ -433,6 +435,7 @@ private:
     std::atomic<bool> restoreEnabled_ = false;
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
+    BindingObjectConfigUpdateCallback bindingObjectConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
     bool isHook_ = false;
     bool hookOff_ = false;

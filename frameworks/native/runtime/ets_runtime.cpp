@@ -362,7 +362,7 @@ bool ETSRuntime::CreateEtsEnv(const Options &options)
     return true;
 }
 
-ani_env *ETSRuntime::GetAniEnv()
+ani_env *ETSRuntime::GetAniEnv() const
 {
     if (g_etsEnvFuncs == nullptr ||
         g_etsEnvFuncs->GetAniEnv == nullptr) {
