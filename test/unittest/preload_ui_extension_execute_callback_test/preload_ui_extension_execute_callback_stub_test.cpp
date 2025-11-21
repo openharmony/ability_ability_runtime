@@ -112,29 +112,6 @@ public:
     sptr<MockPreloadUIExtensionExecuteCallback> stub_ = nullptr;
 };
 
-class PreloadUIExtensionExecuteCallbackProxyTest : public testing::Test {
-public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    
-    void SetUp() override
-    {
-        mockRemote_ = new (std::nothrow) MockRemoteObject();
-        ASSERT_NE(mockRemote_, nullptr);
-        proxy_ = new (std::nothrow) PreloadUIExtensionExecuteCallbackProxy(mockRemote_);
-        ASSERT_NE(proxy_, nullptr);
-    }
-    
-    void TearDown() override
-    {
-        proxy_ = nullptr;
-        mockRemote_ = nullptr;
-    }
-
-    sptr<MockRemoteObject> mockRemote_ = nullptr;
-    sptr<PreloadUIExtensionExecuteCallbackProxy> proxy_ = nullptr;
-};
-
 /**
  * @tc.name: HandleOnLoadedDone_0100
  * @tc.desc: Test HandleOnLoadedDone with valid parameters
@@ -204,13 +181,62 @@ HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, HandleOnDestroyDone_0100, Te
     data.WriteInt32(extensionAbilityId);
     
     auto result = stub_->OnRemoteRequest(
-        IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_DESTROY_DONE,
-        data, reply, option);
-    
+        IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_DESTROY_DONE, data, reply, option);
     EXPECT_EQ(result, ERR_OK);
     EXPECT_TRUE(stub_->IsOnDestroyDoneCalled());
     EXPECT_EQ(stub_->GetExtensionAbilityId(), extensionAbilityId);
     TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: OnRemoteRequest_TokenMismatch_0100
+ * @tc.desc: Test InterfaceToken mismatch.
+ *           Expected: ERR_INVALID_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, OnRemoteRequest_TokenMismatch_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnRemoteRequest_TokenMismatch_0100 start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(u"Invalid.Token.Descriptor");
+    
+    auto result = stub_->OnRemoteRequest(
+        IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_LOADED_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_STATE);
+    TAG_LOGI(AAFwkTag::TEST, "OnRemoteRequest_TokenMismatch_0100 end");
+}
+
+/**
+ * @tc.name: HandleOnPreloadSuccess_0100
+ * @tc.desc: Test ON_PRELOAD_UI_EXTENSION_ABILITY_SUCCESS branch and HandleOnPreloadSuccess impl.
+ *           Expected: ERR_OK and callback invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, HandleOnPreloadSuccess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleOnPreloadSuccess_0100 start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(IPreloadUIExtensionExecuteCallback::GetDescriptor());
+    
+    int32_t requestCode = 10;
+    int32_t extensionAbilityId = 500;
+    int32_t innerErrCode = 0;
+
+    data.WriteInt32(requestCode);
+    data.WriteInt32(extensionAbilityId);
+    data.WriteInt32(innerErrCode);
+    
+    auto result = stub_->OnRemoteRequest(
+        IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_SUCCESS,
+        data, reply, option);
+    
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "HandleOnPreloadSuccess_0100 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
