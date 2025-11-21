@@ -451,9 +451,7 @@ export default class UIAbilityContext extends Context {
 
   setMissionLabel(label: string, callback: AsyncCallback<void>): void {
     let syncCall = new AsyncCallbackWrapper<void>(callback);
-    taskpool.execute((): void => {
-      this.nativeSetMissionLabel(label, syncCall);
-    });
+    this.nativeSetMissionLabel(label, syncCall);
   }
 
   setMissionLabel(label: string): Promise<void> {
@@ -465,9 +463,7 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      taskpool.execute(() => {
-        this.nativeSetMissionLabel(label, syncCall);
-      });
+      this.nativeSetMissionLabel(label, syncCall);
     });
   }
 
