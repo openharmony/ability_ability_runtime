@@ -132,6 +132,7 @@
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:auto_fill_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:extension_module",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:insight_intent_executor_ani",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:photo_editor_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:service_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_ability_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension_ani",
