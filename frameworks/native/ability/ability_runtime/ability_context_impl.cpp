@@ -1660,7 +1660,7 @@ ErrCode AbilityContextImpl::AddCompletionHandlerForAtomicService(const std::stri
 }
 
 ErrCode AbilityContextImpl::AddCompletionHandlerForOpenLink(const std::string &requestId,
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
 {
     if (onRequestSucc == nullptr || onRequestFail == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "either func is null");

@@ -551,7 +551,7 @@ void UIExtensionContext::OnRequestFailure(const std::string &requestId, const Ap
 }
 
 ErrCode UIExtensionContext::AddCompletionHandlerForOpenLink(const std::string &requestId,
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
 {
     if (onRequestSucc == nullptr || onRequestFail == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "either func is null");
