@@ -172,5 +172,30 @@ HWTEST_F(AbilityContextImplSecondTest, TransferRestartWSError_0100, Function | M
     EXPECT_EQ(AbilityContextImpl::TransferRestartWSError(srcCode), ERR_INVALID_VALUE);
 }
 #endif
+
+/**
+ * @tc.number: RegisterBindingObjectConfigUpdateCallback_0100
+ * @tc.name: RegisterBindingObjectConfigUpdateCallback
+ */
+HWTEST_F(AbilityContextImplSecondTest, RegisterBindingObjectConfigUpdateCallback_0100, Function | MediumTest | Level1)
+{
+    context_->RegisterBindingObjectConfigUpdateCallback(nullptr);
+    EXPECT_EQ(context_->bindingObjectConfigUpdateCallback_, nullptr);
+
+    context_->config_ = nullptr;
+    context_->NotifyBindingObjectConfigUpdate();
+    std::shared_ptr<Configuration> testConfig = std::make_shared<Configuration>();
+    context_->config_ = testConfig;
+    context_->NotifyBindingObjectConfigUpdate();
+
+    bool testFlag = false;
+    BindingObjectConfigUpdateCallback cb = [&testFlag, testConfig](std::shared_ptr<Configuration> config) -> void {
+        testFlag = true;
+        EXPECT_EQ(testConfig, config);
+    };
+    context_->RegisterBindingObjectConfigUpdateCallback(cb);
+    context_->NotifyBindingObjectConfigUpdate();
+    EXPECT_EQ(testFlag, true);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

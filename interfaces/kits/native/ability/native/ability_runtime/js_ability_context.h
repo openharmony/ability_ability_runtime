@@ -84,7 +84,7 @@ public:
     static napi_value RestartAppWithWindow(napi_env env, napi_callback_info info);
     static napi_value SetMissionWindowIcon(napi_env env, napi_callback_info info);
 
-    static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
+    static void ConfigurationUpdated(napi_env env, napi_value object,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<AbilityContext> GetAbilityContext()

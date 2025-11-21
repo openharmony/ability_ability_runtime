@@ -608,6 +608,14 @@ public:
     {
         return 0;
     }
+
+    void RegisterBindingObjectConfigUpdateCallback(BindingObjectConfigUpdateCallback callback) override
+    {
+    }
+
+    void NotifyBindingObjectConfigUpdate() override
+    {
+    }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;
 };

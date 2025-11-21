@@ -226,6 +226,38 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
         delete workContext;
     }
 }
+
+NativeReference *GetBindingContext(const std::weak_ptr<AbilityRuntime::AbilityContext> &abilityContextWeakPtr)
+{
+    auto abilityContext = abilityContextWeakPtr.lock();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return nullptr;
+    }
+    auto& bindingObject = abilityContext->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return nullptr;
+    }
+    auto* ptr = bindingObject->Get<NativeReference>();
+    return ptr;
+}
+
+void UpdateAniContextConfig(napi_env env, const std::weak_ptr<AbilityRuntime::AbilityContext> &abilityContextWeakPtr,
+    std::shared_ptr<AppExecFwk::Configuration> config)
+{
+    if (env == nullptr || config == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "env or config is null");
+        return;
+    }
+
+    NativeReference *context = GetBindingContext(abilityContextWeakPtr);
+    if (context == nullptr) {
+        return;
+    }
+
+    JsAbilityContext::ConfigurationUpdated(env, context->GetNapiValue(), config);
+}
 } // namespace
 
 UIAbility *JsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
@@ -349,6 +381,11 @@ void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::Abi
     }
 
     BindContext(env, std::move(contextRef), jsRuntime, abilityContext);
+    std::weak_ptr abilityContextWeakPtr = abilityContext;
+    abilityContext->RegisterBindingObjectConfigUpdateCallback(
+        [env, abilityContextWeakPtr](std::shared_ptr<AppExecFwk::Configuration> config) {
+            UpdateAniContextConfig(env, abilityContextWeakPtr, config);
+        });
 }
 
 void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
@@ -1724,7 +1761,10 @@ void JsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
     CallObjectMethod("onConfigurationUpdated", &napiConfiguration, 1);
     CallObjectMethod("onConfigurationUpdate", &napiConfiguration, 1);
     auto realConfigPtr = std::make_shared<Configuration>(realConfig);
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
+    if (shellContextRef_ != nullptr) {
+        JsAbilityContext::ConfigurationUpdated(env, shellContextRef_->GetNapiValue(), realConfigPtr);
+    }
+    abilityContext_->NotifyBindingObjectConfigUpdate();
 }
 
 void JsUIAbility::OnMemoryLevel(int level)
@@ -1758,7 +1798,11 @@ void JsUIAbility::UpdateContextConfiguration()
     }
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
+    if (shellContextRef_ != nullptr) {
+        JsAbilityContext::ConfigurationUpdated(env, shellContextRef_->GetNapiValue(),
+            abilityContext_->GetConfiguration());
+    }
+    abilityContext_->NotifyBindingObjectConfigUpdate();
 }
 
 void JsUIAbility::RemoveShareRouterByBundleType(const Want &want)

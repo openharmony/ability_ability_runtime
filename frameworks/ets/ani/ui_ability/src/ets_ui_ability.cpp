@@ -135,6 +135,51 @@ void OnPrepareTerminatePromiseCallback(ani_env *env, ani_object aniObj, ani_bool
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "OnPrepareTerminatePromiseCallback end");
 }
+
+ani_object GetBindingContext(const std::weak_ptr<AbilityRuntime::AbilityContext> &abilityContextWeakPtr)
+{
+    auto abilityContext = abilityContextWeakPtr.lock();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return nullptr;
+    }
+    auto& bindingObject = abilityContext->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return nullptr;
+    }
+    auto* ptr = bindingObject->Get<ani_ref>();
+    if (ptr == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "no binding context");
+        return nullptr;
+    }
+
+    return *reinterpret_cast<ani_object *>(ptr);
+}
+
+void UpdateAniContextConfig(ani_vm *aniVM, const std::weak_ptr<AbilityRuntime::AbilityContext> &abilityContextWeakPtr,
+    std::shared_ptr<AppExecFwk::Configuration> config)
+{
+    if (aniVM == nullptr || config == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "etsVm or config is null");
+        return;
+    }
+
+    ani_object context = GetBindingContext(abilityContextWeakPtr);
+    if (context == nullptr) {
+        return;
+    }
+
+    bool isAttachedThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(aniVM, isAttachedThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "AttachAniEnv failed");
+        return;
+    }
+
+    EtsAbilityContext::ConfigurationUpdated(env, context, config);
+    AppExecFwk::DetachAniEnv(aniVM, isAttachedThread);
+}
 } // namespace
 
 UIAbility *EtsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
@@ -289,6 +334,17 @@ void EtsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::Ab
             return;
         }
         abilityContext->Bind(etsRuntime, contextGlobalRef);
+        std::weak_ptr abilityContextWeakPtr = abilityContext;
+        ani_vm *aniVM = nullptr;
+        status = env->GetVM(&aniVM);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get vm failed: %{public}d", status);
+            return;
+        }
+        abilityContext->RegisterBindingObjectConfigUpdateCallback(
+            [aniVM, abilityContextWeakPtr](std::shared_ptr<AppExecFwk::Configuration> config) {
+                UpdateAniContextConfig(aniVM, abilityContextWeakPtr, config);
+            });
     }
     // no CreateAniEmbeddableUIAbilityContext
 }
@@ -1482,7 +1538,10 @@ void EtsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
     CallObjectMethod(false, "onConfigurationUpdated", nullptr, aniConfiguration);
     CallObjectMethod(false, "onConfigurationUpdate", nullptr, aniConfiguration);
     auto realConfigPtr = std::make_shared<Configuration>(realConfig);
-    EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
+    if (shellContextRef_ != nullptr) {
+        EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_->aniObj, realConfigPtr);
+    }
+    abilityContext_->NotifyBindingObjectConfigUpdate();
 }
 
 void EtsUIAbility::OnMemoryLevel(int level)
@@ -1518,7 +1577,10 @@ void EtsUIAbility::UpdateContextConfiguration()
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
+    if (shellContextRef_ != nullptr) {
+        EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_->aniObj, abilityContext_->GetConfiguration());
+    }
+    abilityContext_->NotifyBindingObjectConfigUpdate();
 }
 
 void EtsUIAbility::OnNewWant(const Want &want)
