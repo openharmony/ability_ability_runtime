@@ -1395,9 +1395,6 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     if (type == "applicationStateChange") {
         return OnOnApplicationStateChange(env, info);
     }
-    if (type == "interopAbilityLifecycle") {
-        return OnOnInteropAbilityLifecycle(env, info);
-    }
     TAG_LOGE(AAFwkTag::APPKIT, "on function type not match");
     ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
     return CreateJsUndefined(env);
@@ -1451,9 +1448,6 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
     }
     if (type == "environmentEvent") {
         return OnOffEnvironmentEventSync(env, info, callbackId);
-    }
-    if (type == "interopAbilityLifecycle") {
-        return OnOffInteropAbilityLifecycle(env, info);
     }
     TAG_LOGE(AAFwkTag::APPKIT, "off function type not match");
     ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
@@ -1515,66 +1509,6 @@ napi_value JsApplicationContextUtils::OnOffAbilityLifecycle(
     NapiAsyncTask::Schedule("JsApplicationContextUtils::OnOffAbilityLifecycle", env,
         CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
-}
-
-napi_value JsApplicationContextUtils::OnOnInteropAbilityLifecycle(
-    napi_env env, NapiCallbackInfo& info)
-{
-    auto applicationContext = applicationContext_.lock();
-    if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-
-    if (interopCallback_ != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "interopCallback_ is not nullptr");
-        auto result = interopCallback_->Register(info.argv[INDEX_ONE]);
-        if (result != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "failed to register:%{public}d", result);
-            AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        }
-        return CreateJsUndefined(env);
-    }
-    interopCallback_ = std::make_shared<JsInteropAbilityLifecycleCallback>(env);
-    auto result = interopCallback_->Register(info.argv[INDEX_ONE]);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to register:%{public}d", result);
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-    applicationContext->RegisterInteropAbilityLifecycleCallback(interopCallback_);
-    return CreateJsUndefined(env);
-}
-
-napi_value JsApplicationContextUtils::OnOffInteropAbilityLifecycle(
-    napi_env env, NapiCallbackInfo& info)
-{
-    auto applicationContext = applicationContext_.lock();
-    if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-
-    if (interopCallback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null interop callback");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-
-    if (info.argc == ARGC_ONE || !CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
-        interopCallback_->Unregister();
-    } else if (!interopCallback_->Unregister(info.argv[INDEX_ONE])) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call Unregister failed");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-
-    if (interopCallback_->Empty()) {
-        interopCallback_.reset();
-    }
-    return CreateJsUndefined(env);
 }
 
 napi_value JsApplicationContextUtils::OnOffAbilityLifecycleEventSync(

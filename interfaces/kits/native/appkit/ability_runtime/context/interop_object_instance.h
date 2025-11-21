@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
-#define OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
+#ifndef OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_INSTANCE_H
+#define OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_INSTANCE_H
+
+#include <memory>
+#include <string>
+
+#include "ability_lifecycle_callback.h"
+#include "interop_object.h"
+#include "runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class InteropObject {
+class InteropObjectInstance {
 public:
-    virtual ~InteropObject() {}
-    virtual bool IsFromNapi()
-    {
-        return false;
-    }
+    static std::shared_ptr<InteropObject> CreateInteropObject(const Runtime &runtime,
+        const AbilityLifecycleCallbackArgs &arg);
+
+private:
+    static std::shared_ptr<InteropObject> CreateEtsInteropObject(const Runtime &runtime,
+        const AbilityLifecycleCallbackArgs &arg);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
+#endif // OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_INSTANCE_H

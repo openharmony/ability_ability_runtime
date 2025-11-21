@@ -35,6 +35,7 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
+#include "interop_object_instance.h"
 #include "js_ability_context.h"
 #include "js_ability_lifecycle_callback.h"
 #include "js_data_struct_converter.h"
@@ -227,6 +228,26 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     }
 }
 } // namespace
+
+#define DISPATCH_ABILITY_INTEROP(type, applicationContext, jsRuntime, ability)                      \
+    do {                                                                                            \
+        if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
+            std::shared_ptr<InteropObject> interopObject =                                          \
+                InteropObjectInstance::CreateInteropObject(jsRuntime_, ability);                    \
+            applicationContext->Dispatch##type(interopObject);                                      \
+        }                                                                                           \
+    } while(0)
+
+#define DISPATCH_WINDOW_INTEROP(type, applicationContext, jsRuntime, ability, stage)                \
+    do {                                                                                            \
+        if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
+            std::shared_ptr<InteropObject> interopAbility =                                         \
+                InteropObjectInstance::CreateInteropObject(jsRuntime_, ability);                    \
+            std::shared_ptr<InteropObject> interopWindowStage =                                     \
+                InteropObjectInstance::CreateInteropObject(jsRuntime_, stage);                      \
+            applicationContext->Dispatch##type(interopAbility, interopWindowStage);                 \
+        }                                                                                           \
+    } while(0)
 
 UIAbility *JsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -474,9 +495,7 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     if (applicationContext != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityCreate(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
-            jsAbilityObj_->GetNapiValue());
-        applicationContext->DispatchOnAbilityCreate(interopObject);
+        DISPATCH_ABILITY_INTEROP(OnAbilityCreate, applicationContext, jsRuntime_, ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -617,9 +636,7 @@ void JsUIAbility::OnStopCallback()
     if (applicationContext != nullptr && jsAbilityObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityDestroy(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
-        applicationContext->DispatchOnAbilityDestroy(interopObject);
+        DISPATCH_ABILITY_INTEROP(OnAbilityDestroy, applicationContext, jsRuntime_, ability);
     }
 }
 
@@ -666,11 +683,7 @@ void JsUIAbility::OnSceneCreated()
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
         applicationContext->DispatchOnWindowStageCreate(ability, stage);
-        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
-        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsWindowStageObj_->GetNapiValue());
-        applicationContext->DispatchOnWindowStageCreate(interopAbility, interopWindowStage);
+        DISPATCH_WINDOW_INTEROP(OnWindowStageCreate, applicationContext, jsRuntime_, ability, stage);
     }
 
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -762,11 +775,7 @@ void JsUIAbility::onSceneDestroyed()
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         JsAbilityLifecycleCallbackArgs stage(jsWindowStageObj_);
         applicationContext->DispatchOnWindowStageDestroy(ability, stage);
-        std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
-        std::shared_ptr<InteropObject> interopWindowStage = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsWindowStageObj_->GetNapiValue());
-        applicationContext->DispatchOnWindowStageDestroy(interopAbility, interopWindowStage);
+        DISPATCH_WINDOW_INTEROP(OnWindowStageDestroy, applicationContext, jsRuntime_, ability, stage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -833,9 +842,7 @@ void JsUIAbility::CallOnForegroundFunc(const Want &want)
     if (applicationContext != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityForeground(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(env,
-            jsAbilityObj_->GetNapiValue());
-        applicationContext->DispatchOnAbilityForeground(interopObject);
+        DISPATCH_ABILITY_INTEROP(OnAbilityForeground, applicationContext, jsRuntime_, ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -869,9 +876,7 @@ void JsUIAbility::OnBackground()
     if (applicationContext != nullptr && jsAbilityObj_ != nullptr) {
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityBackground(ability);
-        std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
-            jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
-        applicationContext->DispatchOnAbilityBackground(interopObject);
+        DISPATCH_ABILITY_INTEROP(OnAbilityBackground, applicationContext, jsRuntime_, ability);
     }
     auto want = GetWant();
     if (want != nullptr) {
