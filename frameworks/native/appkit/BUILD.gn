@@ -472,10 +472,8 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/bindable_sub_thread.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
-    "${ability_runtime_native_path}/appkit/ability_runtime/context/ets_interop_ability_lifecycle_callback.cpp",
-    "${ability_runtime_native_path}/appkit/ability_runtime/context/interop_object.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/interop_object_instance.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/js_ability_lifecycle_callback.cpp",
-    "${ability_runtime_native_path}/appkit/ability_runtime/context/js_interop_ability_lifecycle_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
   ]
@@ -504,8 +502,6 @@ ohos_shared_library("app_context") {
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "runtime_core:ani",
-    "runtime_core:ani_helpers",
     "samgr:samgr_proxy",
   ]
   public_external_deps = [
