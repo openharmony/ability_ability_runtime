@@ -228,18 +228,6 @@ int DataAbilityManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
         return ERR_UNKNOWN_OBJECT;
     }
 
-    if (DEBUG_ENABLED && dataAbilityRecord->GetClientCount() > 0) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attachingy '%{public}s' has clients", abilityName.c_str());
-    }
-
-    if (DEBUG_ENABLED && dataAbilityRecord->GetScheduler()) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attaching '%{public}s' has ready", abilityName.c_str());
-    }
-
-    if (DEBUG_ENABLED && dataAbilityRecordsLoaded_.count(it->first) != 0) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attaching '%{public}s' exist", abilityName.c_str());
-    }
-
     return dataAbilityRecord->Attach(scheduler);
 }
 
