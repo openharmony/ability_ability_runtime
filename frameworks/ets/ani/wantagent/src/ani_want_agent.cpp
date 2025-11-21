@@ -468,15 +468,11 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         return PARAMETER_ERROR;
     }
     params.requestCode = requestCode;
-    if (!isOperationTypeUndefined) {
-        return BUSINESS_ERROR_CODE_OK;
-    }
+
+    ani_boolean isActionFlagsRefUndefined = true;
     ani_ref actionFlagsRef = nullptr;
-    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isActionTypeUndefined)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "actionFlags GetPropertyRef failed");
-        return PARAMETER_ERROR;
-    }
-    if (!isActionTypeUndefined) {
+    GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isActionFlagsRefUndefined);
+    if (!isActionFlagsRefUndefined) {
         ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
@@ -497,18 +493,14 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         }
     }
 
+    ani_boolean isExtraInfosUndefined = true;
+    ani_boolean isExtraInfoUndefined = true;
     ani_ref extraInfoRef = nullptr;
-    if (!GetPropertyRef(env, info, "extraInfos", extraInfoRef, isActionTypeUndefined)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfos GetPropertyRef failed");
-        return PARAMETER_ERROR;
+    GetPropertyRef(env, info, "extraInfos", extraInfoRef, isExtraInfosUndefined);
+    if (isExtraInfosUndefined) {
+        GetPropertyRef(env, info, "extraInfo", extraInfoRef, isExtraInfoUndefined);
     }
-    if (isActionTypeUndefined) {
-        if (!GetPropertyRef(env, info, "extraInfo", extraInfoRef, isActionTypeUndefined)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfo GetPropertyRef failed");
-            return PARAMETER_ERROR;
-        }
-    }
-    if (!isActionTypeUndefined) {
+    if (!isExtraInfosUndefined || !isExtraInfoUndefined) {
         if (!UnwrapWantParams(env, extraInfoRef, params.extraInfo)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
             return PARAMETER_ERROR;
