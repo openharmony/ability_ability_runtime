@@ -4055,5 +4055,162 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_ScheduleDisconnectAbilityDon
     res = connectManager->ScheduleDisconnectAbilityDoneLocked(nullptr);
     EXPECT_EQ(res, CONNECTION_NOT_EXIST);
 }
+
+/**
+ * @tc.name: UnPreloadUIExtensionAbilityLocked_0100
+ * @tc.desc: unpreload uiextension ability with invalid id
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UnPreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
+    auto ret = connectManager->UnPreloadUIExtensionAbilityLocked(extensionAbilityId);
+    EXPECT_EQ(ret, ERR_CODE_INVALID_ID);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ClearAllPreloadUIExtensionAbilityLocked
+ * SubFunction: ClearAllPreloadUIExtensionAbilityInner
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify ClearAllPreloadUIExtensionAbilityLocked when uiExtensionAbilityRecordMgr_ is nullptr
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_ClearAllPreloadUIExtensionAbilityLocked_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
+    
+    int res = connectManager->ClearAllPreloadUIExtensionAbilityLocked();
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ClearAllPreloadUIExtensionAbilityLocked
+ * SubFunction: ClearAllPreloadUIExtensionAbilityInner
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify ClearAllPreloadUIExtensionAbilityLocked with valid uiExtensionAbilityRecordMgr_
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_ClearAllPreloadUIExtensionAbilityLocked_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    
+    int res = connectManager->ClearAllPreloadUIExtensionAbilityLocked();
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: RegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterPreloadUIExtensionHostClient when callerToken is nullptr
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_RegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    sptr<IRemoteObject> callerToken = nullptr;
+    
+    int32_t res = connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: RegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterPreloadUIExtensionHostClient when uiExtensionAbilityRecordMgr_ is nullptr
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_RegisterPreloadUIExtensionHostClient_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
+    ASSERT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    ASSERT_NE(callerToken, nullptr);
+    connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
+    
+    int32_t res = connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: RegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterPreloadUIExtensionHostClient with valid parameters
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_RegisterPreloadUIExtensionHostClient_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
+    ASSERT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    ASSERT_NE(callerToken, nullptr);
+    
+    int32_t res = connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify UnRegisterPreloadUIExtensionHostClient when uiExtensionAbilityRecordMgr_ is nullptr
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_UnRegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
+    int32_t callerPid = 1234;
+    
+    int32_t res = connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify UnRegisterPreloadUIExtensionHostClient with DEFAULT_INVALID_VALUE
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_UnRegisterPreloadUIExtensionHostClient_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    int32_t callerPid = DEFAULT_INVAL_VALUE;
+    
+    int32_t res = connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify UnRegisterPreloadUIExtensionHostClient with valid callerPid
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_UnRegisterPreloadUIExtensionHostClient_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    int32_t callerPid = 5678;
+    
+    int32_t res = connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_EQ(res, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

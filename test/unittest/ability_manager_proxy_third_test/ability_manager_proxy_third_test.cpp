@@ -1516,6 +1516,49 @@ HWTEST_F(AbilityManagerProxyTest, UnRegisterPreloadUIExtensionHostClient_5200, T
 
     GTEST_LOG_(INFO) << "UnRegisterPreloadUIExtensionHostClient_5200 end";
 }
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_0100
+ * @tc.desc: ClearPreloadedUIExtensionAbilities with SendRequest error
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbilities_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_0100 start";
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    
+    int32_t userId = 100;
+    int32_t result = proxy_->ClearPreloadedUIExtensionAbilities(userId);
+    
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY),
+        mock_->code_);
+    EXPECT_NE(result, NO_ERROR);
+
+    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_0100 end";
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_0200
+ * @tc.desc: ClearPreloadedUIExtensionAbilities with valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbilities_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_0200 start";
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    
+    int32_t userId = 100;
+    int32_t result = proxy_->ClearPreloadedUIExtensionAbilities(userId);
+    
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY),
+        mock_->code_);
+    EXPECT_EQ(result, NO_ERROR);
+    GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_0200 end";
+}
 #endif
 } // namespace AAFwk
 } // namespace OHOS
