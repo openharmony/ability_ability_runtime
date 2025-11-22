@@ -3969,6 +3969,19 @@ int32_t AbilityConnectManager::RegisterPreloadUIExtensionHostClient(const sptr<I
         return ERR_INVALID_VALUE;
     }
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    auto deathRecipient = new PreloadUIExtensionHostClientDeathRecipient(
+        [self = weak_from_this(), callerPid](const wptr<IRemoteObject> &remote) {
+            auto selfObj = self.lock();
+            if (selfObj != nullptr) {
+                selfObj->UnRegisterPreloadUIExtensionHostClient(callerPid);
+            }
+        });
+    {
+        std::lock_guard lock(preloadUIExtRecipientMapMutex_);
+        preloadUIExtensionHostClientDeathRecipients_[callerPid] = deathRecipient;
+    }
+    callerToken->AddDeathRecipient(deathRecipient);
     uiExtensionAbilityRecordMgr_->RegisterPreloadUIExtensionHostClient(callerToken);
     return ERR_OK;
 }
@@ -3979,8 +3992,27 @@ int32_t AbilityConnectManager::UnRegisterPreloadUIExtensionHostClient(int32_t ca
     if (callerPid == DEFAULT_INVALID_VALUE) {
         callerPid = IPCSkeleton::GetCallingPid();
     }
-    uiExtensionAbilityRecordMgr_->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    std::lock_guard lock(preloadUIExtRecipientMapMutex_);
+    auto deathIter = preloadUIExtensionHostClientDeathRecipients_.find(callerPid);
+    if (deathIter != preloadUIExtensionHostClientDeathRecipients_.end()) {
+        auto deathRecipient = deathIter->second;
+        uiExtensionAbilityRecordMgr_->UnRegisterPreloadUIExtensionHostClient(callerPid, deathRecipient);
+        preloadUIExtensionHostClientDeathRecipients_.erase(deathIter);
+    }
     return ERR_OK;
+}
+
+AbilityConnectManager::PreloadUIExtensionHostClientDeathRecipient::PreloadUIExtensionHostClientDeathRecipient(
+    PreloadUIExtensionHostClientDiedHandler handler)
+    : diedHandler_(handler)
+{}
+
+void AbilityConnectManager::PreloadUIExtensionHostClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    TAG_LOGE(AAFwkTag::UI_EXT, "OnRemoteDied");
+    if (diedHandler_) {
+        diedHandler_(remote);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

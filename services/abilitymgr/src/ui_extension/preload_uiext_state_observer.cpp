@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ability_manager_client.h"
 #include "extension_record.h"
 #include "preload_uiext_state_observer.h"
 #include "hilog_tag_wrapper.h"
@@ -38,7 +37,6 @@ void PreLoadUIExtStateObserver::OnProcessDied(const AppExecFwk::ProcessData &pro
             return;
         }
         extensionRecord->UnloadUIExtensionAbility();
-        AbilityManagerClient::GetInstance()->UnRegisterPreloadUIExtensionHostClient(diedPid);
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "extensionRecord null");
     }
