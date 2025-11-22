@@ -27,6 +27,7 @@
 #include "overlay_manager_proxy.h"
 #include "ability_connect_callback_stub.h"
 #include "session_manager_lite.h"
+#include "process_uid_define.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2577,64 +2578,6 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SaveBrowserChannel_002, TestSize.Level1)
 }
 
 /**
-* @tc.name: GenerateRenderUid_001
-* @tc.desc: test GenerateRenderUid_001
-* @tc.type: FUNC
-*/
-HWTEST_F(AppMgrServiceInnerSeventhTest, GenerateRenderUid_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
-
-    int32_t pid = 1;
-    auto ret = appMgrServiceInner->GenerateRenderUid(pid);
-    EXPECT_EQ(ret, true);
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_001 end");
-}
-
-/**
-* @tc.name: GenerateRenderUid_002
-* @tc.desc: test GenerateRenderUid_002
-* @tc.type: FUNC
-*/
-HWTEST_F(AppMgrServiceInnerSeventhTest, GenerateRenderUid_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_002 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS - 1;
-    appMgrServiceInner->renderUidSet_.clear();
-    appMgrServiceInner->renderUidSet_.insert(Constants::END_UID_FOR_RENDER_PROCESS);
-
-    int32_t pid = 1;
-    auto ret = appMgrServiceInner->GenerateRenderUid(pid);
-    EXPECT_EQ(ret, true);
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_002 end");
-}
-
-/**
-* @tc.name: GenerateRenderUid_003
-* @tc.desc: test GenerateRenderUid_003
-* @tc.type: FUNC
-*/
-HWTEST_F(AppMgrServiceInnerSeventhTest, GenerateRenderUid_003, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_003 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
-    for (int32_t i = Constants::START_UID_FOR_RENDER_PROCESS; i <= Constants::END_UID_FOR_RENDER_PROCESS; i++) {
-        appMgrServiceInner->renderUidSet_.insert(i);
-    }
-    
-    int32_t pid = 1;
-    auto ret = appMgrServiceInner->GenerateRenderUid(pid);
-    EXPECT_EQ(ret, false);
-    TAG_LOGI(AAFwkTag::TEST, "GenerateRenderUid_003 end");
-}
-
-/**
 * @tc.name: StartRenderProcessImpl_001
 * @tc.desc: test StartRenderProcessImpl_001
 * @tc.type: FUNC
@@ -2669,10 +2612,9 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_002, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getNWebSpawnClient_ = std::make_shared<AppSpawnClient>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
-    for (int32_t i = Constants::START_UID_FOR_RENDER_PROCESS; i <= Constants::END_UID_FOR_RENDER_PROCESS; i++) {
-        appMgrServiceInner->renderUidSet_.insert(i);
+    appMgrServiceInner->renderProcessIsolationUidSet_.clear();
+    for (int32_t i = START_ID_FOR_RENDER_PROCESS_ISOLATION; i <= END_ID_FOR_RENDER_PROCESS_ISOLATION; i++) {
+        appMgrServiceInner->renderProcessIsolationUidSet_.insert(i);
     }
 
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
@@ -2699,8 +2641,7 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_003, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getNWebSpawnClient_ = std::make_shared<AppSpawnClient>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
+    appMgrServiceInner->renderProcessIsolationUidSet_.clear();
     AAFwk::MyStatus::GetInstance().startProcess_ = ERR_OK;
 
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
@@ -2727,8 +2668,7 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_004, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getNWebSpawnClient_ = std::make_shared<AppSpawnClient>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
+    appMgrServiceInner->renderProcessIsolationUidSet_.clear();
     AAFwk::MyStatus::GetInstance().startProcess_ = ERR_OK;
 
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
@@ -2755,8 +2695,7 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetRenderStartMsg_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "SetRenderStartMsg_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getNWebSpawnClient_ = std::make_shared<AppSpawnClient>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
+    appMgrServiceInner->renderProcessIsolationUidSet_.clear();
     AAFwk::MyStatus::GetInstance().startProcess_ = ERR_OK;
 
     AppSpawnStartMsg startMsg;
@@ -2786,8 +2725,7 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetRenderStartMsg_002, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "SetRenderStartMsg_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getNWebSpawnClient_ = std::make_shared<AppSpawnClient>();
-    appMgrServiceInner->lastRenderUid_ = Constants::END_UID_FOR_RENDER_PROCESS;
-    appMgrServiceInner->renderUidSet_.clear();
+    appMgrServiceInner->renderProcessIsolationUidSet_.clear();
     AAFwk::MyStatus::GetInstance().startProcess_ = ERR_OK;
 
     AppSpawnStartMsg startMsg;
