@@ -29,7 +29,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int64_t EXTENSION_LIMIT_INTERVAL_MS = 1000;  // 1s
-constexpr int32_t EXTENSION_MAX_LIMIT = 20;
+constexpr int32_t EXTENSION_MAX_LIMIT = 50;
 constexpr int64_t REPORT_LIMIT_INTERVAL_MS = 5000; // 5s
 constexpr int32_t REPORT_MAX_LIMIT = 1;
 }
@@ -67,7 +67,7 @@ HWTEST_F(RateLimiterTest, CheckExtensionLimitTest_0100, TestSize.Level2)
     auto &rateLimiter = RateLimiter::GetInstance();
     auto uid = 20010001;
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_FALSE(isLimit);
+    EXPECT_FALSE(isLimit.limited);
 
     TAG_LOGI(AAFwkTag::TEST, "CheckExtensionLimitTest_0100 end.");
 }
@@ -87,7 +87,7 @@ HWTEST_F(RateLimiterTest, CheckExtensionLimitTest_0200, TestSize.Level2)
         rateLimiter.CheckExtensionLimit(uid);
     }
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_TRUE(isLimit);
+    EXPECT_TRUE(isLimit.limited);
 
     TAG_LOGI(AAFwkTag::TEST, "CheckExtensionLimitTest_0200 end.");
 }
@@ -103,7 +103,7 @@ HWTEST_F(RateLimiterTest, CheckReportLimitTest_0100, TestSize.Level2)
 
     auto &rateLimiter = RateLimiter::GetInstance();
     auto uid = 20010001;
-    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    auto isLimit = rateLimiter.CheckReportLimit(uid, 50);
     EXPECT_FALSE(isLimit);
 
     TAG_LOGI(AAFwkTag::TEST, "CheckReportLimitTest_0100 end.");
@@ -121,9 +121,9 @@ HWTEST_F(RateLimiterTest, CheckReportLimitTest_0200, TestSize.Level2)
     auto &rateLimiter = RateLimiter::GetInstance();
     auto uid = 20010001;
     for (int i = 0; i < REPORT_MAX_LIMIT; i++) {
-        rateLimiter.CheckReportLimit(uid);
+        rateLimiter.CheckReportLimit(uid, 50);
     }
-    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    auto isLimit = rateLimiter.CheckReportLimit(uid, 50);
     EXPECT_TRUE(isLimit);
 
     TAG_LOGI(AAFwkTag::TEST, "CheckReportLimitTest_0200 end.");
@@ -171,17 +171,70 @@ HWTEST_F(RateLimiterTest, CleanCallMapTest_0200, TestSize.Level2)
     auto uid1 = 20010001;
     auto uid2 = 20010002;
 
-    rateLimiter.CheckReportLimit(uid1);
+    rateLimiter.CheckReportLimit(uid1, 50);
     std::this_thread::sleep_for(std::chrono::milliseconds(REPORT_LIMIT_INTERVAL_MS + 100));
-    rateLimiter.CheckReportLimit(uid2);
+    rateLimiter.CheckReportLimit(uid2, 50);
 
     rateLimiter.lastCleanTimeMillis_ = 0;
     rateLimiter.CleanCallMap();
-    auto mapSize = rateLimiter.reportCallMap_.size();
-    TAG_LOGI(AAFwkTag::TEST, "reportCallMap_ size:%{public}zu", mapSize);
-    EXPECT_EQ(mapSize, 1);
+    auto mapSize = rateLimiter.tierReportCallMap_.size();
+    TAG_LOGI(AAFwkTag::TEST, "tierReportCallMap_ size:%{public}zu", mapSize);
+    EXPECT_EQ(mapSize, 2);
 
     TAG_LOGI(AAFwkTag::TEST, "CleanCallMapTest_0200 end.");
+}
+
+HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0100, TestSize.Level2)
+{
+    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 300}};
+    int64_t timeBefore = 400;
+    auto &rateLimiter = RateLimiter::GetInstance();
+    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
+ 
+    EXPECT_TRUE(userTiers.empty());
+}
+ 
+HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0200, TestSize.Level2)
+{
+    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 300}};
+    int64_t timeBefore = 50;
+    auto &rateLimiter = RateLimiter::GetInstance();
+    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
+ 
+    EXPECT_EQ(userTiers.size(), 3);
+}
+ 
+HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0300, TestSize.Level2)
+{
+    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 150}};
+    int64_t timeBefore = 200;
+    auto &rateLimiter = RateLimiter::GetInstance();
+    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
+ 
+    EXPECT_EQ(userTiers.size(), 1);
+    EXPECT_EQ(userTiers.find(1), userTiers.end());
+    EXPECT_EQ(userTiers.find(3), userTiers.end());
+    EXPECT_NE(userTiers.find(2), userTiers.end());
+}
+ 
+HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0400, TestSize.Level2)
+{
+    std::unordered_map<int32_t, int64_t> userTiers = {};
+    int64_t timeBefore = 101;
+    auto &rateLimiter = RateLimiter::GetInstance();
+    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
+ 
+    EXPECT_TRUE(userTiers.empty());
+}
+ 
+HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0500, TestSize.Level2)
+{
+    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}};
+    int64_t timeBefore = 100;
+    auto &rateLimiter = RateLimiter::GetInstance();
+    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
+ 
+    EXPECT_TRUE(userTiers.empty());
 }
 }  // namespace AAFwk
 }  // namespace OHOS

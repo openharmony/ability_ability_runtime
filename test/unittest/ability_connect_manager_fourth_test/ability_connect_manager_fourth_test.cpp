@@ -1077,5 +1077,19 @@ HWTEST_F(AbilityConnectManagerFourthTest, SignRestartProcess_001, TestSize.Level
     connectManager->SignRestartProcess(pid);
     EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
 }
+
+HWTEST_F(AbilityConnectManagerFourthTest, HandleConnectionCountIncrementTest_001, TestSize.Level2)
+{
+    int32_t pid = 1234;
+    std::string bundleName = "com.example.bundle";
+    std::string abilityName = "com.example.ability";
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    connectManager->callerPidConnectionCountMap_[pid] = 0;
+    connectManager->HandleConnectionCountIncrement(pid, bundleName, abilityName);
+    EXPECT_EQ(connectManager->callerPidConnectionCountMap_[pid], 1);
+    connectManager->thresholds_ = {1, 2};
+    connectManager->HandleConnectionCountIncrement(pid, bundleName, abilityName);
+    EXPECT_EQ(connectManager->callerPidConnectionCountMap_[pid], 2);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
