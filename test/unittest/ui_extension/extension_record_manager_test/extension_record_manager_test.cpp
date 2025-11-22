@@ -971,8 +971,7 @@ HWTEST_F(ExtensionRecordManagerTest, RegisterPreloadUIExtensionHostClient_0100, 
     {
         std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
         auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);
-        EXPECT_NE(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
-        EXPECT_EQ(it->second, nullptr);
+        EXPECT_EQ(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
     }
     
     TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_0100 end");
@@ -1018,7 +1017,7 @@ HWTEST_F(ExtensionRecordManagerTest, UnRegisterPreloadUIExtensionHostClient_0100
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
     ASSERT_NE(extRecordMgr, nullptr);
     int32_t nonExistentKey = 99999;
-    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(nonExistentKey);
+    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(nonExistentKey, nullptr);
     
     {
         std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
@@ -1053,7 +1052,7 @@ HWTEST_F(ExtensionRecordManagerTest, UnRegisterPreloadUIExtensionHostClient_0200
         EXPECT_NE(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
         EXPECT_EQ(it->second, validToken);
     }
-    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(callerPid, nullptr);
     {
         std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
         auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);

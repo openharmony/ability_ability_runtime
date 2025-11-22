@@ -4212,5 +4212,30 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_UnRegisterPreloadUIExtension
     int32_t res = connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: UnRegisterPreloadUIExtensionHostClient
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify UnRegisterPreloadUIExtensionHostClient
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_UnRegisterPreloadUIExtensionHostClient_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
+    ASSERT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(connectManager->uiExtensionAbilityRecordMgr_->preloadUIExtensionHostClientCallerTokens_.size(), 1);
+    
+    connectManager->UnRegisterPreloadUIExtensionHostClient(1);
+    EXPECT_EQ(connectManager->uiExtensionAbilityRecordMgr_->preloadUIExtensionHostClientCallerTokens_.size(), 1);
+
+    connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_EQ(connectManager->uiExtensionAbilityRecordMgr_->preloadUIExtensionHostClientCallerTokens_.size(), 0);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
