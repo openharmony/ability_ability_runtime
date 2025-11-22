@@ -1349,7 +1349,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestS
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
-    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    auto isLimit = rateLimiter.CheckReportLimit(uid, 50);
     EXPECT_EQ(isLimit, true);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_003 end");
