@@ -429,6 +429,16 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t SetExtBundleStats(uint32_t userId, const std::string &businessName, uint64_t businessSize) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetExtBundleStats(uint32_t userId, const std::string &businessName, uint64_t &businessSize) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
