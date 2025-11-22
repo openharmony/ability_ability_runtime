@@ -270,12 +270,26 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             break;
         }
         case PROCESS_MODE_HOST_SPECIFIED: {
-            std::string process = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
-            if (!IsHostSpecifiedProcessValid(abilityRequest, record, process)) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid name, %{public}s", process.c_str());
+            std::string processName = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
+            if (abilityRecord->GetAppIndex() > 0) {
+                auto isStrEndWith = [](const std::string &targetStr, const std::string &suffix) {
+                    if (targetStr.length() >= suffix.length()) {
+                        return targetStr.substr(targetStr.length() - suffix.length()) == suffix;
+                    }
+                    return false;
+                };
+                std::string suffix = ":" + std::to_string(abilityRecord->GetAppIndex());
+                if (!isStrEndWith(processName, suffix)) {
+                    TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid name, %{public}s", processName.c_str());
+                    return ERR_INVALID_VALUE;
+                }
+                processName = processName.substr(0, processName.size() - suffix.size());
+            }
+            if (!IsHostSpecifiedProcessValid(abilityRequest, record, processName)) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid name, %{public}s", processName.c_str());
                 return ERR_INVALID_VALUE;
             }
-            abilityRecord->SetProcessName(process);
+            abilityRecord->SetProcessName(processName);
             break;
         }
         case PROCESS_MODE_RUN_WITH_MAIN_PROCESS: {
