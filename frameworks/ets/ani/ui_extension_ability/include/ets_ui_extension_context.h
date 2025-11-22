@@ -85,12 +85,17 @@ public:
     static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
     static void ConnectUIServiceExtension(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object uiServiceExtConCallbackObj, ani_object callback);
+    static void StartUIAbilities(ani_env *env, ani_object aniObj, ani_object wantListObj,
+        ani_object callback);
+    static bool UnwrapWantList(ani_env *env, ani_object wantListObj, std::vector<AAFwk::Want> &wantList);
     static void StartUIServiceExtension(ani_env *env, ani_object aniObj,
         ani_object wantObj, ani_object callback);
     static void DisconnectUIServiceExtension(ani_env *env, ani_object aniObj, ani_object proxyObj,
         ani_object callback);
     static void WantCheck(ani_env *env, ani_object aniObj, ani_object wantObj);
     static void DisconnectUIServiceExtensionCheck(ani_env *env, ani_object aniObj, ani_object proxyObj);
+    static void StartUIAbilitiesInSplitWindowMode(ani_env *env, ani_object aniObj,
+        ani_int primaryWindowId, ani_object wantObj, ani_object callback);
     static void OpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
         ani_object optionsObj, ani_object callbackobj);
     static void OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink);
@@ -130,11 +135,15 @@ private:
         sptr<EtsUIExtensionConnection>& connection, AAFwk::Want& want);
     void OnSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
     void OnReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
+    void OnStartUIAbilities(ani_env *env, ani_object aniObj, ani_object wantListObj,
+        ani_object callback);
     void OnConnectUIServiceExtension(ani_env *env, ani_object wantObj, ani_object uiServiceExtConCallbackObj,
         ani_object callback);
     void OnStartUIServiceExtension(ani_env *env, ani_object wantObj, ani_object callback);
     void OnDisconnectUIServiceExtension(ani_env *env, ani_object proxyObj, ani_object callback);
     bool CheckConnectAlreadyExist(ani_env *env, const AAFwk::Want& want, ani_object callback, ani_object myCallback);
+    void OnStartUIAbilitiesInSplitWindowMode(ani_env *env, ani_int primaryWindowId,
+        ani_object wantObj, ani_object callback);
     void OpenLinkInner(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
         ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm);
     void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,

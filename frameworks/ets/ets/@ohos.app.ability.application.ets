@@ -39,6 +39,19 @@ export default namespace application {
 
   export native function nativeGetApplicationContext(): ApplicationContext;
 
+  export native function nativeDemoteCurrentFromCandidateMasterProcess(callback: AsyncCallbackWrapper<void>): void;
+
+  export native function nativePromoteCurrentToCandidateMasterProcess(isInsertToHead: boolean,
+    callback:AsyncCallbackWrapper<void>): void;
+
+  export native function nativeExitMasterProcessRole(callback: AsyncCallbackWrapper<void>): void;
+
+  export native function nativeCreatePluginModuleContextForHostBundle(context: Context, pluginBundleName: string,
+    pluginModuleName: string, hostBundleName: string, callback: AsyncCallbackWrapper<Context>): void;
+
+  export native function nativeCreatePluginModuleContextForHostBundleCheck(context: Context, pluginBundleName: string,
+    pluginModuleName: string, hostBundleName: string): void;
+
   export native function nativeGetApplicationContextInstance(): ApplicationContext;
 
   export native function nativeGetAppPreloadType(): AppPreloadType;
@@ -120,6 +133,38 @@ export default namespace application {
     return p;
   }
 
+  export function demoteCurrentFromCandidateMasterProcess(): Promise<void> {
+    let p: Promise<void> =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          application.nativeDemoteCurrentFromCandidateMasterProcess(myCall);
+        });
+      });
+    return p;
+  }
+
+  export function promoteCurrentToCandidateMasterProcess(isInsertToHead: boolean): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        application.nativePromoteCurrentToCandidateMasterProcess(isInsertToHead, asyncCall);
+      });
+    });
+  }
+
   export function getApplicationContext(): ApplicationContext {
     return nativeGetApplicationContext();
   }
@@ -130,5 +175,41 @@ export default namespace application {
 
   export function getAppPreloadType(): AppPreloadType {
     return nativeGetAppPreloadType();
+  }
+
+  export function exitMasterProcessRole(): Promise<void> {
+    let p: Promise<void> =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=> {
+          if (err == null || err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+            application.nativeExitMasterProcessRole(myCall);
+        });
+      });
+    return p;
+  }
+
+  export function createPluginModuleContextForHostBundle(context: Context, pluginBundleName: string,
+    pluginModuleName: string, hostBundleName: string): Promise<Context> {
+    application.nativeCreatePluginModuleContextForHostBundleCheck(context, pluginBundleName, pluginModuleName, hostBundleName);
+    let p =
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          application.nativeCreatePluginModuleContextForHostBundle(context, pluginBundleName, pluginModuleName, hostBundleName, myCall);
+        });
+      });
+    return p;
   }
 }
