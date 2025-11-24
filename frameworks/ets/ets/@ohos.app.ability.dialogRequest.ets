@@ -48,17 +48,17 @@ namespace dialogRequest {
   let unregisterTokenReqCallback = new object();
   
   export interface WindowRect {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
+    left: int;
+    top: int;
+    width: int;
+    height: int;
   }
 
   export class WindowRectInner implements WindowRect {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
+    left: int;
+    top: int;
+    width: int;
+    height: int;
   }
 
   export interface RequestInfo {
