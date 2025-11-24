@@ -145,8 +145,9 @@ void RateLimiter::CleanUserTierTriggerTimes(std::unordered_map<int32_t, int64_t>
     }
 }
 
-void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>>& callMap, 
-                                    std::mutex& mapLock, int64_t limitInterval) {
+void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>>& callMap,
+    std::mutex& mapLock, int64_t limitInterval)
+{
     int64_t timeBefore = CurrentTimeMillis() - limitInterval;
     std::lock_guard<std::mutex> guard(mapLock);
     auto it = callMap.begin();
