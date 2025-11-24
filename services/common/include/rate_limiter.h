@@ -28,7 +28,7 @@ namespace AAFwk {
 class RateLimiter {
 public:
     struct LimitResult {
-        bool limited;
+        bool limited = false;
         int32_t triggeredLimit;
     };
     static RateLimiter &GetInstance();
