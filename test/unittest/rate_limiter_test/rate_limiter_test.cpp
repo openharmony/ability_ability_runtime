@@ -183,58 +183,5 @@ HWTEST_F(RateLimiterTest, CleanCallMapTest_0200, TestSize.Level2)
 
     TAG_LOGI(AAFwkTag::TEST, "CleanCallMapTest_0200 end.");
 }
-
-HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0100, TestSize.Level2)
-{
-    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 300}};
-    int64_t timeBefore = 400;
-    auto &rateLimiter = RateLimiter::GetInstance();
-    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
- 
-    EXPECT_TRUE(userTiers.empty());
-}
- 
-HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0200, TestSize.Level2)
-{
-    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 300}};
-    int64_t timeBefore = 50;
-    auto &rateLimiter = RateLimiter::GetInstance();
-    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
- 
-    EXPECT_EQ(userTiers.size(), 3);
-}
- 
-HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0300, TestSize.Level2)
-{
-    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}, {2, 200}, {3, 150}};
-    int64_t timeBefore = 200;
-    auto &rateLimiter = RateLimiter::GetInstance();
-    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
- 
-    EXPECT_EQ(userTiers.size(), 1);
-    EXPECT_EQ(userTiers.find(1), userTiers.end());
-    EXPECT_EQ(userTiers.find(3), userTiers.end());
-    EXPECT_NE(userTiers.find(2), userTiers.end());
-}
- 
-HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0400, TestSize.Level2)
-{
-    std::unordered_map<int32_t, int64_t> userTiers = {};
-    int64_t timeBefore = 101;
-    auto &rateLimiter = RateLimiter::GetInstance();
-    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
- 
-    EXPECT_TRUE(userTiers.empty());
-}
- 
-HWTEST_F(RateLimiterTest, CleanUserTierTriggerTimesTest_0500, TestSize.Level2)
-{
-    std::unordered_map<int32_t, int64_t> userTiers = {{1, 100}};
-    int64_t timeBefore = 100;
-    auto &rateLimiter = RateLimiter::GetInstance();
-    rateLimiter.CleanUserTierTriggerTimes(userTiers, timeBefore);
- 
-    EXPECT_TRUE(userTiers.empty());
-}
 }  // namespace AAFwk
 }  // namespace OHOS
