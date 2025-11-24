@@ -447,7 +447,7 @@ void EtsServiceExtensionContext::WantCheck(ani_env *env, ani_object aniObj, ani_
     }
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapWant filed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapWant failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want");
     }
 }
@@ -664,11 +664,11 @@ EtsServiceExtensionContext *EtsServiceExtensionContext::GetEtsAbilityContext(
         return nullptr;
     }
     if ((status = env->Class_FindField(cls, "nativeEtsContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to find filed, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to find field, status : %{public}d", status);
         return nullptr;
     }
     if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get filed, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get field, status : %{public}d", status);
         return nullptr;
     }
     auto weakContext = reinterpret_cast<EtsServiceExtensionContext *>(nativeContextLong);
@@ -776,8 +776,8 @@ void EtsServiceExtensionContext::OnStartAbility(ani_env *env, ani_object aniObj,
     if (opt != nullptr) {
         AAFwk::StartOptions startOptions;
         if (!AppExecFwk::UnwrapStartOptions(env, opt, startOptions)) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapStartOptions filed");
-            aniObject = EtsErrorUtil::CreateInvalidParamError(env, "UnwrapWant filed");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapStartOptions failed");
+            aniObject = EtsErrorUtil::CreateInvalidParamError(env, "UnwrapStartOptions failed");
             AppExecFwk::AsyncCallback(env, callbackObj, aniObject, nullptr);
             return;
         }
@@ -866,7 +866,7 @@ void EtsServiceExtensionContext::OnStartAbilityAsCaller(ani_env *env, ani_object
     if (optionsObj != nullptr) {
         AAFwk::StartOptions startOptions;
         if (!AppExecFwk::UnwrapStartOptions(env, optionsObj, startOptions)) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapStartOptions filed");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapStartOptions failed");
             aniObject = EtsErrorUtil::CreateInvalidParamError(env,
                 "Parse param startOptions failed, startOptions must be StartOptions.");
             AppExecFwk::AsyncCallback(env, callbackObj, aniObject, nullptr);
@@ -1612,7 +1612,7 @@ void EtsServiceExtensionContext::OnPreStartMission(ani_env *env, ani_object aniO
 void EtsServiceExtensionContext::OnRequestModalUIExtension(ani_env *env, ani_object aniObj, ani_object wantObj,
     ani_object callbackobj)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnStartServiceExtensionAbility");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnRequestModalUIExtension");
     ani_object aniObject = nullptr;
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
