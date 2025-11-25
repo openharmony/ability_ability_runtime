@@ -3678,7 +3678,12 @@ int32_t AbilityManagerStub::StartSpecifiedAbilityBySCBInner(MessageParcel &data,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
         return ERR_INVALID_VALUE;
     }
-    auto resultCode = StartSpecifiedAbilityBySCB(*want);
+    std::unique_ptr<StartSpecifiedAbilityParams> params(data.ReadParcelable<StartSpecifiedAbilityParams>());
+    if (params == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params null");
+        return ERR_INVALID_VALUE;
+    }
+    auto resultCode = StartSpecifiedAbilityBySCB(*want, *params);
     reply.WriteInt32(resultCode);
     return NO_ERROR;
 }
