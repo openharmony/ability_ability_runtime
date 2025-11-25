@@ -231,6 +231,11 @@ napi_value JsEmbeddableUIAbilityContext::ConnectUIServiceExtension(napi_env env,
     GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnConnectUIServiceExtension);
 }
 
+napi_value JsEmbeddableUIAbilityContext::RestartAppWithWindow(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnRestartAppWithWindow);
+}
+
 napi_value JsEmbeddableUIAbilityContext::DisconnectUIServiceExtension(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnDisconnectUIServiceExtension);
@@ -604,6 +609,17 @@ napi_value JsEmbeddableUIAbilityContext::OnDisconnectUIServiceExtension(napi_env
     return jsAbilityContext_->OnDisconnectUIServiceExtension(env, info);
 }
 
+napi_value JsEmbeddableUIAbilityContext::OnRestartAppWithWindow(napi_env env, NapiCallbackInfo& info)
+{
+    if (IsEmbeddableStart(screenMode_)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "OnRestartAppWithWindow in half screen mode");
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
+        return CreateJsUndefined(env);
+    }
+    CHECK_POINTER_RETURN(env, jsAbilityContext_);
+    return jsAbilityContext_->OnRestartAppWithWindow(env, info);
+}
+
 #ifdef SUPPORT_GRAPHICS
 napi_value JsEmbeddableUIAbilityContext::SetMissionLabel(napi_env env, napi_callback_info info)
 {
@@ -735,6 +751,7 @@ napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi
     BindNativeFunction(env, objValue, "startUIServiceExtensionAbility", moduleName, StartUIServiceExtension);
     BindNativeFunction(env, objValue, "connectUIServiceExtensionAbility", moduleName, ConnectUIServiceExtension);
     BindNativeFunction(env, objValue, "disconnectUIServiceExtensionAbility", moduleName, DisconnectUIServiceExtension);
+    BindNativeFunction(env, objValue, "restartApp", moduleName, RestartAppWithWindow);
 
 #ifdef SUPPORT_GRAPHICS
     BindNativeFunction(env, objValue, "setMissionLabel", moduleName, SetMissionLabel);

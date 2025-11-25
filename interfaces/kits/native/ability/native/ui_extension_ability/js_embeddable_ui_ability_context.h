@@ -72,6 +72,7 @@ public:
     static napi_value StartUIServiceExtension(napi_env env, napi_callback_info info);
     static napi_value ConnectUIServiceExtension(napi_env env, napi_callback_info info);
     static napi_value DisconnectUIServiceExtension(napi_env env, napi_callback_info info);
+    static napi_value RestartAppWithWindow(napi_env env, napi_callback_info info);
 
 private:
     static void WrapJsUIAbilityContext(napi_env env, std::shared_ptr<AbilityContext> uiAbiContext,
@@ -112,6 +113,7 @@ private:
     napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     napi_value OnConnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     napi_value OnDisconnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
+    napi_value OnRestartAppWithWindow(napi_env env, NapiCallbackInfo& info);
 
 #ifdef SUPPORT_GRAPHICS
 public:
