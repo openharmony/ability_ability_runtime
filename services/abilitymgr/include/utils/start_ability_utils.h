@@ -21,6 +21,7 @@
 
 #include "ability_info.h"
 #include "extension_ability_info.h"
+#include "start_specified_ability_params.h"
 #include "want.h"
 
 namespace OHOS {
@@ -99,6 +100,7 @@ struct StartAbilityWrapParam {
     bool isFreeInstallFromService = false;
     uint64_t specifiedFullTokenId = 0;
     bool removeInsightIntentFlag = false;
+    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
 };
 }
 }
