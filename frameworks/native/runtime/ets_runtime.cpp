@@ -30,6 +30,7 @@
 #include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hdc_register.h"
+#include "hitrace_meter.h"
 #include "hybrid_js_module_reader.h"
 #include "nocopyable.h"
 #include "parameters.h"
@@ -180,6 +181,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<Runtime> &jsRu
 std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options,
     std::unique_ptr<Runtime> &jsRuntime, bool isMove)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Create called");
     if (!RegisterETSEnvFuncs()) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "RegisterETSEnvFuncs failed");
