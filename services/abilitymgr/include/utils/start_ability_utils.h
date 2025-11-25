@@ -94,6 +94,7 @@ struct StartAbilityWrapParam {
     bool isAppCloneSelector = false;
     bool hideFailureTipDialog = false;
     bool isFreeInstallFromService = false;
+    uint64_t specifiedFullTokenId = 0;
 };
 }
 }

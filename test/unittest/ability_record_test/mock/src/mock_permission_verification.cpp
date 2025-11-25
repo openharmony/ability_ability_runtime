@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 namespace OHOS {
 namespace AAFwk {
 
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+    const uint32_t specifyTokenId) const
 {
     return !!(MyFlag::flag_);
 }
@@ -113,6 +114,10 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     return MyFlag::flag_;
 }
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
+{
+    return true;
+}
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
 {
     return true;
 }

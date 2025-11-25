@@ -27,7 +27,8 @@ bool MockAbilityDelegatorStub::finishFlag_ = false;
 MockAbilityDelegatorStub::MockAbilityDelegatorStub()
 {}
 
-int MockAbilityDelegatorStub::StartAbility(const Want& want, int32_t userId, int requestCode)
+int MockAbilityDelegatorStub::StartAbility(
+    const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     return 0;
 }
@@ -221,7 +222,8 @@ TESTCASE_BRANCH MockAbilityDelegatorStub2::testcaseBranch_ = TESTCASE_BRANCH::BR
 MockAbilityDelegatorStub2::MockAbilityDelegatorStub2()
 {}
 
-int MockAbilityDelegatorStub2::StartAbility(const Want& want, int32_t userId, int requestCode)
+int MockAbilityDelegatorStub2::StartAbility(
+    const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     return 0;
 }

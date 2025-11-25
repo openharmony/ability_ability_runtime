@@ -157,10 +157,12 @@ public:
      * @param want, the want of the ability to start.
      * @param requestCode, Ability request code.
      * @param userId, Designation User ID.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
-        const Want &want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
+        const Want &want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0) override;
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -169,13 +171,15 @@ public:
      * @param callerToken, caller ability token.
      * @param userId, Designation User ID.
      * @param requestCode the resultCode of the ability to start.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) override;
+        int requestCode = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0) override;
 
     /**
      * Start Self UIAbility In Current Process.
@@ -693,7 +697,8 @@ public:
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        bool isQueryExtensionOnly = false) override;
+        bool isQueryExtensionOnly = false,
+        uint64_t specifiedFullTokenId = 0) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -1143,7 +1148,8 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
 
     int32_t StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId,
-        int32_t requestCode, bool hideFailureTipDialog = false, bool isFreeInstallFromService = false);
+        int32_t requestCode, bool hideFailureTipDialog = false, bool isFreeInstallFromService = false,
+        uint64_t specifiedFullTokenId = 0);
 
     int StartAbilityWrap(const StartAbilityWrapParam &startAbilityWrapParam);
 
@@ -1161,7 +1167,8 @@ public:
         bool isAppCloneSelector = false,
         bool hideFailureTipDialog = false,
         bool isBySCB = false,
-        bool isFreeInstallFromService = false);
+        bool isFreeInstallFromService = false,
+        uint64_t specifiedFullTokenId = 0);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -2267,7 +2274,7 @@ public:
 
     int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
         int32_t userId, int requestCode, bool removeInsightIntentFlag,
-        bool hideFailureTipDialog = false, bool isFreeInstallFromService = false);
+        bool hideFailureTipDialog = false, bool isFreeInstallFromService = false, uint64_t specifiedFullTokenId = 0);
     
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -2457,7 +2464,8 @@ private:
         AppExecFwk::ExtensionAbilityType extensionType,
         const sptr<SessionInfo> &sessionInfo = nullptr,
         bool isQueryExtensionOnly = false,
-        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
+        uint64_t specifiedFullTokenId = 0);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);

@@ -31,6 +31,10 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return !!(MyFlag::flag_);
 }
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
 bool PermissionVerification::IsSACall() const
 {
     return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
