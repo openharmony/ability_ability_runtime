@@ -37,6 +37,9 @@ public:
     AppExecFwk::ElementName ability;
     std::string processName;
 
+    // not write to parcel
+    std::string firstCallerBundleName;
+
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static AbilityRunningInfo *Unmarshalling(Parcel &parcel);
