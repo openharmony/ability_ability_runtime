@@ -1042,18 +1042,20 @@ void ExtensionRecordManager::RegisterPreloadUIExtensionHostClient(const sptr<IRe
 {
     std::lock_guard<std::mutex> lock(preloadUIExtensionHostClientMutex_);
     int32_t callerPid = IPCSkeleton::GetCallingPid();
-    preloadUIExtensionHostClientCallerTokens_[callerPid] = callerToken;
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null callerToken");
         return;
     }
+    preloadUIExtensionHostClientCallerTokens_[callerPid] = callerToken;
 }
 
-void ExtensionRecordManager::UnRegisterPreloadUIExtensionHostClient(int32_t key)
+void ExtensionRecordManager::UnRegisterPreloadUIExtensionHostClient(
+    int32_t key, const sptr<IRemoteObject::DeathRecipient> &deathRecipient)
 {
     std::lock_guard<std::mutex> lock(preloadUIExtensionHostClientMutex_);
     auto it = preloadUIExtensionHostClientCallerTokens_.find(key);
     if (it != preloadUIExtensionHostClientCallerTokens_.end() && it->second != nullptr) {
+        it->second->RemoveDeathRecipient(deathRecipient);
         preloadUIExtensionHostClientCallerTokens_.erase(it);
     }
 }
