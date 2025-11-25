@@ -96,7 +96,7 @@ public:
     int AppfreezeHandle(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow = FreezeUtil::LifecycleFlow());
-    std::string WriteToFile(const std::string& fileName, std::string& content);
+    std::string WriteToFile(const std::string& fileName, const std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
     bool IsProcessDebug(int32_t pid, std::string bundleName);
     bool IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& errorName);
@@ -178,6 +178,7 @@ private:
     std::string GetFirstLine(const std::string &path);
     bool RemoveOldKillInfo();
     bool CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName);
+    std::string GetCatcherStack(const std::string& fileName, const std::string& catcherStack);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
