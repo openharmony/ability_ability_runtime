@@ -10649,6 +10649,7 @@ void AbilityManagerService::GetAbilityRunningInfo(std::vector<AbilityRunningInfo
     runningInfo.uid = processInfo.uid_;
     runningInfo.processName = processInfo.processName_;
     runningInfo.appCloneIndex = processInfo.appCloneIndex;
+    runningInfo.firstCallerBundleName = abilityRecord->GetFirstCallerBundleName();
     info.emplace_back(runningInfo);
 }
 
@@ -13064,6 +13065,7 @@ int32_t AbilityManagerService::GetForegroundUIAbilities(std::vector<AppExecFwk::
         abilityData.uid = info.uid;
         abilityData.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
         abilityData.appCloneIndex = info.appCloneIndex;
+        abilityData.callerBundleName = info.firstCallerBundleName;
         AppExecFwk::ApplicationInfo appInfo;
         int32_t userId = abilityData.uid / BASE_USER_RANGE;
         if (!StartAbilityUtils::GetApplicationInfo(abilityData.bundleName, userId, appInfo)) {

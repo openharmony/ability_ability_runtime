@@ -3566,5 +3566,23 @@ HWTEST_F(AbilityRecordTest, PromotePriority_001, TestSize.Level1)
     abilityRecord_->PromotePriority();
     GTEST_LOG_(INFO) << "PromotePriority_001 end";
 }
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetFirstCallerBundleName
+ * SubFunction: GetFirstCallerBundleName
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetFirstCallerBundleName
+ */
+HWTEST_F(AbilityRecordTest, GetFirstCallerBundleName_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetFirstCallerBundleName_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    auto callerBundleName = "testBundle";
+    abilityRecord_->firstCallerBundleName_ = callerBundleName;
+    EXPECT_EQ(abilityRecord_->GetFirstCallerBundleName(), callerBundleName);
+    GTEST_LOG_(INFO) << "GetFirstCallerBundleName_001 end";
+}
 }  // namespace AAFwk
 }  // namespace OHOS
