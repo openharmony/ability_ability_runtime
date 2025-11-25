@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -467,6 +467,25 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_1000, Tes
     verificationInfo.associatedWakeUp = false;
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceAbilityPermission(verificationInfo);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/**
+ * @tc.name: CheckCallServiceAbilityPermission_1100
+ * @tc.desc: CheckCallServiceAbilityPermission with specified token id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_1100, TestSize.Level2)
+{
+    AAFwk::PermissionVerification::VerificationInfo verificationInfo;
+    int api9 = 9;
+    verificationInfo.apiTargetVersion = api9;
+    verificationInfo.visible = true;
+    verificationInfo.isBackgroundCall = false;
+    verificationInfo.associatedWakeUp = true;
+    uint32_t specifyTokenId = 0;
+    int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceAbilityPermission(
+        verificationInfo, specifyTokenId);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**

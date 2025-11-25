@@ -71,7 +71,7 @@ bool AbilityManagerProxy::ExtendMaxIpcCapacityForWant(const Want &want, MessageP
     return false;
 }
 
-int AbilityManagerProxy::StartAbility(const Want &want, int32_t userId, int requestCode)
+int AbilityManagerProxy::StartAbility(const Want &want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -98,6 +98,11 @@ int AbilityManagerProxy::StartAbility(const Want &want, int32_t userId, int requ
 
     if (!data.WriteInt32(requestCode)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "requestCode write fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteUint64(specifiedFullTokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFullTokenId write fail");
         return INNER_ERR;
     }
 
@@ -216,7 +221,8 @@ int AbilityManagerProxy::StartAbility(const Want &want, const AbilityStartSettin
 }
 
 int AbilityManagerProxy::StartAbility(
-    const Want &want, const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
+    const Want &want, const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode,
+    uint64_t specifiedFullTokenId)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -252,6 +258,10 @@ int AbilityManagerProxy::StartAbility(
     }
     if (!data.WriteInt32(requestCode)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "requestCode write fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint64(specifiedFullTokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFullTokenId write fail");
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_ABILITY_ADD_CALLER, data, reply, option);
@@ -1383,7 +1393,8 @@ int AbilityManagerProxy::ConnectAbility(
 
 int AbilityManagerProxy::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
-    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId, bool isQueryExtensionOnly)
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId, bool isQueryExtensionOnly,
+    uint64_t specifiedFullTokenId)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -1413,6 +1424,7 @@ int AbilityManagerProxy::ConnectAbilityCommon(
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, static_cast<int32_t>(extensionType));
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Bool, isQueryExtensionOnly);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Uint64, specifiedFullTokenId);
     int error = SendRequest(AbilityManagerInterfaceCode::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s, request error:%{public}d", __func__, error);

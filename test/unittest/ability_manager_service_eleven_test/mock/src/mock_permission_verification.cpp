@@ -116,6 +116,10 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return true;
 }
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
 {
     return true;

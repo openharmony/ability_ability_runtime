@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,17 +30,20 @@ public:
      * CheckSAPermission, check if it has SA permissions.
      *
      * @param extensionType The extension type.
+    * @param specifyTokenId The specified token ID.
      * @return Whether it has SA permissions.
      */
-    static bool CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType);
+    static bool CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType, uint32_t specifyTokenId = 0);
 
     /**
      * CheckSAPermissionMore, check if it has SA permissions or more.
      *
      * @param extensionType The extension type.
+    * @param specifyTokenId The specified token ID.
      * @return Whether it has SA permissions or more.
      */
-    static bool CheckSAPermissionMore(const AppExecFwk::ExtensionAbilityType &extensionType);
+    static bool CheckSAPermissionMore(const AppExecFwk::ExtensionAbilityType &extensionType,
+        uint32_t specifyTokenId = 0);
 };
 
 } // namespace AAFwk

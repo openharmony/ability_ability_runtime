@@ -2110,6 +2110,29 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
 }
 
 /**
+ * @tc.name: AbilityManagerServiceFirstTest_CheckStaticCfgPermission_0002
+ * @tc.desc: Test the state of CheckStaticCfgPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
+    AppExecFwk::AbilityRequest abilityRequest;
+    bool isStartAsCaller = false;
+    uint32_t callerTokenId = 0;
+    bool isData = false;
+    bool isSaCall = false;
+    bool isImplicit = false;
+    abilityRequest.abilityInfo.permissions.push_back("test.permission");
+
+    abilityRequest.specifiedFullTokenId = 1000001;
+    MyFlag::flag_ = 1;
+    int ret = abilityMs->CheckStaticCfgPermission(
+        abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
+}
+
+/**
  * @tc.name: AbilityManagerServiceFirstTest_CheckPermissionForUIService_0001
  * @tc.desc: Test the state of CheckPermissionForUIService
  * @tc.type: FUNC

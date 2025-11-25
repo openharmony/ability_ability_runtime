@@ -117,6 +117,10 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return true;
 }
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
 bool PermissionVerification::IsSystemAppCall() const
 {
     return MyFlag::flag_;

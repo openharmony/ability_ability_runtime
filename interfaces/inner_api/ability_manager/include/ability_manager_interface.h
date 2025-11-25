@@ -150,12 +150,14 @@ public:
      * @param want, the want of the ability to start.
      * @param userId, Designation User ID.
      * @param requestCode, Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
         const Want &want,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) = 0;
+        int requestCode = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0) = 0;
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -164,13 +166,15 @@ public:
      * @param callerToken, caller ability token.
      * @param userId, Designation User ID.
      * @param requestCode, Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) = 0;
+        int requestCode = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0) = 0;
 
     /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
@@ -719,6 +723,7 @@ public:
      * @param callerToken, caller ability token.
      * @param extensionType, type of the extension.
      * @param userId, the service user ID.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ConnectAbilityCommon(
@@ -727,7 +732,8 @@ public:
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        bool isQueryExtensionOnly = false)
+        bool isQueryExtensionOnly = false,
+        uint64_t specifiedFullTokenId = 0)
     {
         return 0;
     }

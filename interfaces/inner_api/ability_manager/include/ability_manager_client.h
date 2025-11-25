@@ -152,10 +152,11 @@ public:
      *
      * @param want Ability want.
      * @param requestCode Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE, uint64_t specifiedFullTokenId = 0);
 
     /**
      * StartAbilityWithWait, send want and abilityStartWithWaitObserver to abms.
@@ -172,13 +173,15 @@ public:
      * @param want Ability want.
      * @param callerToken caller ability token.
      * @param requestCode Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbility(
         const Want &want,
         sptr<IRemoteObject> callerToken,
         int requestCode = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0);
 
     /**
      * StartAbility by insight intent, send want to ability manager service.
@@ -596,13 +599,15 @@ public:
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken, caller ability token.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectAbility(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0);
     
     /**
      * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.
