@@ -3970,7 +3970,7 @@ int32_t AbilityConnectManager::RegisterPreloadUIExtensionHostClient(const sptr<I
     }
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
     int32_t callerPid = IPCSkeleton::GetCallingPid();
-    auto deathRecipient = new PreloadUIExtensionHostClientDeathRecipient(
+    sptr<PreloadUIExtensionHostClientDeathRecipient> deathRecipient = new PreloadUIExtensionHostClientDeathRecipient(
         [self = weak_from_this(), callerPid](const wptr<IRemoteObject> &remote) {
             auto selfObj = self.lock();
             if (selfObj != nullptr) {
@@ -3982,7 +3982,12 @@ int32_t AbilityConnectManager::RegisterPreloadUIExtensionHostClient(const sptr<I
         preloadUIExtensionHostClientDeathRecipients_[callerPid] = deathRecipient;
     }
     callerToken->AddDeathRecipient(deathRecipient);
-    uiExtensionAbilityRecordMgr_->RegisterPreloadUIExtensionHostClient(callerToken);
+    try {
+        uiExtensionAbilityRecordMgr_->RegisterPreloadUIExtensionHostClient(callerToken);
+    } catch (std::exception &e) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "RegisterPreloadUIExtensionHostClient failed, exception = %{public}s", e.what());
+        callerToken->RemoveDeathRecipient(deathRecipient);
+    }
     return ERR_OK;
 }
 
