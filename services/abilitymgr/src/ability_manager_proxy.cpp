@@ -860,7 +860,7 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
 }
 
 int AbilityManagerProxy::PreloadUIExtensionAbility(
-    const Want &want, std::string &hostBundleName, int32_t requestCode, int32_t userId, int32_t hostPid)
+    const Want &want, std::string &hostBundleName, int32_t userId, int32_t hostPid, int32_t requestCode)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -878,9 +878,9 @@ int AbilityManagerProxy::PreloadUIExtensionAbility(
         return ERR_INVALID_VALUE;
     }
 
-    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, requestCode);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, hostPid);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, requestCode);
     int error;
     MessageParcel reply;
     MessageOption option;
