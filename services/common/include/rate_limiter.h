@@ -29,7 +29,7 @@ class RateLimiter {
 public:
     struct LimitResult {
         bool limited = false;
-        int32_t triggeredLimit;
+        int32_t triggeredLimit = 50;
     };
     static RateLimiter &GetInstance();
 
