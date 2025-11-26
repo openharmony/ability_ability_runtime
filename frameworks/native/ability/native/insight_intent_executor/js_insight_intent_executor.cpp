@@ -274,6 +274,11 @@ napi_value JsInsightIntentExecutor::ResolveCbCpp(napi_env env, napi_callback_inf
     }
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp =
         JsInsightIntentExecutor::GetResultFromJs(env, resultJs);
+    if (resultCpp == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null resultCpp");
+        JsInsightIntentExecutor::ReplyFailed(callback);
+        return nullptr;
+    }
     JsInsightIntentExecutor::ReplySucceeded(callback, resultCpp);
     return nullptr;
 }
@@ -294,6 +299,11 @@ napi_value JsInsightIntentExecutor::ResolveExecuteResultWithDelay(napi_env env, 
     }
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp =
         JsInsightIntentExecutor::GetResultFromJs(env, resultJs);
+    if (resultCpp == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null resultCpp");
+        JsInsightIntentExecutor::ReplyFailed(callback);
+        return nullptr;
+    }
     resultCpp->isNeedDelayResult = true;
     JsInsightIntentExecutor::ReplySucceeded(callback, resultCpp);
     return nullptr;

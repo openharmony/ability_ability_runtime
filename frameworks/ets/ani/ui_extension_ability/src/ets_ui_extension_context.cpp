@@ -19,6 +19,7 @@
 #include "ani_common_start_options.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
+#include "errors.h"
 #include "remote_object_taihe_ani.h"
 #include "common_fun_ani.h"
 #include "ets_context_utils.h"
@@ -29,6 +30,7 @@
 #include "ui_extension_context.h"
 #include "ets_uiservice_uiext_connection.h"
 #include "ets_ui_service_proxy.h"
+#include "ets_start_abilities_observer.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -52,8 +54,11 @@ constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION =
     "Lapplication/UIServiceProxy/UIServiceProxy;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *SIGNATURE_WANT_CHK = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK = "Lapplication/UIServiceProxy/UIServiceProxy;:V";
+constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE =
+    "IL@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
+constexpr int32_t ARGC_FOUR = 4;
 constexpr const char *SIGNATURE_OPEN_ATOMIC_SERVICE = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
     "L@ohos/app/ability/AtomicServiceOptions/AtomicServiceOptions;:V";
 constexpr const char *SIGNATURE_OPEN_LINK = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
@@ -322,6 +327,22 @@ void EtsUIExtensionContext::SetHostPageOverlayForbidden(ani_env *env, ani_object
     etsUiExtensionContext->OnSetHostPageOverlayForbidden(env, aniObj, aniIsForbidden);
 }
 
+void EtsUIExtensionContext::StartUIAbilities(ani_env *env, ani_object aniObj, ani_object wantListObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartUIAbilities");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnStartUIAbilities(env, aniObj, wantListObj, callback);
+}
+
 void EtsUIExtensionContext::OnTerminateSelf(ani_env *env, ani_object obj, ani_object callback)
 {
     ani_object aniObject = nullptr;
@@ -489,6 +510,56 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
     (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task))
                                  : context->StartAbilityForResult(want, startOptions, requestCode, std::move(task));
     return;
+}
+
+void EtsUIExtensionContext::OnStartUIAbilities(ani_env *env, ani_object aniObj, ani_object wantListObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStartUIAbilities");
+    
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    ani_vm *etsVm = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->GetVM(&etsVm)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+        return;
+    }
+
+    ErrCode innerErrCode = ERR_OK;
+    std::vector<AAFwk::Want> wantList;
+    std::string requestKey = std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    if (!EtsUIExtensionContext::UnwrapWantList(env, wantListObj, wantList)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Unwrap wantList param failed.");
+        ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "UnwrapWant filed");
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "startUIAbilities wantListLength: %{public}zu", wantList.size());
+    EtsStartAbilitiesObserver::GetInstance().SetEtsVm(etsVm);
+    EtsStartAbilitiesObserver::GetInstance().AddObserver(env, requestKey, callback);
+
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "null context");
+        innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        ani_object aniObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(innerErrCode));
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
+        return;
+    }
+    innerErrCode = context->StartUIAbilities(wantList, requestKey);
+
+    TAG_LOGD(AAFwkTag::UI_EXT, "startUIAbilities complete innerErrCode: %{public}d", innerErrCode);
+    if (innerErrCode == AAFwk::START_UI_ABILITIES_WAITING_SPECIFIED_CODE) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "startUIAbilities waiting specified.");
+        ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
+        return;
+    }
+    EtsStartAbilitiesObserver::HandleFinished(requestKey, innerErrCode);
 }
 
 ani_long EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
@@ -1283,6 +1354,53 @@ void EtsUIExtensionContext::OnDisconnectUIServiceExtension(ani_env *env, ani_obj
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
 }
 
+void EtsUIExtensionContext::StartUIAbilitiesInSplitWindowMode(ani_env *env, ani_object aniObj,
+    ani_int primaryWindowId, ani_object wantObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartUIAbilitiesInSplitWindowMode called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnStartUIAbilitiesInSplitWindowMode(env, primaryWindowId, wantObj, callback);
+}
+
+void EtsUIExtensionContext::OnStartUIAbilitiesInSplitWindowMode(ani_env *env, ani_int primaryWindowId,
+    ani_object wantObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStartUIAbilitiesInSplitWindowMode is called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    AAFwk::Want want;
+    if (!want.HasParameter(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
+    }
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWant failed");
+        return;
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    int32_t innerErrCode = ERR_OK;
+    innerErrCode = context->StartUIAbilitiesInSplitWindowMode(primaryWindowId, want);
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartUIServiceExtension code:%{public}d", innerErrCode);
+    AppExecFwk::AsyncCallback(env, callback,
+        AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode), nullptr);
+}
+
+
 bool EtsUIExtensionContext::BindNativePtrCleaner(ani_env *env)
 {
     if (env == nullptr) {
@@ -1422,6 +1540,12 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             reinterpret_cast<void*>(EtsUIExtensionContext::WantCheck)},
         ani_native_function{"nativeDisconnectUIServiceExtensionCheck", SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK,
             reinterpret_cast<void*>(EtsUIExtensionContext::DisconnectUIServiceExtensionCheck)},
+        ani_native_function {"nativeStartUIAbilities",
+            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsUIExtensionContext::StartUIAbilities)},
+        ani_native_function{"nativeStartUIAbilitiesInSplitWindowMode",
+            SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE,
+            reinterpret_cast<void*>(EtsUIExtensionContext::StartUIAbilitiesInSplitWindowMode)},
         ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenAtomicService) },
         ani_native_function { "nativeOpenAtomicServiceCheck", ":V",
@@ -1489,6 +1613,43 @@ EtsUIExtensionContext* EtsUIExtensionContext::GetEtsUIExtensionContext(ani_env *
         return nullptr;
     }
     return etsContext;
+}
+
+bool EtsUIExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
+    std::vector<AAFwk::Want> &wantList)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return false;
+    }
+
+    ani_array_ref wantListArray = reinterpret_cast<ani_array_ref>(wantListObj);
+    ani_size arrayLength = 0;
+    if (env->Array_GetLength(wantListArray, &arrayLength) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get array length.");
+        return false;
+    }
+    if (arrayLength < ARGC_ONE || arrayLength > ARGC_FOUR) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "wantList size not support");
+        return false;
+    }
+    for (ani_size i = 0; i < arrayLength; i++) {
+        ani_ref wantRef  = nullptr;
+        if (env->Array_Get_Ref(wantListArray, i, &wantRef) != ANI_OK || wantRef == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get want object");
+            return false;
+        }
+        ani_object wantObj = reinterpret_cast<ani_object>(wantRef);
+        AAFwk::Want curWant;
+        if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, curWant)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "startUIAbilities parse want failed");
+            return false;
+        }
+        TAG_LOGD(AAFwkTag::UI_EXT, "startUIAbilities ability:%{public}s",
+            curWant.GetElement().GetAbilityName().c_str());
+        wantList.emplace_back(curWant);
+    }
+    return true;
 }
 
 EtsUIExtensionConnection::EtsUIExtensionConnection(ani_vm *etsVm) : etsVm_(etsVm) {}

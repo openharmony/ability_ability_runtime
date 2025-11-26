@@ -146,7 +146,8 @@ public:
     int32_t ClearPreloadedUIExtensionAbility(int32_t extensionRecordId);
     int32_t ClearAllPreloadUIExtensionRecordForHost();
     void RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
-    void UnRegisterPreloadUIExtensionHostClient(int32_t key);
+    void UnRegisterPreloadUIExtensionHostClient(
+        int32_t key, const sptr<IRemoteObject::DeathRecipient> &deathRecipient);
 
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);

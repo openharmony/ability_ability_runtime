@@ -61,6 +61,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
 static constexpr int DUMP_STACK_FAILED = -1;
 static constexpr int DUMP_KERNEL_STACK_SUCCESS = 1;
 static constexpr int MIN_APP_UID = 20000;
+static constexpr int MAX_REPORT_STACK_SIZE = 300 * 1024; // 300KB
 const std::string LOG_FILE_PATH = "data/log/eventlog";
 static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
 static bool g_overseaVersion = OHOS::system::GetParameter("const.global.region", "CN") != "CN";
@@ -162,6 +163,23 @@ void AppfreezeManager::CollectFreezeSysMemory(std::string& memoryContent)
     memoryContent += tmp + "\nGet freeze memory end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
 }
 
+std::string AppfreezeManager::GetCatcherStack(const std::string& fileName, const std::string& catcherStack)
+{
+    std::string stackFile = WriteToFile(fileName, catcherStack);
+    if (!stackFile.empty()) {
+        return stackFile;
+    }
+    if (catcherStack.size() > MAX_REPORT_STACK_SIZE) {
+        stackFile = "";
+        TAG_LOGW(AAFwkTag::APPDFR, "create stack failed, catcherStack over size: %{public}zu",
+            catcherStack.size());
+    } else {
+        stackFile = catcherStack;
+        TAG_LOGW(AAFwkTag::APPDFR, "create stack failed, catcherStack size: %{public}zu", catcherStack.size());
+    }
+    return stackFile;
+}
+
 int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo)
 {
     std::string memoryContent;
@@ -186,7 +204,7 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     uint64_t dumpFinishTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     std::string timeStamp = "Catche stack trace end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
-    faultNotifyData.errorObject.stack = WriteToFile(fileName, catcherStack);
+    faultNotifyData.errorObject.stack = GetCatcherStack(fileName, catcherStack);
     if (appInfo.isOccurException) {
         faultNotifyData.errorObject.message += "\nnotifyAppFault exception.\n";
     }
@@ -262,17 +280,16 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     return MergeNotifyInfo(faultNotifyData, appInfo);
 }
 
-std::string AppfreezeManager::WriteToFile(const std::string& fileName, std::string& content)
+std::string AppfreezeManager::WriteToFile(const std::string& fileName, const std::string& content)
 {
-    std::string dir_path = LOG_FILE_PATH + "/freeze";
+    std::string path = LOG_FILE_PATH + "/freeze";
     constexpr mode_t defaultLogDirMode = 0770;
-    if (!OHOS::FileExists(dir_path)) {
-        OHOS::ForceCreateDirectory(dir_path);
-        OHOS::ChangeModeDirectory(dir_path, defaultLogDirMode);
+    if (!OHOS::FileExists(path)) {
+        OHOS::ForceCreateDirectory(path);
+        OHOS::ChangeModeDirectory(path, defaultLogDirMode);
     }
-    std::string realPath;
-    if (!OHOS::PathToRealPath(dir_path, realPath)) {
-        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed:%{public}s", dir_path.c_str());
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(path);
+    if (realPath.empty()) {
         return "";
     }
     std::string stackPath = realPath + "/" + fileName;
@@ -1020,10 +1037,8 @@ void AppfreezeManager::PerfStart(std::string eventName)
 }
 std::string AppfreezeManager::GetFirstLine(const std::string &path)
 {
-    std::string realPath;
-    if (!OHOS::PathToRealPath(path, realPath)) {
-        TAG_LOGE(AAFwkTag::APPDFR, "realpath failed, path:%{public}s errno:%{public}d",
-            path.c_str(), errno);
+    std::string realPath = AppfreezeUtil::FreezePathToRealPath(path);
+    if (realPath.empty()) {
         return "";
     }
     std::ifstream inFile(realPath.c_str());

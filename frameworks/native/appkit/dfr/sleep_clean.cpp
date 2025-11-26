@@ -38,25 +38,6 @@ SleepClean &SleepClean::GetInstance()
     return instance_;
 }
 
-void SleepClean::HandleAppSaveState(const std::shared_ptr<OHOSApplication> &application)
-{
-    auto &runtime = application->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPDFR, "null runtime");
-        return;
-    }
-    AbilityRuntime::JsRuntime *jsRuntime = static_cast<AbilityRuntime::JsRuntime *>(runtime.get());
-    if (jsRuntime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPDFR, "null runtime");
-        return;
-    }
-    auto task = []() {
-        AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
-    };
-    jsRuntime->PostTask(task, "Sleep_Clean_SaveAppState", 0);
-    return;
-}
-
 bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &application)
 {
     string getParamHeapSizeStr = OHOS::system::GetParameter("const.dfx.nightclean.jsheap", "-1");
@@ -77,7 +58,7 @@ bool SleepClean::HandleAppSaveIfHeap(const std::shared_ptr<OHOSApplication> &app
     if (appHeapTotalSize < getParamHeapSize) {
         return false;
     }
-    HandleAppSaveState(application);
+    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::JS_ERROR);
     return true;
 }
 
@@ -86,7 +67,7 @@ bool SleepClean::HandleSleepClean(const FaultData &faultData, const std::shared_
     if (faultData.waitSaveState) {
         return HandleAppSaveIfHeap(application);
     }
-    HandleAppSaveState(application);
+    AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::JS_ERROR);
     return false;
 }
 

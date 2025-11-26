@@ -185,6 +185,8 @@ public:
      */
     virtual int32_t UpdateTargetIfNeed(Want &want) override;
 
+    virtual int32_t RemoveCallerIfNeed(Want &want) override;
+
     /**
      * @brief kill processes by bundleName.
      * @param bundleName the bundleName of processes to be killed.

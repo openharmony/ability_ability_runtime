@@ -880,5 +880,42 @@ bool AppUtils::IsStartUIAbilityInCurrentProcess()
     TAG_LOGD(AAFwkTag::DEFAULT, "startAbilityInCurrentProcess: %{public}d", isStartUIAbilityInCurrentProcess_.value);
     return isStartUIAbilityInCurrentProcess_.value;
 }
+
+void AppUtils::LoadAppTransferList()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration("/system/etc/ability_runtime/app_transfer_list.json", object)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "load onNewProcessEnableList file failed");
+        return;
+    }
+    if (!object.contains("appTransferList") ||
+        !object.at("appTransferList").is_array()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appTransferList file invalid");
+        return;
+    }
+    for (auto &item : object.at("appTransferList").items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appTransferList bundleName failed");
+            return;
+        }
+        appTransferList_.value.emplace_back(jsonObject.get<std::string>());
+    }
+}
+
+bool AppUtils::InAppTransferList(const std::string &bundleName)
+{
+    std::lock_guard lock(appTransferListMutex_);
+    if (!appTransferList_.isLoaded) {
+        LoadAppTransferList();
+        appTransferList_.isLoaded = true;
+    }
+    for (const auto &item: appTransferList_.value) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
