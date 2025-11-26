@@ -27,12 +27,16 @@ namespace OHOS {
 namespace AAFwk {
 class RateLimiter {
 public:
+    struct LimitResult {
+        bool limited = false;
+        int32_t triggeredLimit = 50;
+    };
     static RateLimiter &GetInstance();
 
     ~RateLimiter() = default;
 
-    bool CheckExtensionLimit(int32_t uid);
-    bool CheckReportLimit(int32_t uid);
+    RateLimiter::LimitResult CheckExtensionLimit(int32_t uid);
+    bool CheckReportLimit(int32_t uid, int32_t triggeredTier);
 
 private:
     RateLimiter() = default;
@@ -43,14 +47,17 @@ private:
     void CleanCallMap();
     void CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>> &callMap, std::mutex &mapLock,
         int64_t limitInterval);
+    void CleanNestedCallMap(
+        std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<int64_t>>>& nestedMap,
+        std::mutex& mapLock, int64_t limitInterval);
     int64_t CurrentTimeMillis();
 
     int64_t lastCleanTimeMillis_ = 0;
     std::mutex lastCleanTimeMillisLock_;
     std::unordered_map<int32_t, std::vector<int64_t>> extensionCallMap_;
     std::mutex extensionCallMapLock_;
-    std::unordered_map<int32_t, std::vector<int64_t>> reportCallMap_;
-    std::mutex reportCallMapLock_;
+    std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<int64_t>>> tierReportCallMap_;
+    std::mutex tierReportCallMapLock_;
 
     DISALLOW_COPY_AND_MOVE(RateLimiter);
 };
