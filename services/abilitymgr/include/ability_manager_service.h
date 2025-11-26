@@ -487,8 +487,8 @@ public:
     int RequestModalUIExtension(const Want &want) override;
 
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE,
-        int32_t hostPid = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
+        int32_t requestCode = DEFAULT_INVAL_VALUE) override;
 
     int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
 
@@ -1176,8 +1176,8 @@ public:
     int RequestModalUIExtensionInner(Want want);
 
     int PreloadUIExtensionAbilityInner(const Want &want, std::string &bundleName,
-        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE,
-        int32_t hostPid = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
+        int32_t requestCode = DEFAULT_INVAL_VALUE);
 
     int StartAbilityForOptionWrap(const Want &want, const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken, bool isPendingWantCaller, int32_t userId = DEFAULT_INVAL_VALUE,

@@ -175,8 +175,10 @@ void PreloadUIExtensionHostClient::PreloadUIExtensionAbility(
             RegisterPreloadUIExtensionHostClient();
         }
     }
-    ErrCode ret =
-        AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(want, hostBundleName, requestCode);
+    int32_t userId = AAFwk::DEFAULT_INVAL_VALUE;
+    int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE;
+    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(
+        want, hostBundleName, userId, hostPid, requestCode);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "PreloadUIExtensionAbility failed, ret: %{public}d", ret);
         OnPreloadSuccess(requestCode, -1, ret);

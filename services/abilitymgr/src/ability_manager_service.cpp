@@ -3598,7 +3598,7 @@ int AbilityManagerService::ImplicitStartExtensionAbility(const Want &want, const
 }
 
 int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::string &bundleName,
-    int32_t requestCode, int32_t userId, int32_t hostPid)
+    int32_t userId, int32_t hostPid, int32_t requestCode)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -3615,11 +3615,11 @@ int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::stri
             PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
         return ERR_PERMISSION_DENIED;
     }
-    return PreloadUIExtensionAbilityInner(want, bundleName, requestCode, userId, hostPid);
+    return PreloadUIExtensionAbilityInner(want, bundleName, userId, hostPid, requestCode);
 }
 
 int AbilityManagerService::PreloadUIExtensionAbilityInner(
-    const Want &want, std::string &hostBundleName, int32_t requestCode, int32_t userId, int32_t hostPid)
+    const Want &want, std::string &hostBundleName, int32_t userId, int32_t hostPid, int32_t requestCode)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "PreloadUIExtension called, elementName: %{public}s/%{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
