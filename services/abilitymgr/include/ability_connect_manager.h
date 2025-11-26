@@ -722,7 +722,11 @@ private:
 
     void UpdateUIExtensionBindInfo(
         const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind);
-    
+
+    void HandleConnectionCountIncrement(int32_t pid, const std::string &callerBundleName,
+        const std::string &targetName);
+    void DecrementConnectionCountAndCleanup(int32_t pid);
+
     class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
@@ -746,6 +750,7 @@ private:
     RecipientMapType uiExtRecipientMap_;
     UIExtensionMapType uiExtensionMap_;
     WindowExtensionMapType windowExtensionMap_;
+    std::map<int32_t, int32_t> callerPidConnectionCountMap_;
 
     std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
@@ -763,8 +768,10 @@ private:
     std::mutex windowExtensionMapMutex_;
     std::mutex startServiceReqListLock_;
     std::mutex loadAbilityQueueLock_;
+    std::mutex callerPidConnectionCountMapMutex_;
     std::mutex preloadUIExtRecipientMapMutex_;
     std::deque<std::map<int32_t, LoadAbilityContext>> loadAbilityQueue_;
+    std::vector<int32_t> thresholds_ = {50, 100, 200, 500};
     std::map<int32_t, sptr<IRemoteObject::DeathRecipient>> preloadUIExtensionHostClientDeathRecipients_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);

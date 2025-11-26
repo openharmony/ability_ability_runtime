@@ -30,7 +30,7 @@ using OHOS::AppExecFwk::ExtensionAbilityType;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-constexpr int32_t EXTENSION_MAX_LIMIT = 20;
+constexpr int32_t EXTENSION_MAX_LIMIT = 50;
 }
 class AbilityManagerServiceFourteenthTest : public testing::Test {
 public:
@@ -1290,13 +1290,16 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_001, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 1;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_EQ(isLimit, false);
+    EXPECT_EQ(isLimit.limited, false);
     
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_001 end");
 }
@@ -1317,13 +1320,16 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_002, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_EQ(isLimit, true);
+    EXPECT_EQ(isLimit.limited, true);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_002 end");
 }
@@ -1344,12 +1350,15 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
-    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    auto isLimit = rateLimiter.CheckReportLimit(uid, 50);
     EXPECT_EQ(isLimit, true);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_003 end");
