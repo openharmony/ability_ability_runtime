@@ -39,6 +39,7 @@ namespace AAFwk {
 using namespace AppExecFwk;
 enum class DataObsServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 constexpr char SHARE_PREFERENCES[] = "sharepreferences";
+constexpr char RELATIONAL_STORE[] = "rdb";
 /**
  * @class DataObsMgrService
  * DataObsMgrService provides a facility for dataobserver.

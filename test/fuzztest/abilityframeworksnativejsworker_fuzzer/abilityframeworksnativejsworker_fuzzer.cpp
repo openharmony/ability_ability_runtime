@@ -77,7 +77,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string jsonStr(data, size);
     uint8_t *buff = nullptr;
     size_t buffSize;
-    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    std::shared_ptr<AbilityBase::FileMapper> fileMapper = std::shared_ptr<AbilityBase::FileMapper>();
     void* mapper = static_cast<void*>(fileMapper.get());
     helper.GetSafeData(jsonStr, &buff, &buffSize, &mapper);
     helper.NormalizedFileName(jsonStr);
@@ -91,9 +91,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     bool isDebugApp = *data % ENABLE;
     bool isNativeStart = *data % ENABLE;
     AbilityRuntime::JsRuntimeCommon::GetInstance().StartDebuggerModule(isDebugApp, isNativeStart);
-    NativeEngine *nativeEngine = nullptr;
-    AbilityRuntime::InitWorkerFunc(nativeEngine);
-    AbilityRuntime::OffWorkerFunc(nativeEngine);
     int32_t id = static_cast<int32_t>(GetU32Data(data));
     AbilityRuntime::UpdateContainerScope(id);
     AbilityRuntime::RestoreContainerScope(id);

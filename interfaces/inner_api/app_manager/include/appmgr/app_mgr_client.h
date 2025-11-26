@@ -177,7 +177,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual AppMgrResultCode KillApplication(const std::string &bundleName, bool clearPageStack = false,
-        int32_t appIndex = 0);
+        int32_t appIndex = 0, const std::string &reason = "KillApplication");
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -1063,6 +1063,8 @@ public:
     void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
 
     void AllowScbProcessMoveToBackground();
+
+    int32_t KillChildProcessByPid(int32_t pid);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

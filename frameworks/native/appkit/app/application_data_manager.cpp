@@ -107,5 +107,16 @@ bool ApplicationDataManager::NotifyETSExceptionObject(const AppExecFwk::ErrorObj
     }
     return AppRecovery::GetInstance().TryRecoverApp(StateReason::JS_ERROR);
 }
+
+void ApplicationDataManager::SetIsUncatchable(bool isUncatchable)
+{
+    isUncatchable_.store(isUncatchable);
+}
+
+bool ApplicationDataManager::GetIsUncatchable()
+{
+    bool isUncatchable = isUncatchable_.load();
+    return isUncatchable;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

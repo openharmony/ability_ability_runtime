@@ -13,6 +13,10 @@
 
 import("//build/ohos.gni")
 
+use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
+          "${current_os}_${current_cpu}" == "mac_arm64"
+use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
+
 cj_config = {
   platform_name = ""
   common_defines = []

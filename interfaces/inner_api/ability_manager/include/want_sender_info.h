@@ -30,6 +30,7 @@ struct WantSenderInfo : public Parcelable {
     int32_t requestCode;
     uint32_t flags;
     int32_t userId;
+    int32_t appIndex;
     std::string bundleName;
     std::string resultWho;
     std::vector<WantsInfo> allWants;

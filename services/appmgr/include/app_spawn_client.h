@@ -41,7 +41,7 @@ using DataGroupInfoList = std::vector<DataGroupInfo>;
 using JITPermissionsMap = std::map<std::string, std::string>;
 const int32_t MAX_FLAG_INDEX = 32;
 const int32_t MAX_PROC_NAME_LEN = 256;
-const int32_t START_FLAG_BASE = 1;
+const int64_t START_FLAG_BASE = 1;
 const int32_t MAX_COST_TIME = 500;
 struct AppSpawnStartMsg {
     uint8_t setAllowInternet;
@@ -68,7 +68,7 @@ struct AppSpawnStartMsg {
 #endif // SUPPORT_CHILD_PROCESS
     int32_t hostProcessUid = 0; // host process uid, only use for nwebspawn.
     uint32_t accessTokenId;
-    uint32_t flags;
+    uint64_t flags;
     uint32_t hapFlags = 0; // whether is pre installed hap
     uint32_t mountPermissionFlags;
     uint32_t apiTargetVersion = 0;
@@ -113,6 +113,8 @@ struct StartFlags {
     static const int HWASANENABLED = 21;
     static const int UBSANENABLED = 22;
     static const int TEMP_JIT_ALLOW = 28;
+    static const int DLP_MANAGER_FULL_CONTROL = 37;
+    static const int DLP_MANAGER_READ_ONLY = 38;
 };
 
 struct CreateStartMsgParam {
@@ -120,7 +122,7 @@ struct CreateStartMsgParam {
     bool networkEnableFlags = true;
     bool saEnableFlags = true;
     ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
-    uint32_t startFlags = 0;
+    uint64_t startFlags = 0;
     int32_t uid = -1;
     int32_t bundleIndex = 0;
     std::shared_ptr<AAFwk::Want> want = nullptr;

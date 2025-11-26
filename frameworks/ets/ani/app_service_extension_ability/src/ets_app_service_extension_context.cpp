@@ -62,12 +62,12 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;"
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::StartAbilityWithOption) },
-        ani_native_function { "nativeConnectAppServiceExtensionAbility",
+        ani_native_function { "nativeConnectServiceExtensionAbility",
             "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J",
-            reinterpret_cast<void *>(EtsAppServiceExtensionContext::ConnectAppServiceExtensionAbility) },
-        ani_native_function { "nativeDisconnectAppServiceExtensionAbility",
+            reinterpret_cast<void *>(EtsAppServiceExtensionContext::ConnectServiceExtensionAbility) },
+        ani_native_function { "nativeDisconnectServiceExtensionAbility",
             "JLutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(EtsAppServiceExtensionContext::DisconnectAppServiceExtensionAbility) },
+            reinterpret_cast<void *>(EtsAppServiceExtensionContext::DisconnectServiceExtensionAbility) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
         && status != ANI_ALREADY_BINDED) {
@@ -187,10 +187,10 @@ void EtsAppServiceExtensionContext::TerminateSelf(ani_env *env, ani_object obj, 
     etsAppServiceExtensionContext->OnTerminateSelf(env, obj, callback);
 }
 
-ani_long EtsAppServiceExtensionContext::ConnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj,
+ani_long EtsAppServiceExtensionContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
     ani_object wantObj, ani_object connectOptionsObj)
 {
-    TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "ConnectAppServiceExtensionAbility");
+    TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "ConnectServiceExtensionAbility");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null env");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
@@ -205,10 +205,10 @@ ani_long EtsAppServiceExtensionContext::ConnectAppServiceExtensionAbility(ani_en
     return etsAppServiceExtensionContext->OnConnectAppServiceExtensionAbility(env, aniObj, wantObj, connectOptionsObj);
 }
 
-void EtsAppServiceExtensionContext::DisconnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj,
+void EtsAppServiceExtensionContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
     ani_long connectId, ani_object callback)
 {
-    TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "DisconnectAppServiceExtensionAbility");
+    TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "DisconnectServiceExtensionAbility");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null env");
         return;

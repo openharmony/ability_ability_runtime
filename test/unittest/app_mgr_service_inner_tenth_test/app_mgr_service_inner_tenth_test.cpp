@@ -1443,40 +1443,6 @@ HWTEST_F(AppMgrServiceInnerTenthTest, KillProcessDependedOnWeb_004, TestSize.Lev
 }
 
 /**
- * @tc.name: UpdateInstanceKeyBySpecifiedId_001
- * @tc.desc: Test UpdateInstanceKeyBySpecifiedId
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTenthTest, UpdateInstanceKeyBySpecifiedId_001, TestSize.Level2)
-{
-    TAG_LOGI(AAFwkTag::TEST, "UpdateInstanceKeyBySpecifiedId_001 start");
-    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
-    std::string instanceKey = "test_instance_key";
-    appMgrServiceInner->UpdateInstanceKeyBySpecifiedId(1, instanceKey);
-    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().updateInstanceKeyBySpecifiedIdCalled_);
-    TAG_LOGI(AAFwkTag::TEST, "UpdateInstanceKeyBySpecifiedId_001 end");
-}
-
-/**
- * @tc.name: UpdateInstanceKeyBySpecifiedId_002
- * @tc.desc: Test UpdateInstanceKeyBySpecifiedId
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTenthTest, UpdateInstanceKeyBySpecifiedId_002, TestSize.Level2)
-{
-    TAG_LOGI(AAFwkTag::TEST, "UpdateInstanceKeyBySpecifiedId_002 start");
-    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    std::string instanceKey = "test_instance_key";
-    appMgrServiceInner->UpdateInstanceKeyBySpecifiedId(1, instanceKey);
-    EXPECT_FALSE(AAFwk::MyStatus::GetInstance().updateInstanceKeyBySpecifiedIdCalled_);
-    TAG_LOGI(AAFwkTag::TEST, "UpdateInstanceKeyBySpecifiedId_002 end");
-}
-
-/**
  * @tc.name: BindUIExtensionProcess_001
  * @tc.desc: Test BindUIExtensionProcess with new pid and callerPid (first bind)
  * @tc.type: FUNC

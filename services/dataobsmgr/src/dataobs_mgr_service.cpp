@@ -48,8 +48,6 @@ namespace AAFwk {
 using namespace DataShare;
 using namespace Security::AccessToken;
 using namespace AppExecFwk;
-static constexpr const char *SCHEME_RDB = "rdb";
-static constexpr const char *SCHEME_SP = "sharepreferences";
 static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
@@ -293,6 +291,10 @@ std::pair<Status, std::string> DataObsMgrService::GetUriPermission(Uri &uri, boo
 {
     uint32_t tokenId = info.tokenId;
     std::string uriStr = uri.ToString();
+    if (permission_ == nullptr) {
+        LOG_ERROR("permission_ nullptr");
+        return std::make_pair(COMMON_ERROR, "");
+    }
     auto [ret, permission] = permission_->GetUriPermission(uri, info.userId, isRead, info.isSilentUri);
     if (ret != DataShare::E_OK) {
         info.errMsg.append(std::to_string(info.isFromExtension) + "_GetUriPermission");
@@ -357,10 +359,10 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
 void DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
     const uint32_t userId, const std::string &method)
 {
-    if (uri.GetScheme() == SCHEME_RDB) {
-        VerifyUriPermission(uri, tokenId, userId, SCHEME_RDB + method);
-    } else if (uri.GetScheme() == SCHEME_SP) {
-        VerifyUriPermission(uri, tokenId, userId, SCHEME_RDB + method);
+    if (uri.GetScheme() == RELATIONAL_STORE) {
+        VerifyUriPermission(uri, tokenId, userId, RELATIONAL_STORE + method);
+    } else if (uri.GetScheme() == SHARE_PREFERENCES) {
+        VerifyUriPermission(uri, tokenId, userId, SHARE_PREFERENCES + method);
     }
 }
 

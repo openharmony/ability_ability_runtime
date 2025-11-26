@@ -59,6 +59,7 @@ public:
     pid_t hostPid_ = 0;
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord_ = nullptr;
     std::string hostBundleName_;
+    int32_t requestCode_ = -1;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
     sptr<IRemoteObject> focusedCallerToken_ = nullptr;

@@ -18,7 +18,10 @@
 
 #include <cstdint>
 
+#include "refbase.h"
+
 namespace OHOS {
+class IRemoteObject;
 namespace AAFwk {
 class Want;
 class StartOptions;
@@ -32,10 +35,12 @@ public:
     StartOptionsUtils() = default;
     ~StartOptionsUtils() = default;
 
-    static int32_t CheckProcessOptions(const Want &want, const StartOptions &options, int32_t userId);
+    static int32_t CheckProcessOptions(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
+        int32_t userId);
 
 private:
-    static int32_t CheckProcessOptionsInner(const Want &want, const StartOptions &options, int32_t userId);
+    static int32_t CheckProcessOptionsInner(const Want &want, const StartOptions &options,
+        sptr<IRemoteObject> callerToken, int32_t userId);
 
     static int32_t CheckStartSelfUIAbilityStartOptions(const Want &want, const StartOptions &options);
 };

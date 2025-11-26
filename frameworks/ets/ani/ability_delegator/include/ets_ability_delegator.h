@@ -33,7 +33,7 @@ public:
     EtsAbilityDelegator();
     ~EtsAbilityDelegator();
     static void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
-        ani_string cmd, ani_double timeoutSecs, ani_object callback);
+        ani_string cmd, ani_long timeoutSecs, ani_object callback);
 
     static void FinishTest(ani_env *env, [[maybe_unused]]ani_object object,
         ani_string msg, ani_long code, ani_object callback);
@@ -47,21 +47,29 @@ public:
     static void AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object monitorObj, ani_object callback);
 
+    static void AddAbilityMonitorCheck(ani_env *env, ani_object object, ani_object monitorObj);
+
     static void AddAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
 
     static void RemoveAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object monitorObj, ani_object callback);
+
+    static void RemoveAbilityMonitorCheck(ani_env *env, ani_object object, ani_object monitorObj);
 
     static void RemoveAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
 
     static void WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object monitorObj, ani_long timeout, ani_object callback);
 
+    static void AddAbilityStageMonitorCheck(ani_env *env, ani_object aniObj, ani_object stageMonitorObj);
+
     static void AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object stageMonitorObj, ani_object callback);
 
     static void AddAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object stageMonitorObj);
+
+    static void RemoveAbilityStageMonitorCheck(ani_env *env, ani_object aniObj, ani_object monitorObj);
 
     static void RemoveAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object stageMonitorObj, ani_object callback);
@@ -71,6 +79,9 @@ public:
 
     static void WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object stageMonitorObj, ani_long timeout, ani_object callback);
+
+    static void DoAbilityForegroundOrBackgroundCheck(ani_env *env, [[maybe_unused]]ani_object object,
+        ani_object abilityObj);
 
     static void DoAbilityForeground(ani_env *env, [[maybe_unused]]ani_object object,
         ani_object abilityObj, ani_object callback);

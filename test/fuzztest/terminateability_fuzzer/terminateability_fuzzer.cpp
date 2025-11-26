@@ -58,10 +58,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int requestCode = -1;
     auto abilityRecord = new AbilityRecord(*want, abilityInfo, applicationInfo, requestCode);
 
-    if (!abilityRecord->Init()) {
-        std::cout << "AbilityRecord Init failed" << std::endl;
-        return false;
-    }
+    abilityRecord->Init(AbilityRequest());
     if (abilityRecord->TerminateAbility() != ERR_OK) {
         std::cout << "AbilityRecord TerminateAbility failed" << std::endl;
         return false;

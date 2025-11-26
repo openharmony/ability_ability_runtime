@@ -124,9 +124,10 @@ void ContinuationTest::SetUp(void)
     std::shared_ptr<Want> want = std::make_shared<Want>();
     std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo_, continueToken_,
         want, 0);
-    mockUIAbility_->Init(record, application, handler, continueToken_);
+    bool createObjSuc = false;
+    mockUIAbility_->Init(record, application, handler, continueToken_, createObjSuc);
     uiAbility_ = std::make_shared<AbilityRuntime::UIAbility>();
-    uiAbility_->Init(record, application, handler, continueToken_);
+    uiAbility_->Init(record, application, handler, continueToken_, createObjSuc);
 }
 
 void ContinuationTest::TearDown(void)

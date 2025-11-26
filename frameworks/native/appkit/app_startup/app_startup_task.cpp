@@ -17,6 +17,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+const std::string AppStartupTask::TASK_TYPE_JS = "Js";
+const std::string AppStartupTask::TASK_TYPE_ETS = "Ets";
+const std::string AppStartupTask::TASK_TYPE_PRELOAD_SO = "PreloadSo";
+
 AppStartupTask::AppStartupTask(const std::string& name) : StartupTask(name)
 {
 }
@@ -87,5 +91,8 @@ void AppStartupTask::SetPreAbilityStageLoad(bool preAbilityStageLoad)
 {
     preAbilityStageLoad_ = preAbilityStageLoad;
 }
+
+void AppStartupTask::UpdateContextRef(std::shared_ptr<NativeReference> contextJsRef)
+{}
 } // namespace AbilityRuntime
 } // namespace OHOS

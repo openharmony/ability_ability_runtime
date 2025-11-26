@@ -134,7 +134,7 @@ ErrCode AbilityManagerClient::StartAbility(
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want& want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callerToken, int32_t accountId, bool isSilent)
+    sptr<IRemoteObject> callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient::StartAbilityByCall start");
     if (g_remoteObject == nullptr) {

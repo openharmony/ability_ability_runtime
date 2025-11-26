@@ -132,7 +132,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
 }
 
 int AbilityConnectManager::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
-    std::string &hostBundleName)
+    int32_t &hostPid)
 {
     return ERR_OK;
 }
@@ -769,7 +769,7 @@ int32_t AbilityConnectManager::UpdateKeepAliveEnableState(const std::string &bun
 
 int32_t AbilityConnectManager::QueryPreLoadUIExtensionRecordInner(const AppExecFwk::ElementName &element,
                                                                   const std::string &moduleName,
-                                                                  const std::string &hostBundleName,
+                                                                  const int32_t hostPid,
                                                                   int32_t &recordNum)
 {
     return ERR_OK;
@@ -785,5 +785,42 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
     const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind)
 {
 }
+
+int AbilityConnectManager::UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId)
+{
+    return 0;
+}
+
+int AbilityConnectManager::ClearAllPreloadUIExtensionAbilityLocked()
+{
+    return 0;
+}
+
+int32_t AbilityConnectManager::RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken)
+{
+    return 0;
+}
+
+int32_t AbilityConnectManager::UnRegisterPreloadUIExtensionHostClient(int32_t key)
+{
+    return 0;
+}
+
+class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
+    explicit PreloadUIExtensionHostClientDeathRecipient(PreloadUIExtensionHostClientDiedHandler handler)
+        : diedHandler_(handler)
+    {}
+    ~PreloadUIExtensionHostClientDeathRecipient() = default;
+    void OnRemoteDied(const wptr<IRemoteObject> &remote) final
+    {
+        if (diedHandler_) {
+            diedHandler_(remote);
+        }
+    }
+private:
+    PreloadUIExtensionHostClientDiedHandler diedHandler_;
+};
 }  // namespace AAFwk
 }  // namespace OHOS

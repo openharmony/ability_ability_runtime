@@ -26,11 +26,12 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
+#include "iremote_object.h"
 #include "permission_verification.h"
 #include "process_options.h"
 #include "scene_board_judgement.h"
+#include "start_ability_utils.h"
 #include "start_options.h"
-#include "startup_util.h"
 #include "want.h"
 
 namespace OHOS {
@@ -39,7 +40,8 @@ namespace {
 constexpr const char* ACTION_CHOOSE = "ohos.want.action.select";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 }
-int32_t StartOptionsUtils::CheckProcessOptions(const Want &want, const StartOptions &options, int32_t userId)
+int32_t StartOptionsUtils::CheckProcessOptions(const Want &want, const StartOptions &options,
+    sptr<IRemoteObject> callerToken, int32_t userId)
 {
     if (HiddenStartUtils::IsHiddenStart(options)) {
         return HiddenStartUtils::CheckHiddenStartSupported(options);
@@ -48,10 +50,11 @@ int32_t StartOptionsUtils::CheckProcessOptions(const Want &want, const StartOpti
         options.processOptions != nullptr && options.processOptions->isStartFromNDK) {
         return CheckStartSelfUIAbilityStartOptions(want, options);
     }
-    return CheckProcessOptionsInner(want, options, userId);
+    return CheckProcessOptionsInner(want, options, callerToken, userId);
 }
 
-int32_t StartOptionsUtils::CheckProcessOptionsInner(const Want &want, const StartOptions &options, int32_t userId)
+int32_t StartOptionsUtils::CheckProcessOptionsInner(const Want &want, const StartOptions &options,
+    sptr<IRemoteObject> callerToken, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (options.processOptions == nullptr ||
@@ -76,7 +79,7 @@ int32_t StartOptionsUtils::CheckProcessOptionsInner(const Want &want, const Star
     }
 
     int32_t appIndex = 0;
-    appIndex = !AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ? 0 : appIndex;
+    appIndex = !StartAbilityUtils::GetAppIndex(want, callerToken, appIndex) ? 0 : appIndex;
     CHECK_TRUE_RETURN_RET(!DelayedSingleton<AbilityManagerService>::GetInstance()->CheckCallingTokenId(
         element.GetBundleName(), userId, appIndex), ERR_NOT_SELF_APPLICATION, "not self application");
 
@@ -91,7 +94,7 @@ int32_t StartOptionsUtils::CheckProcessOptionsInner(const Want &want, const Star
         !uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey)), ERR_START_OPTIONS_CHECK_FAILED,
         "not in status bar");
 
-    auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);
+    auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element, appIndex);
     CHECK_TRUE_RETURN_RET(!abilityRecords.empty() && abilityRecords[0] &&
         abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD &&
         abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::SPECIFIED,

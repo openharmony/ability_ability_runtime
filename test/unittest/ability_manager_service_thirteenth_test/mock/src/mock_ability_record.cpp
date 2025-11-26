@@ -128,7 +128,7 @@ Token::Token(std::weak_ptr<AbilityRecord> abilityRecord) : abilityRecord_(abilit
 Token::~Token()
 {}
 
-std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
+std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(sptr<IRemoteObject> token)
 {
     return MyStatus::GetInstance().arGetAbilityRecord_;
 }
@@ -177,7 +177,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
     recordId_ = abilityRecordId++;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (abilityMgr) {
-        bool isRootLauncher = (abilityInfo_.applicationInfo.bundleName == LAUNCHER_BUNDLE_NAME);
+        bool isRootLauncher = (abilityInfo_.applicationInfo.bundleName == AbilityConfig::LAUNCHER_BUNDLE_NAME);
         restartMax_ = AmsConfigurationParameter::GetInstance().GetMaxRestartNum(isRootLauncher);
         bool flag = abilityMgr->GetStartUpNewRuleFlag();
         want_.SetParam(COMPONENT_STARTUP_NEW_RULES, flag);
@@ -226,10 +226,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     if (abilityRequest.sessionInfo != nullptr) {
         abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
     }
-    if (!abilityRecord->Init()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init");
-        return nullptr;
-    }
+    abilityRecord->Init(abilityRequest);
     if (abilityRequest.startSetting != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityRequest.startSetting...");
         abilityRecord->SetStartSetting(abilityRequest.startSetting);
@@ -255,18 +252,18 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     return abilityRecord;
 }
 
-bool AbilityRecord::Init()
+void AbilityRecord::Init(const AbilityRequest &)
 {
     lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    CHECK_POINTER_RETURN_BOOL(lifecycleDeal_);
-
     token_ = new (std::nothrow) Token(weak_from_this());
-    CHECK_POINTER_RETURN_BOOL(token_);
-
     if (abilityInfo_.applicationInfo.isLauncherApp) {
         isLauncherAbility_ = true;
     }
-    return true;
+}
+
+AbilityRecordType AbilityRecord::GetAbilityRecordType()
+{
+    return AbilityRecordType::BASE_ABILITY;
 }
 
 void AbilityRecord::SetUid(int32_t uid)
@@ -279,7 +276,7 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-pid_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid() const
 {
     return pid_;
 }
@@ -2029,6 +2026,19 @@ void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
 bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
+}
+
+void AbilityRecord::SetPromotePriority(bool promotePriority)
+{
+}
+
+bool AbilityRecord::GetPromotePriority()
+{
+    return false;
+}
+
+void AbilityRecord::PromotePriority()
+{
 }
 }  // namespace AAFwk
 }  // namespace OHOS

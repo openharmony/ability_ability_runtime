@@ -28,6 +28,7 @@
 #include "singleton.h"
 #include "application_env.h"
 #include "js_application_utils.h"
+#include "application_context_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -48,6 +49,11 @@ void JsApplication::Finalizer(napi_env env, void *data, void *hint)
 napi_value JsApplication::GetApplicationContext(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnGetApplicationContext);
+}
+
+napi_value JsApplication::GetApplicationContextInstance(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnGetApplicationContextInstance);
 }
 
 napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo &info)
@@ -85,6 +91,64 @@ napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo
             return CreateJsUndefined(env);
         }
     }
+    return object;
+}
+
+napi_value JsApplication::OnGetApplicationContextInstance(napi_env env, NapiCallbackInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    std::shared_ptr<ApplicationContext> applicationContext = Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+
+    if (!applicationContext->GetApplicationInfoUpdateFlag()) {
+        std::shared_ptr<NativeReference> applicationContextObj =
+            ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(env);
+        if (applicationContextObj != nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "get current applicationContext");
+            napi_value objValue = applicationContextObj->GetNapiValue();
+            return objValue;
+        }
+    }
+    napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid systemModule");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+        return CreateJsUndefined(env);
+    }
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to get context native object");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+        return CreateJsUndefined(env);
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
+    napi_coerce_to_native_binding_object(
+        env, object, DetachCallbackFunc, AttachApplicationContext, workContext, nullptr);
+    if (workContext != nullptr) {
+        auto res = napi_wrap(env, object, workContext,
+            [](napi_env, void *data, void *) {
+              TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
+              delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+              data = nullptr;
+            },
+            nullptr, nullptr);
+        if (res != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+            delete workContext;
+            return CreateJsUndefined(env);
+        }
+    }
+    napi_ref ref = nullptr;
+    napi_create_reference(env, object, 1, &ref);
+    ApplicationContextManager::GetApplicationContextManager()
+        .AddGlobalObject(env, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
+    applicationContext->SetApplicationInfoUpdateFlag(false);
     return object;
 }
 
@@ -650,6 +714,9 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
     const char *moduleName = "application";
     BindNativeFunction(env, exportObj, "getApplicationContext", moduleName,
         JsApplication::GetApplicationContext);
+
+    BindNativeFunction(env, exportObj, "getApplicationContextInstance", moduleName,
+        JsApplication::GetApplicationContextInstance);
 
     BindNativeFunction(env, exportObj, "createModuleContext", moduleName,
         JsApplication::CreateModuleContext);

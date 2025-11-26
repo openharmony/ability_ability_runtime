@@ -944,12 +944,18 @@ ohos_unittest("dump_ipc_helper_test") {
 }
 
 ohos_unittest("dump_runtime_helper_test") {
-  include_dirs = []
+  include_dirs = [
+    "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+  ]
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_native_path}/appkit/app/dump_runtime_helper.cpp",
     "dump_runtime_helper_test.cpp",
   ]
+
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
 
   configs = [ ":module_context_config" ]
 
@@ -1229,7 +1235,6 @@ ohos_unittest("startup_manager_mock_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
     "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_extractor.cpp",
-    "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_native_module_manager.cpp",
     "startup_manager_mock_test.cpp",
   ]
 
@@ -1255,6 +1260,7 @@ ohos_unittest("startup_manager_mock_test") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 

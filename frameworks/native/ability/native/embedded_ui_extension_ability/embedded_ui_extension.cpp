@@ -15,6 +15,7 @@
 
 #include "embedded_ui_extension.h"
 
+#include "ets_embedded_ui_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "js_embedded_ui_extension.h"
 #include "cj_embedded_ui_extension_instance.h"
@@ -34,6 +35,8 @@ EmbeddedUIExtension *EmbeddedUIExtension::Create(const std::unique_ptr<Runtime> 
             return JsEmbeddedUIExtension::Create(runtime);
         case Runtime::Language::CJ:
             return CreateCJEmbeddedUIExtension(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSEmbeddedUIExtension(runtime);
         default:
             return new (std::nothrow) EmbeddedUIExtension();
     }

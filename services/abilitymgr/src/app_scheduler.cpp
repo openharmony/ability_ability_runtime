@@ -278,11 +278,12 @@ void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
     callback->NotifyAppPreCache(pid, userId);
 }
 
-int AppScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
+int AppScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string &reason)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack, appIndex);
+    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack, appIndex, reason);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed kill app");
         return INNER_ERR;

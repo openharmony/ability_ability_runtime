@@ -415,6 +415,13 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFaultNotifyData_001, Test
     faultData.eventId = 10;
     faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
     EXPECT_EQ(faultNotifyData.eventId, 10);
+    faultData.markedId = 10;
+    faultData.processedId = 10;
+    faultData.dispatchedEventId = 10;
+    faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
+    EXPECT_EQ(faultNotifyData.markedId, 10);
+    EXPECT_EQ(faultNotifyData.processedId, 10);
+    EXPECT_EQ(faultNotifyData.dispatchedEventId, 10);
 }
 
 /**
@@ -462,6 +469,71 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetUidByPid_Test001, TestSiz
     EXPECT_TRUE(ret < 0);
     ret = AppfreezeUtil::GetUidByPid(1);
     EXPECT_TRUE(ret > 0);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest InsertKillThread Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_KillThreadStateManagement_Test001, TestSize.Level1)
+{
+    int32_t killState = 1;
+    int32_t pid = getpid();
+    int32_t uid = getuid();
+    std::string bundleName = "Test001";
+    appfreezeManager->InsertKillThread(killState, pid, uid, bundleName);
+    EXPECT_TRUE(appfreezeManager->freezeKillThreadMap_.size() > 0);
+    appfreezeManager->InsertKillThread(killState, pid, uid, bundleName);
+    EXPECT_TRUE(appfreezeManager->freezeKillThreadMap_.size() > 0);
+    int count = 10; // test value
+    for (int i = 1; i <= count; i++) {
+        pid += i;
+        appfreezeManager->InsertKillThread(killState, pid, uid, bundleName);
+    }
+    while (count > 0) {
+        count = sleep(count);
+    }
+    pid += 1;
+    appfreezeManager->InsertKillThread(killState, pid, uid, bundleName);
+    EXPECT_TRUE(appfreezeManager->freezeKillThreadMap_.size() > 0);
+    bool ret = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_TRUE(ret);
+    ret = appfreezeManager->IsSkipDetect(pid, uid, bundleName, "test");
+    EXPECT_TRUE(ret);
+    killState = -1;
+    appfreezeManager->InsertKillThread(killState, pid, uid, bundleName);
+    ret = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_TRUE(!ret);
+    ret = appfreezeManager->CheckThreadKilled(10, 10, bundleName);
+    EXPECT_TRUE(!ret);
+    ret = appfreezeManager->IsSkipDetect(pid, uid, bundleName, "test");
+    EXPECT_TRUE(!ret);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest GetCatcherStack Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetCatcherStack_Test001, TestSize.Level1)
+{
+    FaultData faultData;
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    faultData.faultType = FaultDataType::APP_FREEZE;
+    AppfreezeManager::AppInfo appInfo;
+    int ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
+    EXPECT_EQ(ret, 0);
+    std::string fileName = "/data/log/freeze/freeze.txt";
+    std::string catcherStack = "AppfreezeManagerTest_GetCatcherStack_Test001";
+    std::string result = appfreezeManager->GetCatcherStack(fileName, catcherStack);
+    EXPECT_EQ(result, catcherStack);
+    constexpr int MAX_REPORT_STACK_SIZE = 300 * 1024; // 300KB
+    while (catcherStack.size() <= MAX_REPORT_STACK_SIZE) {
+        catcherStack += "AppfreezeManagerTest_GetCatcherStack_Test001";
+    }
+    result = appfreezeManager->GetCatcherStack(fileName, catcherStack);
+    EXPECT_EQ(result, "");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

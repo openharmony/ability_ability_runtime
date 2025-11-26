@@ -31,6 +31,8 @@ public:
     };
 private:
     void QueryTargetAbilityInfo(const AbilityInterceptorParam &param, AppExecFwk::AbilityInfo &targetAbilityInfo);
+    void RecordExtensionEventWhenScreenUnlock(const AbilityInterceptorParam &param,
+        const AppExecFwk::AbilityInfo &targetAbilityInfo);
 };
 } // namespace AAFwk
 } // namespace OHOS

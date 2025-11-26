@@ -106,7 +106,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     UriUtils::GetInstance().IsSandboxApp(tokenId);
     UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
     UriUtils::GetInstance().ProcessUDMFKey(want);
-    UriUtils::GetInstance().PublishFileOpenEvent(want);
+    UriUtils::GetInstance().PublishFileOpenEvent(want, grantInfo);
     UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
     UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
     UriUtils::GetInstance().SendGrantUriPermissionEvent(callerBundleName, targetBundleName, oriUri,

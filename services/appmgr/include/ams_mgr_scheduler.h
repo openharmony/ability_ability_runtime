@@ -177,7 +177,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false,
-        int32_t appIndex = 0) override;
+        int32_t appIndex = 0, const std::string &reason = "KillApplication") override;
 
     /**
      * ForceKillApplication, force kill the application.

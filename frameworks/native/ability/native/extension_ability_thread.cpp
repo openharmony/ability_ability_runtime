@@ -24,6 +24,7 @@
 #include "hitrace_meter.h"
 #include "js_start_abilities_observer.h"
 #include "ui_extension_utils.h"
+#include "start_abilities_observer.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -595,6 +596,7 @@ void ExtensionAbilityThread::ScheduleAbilitiesRequestDone(const std::string &req
         }
 
         JsStartAbilitiesObserver::GetInstance().HandleFinished(requestKey, resultCode);
+        StartAbilitiesObserver::HandleFinished(requestKey, resultCode);
     };
     abilityHandler_->PostTask(task);
 }

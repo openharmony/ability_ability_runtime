@@ -51,6 +51,7 @@ public:
     bool GetCanceled();
     std::list<sptr<IWantReceiver>> GetCancelCallbacks();
     void BuildSendWant(SenderInfo &senderInfo, Want &want);
+    int32_t GetAppIndexbyUid(int32_t uid, const std::string bundleName, int32_t &appIndex);
 
 private:
     int32_t ExecuteOperation(

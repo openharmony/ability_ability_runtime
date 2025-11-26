@@ -179,7 +179,6 @@ private:
     int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillAppSelfWithInstanceKey(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsSpecifiedModuleLoaded(MessageParcel &data, MessageParcel &reply);
     int32_t HandleQueryRunningSharedBundles(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
@@ -209,6 +208,7 @@ private:
     int32_t HandleRegisterApplicationStateObserverWithFilter(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAllowScbProcessMoveToBackground(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessByPidForExit(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillChildProcessByPid(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AppMgrStub);
 };
 }  // namespace AppExecFwk

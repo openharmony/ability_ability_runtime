@@ -27,6 +27,8 @@
 #include "mock_native_token.h"
 #include "scene_board_judgement.h"
 #include "session_info.h"
+#include "preload_ui_extension_execute_callback_interface.h"
+#include "ui_extension_record.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,6 +41,37 @@ namespace {
     constexpr int32_t EXTENSION_RECORD_KEY_2 = 2;
     constexpr const char *SEPARATOR = ":";
 } // namespace
+class MockPreloadCallback : public IRemoteStub<AAFwk::IPreloadUIExtensionExecuteCallback> {
+public:
+    MockPreloadCallback() = default;
+    virtual ~MockPreloadCallback() = default;
+    int32_t lastCalledId = -1;
+    bool onDestroyCalled = false;
+    bool onPreloadSuccessCalled = false;
+    int32_t lastErrCode = -1;
+    int32_t lastRequestCode = -1;
+
+    void OnLoadedDone(int32_t extensionAbilityId) override
+    {
+        lastCalledId = extensionAbilityId;
+    }
+    void OnDestroyDone(int32_t extensionAbilityId) override
+    {
+        onDestroyCalled = true;
+    }
+    void OnPreloadSuccess(int32_t requestCode, int32_t extensionAbilityId, int32_t innerErrCode) override
+    {
+        onPreloadSuccessCalled = true;
+        lastRequestCode = requestCode;
+        lastErrCode = innerErrCode;
+    }
+
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        return 0;
+    }
+};
+
 class ExtensionRecordManagerTest : public testing::Test {
 public:
 
@@ -255,8 +288,8 @@ HWTEST_F(ExtensionRecordManagerTest, GetAbilityRecordBySessionInfo_0100, TestSiz
     std::string  bundleName = "";
     extRecordMgr->GetOrCreateExtensionRecord(abilityRequest, bundleName, abilityRecord2, bLoaded);
     extRecordMgr->GetOrCreateExtensionRecord(abilityRequest2, bundleName, abilityRecord2, bLoaded);
-    bundleName = "";
-    extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, bundleName);
+    int32_t hostPid = 0;
+    extRecordMgr->GetHostPidForExtensionId(extensionRecordId, hostPid);
 }
 
 /**
@@ -450,8 +483,9 @@ HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Lev
     std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
     std::string hostBundleName = "testHostBundleName";
     bool isLoaded = false;
+    int32_t hostPid = 0;
 
-    bool result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    bool result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 
     std::string deviceId = "testDeviceId";
@@ -459,23 +493,23 @@ HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Lev
     std::string abilityName = "testAbilityName";
     std::string moduleName = "testModuleName";
     abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
-    auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostBundleName);
+    auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostPid);
     std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
     std::vector<std::shared_ptr<ExtensionRecord>> extensions;
 
     extensions.push_back(extRecord);
     extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_TRUE(isLoaded);
     EXPECT_TRUE(result);
 
     extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 
     nullExtensions.push_back(nullptr);
     extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
-    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostPid, extRecord, isLoaded);
     EXPECT_FALSE(result);
 }
 
@@ -510,6 +544,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     std::shared_ptr<ExtensionRecord> extRecord =
         std::make_shared<ExtensionRecord>(abilityRecord);
     extRecord->abilityRecord_ = abilityRecord;
+    int32_t hostPid = 0;
     std::string hostBundleName = "testHostBundleName";
     bool isLoaded = false;
 
@@ -519,7 +554,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     std::string moduleName = "testModuleName";
     abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     auto extensionRecordMapKey = std::make_tuple(abilityName,
-        bundleName, moduleName, hostBundleName);
+        bundleName, moduleName, hostPid);
     std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
     std::vector<std::shared_ptr<ExtensionRecord>> extensions;
 
@@ -527,7 +562,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.L
     extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
     auto ret = extRecordMgr->GetOrCreateExtensionRecord(abilityRequest,
         hostBundleName, abilityRecord, isLoaded);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**
@@ -741,6 +776,580 @@ HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0600, TestSize.Le
     UIExtensionSessionInfo uiExtensionSessionInfo;
     auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetRemoteCallback_0100
+ * @tc.desc: Test GetRemoteCallback when uiExtensionRecord is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetRemoteCallback_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0100 begin.");
+    
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+
+    auto result = extRecordMgr->GetRemoteCallback(nullptr);
+    EXPECT_EQ(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0100 end.");
+}
+
+/**
+ * @tc.name: GetRemoteCallback_0200
+ * @tc.desc: Test GetRemoteCallback when hostPid is 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetRemoteCallback_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0200 begin.");
+    
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    extRecord->hostPid_ = 0;
+
+    auto result = extRecordMgr->GetRemoteCallback(extRecord);
+    EXPECT_EQ(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0200 end.");
+}
+
+/**
+ * @tc.name: GetRemoteCallback_0300
+ * @tc.desc: Test GetRemoteCallback when Map lookup fails (pid not found).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetRemoteCallback_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0300 begin.");
+    
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    extRecord->hostPid_ = 9999;
+
+    auto result = extRecordMgr->GetRemoteCallback(extRecord);
+    EXPECT_EQ(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0300 end.");
+}
+
+/**
+ * @tc.name: GetRemoteCallback_0400
+ * @tc.desc: Test GetRemoteCallback when Map lookup succeeds but Cast fails.
+ *           This covers the map finding logic without needing a specific Mock class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetRemoteCallback_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0400 begin.");
+    
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    int32_t testPid = 1001;
+    extRecord->hostPid_ = testPid;
+
+    sptr<IRemoteObject> token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        extRecordMgr->preloadUIExtensionHostClientCallerTokens_[testPid] = token;
+    }
+    auto result = extRecordMgr->GetRemoteCallback(extRecord);
+    
+    EXPECT_EQ(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetRemoteCallback_0400 end.");
+}
+
+/**
+ * @tc.name: HandlePreloadUIExtensionLoadedById_0300
+ * @tc.desc: Test Success Scenario.
+ *           Verify OnLoadedDone is actually called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionLoadedById_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoadedById_0300 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test";
+    abilityRequest.abilityInfo.name = "TestAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+
+    int32_t recordId = 200;
+    int32_t hostPid = 8888;
+    
+    extRecord->hostPid_ = hostPid;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
+    }
+    extRecordMgr->HandlePreloadUIExtensionLoadedById(recordId);
+    EXPECT_EQ(mockCallback->lastCalledId, recordId);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoadedById_0300 end");
+}
+
+/**
+ * @tc.name: HandlePreloadUIExtensionDestroyedById_0200
+ * @tc.desc: Test destroyed logic - Success scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionDestroyedById_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyedById_0200 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.destroy";
+    abilityRequest.abilityInfo.name = "DestroyAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+
+    int32_t recordId = 300;
+    int32_t hostPid = 3333;
+    extRecord->hostPid_ = hostPid;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
+    }
+
+    extRecordMgr->HandlePreloadUIExtensionDestroyedById(recordId);
+    EXPECT_TRUE(mockCallback->onDestroyCalled);
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyedById_0200 end");
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_0100
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient with nullptr token
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, RegisterPreloadUIExtensionHostClient_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_0100 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+    
+    sptr<IRemoteObject> nullToken = nullptr;
+    extRecordMgr->RegisterPreloadUIExtensionHostClient(nullToken);
+    
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);
+        EXPECT_EQ(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
+    }
+    
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_0100 end");
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_0200
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient with valid token
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, RegisterPreloadUIExtensionHostClient_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_0200 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+    
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    
+    sptr<IRemoteObject> validToken = mockCallback->AsObject();
+    ASSERT_NE(validToken, nullptr);
+    
+    extRecordMgr->RegisterPreloadUIExtensionHostClient(validToken);
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);
+        EXPECT_NE(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
+        EXPECT_EQ(it->second, validToken);
+    }
+    
+    TAG_LOGI(AAFwkTag::TEST, "RegisterPreloadUIExtensionHostClient_0200 end");
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_0100
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient with non-existent key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, UnRegisterPreloadUIExtensionHostClient_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_0100 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+    int32_t nonExistentKey = 99999;
+    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(nonExistentKey, nullptr);
+    
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(nonExistentKey);
+        EXPECT_EQ(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
+    }
+    
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_0100 end");
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_0200
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient with valid token
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, UnRegisterPreloadUIExtensionHostClient_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_0200 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    sptr<IRemoteObject> validToken = mockCallback->AsObject();
+    ASSERT_NE(validToken, nullptr);
+    
+    extRecordMgr->RegisterPreloadUIExtensionHostClient(validToken);
+    
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);
+        EXPECT_NE(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
+        EXPECT_EQ(it->second, validToken);
+    }
+    extRecordMgr->UnRegisterPreloadUIExtensionHostClient(callerPid, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        auto it = extRecordMgr->preloadUIExtensionHostClientCallerTokens_.find(callerPid);
+        EXPECT_EQ(it, extRecordMgr->preloadUIExtensionHostClientCallerTokens_.end());
+    }
+    TAG_LOGI(AAFwkTag::TEST, "UnRegisterPreloadUIExtensionHostClient_0200 end");
+}
+
+/**
+ * @tc.name: HandlePreloadUIExtensionSuccess_0200
+ * @tc.desc: Test success logic - isPreloadedSuccess = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionSuccess_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionSuccess_0200 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.success";
+    abilityRequest.abilityInfo.name = "SuccessAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+
+    int32_t recordId = 400;
+    int32_t hostPid = 4444;
+    int32_t requestCode = 12345;
+    
+    extRecord->hostPid_ = hostPid;
+    extRecord->requestCode_ = requestCode;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
+    }
+
+    extRecordMgr->HandlePreloadUIExtensionSuccess(recordId, true);
+
+    EXPECT_TRUE(mockCallback->onPreloadSuccessCalled);
+    EXPECT_EQ(mockCallback->lastRequestCode, requestCode);
+    EXPECT_EQ(mockCallback->lastErrCode, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionSuccess_0200 end");
+}
+
+/**
+ * @tc.name: HandlePreloadUIExtensionSuccess_0300
+ * @tc.desc: Test success logic - isPreloadedSuccess = false.
+ *           Should verify error code and that unload logic is triggered (no crash).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionSuccess_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionSuccess_0300 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.fail";
+    abilityRequest.abilityInfo.name = "FailAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+
+    int32_t recordId = 500;
+    int32_t hostPid = 5555;
+    
+    extRecord->hostPid_ = hostPid;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+    sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
+    ASSERT_NE(mockCallback, nullptr);
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
+        extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
+    }
+    extRecordMgr->HandlePreloadUIExtensionSuccess(recordId, false);
+
+    EXPECT_TRUE(mockCallback->onPreloadSuccessCalled);
+    EXPECT_NE(mockCallback->lastErrCode, 0);
+    EXPECT_EQ(mockCallback->lastErrCode, static_cast<int32_t>(AAFwk::INNER_ERR));
+
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionSuccess_0300 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_0100
+ * @tc.desc: Test ID not found.
+ *           Expected: AAFwk::ERR_CODE_INVALID_ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ClearPreloadedUIExtensionAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0100 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    int32_t invalidId = 9999;
+    int32_t ret = extRecordMgr->ClearPreloadedUIExtensionAbility(invalidId);
+
+    EXPECT_EQ(ret, AAFwk::ERR_CODE_INVALID_ID);
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0100 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_0200
+ * @tc.desc: Test Record is nullptr in map.
+ *           Expected: ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ClearPreloadedUIExtensionAbility_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0200 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    int32_t recordId = 100;
+    {
+        std::lock_guard<std::mutex> lock(extRecordMgr->mutex_);
+        extRecordMgr->extensionRecords_[recordId] = nullptr;
+    }
+
+    int32_t ret = extRecordMgr->ClearPreloadedUIExtensionAbility(recordId);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(extRecordMgr->extensionRecords_.count(recordId), 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0200 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_0300
+ * @tc.desc: Test PID mismatch (Safety check).
+ *           Expected: AAFwk::ERR_CODE_INVALID_ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ClearPreloadedUIExtensionAbility_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0300 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test";
+    abilityRequest.abilityInfo.name = "TestAbility";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    int32_t currentPid = IPCSkeleton::GetCallingPid();
+    extRecord->hostPid_ = currentPid + 100;
+
+    int32_t recordId = 200;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    int32_t ret = extRecordMgr->ClearPreloadedUIExtensionAbility(recordId);
+    EXPECT_EQ(ret, AAFwk::ERR_CODE_INVALID_ID);
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0300 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_0400
+ * @tc.desc: Test AbilityRecord is null inside ExtensionRecord.
+ *           Expected: ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ClearPreloadedUIExtensionAbility_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0400 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test";
+    abilityRequest.abilityInfo.name = "TestAbility";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    
+    extRecord->abilityRecord_ = nullptr;
+    extRecord->hostPid_ = IPCSkeleton::GetCallingPid();
+
+    int32_t recordId = 300;
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    int32_t ret = extRecordMgr->ClearPreloadedUIExtensionAbility(recordId);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(extRecordMgr->extensionRecords_.count(recordId), 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0400 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_0500
+ * @tc.desc: Test RemovePreloadUIExtensionRecordById fail (Map inconsistency).
+ *           Record exists in extensionRecords_ but not in the index Map.
+ *           Expected: ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ClearPreloadedUIExtensionAbility_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0500 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.fail";
+    abilityRequest.abilityInfo.name = "FailAbility";
+    abilityRequest.abilityInfo.moduleName = "entry";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    
+    extRecord->hostPid_ = IPCSkeleton::GetCallingPid();
+    int32_t recordId = 400;
+    
+    extRecordMgr->AddExtensionRecord(recordId, extRecord);
+
+    int32_t ret = extRecordMgr->ClearPreloadedUIExtensionAbility(recordId);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "ClearPreloadedUIExtensionAbility_0500 end");
+}
+
+/**
+ * @tc.name: ConvertToUnloadExtensionRecords0100
+ * @tc.desc: Coverage test: Input list contains both valid record and nullptr.
+ *           Covers both 'if' (valid) and 'else' (null) branches in one go.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, ConvertToUnloadExtensionRecords0100, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+
+    AAFwk::AbilityRequest request;
+    request.abilityInfo.name = "CoverageTest";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(request);
+    auto validRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    std::vector<std::shared_ptr<ExtensionRecord>> sourceRecords;
+    sourceRecords.push_back(validRecord);
+    sourceRecords.push_back(nullptr);
+
+    std::vector<std::shared_ptr<ExtensionRecord>> recordsToUnload;
+
+    extRecordMgr->ConvertToUnloadExtensionRecords(sourceRecords, recordsToUnload);
+    
+    EXPECT_EQ(recordsToUnload.size(), 1);
+    EXPECT_EQ(sourceRecords.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateProcessName_0800
+ * @tc.desc: UpdateProcessName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0800, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "testBundleName";
+    abilityRequest.abilityInfo.name = "testInfoName";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(1);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName1"));
+    int result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(1);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:1"));
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(1);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:1"));
+    abilityRecord->SetProcessName("processName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(2);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:1"));
+    abilityRecord->SetProcessName("processName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(1);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName123:1"));
+    abilityRecord->SetProcessName("processName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -70,6 +70,7 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     if (abilityStateData.appCloneIndex != -1) {
         napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, abilityStateData.appCloneIndex));
     }
+    napi_set_named_property(env, object, "callerBundleName", CreateJsValue(env, abilityStateData.callerBundleName));
     TAG_LOGD(AAFwkTag::APPMGR, "end");
     return object;
 }

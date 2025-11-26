@@ -30,6 +30,9 @@
 #include "ffrt.h"
 #include "directory_ex.h"
 #include "storage_acl.h"
+#ifdef CJ_FRONTEND
+#include "cj_runtime.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -45,7 +48,6 @@ static uint64_t g_lastOOMDumpTime = 0;
 static constexpr const char* const EVENT_XATTR_NAME = "user.appevent";
 static constexpr const char* const OOM_QUOTA_XATTR_NAME = "user.oomdump.quota";
 static constexpr const char* const PROPERTY2C = "user.oomdumptelemetry.quota";
-static constexpr const char* const PROPERTY_RUNNING_ID = "user.running_id";
 static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cache/hiappevent";
 static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
 static constexpr const char* const JS_HEAP_LOGTYPE = "user.event_config.js_heap_logtype";
@@ -247,26 +249,26 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
 
 void DumpRuntimeHelper::DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
 {
-    if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null application");
-        return;
-    }
-    auto &runtime = application_->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-        return;
-    }
-    if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::CJ) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not CJ");
+#ifdef CJ_FRONTEND
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjEnv");
         return;
     }
     if (info.needSnapshot == true) {
-        runtime->DumpHeapSnapshot(info.pid, info.needGc);
-    } else {
-        if (info.needGc == true) {
-            runtime->ForceFullGC(info.pid);
+        int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::CJ_HEAP_SNAPSHOT));
+        if (fd < 0) {
+            TAG_LOGE(AAFwkTag::APPKIT, "fd:%{public}d.\n", fd);
+            return;
         }
+        cjEnv->dumpHeapSnapshot(fd);
+        close(fd);
+        return;
     }
+    if (info.needGc == true) {
+        cjEnv->forceFullGC();
+    }
+#endif
 }
 
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
@@ -368,11 +370,7 @@ void DumpRuntimeHelper::CreateDirDelay(const std::string &path)
             TAG_LOGE(AAFwkTag::APPKIT, "failed to create %{public}s", path.c_str());
             return;
         }
-        if (!SetDirXattr(path, PROPERTY_RUNNING_ID, DFX_GetAppRunningUniqueId())) {
-            TAG_LOGE(AAFwkTag::APPKIT, "failed to SetDirXattr, path: %{public}s", path.c_str());
-            return;
-        }
-        TAG_LOGI(AAFwkTag::APPKIT, "success to SetDirXattr running_id, path: %{public}s", path.c_str());
+        TAG_LOGI(AAFwkTag::APPKIT, "success to create %{public}s", path.c_str());
         }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
 }
 

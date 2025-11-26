@@ -257,6 +257,11 @@ bool AbilityRecord::Init()
     return true;
 }
 
+AbilityRecordType AbilityRecord::GetAbilityRecordType()
+{
+    return AbilityRecordType::BASE_ABILITY;
+}
+
 void AbilityRecord::SetUid(int32_t uid)
 {
     uid_ = uid;
@@ -267,7 +272,7 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-pid_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid() const
 {
     return pid_;
 }
@@ -1993,6 +1998,19 @@ void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
 bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
+}
+
+void AbilityRecord::SetPromotePriority(bool promotePriority)
+{
+}
+
+bool AbilityRecord::GetPromotePriority()
+{
+    return false;
+}
+
+void AbilityRecord::PromotePriority()
+{
 }
 }  // namespace AAFwk
 }  // namespace OHOS

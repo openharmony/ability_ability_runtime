@@ -24,6 +24,8 @@
 #include "context.h"
 #include "context_impl.h"
 #include "environment_callback.h"
+#include "interop_ability_lifecycle_callback.h"
+
 namespace OHOS {
 namespace AAFwk {
 class Want;
@@ -39,23 +41,34 @@ public:
     ~ApplicationContext() = default;
     void RegisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
     void UnregisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
+    void RegisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
+    void UnregisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
     bool IsAbilityLifecycleCallbackEmpty();
+    bool IsInteropAbilityLifecycleCallbackEmpty();
     void RegisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void RegisterApplicationStateChangeCallback(
         const std::weak_ptr<ApplicationStateChangeCallback> &applicationStateChangeCallback);
     void DispatchOnAbilityCreate(const AbilityLifecycleCallbackArgs &ability);
+    void DispatchOnAbilityCreate(std::shared_ptr<InteropObject> ability);
     void DispatchOnWindowStageCreate(const AbilityLifecycleCallbackArgs &ability,
         const AbilityLifecycleCallbackArgs &windowStage);
+    void DispatchOnWindowStageCreate(std::shared_ptr<InteropObject> ability,
+        std::shared_ptr<InteropObject> windowStage);
     void DispatchOnWindowStageDestroy(const AbilityLifecycleCallbackArgs &ability,
         const AbilityLifecycleCallbackArgs &windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<InteropObject> ability,
+        std::shared_ptr<InteropObject> windowStage);
     void DispatchWindowStageFocus(const AbilityLifecycleCallbackArgs &ability,
         const AbilityLifecycleCallbackArgs &windowStage);
     void DispatchWindowStageUnfocus(const AbilityLifecycleCallbackArgs &ability,
         const AbilityLifecycleCallbackArgs &windowStage);
     void DispatchOnAbilityDestroy(const AbilityLifecycleCallbackArgs &ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityForeground(const AbilityLifecycleCallbackArgs &ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityBackground(const AbilityLifecycleCallbackArgs &ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityContinue(const AbilityLifecycleCallbackArgs &ability);
     void DispatchOnAbilityWillContinue(const AbilityLifecycleCallbackArgs &ability);
     void DispatchOnWindowStageWillRestore(const AbilityLifecycleCallbackArgs &ability,
@@ -178,11 +191,16 @@ protected:
     }
 
 private:
+    std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> GetInteropCallbacks();
+
+private:
     std::shared_ptr<ContextImpl> contextImpl_;
     static std::vector<std::shared_ptr<AbilityLifecycleCallback>> callbacks_;
+    static std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> interopCallbacks_;
     static std::vector<std::shared_ptr<EnvironmentCallback>> envCallbacks_;
     static std::vector<std::weak_ptr<ApplicationStateChangeCallback>> applicationStateCallback_;
     std::recursive_mutex callbackLock_;
+    std::mutex interopCallbackLock_;
     std::recursive_mutex envCallbacksLock_;
     std::recursive_mutex applicationStateCallbackLock_;
     bool applicationInfoUpdateFlag_ = false;

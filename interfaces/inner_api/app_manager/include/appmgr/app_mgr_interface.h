@@ -1015,8 +1015,6 @@ public:
         return 0;
     }
 
-    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) {}
-
     /**
      * Get if the specified module has been loaded.
      * @param want info to query module.
@@ -1084,6 +1082,11 @@ public:
     virtual void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId) {}
 
     virtual void AllowScbProcessMoveToBackground() {}
+
+    virtual int32_t KillChildProcessByPid(int32_t pid)
+    {
+        return 0;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

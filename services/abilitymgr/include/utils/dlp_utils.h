@@ -23,6 +23,7 @@
 #endif // WITH_DLP
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "iremote_object.h"
 #include "permission_verification.h"
@@ -35,6 +36,7 @@ namespace DlpUtils {
 #ifdef WITH_DLP
 using Dlp = Security::DlpPermission::DlpPermissionKit;
 #endif // WITH_DLP
+
 [[maybe_unused]]static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, const Want &want)
 {
 #ifdef WITH_DLP
@@ -71,9 +73,9 @@ using Dlp = Security::DlpPermission::DlpPermissionKit;
     return true;
 }
 
-#ifdef WITH_DLP
 [[maybe_unused]]static bool OtherAppsAccessDlpCheck(const sptr<IRemoteObject> &callerToken, const Want &want)
 {
+#ifdef WITH_DLP
     int32_t dlpIndex = want.GetIntParam(AbilityRuntime::ServerConstant::DLP_INDEX, 0);
     if (dlpIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX && dlpIndex != 0) {
         return false;
@@ -88,8 +90,11 @@ using Dlp = Security::DlpPermission::DlpPermissionKit;
     }
 
     return PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want));
-}
+#else
+    return true;
 #endif // WITH_DLP
+}
+
 
 [[maybe_unused]]static bool SandboxAuthCheck(const AbilityRecord &callerRecord, const Want &want)
 {
@@ -126,6 +131,12 @@ static bool CheckCallerIsDlpManager(const std::shared_ptr<AppExecFwk::BundleMgrH
         return false;
     }
     return true;
+}
+
+static bool AccessCheck(const sptr<IRemoteObject> &callerToken, const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
+    return DlpAccessOtherAppsCheck(callerToken, want) && OtherAppsAccessDlpCheck(callerToken, want);
 }
 }  // namespace DlpUtils
 }  // namespace AAFwk

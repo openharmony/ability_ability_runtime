@@ -37,6 +37,7 @@ ohos_fuzztest("SubManagersHelperFuzzTest") {
     "submanagershelper_fuzzer.cpp",
     "${ability_runtime_innerkits_path}/deps_wrapper/src/os_account_manager_wrapper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/restart_app_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/request_id_util.cpp",
