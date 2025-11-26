@@ -277,7 +277,7 @@ JsUIAbility::~JsUIAbility()
 
 void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
-    const sptr<IRemoteObject> &token)
+    const sptr<IRemoteObject> &token, bool &createObjSuc)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (record == nullptr) {
@@ -289,7 +289,7 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
         return;
     }
-    UIAbility::Init(record, application, handler, token);
+    UIAbility::Init(record, application, handler, token, createObjSuc);
 #ifdef SUPPORT_GRAPHICS
     if (abilityContext_ != nullptr) {
         AppExecFwk::AppRecovery::GetInstance().AddAbility(
@@ -319,7 +319,7 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     std::string moduleName(abilityInfo->moduleName);
     moduleName.append("::").append(abilityInfo->name);
 
-    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
+    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath, createObjSuc);
 }
 
 void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
@@ -373,13 +373,14 @@ void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::Abi
 }
 
 void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
-    std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath)
+    std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath, bool &createObjSuc)
 {
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     UpdateAbilityObj(abilityInfo, moduleName, srcPath);
     if (jsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_ or abilityContext_ or want");
+        createObjSuc = false;
         return;
     }
     reusingWindow_ = want->GetBoolParam(REUSING_WINDOW, false);
@@ -410,13 +411,11 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     }
     abilityContext_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    TAG_LOGD(AAFwkTag::UIABILITY, "set ability context");
     if (abilityRecovery_ != nullptr) {
         abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(workContext));
     }
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *hint) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok && workContext != nullptr) {

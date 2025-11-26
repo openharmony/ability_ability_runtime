@@ -1380,5 +1380,20 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0200,
     abilitythread->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
 }
+
+/**
+ * @tc.number: AbilityRuntime_AttachInner_0100
+ * @tc.name: AttachInner
+ * @tc.desc: Test AttachInner function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_AttachInner_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_AttachInner_0100 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    EXPECT_NE(abilitythread, nullptr);
+    abilitythread->AttachInner(nullptr, nullptr, nullptr);
+    EXPECT_NE(abilitythread->abilityImpl_, nullptr);
+    GTEST_LOG_(INFO) << "AbilityRuntime_AttachInner_0100 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
