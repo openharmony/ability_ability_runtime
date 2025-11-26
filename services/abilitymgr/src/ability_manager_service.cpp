@@ -1166,7 +1166,7 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
     return ERR_OK;
 }
 
-void AbilityManagerService::CheckExtensionRateLimit(const std::string &targetName)
+void AbilityManagerService::CheckExtensionRateLimit(const Want &want)
 {
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return;
@@ -1190,7 +1190,7 @@ void AbilityManagerService::CheckExtensionRateLimit(const std::string &targetNam
         return;
     }
     EventInfo eventInfo;
-    eventInfo.abilityName = targetName;
+    eventInfo.abilityName = want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName();
     eventInfo.callerBundleName = callerBundleName;
     eventInfo.moduleName = "ReachLimit";
     eventInfo.extensionType = limitResult.triggeredLimit;
@@ -3808,7 +3808,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     TAG_LOGI(AAFwkTag::SERVICE_EXT,
         "Start extension ability come, bundlename: %{public}s, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    CheckExtensionRateLimit(want.GetElement().GetAbilityName() + "/" + want.GetElement().GetAbilityName());
+    CheckExtensionRateLimit(want);
     if (checkSystemCaller) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
@@ -5143,7 +5143,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     XCOLLIE_TIMER_LESS_IGNORE(__PRETTY_FUNCTION__, !want.GetElement().GetDeviceID().empty());
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "element: %{public}s/%{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
-    CheckExtensionRateLimit(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
+    CheckExtensionRateLimit(want);
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE && want.HasParameter(UISERVICEHOSTPROXY_KEY)) {

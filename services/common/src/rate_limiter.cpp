@@ -64,7 +64,13 @@ bool RateLimiter::CheckReportLimit(int32_t uid, int32_t triggeredTier)
     int64_t timeBefore = currentTimeMillis - REPORT_LIMIT_INTERVAL_MS;
     auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
     timestamps.erase(timestamps.begin(), it);
-    if (timestamps.size() >= static_cast<size_t>(REPORT_MAX_LIMIT)) {
+        if (timestamps.size() >= static_cast<size_t>(REPORT_MAX_LIMIT)) {
+        if (timestamps.empty()) {
+            userTierReports.erase(triggeredTier);
+            if (userTierReports.empty()) {
+                tierReportCallMap_.erase(uid);
+            }
+        }
         return true;
     }
     timestamps.emplace_back(currentTimeMillis);

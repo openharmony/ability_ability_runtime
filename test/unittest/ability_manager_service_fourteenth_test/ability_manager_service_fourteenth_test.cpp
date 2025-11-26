@@ -1290,8 +1290,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_001, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 1;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit("test_targetName");
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
@@ -1317,8 +1320,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_002, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit("test_targetName");
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
@@ -1344,8 +1350,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit("test_targetName");
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();

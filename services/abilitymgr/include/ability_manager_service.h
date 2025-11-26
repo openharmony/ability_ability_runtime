@@ -2899,7 +2899,7 @@ private:
         bool isSendDialogResult, uint32_t specifyTokenId,
         const std::string& callerBundleName, bool isSelector, bool isFreeInstallFromService = false);
 
-    void CheckExtensionRateLimit(const std::string &targetName);
+    void CheckExtensionRateLimit(const Want &want);
 
     int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken, bool &isTargetPlugin);
 
