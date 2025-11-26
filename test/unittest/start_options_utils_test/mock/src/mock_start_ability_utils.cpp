@@ -23,5 +23,7 @@ bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> caller
     appIndex = 0;
     return true;
 }
+
+void StartAbilityUtils::SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken) {}
 }
 }
