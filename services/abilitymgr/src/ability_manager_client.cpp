@@ -355,13 +355,13 @@ ErrCode AbilityManagerClient::RequestModalUIExtension(const Want &want)
 }
 
 ErrCode AbilityManagerClient::PreloadUIExtensionAbility(
-    const Want &want, std::string &hostBundleName, int32_t requestCode, int32_t userId, int32_t hostPid)
+    const Want &want, std::string &hostBundleName, int32_t userId, int32_t hostPid, int32_t requestCode)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "elementName:%{public}s/%{public}s, hostBundleName:%{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), hostBundleName.c_str());
-    return abms->PreloadUIExtensionAbility(want, hostBundleName, requestCode, userId, hostPid);
+    return abms->PreloadUIExtensionAbility(want, hostBundleName, userId, hostPid, requestCode);
 }
 
 ErrCode AbilityManagerClient::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)

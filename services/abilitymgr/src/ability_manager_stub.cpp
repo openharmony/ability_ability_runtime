@@ -1576,10 +1576,10 @@ int AbilityManagerStub::PreloadUIExtensionAbilityInner(MessageParcel &data, Mess
         return ERR_INVALID_VALUE;
     }
     std::string hostBundleName = Str16ToStr8(data.ReadString16());
-    int32_t requestCode = data.ReadInt32();
     int32_t userId = data.ReadInt32();
     int32_t hostPid = data.ReadInt32();
-    int32_t result = PreloadUIExtensionAbility(*want, hostBundleName, requestCode, userId, hostPid);
+    int32_t requestCode = data.ReadInt32();
+    int32_t result = PreloadUIExtensionAbility(*want, hostBundleName, userId, hostPid, requestCode);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
