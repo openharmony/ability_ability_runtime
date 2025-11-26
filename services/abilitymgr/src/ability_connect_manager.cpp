@@ -2327,9 +2327,6 @@ void AbilityConnectManager::TerminateDone(const std::shared_ptr<AbilityRecord> &
 
 void AbilityConnectManager::RemoveConnectionRecordFromMap(std::shared_ptr<ConnectionRecord> connection)
 {
-    if (connection != nullptr) {
-        DecrementConnectionCountAndCleanup(connection->GetCallerPid());
-    }
     std::lock_guard lock(connectMapMutex_);
     for (auto &connectCallback : connectMap_) {
         auto &connectList = connectCallback.second;
@@ -2338,6 +2335,9 @@ void AbilityConnectManager::RemoveConnectionRecordFromMap(std::shared_ptr<Connec
             CHECK_POINTER(*connectRecord);
             TAG_LOGD(AAFwkTag::EXT, "connrecord(%{public}d)", (*connectRecord)->GetRecordId());
             connectList.remove(connection);
+            if (connection != nullptr) {
+                DecrementConnectionCountAndCleanup(connection->GetCallerPid());
+            }
             if (connectList.empty()) {
                 RemoveConnectDeathRecipient(connectCallback.first);
                 connectMap_.erase(connectCallback.first);

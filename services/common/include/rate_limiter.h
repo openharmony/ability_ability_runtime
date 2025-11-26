@@ -47,6 +47,9 @@ private:
     void CleanCallMap();
     void CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>> &callMap, std::mutex &mapLock,
         int64_t limitInterval);
+    void CleanNestedCallMap(
+        std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<int64_t>>>& nestedMap,
+        std::mutex& mapLock, int64_t limitInterval);
     int64_t CurrentTimeMillis();
 
     int64_t lastCleanTimeMillis_ = 0;
