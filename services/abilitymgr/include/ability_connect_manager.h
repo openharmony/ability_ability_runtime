@@ -771,11 +771,8 @@ private:
     std::mutex callerPidConnectionCountMapMutex_;
     std::mutex preloadUIExtRecipientMapMutex_;
     std::deque<std::map<int32_t, LoadAbilityContext>> loadAbilityQueue_;
-<<<<<<< limite_extension
     std::vector<int32_t> thresholds_ = {50, 100, 200, 500};
-=======
     std::map<int32_t, sptr<IRemoteObject::DeathRecipient>> preloadUIExtensionHostClientDeathRecipients_;
->>>>>>> master
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };
