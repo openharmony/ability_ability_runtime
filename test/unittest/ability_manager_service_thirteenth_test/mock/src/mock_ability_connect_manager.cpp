@@ -805,5 +805,22 @@ int32_t AbilityConnectManager::UnRegisterPreloadUIExtensionHostClient(int32_t ke
 {
     return 0;
 }
+
+class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
+    explicit PreloadUIExtensionHostClientDeathRecipient(PreloadUIExtensionHostClientDiedHandler handler)
+        : diedHandler_(handler)
+    {}
+    ~PreloadUIExtensionHostClientDeathRecipient() = default;
+    void OnRemoteDied(const wptr<IRemoteObject> &remote) final
+    {
+        if (diedHandler_) {
+            diedHandler_(remote);
+        }
+    }
+private:
+    PreloadUIExtensionHostClientDiedHandler diedHandler_;
+};
 }  // namespace AAFwk
 }  // namespace OHOS

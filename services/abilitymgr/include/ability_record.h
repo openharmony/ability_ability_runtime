@@ -1007,6 +1007,11 @@ public:
     bool GetPromotePriority();
 
     void PromotePriority();
+    
+    std::string GetFirstCallerBundleName()
+    {
+        return firstCallerBundleName_;
+    }
 
 protected:
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1258,6 +1263,7 @@ private:
         bool promotePriority = false;
     };
     std::shared_ptr<UIAbilityProperty> uiAbilityProperty_ = nullptr;
+    std::string firstCallerBundleName_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

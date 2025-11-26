@@ -156,13 +156,14 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
 
     auto identity = IPCSkeleton::ResetCallingIdentity();
     auto startAbilityTask = [imp = shared_from_this(), request, userId, identity]
-        (const std::string& bundle, const std::string& abilityName) mutable {
+        (const std::string& bundle, const std::string& abilityName, int32_t appIndex) mutable {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "callback");
 
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
 
         AAFwk::Want targetWant = request.want;
+        targetWant.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
         targetWant.SetElementName(bundle, abilityName);
         return imp->CallStartAbilityInner(userId, targetWant, request, request.callType);
     };
@@ -255,7 +256,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         if (!IsActionImplicitStart(request.want, genReqParam.findDefaultApp)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "ImplicitQueryInfos success,target ability: %{public}s",
                 info.abilityName.data());
-            return IN_PROCESS_CALL(startAbilityTask(info.bundleName, info.abilityName));
+            return IN_PROCESS_CALL(startAbilityTask(info.bundleName, info.abilityName, info.appIndex));
         }
     }
 
@@ -975,7 +976,7 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
     dialogAppInfo.bundleIconId = param.info.applicationInfo.iconId;
     dialogAppInfo.bundleLabelId = param.info.applicationInfo.labelId;
     dialogAppInfo.visible = param.info.visible;
-    dialogAppInfo.appIndex = param.info.applicationInfo.appIndex;
+    dialogAppInfo.appIndex = param.info.appIndex;
     dialogAppInfo.multiAppMode = param.info.applicationInfo.multiAppMode;
     dialogAppInfo.isAppLink = (param.info.linkType == AppExecFwk::LinkType::APP_LINK);
     dialogAppInfos.emplace_back(dialogAppInfo);

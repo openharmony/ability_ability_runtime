@@ -82,6 +82,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     }
 
     napi_value globalObj = nullptr;
+    HandleScope handleScope(reinterpret_cast<napi_env>(nativeEngine));
     napi_get_global(reinterpret_cast<napi_env>(nativeEngine), &globalObj);
     if (globalObj == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null globalObj");
