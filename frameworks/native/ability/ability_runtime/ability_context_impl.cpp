@@ -269,7 +269,7 @@ ErrCode AbilityContextImpl::StartAbilityWithAccount(
 
 ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, int requestCode, RuntimeTask&& task)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    TAG_LOGI(AAFwkTag::CONTEXT, "AMC, ForResult code:%{public}d", requestCode);
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode, -1);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
@@ -282,7 +282,7 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, int r
 ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
     const AAFwk::Want& want, const int accountId, int requestCode, RuntimeTask&& task)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "accountId:%{private}d", accountId);
+    TAG_LOGI(AAFwkTag::CONTEXT, "AMC, ForResult code:%{public}d, userId:%{public}d", requestCode, accountId);
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode, accountId);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
@@ -758,6 +758,18 @@ ErrCode AbilityContextImpl::RestoreWindowStage(napi_env env, napi_value contentS
     napi_ref value = nullptr;
     napi_create_reference(env, contentStorage, 1, &value);
     contentStorage_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(value));
+    return ERR_OK;
+}
+
+ErrCode AbilityContextImpl::RestoreWindowStage(void *contentStorage)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage called");
+    if (isHook_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage is hook module");
+        return ERR_NOT_SUPPORTED;
+    }
+    std::lock_guard lock(contentStorageMutex_);
+    etsContentStorage_ = contentStorage;
     return ERR_OK;
 }
 
@@ -1648,7 +1660,7 @@ ErrCode AbilityContextImpl::AddCompletionHandlerForAtomicService(const std::stri
 }
 
 ErrCode AbilityContextImpl::AddCompletionHandlerForOpenLink(const std::string &requestId,
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
 {
     if (onRequestSucc == nullptr || onRequestFail == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "either func is null");

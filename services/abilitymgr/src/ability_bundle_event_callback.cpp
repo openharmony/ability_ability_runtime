@@ -126,14 +126,8 @@ void AbilityBundleEventCallback::HandleRemoveUriPermission(uint32_t tokenId)
 void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid,
     const std::string &moduleName, bool isPlugin)
 {
-    wptr<AbilityBundleEventCallback> weakThis = this;
-    auto task = [weakThis, bundleName, uid, moduleName, isPlugin]() {
-        sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
-        if (sharedThis == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "sharedThis is nullptr.");
-            return;
-        }
-        sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid, moduleName, isPlugin);
+    auto task = [bundleName, uid, moduleName, isPlugin]() {
+        AbilityEventUtil::HandleModuleInfoUpdated(bundleName, uid, moduleName, isPlugin);
     };
     taskHandler_->SubmitTask(task);
 }

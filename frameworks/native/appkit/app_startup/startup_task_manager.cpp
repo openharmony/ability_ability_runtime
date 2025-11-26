@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+
 StartupTaskManager::StartupTaskManager(uint32_t startupTaskManagerId,
     std::map<std::string, std::shared_ptr<StartupTask>> tasks)
     : startupTaskManagerId_(startupTaskManagerId), tasks_(std::move(tasks))
@@ -50,6 +51,11 @@ int32_t StartupTaskManager::AddTask(const std::shared_ptr<StartupTask> &task)
 void StartupTaskManager::SetConfig(const std::shared_ptr<StartupConfig> &config)
 {
     config_ = config;
+}
+
+std::map<std::string, std::shared_ptr<StartupTask>> StartupTaskManager::GetStartupTasks()
+{
+    return tasks_;
 }
 
 size_t StartupTaskManager::GetStartupTaskCount() const
@@ -192,23 +198,24 @@ void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeRefer
         if (iter.second == nullptr) {
             continue;
         }
-        if (iter.second->GetType() != JsStartupTask::TASK_TYPE) {
+        if (iter.second->GetType() != AppStartupTask::TASK_TYPE_JS &&
+            iter.second->GetType() != AppStartupTask::TASK_TYPE_ETS) {
             continue;
         }
-        std::shared_ptr<JsStartupTask> jsStartupTask = std::static_pointer_cast<JsStartupTask>(iter.second);
-        if (jsStartupTask == nullptr) {
-            TAG_LOGE(AAFwkTag::STARTUP, "null jsStartupTask: %{public}s", iter.first.c_str());
-            continue;
-        }
-        if (updateAll || jsStartupTask->GetModuleType() == AppExecFwk::ModuleType::SHARED) {
-            jsStartupTask->UpdateContextRef(contextJsRef);
+        std::shared_ptr<AppStartupTask> appStartupTask = std::static_pointer_cast<AppStartupTask>(iter.second);
+        if (updateAll || appStartupTask->GetModuleType() == AppExecFwk::ModuleType::SHARED) {
+            appStartupTask->UpdateContextRef(contextJsRef);
         }
     }
 }
-
 void StartupTaskManager::SetTimeoutCallback(const std::function<void()>& callback)
 {
     timeoutCallback_ = callback;
+}
+
+uint32_t StartupTaskManager::GetStartupTaskManagerId() const
+{
+    return startupTaskManagerId_;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

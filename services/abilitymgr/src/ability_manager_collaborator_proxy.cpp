@@ -626,6 +626,40 @@ int32_t AbilityManagerCollaboratorProxy::UpdateCallerIfNeed(Want &want)
     return NO_ERROR;
 }
 
+int32_t AbilityManagerCollaboratorProxy::RemoveCallerIfNeed(Want &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::REMOVE_CALLER_IF_NEED,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update caller error:%{public}d", ret);
+        return ret;
+    }
+    ret = reply.ReadInt32();
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update caller failed:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
+    if (!wantInfo) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    want = *wantInfo;
+    return NO_ERROR;
+}
+
 int32_t AbilityManagerCollaboratorProxy::NotifyKillProcesses(const std::string &bundleName, int32_t userId)
 {
     MessageParcel data;
@@ -748,16 +782,9 @@ int32_t AbilityManagerCollaboratorProxy::NotifyGrantUriPermissionEnd(const std::
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
         return ERR_INVALID_OPERATION;
     }
-    int32_t uriCount = checkResults.size();
-    if (!data.WriteInt32(uriCount)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uriCount failed");
+    if (!data.WriteBoolVector(checkResults)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write checkResults failed");
         return ERR_INVALID_OPERATION;
-    }
-    for (int32_t i = 0; i < uriCount; i++) {
-        if (!data.WriteBool(checkResults[i])) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write check result failed");
-            return ERR_INVALID_OPERATION;
-        }
     }
     int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_END, data, reply, option);
     if (ret != NO_ERROR) {

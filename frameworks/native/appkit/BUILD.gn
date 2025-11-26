@@ -141,10 +141,12 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app_startup/preload_so_startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/preload_system_so_startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_config.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_config_instance.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_listener.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task_dispatcher.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_task_instance.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task_result.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_topologysort.cpp",
@@ -152,8 +154,8 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/dfr/appfreeze_inner.cpp",
     "${ability_runtime_native_path}/appkit/dfr/appfreeze_state.cpp",
     "${ability_runtime_native_path}/appkit/dfr/dump_process_helper.cpp",
-    "${ability_runtime_native_path}/appkit/dfr/watchdog.cpp",
     "${ability_runtime_native_path}/appkit/dfr/sleep_clean.cpp",
+    "${ability_runtime_native_path}/appkit/dfr/watchdog.cpp",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -212,6 +214,7 @@ ohos_shared_library("appkit_native") {
     "hitrace:hitrace_meter",
     "i18n:preferred_language",
     "init:libbegetutil",
+    "input:libmmi-client",
     "ipc:ipc_capi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
@@ -367,6 +370,7 @@ ohos_shared_library("ability_stage_ani") {
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
   ]
 
   configs = []
@@ -376,6 +380,12 @@ ohos_shared_library("ability_stage_ani") {
   sources = [
     "${ability_runtime_native_path}/appkit/ability_runtime/app/ets_ability_stage.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/app/ets_ability_stage_context.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/app/stage_context_transfer.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/app/startup_task_utils.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/ets_startup_config.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/ets_startup_task.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/ets_startup_task_executor.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/ets_startup_task_result.cpp",
   ]
   cflags = []
 
@@ -385,9 +395,12 @@ ohos_shared_library("ability_stage_ani") {
     "${ability_runtime_abilitymgr_path}/:abilityms",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/ani_base_context:ani_base_context",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
@@ -425,6 +438,7 @@ ohos_shared_library("ability_stage_ani") {
     "ipc:ipc_single",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -441,6 +455,7 @@ ohos_shared_library("app_context") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -457,6 +472,7 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/bindable_sub_thread.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/interop_object_instance.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/js_ability_lifecycle_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",

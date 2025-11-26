@@ -42,7 +42,7 @@ ErrCode ExtensionContext::AddCompletionHandlerForAtomicService(const std::string
 }
 
 ErrCode ExtensionContext::AddCompletionHandlerForOpenLink(const std::string &requestId,
-    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
 {
     return ERR_OK;
 }

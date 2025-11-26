@@ -174,6 +174,8 @@ public:
 
     virtual ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) = 0;
 
+    virtual ErrCode RestoreWindowStage(void *contentStorage) = 0;
+
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
@@ -285,6 +287,13 @@ public:
      * @return Returns the ContentStorage.
      */
     virtual std::unique_ptr<NativeReference>& GetContentStorage() = 0;
+
+    /**
+     * @brief Get EtsContentStorage.
+     *
+     * @return Returns the ContentStorage.
+     */
+    virtual void *GetEtsContentStorage() = 0;
 
     /**
      * call function by callback object
@@ -517,7 +526,7 @@ public:
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) = 0;
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail) = 0;
 
     virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions) = 0;

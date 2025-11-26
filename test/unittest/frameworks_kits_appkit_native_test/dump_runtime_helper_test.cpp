@@ -72,6 +72,63 @@ HWTEST_F(DumpRuntimeHelperTest, DumpJsHeap_0100, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number: DumpCjHeap_0100
+ * @tc.name: DumpCjHeap
+ * @tc.desc: Test whether DumpCjHeap and are called normally.
+ */
+HWTEST_F(DumpRuntimeHelperTest, DumpCjHeap_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0100 start";
+    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
+    EXPECT_NE(application, nullptr);
+    OHOS::AppExecFwk::CjHeapDumpInfo info;
+    info.pid = 1;
+    info.needGc = false;
+    info.needSnapshot = true;
+    auto helper = std::make_shared<DumpRuntimeHelper>(application);
+    helper->DumpCjHeap(info);
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0100 end";
+}
+
+/**
+ * @tc.number: DumpCjHeap_0200
+ * @tc.name: DumpCjHeap
+ * @tc.desc: Test whether DumpCjHeap and are called normally.
+ */
+HWTEST_F(DumpRuntimeHelperTest, DumpCjHeap_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0200 start";
+    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
+    EXPECT_NE(application, nullptr);
+    OHOS::AppExecFwk::CjHeapDumpInfo info;
+    info.pid = 1;
+    info.needGc = true;
+    info.needSnapshot = false;
+    auto helper = std::make_shared<DumpRuntimeHelper>(application);
+    helper->DumpCjHeap(info);
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0200 end";
+}
+
+/**
+ * @tc.number: DumpCjHeap_0300
+ * @tc.name: DumpCjHeap
+ * @tc.desc: Test whether DumpCjHeap and are called normally.
+ */
+HWTEST_F(DumpRuntimeHelperTest, DumpCjHeap_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0300 start";
+    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
+    EXPECT_NE(application, nullptr);
+    OHOS::AppExecFwk::CjHeapDumpInfo info;
+    info.pid = 1;
+    info.needGc = false;
+    info.needSnapshot = false;
+    auto helper = std::make_shared<DumpRuntimeHelper>(application);
+    helper->DumpCjHeap(info);
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpCjHeap_0300 end";
+}
+
+/**
  * @tc.number: CheckOomdumpSwitch_0100
  * @tc.name: CheckOomdumpSwitch
  * @tc.desc: Test the function of CheckOomdumpSwitch.
@@ -99,13 +156,13 @@ protected:
 
     void SetUp() override
     {
-        std::string testDir = "/data/local/tmp/test_dir";
+        std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
         RemoveTestDir(testDir);
     }
 
     void TearDown() override
     {
-        std::string testDir = "/data/local/tmp/test_dir";
+        std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
         RemoveTestDir(testDir);
     }
 
@@ -139,7 +196,7 @@ HWTEST_F(CreateDirTest, CreateDir_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "CreateDirTest CreateDir_0100 start";
 
-    std::string testDir = "/data/local/tmp/test_dir";
+    std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
     CreateTestDir(testDir);
     EXPECT_TRUE(DumpRuntimeHelper::IsFileExists(testDir));
     EXPECT_TRUE(DumpRuntimeHelper::CreateDir(testDir));
@@ -156,7 +213,7 @@ HWTEST_F(CreateDirTest, CreateDir_0200, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "CreateDirTest CreateDir_0200 start";
 
-    std::string testDir = "/data/local/tmp/test_dir";
+    std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
     RemoveTestDir(testDir);
     EXPECT_FALSE(DumpRuntimeHelper::IsFileExists(testDir));
     EXPECT_TRUE(DumpRuntimeHelper::CreateDir(testDir));

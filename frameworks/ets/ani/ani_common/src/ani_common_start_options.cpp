@@ -24,6 +24,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr const char *APP_LINKING_ONLY = "appLinkingOnly";
+constexpr const char *HIDE_FAILURE_TIP_DIALOG = "hideFailureTipDialog";
+}
 
 bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions)
 {
@@ -166,6 +170,12 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
     if (GetFieldBoolByName(env, param, "windowFocused", windowFocused)) {
         TAG_LOGD(AAFwkTag::ANI, "windowFocused:%{public}hhu", windowFocused);
         startOptions.SetWindowFocused(windowFocused);
+    }
+
+    bool hideStartWindow = false;
+    if (GetFieldBoolByName(env, param, "hideStartWindow", hideStartWindow)) {
+        TAG_LOGD(AAFwkTag::ANI, "hideStartWindow:%{public}hhu", hideStartWindow);
+        startOptions.SetHideStartWindow(hideStartWindow);
     }
 
     if (!SetSupportWindowModes(env, param, startOptions)) {
@@ -314,6 +324,41 @@ bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want
         want.SetFlags(flags);
     }
     return true;
+}
+
+void UnWrapOpenLinkOptions(
+    ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::ANI, "UnWrapOpenLinkOptions");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "env is null");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref paramRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &paramRef)) == ANI_OK) {
+        AAFwk::WantParams wantParam;
+        if (AppExecFwk::UnwrapWantParams(env, paramRef, wantParam)) {
+            want.SetParams(wantParam);
+        } else {
+            TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
+        }
+    }
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, APP_LINKING_ONLY, &paramRef)) == ANI_OK) {
+        bool appLinkingOnly = false;
+        AppExecFwk::GetBooleanPropertyObject(env, optionsObj, APP_LINKING_ONLY, appLinkingOnly);
+        openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
+        want.SetParam(std::string(APP_LINKING_ONLY), appLinkingOnly);
+    }
+    if (!want.HasParameter(std::string(APP_LINKING_ONLY))) {
+        want.SetParam(std::string(APP_LINKING_ONLY), false);
+    }
+
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, HIDE_FAILURE_TIP_DIALOG, &paramRef)) == ANI_OK) {
+        bool hideFailureTipDialog = false;
+        AppExecFwk::GetBooleanPropertyObject(env, optionsObj, HIDE_FAILURE_TIP_DIALOG, hideFailureTipDialog);
+        openLinkOptions.SetHideFailureTipDialog(hideFailureTipDialog);
+    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -52,7 +52,7 @@ int MockServiceAbilityManagerService::StartAbilityAsCaller(
 }
 
 int MockServiceAbilityManagerService::StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     GTEST_LOG_(INFO) << "MockServiceAbilityManagerService::StartAbilityByCall begain";
     if (!connect) {

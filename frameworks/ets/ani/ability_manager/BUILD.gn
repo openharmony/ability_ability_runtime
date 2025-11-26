@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("ability_manager_ani_kit") {
+  use_exceptions = true
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -42,6 +44,8 @@ ohos_shared_library("ability_manager_ani_kit") {
     "./src/ets_ability_foreground_state_observer.cpp",
     "./src/ets_ability_manager.cpp",
     "./src/ets_ability_manager_utils.cpp",
+    "./src/ets_preload_ui_extension_callback_client.cpp",
+    "./src/ets_query_erms_observer.cpp",
   ]
 
   cflags = []
@@ -56,16 +60,20 @@ ohos_shared_library("ability_manager_ani_kit") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
+    "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
     "runtime_core:ani",

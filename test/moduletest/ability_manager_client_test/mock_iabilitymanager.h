@@ -154,7 +154,8 @@ public:
     {
         return 0;
     }
-    int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) override
+    int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillProcess") override
     {
         return 0;
     }
@@ -281,7 +282,8 @@ public:
         return 0;
     }
     int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false) override
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false,
+        bool promotePriority = false) override
     {
         return 0;
     }

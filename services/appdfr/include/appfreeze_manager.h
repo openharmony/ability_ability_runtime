@@ -96,7 +96,7 @@ public:
     int AppfreezeHandle(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow = FreezeUtil::LifecycleFlow());
-    std::string WriteToFile(const std::string& fileName, std::string& content);
+    std::string WriteToFile(const std::string& fileName, const std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
     bool IsProcessDebug(int32_t pid, std::string bundleName);
     bool IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& errorName);
@@ -110,6 +110,10 @@ public:
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     bool CheckInBackGround(const FaultData &faultData);
     bool CheckAppfreezeHappend(int32_t pid, const std::string& eventName);
+    bool IsBetaVersion();
+    void InsertKillThread(int32_t killState, int32_t pid, int32_t uid, const std::string& bundleName);
+    bool IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,
+        const std::string& eventName);
 
 private:
     struct PeerBinderInfo {
@@ -129,6 +133,11 @@ private:
         int32_t eventTid;
         int32_t pid;
         int layer;
+    };
+
+    struct AppFreezeKillInfo {
+        int killState = 0;
+        int64_t occurTime = 0;
     };
 
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
@@ -165,8 +174,12 @@ private:
         uint64_t dumpFinishTime, const std::string& dumpResult);
     std::string ParseDecToHex(uint64_t id);
     std::string GetHitraceInfo();
+    AppFaultDataBySA GenerateFaultDataBySA(const ParamInfo& info, const FreezeUtil::LifecycleFlow& flow);
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
+    bool RemoveOldKillInfo();
+    bool CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName);
+    std::string GetCatcherStack(const std::string& fileName, const std::string& catcherStack);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
@@ -183,6 +196,8 @@ private:
     static std::string appfreezeInfoPath_;
     std::mutex freezeMapMutex_;
     std::map<int32_t, std::map<std::string, AppfreezeEventRecord>> freezeEventMap_;
+    std::mutex freezeKillThreadMutex_;
+    std::map<std::string, AppFreezeKillInfo> freezeKillThreadMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

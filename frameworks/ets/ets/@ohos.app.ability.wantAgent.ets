@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import Want from '@ohos.app.ability.Want';
 import { WantAgentInfo as _WantAgentInfo } from 'wantAgent.wantAgentInfo';
 import { LocalWantAgentInfo as _LocalWantAgentInfo } from 'wantAgent.wantAgentInfo';
 import { TriggerInfo as _TriggerInfo } from 'wantAgent.triggerInfo';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import { AbilityUtils } from './utils/AbilityUtils';
+import Context from 'application.Context';
+
+const ERROR_CODE_INVALID_PARAM: int = 401;
+
 
 namespace wantAgent {
   loadLibraryWithPermissionCheck("aniwantagent.z", "@ohos.app.ability.wantAgent");
@@ -71,8 +76,13 @@ namespace wantAgent {
   native function nativeGetWantAgent(agent: WantAgentInfo, callback: AsyncCallbackWrapper<WantAgent>): void;
   native function nativeIsLocalWantAgent(agent: WantAgent): boolean;
   native function nativeCreateLocalWantAgent(info: LocalWantAgentInfo): WantAgent;
+  native function nativeTriggerCheck(agent: WantAgent, triggerInfo: TriggerInfo): void;
+  native function nativeTriggerAsync(agent: WantAgent, triggerInfo: TriggerInfo, context: Context, callback: AsyncCallbackWrapper<CompleteData>): void;
 
   export function getBundleName(agent: WantAgent, callback: AsyncCallback<string>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent failed. Agent must be a WantAgent.');
+    }
     let call = new AsyncCallbackWrapper<string>(callback);
     taskpool.execute((): void => {
       try {
@@ -82,8 +92,36 @@ namespace wantAgent {
       }
     });
   }
+  export native function nativetriggerAsyncCheck(agent: WantAgent, triggerInfo: TriggerInfo, context: Context): void;
+  export function triggerAsync(agent: WantAgent, triggerInfo: TriggerInfo, context: Context): Promise<CompleteData> {
+    nativetriggerAsyncCheck(agent, triggerInfo, context);
+    return new Promise<CompleteData>((resolve: (data: CompleteData) => void,
+      reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<CompleteData>((err: BusinessError | null, data: CompleteData | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as CompleteData);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        try {
+          nativeTriggerAsync(agent, triggerInfo, context, call);
+        } catch (err: BusinessError) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  export function setWantAgentMultithreading(isMultithreadingSupported: boolean): void {
+ 
+  }
 
   export function getBundleName(agent: WantAgent): Promise<string> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent failed. Agent must be a WantAgent.');
+    }
     return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined) => {
         if (err == null || err.code == 0) {
@@ -103,6 +141,9 @@ namespace wantAgent {
   }
 
   export function getUid(agent: WantAgent, callback: AsyncCallback<int>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent error. Agent must be a WantAgent.');
+    }
     let call = new AsyncCallbackWrapper<int>(callback);
     taskpool.execute((): void => {
       try {
@@ -114,6 +155,9 @@ namespace wantAgent {
   }
 
   export function getUid(agent: WantAgent): Promise<int> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent error. Agent must be a WantAgent.');
+    }
     return new Promise<int>((resolve: (data: int) => void, reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<int>((err: BusinessError | null, data: int | undefined) => {
         if (err == null || err.code == 0) {
@@ -133,6 +177,9 @@ namespace wantAgent {
   }
 
   export function getWant(agent: WantAgent, callback: AsyncCallback<Want>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse wantAgent failed! Agent must be a WantAgent!');
+    }
     let call = new AsyncCallbackWrapper<Want>(callback);
     taskpool.execute((): void => {
       try {
@@ -144,6 +191,9 @@ namespace wantAgent {
   }
 
   export function getWant(agent: WantAgent): Promise<Want> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse wantAgent failed! Agent must be a WantAgent!');
+    }
     return new Promise<Want>((resolve: (data: Want) => void, reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<Want>((err: BusinessError | null, data: Want | undefined) => {
         if (err == null || err.code == 0) {
@@ -163,6 +213,9 @@ namespace wantAgent {
   }
 
   export function cancel(agent: WantAgent, callback: AsyncCallback<void>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent error. Agent must be a WantAgent.');
+    }
     let call = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       try {
@@ -174,6 +227,9 @@ namespace wantAgent {
   }
 
   export function cancel(agent: WantAgent): Promise<void> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgent error. Agent must be a WantAgent.');
+    }
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
@@ -193,6 +249,7 @@ namespace wantAgent {
   }
 
   export function trigger(agent: WantAgent, triggerInfo: TriggerInfo, callback?: AsyncCallback<CompleteData>): void {
+    nativeTriggerCheck(agent, triggerInfo);
     taskpool.execute((): void => {
       if (callback == undefined) {
         nativeTrigger(agent, triggerInfo);
@@ -208,6 +265,12 @@ namespace wantAgent {
   }
 
   export function equal(agent: WantAgent, otherAgent: WantAgent, callback: AsyncCallback<boolean>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgentFirst failed. Agent must be a WantAgent.');
+    }
+    if (!(otherAgent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgentSceond failed. OtherAgent must be a WantAgent.');
+    }
     let call = new AsyncCallbackWrapper<boolean>(callback);
     taskpool.execute((): void => {
       try {
@@ -219,6 +282,12 @@ namespace wantAgent {
   }
 
   export function equal(agent: WantAgent, otherAgent: WantAgent): Promise<boolean> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgentFirst failed. Agent must be a WantAgent.');
+    }
+    if (!(otherAgent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse pWantAgentSceond failed. OtherAgent must be a WantAgent.');
+    }
     return new Promise<boolean>((resolve: (data: boolean) => void,
       reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined) => {
@@ -270,6 +339,9 @@ namespace wantAgent {
   }
 
   export function getOperationType(agent: WantAgent, callback: AsyncCallback<int>): void {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse wantAgent failed! Agent must be a WantAgent.');
+    }
     let call = new AsyncCallbackWrapper<int>(callback);
     taskpool.execute((): void => {
       try {
@@ -281,6 +353,9 @@ namespace wantAgent {
   }
 
   export function getOperationType(agent: WantAgent): Promise<int> {
+    if (!(agent instanceof WantAgentCls)) {
+      throw AbilityUtils.createBusinessError(ERROR_CODE_INVALID_PARAM, 'Parse wantAgent failed! Agent must be a WantAgent.');
+    }
     return new Promise<int>((resolve: (data: int) => void, reject: (err: BusinessError) => void): void => {
       let call = new AsyncCallbackWrapper<int>((err: BusinessError | null, data: int | undefined) => {
         if (err == null || err.code == 0) {
@@ -334,7 +409,7 @@ namespace wantAgent {
     want: Want;
     finalCode: int;
     finalData: string;
-    extraInfo?: Record<string, Object>;
+    extraInfo?: Record<string, RecordData>;
   }
 
   class CompleteDataImpl implements CompleteData {
@@ -342,7 +417,7 @@ namespace wantAgent {
     public want: Want;
     public finalCode: int;
     public finalData: string;
-    public extraInfo?: Record<string, Object>;
+    public extraInfo?: Record<string, RecordData>;
   }
 
   export type TriggerInfo = _TriggerInfo;

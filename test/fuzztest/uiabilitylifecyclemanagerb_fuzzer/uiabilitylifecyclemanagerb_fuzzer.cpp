@@ -126,7 +126,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     sptr<SessionInfo> sessionInfo;
     uIAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, boolParam);
     AppExecFwk::ElementName element;
-    uIAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    uIAbilityLifecycleManager->GetAbilityRecordsByName(element, int32Param);
     uIAbilityLifecycleManager->GetAbilityRecordByToken(token);
 
     #ifdef SUPPORT_GRAPHICS

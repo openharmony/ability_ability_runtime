@@ -33,9 +33,9 @@ public:
 
     ResultType GetResultType() const override;
 
-    const std::shared_ptr<NativeReference>& GetJsStartupResultRef() const;
+    virtual const std::shared_ptr<NativeReference> GetJsStartupResultRef();
 
-private:
+protected:
     std::shared_ptr<NativeReference> jsStartupResultRef_;
 };
 } // namespace AbilityRuntime

@@ -55,6 +55,7 @@ ohos_fuzztest("ConnectAbilityFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_manager",
     "appspawn:appspawn_client",

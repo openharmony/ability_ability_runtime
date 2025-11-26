@@ -75,7 +75,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_001, TestSize
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
     int recId = abilityRecord_->GetRecordId();
@@ -123,7 +123,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_002, TestSize
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
     int recId = abilityRecord_->GetRecordId();
@@ -171,7 +171,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_003, TestSize
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
     int recId = abilityRecord_->GetRecordId();
@@ -219,7 +219,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_004, TestSize
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
     int recId = abilityRecord_->GetRecordId();
@@ -267,7 +267,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_001, TestSize.Le
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     int recId = abilityRecord_->GetRecordId();
     EXPECT_EQ(rec, nullptr);
@@ -307,7 +307,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_002, TestSize.Le
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     int recId = abilityRecord_->GetRecordId();
     EXPECT_EQ(rec, nullptr);
@@ -347,7 +347,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_003, TestSize.Le
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     int recId = abilityRecord_->GetRecordId();
     EXPECT_EQ(rec, nullptr);
@@ -387,7 +387,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_004, TestSize.Le
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     int recId = abilityRecord_->GetRecordId();
     EXPECT_EQ(rec, nullptr);
@@ -428,7 +428,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_005, TestSize.Le
     ElementName element("", "", "ability", "");
     want.SetElement(element);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     int recId = abilityRecord_->GetRecordId();
     EXPECT_EQ(rec, nullptr);
@@ -467,7 +467,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
     int recId1 = abilityRecord1->GetRecordId();
@@ -477,7 +477,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
     applicationInfo2.accessTokenId = 2;
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -487,7 +487,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
 
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo1.accessTokenId);
@@ -514,7 +514,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -524,7 +524,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
     applicationInfo2.accessTokenId = 2;
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
     int recId2 = abilityRecord2->GetRecordId();
@@ -534,7 +534,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 2;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
 
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo2.accessTokenId);
@@ -562,7 +562,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -573,7 +573,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level
     applicationInfo2.accessTokenId = 2;
 
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -583,7 +583,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     int recId3 = abilityRecord3->GetRecordId();
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
     EXPECT_EQ(rec, nullptr);
@@ -595,7 +595,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level
     applicationInfo4.accessTokenId = 3;
 
     auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
-    abilityRecord4->Init();
+    abilityRecord4->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
     EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
@@ -623,7 +623,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
     int recId1 = abilityRecord1->GetRecordId();
@@ -633,7 +633,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
     applicationInfo2.accessTokenId = 2;
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -643,7 +643,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
 
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo1.accessTokenId);
@@ -672,7 +672,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_005, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -683,7 +683,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_005, TestSize.Level
     applicationInfo2.accessTokenId = 2;
 
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -693,7 +693,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_005, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     int recId3 = abilityRecord3->GetRecordId();
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
     EXPECT_EQ(rec, nullptr);
@@ -705,7 +705,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_005, TestSize.Level
     applicationInfo4.accessTokenId = 3;
 
     auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
-    abilityRecord4->Init();
+    abilityRecord4->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
     EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
@@ -734,7 +734,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_006, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -745,7 +745,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_006, TestSize.Level
     applicationInfo2.accessTokenId = 2;
 
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -755,7 +755,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_006, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     int recId3 = abilityRecord3->GetRecordId();
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
     EXPECT_EQ(rec, nullptr);
@@ -767,7 +767,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_006, TestSize.Level
     applicationInfo4.accessTokenId = 3;
 
     auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
-    abilityRecord4->Init();
+    abilityRecord4->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
     EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
@@ -796,7 +796,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_007, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -807,7 +807,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_007, TestSize.Level
     applicationInfo2.accessTokenId = 2;
 
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -817,7 +817,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_007, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     int recId3 = abilityRecord3->GetRecordId();
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
     EXPECT_EQ(rec, nullptr);
@@ -829,7 +829,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_007, TestSize.Level
     applicationInfo4.accessTokenId = 3;
 
     auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
-    abilityRecord4->Init();
+    abilityRecord4->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
     EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
@@ -858,7 +858,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_008, TestSize.Level
     applicationInfo1.accessTokenId = 1;
     Want want;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
     EXPECT_EQ(rec, nullptr);
 
@@ -869,7 +869,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_008, TestSize.Level
     applicationInfo2.accessTokenId = 2;
 
     auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
-    abilityRecord2->Init();
+    abilityRecord2->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
     EXPECT_EQ(rec, nullptr);
 
@@ -879,7 +879,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_008, TestSize.Level
     OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
     applicationInfo3.accessTokenId = 3;
     auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
-    abilityRecord3->Init();
+    abilityRecord3->Init(AbilityRequest());
     int recId3 = abilityRecord3->GetRecordId();
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
     EXPECT_EQ(rec, nullptr);
@@ -891,7 +891,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_008, TestSize.Level
     applicationInfo4.accessTokenId = 3;
 
     auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
-    abilityRecord4->Init();
+    abilityRecord4->Init(AbilityRequest());
     rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
     EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
     EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
@@ -919,7 +919,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndRemoveTest_001, TestS
     applicationInfo.accessTokenId = 0;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord_);
@@ -934,7 +934,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndRemoveTest_001, TestS
     OHOS::AppExecFwk::ApplicationInfo applicationInfo1;
     applicationInfo.accessTokenId = 1;
     auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord1->Init();
+    abilityRecord1->Init(AbilityRequest());
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord1);
 }
 
@@ -954,7 +954,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByToken_001, TestSize.L
     applicationInfo.accessTokenId = 0;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
@@ -989,7 +989,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerGetAbilityList_001, TestSiz
     applicationInfo.accessTokenId = 0;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
@@ -1021,7 +1021,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindBySessionId_001, TestSi
     Want want;
     want.SetParam(Want::PARAM_ASSERT_FAULT_SESSION_ID, sessionId);
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
@@ -1056,7 +1056,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByServiceKey_001, TestS
     applicationInfo.accessTokenId = 0;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::string serviceKey = abilityRecord_->GetURI();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
@@ -1093,7 +1093,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, Tes
     applicationInfo.bundleName = abilityInfo.bundleName;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
@@ -1121,7 +1121,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerDeleteInvalidRecord_001, Te
     applicationInfo.accessTokenId = 0;
     Want want;
     auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);

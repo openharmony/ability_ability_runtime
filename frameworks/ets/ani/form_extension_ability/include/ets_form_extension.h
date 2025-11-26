@@ -51,7 +51,13 @@ public:
     sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want &want) override;
 
     void OnStop() override;
-    
+
+    bool OnShare(int64_t formId, AAFwk::WantParams &wantParams) override;
+
+    bool OnAcquireData(int64_t formId, AAFwk::WantParams &wantParams) override;
+
+    void OnFormLocationChanged(const int64_t formId, const int32_t formLocation) override;
+
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
     FormState OnAcquireFormState(const Want &want) override;

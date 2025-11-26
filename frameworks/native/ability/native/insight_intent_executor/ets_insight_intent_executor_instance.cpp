@@ -38,12 +38,12 @@ InsightIntentExecutor *CreateETSInsightIntentExecutor(Runtime &runtime)
     }
     auto handle = dlopen(ETS_ANI_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
+        TAG_LOGE(AAFwkTag::INTENT, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
     auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::INTENT, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }

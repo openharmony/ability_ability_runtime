@@ -176,7 +176,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
@@ -710,7 +710,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_002, TestSize.Leve
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto token = abilityRecord->token_;
     const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
     abilityMs->OnAbilityRequestDone(token, 0);
@@ -2094,18 +2094,19 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
     bool isSaCall = false;
     bool isImplicit = false;
     abilityRequest.abilityInfo.permissions.push_back("test1");
-
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
     isSaCall = true;
     int ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
 
     abilityRequest.abilityInfo.applicationInfo.accessTokenId = 1;
     callerTokenId = 1;
 
     ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
+    MyFlag::flag_ = 0;
 }
 
 /**
@@ -2507,7 +2508,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_002, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);
@@ -2529,7 +2530,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_003, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = nullptr;
     EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);
@@ -2551,7 +2552,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_004, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);

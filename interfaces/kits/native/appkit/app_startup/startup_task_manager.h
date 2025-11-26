@@ -42,6 +42,8 @@ public:
 
     size_t GetStartupTaskCount() const;
 
+    std::map<std::string, std::shared_ptr<StartupTask>> GetStartupTasks();
+
     int32_t Prepare();
 
     int32_t Run(const std::shared_ptr<OnCompletedCallback> &mainThreadAwaitCallback);
@@ -53,6 +55,8 @@ public:
     void UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef, bool updateAll = false);
 
     void SetTimeoutCallback(const std::function<void()>& callback);
+
+    uint32_t GetStartupTaskManagerId() const;
 
 private:
     uint32_t startupTaskManagerId_ = 0;

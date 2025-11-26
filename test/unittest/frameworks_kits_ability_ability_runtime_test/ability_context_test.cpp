@@ -203,6 +203,17 @@ public:
     {
         return ERR_OK;
     }
+
+    virtual ErrCode RestoreWindowStage(void *contentStorage)
+    {
+        return ERR_OK;
+    }
+
+    void *GetEtsContentStorage()
+    {
+        return nullptr;
+    }
+
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData)
     {
         return;
@@ -539,7 +550,7 @@ public:
     }
 
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail)
     {
         return 0;
     }

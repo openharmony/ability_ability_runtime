@@ -331,7 +331,7 @@ private:
     }
 
     bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param,
-        AAFwk::OnOpenLinkRequestFunc& onRequestSucc, AAFwk::OnOpenLinkRequestFunc& onRequestFail)
+        OnRequestResult &onRequestSucc, OnRequestResult &onRequestFail)
     {
         napi_value completionHandlerForOpenLink = AppExecFwk::GetPropertyValueByPropertyName(env, param,
             "completionHandler", napi_object);
@@ -368,8 +368,8 @@ private:
         return true;
     }
 
-    void AddCompletionHandlerForOpenLink(AAFwk::Want& want, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail)
+    void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
+    OnRequestResult &onRequestFail)
     {
         auto context = context_.lock();
         if (!context) {
@@ -403,8 +403,8 @@ private:
                 "Parse param link or openLinkOptions failed, link must be string, openLinkOptions must be options.");
             return CreateJsUndefined(env);
         }
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc;
-        AAFwk::OnOpenLinkRequestFunc onRequestFail;
+        OnRequestResult onRequestSucc;
+        OnRequestResult onRequestFail;
         if (CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object) &&
             UnwrapCompletionHandlerForOpenLink(env, info.argv[INDEX_ONE], onRequestSucc, onRequestFail)) {
             AddCompletionHandlerForOpenLink(want, onRequestSucc, onRequestFail);

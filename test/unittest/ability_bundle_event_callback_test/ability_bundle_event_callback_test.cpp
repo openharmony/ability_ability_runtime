@@ -17,7 +17,6 @@
 #define private public
 #define protected public
 #include "ability_bundle_event_callback.h"
-#include "ability_event_util.h"
 #undef private
 #undef protected
 

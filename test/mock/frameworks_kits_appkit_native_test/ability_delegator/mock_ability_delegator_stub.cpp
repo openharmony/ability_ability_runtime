@@ -99,7 +99,7 @@ int MockAbilityDelegatorStub::UnRegisterMissionListener(const std::string& devic
 }
 
 int MockAbilityDelegatorStub::StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     return 0;
 }
@@ -298,7 +298,7 @@ int MockAbilityDelegatorStub2::UnRegisterMissionListener(const std::string& devi
 }
 
 int MockAbilityDelegatorStub2::StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     return 0;
 }

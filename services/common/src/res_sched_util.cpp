@@ -63,7 +63,7 @@ void ResSchedUtil::ReportSubHealtyPerfInfoToRSS()
 }
 
 void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
-    bool supportWarmSmartGC)
+    bool supportWarmSmartGC, int32_t preloadMode)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START;
@@ -73,7 +73,8 @@ void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, i
         { "bundleName", abilityInfo.applicationInfo.bundleName },
         { "abilityName", abilityInfo.name },
         { "pid", std::to_string(pid) },
-        { "supportWarmSmartGC", supportWarmSmartGC ? "1": "0" }
+        { "supportWarmSmartGC", supportWarmSmartGC ? "1": "0" },
+        { "preloadMode", std::to_string(preloadMode) }
     };
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, isColdStart ? 1 : 0, eventParams);
@@ -160,6 +161,24 @@ void ResSchedUtil::ReportEventToRSS(const int32_t uid, const std::string &bundle
     nlohmann::json reply;
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+#endif
+}
+
+void ResSchedUtil::PromotePriorityToRSS(int32_t callerUid, int32_t callerPid, const std::string &targetBundleName,
+    int32_t targetUid, int32_t targetPid)
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "PromotePriorityToRSS---%{public}d_%{public}d_%{public}s_%{public}d_%{public}d",
+        callerUid, callerPid, targetBundleName.c_str(), targetUid, targetPid);
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_SA_PULL_APP_IDENTIFIER;
+    std::unordered_map<std::string, std::string> eventParams {
+        { "callerUid", std::to_string(callerUid) },
+        { "callerPid", std::to_string(callerPid) },
+        { "targetBundleName", targetBundleName },
+        { "targetUid", std::to_string(targetUid) },
+        { "targetPid", std::to_string(targetPid) },
+    };
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, 0, eventParams);
 #endif
 }
 

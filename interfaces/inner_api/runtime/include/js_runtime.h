@@ -75,6 +75,7 @@ public:
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
     static void InheritPluginNamespace(const std::vector<std::string> &moduleNames);
+    static void CreatePluginDefaultNamespace(const std::string &lddictorys);
 
     static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
     JsRuntime();

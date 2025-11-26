@@ -31,6 +31,7 @@ ohos_unittest("deeplink_reserve_config_test") {
   external_deps = [
     "c_utils:utils",
     "googletest:gmock_main",
+    "json:nlohmann_json_static",
   ]
 }
 

@@ -487,9 +487,10 @@ public:
     int RequestModalUIExtension(const Want &want) override;
 
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE) override;
+        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE,
+        int32_t hostPid = DEFAULT_INVAL_VALUE) override;
 
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -950,7 +951,8 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) override;
+    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "Abilityms::KillProcess") override;
 
     /**
      * Uninstall app
@@ -1072,11 +1074,12 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
 
     /**
      * Start Ability, connect session with common ability.
@@ -1087,11 +1090,12 @@ public:
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
 
     /**
      * Start Ability for prelauch.
@@ -1172,19 +1176,13 @@ public:
     int RequestModalUIExtensionInner(Want want);
 
     int PreloadUIExtensionAbilityInner(const Want &want, std::string &bundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE);
+        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE,
+        int32_t hostPid = DEFAULT_INVAL_VALUE);
 
-    int StartAbilityForOptionWrap(
-        const Want &want,
-        const StartOptions &startOptions,
-        const sptr<IRemoteObject> &callerToken,
-        bool isPendingWantCaller,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE,
-        bool isStartAsCaller = false,
-        uint32_t callerTokenId = 0,
-        bool isImplicit = false,
-        bool isCallByShortcut = false);
+    int StartAbilityForOptionWrap(const Want &want, const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken, bool isPendingWantCaller, int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE, bool isStartAsCaller = false, uint32_t callerTokenId = 0,
+        bool isImplicit = false, bool isCallByShortcut = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
@@ -1286,7 +1284,7 @@ public:
     virtual int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info) override;
     virtual int GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info) override;
     int GetProcessRunningInfosByUserId(std::vector<AppExecFwk::RunningProcessInfo> &info, int32_t userId);
-    void GetAbilityRunningInfo(std::vector<AbilityRunningInfo> &info, std::shared_ptr<AbilityRecord> &abilityRecord);
+    void GetAbilityRunningInfo(std::vector<AbilityRunningInfo> &info, std::shared_ptr<AbilityRecord> abilityRecord);
     void GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord, const int32_t userId,
         std::vector<ExtensionRunningInfo> &info);
 
@@ -2156,7 +2154,7 @@ public:
      */
     virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                                   const std::string &moduleName,
-                                                  const std::string &hostBundleName,
+                                                  const int32_t hostPid,
                                                   int32_t &recordNum,
                                                   int32_t userId = DEFAULT_INVAL_VALUE) override;
 
@@ -2371,6 +2369,39 @@ protected:
         std::shared_ptr<AbilityRecord> targetService, bool isFromConnect);
 
     static void HandleAutoStartupReadyCallback(const char *key, const char *value, void *context);
+
+    /**
+     * UnPreload UIExtension with want, send want to ability manager service.
+     *
+     * @param extensionAbilityId The extension ability Id.
+     * @param userId The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ClearPreloadedUIExtensionAbility(
+        int32_t extensionAbilityId, int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    /**
+     * clear all Preload UIExtension with want, send want to ability manager service.
+     *
+     * @param userId The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ClearPreloadedUIExtensionAbilities(int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    /**
+     * @brief Register preload ui extension host client.
+     * @param callerToken Caller ability token.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken) override;
+
+    /**
+     * @brief UnRegister preload ui extension host client.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -3055,7 +3086,6 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    AbilityEventUtil eventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

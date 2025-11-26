@@ -117,10 +117,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     virtual void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<AppExecFwk::OHOSApplication> application,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token);
+        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc);
 
     /**
      * @brief Attach Ability Context
@@ -362,6 +363,7 @@ protected:
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
     AAFwk::LaunchParam launchParam_;
     bool securityFlag_ = false;
+    uint64_t intentId_;
 
 private:
     friend class UIAbilityImpl;
@@ -392,6 +394,13 @@ private:
 #ifdef SUPPORT_SCREEN
 public:
     uint32_t sceneFlag_ = 0;
+
+    enum CollaborateResult {
+        ACCEPT = 0,
+        REJECT = 1,
+        ON_COLLABORATE_NOT_IMPLEMENTED = 10,
+        ON_COLLABORATE_ERR = 11,
+    };
 
     /**
      * @brief Called after instantiating WindowScene.
@@ -631,7 +640,15 @@ public:
      * @brief Called when distributed system trying to collaborate remote ability.
      * @param want want with collaborative info.
      */
-    virtual void HandleCollaboration(const AAFwk::Want &want);
+    void HandleCollaboration(const AAFwk::Want &want);
+
+    /**
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
+     */
+    virtual int32_t OnCollaborate(WantParams &wantParams);
 
     /**
      * @brief Called when startAbility request failed.

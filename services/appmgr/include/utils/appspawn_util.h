@@ -34,21 +34,26 @@ constexpr const char*
     JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY = "ohos.permission.kernel.ALLOW_EXECUTABLE_FORT_MEMORY";
 constexpr const char*
     JIT_PERMISSION_DISABLE_GOTPLT_RO_PROTECTION = "ohos.permission.kernel.DISABLE_GOTPLT_RO_PROTECTION";
+constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 
-static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &applicationInfo)
+static uint64_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &applicationInfo)
 {
-    uint32_t startFlags = 0x0;
+    uint64_t startFlags = 0x0;
     if (want.GetBoolParam("coldStart", false)) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::COLD_START);
     }
 
 #ifdef WITH_DLP
     if (want.GetIntParam(DLP_PARAMS_INDEX, 0) != 0) {
-        startFlags = startFlags | (START_FLAG_BASE << StartFlags::DLP_MANAGER);
+        if (want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false)) {
+            startFlags = startFlags | (START_FLAG_BASE << StartFlags::DLP_MANAGER_READ_ONLY);
+        } else {
+            startFlags = startFlags | (START_FLAG_BASE << StartFlags::DLP_MANAGER_FULL_CONTROL);
+        }
     }
 #endif // WITH_DLP
 
-    if (applicationInfo.debug) {
+    if (applicationInfo.debug && applicationInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::DEBUGGABLE);
     }
     if (applicationInfo.asanEnabled) {
@@ -83,9 +88,9 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     return startFlags;
 }
 
-static uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
+static uint64_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
 {
-    uint32_t startFlags = BuildStartFlags(want, abilityInfo.applicationInfo);
+    uint64_t startFlags = BuildStartFlags(want, abilityInfo.applicationInfo);
 
     if (abilityInfo.extensionAbilityType == ExtensionAbilityType::BACKUP) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::BACKUP_EXTENSION);

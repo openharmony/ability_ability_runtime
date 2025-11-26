@@ -67,7 +67,7 @@ void DataAbilityRecordTest::SetUp(void)
         OHOS::AppExecFwk::ApplicationInfo applicationInfo;
         const Want want;
         abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-        abilityRecord_->Init();
+        abilityRecord_->Init(AbilityRequest());
     }
     abilityState_ = INITIAL;
 }

@@ -18,9 +18,12 @@
 
 #include <memory>
 
+#include "context.h"
+#include "runtime.h"
 #include "startup_listener.h"
 #include "startup_task_result.h"
 #include "startup_utils.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -35,6 +38,9 @@ public:
     explicit StartupConfig(const std::shared_ptr<StartupListener> &listener);
 
     StartupConfig(int32_t awaitTimeoutMs, const std::shared_ptr<StartupListener> &listener);
+
+    virtual int32_t Init(Runtime &runtime, std::shared_ptr<Context> context, const std::string &srcEntry,
+        std::shared_ptr<AAFwk::Want> want);
 
     int32_t GetAwaitTimeoutMs() const;
 

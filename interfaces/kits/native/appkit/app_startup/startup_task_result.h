@@ -27,7 +27,8 @@ class StartupTaskResult {
 public:
     enum class ResultType {
         INVALID,
-        JS
+        JS,
+        ETS
     };
 
     StartupTaskResult();

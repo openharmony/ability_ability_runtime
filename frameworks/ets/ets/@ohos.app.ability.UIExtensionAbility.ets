@@ -24,7 +24,7 @@ export default class UIExtensionAbility extends ExtensionAbility {
 
   private destroyCallbackPoint: long;
   private native nativeOnDestroyCallback(): void;
-  private callOnDestroy(): boolean {
+  public callOnDestroy(): boolean {
     let p = this.onDestroy();
     if (p instanceof Promise) {
       p.then(() => this.nativeOnDestroyCallback());

@@ -197,8 +197,6 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, tokenId: %{private}u, abilityName: %{public}s.",
-        bundleName.c_str(), accessTokenId, abilityName.c_str());
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -225,7 +223,7 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
                 abilityList.erase(std::remove(abilityList.begin(), abilityList.end(), abilityName), abilityList.end());
                 UpdateAppExitReason(accessTokenId, abilityList, exitReason, processInfo, withKillMsg);
             }
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "current bundle name: %{public}s, tokenId:%{private}u, reason: %{public}d,"
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "current bundle name: %{public}s, tokenId:%{private}u, reason: %{public}d,"
                 "  exitMsg: %{public}s, abilityName:%{public}s isSetReason:%{public}d",
                 bundleName.c_str(), accessTokenId, exitReason.reason, exitReason.exitMsg.c_str(),
                 abilityName.c_str(), isSetReason);
@@ -1006,9 +1004,13 @@ void AppExitReasonDataManager::PutAsync(const DistributedKv::Key &key, const Dis
         auto pThis = DelayedSingleton<AppExitReasonDataManager>::GetInstance();
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, PUT_TASK_NAME);
         AAFwk::RecordCostTimeUtil timeRecord(PUT_TASK_NAME);
+        if (!pThis) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null pThis");
+            return;
+        }
         std::lock_guard lock(pThis->kvStorePtrMutex_);
-        if (!pThis || !pThis->kvStorePtr_) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "null pThis or null kvStorePtr_");
+        if (!pThis->kvStorePtr_) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
             return;
         }
         auto status = pThis->kvStorePtr_->Put(key, value);

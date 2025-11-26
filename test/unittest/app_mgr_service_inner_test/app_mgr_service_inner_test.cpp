@@ -4043,12 +4043,66 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_001, TestSize.Level2)
     want.SetParam("coldStart", true);
     want.SetParam("ohos.dlp.params.index", 1);
     abilityInfo.extensionAbilityType = ExtensionAbilityType::BACKUP;
-    uint32_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
-    EXPECT_EQ(result, 7);
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << StartFlags::COLD_START);
+    flag = flag | (baseFlag << StartFlags::DLP_MANAGER_FULL_CONTROL);
+    flag = flag | (baseFlag << StartFlags::BACKUP_EXTENSION);
+    EXPECT_EQ(result, flag);
 
     TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_001 end");
 }
+
+/**
+ * @tc.name: BuildStartFlags_002
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_002, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_002 start");
+
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    AppspawnUtil::BuildStartFlags(want, abilityInfo);
+
+    want.SetParam("coldStart", false);
+    want.SetParam("ohos.dlp.params.index", 1);
+    want.SetParam("ohos.dlp.params.securityFlag", true);
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << StartFlags::DLP_MANAGER_READ_ONLY);
+    EXPECT_EQ(result, flag);
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_002 end");
+}
 #endif // WITH_DLP
+
+/**
+ * @tc.name: BuildStartFlags_003
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_003, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_003 start");
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    abilityInfo.applicationInfo.debug = true;
+    abilityInfo.applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << StartFlags::DEBUGGABLE);
+    EXPECT_EQ(result, flag);
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_003 end");
+}
 
 /**
  * @tc.name: RegisterFocusListener_001
@@ -5211,7 +5265,6 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
-    EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
     appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
 }
 

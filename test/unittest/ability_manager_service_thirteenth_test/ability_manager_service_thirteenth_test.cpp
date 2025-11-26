@@ -423,7 +423,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_003, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -494,7 +494,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_005, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
 
@@ -530,7 +530,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_006, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::BACKGROUND;
     record->isAbilityForegrounding_ = false;
@@ -568,7 +568,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_007, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = false;
@@ -606,7 +606,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_008, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -645,7 +645,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_009, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -795,7 +795,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_005,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
 
@@ -834,7 +834,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_006,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::BACKGROUND;
     record->isAbilityForegrounding_ = false;
@@ -876,7 +876,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_007,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = false;
@@ -922,7 +922,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_008,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -968,7 +968,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_009,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -1015,7 +1015,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_010,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -1061,7 +1061,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_011,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -2712,7 +2712,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, DoAbilityForeground_005, TestSize.
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
     MyStatus::GetInstance().smhGetUIAbilityManagerByUserId_ = true;

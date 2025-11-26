@@ -1402,7 +1402,6 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
         ThrowInvalidParamError(env, "Not enough params.");

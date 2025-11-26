@@ -20,9 +20,9 @@
 #include <memory>
 
 #include "ability_manager_constants.h"
-#include "ability_record.h"
 #include "iremote_object.h"
 #include "mission.h"
+#include "mission_ability_record.h"
 
 using IRemoteObject = OHOS::IRemoteObject;
 

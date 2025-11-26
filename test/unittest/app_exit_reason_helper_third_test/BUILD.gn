@@ -43,6 +43,7 @@ ohos_unittest("app_exit_reason_helper_third_test") {
     "${ability_runtime_services_path}/abilitymgr/src/mission/mission_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/mission/mission_list_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/restart_app_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_start_with_wait_observer_manager/ability_start_with_wait_observer_manager.cpp",
@@ -86,7 +87,7 @@ ohos_unittest("app_exit_reason_helper_third_test") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-      "window_manager:libdm",
+    "window_manager:libdm",
     "window_manager:libwsutils",
     "window_manager:session_manager_lite",
   ]

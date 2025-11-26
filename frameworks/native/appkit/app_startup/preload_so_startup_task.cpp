@@ -99,7 +99,6 @@ int32_t ParseOhmUrl(const std::string& ohmUrl, std::string& soName)
     return ERR_STARTUP_INVALID_VALUE;
 }
 } // namespace
-const std::string PreloadSoStartupTask::TASK_TYPE = "PreloadSo";
 
 PreloadSoStartupTask::PreloadSoStartupTask(const std::string& name, const std::string& ohmUrl, const std::string& path)
     : AppStartupTask(name), ohmUrl_(ohmUrl), path_(path)
@@ -112,7 +111,7 @@ PreloadSoStartupTask::~PreloadSoStartupTask() = default;
 
 const std::string &PreloadSoStartupTask::GetType() const
 {
-    return TASK_TYPE;
+    return AppStartupTask::TASK_TYPE_PRELOAD_SO;
 }
 
 int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback)

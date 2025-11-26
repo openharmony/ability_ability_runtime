@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #define protected public
 #include "ability_command.h"
 #undef protected
+#undef private
 #include "mock_ability_manager_stub.h"
 #define private public
 #include "ability_manager_client.h"
@@ -1071,6 +1073,7 @@ HWTEST_F(AaCommandStartTest, Aa_Command_Start_4000, Function | MediumTest | Leve
     AbilityManagerShellCommand cmd(argc, argv);
     EXPECT_EQ(cmd.ExecCommand(), STRING_INVALID_NUMBER_BOOL_OPTION + "\n" + HELP_MSG_START);
 }
+
 /**
  * @tc.number: Aa_Command_Start_4100
  * @tc.name: ExecCommand
@@ -1099,4 +1102,471 @@ HWTEST_F(AaCommandStartTest, Aa_Command_Start_4100, Function | MediumTest | Leve
 
     AbilityManagerShellCommand cmd(argc, argv);
     EXPECT_EQ(cmd.ExecCommand(), STRING_INVALID_NUMBER_NULL_STRING_OPTION + "\n" + HELP_MSG_START);
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4200
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start -d <device-id> -a <ability-name> -b <bundle-name> -s timeout 30000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4200");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"-d",
+        (char*)STRING_DEVICE.c_str(),
+        (char*)"-a",
+        (char*)STRING_ABILITY_NAME.c_str(),
+        (char*)"-b",
+        (char*)STRING_BUNDLE_NAME.c_str(),
+        (char*)"-s",
+        (char*)"timeout",
+        (char*)"30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4300
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --pi timeout 30000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4300, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4300");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4400
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --pi timeout -30000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4400, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4400");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4500
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --ps timeout 30000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4500, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4500");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--ps",
+        (char*)"timeout",
+        (char*)"30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4600
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --ps timeout -30000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4600, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4600");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--ps",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4700
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --ps timeout -30000 --pi key 1000" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4700, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4700");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--ps",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"--pi",
+        (char*)"key",
+        (char*)"1000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4800
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --ps timeout -30000 -e entity" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4800, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4800");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--ps",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"-e",
+        (char*)"entity",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_EQ(result, STRING_START_ABILITY_OK + "\n");
+}
+
+/**
+ * @tc.number: Aa_Command_Start_4900
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --ps timeout -30000 -2000 -e entity" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_4900, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_4900");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--ps",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"-2000",
+        (char*)"--e",
+        (char*)"entity",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_TRUE(result.find(STRING_INVALID_NUMBER_STRING_OPTION) == 0);
+}
+
+/**
+ * @tc.number: Aa_Command_Start_5000
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa start --pi timeout -30000 -2000 -e entity" command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, Aa_Command_Start_5000, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Aa_Command_Start_5000");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"-2000",
+        (char*)"--e",
+        (char*)"entity",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string result = cmd.ExecCommand();
+    TAG_LOGI(AAFwkTag::TEST, "exec result: %{public}s", result.c_str());
+    EXPECT_TRUE(result.find(STRING_INVALID_NUMBER_INTEGER_OPTION) == 0);
+}
+
+/**
+ * @tc.number: IsLongStartOption_0010
+ * @tc.name: IsLongStartOption
+ * @tc.desc: Verify the "--pi".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsLongStartOption_0010, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLongStartOption_0010");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_TRUE(cmd.IsLongStartOption("--pi"));
+}
+
+/**
+ * @tc.number: IsLongStartOption_0020
+ * @tc.name: IsLongStartOption
+ * @tc.desc: Verify the "--pp".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsLongStartOption_0020, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLongStartOption_0020");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_FALSE(cmd.IsLongStartOption("--ppp"));
+}
+
+/**
+ * @tc.number: IsShortStartOption_0010
+ * @tc.name: IsShortStartOption
+ * @tc.desc: Verify the "-x".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsShortStartOption_0010, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsShortStartOption_0010");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_FALSE(cmd.IsShortStartOption("-x"));
+}
+
+/**
+ * @tc.number: IsShortStartOption_0020
+ * @tc.name: IsShortStartOption
+ * @tc.desc: Verify the "-e".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsShortStartOption_0020, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsShortStartOption_0020");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_TRUE(cmd.IsShortStartOption("-e"));
+}
+
+/**
+ * @tc.number: IsStartOption_0010
+ * @tc.name: IsStartOption_0010
+ * @tc.desc: Verify the "--pi".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsStartOption_0010, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsStartOption_0010");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_TRUE(cmd.IsStartOption("--pi"));
+}
+
+/**
+ * @tc.number: IsStartOption_0020
+ * @tc.name: IsStartOption
+ * @tc.desc: Verify the "--pp".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsStartOption_0020, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsStartOption_0020");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_FALSE(cmd.IsStartOption("--ppp"));
+}
+
+/**
+ * @tc.number: IsStartOption_0030
+ * @tc.name: IsStartOption
+ * @tc.desc: Verify the "-x".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsStartOption_0030, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsStartOption_0030");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_FALSE(cmd.IsStartOption("-x"));
+}
+
+/**
+ * @tc.number: IsStartOption_0040
+ * @tc.name: IsStartOption
+ * @tc.desc: Verify the "-e".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsStartOption_0040, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsStartOption_0040");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_TRUE(cmd.IsStartOption("-e"));
+}
+
+/**
+ * @tc.number: IsStartOption_0050
+ * @tc.name: IsStartOption
+ * @tc.desc: Verify the "100".
+ * @tc.type: FUNC
+ */
+HWTEST_F(AaCommandStartTest, IsStartOption_0050, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsStartOption_0050");
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)cmd_.c_str(),
+        (char*)"--pi",
+        (char*)"timeout",
+        (char*)"-30000",
+        (char*)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_FALSE(cmd.IsStartOption("100"));
 }

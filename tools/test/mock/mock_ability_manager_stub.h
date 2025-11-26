@@ -69,7 +69,8 @@ public:
     int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
         const sptr<IRemoteObject> &token = nullptr);
 
-    MOCK_METHOD3(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
+    MOCK_METHOD4(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex,
+        const std::string& reason));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string& bundleName, int32_t uid, int32_t appIndex));
 
@@ -186,7 +187,8 @@ public:
     }
 
     virtual int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-        const sptr<IRemoteObject>& callerToken, int32_t userId = DEFAULT_INVAL_VALUE, bool isSilent = false)
+        const sptr<IRemoteObject>& callerToken, int32_t userId = DEFAULT_INVAL_VALUE, bool isSilent = false,
+        bool promotePriority = false)
     {
         return 0;
     }

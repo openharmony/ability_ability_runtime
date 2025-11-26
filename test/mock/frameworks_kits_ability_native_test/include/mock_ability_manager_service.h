@@ -145,8 +145,8 @@ public:
     MOCK_METHOD1(GetProcessRunningInfos, int(std::vector<AppExecFwk::RunningProcessInfo>& info));
 
     MOCK_METHOD2(GetWantSenderInfo, int(const sptr<IWantSender>& target, std::shared_ptr<WantSenderInfo>& info));
-    MOCK_METHOD5(StartAbilityByCall,
-        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t, bool));
+    MOCK_METHOD6(StartAbilityByCall,
+        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t, bool, bool));
 
     MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
@@ -169,7 +169,8 @@ public:
         return releaseDataAbility_;
     }
 
-    int KillProcess(const std::string& bundleName, bool clearPageStack = false, int32_t appIndex = 0) override;
+    int KillProcess(const std::string& bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "KillProcess") override;
 
     int UninstallApp(const std::string& bundleName, int32_t uid) override;
 

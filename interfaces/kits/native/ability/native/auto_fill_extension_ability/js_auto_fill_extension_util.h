@@ -63,6 +63,7 @@ public:
     static void UnwrapRectData(const napi_env env, const napi_value value, AbilityBase::Rect &rect);
     static void UnwrapFillResponse(const napi_env env, const napi_value value, FillResponse &response);
     static void UnwrapPopupSize(const napi_env env, const napi_value value, PopupSize &popupSize);
+    static void SetTriggerTypeParam(const napi_env env, napi_value jsObject, const AAFwk::Want &want);
 
     enum AutoFillResultCode {
         CALLBACK_SUCESS = 0,

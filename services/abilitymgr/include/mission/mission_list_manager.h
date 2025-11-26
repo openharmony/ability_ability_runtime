@@ -1306,7 +1306,7 @@ private:
      *
      * @param abilityRecord A reference to the ability record for which to set the last exit reason.
      */
-    void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord);
+    void SetLastExitReason(std::shared_ptr<AbilityRecord> abilityRecord);
 
     /**
      * @brief Checks if the specified ability record is the last ability of its application.
