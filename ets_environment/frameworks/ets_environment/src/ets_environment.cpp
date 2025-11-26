@@ -30,6 +30,7 @@
 #include "runtime.h"
 #include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 #include "static_core/runtime/tooling/inspector/debugger_arkapi.h"
+#include "ark_vm_api.h"
 #include "ets_ani_expo.h"
 #ifdef LIKELY
 #undef LIKELY
@@ -68,8 +69,9 @@ const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
 
 constexpr const char* CLASSNAME_LINKER = "std.core.AbcRuntimeLinker";
-constexpr const char* CLASSNAME_COROUTINE = "std.core.Coroutine";
 } // namespace
+
+static void PostTaskWrapper(void(*task)(void *), void *data, const char *taskName, int64_t delayMs);
 
 using namespace arkts::ani_signature;
 
@@ -554,6 +556,8 @@ void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
     ark::ets::ETSAni::Postfork(env, options);
     appInnerHspPathList_ = appInnerHspPathList;
     commonHspBundleInfos_ = commonHspBundleInfos;
+
+    ARKVM_RegisterExternalScheduler(PostTaskWrapper);
     PostCoroutineScheduleTask();
 }
 
@@ -876,32 +880,19 @@ ani_object ETSEnvironment::CreateRuntimeLinker(
     return object;
 }
 
-static void ScheduleCoroutine(ani_env *aniEnv)
+static void PostTaskWrapper(void(*task)(void *), void *data, const char *taskName, int64_t delayMs)
 {
-    ani_class cls = nullptr;
-    if (aniEnv->FindClass(CLASSNAME_COROUTINE, &cls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass std.core.Coroutine Failed");
-        return;
-    }
-    ani_static_method schedule {};
-    if (aniEnv->Class_FindStaticMethod(cls, "Schedule", ":", &schedule) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindStaticMethod Schedule failed");
-        return;
-    }
-    if (aniEnv->Class_CallStaticMethod_Void(cls, schedule) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_CallStaticMethod_Void Schedule failed");
-        return;
-    }
+    ETSEnvironment::GetInstance()->PostTask([task, data]() { task(data); }, taskName, delayMs);
 }
 
 void ETSEnvironment::PostCoroutineScheduleTask()
 {
+    static constexpr uint64_t COROUTINE_SCHEDULE_PERIODIC_TIME = 100;
     auto scheduleTask = []() {
-        auto &etsEnv = GetInstance();
-        ScheduleCoroutine(etsEnv->GetAniEnv());
-        etsEnv->PostCoroutineScheduleTask();
+        ARKVM_RunScheduler(ARKVM_SCHEDULER_RUN_ONCE);
+        GetInstance()->PostCoroutineScheduleTask();
     };
-    PostTask(scheduleTask, "ScheduleCoroutine", 1);
+    PostTask(scheduleTask, "ScheduleCoroutinePeriodically", COROUTINE_SCHEDULE_PERIODIC_TIME);
 }
 
 } // namespace EtsEnv
