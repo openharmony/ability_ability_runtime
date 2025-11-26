@@ -64,17 +64,39 @@ bool RateLimiter::CheckReportLimit(int32_t uid, int32_t triggeredTier)
     int64_t timeBefore = currentTimeMillis - REPORT_LIMIT_INTERVAL_MS;
     auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
     timestamps.erase(timestamps.begin(), it);
-        if (timestamps.size() >= static_cast<size_t>(REPORT_MAX_LIMIT)) {
-        if (timestamps.empty()) {
-            userTierReports.erase(triggeredTier);
-            if (userTierReports.empty()) {
-                tierReportCallMap_.erase(uid);
-            }
-        }
+    if (timestamps.size() >= static_cast<size_t>(REPORT_MAX_LIMIT)) {
         return true;
     }
     timestamps.emplace_back(currentTimeMillis);
     return false;
+}
+
+void RateLimiter::CleanNestedCallMap(
+    std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<int64_t>>>& nestedMap,
+    std::mutex& mapLock, int64_t limitInterval)
+{
+    int64_t timeBefore = CurrentTimeMillis() - limitInterval;
+    std::lock_guard<std::mutex> guard(mapLock);
+    auto userIt = nestedMap.begin();
+    while (userIt != nestedMap.end()) {
+        auto& innerMap = userIt->second;
+        auto innerIt = innerMap.begin();
+        while (innerIt != innerMap.end()) {
+            auto& timestamps = innerIt->second;
+            auto tsIt = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
+            timestamps.erase(timestamps.begin(), tsIt);
+            if (timestamps.empty()) {
+                innerIt = innerMap.erase(innerIt);
+            } else {
+                ++innerIt;
+            }
+        }
+        if (innerMap.empty()) {
+            userIt = nestedMap.erase(userIt);
+        } else {
+            ++userIt;
+        }
+    }
 }
 
 bool RateLimiter::CheckSingleLimit(int32_t uid, std::unordered_map<int32_t, std::vector<int64_t>> &callMap,
@@ -98,10 +120,9 @@ bool RateLimiter::CheckSingleLimit(int32_t uid, std::unordered_map<int32_t, std:
 
 void RateLimiter::CleanCallMap()
 {
-    int64_t currentTimeMillis;
     {
         std::lock_guard<std::mutex> guard(lastCleanTimeMillisLock_);
-        currentTimeMillis = CurrentTimeMillis();
+        auto currentTimeMillis = CurrentTimeMillis();
         if (currentTimeMillis - lastCleanTimeMillis_ < CLEAN_INTERVAL_MS) {
             return;
         }
@@ -109,6 +130,7 @@ void RateLimiter::CleanCallMap()
     }
     
     CleanSingleCallMap(extensionCallMap_, extensionCallMapLock_, EXTENSION_LIMIT_INTERVAL_MS);
+    CleanNestedCallMap(tierReportCallMap_, tierReportCallMapLock_, REPORT_LIMIT_INTERVAL_MS);
 }
 
 void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>>& callMap,
