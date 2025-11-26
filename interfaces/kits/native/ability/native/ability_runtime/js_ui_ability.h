@@ -67,10 +67,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<OHOSApplication> application,
-        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
+        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc) override;
 
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
@@ -416,8 +417,8 @@ private:
     int32_t CallSaveStatePromise(napi_value result, CallOnSaveStateInfo info);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
-    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
-        std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath);
+    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
+        const std::string &moduleName, const std::string &srcPath, bool &createObjSuc);
     void DoOnForegroundForSceneIsNull(const Want &want);
     void GetDumpInfo(
         napi_env env, napi_value dumpInfo, napi_value onDumpInfo, std::vector<std::string> &info);

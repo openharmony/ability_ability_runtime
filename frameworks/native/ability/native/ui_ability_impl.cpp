@@ -35,7 +35,7 @@ const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
     const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record, std::shared_ptr<UIAbility> &ability,
-    std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
+    std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -51,7 +51,7 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(
         new (std::nothrow) WindowLifeCycleImpl(token_, shared_from_this())));
 #endif
-    ability_->Init(record, application, handler, token);
+    ability_->Init(record, application, handler, token, createObjSuc);
     ability_->BindHybridContext(application, record);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
