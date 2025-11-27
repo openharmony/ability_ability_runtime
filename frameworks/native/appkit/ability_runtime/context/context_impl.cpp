@@ -54,6 +54,10 @@ namespace AbilityRuntime {
 std::mutex ContextImpl::getDisplayConfigCallbackMutex_;
 GetDisplayConfigCallback ContextImpl::getDisplayConfigCallback_ = nullptr;
 #endif
+#ifdef SUPPORT_SCREEN
+std::mutex ContextImpl::getAllUIAbilitiesCallbackMutex_;
+GetAllUIAbilitiesCallback ContextImpl::getAllUIAbilitiesCallback_ = nullptr;
+#endif
 using namespace OHOS::AbilityBase::Constants;
 
 const std::string PATTERN_VERSION = std::string(FILE_SEPARATOR) + "v\\d+" + FILE_SEPARATOR;
@@ -1457,6 +1461,24 @@ int32_t ContextImpl::GetAllRunningInstanceKeys(std::vector<std::string> &instanc
     TAG_LOGD(AAFwkTag::APPKIT, "result is %{public}d", result);
     return result;
 }
+
+#ifdef SUPPORT_SCREEN
+void ContextImpl::GetAllUIAbilities(std::vector<std::shared_ptr<UIAbility>> &uiAbility)
+{
+    std::lock_guard<std::mutex> lock(getDisplayConfigCallbackMutex_);
+    if (getAllUIAbilitiesCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null getAllUIAbilitiesCallback_");
+        return;
+    }
+    getAllUIAbilitiesCallback_(uiAbility);
+}
+
+void ContextImpl::RegisterGetAllUIAbilitiesCallback(GetAllUIAbilitiesCallback getAllUIAbilitiesCallback)
+{
+    std::lock_guard<std::mutex> lock(getAllUIAbilitiesCallbackMutex_);
+    getAllUIAbilitiesCallback_ = getAllUIAbilitiesCallback;
+}
+#endif
 
 int32_t ContextImpl::RestartApp(const AAFwk::Want& want)
 {

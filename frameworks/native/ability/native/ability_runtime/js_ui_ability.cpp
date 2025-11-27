@@ -1238,6 +1238,35 @@ std::shared_ptr<NativeReference> JsUIAbility::GetJsWindowStage()
     return jsWindowStageObj_;
 }
 
+napi_value JsUIAbility::GetWindowStage()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (shellContextRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null shellContextRef_");
+        return nullptr;
+    }
+
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value contextObj = shellContextRef_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "contextObj is not a valid JS object");
+        return nullptr;
+    }
+
+    napi_value windowStage = nullptr;
+    napi_status status = napi_get_named_property(env, contextObj, "windowStage", &windowStage);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Failed to get 'windowStage' property, status: %{public}d", status);
+        return nullptr;
+    }
+    napi_valuetype type;
+    napi_typeof(env, windowStage, &type);
+    if (type == napi_undefined || type == napi_null) {
+        return nullptr;
+    }
+    return windowStage;
+}
+
 const JsRuntime &JsUIAbility::GetJsRuntime()
 {
     return jsRuntime_;

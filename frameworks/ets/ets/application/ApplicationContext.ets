@@ -19,6 +19,7 @@ import Context from 'application.Context'
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import Want from '@ohos.app.ability.Want';
+import window from '@ohos.window';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
@@ -81,6 +82,7 @@ export default class ApplicationContext extends Context {
   public native nativesetFont(font: string): void;
   public native nativerestartApp(want: Want): void;
   public native nativeGetAllRunningInstanceKeys(callback: AsyncCallbackWrapper<Array<string>>): void;
+  public native nativeGetAllWindowStages(callback: AsyncCallbackWrapper<Array<window.WindowStage>>): void;
   public native nativeOnEnvironmentSync(callback: EnvironmentCallback): int;
   public native nativeOffEnvironmentSync(callbackId: int, callback: AsyncCallbackWrapper<void>): void;
   public native nativeOffEnvironmentCheck(): void;
@@ -235,6 +237,24 @@ export default class ApplicationContext extends Context {
       });
       taskpool.execute((): void => {
         this.nativeGetAllRunningInstanceKeys(myCall);
+      });
+    });
+    return p;
+  }
+
+  getAllWindowStages(): Promise<Array<window.WindowStage>> {
+    let p = new Promise<Array<window.WindowStage>>((resolve: (data: Array<window.WindowStage>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<window.WindowStage>>((err: BusinessError | null,
+        data: Array<window.WindowStage> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<window.WindowStage>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeGetAllWindowStages(myCall);
       });
     });
     return p;

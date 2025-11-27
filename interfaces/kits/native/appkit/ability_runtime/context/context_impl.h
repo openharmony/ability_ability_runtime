@@ -34,6 +34,10 @@ namespace AbilityRuntime {
 #ifdef SUPPORT_GRAPHICS
 using GetDisplayConfigCallback = std::function<bool(uint64_t displayId, float &density, std::string &directionStr)>;
 #endif
+#ifdef SUPPORT_SCREEN
+class UIAbility;
+using GetAllUIAbilitiesCallback = std::function<void(std::vector<std::shared_ptr<UIAbility>> &uiAbility)>;
+#endif
 class ContextImpl : public Context {
 public:
     ContextImpl();
@@ -438,6 +442,20 @@ public:
 
     std::string GetLatestParameter();
 
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Query all UIAbilities of the current process.
+     * @param uIAbilities Output parameters, return UIAbility list.
+     */
+    void GetAllUIAbilities(std::vector<std::shared_ptr<UIAbility>> &uiAbility);
+
+    /**
+     * @brief Register the callback function to get all UIAbilities of the current process.
+     * @param getAllUIAbilitiesCallback The registered callback function
+     */
+    void RegisterGetAllUIAbilitiesCallback(GetAllUIAbilitiesCallback getAllUIAbilitiesCallback);
+#endif
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Create a context by displayId. This Context updates the density and direction properties
@@ -584,6 +602,12 @@ private:
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;
 #endif
+
+#ifdef SUPPORT_SCREEN
+    static std::mutex getAllUIAbilitiesCallbackMutex_;
+    static GetAllUIAbilitiesCallback getAllUIAbilitiesCallback_;
+#endif
+
     std::shared_ptr<Context> WrapContext(const std::string &pluginBundleName, const std::string &moduleName,
         std::shared_ptr<Context> inputContext, AppExecFwk::PluginBundleInfo &pluginBundleInfo,
         const std::string &hostBundleName);
