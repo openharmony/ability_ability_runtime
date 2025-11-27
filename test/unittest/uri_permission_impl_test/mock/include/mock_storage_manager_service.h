@@ -430,12 +430,17 @@ public:
         return E_OK;
     }
 
-    virtual int32_t SetExtBundleStats(uint32_t userId, const std::string &businessName, uint64_t businessSize) override
+    virtual int32_t SetExtBundleStats(uint32_t userId, const ExtBundleStats &stats) override
     {
         return E_OK;
     }
 
-    virtual int32_t GetExtBundleStats(uint32_t userId, const std::string &businessName, uint64_t &businessSize) override
+    virtual int32_t GetExtBundleStats(uint32_t userId, ExtBundleStats &stats) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetAllExtBundleStats(uint32_t userId, std::vector<ExtBundleStats> &statsVec) override
     {
         return E_OK;
     }
