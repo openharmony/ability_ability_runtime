@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_STARTUP_TASK_RESULT_H
 #define OHOS_ABILITY_RUNTIME_STARTUP_TASK_RESULT_H
 
+#include <atomic>
 #include <string>
 
 #include "ability_transaction_callback_info.h"
@@ -71,7 +72,7 @@ public:
 
 private:
     OnCompletedCallbackFunc callbackFunc_;
-    bool isCalled_ = false;
+    std::atomic<bool> isCalled_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
