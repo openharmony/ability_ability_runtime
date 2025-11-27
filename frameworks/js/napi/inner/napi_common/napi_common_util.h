@@ -105,6 +105,19 @@ napi_value GetPropertyValueByPropertyName(
 bool SetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, napi_value value);
 
 /**
+ * @brief Get the JSValue of the specified name from the JS object and create a native reference.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the property.
+ * @param expectType Indicates expected JS data type.
+ *
+ * @return Return the property reference of the specified property name in jsObject on success, other return nullptr.
+ */
+std::shared_ptr<NativeReference> CreateNativeRef(
+    napi_env env, napi_value jsObject, const char *propertyName, napi_valuetype type);
+
+/**
  * @brief Get the native number(int32) from the JSObject of the given property name.
  *
  * @param env The environment that the Node-API call is invoked under.

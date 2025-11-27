@@ -708,6 +708,26 @@ bool SetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const cha
     return false;
 }
 
+std::shared_ptr<NativeReference> CreateNativeRef(
+    napi_env env, napi_value jsObject, const char *propertyName, napi_valuetype type)
+{
+    if (jsObject == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "jsObject is nullptr");
+        return nullptr;
+    }
+    napi_value func = GetPropertyValueByPropertyName(env, jsObject, propertyName, type);
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null %{public}s", propertyName);
+        return nullptr;
+    }
+    napi_ref ref = nullptr;
+    if (napi_create_reference(env, func, 1, &ref) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "create reference failed for %{public}s", propertyName);
+        return nullptr;
+    }
+    return std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
+}
+
 /**
  * @brief Get the native number(int32) from the JSObject of the given property name.
  *
