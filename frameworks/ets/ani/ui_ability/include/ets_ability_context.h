@@ -162,6 +162,7 @@ public:
     static void SetMissionIconCheck(ani_env *env, ani_object aniObj, ani_object pixelMapObj);
     static void SetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
         ani_object callbackobj);
+    static void SetMissionContinueState(ani_env *env, ani_object aniObj, ani_object state, ani_object callbackObj);
 
 private:
     void OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
@@ -169,6 +170,7 @@ private:
     void OnSetAbilityInstanceInfoInner(ani_env *env, std::string& label,
         std::shared_ptr<OHOS::Media::PixelMap> icon, ani_object callback, ani_vm *etsVm, ani_ref callbackRef);
     void OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
+    void OnSetMissionContinueState(ani_env *env, ani_object aniObj, ani_object stateObj, ani_object callbackObj);
 #endif
 private:
     void InheritWindowMode(AAFwk::Want &want);
