@@ -107,17 +107,17 @@ void StartupTaskDispatcher::Dispatch(const std::string &name, const std::shared_
     }
 
     if (findResult->second->GetWaitOnMainThread()) {
-        mainThreadAwaitCount_--;
-        TAG_LOGD(AAFwkTag::STARTUP, "mainThreadAwaitCount %{public}d", mainThreadAwaitCount_.load());
-        if (mainThreadAwaitCount_ == 0) {
+        uint32_t oldAwaitCount = mainThreadAwaitCount_.fetch_sub(1);
+        TAG_LOGD(AAFwkTag::STARTUP, "mainThreadAwaitCount %{public}d", oldAwaitCount - 1);
+        if (oldAwaitCount == 1) {
             if (mainThreadAwaitCallback_ != nullptr) {
                 mainThreadAwaitCallback_->Call(result);
             }
         }
     }
-    tasksCount_--;
-    TAG_LOGD(AAFwkTag::STARTUP, "tasksCount %{public}d", tasksCount_.load());
-    if (tasksCount_ == 0) {
+    uint32_t oldTaskCount = tasksCount_.fetch_sub(1);
+    TAG_LOGD(AAFwkTag::STARTUP, "tasksCount %{public}d", oldTaskCount - 1);
+    if (oldTaskCount == 1) {
         if (completedCallback_ != nullptr) {
             completedCallback_->Call(result);
         }
