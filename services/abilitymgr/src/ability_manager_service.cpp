@@ -12460,8 +12460,9 @@ int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IS
 
 int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
 {
-    if (!IsCallerSceneBoard()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard called, no allowed");
+    if (!IsCallerSceneBoard() && !PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_KILL_APP_PROCESSES)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not scb called or has kill permission, no allowed");
         return ERR_WRONG_INTERFACE_CALL;
     }
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
