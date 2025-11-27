@@ -2023,8 +2023,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
             return;
         }
-        appMgr_->PreloadModuleFinished(applicationImpl_->GetRecordId());
-        TAG_LOGI(AAFwkTag::APPKIT, "preoload module finished");
     }
 }
 
