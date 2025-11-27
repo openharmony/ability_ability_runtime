@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "hilog_wrapper.h"
 #define private public
@@ -33,6 +34,24 @@ using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
 namespace AbilityRuntime {
+class NativeReferenceMock : public NativeReference {
+public:
+    NativeReferenceMock() = default;
+    ~NativeReferenceMock() override = default;
+
+    MOCK_METHOD(uint32_t, Ref, (), (override));
+    MOCK_METHOD(uint32_t, Unref, (), (override));
+    MOCK_METHOD(napi_value, Get, (), (override));
+    MOCK_METHOD(void*, GetData, (), (override));
+    MOCK_METHOD(void, SetDeleteSelf, (), (override));
+    MOCK_METHOD(uint32_t, GetRefCount, (), (override));
+    MOCK_METHOD(bool, GetFinalRun, (), (override));
+    explicit operator napi_value() override
+    {
+        return reinterpret_cast<napi_value>(this);
+    }
+    MOCK_METHOD(napi_value, GetNapiValue, (), (override));
+};
 
 class JsUiAbilityTest : public testing::Test {
 public:
@@ -510,6 +529,164 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0100, TestSize.Level1)
     auto windowStage  = ability->GetWindowStage();
     ASSERT_EQ(windowStage, nullptr);
     GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0100 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_GetWindowStage_0200
+ * @tc.desc: GetWindowStage test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0200 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    ASSERT_NE(jsRuntime, nullptr);
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+    ASSERT_NE(ability, nullptr);
+    napi_env env = jsRuntime->GetNapiEnv();
+    ASSERT_NE(env, nullptr);
+    napi_value jsContextObj = nullptr;
+    ASSERT_EQ(napi_create_object(env, &jsContextObj), napi_ok);
+    ASSERT_NE(jsContextObj, nullptr);
+    auto mockRef = std::make_shared<NativeReferenceMock>();
+    ON_CALL(*mockRef, GetNapiValue()).WillByDefault(Return(jsContextObj));
+    ability->shellContextRef_ = mockRef;
+    ASSERT_NE(ability->shellContextRef_, nullptr);
+    auto windowStage = ability->GetWindowStage();
+    ASSERT_EQ(windowStage, nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0200 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_GetWindowStage_0300
+ * @tc.desc: GetWindowStage test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0300 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    ASSERT_NE(jsRuntime, nullptr);
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+    ASSERT_NE(ability, nullptr);
+    napi_env env = jsRuntime->GetNapiEnv();
+    ASSERT_NE(env, nullptr);
+    napi_value jsContextObj = nullptr;
+    ASSERT_EQ(napi_create_object(env, &jsContextObj), napi_ok);
+    ASSERT_NE(jsContextObj, nullptr);
+    auto mockRef = std::make_shared<NativeReferenceMock>();
+    napi_value windowStageObj = nullptr;
+    napi_create_object(env, &windowStageObj);
+    ASSERT_EQ(napi_set_named_property(env, jsContextObj, "windowStage", windowStageObj), napi_ok);
+    ON_CALL(*mockRef, GetNapiValue()).WillByDefault(Return(jsContextObj));
+    ability->shellContextRef_ = mockRef;
+    ASSERT_NE(ability->shellContextRef_, nullptr);
+    auto windowStage = ability->GetWindowStage();
+    ASSERT_NE(windowStage, nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0300 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_GetWindowStage_0400
+ * @tc.desc: GetWindowStage test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0400 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    ASSERT_NE(jsRuntime, nullptr);
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+    ASSERT_NE(ability, nullptr);
+    napi_env env = jsRuntime->GetNapiEnv();
+    ASSERT_NE(env, nullptr);
+    napi_value notAnObject = nullptr;
+    ASSERT_EQ(napi_create_double(env, 42.0, &notAnObject), napi_ok);
+    ASSERT_NE(notAnObject, nullptr);
+    auto mockRef = std::make_shared<NativeReferenceMock>();
+    ON_CALL(*mockRef, GetNapiValue()).WillByDefault(Return(notAnObject));
+    ability->shellContextRef_ = mockRef;
+    ASSERT_NE(ability->shellContextRef_, nullptr);
+    auto windowStage = ability->GetWindowStage();
+    ASSERT_EQ(windowStage, nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0400 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_GetWindowStage_0500
+ * @tc.desc: GetWindowStage test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0500 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    ASSERT_NE(jsRuntime, nullptr);
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+    ASSERT_NE(ability, nullptr);
+    napi_env env = jsRuntime->GetNapiEnv();
+    ASSERT_NE(env, nullptr);
+    napi_value undefinedVal = nullptr;
+    napi_status status = napi_get_undefined(env, &undefinedVal);
+    ASSERT_EQ(status, napi_ok);
+    napi_value jsContextObj = nullptr;
+    status = napi_create_object(env, &jsContextObj);
+    ASSERT_EQ(status, napi_ok);
+    ASSERT_NE(jsContextObj, nullptr);
+    ASSERT_EQ(napi_set_named_property(env, jsContextObj, "windowStage", undefinedVal), napi_ok);
+    auto mockRef = std::make_shared<NativeReferenceMock>();
+    ON_CALL(*mockRef, GetNapiValue()).WillByDefault(Return(jsContextObj));
+    ability->shellContextRef_ = mockRef;
+    ASSERT_NE(ability->shellContextRef_, nullptr);
+    auto windowStage = ability->GetWindowStage();
+    ASSERT_EQ(windowStage, nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0500 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_GetWindowStage_0600
+ * @tc.desc: GetWindowStage test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_GetWindowStage_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0600 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    ASSERT_NE(jsRuntime, nullptr);
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+    ASSERT_NE(ability, nullptr);
+    napi_env env = jsRuntime->GetNapiEnv();
+    ASSERT_NE(env, nullptr);
+    napi_value nullVal = nullptr;
+    napi_status status = napi_get_null(env, &nullVal);
+    ASSERT_EQ(status, napi_ok);
+    napi_value jsContextObj = nullptr;
+    status = napi_create_object(env, &jsContextObj);
+    ASSERT_EQ(status, napi_ok);
+    ASSERT_NE(jsContextObj, nullptr);
+    ASSERT_EQ(napi_set_named_property(env, jsContextObj, "windowStage", nullVal), napi_ok);
+    auto mockRef = std::make_shared<NativeReferenceMock>();
+    ON_CALL(*mockRef, GetNapiValue()).WillByDefault(Return(jsContextObj));
+    ability->shellContextRef_ = mockRef;
+    ASSERT_NE(ability->shellContextRef_, nullptr);
+    auto windowStage = ability->GetWindowStage();
+    ASSERT_EQ(windowStage, nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_GetWindowStage_0600 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
