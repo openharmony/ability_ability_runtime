@@ -66,6 +66,7 @@ ohos_unittest("js_ui_ability_test") {
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
