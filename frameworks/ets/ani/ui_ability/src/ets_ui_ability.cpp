@@ -406,6 +406,10 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want, sptr<AAFwk::Sess
 void EtsUIAbility::SetSelfSpecifiedId(ani_env *env, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "SetSelfSpecifiedId called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     if (abilityInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return;
