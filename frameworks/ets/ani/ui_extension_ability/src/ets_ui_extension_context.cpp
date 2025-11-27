@@ -884,12 +884,18 @@ void EtsUIExtensionContext::OpenLinkInner(ani_env *env, ani_object aniObj, ani_s
         CreateOpenLinkTask(env, callbackobj, context, want, requestCode);
     }
     ErrCode = context->OpenLink(want, requestCode);
-    if (ErrCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
-        aniObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(ERR_OK));
-    } else {
-        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ErrCode));
+    if (ErrCode == 0) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "openLink succeeded");
+        return;
     }
-    AppExecFwk::AsyncCallback(env, myCallbackobj, aniObject, nullptr);
+    if (freeInstallObserver_ != nullptr) {
+        if (ErrCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "start ability by default succeeded");
+            freeInstallObserver_->OnInstallFinishedByUrl(startTime, link, ERR_OK);
+            return;
+        }
+        freeInstallObserver_->OnInstallFinishedByUrl(startTime, link, ErrCode);
+    }
 }
 
 void EtsUIExtensionContext::CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
