@@ -1935,5 +1935,30 @@ HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_Bind_001, Function | MediumTest
 
     TAG_LOGI(AAFwkTag::TEST, "ContextImpl_Bind_001 end");
 }
+
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.number: RegisterGetAllUIAbilitiesCallback_001
+ * @tc.name: RegisterGetAllUIAbilitiesCallback
+ * @tc.desc: RegisterGetAllUIAbilitiesCallback test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, RegisterGetAllUIAbilitiesCallback_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uIAbilities;
+    contextImpl_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 0);
+    contextImpl_->RegisterGetAllUIAbilitiesCallback(
+        [](std::vector<std::shared_ptr<AbilityRuntime::UIAbility>>& uIAbilities) -> void {
+            std::shared_ptr<AbilityRuntime::UIAbility> uiability = nullptr;
+            uIAbilities.emplace_back(uiability);
+        });
+    contextImpl_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 1);
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 end";
+}
+#endif
 }  // namespace AppExecFwk
 }

@@ -24,6 +24,9 @@
 #include "ets_interop_ability_lifecycle_callback.h"
 #include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
+#ifdef SUPPORT_SCREEN
+#include "ui_ability.h"
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -39,6 +42,9 @@ constexpr double ERROR_CODE_NULL_CALLBACK = -2;
 constexpr double ERROR_CODE_NULL_CONTEXT = -3;
 constexpr double ERROR_CODE_INVALID_PARAM = -4;
 const std::string TYPE_ABILITY_LIFECYCLE = "abilityLifecycle";
+#ifdef SUPPORT_SCREEN
+constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+#endif
 }
 
 std::mutex EtsApplicationContextUtils::abilityLifecycleCallbackLock_;
@@ -255,6 +261,97 @@ void EtsApplicationContextUtils::OnGetAllRunningInstanceKeys(ani_env *env, ani_o
     AppExecFwk::WrapArrayString(env, stringArray, instanceKeys);
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), stringArray);
 }
+
+void EtsApplicationContextUtils::OnGetAllWindowStages(ani_env *env, ani_object aniObj, ani_object callback)
+{
+    ani_object emptyArray = AppExecFwk::CreateEmptyArray(env);
+#ifdef SUPPORT_SCREEN
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    std::vector<std::shared_ptr<UIAbility>> uiAbility;
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        AppExecFwk::AsyncCallback(
+            env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), emptyArray);
+        return;
+    }
+    applicationContext->GetAllUIAbilities(uiAbility);
+    ani_object windowStages = CreateWindowStageArray(env, uiAbility);
+    AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), windowStages);
+#else
+    AppExecFwk::AsyncCallback(
+        env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), emptyArray);
+#endif
+}
+
+void EtsApplicationContextUtils::GetAllWindowStages(ani_env *env, ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "GetAllWindowStages Call");
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsContext");
+        return;
+    }
+    etsContext->OnGetAllWindowStages(env, aniObj, callback);
+}
+
+#ifdef SUPPORT_SCREEN
+ani_object EtsApplicationContextUtils::CreateWindowStageArray(
+    ani_env *env, std::vector<std::shared_ptr<UIAbility>> uiAbility)
+{
+    ani_class arrayCls = nullptr;
+    ani_status status = ANI_OK;
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return nullptr;
+    }
+
+    status = env->FindClass(CLASSNAME_ARRAY, &arrayCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass failed status: %{public}d", status);
+        return nullptr;
+    }
+
+    ani_method arrayCtor;
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find ctor failed status: %{public}d", status);
+        return nullptr;
+    }
+
+    std::vector<ani_object> windowStageArray;
+    for (auto &item : uiAbility) {
+        if (item == nullptr) {
+            continue;
+        }
+        auto windowStage = item->GetEtsWindowStage();
+        if (windowStage == nullptr) {
+            continue;
+        }
+        windowStageArray.emplace_back(windowStage);
+    }
+    ani_object arrayObj;
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, windowStageArray.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_New array status: %{public}d", status);
+        return arrayObj;
+    }
+    ani_size index = 0;
+    for (auto &windowStage : windowStageArray) {
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, windowStage);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethodByName_Void failed status: %{public}d", status);
+            continue;
+        }
+        index++;
+    }
+    return arrayObj;
+}
+#endif
 
 void EtsApplicationContextUtils::NativeOnInteropLifecycleCallbackSync(ani_env *env,
     ani_object aniObj, ani_object callback)
@@ -1082,6 +1179,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env *aniEnv)
                 reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOffApplicationStateChangeSync)},
             ani_native_function {"nativeGetAllRunningInstanceKeys", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetAllRunningInstanceKeys)},
+            ani_native_function {"nativeGetAllWindowStages", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::GetAllWindowStages)},
             ani_native_function{"nativegetCurrentInstanceKey", ":Lstd/core/String;",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentInstanceKey)},
             ani_native_function {"nativegetCurrentAppCloneIndex", ":I",

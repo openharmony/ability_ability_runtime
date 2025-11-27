@@ -1891,5 +1891,22 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_CreateProperty_0400, TestSize.Level1)
     EXPECT_FALSE(result);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
+
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.name: UIAbility_GetWindowStage_0400
+ * @tc.desc: GetWindowStage virtual function test
+ * @tc.desc: Verify function GetWindowStage.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_GetWindowStage_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    ASSERT_EQ(uiAbility->GetWindowStage(), nullptr);
+    ASSERT_EQ(uiAbility->GetEtsWindowStage(), nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+#endif
 } // namespace AppExecFwk
 } // namespace OHOS

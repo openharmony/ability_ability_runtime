@@ -1395,5 +1395,37 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_AttachInner_0100, Function | Medium
     EXPECT_NE(abilitythread->abilityImpl_, nullptr);
     GTEST_LOG_(INFO) << "AbilityRuntime_AttachInner_0100 end";
 }
+
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.number: AbilityRuntime_GetUIAbility_0100
+ * @tc.name: GetUIAbility
+ * @tc.desc: Test GetUIAbility function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_GetUIAbility_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0100 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    ASSERT_NE(abilitythread, nullptr);
+    ASSERT_EQ(abilitythread->abilityImpl_, nullptr);
+    ASSERT_EQ(abilitythread->GetUIAbility(), nullptr);
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_GetUIAbility_0200
+ * @tc.name: GetUIAbility
+ * @tc.desc: Test GetUIAbility function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_GetUIAbility_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0200 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    ASSERT_NE(abilitythread, nullptr);
+    abilitythread->abilityImpl_ = std::make_shared<AbilityRuntime::UIAbilityImpl>();
+    ASSERT_EQ(abilitythread->GetUIAbility(), nullptr);
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0200 end";
+}
+#endif
 } // namespace AppExecFwk
 } // namespace OHOS
