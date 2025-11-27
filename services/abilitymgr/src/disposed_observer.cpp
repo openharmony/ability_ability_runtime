@@ -61,6 +61,7 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
 
 void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "recv onPageShow");
     if (pageStateData.uid != uid_) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "currentUid:%{public}d, paramUid:%{public}d", uid_, pageStateData.uid);
         return;
