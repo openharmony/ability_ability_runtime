@@ -2485,5 +2485,36 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0200, T
     abilityImpl->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
 }
+
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.number: AbilityRuntime_GetUIAbility_0100
+ * @tc.name: GetUIAbility
+ * @tc.desc: Verify GetUIAbility.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_GetUIAbility_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0100 start";
+    ASSERT_NE(abilityImpl_, nullptr);
+    ASSERT_EQ(abilityImpl_->GetUIAbility(), nullptr);
+    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    EXPECT_NE(token, nullptr);
+    if (token != nullptr) {
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
+        std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
+        std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
+        std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
+        ASSERT_NE(pMocKUIAbility, nullptr);
+        std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
+        ASSERT_NE(uiability, nullptr);
+        bool createObjSuc = false;
+        abilityImpl_->Init(application, record, uiability, handler, token, createObjSuc);
+        ASSERT_NE(abilityImpl_->GetUIAbility(), nullptr);
+    }
+    GTEST_LOG_(INFO) << "AbilityRuntime_GetUIAbility_0100 end";
+}
+#endif
 } // namespace AppExecFwk
 } // namespace OHOS

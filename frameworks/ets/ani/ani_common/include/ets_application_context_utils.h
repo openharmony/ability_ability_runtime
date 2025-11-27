@@ -57,6 +57,7 @@ public:
     static ani_int GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
     static ani_string GetCurrentInstanceKey(ani_env *env, ani_object aniObj);
     static void GetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    static void GetAllWindowStages(ani_env *env, ani_object aniObj, ani_object callback);
     static ani_int NativeOnLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
         ani_object callback);
     static void NativeOffLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
@@ -87,11 +88,13 @@ private:
     ani_int OnGetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
     ani_string OnGetCurrentInstanceKey(ani_env *env, ani_object aniObj);
     void OnGetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnGetAllWindowStages(ani_env *env, ani_object aniObj, ani_object callback);
     void OnNativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     void OnNativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     void OnNativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_int callbackId, ani_object callback);
     ani_int OnNativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
     static void SetEventHubContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef);
+    ani_object CreateWindowStageArray(ani_env *env, std::vector<std::shared_ptr<UIAbility>> uiAbility);
     std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_;
     std::shared_ptr<EtsApplicationStateChangeCallback> applicationStateCallback_;
     static std::mutex abilityLifecycleCallbackLock_;

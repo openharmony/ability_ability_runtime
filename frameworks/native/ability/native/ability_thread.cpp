@@ -302,6 +302,13 @@ void AbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId, 
     TAG_LOGD(AAFwkTag::ABILITY, "called");
 }
 
+#ifdef SUPPORT_SCREEN
+std::shared_ptr<AbilityRuntime::UIAbility> AbilityThread::GetUIAbility()
+{
+    return nullptr;
+}
+#endif
+
 void AbilityThread::ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode)
 {
 }

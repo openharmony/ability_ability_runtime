@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,7 @@ public:
     napi_value OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetAllWindowStages(napi_env env, NapiCallbackInfo& info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
@@ -126,6 +127,7 @@ public:
     static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
     static napi_value CreateAreaModeContext(napi_env env, napi_callback_info info);
     static napi_value CreateDisplayContext(napi_env env, napi_callback_info info);
+    static napi_value GetAllWindowStages(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;

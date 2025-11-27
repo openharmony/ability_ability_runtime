@@ -253,6 +253,20 @@ public:
      */
     bool OnRestoreData(AAFwk::WantParams &restoreData) override;
 
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Get WindowStage
+     * @return Returns the napi_value of WindowStage.
+     */
+    virtual napi_value GetWindowStage();
+
+    /**
+     * @brief Get WindowStage.
+     * @return Returns the ani_object of WindowStage.
+     */
+    virtual ani_object GetEtsWindowStage();
+#endif
+
     /**
      * @brief Obtains the lifecycle state of this ability.
      * @return Returns the lifecycle state of this ability.

@@ -1973,6 +1973,45 @@ HWTEST_F(ApplicationContextTest, IsInteropAbilityLifecycleCallbackEmpty_0200, Te
     GTEST_LOG_(INFO) << "IsInteropAbilityLifecycleCallbackEmpty_0200 end";
 }
 
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.number: RegisterGetAllUIAbilitiesCallback_001
+ * @tc.name: RegisterGetAllUIAbilitiesCallback
+ * @tc.desc: RegisterGetAllUIAbilitiesCallback test
+ */
+HWTEST_F(ApplicationContextTest, RegisterGetAllUIAbilitiesCallback_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 start";
+    context_->RegisterGetAllUIAbilitiesCallback([](std::vector<std::shared_ptr<UIAbility>> &uIAbilities) -> void {
+        std::shared_ptr<UIAbility> uiability = nullptr;
+        uIAbilities.emplace_back(uiability);
+    });
+    std::vector<std::shared_ptr<UIAbility>> uIAbilities;
+    context_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 0);
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 end";
+}
+
+/**
+ * @tc.number: RegisterGetAllUIAbilitiesCallback_002
+ * @tc.name: RegisterGetAllUIAbilitiesCallback
+ * @tc.desc: RegisterGetAllUIAbilitiesCallback test
+ */
+HWTEST_F(ApplicationContextTest, RegisterGetAllUIAbilitiesCallback_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_002 start";
+    context_->AttachContextImpl(mock_);
+    context_->RegisterGetAllUIAbilitiesCallback([](std::vector<std::shared_ptr<UIAbility>> &uIAbilities) -> void {
+        std::shared_ptr<UIAbility> uiability = nullptr;
+        uIAbilities.emplace_back(uiability);
+    });
+    std::vector<std::shared_ptr<UIAbility>> uIAbilities;
+    context_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 1);
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_002 end";
+}
+#endif
+
 /**
  * @tc.number: GetInteropCallbacks_0100
  * @tc.name: GetInteropCallbacks

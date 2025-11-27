@@ -223,6 +223,18 @@ void UIAbility::AttachAbilityContext(const std::shared_ptr<AbilityRuntime::Abili
     });
 }
 
+#ifdef SUPPORT_SCREEN
+napi_value UIAbility::GetWindowStage()
+{
+    return nullptr;
+}
+
+ani_object UIAbility::GetEtsWindowStage()
+{
+    return nullptr;
+}
+#endif
+
 void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

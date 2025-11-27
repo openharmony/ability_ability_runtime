@@ -586,6 +586,46 @@ void EtsUIAbility::OnSceneCreated()
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
 
+ani_object EtsUIAbility::GetEtsWindowStage()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetEtsWindowStage called");
+
+    if (shellContextRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null shellContextRef_");
+        return nullptr;
+    }
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return nullptr;
+    }
+
+    ani_ref windowStageRef = nullptr;
+    ani_status status = env->Object_GetFieldByName_Ref(shellContextRef_->aniObj, "windowStage", &windowStageRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Object_GetFieldByName_Ref failed, status: %{public}d", status);
+        return nullptr;
+    }
+
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(windowStageRef, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Reference_IsUndefined status: %{public}d", status);
+        return nullptr;
+    }
+    ani_boolean isNull = true;
+    if ((status = env->Reference_IsNullishValue(windowStageRef, &isNull)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Reference_IsNullishValue status: %{public}d", status);
+        return nullptr;
+    }
+    if (isUndefined || isNull) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "monitorObj is undefined or null");
+        return nullptr;
+    }
+
+    return reinterpret_cast<ani_object>(windowStageRef);
+}
+
 void EtsUIAbility::OnSceneRestored()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

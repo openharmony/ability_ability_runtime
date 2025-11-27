@@ -301,6 +301,13 @@ public:
      */
     void OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;
+
+    /**
+     * @brief Get WindowStage.
+     * @return Returns the ani_object of WindowStage.
+     */
+    ani_object GetEtsWindowStage() override;
+
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
