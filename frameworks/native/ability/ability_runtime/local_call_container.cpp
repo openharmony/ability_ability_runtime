@@ -378,9 +378,9 @@ void CallerConnection::OnAbilityConnectDone(
     localCallRecord_->SetRemoteObject(remoteObject, callRecipient);
 
     if (isSingleton) {
-        container->SetCallLocalRecord(element, localCallRecord_);
+        container->SetCallLocalRecord(localCallRecord_->GetElementName(), localCallRecord_);
     } else {
-        container->SetMultipleCallLocalRecord(element, localCallRecord_);
+        container->SetMultipleCallLocalRecord(localCallRecord_->GetElementName(), localCallRecord_);
     }
 
     localCallRecord_->InvokeCallBack();
