@@ -3700,6 +3700,10 @@ int AbilityManagerProxy::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> 
 
 int AbilityManagerProxy::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start GetExtensionRunningInfos");
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -5980,6 +5984,10 @@ int32_t AbilityManagerProxy::TransferAbilityResultForExtension(const sptr<IRemot
 
 void AbilityManagerProxy::NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start NotifyFrozenProcessByRSS");
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
