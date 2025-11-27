@@ -1,0 +1,141 @@
+# Copyright (C) 2025-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+subsystem_name = "ability"
+part_name = "ability_runtime"
+taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+
+copy_taihe_idl("copy_taihe") {
+  sources = [
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/ContinuableInfo.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/ContinueCallback.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/ContinueDeviceInfo.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/ContinueMissionInfo.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/MissionCallbacks.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/MissionDeviceInfo.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/MissionParameter.taihe",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/idl/ohos.distributedmissionmanager.taihe",
+  ]
+}
+
+ohos_taihe("run_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_taihe" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.distributedmissionmanager.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.distributedmissionmanager.abi.c",
+    "$taihe_generated_file_path/src/ContinuableInfo.ani.cpp",
+    "$taihe_generated_file_path/src/ContinuableInfo.abi.c",
+    "$taihe_generated_file_path/src/ContinueCallback.ani.cpp",
+    "$taihe_generated_file_path/src/ContinueCallback.abi.c",
+    "$taihe_generated_file_path/src/ContinueDeviceInfo.ani.cpp",
+    "$taihe_generated_file_path/src/ContinueDeviceInfo.abi.c",
+    "$taihe_generated_file_path/src/ContinueMissionInfo.ani.cpp",
+    "$taihe_generated_file_path/src/ContinueMissionInfo.abi.c",
+    "$taihe_generated_file_path/src/MissionCallbacks.ani.cpp",
+    "$taihe_generated_file_path/src/MissionCallbacks.abi.c",
+    "$taihe_generated_file_path/src/MissionDeviceInfo.ani.cpp",
+    "$taihe_generated_file_path/src/MissionDeviceInfo.abi.c",
+    "$taihe_generated_file_path/src/MissionParameter.ani.cpp",
+    "$taihe_generated_file_path/src/MissionParameter.abi.c",
+  ]
+}
+
+taihe_shared_library("distributedmissionmanager_ani") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+  include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/include",
+    "${ability_runtime_path}/frameworks/js/napi/mission_manager",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+  ]
+  sources = get_target_outputs(":run_taihe")
+  sources += [
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_constructor.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_utils.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_error_utils.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_observer_utils.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_remotelistener_utils.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ohos.distributedmissionmanager.impl.cpp",
+    "${ability_runtime_path}/frameworks/js/napi/mission_manager/dms_sa_client.cpp",
+    "${ability_runtime_path}/frameworks/js/napi/mission_manager/mission_continue_stub.cpp",
+  ]
+  deps = [
+    ":run_taihe",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:mission_info",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+  ]
+
+  if (os_level == "standard") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+  }
+  cflags = [
+    "-DHILOG_ENABLE",
+    "-fPIC",
+    "-g3",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+generate_static_abc("distributedmissionmanager_abc") {
+  base_url = "$taihe_generated_file_path"
+  files = [
+    "$taihe_generated_file_path/@ohos.distributedMissionManager.ets",
+    "$taihe_generated_file_path/application.ContinuableInfo.ets",
+    "$taihe_generated_file_path/application.ContinueCallback.ets",
+    "$taihe_generated_file_path/application.ContinueDeviceInfo.ets",
+    "$taihe_generated_file_path/application.ContinueMissionInfo.ets",
+    "$taihe_generated_file_path/application.MissionCallbacks.ets",
+    "$taihe_generated_file_path/application.MissionDeviceInfo.ets",
+    "$taihe_generated_file_path/application.MissionParameter.ets",
+  ]
+  dst_file = "$target_out_dir/distributedmissionmanager.abc"
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/distributedmissionmanager.abc"
+  dependencies = [ ":run_taihe" ]
+}
+
+ohos_prebuilt_etc("distributedmissionmanager_etc") {
+  source = "$target_out_dir/distributedmissionmanager.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":distributedmissionmanager_abc" ]
+}
+
+group("distributedmissionmanager_ani_pack") {
+  deps = [
+    ":distributedmissionmanager_ani",
+    ":distributedmissionmanager_etc",
+  ]
+}
