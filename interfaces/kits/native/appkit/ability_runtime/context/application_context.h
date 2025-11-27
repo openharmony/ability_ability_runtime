@@ -159,6 +159,21 @@ public:
     void RegisterAppFontObserver(AppConfigUpdateCallback appFontCallback);
     void RegisterProcessSecurityExit(AppProcessExitCallback appProcessExitCallback);
     void RegisterAppGetSpecifiedRuntime(AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback);
+
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Query all UIAbilities of the current process.
+     * @param uIAbilities Output parameters, return UIAbilities list.
+     */
+    void GetAllUIAbilities(std::vector<std::shared_ptr<UIAbility>> &uiAbility);
+
+    /**
+     * @brief Register the callback function to get all UIAbilities of the current process.
+     * @param getAllUIAbilitiesCallback The registered callback function.
+     */
+    void RegisterGetAllUIAbilitiesCallback(GetAllUIAbilitiesCallback getAllUIAbilitiesCallback);
+#endif
+
 #ifdef SUPPORT_GRAPHICS
     void RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback);
 #endif

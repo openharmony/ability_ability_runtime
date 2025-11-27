@@ -182,6 +182,14 @@ public:
 
     void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
 
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Get the UIability of the current thread.
+     * @return Returns a null pointer if the UIAbility has not been created or has been destroyed.
+     */
+    std::shared_ptr<UIAbility> GetUIAbility();
+#endif
+
 #ifdef SUPPORT_GRAPHICS
 public:
 
