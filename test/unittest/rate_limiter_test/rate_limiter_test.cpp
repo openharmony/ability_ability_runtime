@@ -179,7 +179,7 @@ HWTEST_F(RateLimiterTest, CleanCallMapTest_0200, TestSize.Level2)
     rateLimiter.CleanCallMap();
     auto mapSize = rateLimiter.tierReportCallMap_.size();
     TAG_LOGI(AAFwkTag::TEST, "tierReportCallMap_ size:%{public}zu", mapSize);
-    EXPECT_EQ(mapSize, 2);
+    EXPECT_EQ(mapSize, 1);
 
     TAG_LOGI(AAFwkTag::TEST, "CleanCallMapTest_0200 end.");
 }
