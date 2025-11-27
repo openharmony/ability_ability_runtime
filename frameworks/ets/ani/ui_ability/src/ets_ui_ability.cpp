@@ -350,11 +350,11 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    OnStartInner(env, want);
+    OnStartInner(env, want, sessionInfo);
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
 
-void EtsUIAbility::OnStartInner(ani_env *env, const Want &want)
+void EtsUIAbility::OnStartInner(ani_env *env, const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     ani_object wantObj = AppExecFwk::WrapWant(env, want);
     if (wantObj == nullptr) {
@@ -370,6 +370,7 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "lastRequestWant Object_SetFieldByName_Ref status: %{public}d", status);
         return;
     }
+    SetSelfSpecifiedId(env, sessionInfo);
     auto launchParam = GetLaunchParam();
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
@@ -400,6 +401,27 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want)
         applicationContext->DispatchOnAbilityCreate(ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
+}
+
+void EtsUIAbility::SetSelfSpecifiedId(ani_env *env, sptr<AAFwk::SessionInfo> sessionInfo)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "SetSelfSpecifiedId called");
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
+        return;
+    }
+    if (etsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null etsAbilityObj_");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    if (sessionInfo != nullptr && abilityInfo_->launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        if ((status = env->Object_SetFieldByName_Ref(etsAbilityObj_->aniObj,
+            "specifiedId", AppExecFwk::GetAniString(env, sessionInfo->specifiedFlag))) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "specifiedId Object_SetFieldByName_Ref status: %{public}d", status);
+            return;
+        }
+    }
 }
 
 int32_t EtsUIAbility::OnShare(WantParams &wantParam)
