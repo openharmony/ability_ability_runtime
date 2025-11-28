@@ -1542,12 +1542,12 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetProcessType_0001, TestSize.Le
     appRunningRecord->SetProcessAndExtensionType(abilityInfo, 0);
     ExtensionAbilityType extensionAbilityType = appRunningRecord->GetExtensionType();
     ProcessType processType = appRunningRecord->GetProcessType();
-    ASSERT_NE(extensionAbilityType, ExtensionAbilityType::SERVICE);
-    ASSERT_NE(processType, ProcessType::EXTENSION);
+    EXPECT_EQ(extensionAbilityType, ExtensionAbilityType::SERVICE);
+    EXPECT_EQ(processType, ProcessType::EXTENSION);
 
     appRunningRecord->SetProcessType(ProcessType::NORMAL);
     ProcessType normalType = appRunningRecord->GetProcessType();
-    ASSERT_NE(normalType, ProcessType::NORMAL);
+    EXPECT_EQ(normalType, ProcessType::NORMAL);
 }
 
 } // namespace AppExecFwk
