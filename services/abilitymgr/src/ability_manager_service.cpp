@@ -1537,7 +1537,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
             abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(""));
         }
-        CollaboratorUtil::HandleCallerIfNeed(callerToken, collaborator, abilityRequest.want);
+        CollaboratorUtil::HandleCallerIfNeed(callerToken, collaborator, abilityRequest.want, callerBundleName);
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         result = uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
@@ -7692,7 +7692,6 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, uint64_t 
             TAG_LOGE(AAFwkTag::ABILITYMGR, "query highest priority ability failed");
             return RESOLVE_ABILITY_ERR;
         }
-        AbilityRequest abilityRequest;
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
     queryTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
@@ -10023,7 +10022,7 @@ bool AbilityManagerService::IsSceneBoardReady(int32_t userId)
         return false;
     }
     if (connectManager->GetSceneBoardTokenId() == 0) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "SCB not ready");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "SCB not ready");
         return false;
     }
     return true;
