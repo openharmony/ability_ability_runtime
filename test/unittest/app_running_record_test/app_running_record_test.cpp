@@ -1522,5 +1522,33 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_FillAbilityStateDataWithWant_000
     EXPECT_EQ(abilityStateData.hostPid, 0);
     EXPECT_EQ(abilityStateData.hostBundleName, "");
 }
+
+/**
+ * @tc.name: AppRunningRecord_SetProcessType_0001
+ * @tc.desc: Test SetProcessType works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetProcessType_0001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
+    abilityInfo->type = AbilityType::SERVICE;
+
+    std::shared_ptr<ApplicationInfo> info = nullptr;
+    int32_t recordId = 0;
+    std::string processName = "TestSetProcessType";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(info, recordId, processName);
+    appRunningRecord->SetProcessAndExtensionType(abilityInfo, 0);
+    ExtensionAbilityType extensionAbilityType = appRunningRecord->GetExtensionType();
+    ProcessType processType = appRunningRecord->GetProcessType();
+    ASSERT_NE(extensionAbilityType, ExtensionAbilityType::SERVICE);
+    ASSERT_NE(processType, ProcessType::EXTENSION);
+
+    appRunningRecord->SetProcessType(ProcessType::NORMAL);
+    ProcessType normalType = appRunningRecord->GetProcessType();
+    ASSERT_NE(normalType, ProcessType::NORMAL);
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -1575,5 +1575,58 @@ void AppStateObserverManager::HandleOnProcessPreForegroundChanged(std::shared_pt
         }
     }
 }
+
+void AppStateObserverManager::OnProcessTypeChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, "OnProcessTypeChanged");
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+        return;
+    }
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), appRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "OnProcessTypeChanged task.");
+        self->HandleOnProcessTypeChanged(appRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::HandleOnProcessTypeChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+        return;
+    }
+    ProcessData data = WrapProcessData(appRecord);
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, state:%{public}d, "
+        "isContinuousTask:%{public}d, gpuPid:%{public}d, processType:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid, data.processType);
+    auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
+    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_TYPE_CHANGED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::ALL,
+            FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
+            it->first->OnProcessTypeChanged(data);
+        }
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
