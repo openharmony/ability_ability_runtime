@@ -885,7 +885,7 @@ void AppUtils::LoadAppTransferList()
 {
     nlohmann::json object;
     if (!JsonUtils::GetInstance().LoadConfiguration("/system/etc/ability_runtime/app_transfer_list.json", object)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "load onNewProcessEnableList file failed");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadAppTransferList failed");
         return;
     }
     if (!object.contains("appTransferList") ||
