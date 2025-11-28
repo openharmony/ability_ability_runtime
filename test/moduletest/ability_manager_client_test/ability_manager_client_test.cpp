@@ -635,5 +635,19 @@ HWTEST_F(AbilityManagerClientTest, ResumeExtensionAbility_0100, TestSize.Level1)
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "ResumeExtensionAbility_0100 end");
 }
+
+/**
+ * @tc.name: ManualStartAutoStartupApps_0100
+ * @tc.desc: ManualStartAutoStartupApps
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, ManualStartAutoStartupApps_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupApps_0100 start");
+    int32_t userId = -1;
+    auto result = AbilityManagerClient::GetInstance()->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupApps_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

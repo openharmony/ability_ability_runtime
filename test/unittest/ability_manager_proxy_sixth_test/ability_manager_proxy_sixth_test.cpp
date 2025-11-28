@@ -1067,5 +1067,35 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_PreloadApplication_00
     auto res = proxy_->PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(res, 0);
 }
+
+/*
+ * @tc.name: AbilityManagerProxy_ManualStartAutoStartupApps_001
+ * Function: ManualStartAutoStartupApps
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_ManualStartAutoStartupApps_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(0));
+    int32_t userId = -1;
+    auto res = proxy_->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(res, 0);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_ManualStartAutoStartupApps_002
+ * Function: ManualStartAutoStartupApps
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_ManualStartAutoStartupApps_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    int32_t userId = -1;
+    auto res = proxy_->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(res, -1);
+}
 } // namespace AAFwk
 } // namespace OHOS

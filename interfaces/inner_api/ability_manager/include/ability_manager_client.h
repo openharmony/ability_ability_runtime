@@ -1174,6 +1174,13 @@ public:
     ErrCode GetAutoStartupStatusForSelf(bool &isAutoStartEnabled);
 
     /**
+     * @brief Manual start auto startup apps, EDM use only.
+     * @param userId Indicates which user's auto startup apps to be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ManualStartAutoStartupApps(int32_t userId);
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
