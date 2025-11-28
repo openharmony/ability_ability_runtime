@@ -1511,5 +1511,21 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0300 end.";
 }
 #endif
+
+/*
+* @tc.number: GetAppCloneIndex_0100
+* @tc.name: GetAppCloneIndex
+* @tc.desc: Verify function GetAppCloneIndex
+*/
+HWTEST_F(OHOSApplicationTest, GetAppCloneIndex_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppCloneIndex_0100 start.";
+    std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    ohosApplication_->SetApplicationContext(abilityRuntimeContext);
+    int32_t index;
+    EXPECT_TRUE(ohosApplication_->GetAppCloneIndex(index));
+    GTEST_LOG_(INFO) << "GetAppCloneIndex_0100 end.";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -754,6 +754,7 @@ private:
     bool isPluginNamespaceInherited_ = false;
     std::string pluginDefaultNamespaceLdDictionary_ = "";
     RuntimeUpdateParam runtimeUpdateParam_;
+    std::vector<OHOS::AppExecFwk::HapModuleInfo> hapList_;
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
     std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
@@ -829,6 +830,7 @@ private:
         AppExecFwk::ModuleTestRunner &tsTestRunner);
     bool CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
     void SleepCleanKill();
+    bool CheckHapPathLoaded(const HapModuleInfo &hapModuleInfo);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
