@@ -152,6 +152,13 @@ public:
     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
 
     /**
+     * Will be called when process type to normal.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnProcessTypeChanged(const ProcessData &processData) override;
+
+    /**
      * Will be called when the process keepalive state change.
      *
      * @param processData Process data.
@@ -198,6 +205,8 @@ private:
     int32_t HandleOnKeepAliveStateChanged(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleOnProcessPreForegroundChanged(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleOnProcessTypeChanged(MessageParcel &data, MessageParcel &reply);
 
     static std::mutex callbackMutex_;
 
