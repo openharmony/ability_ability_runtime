@@ -48,6 +48,9 @@ bool CheckAbilityName(const InsightIntentInfo &info, const std::string &abilityN
     }
     return matched;
 }
+
+const std::string INSIGHT_INTENTS_DEVELOP_TYPE_CONFIGURATION = "configuration";
+const std::string INSIGHT_INTENTS_DEVELOP_TYPE_DECORATOR = "decorator";
 } // namespace
 
 uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
@@ -99,14 +102,17 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     TAG_LOGE(AAFwkTag::INTENT, "get srcEntry failed");
     return AAFwk::ERR_INSIGHT_INTENT_START_INVALID_COMPONENT;
 }
+
 uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
     ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForQuery &queryInfo)
 {
+    queryInfo.isConfig = false;
     queryInfo.bundleName = genericInfo.bundleName;
     queryInfo.moduleName = genericInfo.moduleName;
     queryInfo.intentName = genericInfo.intentName;
     queryInfo.displayName = genericInfo.displayName;
     queryInfo.intentType = genericInfo.decoratorType;
+    queryInfo.develoType = INSIGHT_INTENTS_DEVELOP_TYPE_DECORATOR;
     if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_LINK) {
         auto linkInfo = genericInfo.get<InsightIntentLinkInfo>();
         queryInfo.linkInfo.uri = linkInfo.uri;
@@ -166,6 +172,44 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
             insightInfo.parentClassName = entityInfo.parentClassName;
             queryInfo.entities.emplace_back(insightInfo);
         }
+    }
+
+    return ERR_OK;
+}
+
+uint32_t InsightIntentUtils::ConvertConfigInsightIntentInfo(
+    InsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo, bool getEntity)
+{
+    queryInfo.isConfig = true;
+    queryInfo.bundleName = intentInfo.bundleName;
+    queryInfo.moduleName = intentInfo.moduleName;
+    queryInfo.intentName = intentInfo.intentName;
+    queryInfo.srcEntry = intentInfo.srcEntry;
+    queryInfo.displayName = intentInfo.displayName;
+    queryInfo.domain = intentInfo.intentDomain;
+    queryInfo.intentVersion = intentInfo.intentVersion;
+    queryInfo.displayDescription = intentInfo.displayDescription;
+    queryInfo.icon = intentInfo.icon;
+    queryInfo.develoType = INSIGHT_INTENTS_DEVELOP_TYPE_CONFIGURATION;
+
+    for (auto &keyword : intentInfo.keywords) {
+        queryInfo.keywords.emplace_back(keyword);
+    }
+    for (auto &inputParams : intentInfo.inputParams) {
+        queryInfo.inputParams.emplace_back(inputParams);
+    }
+    for (auto &outputParams : intentInfo.outputParams) {
+        queryInfo.outputParams.emplace_back(outputParams);
+    }
+
+    queryInfo.uiAbilityIntentInfo.abilityName = intentInfo.uiAbilityIntentInfo.abilityName;
+    queryInfo.uiAbilityIntentInfo.supportExecuteMode = intentInfo.uiAbilityIntentInfo.supportExecuteMode;
+    queryInfo.uiExtensionIntentInfo.abilityName = intentInfo.uiExtensionIntentInfo.abilityName;
+    queryInfo.serviceExtensionIntentInfo.abilityName = intentInfo.serviceExtensionIntentInfo.abilityName;
+    queryInfo.formIntentInfo.abilityName = intentInfo.formIntentInfo.abilityName;
+    queryInfo.formIntentInfo.formName = intentInfo.formIntentInfo.formName;
+    if (getEntity) {
+        queryInfo.cfgEntities = intentInfo.cfgEntities;
     }
 
     return ERR_OK;

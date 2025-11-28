@@ -49,6 +49,15 @@ struct InsightIntentInfo {
     std::string intentVersion;
     std::string srcEntry;
     std::string arkTSMode;
+    std::vector<std::string> inputParams;
+    std::vector<std::string> outputParams;
+    std::string cfgEntities;
+    std::string displayName;
+    std::string icon;
+    std::string displayDescription;
+    std::string bundleName;
+    std::string moduleName;
+    std::vector<std::string> keywords;
     UIAbilityIntentInfo uiAbilityIntentInfo;
     UIExtensionIntentInfo uiExtensionIntentInfo;
     ServiceExtensionIntentInfo serviceExtensionIntentInfo;
@@ -58,6 +67,7 @@ struct InsightIntentInfo {
 class InsightIntentProfile {
 public:
     static bool TransformTo(const std::string &profileStr, std::vector<InsightIntentInfo> &infos);
+    static bool ToJson(const InsightIntentInfo &info, nlohmann::json &jsonObject);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

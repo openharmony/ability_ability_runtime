@@ -74,6 +74,53 @@ napi_value CreateEntryInfoForQuery(napi_env env, const EntryInfoForQuery &info)
     return objValue;
 }
 
+napi_value CreateUiAbilityInfoForQuery(napi_env env, const UIAbilityIntentInfoForQuery &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (info.abilityName.empty()) {
+        return nullptr;
+    }
+    
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    napi_set_named_property(env, objValue, "executeMode", CreateNativeArray(env, info.supportExecuteMode));
+    return objValue;
+}
+
+napi_value CreateUiExtensionInfoForQuery(napi_env env, const UIExtensionIntentInfoForQuery &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (info.abilityName.empty()) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    return objValue;
+}
+
+napi_value CreateServiceExtensionInfoForQuery(napi_env env, const ServiceExtensionIntentInfoForQuery &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (info.abilityName.empty()) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    return objValue;
+}
+
+napi_value CreateFormIntentInfoForQuery(napi_env env, const FormIntentInfoForQuery &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (info.abilityName.empty()) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    napi_set_named_property(env, objValue, "formName", CreateJsValue(env, info.formName));
+    return objValue;
+}
+
 napi_value CreateFunctionInfoForQuery(napi_env env, const FunctionInfoForQuery &info)
 {
     napi_value objValue = nullptr;
@@ -180,6 +227,26 @@ napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramSt
     return CreateInsightIntentInfoWithJson(env, jsonObject);
 }
 
+napi_value CreateJsConfigPutParams(napi_env env, const std::vector<std::string> &inputParams)
+{
+    napi_value arrayValue = nullptr;
+    NAPI_CALL(env, napi_create_array_with_length(env, inputParams.size(), &arrayValue));
+    uint32_t index = 0;
+    for (const auto &paramStr : inputParams) {
+        if (paramStr.empty()) {
+            continue;
+        }
+        auto json = nlohmann::json::parse(paramStr, nullptr, false);
+        if (json.is_discarded()) {
+            TAG_LOGE(AAFwkTag::INTENT, "discarded input param");
+            continue;
+        }
+        napi_value jsValue = CreateInsightIntentInfoWithJson(env, json);
+        NAPI_CALL(env, napi_set_element(env, arrayValue, index++, jsValue));
+    }
+    return arrayValue;
+}
+
 napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &resultStr)
 {
     if (resultStr.empty()) {
@@ -187,6 +254,22 @@ napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &result
         return nullptr;
     }
     nlohmann::json jsonObject = nlohmann::json::parse(resultStr, nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
+        return nullptr;
+    }
+    return CreateInsightIntentInfoWithJson(env, jsonObject);
+}
+
+napi_value CreateInsightIntentConfigEntities(napi_env env, const std::string &entities)
+{
+    if (entities.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "entities empty");
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        return objValue;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(entities, nullptr, false);
     if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
         return nullptr;
@@ -208,10 +291,18 @@ napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfo
     napi_set_named_property(env, objValue, "schema", CreateJsValue(env, info.schema));
     napi_set_named_property(env, objValue, "icon", CreateJsValue(env, info.icon));
     napi_set_named_property(env, objValue, "llmDescription", CreateJsValue(env, info.llmDescription));
-    napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, info.intentType));
+    if (info.isConfig) {
+        std::string intentType = INSIGHT_INTENTS_TYPE_ENTRY;
+        napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, intentType));
+    } else {
+        napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, info.intentType));
+    }
     napi_set_named_property(env, objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
     napi_set_named_property(env, objValue, "result", CreateInsightIntentInfoResult(env, info.result));
     napi_set_named_property(env, objValue, "keywords", CreateNativeArray(env, info.keywords));
+    if (!info.develoType.empty()) {
+        napi_set_named_property(env, objValue, "developType", CreateJsValue(env, info.develoType));
+    }
     napi_set_named_property(env, objValue, "entities", CreateEntityInfoForArray(env, info.entities));
     if (info.intentType == INSIGHT_INTENTS_TYPE_LINK) {
         napi_set_named_property(env, objValue, "subIntentInfo", CreateLinkInfoForQuery(env, info.linkInfo));
@@ -223,13 +314,53 @@ napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfo
         napi_set_named_property(env, objValue, "subIntentInfo", CreateFunctionInfoForQuery(env, info.functionInfo));
     } else if (info.intentType == INSIGHT_INTENTS_TYPE_FORM) {
         napi_set_named_property(env, objValue, "subIntentInfo", CreateFormInfoForQuery(env, info.formInfo));
+    } else if (info.isConfig) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreateEntryInfoForQuery(env, info.entryInfo));
     } else {
         napi_value objVal = nullptr;
-        napi_create_object(env, &objValue);
+        napi_create_object(env, &objVal);
         napi_set_named_property(env, objValue, "subIntentInfo", objVal);
+    }
+    
+    if (info.isConfig) {
+        napi_set_named_property(env, objValue, "subIntentInfoForConfiguration", CreateConfigIntentInfo(env, info));
     }
     return objValue;
 }
+
+napi_value CreateConfigIntentInfo(napi_env env, const InsightIntentInfoForQuery &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "srcEntry", CreateJsValue(env, info.srcEntry));
+    if (info.inputParams.size() > 0) {
+        napi_set_named_property(env, objValue, "inputParams", CreateJsConfigPutParams(env, info.inputParams));
+    }
+    if (info.outputParams.size() > 0) {
+        napi_set_named_property(env, objValue, "outputParams", CreateJsConfigPutParams(env, info.outputParams));
+    }
+    napi_value uiAbilityInfo = CreateUiAbilityInfoForQuery(env, info.uiAbilityIntentInfo);
+    if (uiAbilityInfo != nullptr) {
+        napi_set_named_property(env, objValue, "uiAbility", uiAbilityInfo);
+    }
+    napi_value uiExtensionInfo = CreateUiExtensionInfoForQuery(env, info.uiExtensionIntentInfo);
+    if (uiExtensionInfo != nullptr) {
+        napi_set_named_property(env, objValue, "uiExtension", uiExtensionInfo);
+    }
+    napi_value serviceExtensionInfo = CreateServiceExtensionInfoForQuery(env, info.serviceExtensionIntentInfo);
+    if (serviceExtensionInfo != nullptr) {
+        napi_set_named_property(env, objValue, "serviceExtension", serviceExtensionInfo);
+    }
+    napi_value formInfo = CreateFormIntentInfoForQuery(env, info.formIntentInfo);
+    if (formInfo != nullptr) {
+        napi_set_named_property(env, objValue, "form", formInfo);
+    }
+    if (!info.cfgEntities.empty()) {
+        napi_set_named_property(env, objValue, "entities", CreateInsightIntentConfigEntities(env, info.cfgEntities));
+    }
+    return objValue;
+}
+
 
 napi_value CreateInsightIntentInfoForQueryArray(napi_env env, const std::vector<InsightIntentInfoForQuery> &infos)
 {

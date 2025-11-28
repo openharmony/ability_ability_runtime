@@ -358,6 +358,17 @@ static napi_value InitInsightIntentTypeObject(napi_env env)
     return napiObject;
 }
 
+static napi_value InitIntentDevelopTypeObject(napi_env env)
+{
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
+
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "CONFIGURATION", "configuration"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "DECORATOR", "decorator"));
+
+    return napiObject;
+}
+
 napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
@@ -381,10 +392,13 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
     NAPI_ASSERT(env, getInsightIntentFlag != nullptr, "failed to create getInsightIntent flag object");
     napi_value insightIntentType = InitInsightIntentTypeObject(env);
     NAPI_ASSERT(env, insightIntentType != nullptr, "failed to create insightIntent type object");
+    napi_value intentDevelopType = InitIntentDevelopTypeObject(env);
+    NAPI_ASSERT(env, intentDevelopType != nullptr, "failed to create develop type object");
 
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("GetInsightIntentFlag", getInsightIntentFlag),
         DECLARE_NAPI_PROPERTY("InsightIntentType", insightIntentType),
+        DECLARE_NAPI_PROPERTY("DevelopType", intentDevelopType),
     };
     napi_status status = napi_define_properties(env, exportObj, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     NAPI_ASSERT(env, status == napi_ok, "failed to define properties for exportObj");

@@ -15356,14 +15356,21 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
     }
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
+        std::vector<InsightIntentInfo> configInfos;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos);
-        if (intentInfos.empty()) {
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos, configInfos);
+        if (intentInfos.empty() && configInfos.empty()) {
             TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
             return ERR_OK;
         }
-        TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
+        TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu, configInfos size: %{public}zu",
+            intentInfos.size(), configInfos.size());
         bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        for (auto &info : configInfos) {
+             InsightIntentInfoForQuery intentInfoQuery;
+             InsightIntentUtils::ConvertConfigInsightIntentInfo(info, intentInfoQuery, getEntity);
+             infos.emplace_back(intentInfoQuery);
+        }
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery, getEntity);
@@ -15371,18 +15378,27 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
         }
     } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
+        std::vector<InsightIntentInfo> configInfos;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllConfigInsightIntentInfo(userId, configInfos);
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(genericInfos);
-        if (genericInfos.empty()) {
+        if (genericInfos.empty() && configInfos.empty()) {
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        for (auto &info : configInfos) {
+             InsightIntentInfoForQuery intentInfoQuery;
+             InsightIntentUtils::ConvertConfigInsightIntentInfo(info, intentInfoQuery, getEntity);
+             infos.emplace_back(intentInfoQuery);
+        }
 
-        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
+        if (getEntity) {
             std::vector<ExtractInsightIntentInfo> intentInfos;
-            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos);
-            if (intentInfos.empty()) {
-                TAG_LOGI(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+            std::vector<InsightIntentInfo> configInfosWithEntity;
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos, configInfosWithEntity);
+            if (intentInfos.empty() && configInfosWithEntity.empty()) {
+                TAG_LOGI(AAFwkTag::INTENT, "InsightIntentInfos empty");
                 return ERR_OK;
             }
             for (auto &info : intentInfos) {
@@ -15418,15 +15434,23 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
     }
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
+        std::vector<InsightIntentInfo> configInfos;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
             bundleName, userId, intentInfos);
-        if (intentInfos.empty()) {
-            TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfoByName(
+            bundleName, userId, configInfos);
+        if (intentInfos.empty() && configInfos.empty()) {
+            TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfos and configInsightIntentInfos empty");
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
         bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        for (auto &info : configInfos) {
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertConfigInsightIntentInfo(info, intentInfoQuery, getEntity);
+            infos.emplace_back(intentInfoQuery);
+        }
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery, getEntity);
@@ -15434,16 +15458,25 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
         }
     } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
+        std::vector<InsightIntentInfo> configInfos;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfoByName(
+            bundleName, userId, configInfos);
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(
             bundleName, genericInfos);
-        if (genericInfos.empty()) {
+        if (genericInfos.empty() && configInfos.empty()) {
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        for (auto &info : configInfos) {
+             InsightIntentInfoForQuery intentInfoQuery;
+             InsightIntentUtils::ConvertConfigInsightIntentInfo(info, intentInfoQuery, getEntity);
+             infos.emplace_back(intentInfoQuery);
+        }
 
-        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
+        if (getEntity) {
             std::vector<ExtractInsightIntentInfo> intentInfos;
-            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
                 bundleName, userId, intentInfos);
             if (intentInfos.empty()) {
@@ -15483,26 +15516,40 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
     }
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         ExtractInsightIntentInfo intentInfo;
+        InsightIntentInfo configIntentInfo;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-            bundleName, moduleName, intentName, userId, intentInfo);
         bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
-        InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info, getEntity);
-    } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
-        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
-            ExtractInsightIntentInfo intentInfo;
-            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfo(
+            bundleName, moduleName, intentName, userId, configIntentInfo);
+        InsightIntentUtils::ConvertConfigInsightIntentInfo(configIntentInfo, info, getEntity);
+        
+        if (info.bundleName.empty()) {
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
                 bundleName, moduleName, intentName, userId, intentInfo);
-            InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(intentInfo, info);
-
-            return ERR_OK;
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info, getEntity);
         }
-
-        ExtractInsightIntentGenericInfo genericInfo;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
-            bundleName, moduleName, intentName, genericInfo);
-        InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
+    } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        InsightIntentInfo configIntentInfo;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfo(
+            bundleName, moduleName, intentName, userId, configIntentInfo);
+        InsightIntentUtils::ConvertConfigInsightIntentInfo(configIntentInfo, info, getEntity);
+        if (info.bundleName.empty()) {
+            if (getEntity) {
+                ExtractInsightIntentInfo intentInfo;
+                DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+                    bundleName, moduleName, intentName, userId, intentInfo);
+                InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(intentInfo, info);
+                
+                return ERR_OK;
+            }
+        
+            ExtractInsightIntentGenericInfo genericInfo;
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
+                bundleName, moduleName, intentName, genericInfo);
+            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
+        }
 
     } else {
         TAG_LOGW(AAFwkTag::INTENT, "invalid flag: %{public}d", flag);
