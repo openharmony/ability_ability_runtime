@@ -516,13 +516,28 @@ bool ETSAbilityStage::CallAcceptOrRequestSync(ani_env *env, const AAFwk::Want &w
         TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
         return false;
     }
-    ani_object resObj = CallObjectMethod(methodName.c_str(), ABILITY_STAGE_SYNC_METHOD_NAME, wantRef);
-    if (resObj == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CallAcceptOrRequestSync unimplemented");
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityObj_");
         return false;
     }
+    ani_method method = nullptr;
+    ani_status status = env->Class_FindMethod(etsAbilityStageObj_->aniCls, methodName.c_str(),
+        ABILITY_STAGE_SYNC_METHOD_NAME, &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindMethod status: %{public}d, or null method", status);
+        return false;
+    }
+
+    ani_value args[] = { { .r = wantRef } };
+    ani_ref result = nullptr;
+    if ((status = env->Object_CallMethod_Ref_A(etsAbilityStageObj_->aniObj, method, &result, args)) != ANI_OK ||
+        result == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CallMethod status: %{public}d, or null result", status);
+        return false;
+    }
+
     std::string resultString = "";
-    if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(resObj), resultString)) {
+    if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(result), resultString)) {
         TAG_LOGE(AAFwkTag::APPKIT, "fail to get resultString");
         return false;
     }
@@ -544,7 +559,25 @@ bool ETSAbilityStage::CallAcceptOrRequestAsync(ani_env *env, const AAFwk::Want &
         TAG_LOGE(AAFwkTag::APPKIT, "null wantRef");
         return false;
     }
-    isAsync = CallObjectMethod(true, methodName.c_str(), ABILITY_STAGE_ASYNC_METHOD_NAME, wantRef);
+    if (etsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsAbilityObj_");
+        return false;
+    }
+    ani_method method = nullptr;
+    ani_status status = env->Class_FindMethod(etsAbilityStageObj_->aniCls, methodName.c_str(),
+        ABILITY_STAGE_ASYNC_METHOD_NAME, &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindMethod status: %{public}d, or null method", status);
+        return false;
+    }
+
+    ani_value args[] = { { .r = wantRef } };
+    ani_boolean res = ANI_FALSE;
+    if ((status = env->Object_CallMethod_Boolean_A(etsAbilityStageObj_->aniObj, method, &res, args)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CallMethod status: %{public}d", status);
+        return false;
+    }
+    isAsync = res;
     return isAsync;
 }
 
