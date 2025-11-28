@@ -206,7 +206,7 @@ void AppSchedulerProxy::ScheduleMemoryCommon(const int32_t level, const uint32_t
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC_WAKEUP_LATER);
     if (!WriteInterfaceToken(data)) {
         return;
     }
