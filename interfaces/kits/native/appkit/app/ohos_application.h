@@ -261,6 +261,8 @@ public:
         return deduplicate_;
     }
 
+    bool GetAppCloneIndex(int32_t &index);
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);

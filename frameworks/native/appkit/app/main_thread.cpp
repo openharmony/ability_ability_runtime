@@ -1560,6 +1560,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #endif
     AppExecFwk::HapModuleInfo entryHapModuleInfo;
     if (!bundleInfo.hapModuleInfos.empty()) {
+        hapList_ = bundleInfo.hapModuleInfos;
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.moduleType == AppExecFwk::ModuleType::ENTRY) {
                 findEntryHapModuleInfo = true;
@@ -3577,16 +3578,43 @@ int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &c
     return NO_ERROR;
 }
 
+bool MainThread::CheckHapPathLoaded(const HapModuleInfo &hapModuleInfo)
+{
+    for (auto it = hapList_.begin(); it != hapList_.end();) {
+        if (it->hqfInfo.moduleName == hapModuleInfo.hqfInfo.moduleName) {
+            if (it->hqfInfo.hapSha256 == hapModuleInfo.hqfInfo.hapSha256) {
+                TAG_LOGI(AAFwkTag::APPKIT, "hap in list");
+                return true;
+            } else {
+                hapList_.erase(it);
+                return false;
+            }
+        } else {
+            ++it;
+        }
+    }
+    return false;
+}
+
+void setFileMap(const HapModuleInfo &hapInfo, const std::string &bundleName,
+    std::vector<std::pair<std::string, std::string>> &fileMap)
+{
+    std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
+    std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
+    TAG_LOGD(AAFwkTag::APPKIT, "bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
+        "hqf file: %{private}s, hap path: %{private}s", bundleName.c_str(), hapInfo.moduleName.c_str(),
+        hapInfo.process.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
+    fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
+}
+
 bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     std::vector<std::pair<std::string, std::string>> &fileMap)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return false;
     }
-
     BundleInfo bundleInfo;
     if (bundleMgrHelper->GetBundleInfoForSelfWithOutCache(
         (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
@@ -3599,19 +3627,35 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
         TAG_LOGE(AAFwkTag::APPKIT, "Get bundle info of %{public}s failed", bundleName.c_str());
         return false;
     }
-
     for (auto hapInfo : bundleInfo.hapModuleInfos) {
-        if ((processInfo_ != nullptr) && (processInfo_->GetProcessName() == hapInfo.process) &&
-            (!hapInfo.hqfInfo.hqfFilePath.empty())) {
-            std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
-            std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
-            TAG_LOGD(AAFwkTag::APPKIT, "bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
-                "hqf file: %{private}s, hap path: %{private}s", bundleName.c_str(), hapInfo.moduleName.c_str(),
-                hapInfo.process.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
-            fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
+        if (processInfo_ == nullptr || hapInfo.hqfInfo.hqfFilePath.empty()) {
+            break;
+        }
+        int32_t appCloneIndex;
+        if (application_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+            return false;
+        }
+        application_->GetAppCloneIndex(appCloneIndex);
+        if (processInfo_->GetProcessName() == hapInfo.process) {
+            setFileMap(hapInfo, bundleName, fileMap);
+        } else if (processInfo_->GetProcessName() == hapInfo.process + std::to_string(appCloneIndex)) {
+            auto &runtime = application_->GetRuntime();
+            if (runtime == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+                return false;
+            }
+            if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS &&
+                hapInfo.moduleType == ModuleType::FEATURE) {
+                break;
+            }
+            if (CheckHapPathLoaded(hapInfo)) {
+                break;
+            }
+            hapList_.push_back(hapInfo);
+            setFileMap(hapInfo, bundleName, fileMap);
         }
     }
-
     return true;
 }
 
