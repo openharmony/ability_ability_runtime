@@ -1465,7 +1465,7 @@ int32_t ContextImpl::GetAllRunningInstanceKeys(std::vector<std::string> &instanc
 #ifdef SUPPORT_SCREEN
 void ContextImpl::GetAllUIAbilities(std::vector<std::shared_ptr<UIAbility>> &uiAbility)
 {
-    std::lock_guard<std::mutex> lock(getDisplayConfigCallbackMutex_);
+    std::lock_guard<std::mutex> lock(getAllUIAbilitiesCallbackMutex_);
     if (getAllUIAbilitiesCallback_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null getAllUIAbilitiesCallback_");
         return;

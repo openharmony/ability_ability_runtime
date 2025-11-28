@@ -1510,6 +1510,95 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0
     EXPECT_EQ(uIAbilities.size(), 0);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0300 end.";
 }
+
+/*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0400
+ * @tc.name: GetAllUIAbilities
+ * @tc.desc: Verify function GetAllUIAbilities
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0400 start.";
+    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
+    ASSERT_NE(ohosApplication_->abilityRecordMgr_, nullptr);
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, nullptr);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uiAbility;
+    ohosApplication_->GetAllUIAbilities(uiAbility);
+    EXPECT_EQ(uiAbility.size(), 0);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0400 end.";
+}
+
+/*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0500
+ * @tc.name: GetAllUIAbilities
+ * @tc.desc: Verify function GetAllUIAbilities
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0500 start.";
+    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
+    ASSERT_NE(ohosApplication_->abilityRecordMgr_, nullptr);
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    ASSERT_NE(info, nullptr);
+    info->type = AbilityType::PAGE;
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
+    ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uiAbility;
+    ohosApplication_->GetAllUIAbilities(uiAbility);
+    EXPECT_EQ(uiAbility.size(), 0);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0500 end.";
+}
+
+/*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0600
+ * @tc.name: GetAllUIAbilities
+ * @tc.desc: Verify function GetAllUIAbilities
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0600 start.";
+    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
+    ASSERT_NE(ohosApplication_->abilityRecordMgr_, nullptr);
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    ASSERT_NE(info, nullptr);
+    info->type = AbilityType::PAGE;
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
+    auto abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    sptr<AbilityThread> abilityThread = abilitythread;
+    ASSERT_NE(abilityThread, nullptr);
+    record->SetAbilityThread(abilityThread);
+    ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uiAbility;
+    ohosApplication_->GetAllUIAbilities(uiAbility);
+    EXPECT_EQ(uiAbility.size(), 0);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_GetAllUIAbilities_0600 end.";
+}
+
+/*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbilitiesCallback_0100
+ * @tc.name: RegisterGetAllUIAbilitiesCallback
+ * @tc.desc: Verify function RegisterGetAllUIAbilitiesCallback
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbilitiesCallback_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbilitiesCallback_0100 start.";
+    std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    ASSERT_NE(abilityRuntimeContext, nullptr);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(contextImpl, nullptr);
+    abilityRuntimeContext->AttachContextImpl(contextImpl);
+    std::weak_ptr<OHOSApplication> emptyWeakPtr;
+    ohosApplication_->RegisterGetAllUIAbilitiesCallback(abilityRuntimeContext, emptyWeakPtr);
+    ASSERT_NE(contextImpl->getAllUIAbilitiesCallback_, nullptr);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uiAbility;
+    contextImpl->getAllUIAbilitiesCallback_(uiAbility);
+    EXPECT_EQ(uiAbility.size(), 0);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbilitiesCallback_0100 end.";
+}
 #endif
 
 /*
