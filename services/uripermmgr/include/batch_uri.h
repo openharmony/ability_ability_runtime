@@ -42,12 +42,12 @@ public:
     BatchUri() {}
 
     int32_t Init(const std::vector<std::string> &uriVec, uint32_t mode = 0,
-        const std::string &callerAlterBundleName = "", const std::string &targetAlterBundleName = "",
-        bool haveSandboxAccessPermission = false);
+                 const std::string &callerAlterBundleName = "", const std::string &targetAlterBundleName = "",
+                 bool haveSandboxAccessPermission = false);
 
     void InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode = 0,
-        const std::string &callerBundleName = "", const std::string &targetBundleName = "",
-        bool haveSandboxAccessPermission = false);
+                         const std::string &callerBundleName = "", const std::string &targetBundleName = "",
+                         bool haveSandboxAccessPermission = false);
 
     void SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult);
 
@@ -62,7 +62,7 @@ public:
     void SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t> &indexs, std::vector<std::string> &uriVec);
 
     int32_t GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoVec,
-        std::vector<PolicyInfo> &bundlePolicyInfoVec);
+                                  std::vector<PolicyInfo> &bundlePolicyInfoVec);
 
     bool GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec);
 
@@ -114,6 +114,6 @@ struct BatchStringUri {
     std::vector<std::string> mediaUriVec;
     std::vector<PolicyInfo> policyVec;
 };
-} // OHOS
-} // AAFwk
-#endif // OHOS_ABILITY_RUNTIME_BATCH_URI_H
+}  // OHOS
+}  // AAFwk
+#endif  // OHOS_ABILITY_RUNTIME_BATCH_URI_H

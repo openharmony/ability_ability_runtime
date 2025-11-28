@@ -50,7 +50,7 @@ constexpr int32_t ERR_OK = 0;
 constexpr uint32_t FLAG_READ_WRITE_URI = Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
-constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
+constexpr const char* DISTRIBUTED_DOCS_URI_MARK = "?networkid=";
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
 const int MAX_URI_COUNT = 200000;
 #ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
@@ -113,7 +113,6 @@ std::vector<bool> UriPermissionManagerStubImpl::VerifyUriPermissionByMap(std::ve
         newFlag = FLAG_WRITE_URI;
     }
     std::vector<bool> result(uriVec.size(), false);
-    std::lock_guard<std::mutex> guard(mutex_);
     for (size_t i = 0; i < uriVec.size(); i++) {
         auto uriStr = uriVec[i].ToString();
         result[i] = VerifySingleUriPermissionByMap(uriStr, newFlag, tokenId);
@@ -124,6 +123,7 @@ std::vector<bool> UriPermissionManagerStubImpl::VerifyUriPermissionByMap(std::ve
 bool UriPermissionManagerStubImpl::VerifySingleUriPermissionByMap(const std::string &uri,
     uint32_t flag, uint32_t tokenId)
 {
+    std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uri);
     if (search != uriMap_.end()) {
         auto& list = search->second;
@@ -140,7 +140,7 @@ bool UriPermissionManagerStubImpl::VerifySingleUriPermissionByMap(const std::str
 bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &uriStr,
                                                              uint32_t newFlag, uint32_t tokenId)
 {
-    auto iPos = uriStr.find(CLOUND_DOCS_URI_MARK);
+    auto iPos = uriStr.find(DISTRIBUTED_DOCS_URI_MARK);
     if (iPos == std::string::npos) {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "Local uri not support to verify sub directory uri permission");
         return false;
@@ -165,8 +165,8 @@ bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &
 
 bool UriPermissionManagerStubImpl::IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri)
 {
-    auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
-    auto cPos = cachedUri.find(CLOUND_DOCS_URI_MARK);
+    auto iPos = inputUri.find(DISTRIBUTED_DOCS_URI_MARK);
+    auto cPos = cachedUri.find(DISTRIBUTED_DOCS_URI_MARK);
     if ((iPos == std::string::npos) || (cPos == std::string::npos)) {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "not distributed file uri");
         return false;
@@ -356,12 +356,12 @@ int32_t UriPermissionManagerStubImpl::RevokeContentUriPermission(uint32_t tokenI
     }
     auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityClient == nullptr) {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "abilityClient null");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "abilityClient null");
         return INNER_ERR;
     }
     auto collaborator = IN_PROCESS_CALL(abilityClient->GetAbilityManagerCollaborator());
     if (collaborator == nullptr) {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "collaborator null");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "collaborator null");
         return INNER_ERR;
     }
     auto ret = collaborator->RevokeUriPermission(tokenId);
