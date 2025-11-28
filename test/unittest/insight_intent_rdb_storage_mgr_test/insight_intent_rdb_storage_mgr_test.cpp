@@ -92,12 +92,13 @@ HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_003, Tes
     std::string bundleName;
     std::string moduleName;
     ExtractInsightIntentProfileInfoVec profileInfos;
+    std::vector<InsightIntentInfo> configInfos;
     MockInsertData(false);
     auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(bundleName,
-        moduleName, userId, profileInfos);
+        moduleName, userId, profileInfos, configInfos);
     MockInsertData(true);
     result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(bundleName,
-        moduleName, userId, profileInfos);
+        moduleName, userId, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -110,10 +111,12 @@ HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_004, Tes
 {
     int32_t userId = 0;
     std::vector<ExtractInsightIntentInfo> infos;
+    std::vector<InsightIntentInfo> configInfos;
     MockQueryDataBeginWithKey(false);
-    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(userId, infos);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(
+        userId, infos, configInfos);
     MockQueryDataBeginWithKey(true);
-    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(userId, infos);
+    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(userId, infos, configInfos);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -153,6 +156,64 @@ HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_006, Tes
         moduleName, intentName, userId, infos);
     MockQueryData(true);
     result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfo(bundleName,
+        moduleName, intentName, userId, infos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_007
+ * @tc.desc: Test LoadConfigInsightIntentInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_007, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::vector<InsightIntentInfo> configInfos;
+    MockQueryDataBeginWithKey(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfos(
+        userId, configInfos);
+    MockQueryDataBeginWithKey(true);
+    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfos(
+        userId, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_008
+ * @tc.desc: Test LoadConfigInsightIntentInfoByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_008, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName;
+    std::vector<InsightIntentInfo> infos;
+    MockQueryDataBeginWithKey(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfoByName(
+        bundleName, userId, infos);
+    MockQueryDataBeginWithKey(true);
+    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfoByName(
+        bundleName, userId, infos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_009
+ * @tc.desc: Test LoadConfigInsightIntentInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_009, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName;
+    std::string moduleName;
+    std::string intentName;
+    InsightIntentInfo infos;
+    MockQueryData(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfo(bundleName,
+        moduleName, intentName, userId, infos);
+    MockQueryData(true);
+    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfo(bundleName,
         moduleName, intentName, userId, infos);
     EXPECT_EQ(result, ERR_OK);
 }

@@ -56,10 +56,31 @@ struct EntityInfoForQuery {
     std::string parentClassName;
 };
 
+struct UIAbilityIntentInfoForQuery {
+    std::string abilityName;
+    std::vector<AppExecFwk::ExecuteMode> supportExecuteMode {};
+};
+
+struct UIExtensionIntentInfoForQuery {
+    std::string abilityName;
+};
+
+struct ServiceExtensionIntentInfoForQuery {
+    std::string abilityName;
+};
+
+struct FormIntentInfoForQuery {
+    std::string abilityName;
+    std::string formName;
+};
+
 struct InsightIntentInfoForQuery : public Parcelable {
+    bool isConfig = false;
     std::string bundleName;
+    std::string develoType;
     std::string moduleName;
     std::string intentName;
+    std::string srcEntry;
     std::string domain;
     std::string intentVersion;
     std::string displayName;
@@ -76,6 +97,13 @@ struct InsightIntentInfoForQuery : public Parcelable {
     EntryInfoForQuery entryInfo;
     FunctionInfoForQuery functionInfo;
     FormInfoForQuery formInfo;
+    std::vector<std::string> inputParams;
+    std::vector<std::string> outputParams;
+    std::string cfgEntities;
+    UIAbilityIntentInfoForQuery uiAbilityIntentInfo;
+    UIExtensionIntentInfoForQuery uiExtensionIntentInfo;
+    ServiceExtensionIntentInfoForQuery serviceExtensionIntentInfo;
+    FormIntentInfoForQuery formIntentInfo;
     std::vector<EntityInfoForQuery> entities {};
 
     bool ReadFromParcel(Parcel &parcel);

@@ -21,26 +21,37 @@
 #include "insight_intent_rdb_data_mgr.h"
 #include "hilog_tag_wrapper.h"
 #include "extract_insight_intent_profile.h"
+#include "insight_intent_profile.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class InsightRdbStorageMgr : public std::enable_shared_from_this<InsightRdbStorageMgr> {
     DECLARE_DELAYED_SINGLETON(InsightRdbStorageMgr)
 public:
-    int32_t LoadInsightIntentInfos(const int32_t userId, std::vector<ExtractInsightIntentInfo> &totalInfos);
+    int32_t LoadInsightIntentInfos(const int32_t userId,
+        std::vector<ExtractInsightIntentInfo> &totalInfos, std::vector<InsightIntentInfo> &configInfos);
+    int32_t LoadConfigInsightIntentInfos(
+        const int32_t userId, std::vector<InsightIntentInfo> &configInfos);
     int32_t LoadInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
         std::vector<ExtractInsightIntentInfo> &totalInfos);
+    int32_t LoadConfigInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
+        std::vector<InsightIntentInfo> &totalInfos);
     int32_t LoadInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
         const std::string &intentName, const int32_t userId, ExtractInsightIntentInfo &totalInfo);
+    int32_t LoadConfigInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
+        const std::string &intentName, const int32_t userId, InsightIntentInfo &totalInfo);
     int32_t SaveStorageInsightIntentData(const std::string &bundleName, const std::string &moduleName,
-        const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos);
+        const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos,
+        std::vector<InsightIntentInfo> &configInfos);
     int32_t DeleteStorageInsightIntentData(const std::string &bundleName,
         const std::string &moduleName, const int32_t userId);
     int32_t DeleteStorageInsightIntentByUserId(const int32_t userId);
 
 private:
     void Transform(std::unordered_map<std::string, std::string> value,
-        std::vector<ExtractInsightIntentInfo> &totalInfos);
+        std::vector<ExtractInsightIntentInfo> &totalInfos, std::vector<InsightIntentInfo> &configInfos);
+    void TransformConfigIntent(std::unordered_map<std::string, std::string> value,
+        std::vector<InsightIntentInfo> &configInfos);
     mutable std::mutex rdbStorePtrMutex_;
 };
 }  // namespace AbilityRuntime
