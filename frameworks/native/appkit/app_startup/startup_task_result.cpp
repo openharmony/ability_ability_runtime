@@ -61,16 +61,16 @@ OnCompletedCallback::~OnCompletedCallback() = default;
 
 void OnCompletedCallback::Call(const std::shared_ptr<StartupTaskResult> &result)
 {
-    if (isCalled_) {
-        TAG_LOGD(AAFwkTag::STARTUP, "callback already called");
-        return;
-    }
     if (callbackFunc_ == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "callbackFunc null");
         return;
     }
+    bool expected = false;
+    if (!isCalled_.compare_exchange_strong(expected, true)) {
+        TAG_LOGD(AAFwkTag::STARTUP, "callback already called");
+        return;
+    }
     callbackFunc_(result);
-    isCalled_ = true;
 }
 
 bool OnCompletedCallback::IsCalled() const
