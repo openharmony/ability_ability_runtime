@@ -773,37 +773,46 @@ ErrCode AbilityContextImpl::RestoreWindowStage(void *contentStorage)
     return ERR_OK;
 }
 
+std::shared_ptr<LocalCallContainer> AbilityContextImpl::GetLocalCallContainer()
+{
+    std::lock_guard lock(callContainerMutex_);
+    return localCallContainer_;
+}
+
 ErrCode AbilityContextImpl::StartAbilityByCall(
     const AAFwk::Want& want, const std::shared_ptr<CallerCallBack>& callback, int32_t accountId)
 {
-    if (localCallContainer_ == nullptr) {
-        localCallContainer_ = std::make_shared<LocalCallContainer>();
+    std::shared_ptr<LocalCallContainer> localCallContainer;
+    {
+        std::lock_guard lock(callContainerMutex_);
         if (localCallContainer_ == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer_");
-            return ERR_INVALID_VALUE;
+            localCallContainer_ = std::make_shared<LocalCallContainer>();
         }
+        localCallContainer = localCallContainer_;
     }
-    return localCallContainer_->StartAbilityByCallInner(want, callback, token_, accountId);
+    return localCallContainer->StartAbilityByCallInner(want, callback, token_, accountId);
 }
 
 ErrCode AbilityContextImpl::ReleaseCall(const std::shared_ptr<CallerCallBack>& callback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer_");
+    auto localCallContainer = GetLocalCallContainer();
+    if (localCallContainer == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer");
         return ERR_INVALID_VALUE;
     }
-    return localCallContainer_->ReleaseCall(callback);
+    return localCallContainer->ReleaseCall(callback);
 }
 
 void AbilityContextImpl::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack>& callback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer_");
+    auto localCallContainer = GetLocalCallContainer();
+    if (localCallContainer == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer");
         return;
     }
-    localCallContainer_->ClearFailedCallConnection(callback);
+    localCallContainer->ClearFailedCallConnection(callback);
 }
 
 void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback)

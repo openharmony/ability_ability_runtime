@@ -199,36 +199,48 @@ void GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallParameters> calls,
     callerCallBack->SetOnRelease(releaseListen);
 }
 
-void StartAbilityByCallExecuteDone(std::shared_ptr<StartAbilityByCallParameters> calldata)
+void StartAbilityByCallExecuteDone(StartAbilityByCallParameters &callData,
+    std::shared_ptr<CallerCallBack> callerCallback, const AAFwk::Want &want,
+    std::weak_ptr<AbilityContext> wContext)
 {
-    if (calldata == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null calldata");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityByCallExecuteDone begin");
+    auto context = wContext.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        callData.err = AAFwk::ERR_INVALID_CONTEXT;
         return;
     }
-    std::unique_lock<std::mutex> lock(calldata->mutexlock);
-    if (calldata->remoteCallee != nullptr) {
+    auto ret = context->StartAbilityByCall(want, callerCallback, -1);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "startAbility failed");
+        callData.err = ret;
+        return;
+    }
+    std::unique_lock<std::mutex> lock(callData.mutexlock);
+    if (callData.remoteCallee != nullptr) {
         TAG_LOGI(AAFwkTag::CONTEXT, "not null callExecute callee");
         return;
     }
 
-    if (calldata->condition.wait_for(lock, std::chrono::seconds(CALLER_TIME_OUT)) == std::cv_status::timeout) {
+    if (callData.condition.wait_for(lock, std::chrono::seconds(CALLER_TIME_OUT)) == std::cv_status::timeout) {
         TAG_LOGE(AAFwkTag::CONTEXT, "callExecute waiting callee timeout");
-        calldata->err = -1;
+        callData.err = ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::CONTEXT, "end");
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityByCallExecuteDone end");
 }
 
 void StartAbilityByCallComplete(napi_env env, NapiAsyncTask& task, std::weak_ptr<AbilityContext> abilityContext,
     std::shared_ptr<StartAbilityByCallParameters> calldata, std::shared_ptr<CallerCallBack> callerCallBack)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (calldata == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null calldata");
         return;
     }
     if (calldata->err != 0) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "err: %{public}d", calldata->err);
-        task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-        TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called");
+        TAG_LOGE(AAFwkTag::CONTEXT, "StartAbilityByCall err: %{public}d", calldata->err);
+        task.Reject(env, CreateJsErrorByNativeErr(env, calldata->err));
         auto context = abilityContext.lock();
         if (context == nullptr || callerCallBack == nullptr) {
             TAG_LOGE(AAFwkTag::CONTEXT, "null context or callBack");
@@ -254,7 +266,7 @@ void StartAbilityByCallComplete(napi_env env, NapiAsyncTask& task, std::weak_ptr
         return contextForRelease->ReleaseCall(callback);
     };
     task.Resolve(env, CreateJsCallerComplex(env, releaseCallAbilityFunc, calldata->remoteCallee, callerCallBack));
-    TAG_LOGD(AAFwkTag::CONTEXT, "end");
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityByCallComplete end");
 }
 }
 
@@ -1326,7 +1338,7 @@ bool JsAbilityContext::CheckStartAbilityByCallParams(napi_env env, NapiCallbackI
 
 napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnStartAbilityByCall called");
     // 1. check params
     napi_value lastParam = nullptr;
     int32_t userId = DEFAULT_INVAL_VALUE;
@@ -1336,10 +1348,12 @@ napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo
     }
 
     // 2. create CallBack function
-    std::shared_ptr<StartAbilityByCallParameters> calls = std::make_shared<StartAbilityByCallParameters>();
-    auto callExecute = [calldata = calls] () { StartAbilityByCallExecuteDone(calldata); };
+    auto calls = std::make_shared<StartAbilityByCallParameters>();
     auto callerCallBack = std::make_shared<CallerCallBack>();
     GenerateCallerCallBack(calls, callerCallBack);
+    auto callExecute = [calls, callerCallBack, want, weak = context_] () {
+        StartAbilityByCallExecuteDone(*calls, callerCallBack, want, weak);
+    };
     auto callComplete = [weak = context_, calldata = calls, callerCallBack] (
         napi_env env, NapiAsyncTask& task, int32_t status) {
         StartAbilityByCallComplete(env, task, weak, calldata, callerCallBack);
@@ -1347,31 +1361,10 @@ napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo
 
     // 3. StartAbilityByCall
     napi_value retsult = nullptr;
-    auto context = context_.lock();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-        return CreateJsUndefined(env);
-    }
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(callExecute), std::move(callComplete), &retsult));
 
-    auto ret = context->StartAbilityByCall(want, callerCallBack, userId);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "startAbility failed");
-        ThrowErrorByNativeErr(env, ret);
-        return CreateJsUndefined(env);
-    }
-
-    if (calls->remoteCallee == nullptr) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "null remoteCallee");
-        NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", env,
-            CreateAsyncTaskWithLastParam(env, lastParam, std::move(callExecute), std::move(callComplete), &retsult));
-    } else {
-        TAG_LOGI(AAFwkTag::CONTEXT, "promise return result execute");
-        NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", env,
-            CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(callComplete), &retsult));
-    }
-
-    TAG_LOGD(AAFwkTag::CONTEXT, "end");
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnStartAbilityByCall end");
     return retsult;
 }
 

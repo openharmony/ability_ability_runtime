@@ -66,6 +66,7 @@ private:
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> callProxyRecords_;
     // used to store multi instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
+    std::mutex connectionsMutex_;
     std::set<sptr<CallerConnection>> connections_;
     std::mutex mutex_;
     std::mutex multipleMutex_;
