@@ -48,13 +48,15 @@ static void RemoveCallerIfNeed(const sptr<IAbilityManagerCollaborator> &collabor
 }
 
 static void HandleCallerIfNeed(const sptr<IRemoteObject> &callerToken,
-    const sptr<IAbilityManagerCollaborator> &collaborator, Want &want)
+    const sptr<IAbilityManagerCollaborator> &collaborator, Want &want, const std::string &callerBundleName)
 {
+    want.SetParam("CollaboratorRemoveCallerName", callerBundleName);
     if (StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
         UpdateCallerIfNeed(collaborator, want);
     } else {
         RemoveCallerIfNeed(collaborator, want);
     }
+    want.RemoveParam("CollaboratorRemoveCallerName");
 }
 
 static void UpdateTargetIfNeed(const sptr<IAbilityManagerCollaborator> &collaborator, const Want &want,
