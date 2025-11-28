@@ -127,6 +127,27 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityByCa
     Want want;
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     ErrCode result = serviceExtensionContextTest.StartAbilityByCall(want, callback);
+    EXPECT_NE(serviceExtensionContextTest.localCallContainer_, nullptr);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+}
+
+/*
+ * Feature: ServiceExtensionContext
+ * Function: startAbility
+ * SubFunction: NA
+ * FunctionPoints: ServiceExtensionContextTest startAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify startAbility
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityByCall_002, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    Want want;
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    auto tempCallContainer = std::make_shared<LocalCallContainer>();
+    serviceExtensionContextTest.localCallContainer_ = tempCallContainer;
+    ErrCode result = serviceExtensionContextTest.StartAbilityByCall(want, callback);
+    EXPECT_EQ(serviceExtensionContextTest.localCallContainer_, tempCallContainer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 

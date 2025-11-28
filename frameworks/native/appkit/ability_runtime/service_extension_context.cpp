@@ -77,38 +77,47 @@ ErrCode ServiceExtensionContext::StartAbilityAsCaller(const AAFwk::Want &want,
     return err;
 }
 
+std::shared_ptr<LocalCallContainer> ServiceExtensionContext::GetLocalCallContainer() const
+{
+    std::lock_guard lock(callContainerMutex_);
+    return localCallContainer_;
+}
+
 ErrCode ServiceExtensionContext::StartAbilityByCall(
     const AAFwk::Want& want, const std::shared_ptr<CallerCallBack> &callback, int32_t accountId)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
-    if (localCallContainer_ == nullptr) {
-        localCallContainer_ = std::make_shared<LocalCallContainer>();
+    std::shared_ptr<LocalCallContainer> localCallContainer;
+    {
+        std::lock_guard lock(callContainerMutex_);
         if (localCallContainer_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null localCallContainer_");
-            return ERR_INVALID_VALUE;
+            localCallContainer_ = std::make_shared<LocalCallContainer>();
         }
+        localCallContainer = localCallContainer_;
     }
-    return localCallContainer_->StartAbilityByCallInner(want, callback, token_, accountId);
+    return localCallContainer->StartAbilityByCallInner(want, callback, token_, accountId);
 }
 
 ErrCode ServiceExtensionContext::ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
-    if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null localCallContainer_");
+    auto localCallContainer = GetLocalCallContainer();
+    if (localCallContainer == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer");
         return ERR_INVALID_VALUE;
     }
-    return localCallContainer_->ReleaseCall(callback);
+    return localCallContainer->ReleaseCall(callback);
 }
 
 void ServiceExtensionContext::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
-    if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null localCallContainer_");
+    auto localCallContainer = GetLocalCallContainer();
+    if (localCallContainer == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null localCallContainer");
         return;
     }
-    localCallContainer_->ClearFailedCallConnection(callback);
+    localCallContainer->ClearFailedCallConnection(callback);
 }
 
 ErrCode ServiceExtensionContext::ConnectAbility(
