@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "hilog_tag_wrapper.h"
 #include "uri_permission_load_callback.h"
-#include "uri_permission_manager_client.h"
+
+#include "hilog_tag_wrapper.h"
 #include "system_ability_definition.h"
+#include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace AAFwk {

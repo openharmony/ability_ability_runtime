@@ -25,12 +25,13 @@ namespace AAFwk {
 class UDMFUtils {
 public:
     static int32_t ProcessUdmfKey(const std::string &key, uint32_t callerTokenId, uint32_t targetTokenId,
-        std::vector<std::string> &uris);
+                                  std::vector<std::string> &uris);
+
 private:
     static int32_t GetBatchData(const std::string &key, std::vector<std::string> &uris);
     static int32_t AddPrivilege(const std::string &key, uint32_t tokenId, const std::string &readPermission);
     static bool IsUdKeyCreateByCaller(uint32_t callerTokenId, const std::string &key);
 };
-} // OHOS
-} // AAFwk
-#endif // OHOS_ABILITY_RUNTIME_UPMS_UDMF_UTILS_H
+}  // OHOS
+}  // AAFwk
+#endif  // OHOS_ABILITY_RUNTIME_UPMS_UDMF_UTILS_H
