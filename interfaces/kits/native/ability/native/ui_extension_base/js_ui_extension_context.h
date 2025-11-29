@@ -111,6 +111,10 @@ private:
     OnRequestResult &onRequestFail);
     void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
     OnRequestResult &onRequestFail);
+    std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> CreateAtomicServiceCallBack(napi_env env,
+        const std::shared_ptr<NativeReference> &atomicServiceRef,
+        const std::shared_ptr<NativeReference> &onRequestSuccRef,
+        const std::shared_ptr<NativeReference> &onRequestFailRef);
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);
     void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);

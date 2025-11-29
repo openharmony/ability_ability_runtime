@@ -1876,43 +1876,75 @@ napi_value JSUIExtensionConnection::CallObjectMethod(const char* name, napi_valu
     return result;
 }
 
-void JsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
-    napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId)
+std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> JsUIExtensionContext::CreateAtomicServiceCallBack(
+    napi_env env,
+    const std::shared_ptr<NativeReference>& atomicServiceRef,
+    const std::shared_ptr<NativeReference>& onRequestSuccRef,
+    const std::shared_ptr<NativeReference>& onRequestFailRef)
 {
-    napi_value completionHandlerForAtomicService = AppExecFwk::GetPropertyValueByPropertyName(env, param,
-        "completionHandlerForAtomicService", napi_object);
-    if (completionHandlerForAtomicService == nullptr) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "null completionHandlerForAtomicService");
-        return;
-    }
-    TAG_LOGI(AAFwkTag::UI_EXT, "completionHandlerForAtomicService exists");
-    napi_value onRequestSuccFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForAtomicService,
-        "onAtomicServiceRequestSuccess", napi_function);
-    napi_value onRequestFailFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForAtomicService,
-        "onAtomicServiceRequestFailure", napi_function);
-    if (onRequestSuccFunc == nullptr || onRequestFailFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null onRequestSuccFunc or onRequestFailFunc");
-        return;
-    }
-    OnAtomicRequestSuccess onRequestSucc = [env, completionHandlerForAtomicService, onRequestSuccFunc](
-        const std::string &appId) {
+    OnAtomicRequestSuccess onRequestSucc = [env, atomicServiceRef, onRequestSuccRef](const std::string &appId) {
         napi_value argv[ARGC_ONE] = { CreateJsValue(env, appId) };
+        napi_value completionHandlerForAtomicService = atomicServiceRef->GetNapiValue();
+        napi_value onRequestSuccFunc = onRequestSuccRef->GetNapiValue();
+        napi_valuetype type = napi_undefined;
+        if (napi_typeof(env, onRequestSuccFunc, &type) != napi_ok || type != napi_function) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "onRequestSuccFunc is not function");
+            return;
+        }
+        if (napi_typeof(env, completionHandlerForAtomicService, &type) != napi_ok || type != napi_object) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "completionHandlerForAtomicService is not napi_object");
+            return;
+        }
         napi_status status = napi_call_function(
             env, completionHandlerForAtomicService, onRequestSuccFunc, ARGC_ONE, argv, nullptr);
         if (status != napi_ok) {
             TAG_LOGE(AAFwkTag::UI_EXT, "call onRequestSuccess, failed: %{public}d", status);
         }
     };
-    OnAtomicRequestFailure onRequestFail = [env, completionHandlerForAtomicService, onRequestFailFunc](
+    OnAtomicRequestFailure onRequestFail = [env, atomicServiceRef, onRequestFailRef](
         const std::string &appId, int32_t failureCode, const std::string &message) {
         napi_value argv[ARGC_THREE] = { CreateJsValue(env, appId), CreateJsValue(env, failureCode),
             CreateJsValue(env, message) };
+        napi_value completionHandlerForAtomicService = atomicServiceRef->GetNapiValue();
+        napi_value onRequestFailFunc = onRequestFailRef->GetNapiValue();
+        napi_valuetype type = napi_undefined;
+        if (napi_typeof(env, onRequestFailFunc, &type) != napi_ok || type != napi_function) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "onRequestFailFunc is not function");
+            return;
+        }
+        if (napi_typeof(env, completionHandlerForAtomicService, &type) != napi_ok || type != napi_object) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "completionHandlerForAtomicService is not napi_object");
+            return;
+        }
         napi_status status = napi_call_function(
             env, completionHandlerForAtomicService, onRequestFailFunc, ARGC_THREE, argv, nullptr);
         if (status != napi_ok) {
             TAG_LOGE(AAFwkTag::UI_EXT, "call onRequestFailure, failed: %{public}d", status);
         }
     };
+    return std::make_pair(onRequestSucc, onRequestFail);
+}
+
+void JsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
+    napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId)
+{
+    std::shared_ptr<NativeReference> atomicServiceRef = AppExecFwk::CreateNativeRef(env, param,
+        "completionHandlerForAtomicService", napi_object);
+    if (atomicServiceRef == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create reference failed");
+        return;
+    }
+    TAG_LOGI(AAFwkTag::UI_EXT, "completionHandlerForAtomicService exists");
+    std::shared_ptr<NativeReference> onRequestSuccRef = AppExecFwk::CreateNativeRef(
+        env, atomicServiceRef->GetNapiValue(), "onAtomicServiceRequestSuccess", napi_function);
+    std::shared_ptr<NativeReference> onRequestFailRef = AppExecFwk::CreateNativeRef(
+        env, atomicServiceRef->GetNapiValue(), "onAtomicServiceRequestFailure", napi_function);
+    if (onRequestSuccRef == nullptr || onRequestFailRef == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestSuccRef or onRequestFailRef failed");
+        return;
+    }
+    auto atomicRequestCallback = CreateAtomicServiceCallBack(
+        env, atomicServiceRef, onRequestSuccRef, onRequestFailRef);
     auto context = context_.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null context");
@@ -1920,7 +1952,8 @@ void JsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
     }
     std::string requestId = std::to_string(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count()));
-    if (context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId) != ERR_OK) {
+    if (context->AddCompletionHandlerForAtomicService(
+        requestId, atomicRequestCallback.first, atomicRequestCallback.second, appId) != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "add completionHandler failed");
         return;
     }
