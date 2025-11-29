@@ -68,15 +68,13 @@ export struct IntentContent {
       insightIntentDriver.getAllInsightIntentInfo(insightIntentDriver.GetInsightIntentFlag.GET_FULL_INSIGHT_INTENT)
         .then((data) => {
           this.listMaterial = data as IntentInfo[];
-          this.intermediateGroupMaterial = this.listMaterial
-            .filter(item => item.developType != insightIntentDriver.DevelopType.CONFIGURATION)
-            .reduce((acc, item) => {
-              const bundleName: string = item.bundleName;
-              if (!acc[bundleName]) {
-                acc[bundleName] = [];
-              }
-              acc[bundleName].push(item);
-              return acc;
+          this.intermediateGroupMaterial = this.listMaterial.reduce((acc, item) => {
+            const bundleName: string = item.bundleName;
+            if (!acc[bundleName]) {
+              acc[bundleName] = [];
+            }
+            acc[bundleName].push(item);
+            return acc;
           }, {} as Record<string, IntentInfo[]>)
           const bundleNames = Object.keys(this.intermediateGroupMaterial);
           const promises = bundleNames.map(async (bundleName) => {
