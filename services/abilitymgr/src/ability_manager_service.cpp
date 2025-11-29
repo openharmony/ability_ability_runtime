@@ -12508,7 +12508,7 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     eventInfo.shouldKillForeground = reason.shouldKillForeground;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     int32_t callerUid = IPCSkeleton::GetCallingUid();
-    if (!ResourceSchedule::ResSchedClient::GetInstance().isAllowedKill(callerUid, reason.exitMsg)) {
+    if (!ResourceSchedule::ResSchedClient::GetInstance().IsAllowedKill(callerUid, reason.exitMsg)) {
         TAG_LOGE(AAFwkTag::APPMGR, "kill reason verification fail");
         return ERR_PERMISSION_DENIED;
     }
