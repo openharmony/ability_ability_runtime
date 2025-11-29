@@ -63,7 +63,8 @@ int32_t AutoFillManager::RequestAutoFill(Ace::UIContent *uiContent, const AutoFi
     }
 
     if (request.autoFillType == AbilityBase::AutoFillType::UNSPECIFIED &&
-        request.autoFillTriggerType == AutoFill::AutoFillTriggerType::UNSPECIFIED) {
+        (request.autoFillTriggerType == AutoFill::AutoFillTriggerType::UNSPECIFIED ||
+        request.autoFillTriggerType == AutoFill::AutoFillTriggerType::AUTO_REQUEST)) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "autoFillType invalid");
         return AutoFill::AUTO_FILL_TYPE_INVALID;
     }
@@ -248,7 +249,15 @@ bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest 
     bool ret = true;
     autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
     AbilityBase::AutoFillType autoFillType = request.autoFillType;
-    if (autoFillType >= AbilityBase::AutoFillType::FULL_STREET_ADDRESS &&
+    if (request.autoFillTriggerType == AutoFill::AutoFillTriggerType::MANUAL_REQUEST ||
+        request.autoFillTriggerType == AutoFill::AutoFillTriggerType::PASTE_REQUEST) {
+        if (system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
+            autoFillWindowType = AutoFill::AutoFillWindowType::POPUP_WINDOW;
+        } else {
+            autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
+        }
+        isSmartAutoFill = false;
+    } else if (autoFillType >= AbilityBase::AutoFillType::FULL_STREET_ADDRESS &&
         autoFillType <= AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER) {
         autoFillWindowType = AutoFill::AutoFillWindowType::POPUP_WINDOW;
         isSmartAutoFill = true;
