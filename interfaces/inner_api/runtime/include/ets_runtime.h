@@ -94,6 +94,7 @@ public:
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
     void StopDebugMode();
     uint32_t instanceId_ = 0;
+    static void PreloadLibrary();
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
