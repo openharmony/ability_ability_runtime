@@ -7577,7 +7577,8 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         }
     }
 
-    if (AppExecFwk::AppfreezeManager::GetInstance()->CheckAppfreezeHappend(pid, eventName)) {
+    std::string key = std::to_string(pid) + "_" + std::to_string(uid) + "_" + bundleName;
+    if (AppExecFwk::AppfreezeManager::GetInstance()->CheckAppfreezeHappend(key, eventName)) {
         return ERR_OK;
     }
 
@@ -7710,6 +7711,11 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
             return ERR_OK;
         }
         auto timeoutNotifyApp = [this, pid, uid, bundleName, processName, transformedFaultData]() {
+            std::string key = std::to_string(pid) + "_" + std::to_string(uid) + "_" + bundleName;
+            if (AppExecFwk::AppfreezeManager::GetInstance()->CheckAppfreezeHappend(key,
+                transformedFaultData.errorObject.name)) {
+                return;
+            }
             this->TimeoutNotifyApp(pid, uid, bundleName, processName, transformedFaultData);
         };
         dfxTaskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
