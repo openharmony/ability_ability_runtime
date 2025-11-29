@@ -2301,6 +2301,7 @@ void UIAbilityLifecycleManager::SetRootSceneSession(const sptr<IRemoteObject> &r
         TAG_LOGE(AAFwkTag::ABILITYMGR, "rootSceneSession invalid");
         return;
     }
+    std::lock_guard guard(sessionLock_);
     rootSceneSession_ = rootSceneSession;
 }
 
