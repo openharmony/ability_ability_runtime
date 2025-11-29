@@ -381,5 +381,21 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSiz
 #endif
     GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 end";
 }
+
+/**
+ * @tc.name: GetCurrentUIStackInfo_0100
+ * @tc.desc: NapiUncaughtExceptionCallbackTest GetCurrentUIStackInfo.
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_GRAPHICS
+HWTEST_F(NapiUncaughtExceptionCallbackTest, GetCurrentUIStackInfo_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetCurrentUIStackInfo_0100 start";
+    std::string summary = "123";
+    NapiUncaughtExceptionCallback::GetCurrentUIStackInfo(summary);
+    ASSERT_EQ(summary, "123");
+    GTEST_LOG_(INFO) << "GetCurrentUIStackInfo_0100 end";
+}
+#endif // SUPPORT_GRAPHICS
 } // namespace AppExecFwk
 } // namespace OHOS
