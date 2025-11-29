@@ -24,6 +24,18 @@ class MockInteropAbilityLifecycleCallback : public InteropAbilityLifecycleCallba
 public:
     MockInteropAbilityLifecycleCallback() {}
     ~MockInteropAbilityLifecycleCallback() {}
+    int32_t Register(void *callback) override
+    {
+        return 0;
+    }
+    bool Unregister(void *callback = nullptr) override
+    {
+        return true;
+    }
+    bool Empty() override
+    {
+        return true;
+    }
     void OnAbilityCreate(std::shared_ptr<InteropObject> ability) override
     {}
     void OnWindowStageCreate(std::shared_ptr<InteropObject> ability,

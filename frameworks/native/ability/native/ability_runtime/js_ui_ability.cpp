@@ -233,7 +233,7 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     do {                                                                                            \
         if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
             std::shared_ptr<InteropObject> interopObject =                                          \
-                InteropObjectInstance::CreateInteropObject(jsRuntime_, ability);                    \
+                InteropObjectInstance::CreateInteropObject(jsRuntime, ability);                     \
             applicationContext->Dispatch##type(interopObject);                                      \
         }                                                                                           \
     } while(0)
@@ -242,9 +242,9 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     do {                                                                                            \
         if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
             std::shared_ptr<InteropObject> interopAbility =                                         \
-                InteropObjectInstance::CreateInteropObject(jsRuntime_, ability);                    \
+                InteropObjectInstance::CreateInteropObject(jsRuntime, ability);                     \
             std::shared_ptr<InteropObject> interopWindowStage =                                     \
-                InteropObjectInstance::CreateInteropObject(jsRuntime_, stage);                      \
+                InteropObjectInstance::CreateInteropObject(jsRuntime, stage);                       \
             applicationContext->Dispatch##type(interopAbility, interopWindowStage);                 \
         }                                                                                           \
     } while(0)

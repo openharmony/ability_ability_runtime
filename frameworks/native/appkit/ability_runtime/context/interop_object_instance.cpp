@@ -25,16 +25,49 @@ namespace AbilityRuntime {
 namespace {
 const char* ETS_ANI_COMMON_LIBNAME = "libani_common.z.so";
 const char* CREATE_ETS_INTEROP_OBJECT_FUNC = "OHOS_CreateEtsInteropObject";
-using CreateEtsInteropObjectFunc = InteropObject*(*)(const Runtime &runtime, const AbilityLifecycleCallbackArgs &arg);
-CreateEtsInteropObjectFunc g_etsInteropObjectCreateFunc = nullptr;
+const char* CREATE_JS_INTEROP_OBJECT_FUNC = "OHOS_CreateJsInteropObject";
+const char* CREATE_JS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_FUNC = "OHOS_CreateJsInteropAbilityLifecycleCallback";
+using CreateInteropObjectFunc = InteropObject*(*)(const Runtime &runtime, const AbilityLifecycleCallbackArgs &arg);
+CreateInteropObjectFunc g_etsInteropObjectCreateFunc = nullptr;
 std::mutex g_etsInteropObjectCreateFuncMutex;
+CreateInteropObjectFunc g_jsInteropObjectCreateFunc = nullptr;
+std::mutex g_jsInteropObjectCreateFuncMutex;
+using CreateInteropAbilityLifecycleCallbackFunc = InteropAbilityLifecycleCallback*(*)(void *env);
+CreateInteropAbilityLifecycleCallbackFunc g_jsInteropAbilityLifecycleCallbackCreateFunc = nullptr;
+std::mutex g_jsInteropAbilityLifecycleCallbackCreateFuncMutex;
+void *g_handle = nullptr;
+std::mutex g_handleMutex;
+
+void *GetDlSymbol(const char *funcName)
+{
+    std::lock_guard<std::mutex> lock(g_handleMutex);
+    if (g_handle == nullptr) {
+        g_handle = dlopen(ETS_ANI_COMMON_LIBNAME, RTLD_LAZY);
+        if (g_handle == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "dlopen failed %{public}s, %{public}s", ETS_ANI_COMMON_LIBNAME, dlerror());
+            return nullptr;
+        }
+    }
+
+    auto symbol = dlsym(g_handle, funcName);
+    if (symbol == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "dlsym failed %{public}s, %{public}s", funcName, dlerror());
+        dlclose(g_handle);
+        g_handle = nullptr;
+        return nullptr;
+    }
+    return symbol;
+}
 }
 
 std::shared_ptr<InteropObject> InteropObjectInstance::CreateInteropObject(const Runtime &runtime,
     const AbilityLifecycleCallbackArgs &arg)
 {
     if (runtime.GetLanguage() == Runtime::Language::JS) {
-            return CreateEtsInteropObject(runtime, arg);
+        return CreateEtsInteropObject(runtime, arg);
+    }
+    if (runtime.GetLanguage() == Runtime::Language::ETS) {
+        return CreateJsInteropObject(runtime, arg);
     }
     return nullptr;
 }
@@ -43,27 +76,65 @@ std::shared_ptr<InteropObject> InteropObjectInstance::CreateEtsInteropObject(con
     const AbilityLifecycleCallbackArgs &arg)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "CreateEtsInteropObject");
-    std::lock_guard<std::mutex> lock(g_etsInteropObjectCreateFuncMutex);
-    if (g_etsInteropObjectCreateFunc != nullptr) {
-        return std::shared_ptr<InteropObject>(g_etsInteropObjectCreateFunc(runtime, arg));
+    {
+        std::lock_guard<std::mutex> lock(g_etsInteropObjectCreateFuncMutex);
+        if (g_etsInteropObjectCreateFunc != nullptr) {
+            return std::shared_ptr<InteropObject>(g_etsInteropObjectCreateFunc(runtime, arg));
+        }
     }
 
-    auto handle = dlopen(ETS_ANI_COMMON_LIBNAME, RTLD_LAZY);
-    if (handle == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "dlopen failed %{public}s, %{public}s", ETS_ANI_COMMON_LIBNAME, dlerror());
-        return nullptr;
-    }
-
-    auto symbol = dlsym(handle, CREATE_ETS_INTEROP_OBJECT_FUNC);
+    auto symbol = GetDlSymbol(CREATE_ETS_INTEROP_OBJECT_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "dlsym failed %{public}s, %{public}s", CREATE_ETS_INTEROP_OBJECT_FUNC, dlerror());
-        dlclose(handle);
         return nullptr;
     }
 
-    g_etsInteropObjectCreateFunc = reinterpret_cast<CreateEtsInteropObjectFunc>(symbol);
-    auto interopObjectPtr = g_etsInteropObjectCreateFunc(runtime, arg);
-    return std::shared_ptr<InteropObject>(interopObjectPtr);
+    std::lock_guard<std::mutex> lock(g_etsInteropObjectCreateFuncMutex);
+    g_etsInteropObjectCreateFunc = reinterpret_cast<CreateInteropObjectFunc>(symbol);
+    return std::shared_ptr<InteropObject>(g_etsInteropObjectCreateFunc(runtime, arg));
+}
+
+std::shared_ptr<InteropObject> InteropObjectInstance::CreateJsInteropObject(const Runtime &runtime,
+    const AbilityLifecycleCallbackArgs &arg)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CreateJsInteropObject");
+    {
+        std::lock_guard<std::mutex> lock(g_jsInteropObjectCreateFuncMutex);
+        if (g_jsInteropObjectCreateFunc != nullptr) {
+            return std::shared_ptr<InteropObject>(g_jsInteropObjectCreateFunc(runtime, arg));
+        }
+    }
+
+    auto symbol = GetDlSymbol(CREATE_JS_INTEROP_OBJECT_FUNC);
+    if (symbol == nullptr) {
+        return nullptr;
+    }
+
+    std::lock_guard<std::mutex> lock(g_jsInteropObjectCreateFuncMutex);
+    g_jsInteropObjectCreateFunc = reinterpret_cast<CreateInteropObjectFunc>(symbol);
+    return std::shared_ptr<InteropObject>(g_jsInteropObjectCreateFunc(runtime, arg));
+}
+
+std::shared_ptr<InteropAbilityLifecycleCallback> InteropObjectInstance::CreateJsInteropAbilityLifecycleCallback(
+    void *env)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "CreateJsInteropAbilityLifecycleCallback");
+    {
+        std::lock_guard<std::mutex> lock(g_jsInteropAbilityLifecycleCallbackCreateFuncMutex);
+        if (g_jsInteropAbilityLifecycleCallbackCreateFunc != nullptr) {
+            return std::shared_ptr<InteropAbilityLifecycleCallback>(
+                g_jsInteropAbilityLifecycleCallbackCreateFunc(env));
+        }
+    }
+
+    auto symbol = GetDlSymbol(CREATE_JS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_FUNC);
+    if (symbol == nullptr) {
+        return nullptr;
+    }
+
+    std::lock_guard<std::mutex> lock(g_jsInteropAbilityLifecycleCallbackCreateFuncMutex);
+    g_jsInteropAbilityLifecycleCallbackCreateFunc =
+        reinterpret_cast<CreateInteropAbilityLifecycleCallbackFunc>(symbol);
+    return std::shared_ptr<InteropAbilityLifecycleCallback>(g_jsInteropAbilityLifecycleCallbackCreateFunc(env));
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
