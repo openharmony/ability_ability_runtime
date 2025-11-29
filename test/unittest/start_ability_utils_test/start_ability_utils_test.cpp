@@ -272,6 +272,39 @@ HWTEST_F(StartAbilityUtilsTest, SetStartAbilityInfo_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartAbilityInfoWrap_001
+ * @tc.desc: test class StartAbilityUtil StartAbilityInfoWrap constructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, StartAbilityInfoWrap_001, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    int32_t validUserId = 0;
+    StartAbilityUtils::startSpecifiedBySCB = true;
+    StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, nullptr);
+    EXPECT_TRUE(StartAbilityUtils::isWantWithAppCloneIndex);
+    StartAbilityUtils::startSpecifiedBySCB = false;
+}
+
+/**
+ * @tc.name: StartAbilityInfoWrap_002
+ * @tc.desc: test class StartAbilityUtil StartAbilityInfoWrap constructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, StartAbilityInfoWrap_002, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    int32_t validUserId = 0;
+    StartAbilityUtils::startSpecifiedBySCB = false;
+    StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, nullptr);
+    EXPECT_FALSE(StartAbilityUtils::isWantWithAppCloneIndex);
+}
+
+/**
  * @tc.name: CreateStartAbilityInfo_001
  * @tc.desc: test class StartAbilityUtil CreateStartAbilityInfo function
  * @tc.type: FUNC
