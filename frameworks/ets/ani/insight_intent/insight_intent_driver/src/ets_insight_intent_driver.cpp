@@ -19,6 +19,7 @@
 
 #include "ability_business_error.h"
 #include "ability_manager_client.h"
+#include "ets_insight_intent_driver_utils.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hilog_tag_wrapper.h"
@@ -177,6 +178,182 @@ public:
         }
         return;
     }
+
+    static void OnGetAllInfoCheck(ani_env *env, ani_int intentFlags)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetAllInfoCheck called");
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+    }
+
+    static void OnGetAllInsightIntentInfo(ani_env *env, ani_int intentFlags, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetAllInsightIntentInfo called");
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
+        auto innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, *infos);
+        if (innerErrorCode == 0) {
+            ani_object result = CreateEtsInsightIntentInfoForQueryArray(env, *infos);
+            AsyncCallback(env, callback, nullptr, result);
+        } else {
+            AsyncCallback(env, callback,
+                AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrorCode), nullptr);
+        }
+        return;
+    }
+
+    static void OnGetInfoByBundleNameCheck(ani_env *env, ani_string bundleNameObj, ani_int intentFlags)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetInfoByBundleNameCheck called");
+        std::string bundleName;
+        if (!GetStdString(env, bundleNameObj, bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param bundleName failed, bundleName must be string.");
+            return;
+        }
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+    }
+
+    static void OnGetInsightIntentInfoByBundleName(
+        ani_env *env, ani_string bundleNameObj, ani_int intentFlags, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetInsightIntentInfoByBundleName called");
+        std::string bundleName;
+        if (!GetStdString(env, bundleNameObj, bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param bundleName failed, bundleName must be string."), nullptr);
+            return;
+        }
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
+        auto innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
+            flag, bundleName, *infos);
+        if (innerErrorCode == 0) {
+            ani_object result = CreateEtsInsightIntentInfoForQueryArray(env, *infos);
+            AsyncCallback(env, callback, nullptr, result);
+        } else {
+            AsyncCallback(env, callback,
+                AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrorCode), nullptr);
+        }
+        return;
+    }
+
+    static void OnGetInfoByIntentNameCheck(ani_env *env, ani_string bundleNameObj,
+        ani_string moduleNameObj, ani_string intentNameObj, ani_int intentFlags)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetInfoByIntentNameCheck called");
+        std::string bundleName;
+        if (!GetStdString(env, bundleNameObj, bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param bundleName failed, bundleName must be string.");
+            return;
+        }
+        std::string moduleName;
+        if (!GetStdString(env, moduleNameObj, moduleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse moduleName failed");
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param moduleName failed, moduleName must be string.");
+            return;
+        }
+        std::string intentName;
+        if (!GetStdString(env, intentNameObj, intentName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse intentName failed");
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param intentName failed, intentName must be string.");
+            return;
+        }
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+    }
+
+    static void OnGetInsightIntentInfoByIntentName(ani_env *env,
+        ani_string bundleNameObj, ani_string moduleNameObj,
+        ani_string intentNameObj, ani_int intentFlags, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnGetInsightIntentInfoByIntentName called");
+        std::string bundleName;
+        if (!GetStdString(env, bundleNameObj, bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param bundleName failed, bundleName must be string."), nullptr);
+            return;
+        }
+        std::string moduleName;
+        if (!GetStdString(env, moduleNameObj, moduleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse moduleName failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param moduleName failed, moduleName must be string."), nullptr);
+            return;
+        }
+        std::string intentName;
+        if (!GetStdString(env, intentNameObj, intentName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse intentName failed");
+            AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
+                "Parse param intentName failed, intentName must be string."), nullptr);
+            return;
+        }
+        GetInsightIntentFlag flag = static_cast<GetInsightIntentFlag>(intentFlags);
+        if (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return;
+        }
+        auto info = std::make_shared<InsightIntentInfoForQuery>();
+        auto innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
+            flag, bundleName, moduleName, intentName, *info);
+        if (innerErrorCode == 0) {
+            ani_object result = CreateEtsInsightIntentInfoForQuery(env, *info);
+            AsyncCallback(env, callback, nullptr, result);
+        } else {
+            AsyncCallback(env, callback,
+                AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrorCode), nullptr);
+        }
+        return;
+    }
 };
 
 void EtsInsightIntentDriverInit(ani_env *env)
@@ -197,6 +374,18 @@ void EtsInsightIntentDriverInit(ani_env *env)
     std::array kitFunctions = {
         ani_native_function {"nativeExecuteSync", nullptr,
             reinterpret_cast<void *>(EtsInsightIntentDriver::OnExecute)},
+        ani_native_function {"nativeGetAllInsightIntentInfo", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetAllInsightIntentInfo)},
+        ani_native_function {"nativeGetAllInfoCheck", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetAllInfoCheck)},
+        ani_native_function {"nativeGetInsightIntentInfoByBundleName", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetInsightIntentInfoByBundleName)},
+        ani_native_function {"nativeGetInfoByBundleNameCheck", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetInfoByBundleNameCheck)},
+        ani_native_function {"nativeGetInsightIntentInfoByIntentName", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetInsightIntentInfoByIntentName)},
+        ani_native_function {"nativeGetInfoByIntentNameCheck", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentDriver::OnGetInfoByIntentNameCheck)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());

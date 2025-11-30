@@ -591,7 +591,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
 
 void toJsonArray(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
 {
-    TAG_LOGE(AAFwkTag::INTENT, "toJsonArray to json");
+    TAG_LOGD(AAFwkTag::INTENT, "toJsonArray to json");
     nlohmann::json inputArray = nlohmann::json::array();
     for (const auto &paramStr : info.inputParams) {
         if (paramStr.empty()) {
