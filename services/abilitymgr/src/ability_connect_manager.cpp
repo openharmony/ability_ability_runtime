@@ -1721,7 +1721,8 @@ void AbilityConnectManager::HandleLoadAbilityOrStartSpecifiedProcess(
     const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     if (abilityRecord->GetAbilityInfo().isolationProcess &&
-        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         TAG_LOGD(AAFwkTag::EXT, "Is UIExtension and isolationProcess, StartSpecifiedProcess");
         LoadAbilityContext context{ std::make_shared<AbilityRuntime::LoadParam>(loadParam),
             std::make_shared<AppExecFwk::AbilityInfo>(abilityRecord->GetAbilityInfo()),

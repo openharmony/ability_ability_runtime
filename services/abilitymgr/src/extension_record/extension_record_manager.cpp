@@ -16,6 +16,7 @@
 #include "extension_record_manager.h"
 
 #include "ability_util.h"
+#include "app_utils.h"
 #include "preload_ui_extension_execute_callback_proxy.h"
 #include "preload_ui_extension_host_client.h"
 #include "ui_extension_record.h"
@@ -493,7 +494,8 @@ int32_t ExtensionRecordManager::SetAbilityProcessName(const AAFwk::AbilityReques
     const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord)
 {
     if (abilityRequest.abilityInfo.isolationProcess &&
-        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         abilityRecord->SetProcessName(
             abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.extensionTypeName);
         return ERR_OK;
