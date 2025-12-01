@@ -26,7 +26,7 @@ constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_BOOL = "std.core.Boolean";
 constexpr const char* CLASSNAME_STRING = "std.core.String";
-constexpr const char* CLASSNAME_ARRAY = "escompat.Array";
+constexpr const char* CLASSNAME_ARRAY = "std.core.Array";
 
 void PutDouble(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani_object aniValue)
 {

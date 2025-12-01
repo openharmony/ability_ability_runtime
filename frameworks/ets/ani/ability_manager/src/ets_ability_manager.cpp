@@ -44,7 +44,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* ETS_ABILITY_MANAGER_NAMESPACE = "@ohos.app.ability.abilityManager.abilityManager";
-constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":C{escompat.Array}";
+constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":C{std.core.Array}";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK = "C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *ON_OFF_TYPE_ABILITY_FOREGROUND_STATE = "abilityForegroundState";
 constexpr int32_t ERR_FAILURE = -1;
