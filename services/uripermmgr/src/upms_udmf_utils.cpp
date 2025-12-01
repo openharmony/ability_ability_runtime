@@ -36,7 +36,7 @@ int32_t UDMFUtils::GetBatchData(const std::string &key, std::vector<std::string>
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "GetBatchData call");
     uris.clear();
-    UDMF::QueryOption query = { .key = key };
+    UDMF::QueryOption query = {.key = key};
     std::vector<UDMF::UnifiedData> unifiedDataset;
     auto ret = IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().GetBatchData(query, unifiedDataset));
     if (ret != ERR_OK) {
@@ -77,8 +77,8 @@ int32_t UDMFUtils::AddPrivilege(const std::string &key, uint32_t tokenId, const 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "AddPrivilege call");
-    UDMF::QueryOption query = { .key = key };
-    UDMF::Privilege privilege = { .tokenId = tokenId, .readPermission = readPermission };
+    UDMF::QueryOption query = {.key = key};
+    UDMF::Privilege privilege = {.tokenId = tokenId, .readPermission = readPermission};
     auto ret = IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().AddPrivilege(query, privilege));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "AddPrivilege failed:%{public}d", ret);
@@ -89,19 +89,19 @@ int32_t UDMFUtils::AddPrivilege(const std::string &key, uint32_t tokenId, const 
 bool UDMFUtils::IsUdKeyCreateByCaller(uint32_t callerTokenId, const std::string &key)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto keyAuthority =  IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().GetBundleNameByUdKey(key));
+    auto keyAuthority = IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().GetBundleNameByUdKey(key));
     std::string callerAuthority;
     FUDUtils::GetAlterableBundleNameByTokenId(callerTokenId, callerAuthority);
     if (callerAuthority != keyAuthority) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Authority: %{public}s-%{public}s",
-            keyAuthority.c_str(), callerAuthority.c_str());
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Authority: %{public}s-%{public}s", keyAuthority.c_str(),
+                 callerAuthority.c_str());
         return false;
     }
     return true;
 }
 
 int32_t UDMFUtils::ProcessUdmfKey(const std::string &key, uint32_t callerTokenId, uint32_t targetTokenId,
-    std::vector<std::string> &uris)
+                                  std::vector<std::string> &uris)
 {
     // To check if the key belong to callerTokenId
     if (!IsUdKeyCreateByCaller(callerTokenId, key)) {
@@ -126,5 +126,5 @@ int32_t UDMFUtils::ProcessUdmfKey(const std::string &key, uint32_t callerTokenId
     }
     return ERR_OK;
 }
-} // OHOS
-} // AAFwk
+}  // OHOS
+}  // AAFwk

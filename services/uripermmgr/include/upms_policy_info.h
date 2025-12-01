@@ -40,6 +40,6 @@ public:
     uint64_t timestamp;
     SetInfo() : bundleName(""), timestamp(0) {}
 };
-} // AAFwk
-} // OHOS
-#endif // OHOS_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
+}  // AAFwk
+}  // OHOS
+#endif  // OHOS_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
