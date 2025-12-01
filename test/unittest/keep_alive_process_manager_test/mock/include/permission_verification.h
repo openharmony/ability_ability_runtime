@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,13 @@ public:
     PermissionVerification() = default;
     ~PermissionVerification() = default;
 
-    bool VerifyCallingPermission(const std::string &permissionName) const;
+    bool VerifyCallingPermission(const std::string &permissionName, const uint32_t specifyTokenId = 0) const;
 
     bool IsSACall() const;
 
     bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
+    bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);

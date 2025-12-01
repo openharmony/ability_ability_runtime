@@ -142,7 +142,8 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
     return MyFlag::flag_;
 }
 
-int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
+int PermissionVerification::CheckCallServiceAbilityPermission(
+    const VerificationInfo &verificationInfo, uint32_t specifyTokenId) const
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
     return MyFlag::flag_;
@@ -205,6 +206,11 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
     return MyFlag::systemAppFlag_;
 }
 
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
+
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
@@ -217,7 +223,7 @@ bool PermissionVerification::VerifyPrepareTerminatePermission(const int &tokenId
     return true;
 }
 
-bool PermissionVerification::VerifyShellStartExtensionType(int32_t type) const
+bool PermissionVerification::VerifyShellStartExtensionType(int32_t type, uint32_t specifyTokenId) const
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
     return MyFlag::flag_;

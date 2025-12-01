@@ -1442,7 +1442,8 @@ int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &re
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartAbility(*want, userId, requestCode);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = StartAbility(*want, userId, requestCode, specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1732,7 +1733,8 @@ int AbilityManagerStub::StartAbilityAddCallerInner(MessageParcel &data, MessageP
 
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartAbility(*want, callerToken, userId, requestCode);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = StartAbility(*want, callerToken, userId, requestCode, specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1828,7 +1830,9 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     int32_t userId = data.ReadInt32();
     AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
     bool isQueryExtensionOnly = data.ReadBool();
-    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly,
+        specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

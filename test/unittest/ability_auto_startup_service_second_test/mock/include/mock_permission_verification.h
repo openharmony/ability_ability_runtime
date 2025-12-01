@@ -93,6 +93,7 @@ public:
     }
 
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
+    bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;
     bool IsSystemAppCall() const;
 };
 } // namespace AAFwk

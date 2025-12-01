@@ -35,11 +35,13 @@ class MockAbilityManagerService : public AbilityManagerStub,
 public:
     MockAbilityManagerService();
     ~MockAbilityManagerService();
-    int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1) override;
+    int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1,
+        uint64_t specifiedFullTokenId = 0) override;
     int StartAbility(const Want& want,
         const sptr<IRemoteObject>& callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = -1) override;
+        int requestCode = -1,
+        uint64_t specifiedFullTokenId = 0) override;
     int StartAbility(
         const Want& want,
         const StartOptions& startOptions,

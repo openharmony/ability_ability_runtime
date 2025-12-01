@@ -17,7 +17,8 @@
 
 namespace OHOS {
 namespace AAFwk {
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+    const uint32_t specifyTokenId) const
 {
     return MyFlag::verifyCallingPermissionFlag_;
 }
@@ -36,6 +37,11 @@ bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission(const st
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return MyFlag::isAllowedToUseSystemAPIFlag_;
+}
+
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
 }
 } // namespace AAFwk
 } // namespace OHOS

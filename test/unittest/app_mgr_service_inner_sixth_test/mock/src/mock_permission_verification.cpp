@@ -122,6 +122,10 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
     TAG_LOGD(AAFwkTag::TEST, "mock JudgeCallerIsAllowedToUseSystemAPI flag_: %{public}d.", MyFlag::flag_);
     return MyFlag::flag_;
 }
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
 bool PermissionVerification::IsSystemAppCall() const
 {
     return true;
