@@ -134,6 +134,9 @@
 #ifdef SUPPORT_SCREEN
 #include "utils/dms_util.h"
 #endif
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#endif
 #include "xcollie/watchdog.h"
 
 using OHOS::AppExecFwk::ElementName;
@@ -454,6 +457,9 @@ bool AbilityManagerService::Init()
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ResourceSchedule::ResSchedClient::GetInstance().InitKillReasonListener();
+#endif
     TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
@@ -12546,6 +12552,13 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     eventInfo.pid = pid;
     eventInfo.exitMsg = reason.exitMsg;
     eventInfo.shouldKillForeground = reason.shouldKillForeground;
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t callerUid = IPCSkeleton::GetCallingUid();
+    if (!ResourceSchedule::ResSchedClient::GetInstance().IsAllowedKill(callerUid, reason.exitMsg)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "kill reason verification fail");
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
     auto ret = KillProcessWithReasonInner(pid, reason, isKillPrecedeStart);
     TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcessWithReason pid:%{public}d,ret:%{public}d,reason:%{public}s", pid, ret,
         reason.exitMsg.c_str());
