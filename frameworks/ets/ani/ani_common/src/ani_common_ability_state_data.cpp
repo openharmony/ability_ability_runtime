@@ -118,7 +118,7 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    static const char *className = "escompat.Array";
+    static const char *className = "std.core.Array";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);

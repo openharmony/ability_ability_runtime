@@ -832,27 +832,27 @@ ani_status BindNativeFunctions(ani_env *aniEnv)
             reinterpret_cast<void *>(EtsWantParams::NativeSetWantParams)
         },
         ani_native_function{
-            "nativeSetArrayStringParam", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayStringParam", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayStringParam)
         },
         ani_native_function{
-            "nativeSetArrayDoubleParam", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayDoubleParam", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayDoubleParam)
         },
         ani_native_function{
-            "nativeSetArrayIntParam", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayIntParam", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayIntParam)
         },
         ani_native_function{
-            "nativeSetArrayLongParam", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayLongParam", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayLongParam)
         },
         ani_native_function{
-            "nativeSetArrayBooleanParam", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayBooleanParam", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayBooleanParam)
         },
         ani_native_function{
-            "nativeSetArrayWantParams", "lC{std.core.String}C{escompat.Array}:z",
+            "nativeSetArrayWantParams", "lC{std.core.String}C{std.core.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayWantParams)
         },
         ani_native_function{
