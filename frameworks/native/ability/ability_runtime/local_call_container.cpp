@@ -311,10 +311,13 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
     }
 }
 
-void LocalCallContainer::SetCallLocalRecord(
-    const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord)
+void LocalCallContainer::SetCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord)
 {
-    const std::string strKey = element.GetURI();
+    if (localCallRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "localCallRecord null");
+        return;
+    }
+    std::string strKey = localCallRecord->GetElementName().GetURI();
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = callProxyRecords_.find(strKey);
     if (iter == callProxyRecords_.end()) {
@@ -326,10 +329,13 @@ void LocalCallContainer::SetCallLocalRecord(
     iter->second.emplace(localCallRecord);
 }
 
-void LocalCallContainer::SetMultipleCallLocalRecord(
-    const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord)
+void LocalCallContainer::SetMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord)
 {
-    const std::string strKey = element.GetURI();
+    if (localCallRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "multiple localCallRecord null");
+        return;
+    }
+    std::string strKey = localCallRecord->GetElementName().GetURI();
     std::lock_guard<std::mutex> lock(multipleMutex_);
     auto iter = multipleCallProxyRecords_.find(strKey);
     if (iter == multipleCallProxyRecords_.end()) {
@@ -378,9 +384,9 @@ void CallerConnection::OnAbilityConnectDone(
     localCallRecord_->SetRemoteObject(remoteObject, callRecipient);
 
     if (isSingleton) {
-        container->SetCallLocalRecord(localCallRecord_->GetElementName(), localCallRecord_);
+        container->SetCallLocalRecord(localCallRecord_);
     } else {
-        container->SetMultipleCallLocalRecord(localCallRecord_->GetElementName(), localCallRecord_);
+        container->SetMultipleCallLocalRecord(localCallRecord_);
     }
 
     localCallRecord_->InvokeCallBack();

@@ -43,10 +43,8 @@ public:
 
     void DumpCalls(std::vector<std::string> &info);
 
-    void SetCallLocalRecord(
-        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
-    void SetMultipleCallLocalRecord(
-        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
+    void SetCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord);
+    void SetMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord);
 
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
 
