@@ -1050,9 +1050,10 @@ void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::St
                     : observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
             return;
         }
+        auto data = isInner ? nullptr : abilityResult;
         auto errCode = isInner ? resultCode : 0;
         AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
-            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
+            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), data);
     };
     auto requestCode = GenerateRequestCode();
     (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task))
@@ -1806,9 +1807,10 @@ void EtsAbilityContext::OnStartAbilityForResultWithAccountInner(ani_env *env, co
                     : observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
             return;
         }
+        auto data = isInner ? nullptr : abilityResult;
         auto errCode = isInner ? resultCode : 0;
         AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
-            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
+            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), data);
     };
     auto requestCode = GenerateRequestCode();
     (startOptionsObj == nullptr) ? context->StartAbilityForResultWithAccount(want, accountId, requestCode,
