@@ -185,16 +185,5 @@ HWTEST_F(FileUriDistributionUtilsTest, IsUdmfOrPasteboardCall_001, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
-/*
- * Feature: FUDUtils
- * Function: SendAutoPersistEvent
- * SubFunction: NA
- * FunctionPoints: FUDUtils SendAutoPersistEvent
- */
-HWTEST_F(FileUriDistributionUtilsTest, SendAutoPersistEvent_001, TestSize.Level1)
-{
-    auto ret = FUDUtils::SendAutoPersistEvent(1001, 1002);
-    EXPECT_EQ(ret, true);
-}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -4590,16 +4590,6 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         return AAFwk::ERR_SPAWN_PROCESS_FAILED;
     }
 
-    #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-    bool checkApiVersion = (appInfo && (appInfo->apiTargetVersion % API_VERSION_MOD == API10));
-    TAG_LOGD(AAFwkTag::APPMGR, "version of api is %{public}d", appInfo->apiTargetVersion % API_VERSION_MOD);
-    if (checkApiVersion && AAFwk::AppUtils::GetInstance().IsGrantPersistUriPermission()) {
-        uint32_t tokenId = appInfo->accessTokenId;
-        auto sandboxRet = AccessControl::SandboxManager::SandboxManagerKit::StartAccessingByTokenId(tokenId);
-        TAG_LOGI(AAFwkTag::APPMGR, "tokenId: %{public}u, ret: %{public}d", tokenId, sandboxRet);
-    }
-    #endif
-
     TAG_LOGI(AAFwkTag::APPMGR, "spawned pname_%{public}s, pid_%{public}d, idx_%{public}d",
         processName.c_str(), pid, bundleIndex);
     SetRunningSharedBundleList(bundleName, startMsg.hspList);

@@ -79,20 +79,6 @@ bool FUDUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint
     return false;
 }
 
-bool FUDUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
-{
-    EventInfo eventInfo;
-    std::string callerBundleName;
-    GetBundleNameByTokenId(callerTokenId, callerBundleName);
-    eventInfo.callerBundleName = callerBundleName;
-    std::string targetBundleName;
-    GetBundleNameByTokenId(targetTokenId, targetBundleName);
-    eventInfo.bundleName = targetBundleName;
-    eventInfo.uri = "autoPersist";
-    EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
-    return true;
-}
-
 bool FUDUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo)
 {
     std::string callerBundleName;
