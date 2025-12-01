@@ -94,7 +94,6 @@ public:
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
     void StopDebugMode();
     uint32_t instanceId_ = 0;
-    static void PreloadLibrary();
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
@@ -105,6 +104,7 @@ private:
     void PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
     void HandleOhmUrlFileName(std::string &fileName);
+    static void PreloadLibrary();
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     std::string moduleName_;
