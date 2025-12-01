@@ -206,7 +206,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ReleaseCall_0100, Function
     context_->localCallContainer_ = std::make_shared<LocalCallContainer>();
     EXPECT_NE(context_->localCallContainer_, nullptr);
 
-    context_->localCallContainer_->SetCallLocalRecord(elementName, localCallRecord);
+    context_->localCallContainer_->SetCallLocalRecord(localCallRecord);
 
     ErrCode ret = context_->ReleaseCall(callback);
     EXPECT_TRUE(ret == ERR_OK);
