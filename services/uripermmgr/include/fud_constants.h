@@ -21,11 +21,11 @@
 namespace OHOS {
 namespace AAFwk {
 namespace FUDConstants {
-constexpr const char* FILE_SCHEME = "file";
-constexpr const char* CONTENT_SCHEME = "content";
-constexpr const char* DOCS_AUTHORITY = "docs";
-constexpr const char* MEDIA_AUTHORITY = "media";
-} // FUDConstants
-} // AAFwk
-} // OHOS
-#endif // OHOS_ABILITY_RUNTIME_FUD_CONSTANTS_H
+constexpr const char *FILE_SCHEME = "file";
+constexpr const char *CONTENT_SCHEME = "content";
+constexpr const char *DOCS_AUTHORITY = "docs";
+constexpr const char *MEDIA_AUTHORITY = "media";
+}  // FUDConstants
+}  // AAFwk
+}  // OHOS
+#endif  // OHOS_ABILITY_RUNTIME_FUD_CONSTANTS_H

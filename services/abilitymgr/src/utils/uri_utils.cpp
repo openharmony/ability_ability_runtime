@@ -317,9 +317,9 @@ bool UriUtils::GrantShellUriPermission(const std::vector<std::string> &strUriVec
         }
         uriVec.emplace_back(uri);
     }
-    uint32_t callerTokendId = IPCSkeleton::GetCallingTokenID();
+    uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
     auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionPrivileged(
-        uriVec, flag, targetPkg, appIndex, callerTokendId));
+        uriVec, flag, targetPkg, appIndex, callerTokenId));
     if (ret != ERR_OK) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "grant uri to shell failed: %{public}d", ret);
     }

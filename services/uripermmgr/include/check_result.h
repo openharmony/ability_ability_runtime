@@ -43,7 +43,7 @@ struct CheckResult : public Parcelable {
 
     static CheckResult *Unmarshalling(Parcel &parcel)
     {
-        CheckResult* checkResult = new (std::nothrow) CheckResult();
+        CheckResult *checkResult = new (std::nothrow) CheckResult();
         if (checkResult == nullptr) {
             return nullptr;
         }
@@ -52,6 +52,6 @@ struct CheckResult : public Parcelable {
         return checkResult;
     }
 };
-} // AAFwk
-} // OHOS
-#endif // OHOS_ABILITY_RUNTIME_CHECK_RESULT_H
+}  // AAFwk
+}  // OHOS
+#endif  // OHOS_ABILITY_RUNTIME_CHECK_RESULT_H

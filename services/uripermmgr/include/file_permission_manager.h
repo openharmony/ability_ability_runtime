@@ -49,6 +49,6 @@ private:
     static bool CheckDocsUriPermission(uint32_t callerTokenId, bool hasFileManagerPerm, bool hasSandboxManagerPerm,
         const std::string &path);
 };
-} // namespace AAFwk
-} // namespace OHOS
-#endif // OHOS_AAFWK_FILE_PERMISSION_MANAGER
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_AAFWK_FILE_PERMISSION_MANAGER

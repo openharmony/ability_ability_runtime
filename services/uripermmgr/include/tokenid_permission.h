@@ -62,6 +62,6 @@ private:
     bool initWriteAudioPermission_ = false;
     bool initProxyAuthorizationUriPermission_ = false;
 };
-} // OHOS
-} // AAFwk
-#endif // OHOS_ABILITY_RUNTIME_TOKENID_PERMISSION_H
+}  // OHOS
+}  // AAFwk
+#endif  // OHOS_ABILITY_RUNTIME_TOKENID_PERMISSION_H

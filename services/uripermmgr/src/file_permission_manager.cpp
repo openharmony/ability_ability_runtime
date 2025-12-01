@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "file_permission_manager.h"
 
 #include <dlfcn.h>
@@ -101,7 +102,7 @@ static bool CheckFileManagerUriPermission(uint32_t providerTokenId,
         return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DOWNLOAD);
     }
     if (path.find(DESKTOP_PATH) == 0) {
-        return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DESKTON);
+        return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DESKTOP);
     }
     if (path.find(DOCUMENTS_PATH) == 0) {
         return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DOCUMENTS);

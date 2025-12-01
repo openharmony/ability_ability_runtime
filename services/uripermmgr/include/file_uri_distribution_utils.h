@@ -32,7 +32,8 @@ class FUDUtils {
 public:
     static bool SendShareUnPrivilegeUriEvent(uint32_t callTokenId, uint32_t targetTokenId);
     static bool SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-        const std::vector<std::string> &uriVec, const std::vector<bool> &resVec);
+                                                     const std::vector<std::string> &uriVec,
+                                                     const std::vector<bool> &resVec);
     static int32_t GetCurrentAccountId();
     static bool IsFoundationCall();
     static bool IsSAOrSystemAppCall();
@@ -54,6 +55,6 @@ private:
     static bool CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo);
     static bool CheckIsSystemAppByBundleName(std::string &bundleName);
 };
-} // OHOS
-} // AAFwk
+}  // OHOS
+}  // AAFwk
 #endif  // OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
