@@ -47,7 +47,6 @@ public:
     static bool IsDocsCloudUri(Uri &uri);
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
     static bool IsUdmfOrPasteboardCall();
-    static bool SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId);
 };
 } // OHOS
 } // AAFwk
