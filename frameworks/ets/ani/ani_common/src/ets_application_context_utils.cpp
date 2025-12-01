@@ -280,6 +280,11 @@ void EtsApplicationContextUtils::OnGetAllWindowStages(ani_env *env, ani_object a
     }
     applicationContext->GetAllUIAbilities(uiAbility);
     ani_object windowStages = CreateWindowStageArray(env, uiAbility);
+    if (windowStages == nullptr) {
+        AppExecFwk::AsyncCallback(
+            env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), emptyArray);
+        return;
+    }
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), windowStages);
 #else
     AppExecFwk::AsyncCallback(
