@@ -326,6 +326,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
     }
     abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
     abilityInfo->customProcess = extensionInfo.customProcess;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionInfo customProcess: %{public}s", abilityInfo->customProcess.c_str());
     // For compatibility translates to AbilityInfo
     AbilityRuntime::StartupUtil::InitAbilityInfoFromExtension(extensionInfo, abilityInfo->abilityInfo);
 
@@ -348,6 +349,7 @@ void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_
         return;
     }
     abilityInfo->customProcess = extensionInfo.customProcess;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionInfo customProcess: %{public}s", abilityInfo->customProcess.c_str());
     if (AbilityRuntime::StartupUtil::IsSupportAppClone(extensionInfo.type)) {
         abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
         // For compatibility translates to AbilityInfo

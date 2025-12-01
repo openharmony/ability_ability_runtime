@@ -202,7 +202,8 @@ int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName)
     return ERR_OK;
 }
 
-void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t) {}
+void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t,
+    const std::string&) {}
 
 int AppScheduler::StartUserTest(
     const Want& want, const sptr<IRemoteObject>& observer, const AppExecFwk::BundleInfo& bundleInfo, int32_t userId)
