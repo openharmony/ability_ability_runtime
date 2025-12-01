@@ -25,7 +25,8 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
     sptr<IRemoteObject> callerToken, int32_t accountId)
 {
     AppExecFwk::ElementName element = want.GetElement();
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "element:%{public}s", element.GetURI().c_str());
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "element:%{public}s/%{public}s/%{public}s", element.GetBundleName().c_str(),
+        element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null callback");
         return ERR_INVALID_VALUE;
@@ -367,8 +368,8 @@ void CallerConnection::SetRecordAndContainer(const std::shared_ptr<LocalCallReco
 void CallerConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code)
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL,
-        "start %{public}s", element.GetURI().c_str());
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "start: %{public}s/%{public}s/%{public}s", element.GetBundleName().c_str(),
+        element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     auto container = container_.lock();
     if (container == nullptr || localCallRecord_ == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null container or record");
