@@ -1411,8 +1411,8 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(const AbilityInfo &abili
         specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "specifiedProcessFlag: %{public}s", specifiedProcessFlag.c_str());
     }
-    if (abilityInfo.isolationProcess &&
-        AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
+    if (abilityInfo.isolationProcess && AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType) &&
+        AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "UIExtension process, specifiedProcessFlag: %{public}s",
             specifiedProcessFlag.c_str());
