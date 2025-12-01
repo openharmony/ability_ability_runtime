@@ -41,6 +41,8 @@ public:
 
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
 
+    bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;
+
     bool VerifyStartRecentAbilityPermission() const;
 
     bool VerifyPrepareTerminatePermission(int32_t tokenId) const;

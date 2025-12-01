@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ struct VerificationInfo {
 
     int CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo, bool isShell) const;
 
-    int CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const;
+    int CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo, uint32_t specifyTokenId = 0) const;
 
     int CheckCallAbilityPermission(const VerificationInfo &verificationInfo, bool isCallByShortcut = false) const;
 
@@ -94,6 +94,8 @@ struct VerificationInfo {
 
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
 
+    bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;
+
     bool IsSystemAppCall() const;
 
     bool IsSystemAppCallByTokenId(uint32_t callerTokenId) const;
@@ -102,7 +104,7 @@ struct VerificationInfo {
 
     bool VerifyPrepareTerminatePermission(const int &tokenId) const;
 
-    bool VerifyShellStartExtensionType(int32_t type) const;
+    bool VerifyShellStartExtensionType(int32_t type, uint32_t specifyTokenId = 0) const;
 
     bool VerifyPreloadApplicationPermission() const;
 
