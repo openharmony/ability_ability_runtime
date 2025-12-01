@@ -25,7 +25,8 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
     sptr<IRemoteObject> callerToken, int32_t accountId)
 {
     AppExecFwk::ElementName element = want.GetElement();
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "element:%{public}s", element.GetURI().c_str());
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "element:%{public}s/%{public}s/%{public}s", element.GetBundleName().c_str(),
+        element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null callback");
         return ERR_INVALID_VALUE;
@@ -311,10 +312,13 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
     }
 }
 
-void LocalCallContainer::SetCallLocalRecord(
-    const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord)
+void LocalCallContainer::SetCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord)
 {
-    const std::string strKey = element.GetURI();
+    if (localCallRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "localCallRecord null");
+        return;
+    }
+    std::string strKey = localCallRecord->GetElementName().GetURI();
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = callProxyRecords_.find(strKey);
     if (iter == callProxyRecords_.end()) {
@@ -326,10 +330,13 @@ void LocalCallContainer::SetCallLocalRecord(
     iter->second.emplace(localCallRecord);
 }
 
-void LocalCallContainer::SetMultipleCallLocalRecord(
-    const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord)
+void LocalCallContainer::SetMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord)
 {
-    const std::string strKey = element.GetURI();
+    if (localCallRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "multiple localCallRecord null");
+        return;
+    }
+    std::string strKey = localCallRecord->GetElementName().GetURI();
     std::lock_guard<std::mutex> lock(multipleMutex_);
     auto iter = multipleCallProxyRecords_.find(strKey);
     if (iter == multipleCallProxyRecords_.end()) {
@@ -361,8 +368,8 @@ void CallerConnection::SetRecordAndContainer(const std::shared_ptr<LocalCallReco
 void CallerConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code)
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL,
-        "start %{public}s", element.GetURI().c_str());
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "start: %{public}s/%{public}s/%{public}s", element.GetBundleName().c_str(),
+        element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     auto container = container_.lock();
     if (container == nullptr || localCallRecord_ == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null container or record");
@@ -378,9 +385,9 @@ void CallerConnection::OnAbilityConnectDone(
     localCallRecord_->SetRemoteObject(remoteObject, callRecipient);
 
     if (isSingleton) {
-        container->SetCallLocalRecord(element, localCallRecord_);
+        container->SetCallLocalRecord(localCallRecord_);
     } else {
-        container->SetMultipleCallLocalRecord(element, localCallRecord_);
+        container->SetMultipleCallLocalRecord(localCallRecord_);
     }
 
     localCallRecord_->InvokeCallBack();
