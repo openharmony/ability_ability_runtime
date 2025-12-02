@@ -318,7 +318,7 @@ napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfo
         napi_set_named_property(env, objValue, "subIntentInfo", CreateEntryInfoForQuery(env, info.entryInfo));
     } else {
         napi_value objVal = nullptr;
-        napi_create_object(env, &objVal);
+        napi_create_object(env, &objValue);
         napi_set_named_property(env, objValue, "subIntentInfo", objVal);
     }
     
