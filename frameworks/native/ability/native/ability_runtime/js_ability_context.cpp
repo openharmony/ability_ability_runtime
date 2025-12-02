@@ -564,7 +564,7 @@ std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> JsAbilityContext::Crea
         napi_status status = napi_call_function(
             env, completionHandlerForAtomicService, onRequestSuccFunc, ARGC_ONE, argv, nullptr);
         if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "call onRequestSuccess, failed: %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestSuccess, failed: %{public}d", status);
         }
     };
     OnAtomicRequestFailure onRequestFail = [env, atomicServiceRef, onRequestFailRef](
@@ -585,7 +585,7 @@ std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> JsAbilityContext::Crea
         napi_status status = napi_call_function(
             env, completionHandlerForAtomicService, onRequestFailFunc, ARGC_THREE, argv, nullptr);
         if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "call onRequestFailure, failed: %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestFailure, failed: %{public}d", status);
         }
     };
     return std::make_pair(onRequestSucc, onRequestFail);
@@ -600,7 +600,7 @@ void JsAbilityContext::UnWrapCompletionHandlerForAtomicService(
         TAG_LOGE(AAFwkTag::CONTEXT, "create reference failed");
         return;
     }
-    TAG_LOGI(AAFwkTag::UI_EXT, "completionHandlerForAtomicService exists");
+    TAG_LOGI(AAFwkTag::CONTEXT, "completionHandlerForAtomicService exists");
     std::shared_ptr<NativeReference> onRequestSuccRef = AppExecFwk::CreateNativeRef(
         env, atomicServiceRef->GetNapiValue(), "onAtomicServiceRequestSuccess", napi_function);
     std::shared_ptr<NativeReference> onRequestFailRef = AppExecFwk::CreateNativeRef(
