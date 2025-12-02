@@ -92,6 +92,7 @@ struct AppSpawnStartMsg {
     std::map<std::string, int32_t> fds;
     DataGroupInfoList dataGroupInfoList; // list of harmony shared package
     JITPermissionsMap jitPermissionsMap; // map of JIT permissions
+    std::string appSignType;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
