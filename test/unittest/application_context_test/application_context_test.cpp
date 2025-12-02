@@ -1226,17 +1226,17 @@ HWTEST_F(ApplicationContextTest, CreateSystemHspModuleResourceManager_0100, Test
 }
 
 /**
- * @tc.number: GetAllTempDir_0100
- * @tc.name: GetAllTempDir
- * @tc.desc: GetAllTempDir
+ * @tc.number: GetAllTempBase_0100
+ * @tc.name: GetAllTempBase
+ * @tc.desc: GetAllTempBase
  */
-HWTEST_F(ApplicationContextTest, GetAllTempDir_0100, TestSize.Level1)
+HWTEST_F(ApplicationContextTest, GetAllTempBase_0100, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "GetAllTempDir_0100 start";
+    GTEST_LOG_(INFO) << "GetAllTempBase_0100 start";
     std::vector<std::string> tempPaths;
-    context_->GetAllTempDir(tempPaths);
+    context_->GetAllTempBase(tempPaths);
     EXPECT_NE(context_, nullptr);
-    GTEST_LOG_(INFO) << "GetAllTempDir_0100 end";
+    GTEST_LOG_(INFO) << "GetAllTempBase_0100 end";
 }
 
 /**

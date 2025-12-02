@@ -107,26 +107,6 @@ HWTEST_F(ApplicationCleanerSecondTest, ClearTempData_0100, Function | MediumTest
 }
 
 /**
- * @tc.number: RenameTempData_0100
- * @tc.name: RenameTempData
- * @tc.desc: Test whether RenameTempData and are called normally.
- */
-HWTEST_F(ApplicationCleanerSecondTest, RenameTempData_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "RenameTempData_0100 start";
-    auto cleaner = ApplicationCleaner::GetInstance();
-    std::vector<std::string> tempDir1{};
-    cleaner->context_ = AbilityRuntime::ApplicationContext::GetInstance();
-    cleaner->context_->GetAllTempDir(tempDir1);
-    cleaner->RenameTempData();
-    std::vector<std::string> tempDir2{};
-    cleaner->context_->GetAllTempDir(tempDir2);
-    bool res = std::equal(tempDir1.begin(), tempDir1.end(), tempDir2.begin());
-    EXPECT_EQ(res, true);
-    GTEST_LOG_(INFO) << "RenameTempData_0100 end";
-}
-
-/**
  * @tc.number: GetObsoleteBundleTempPath_0100
  * @tc.name: GetObsoleteBundleTempPath
  * @tc.desc: Test whether GetObsoleteBundleTempPath and are called normally.
