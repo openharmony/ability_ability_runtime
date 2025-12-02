@@ -4278,6 +4278,7 @@ int32_t AppMgrServiceInner::CreatNewStartMsg(const Want &want, const AbilityInfo
     auto bundleType = appInfo->bundleType;
     bundleInfo.applicationInfo.accessTokenId = appInfo->accessTokenId;
     bundleInfo.applicationInfo.accessTokenIdEx = appInfo->accessTokenIdEx;
+    startMsg.appSignType = appInfo->appSignType;
     CreateStartMsgParam startMsgParam;
     startMsgParam.processName = processName;
     startMsgParam.startFlags = startFlags;
@@ -4560,6 +4561,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(uid),
         bundleInfo.name, bundleInfo.appIndex);
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
+    startMsg.appSignType = appInfo ? appInfo->appSignType : std::string();
 #ifdef SUPPORT_CHILD_PROCESS
     PresetMaxChildProcess(appRecord, startMsg.maxChildProcess);
 #endif // SUPPORT_CHILD_PROCESS
