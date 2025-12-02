@@ -37,7 +37,7 @@ constexpr const char* KEY_CONTINUABLE = "continuable";
 constexpr const char* KEY_ABILITY_STATE = "abilityState";
 constexpr const char* KEY_UNCLEARABLE = "unclearable";
 constexpr const char* KEY_WANT = "want";
-constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iY:";
 constexpr const char *WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
 }
 
