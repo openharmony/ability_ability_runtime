@@ -4331,7 +4331,6 @@ void MainThread::SleepCleanKill()
             return ;
         }
         if(AbilityRuntime::TimeUtil::SystemTimeMillisecond() - beginTime < AppExecFwk::SLEEP_CLEAN_TIME_OUT &&
-            appThread->applicationImpl_ &&
             appThread->applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND){
             AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_RESOURCE_CONTROL,
             "Js_Heap_Sleep_Clean_Kill" });
