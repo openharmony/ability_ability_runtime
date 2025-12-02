@@ -3586,7 +3586,7 @@ bool MainThread::CheckHapPathLoaded(const HapModuleInfo &hapModuleInfo)
                 TAG_LOGI(AAFwkTag::APPKIT, "hap in list");
                 return true;
             } else {
-                hapList_.erase(it);
+                it = hapList_.erase(it);
                 return false;
             }
         } else {
