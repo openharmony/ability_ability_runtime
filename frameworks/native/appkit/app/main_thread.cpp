@@ -4330,7 +4330,7 @@ void MainThread::SleepCleanKill()
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return ;
         }
-        if(AbilityRuntime::TimeUtil::SystemTimeMillisecond() - beginTime < 3000 && appThread->applicationImpl_ &&
+        if(AbilityRuntime::TimeUtil::SystemTimeMillisecond() - beginTime < AppExecFwk::SLEEP_CLEAN_TIME_OUT &&
             appThread->applicationImpl_ &&
             appThread->applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND){
             AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_RESOURCE_CONTROL,
