@@ -4323,17 +4323,21 @@ std::string MainThread::ParsePluginDefaultNamespaceLdDictionary()
 
 void MainThread::SleepCleanKill()
 {
-    auto task = [ weak = wptr<MainThread>(this)]() {
+    int64_t beginTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
+    auto task = [ weak = wptr<MainThread>(this), beginTime]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return ;
         }
-        if(appThread->applicationImpl_ &&
-            appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_BACKGROUND){
-            AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_RESOURCE_CONTROL, "Js_Heap_Sleep_Clean_Kill" });
-            _exit(0);            
+        if(AbilityRuntime::TimeUtil::SystemTimeMillisecond() - beginTime < 3000 && appThread->applicationImpl_ &&
+            appThread->applicationImpl_ &&
+            appThread->applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND){
+            AbilityManagerClient::GetInstance()->RecordAppExitReason({ REASON_RESOURCE_CONTROL,
+            "Js_Heap_Sleep_Clean_Kill" });
+            _exit(0);                    
         }
+
     };
     mainHandler_->PostTask(task, "Sleep Clean:Over HeapSize", AppExecFwk::SLEEP_CLEAN_DELAY_TIME);
 }
