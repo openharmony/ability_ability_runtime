@@ -107,7 +107,7 @@ AppUtils::AppUtils()
         isSceneBoard_ = true;
     }
 #endif // SUPPORT_GRAPHICS
-#ifdef ABILITY_RUNTIME_FORBIDSTART_ENABLE
+#ifdef ABILITY_RUNTIME_FORBID_START_ENABLED
     if (WatchParameter(FORBID_START, AppUtils::ForbidStartCallback, nullptr) != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "want param failed: %{public}s", FORBID_START);
         isForbidStart_.isLoaded = false;
@@ -841,7 +841,7 @@ bool AppUtils::IsPreloadApplicationEnabled()
 
 bool AppUtils::IsForbidStart()
 {
-#ifndef ABILITY_RUNTIME_FORBIDSTART_ENABLE
+#ifndef ABILITY_RUNTIME_FORBID_START_ENABLED
     return false;
 #else
     if (!isForbidStart_.isLoaded) {
