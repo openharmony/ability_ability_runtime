@@ -892,7 +892,9 @@ void JsAbility::OnConfigurationUpdated(const Configuration &configuration)
     napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
     CallObjectMethod("onConfigurationUpdated", &napiConfiguration, 1);
     CallObjectMethod("onConfigurationUpdate", &napiConfiguration, 1);
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
+    if (shellContextRef_ != nullptr) {
+        JsAbilityContext::ConfigurationUpdated(env, shellContextRef_->GetNapiValue(), fullConfig);
+    }
 }
 
 void JsAbility::OnMemoryLevel(int level)
@@ -924,7 +926,10 @@ void JsAbility::UpdateContextConfiguration()
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, GetAbilityContext()->GetConfiguration());
+    if (shellContextRef_ != nullptr) {
+        JsAbilityContext::ConfigurationUpdated(env, shellContextRef_->GetNapiValue(),
+            GetAbilityContext()->GetConfiguration());
+    }
 }
 
 void JsAbility::OnNewWant(const Want &want)

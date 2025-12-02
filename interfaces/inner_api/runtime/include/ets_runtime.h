@@ -85,7 +85,7 @@ public:
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
     void RegisterUncaughtExceptionHandler(const EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo);
-    ani_env *GetAniEnv();
+    ani_env *GetAniEnv() const;
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadModule(const std::string &moduleName,
         const std::string &modulePath, const std::string &hapPath, bool esmodule,
         bool useCommonChunk, const std::string &srcEntrance);

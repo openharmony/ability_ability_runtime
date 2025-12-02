@@ -589,6 +589,22 @@ void AbilityContextImpl::SetAbilityColorMode(int32_t colorMode)
     abilityConfigUpdateCallback_(config);
 }
 
+void AbilityContextImpl::RegisterBindingObjectConfigUpdateCallback(BindingObjectConfigUpdateCallback callback)
+{
+    bindingObjectConfigUpdateCallback_ = callback;
+}
+
+void AbilityContextImpl::NotifyBindingObjectConfigUpdate()
+{
+    if (config_ == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null config_");
+        return;
+    }
+    if (bindingObjectConfigUpdateCallback_) {
+        bindingObjectConfigUpdateCallback_(config_);
+    }
+}
+
 std::shared_ptr<Context> AbilityContextImpl::CreateBundleContext(const std::string& bundleName)
 {
     return stageContext_ ? stageContext_->CreateBundleContext(bundleName) : nullptr;
