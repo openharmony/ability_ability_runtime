@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 const size_t SLEEP_CLEAN_DELAY_TIME = 2000;    //2000ms
-const size_t SLEEP_CLEAN_TIME_OUT = 6000;    //6000ms
+const size_t SLEEP_CLEAN_TIMEOUT = 6000;    //6000ms
 
 class SleepClean {
 public:
