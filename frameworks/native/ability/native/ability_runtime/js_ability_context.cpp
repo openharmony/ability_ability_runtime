@@ -2303,16 +2303,15 @@ void JsAbilityContext::InheritWindowMode(AAFwk::Want &want)
 #endif
 }
 
-void JsAbilityContext::ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
+void JsAbilityContext::ConfigurationUpdated(napi_env env, napi_value object,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    if (jsContext == nullptr || config == nullptr) {
+    if (object == nullptr || config == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null jsContext");
         return;
     }
 
-    napi_value object = jsContext->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "get object failed");
         return;

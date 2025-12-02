@@ -276,15 +276,15 @@ EtsAbilityContext* EtsAbilityContext::GetEtsAbilityContext(ani_env *env, ani_obj
     return etsContext;
 }
 
-void EtsAbilityContext::ConfigurationUpdated(ani_env *env, std::shared_ptr<AppExecFwk::ETSNativeReference> etsContext,
+void EtsAbilityContext::ConfigurationUpdated(ani_env *env, ani_object aniObj,
     std::shared_ptr<AppExecFwk::Configuration> config)
 {
-    if (env == nullptr || etsContext == nullptr || config == nullptr) {
+    if (env == nullptr || aniObj == nullptr || config == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "env or etsContext or config is null");
         return;
     }
     ani_ref configurationRef = AppExecFwk::WrapConfiguration(env, *config);
-    ani_status status = env->Object_SetFieldByName_Ref(etsContext->aniObj, "config", configurationRef);
+    ani_status status = env->Object_SetFieldByName_Ref(aniObj, "config", configurationRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "config SetField status: %{public}d", status);
         return;
