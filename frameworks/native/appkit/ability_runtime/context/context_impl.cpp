@@ -352,8 +352,7 @@ void ContextImpl::GetAllTempBase(std::vector<std::string> &tempPaths)
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
         return;
     }
-    const char* areas[] = {"el1", "el2"};
-    for (const auto &area : areas) {
+    for (const auto &area : CONTEXT_ELS) {
         auto baseDir = GetBaseDir(area);
         tempPaths.push_back(baseDir);
         for (const auto &moduleItem: applicationInfo_->moduleInfos) {

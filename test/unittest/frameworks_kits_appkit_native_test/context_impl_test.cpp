@@ -578,7 +578,7 @@ HWTEST_F(ContextImplTest, GetAllTempBase_0100, TestSize.Level1)
     moduleInfo.moduleName = "testModuleName";
     contextImpl->applicationInfo_->moduleInfos.push_back(moduleInfo);
     contextImpl->GetAllTempBase(tempBases);
-    constexpr int32_t SING_MODULE_TEMP_BASE_SIZE = 4;
+    constexpr int32_t SING_MODULE_TEMP_BASE_SIZE = 10;
     EXPECT_EQ(tempBases.size(), SING_MODULE_TEMP_BASE_SIZE);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
