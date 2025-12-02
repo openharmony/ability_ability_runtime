@@ -12381,8 +12381,11 @@ int32_t AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard called, no allowed");
         return ERR_PERMISSION_DENIED;
     }
-    return StartAbilityInner(want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, false,
+    StartAbilityUtils::startSpecifiedBySCB = true;
+    auto ret = StartAbilityInner(want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, false,
         false, false, false, false, true);
+    StartAbilityUtils::startSpecifiedBySCB = false;
+    return ret;
 }
 
 int32_t AbilityManagerService::RegisterIAbilityManagerCollaborator(
