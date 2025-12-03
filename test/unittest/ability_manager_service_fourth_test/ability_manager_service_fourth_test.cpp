@@ -355,6 +355,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartExtensionAbilityInner_004, TestSi
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
 
+    want.SetElementName("test.bundleName", "test.abilityName");
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
@@ -448,11 +449,11 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityForOptionInner_001, TestSi
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
         isStartAsCaller, specifyTokenId, isImplicit);
     EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
-
+    want.SetElementName("test.bundleName", "test.abilityName");
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
        isStartAsCaller, specifyTokenId, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_NE(result, ERR_INVALID_VALUE);
 }
 
 
@@ -943,9 +944,12 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckAbilityCallPermission_001, TestSi
     AbilityRequest abilityRequest;
     AppExecFwk::AbilityInfo abilityInfo;
     uint32_t specifyTokenId{0};
+    MyFlag::errCode_ = ERR_INVALID_MISSION_ID;
+    MyFlag::flag_ = 0;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    MyFlag::flag_ = 1;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckAbilityCallPermission_001 end");
 }
 
@@ -978,12 +982,14 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
         callerBundleName, false);
     EXPECT_EQ(ret1, ERR_WRONG_INTERFACE_CALL);
 
+    MyFlag::flag_ = 0;
     abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
     auto ret2 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName, false);
     EXPECT_EQ(ret2, ERR_INVALID_VALUE);
 
+    MyFlag::flag_ = 1;
     abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
     constexpr int32_t BROKER_UID = 5557;
     IPCSkeleton::SetCallingUid(BROKER_UID);

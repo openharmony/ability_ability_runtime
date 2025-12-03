@@ -306,6 +306,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_001,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_001 start");
+    MyStatus::GetInstance().permPermission_ = 1;
     bool oldFlag = abilityMs_->startUpNewRule_;
     abilityMs_->startUpNewRule_ = true;
     AbilityRequest abilityRequest;
@@ -324,6 +325,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_002,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_002 start");
+    MyStatus::GetInstance().permPermission_ = 1;
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.visible = false;
     bool oldFlag = abilityMs_->startUpNewRule_;
@@ -342,6 +344,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_003,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    MyStatus::GetInstance().permPermission_ = 1;
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.visible = true;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
@@ -360,6 +363,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_004,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    MyStatus::GetInstance().permPermission_ = 1;
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.visible = true;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
@@ -378,6 +382,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_005,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    MyStatus::GetInstance().permPermission_ = 0;
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.visible = true;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::ADS_SERVICE;

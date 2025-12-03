@@ -371,9 +371,9 @@ HWTEST_F(AbilityManagerServiceNinthTest, KillProcessWithReason_001, TestSize.Lev
     EXPECT_NE(abilityMs_, nullptr);
     int32_t pid = 1;
     ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
-    MyFlag::flag_ = 1;
-    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
     MyFlag::flag_ = 0;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    MyFlag::flag_ = 1;
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest KillProcessWithReason_001 end");
 }
@@ -394,9 +394,9 @@ HWTEST_F(AbilityManagerServiceNinthTest, KillProcessWithReason_002, TestSize.Lev
     ExitReason exitReason;
     exitReason.reason = Reason::REASON_RESOURCE_CONTROL;
     exitReason.exitMsg = "LowMemoryKill";
-    MyFlag::flag_ = 1;
-    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
     MyFlag::flag_ = 0;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    MyFlag::flag_ = 1;
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest KillProcessWithReason_002 end");
 }
