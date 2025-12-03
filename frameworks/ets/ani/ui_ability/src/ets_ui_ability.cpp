@@ -40,6 +40,7 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
+#include "interop_object_instance.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi_common_want.h"
@@ -75,6 +76,26 @@ constexpr const int32_t CALL_BACK_ERROR = -1;
 constexpr const char *ON_SHARE_SIGNATURE = "Lescompat/Record;:V";
 constexpr const char *ON_COLLABORATE =
     "Lescompat/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/CollaborateResult;";
+
+#define DISPATCH_ABILITY_INTEROP(type, applicationContext, etsRuntime, ability)                      \
+    do {                                                                                            \
+        if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
+            std::shared_ptr<InteropObject> interopObject =                                          \
+                InteropObjectInstance::CreateInteropObject(etsRuntime, ability);                    \
+            applicationContext->Dispatch##type(interopObject);                                      \
+        }                                                                                           \
+    } while(0)
+
+#define DISPATCH_WINDOW_INTEROP(type, applicationContext, etsRuntime, ability, stage)                \
+    do {                                                                                            \
+        if (applicationContext && !applicationContext->IsInteropAbilityLifecycleCallbackEmpty()) {  \
+            std::shared_ptr<InteropObject> interopAbility =                                         \
+                InteropObjectInstance::CreateInteropObject(etsRuntime, ability);                    \
+            std::shared_ptr<InteropObject> interopWindowStage =                                     \
+                InteropObjectInstance::CreateInteropObject(etsRuntime, stage);                      \
+            applicationContext->Dispatch##type(interopAbility, interopWindowStage);                 \
+        }                                                                                           \
+    } while(0)
 
 void OnDestroyPromiseCallback(ani_env *env, ani_object aniObj)
 {
@@ -455,6 +476,7 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want, sptr<AAFwk::Sess
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityCreate");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityCreate(ability);
+        DISPATCH_ABILITY_INTEROP(OnAbilityCreate, applicationContext, etsRuntime_, ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
@@ -591,6 +613,7 @@ void EtsUIAbility::OnStopCallback()
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityDestroy");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityDestroy(ability);
+        DISPATCH_ABILITY_INTEROP(OnAbilityDestroy, applicationContext, etsRuntime_, ability);
     }
 }
 
@@ -638,6 +661,7 @@ void EtsUIAbility::OnSceneCreated()
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
         applicationContext->DispatchOnWindowStageCreate(ability, stage);
+        DISPATCH_WINDOW_INTEROP(OnWindowStageCreate, applicationContext, etsRuntime_, ability, stage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
@@ -764,6 +788,7 @@ void EtsUIAbility::onSceneDestroyed()
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         EtsAbilityLifecycleCallbackArgs stage(etsWindowStageObj_);
         applicationContext->DispatchOnWindowStageDestroy(ability, stage);
+        DISPATCH_WINDOW_INTEROP(OnWindowStageDestroy, applicationContext, etsRuntime_, ability, stage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed end");
 }
@@ -822,6 +847,7 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityForeground");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityForeground(ability);
+        DISPATCH_ABILITY_INTEROP(OnAbilityForeground, applicationContext, etsRuntime_, ability);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "CallOnForegroundFunc end");
 }
@@ -856,6 +882,7 @@ void EtsUIAbility::OnBackground()
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityBackground");
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityBackground(ability);
+        DISPATCH_ABILITY_INTEROP(OnAbilityBackground, applicationContext, etsRuntime_, ability);
     }
     auto want = GetWant();
     if (want != nullptr) {

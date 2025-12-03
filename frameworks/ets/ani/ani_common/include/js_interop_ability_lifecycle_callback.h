@@ -13,25 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ETS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H
-#define OHOS_ABILITY_RUNTIME_ETS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H
+#define OHOS_ABILITY_RUNTIME_JS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H
 
-#include <mutex>
+#include <node_api.h>
 #include <vector>
 
-#include "ani.h"
 #include "interop_ability_lifecycle_callback.h"
 
-namespace OHOS {
-namespace EtsEnv {
-struct ETSErrorObject;
-}
+class NativeReference;
 
+namespace OHOS {
 namespace AbilityRuntime {
-class EtsInteropAbilityLifecycleCallback : public InteropAbilityLifecycleCallback,
-    public std::enable_shared_from_this<EtsInteropAbilityLifecycleCallback> {
+class JsInteropAbilityLifecycleCallback : public InteropAbilityLifecycleCallback,
+    public std::enable_shared_from_this<JsInteropAbilityLifecycleCallback> {
 public:
-    EtsInteropAbilityLifecycleCallback(ani_env *env);
+    JsInteropAbilityLifecycleCallback(napi_env env);
 
     void OnAbilityCreate(std::shared_ptr<InteropObject> ability) override;
     void OnWindowStageCreate(std::shared_ptr<InteropObject> ability,
@@ -43,24 +40,17 @@ public:
     void OnAbilityBackground(std::shared_ptr<InteropObject> ability) override;
 
     int32_t Register(void *callback) override;
-    bool Unregister(void *aniCallback = nullptr) override;
+    bool Unregister(void *jsVallback = nullptr) override;
     bool Empty() override;
 
 private:
-    ani_env *GetAniEnv();
-    void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage = nullptr);
-    void CallObjectMethodInner(ani_env *aniEnv, ani_value aniAbility, ani_value aniWindowStage,
-        bool hasWindowStage, ani_function callbackInnerFn);
-    EtsEnv::ETSErrorObject GetETSErrorObject();
-    bool GetAniValueFromInteropObject(ani_env *env, std::shared_ptr<InteropObject> interopObject, ani_value &aniValue);
-    std::string GetErrorProperty(ani_error aniError, const char *propertyName);
+    void CallObjectMethod(const char *methodName, std::shared_ptr<InteropObject> ability,
+        std::shared_ptr<InteropObject> windowStage = nullptr);
 
 private:
-    ani_vm *vm_ = nullptr;
-    std::mutex callbacksLock_;
-    std::vector<ani_ref> callbacks_;
+    napi_env env_ = nullptr;
+    std::vector<std::shared_ptr<NativeReference>> callbacks_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ETS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_INTEROP_ABILITY_LIFECYCLE_CALLBACK_H

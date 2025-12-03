@@ -25,6 +25,9 @@ namespace AbilityRuntime {
 class InteropAbilityLifecycleCallback {
 public:
     virtual ~InteropAbilityLifecycleCallback() {}
+    virtual int32_t Register(void *callback) = 0;
+    virtual bool Unregister(void *callback = nullptr) = 0;
+    virtual bool Empty() = 0;
     virtual void OnAbilityCreate(std::shared_ptr<InteropObject> ability) {}
     virtual void OnWindowStageCreate(std::shared_ptr<InteropObject> ability,
         std::shared_ptr<InteropObject> windowStage) {}
