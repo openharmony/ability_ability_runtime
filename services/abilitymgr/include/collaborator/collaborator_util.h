@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "hitrace_meter.h"
 #include "start_ability_utils.h"
 
 namespace OHOS {
@@ -27,6 +28,7 @@ constexpr const char* PARAM_ANCO_APP_IDENTIFIER = "persist.hmos_fusion_mgr.anco_
 
 static void UpdateCallerIfNeed(const sptr<IAbilityManagerCollaborator> &collaborator, Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (collaborator == nullptr) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
         return;
@@ -37,6 +39,7 @@ static void UpdateCallerIfNeed(const sptr<IAbilityManagerCollaborator> &collabor
 
 static void RemoveCallerIfNeed(const sptr<IAbilityManagerCollaborator> &collaborator, Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (collaborator == nullptr) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
         return;
@@ -62,6 +65,7 @@ static void HandleCallerIfNeed(const sptr<IRemoteObject> &callerToken,
 static void UpdateTargetIfNeed(const sptr<IAbilityManagerCollaborator> &collaborator, const Want &want,
     const std::string &callerBundleName)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (collaborator == nullptr) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
         return;
