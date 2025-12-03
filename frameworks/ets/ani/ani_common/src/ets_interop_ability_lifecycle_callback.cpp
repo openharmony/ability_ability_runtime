@@ -155,7 +155,7 @@ void EtsInteropAbilityLifecycleCallback::CallObjectMethodInner(ani_env *aniEnv, 
     }
 }
 
-int32_t EtsInteropAbilityLifecycleCallback::Register(ani_object callback)
+int32_t EtsInteropAbilityLifecycleCallback::Register(void *callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "enter EtsInteropAbilityLifecycleCallback::Register");
     ani_env *aniEnv = GetAniEnv();
@@ -169,7 +169,8 @@ int32_t EtsInteropAbilityLifecycleCallback::Register(ani_object callback)
     }
     ani_ref ref = nullptr;
     ani_status status = ANI_ERROR;
-    if ((status = aniEnv->GlobalReference_Create(callback, &ref)) != ANI_OK || ref == nullptr) {
+    if ((status = aniEnv->GlobalReference_Create(reinterpret_cast<ani_object>(callback), &ref)) != ANI_OK ||
+        ref == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to create reference, status=%{public}d", status);
         return ERROR_CODE_NULL_REF;
     }
@@ -258,7 +259,7 @@ std::string EtsInteropAbilityLifecycleCallback::GetErrorProperty(ani_error aniEr
     return propertyValue;
 }
 
-bool EtsInteropAbilityLifecycleCallback::Unregister(ani_object aniCallback)
+bool EtsInteropAbilityLifecycleCallback::Unregister(void *aniCallback)
 {
     ani_status status = ANI_ERROR;
     ani_env *env = GetAniEnv();
@@ -288,7 +289,7 @@ bool EtsInteropAbilityLifecycleCallback::Unregister(ani_object aniCallback)
             continue;
         }
         ani_boolean isEqual = false;
-        env->Reference_StrictEquals(aniCallback, *iter, &isEqual);
+        env->Reference_StrictEquals(reinterpret_cast<ani_object>(aniCallback), *iter, &isEqual);
         if (isEqual) {
             if ((status = env->GlobalReference_Delete(*iter)) != ANI_OK) {
                 TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Delete status: %{public}d", status);

@@ -13,24 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
-#define OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_INTEROP_OBJECT_H
+#define OHOS_ABILITY_RUNTIME_ETS_INTEROP_OBJECT_H
+
+#include <memory>
+#include <node_api.h>
+
+#include "ets_native_reference.h"
+#include "interop_object.h"
+
+typedef struct __hybridgref *hybridgref;
 
 namespace OHOS {
 namespace AbilityRuntime {
-class InteropObject {
+class JsInteropObject : public InteropObject {
 public:
-    virtual ~InteropObject() {}
-    virtual bool IsFromNapi()
-    {
-        return false;
-    }
+    JsInteropObject(ani_env *env, std::shared_ptr<AppExecFwk::ETSNativeReference> ref);
+    ~JsInteropObject() override;
 
-    virtual bool IsFromAni()
-    {
-        return false;
-    }
+    bool IsFromAni() override;
+    napi_value GetNapiValue(napi_env env);
+
+private:
+    ani_env *GetAniEnv();
+
+private:
+    hybridgref ref_ = nullptr;
+    ani_vm *vm_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INTEROP_OBJECT_H
+#endif // OHOS_ABILITY_RUNTIME_ETS_INTEROP_OBJECT_H

@@ -385,7 +385,7 @@ void EtsApplicationContextUtils::RegisterInteropAbilityLifecycleCallback(ani_env
     }
     std::lock_guard<std::mutex> lock(g_interopAbilityLifecycleCallbackLock);
     if (interopAbilityLifecycleCallback_ != nullptr) {
-        auto result = interopAbilityLifecycleCallback_->Register(callback);
+        auto result = interopAbilityLifecycleCallback_->Register((void *)callback);
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPKIT, "register failed: %{public}d", result);
             EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -394,7 +394,7 @@ void EtsApplicationContextUtils::RegisterInteropAbilityLifecycleCallback(ani_env
     }
 
     interopAbilityLifecycleCallback_ = std::make_shared<EtsInteropAbilityLifecycleCallback>(env);
-    auto result = interopAbilityLifecycleCallback_->Register(callback);
+    auto result = interopAbilityLifecycleCallback_->Register((void *)callback);
     if (result < 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "register failed: %{public}d", result);
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -440,7 +440,7 @@ void EtsApplicationContextUtils::UnregisterInteropAbilityLifecycleCallback(ani_e
     env->Reference_IsUndefined(callback, &isUndefined);
     if (isUndefined) {
         interopAbilityLifecycleCallback_->Unregister();
-    } else if (!interopAbilityLifecycleCallback_->Unregister(callback)) {
+    } else if (!interopAbilityLifecycleCallback_->Unregister((void *)callback)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Unregister failed");
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return;

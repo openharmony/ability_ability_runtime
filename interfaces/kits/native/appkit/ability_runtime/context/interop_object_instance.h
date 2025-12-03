@@ -20,6 +20,7 @@
 #include <string>
 
 #include "ability_lifecycle_callback.h"
+#include "interop_ability_lifecycle_callback.h"
 #include "interop_object.h"
 #include "runtime.h"
 
@@ -29,9 +30,13 @@ class InteropObjectInstance {
 public:
     static std::shared_ptr<InteropObject> CreateInteropObject(const Runtime &runtime,
         const AbilityLifecycleCallbackArgs &arg);
+    static std::shared_ptr<InteropAbilityLifecycleCallback> CreateJsInteropAbilityLifecycleCallback(
+        void *env);
 
 private:
     static std::shared_ptr<InteropObject> CreateEtsInteropObject(const Runtime &runtime,
+        const AbilityLifecycleCallbackArgs &arg);
+    static std::shared_ptr<InteropObject> CreateJsInteropObject(const Runtime &runtime,
         const AbilityLifecycleCallbackArgs &arg);
 };
 } // namespace AbilityRuntime
