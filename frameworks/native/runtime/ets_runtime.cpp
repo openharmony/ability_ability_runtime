@@ -318,12 +318,17 @@ void ETSRuntime::FinishPreload()
         jsRuntime_->FinishPreload();
     }
 
+    napi_env napiEnv = nullptr;
+    if (jsRuntime_ != nullptr) {
+        napiEnv = static_cast<AbilityRuntime::JsRuntime *>(jsRuntime_.get())->GetNapiEnv();
+    }
+
     if (g_etsEnvFuncs == nullptr ||
         g_etsEnvFuncs->FinishPreload == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or FinishPreload");
         return;
     }
-    g_etsEnvFuncs->FinishPreload();
+    g_etsEnvFuncs->FinishPreload(napiEnv);
 }
 
 void ETSRuntime::RegisterUncaughtExceptionHandler(const EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo)
