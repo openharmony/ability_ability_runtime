@@ -946,6 +946,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
         return RegisterForegroundAppObserverInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
+        return ManualStartAutoStartupAppsInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -3880,6 +3883,14 @@ int32_t AbilityManagerStub::GetAutoStartupStatusForSelfInner(MessageParcel &data
         }
     }
     return result;
+}
+
+int32_t AbilityManagerStub::ManualStartAutoStartupAppsInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    int32_t result = ManualStartAutoStartupApps(userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
 }
 
 int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply)

@@ -3169,5 +3169,39 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_002, TestSiz
     auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/*
+ * Feature: ManualStartAutoStartupApps_001
+ * Function: ManualStartAutoStartupApps
+ * SubFunction: NA
+ * FunctionPoints: CHECK_PERMISSION_FAILED
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, ManualStartAutoStartupApps_001, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_001 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().permPermission_ = 0;
+    int32_t userId = -1;
+    auto result = abilityManagerService->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_001 end");
+}
+
+/*
+ * Feature: ManualStartAutoStartupApps_002
+ * Function: ManualStartAutoStartupApps
+ * SubFunction: NA
+ * FunctionPoints: ERR_OK
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, ManualStartAutoStartupApps_002, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_002 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().permPermission_ = 1;
+    int32_t userId = -1;
+    auto result = abilityManagerService->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_002 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

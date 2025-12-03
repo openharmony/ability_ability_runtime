@@ -4312,5 +4312,48 @@ HWTEST_F(AbilityManagerStubTest, ClearAllPreloadUIExtensionAbilityInner_0100, Te
     EXPECT_EQ(result, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/**
+ * @tc.name: ManualStartAutoStartupAppsInner_0100
+ * @tc.desc: ManualStartAutoStartupAppsInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+    auto result = stub_->ManualStartAutoStartupAppsInner(data, reply);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0100 end");
+}
+
+/**
+ * @tc.name: ManualStartAutoStartupAppsInner_0200
+ * @tc.desc: ManualStartAutoStartupAppsInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+
+    auto result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS), data, reply, option);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 end");
+}
 } // namespace AAFwk
 } // namespace OHOS
