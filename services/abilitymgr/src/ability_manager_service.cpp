@@ -12674,6 +12674,18 @@ int32_t AbilityManagerService::GetAutoStartupStatusForSelf(bool &isAutoStartEnab
         isAutoStartEnabled);
 }
 
+int32_t AbilityManagerService::ManualStartAutoStartupApps(int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ManualStartAutoStartupApps userId: %{public}d", userId);
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_MANAGE_APP_BOOT_INTERNAL)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "verify PERMISSION_MANAGE_APP_BOOT_INTERNAL fail");
+        return CHECK_PERMISSION_FAILED;
+    }
+    StartAutoStartupApps(userId);
+    return ERR_OK;
+}
+
 int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isTerminate)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
