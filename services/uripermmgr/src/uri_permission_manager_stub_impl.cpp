@@ -412,10 +412,10 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vec
     uint32_t flag, TokenId callerTokenId, TokenId targetTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "privileged uris: %{public}zu", uriVec.size());
     if (uriVec.empty()) {
         return INNER_ERR;
     }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "privileged uris: %{public}zu", uriVec.size());
     // only reserve read and write file flag
     flag &= FLAG_READ_WRITE_URI;
     ConnectManager(storageManager_, STORAGE_MANAGER_MANAGER_ID);
@@ -432,14 +432,14 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vec
         return INNER_ERR;
     }
     if (resVec.size() != uriVec.size()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "failed, ret:%{public}u", resVec[0]);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "CreateShareFile failed, invalid resVec, ret:%{public}u", resVec[0]);
         return resVec[0];
     }
     int successCount = 0;
     for (size_t i = 0; i < uriVec.size(); i++) {
         auto ret = resVec[i];
-        if (ret != 0 && ret != -EEXIST) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "CreateShareFile failed");
+        if (ret != 0 && ret != -EEXIST && successCount == 0) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "CreateShareFile failed, ret:%{public}d", ret);
             continue;
         }
         AddTempUriPermission(uriVec[i], flag, callerTokenId, targetTokenId);
@@ -469,7 +469,7 @@ int32_t UriPermissionManagerStubImpl::AddTempUriPermission(const std::string &ur
     auto& infoList = search->second;
     for (auto& item : infoList) {
         if (item.fromTokenId == fromTokenId && item.targetTokenId == targetTokenId) {
-            TAG_LOGI(AAFwkTag::URIPERMMGR, "Item: flag:%{public}u", item.flag);
+            TAG_LOGD(AAFwkTag::URIPERMMGR, "Item: flag:%{public}u", item.flag);
             if ((item.flag & flag) != flag) {
                 item.flag |= flag;
                 return ERR_OK;
