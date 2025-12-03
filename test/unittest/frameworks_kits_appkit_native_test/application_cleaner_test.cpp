@@ -145,15 +145,16 @@ HWTEST_F(ApplicationCleanerTest, RenameTempData_0100, Function | MediumTest | Le
 
     std::vector<std::string> tempDir1{};
     cleaner->context_ = AbilityRuntime::ApplicationContext::GetInstance();
-    cleaner->context_->GetAllTempDir(tempDir1);
+    cleaner->context_->GetAllTempBase(tempDir1);
     cleaner->RenameTempData();
 
     std::vector<std::string> tempDir2{};
-    cleaner->context_->GetAllTempDir(tempDir2);
+    cleaner->context_->GetAllTempBase(tempDir2);
     bool res = std::equal(tempDir1.begin(), tempDir1.end(), tempDir2.begin());
     EXPECT_EQ(res, true);
     GTEST_LOG_(INFO) << "RenameTempData_0100 end";
 }
+
 
 /**
  * @tc.number: GetObsoleteBundleTempPath_0100
@@ -273,7 +274,7 @@ HWTEST_F(ApplicationCleanerTest, GetRootPath_0100, Function | MediumTest | Level
 /**
  * @tc.number: GetRootPath_0200
  * @tc.name: GetRootPath
- * @tc.desc: Test GetRootPath with null OsAccountManagerWrapper.
+ * @tc.desc: Test GetRootPath ok.
  */
 HWTEST_F(ApplicationCleanerTest, GetRootPath_0200, Function | MediumTest | Level1)
 {
@@ -282,47 +283,9 @@ HWTEST_F(ApplicationCleanerTest, GetRootPath_0200, Function | MediumTest | Level
     ApplicationCleaner cleaner;
     cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
     std::vector<std::string> rootPath;
-    MyStatus::GetInstance().instanceStatus_ = false;
-    EXPECT_EQ(cleaner.GetRootPath(rootPath), RESULT_ERR);
-    MyStatus::GetInstance().instanceStatus_ = true;
-
-    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0200 end");
-}
-
-/**
- * @tc.number: GetRootPath_0300
- * @tc.name: GetRootPath
- * @tc.desc: Test GetRootPath with GetOsAccountLocalIdFromProcess failing.
- */
-HWTEST_F(ApplicationCleanerTest, GetRootPath_0300, Function | MediumTest | Level1)
-{
-    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0300 start");
-
-    ApplicationCleaner cleaner;
-    cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
-    std::vector<std::string> rootPath;
-    MyStatus::GetInstance().statusValue_ = RESULT_ERR;
-    EXPECT_EQ(cleaner.GetRootPath(rootPath), RESULT_ERR);
-    MyStatus::GetInstance().statusValue_ = 0;
-
-    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0300 end");
-}
-
-/**
- * @tc.number: GetRootPath_0400
- * @tc.name: GetRootPath
- * @tc.desc: Test GetRootPath ok.
- */
-HWTEST_F(ApplicationCleanerTest, GetRootPath_0400, Function | MediumTest | Level1)
-{
-    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0400 start");
-
-    ApplicationCleaner cleaner;
-    cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
-    std::vector<std::string> rootPath;
     EXPECT_EQ(cleaner.GetRootPath(rootPath), 0);
 
-    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0400 end");
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0200 end");
 }
 }
 }

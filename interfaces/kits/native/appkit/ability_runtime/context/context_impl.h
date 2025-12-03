@@ -97,7 +97,7 @@ public:
      *
      * @param tempPaths Return all temporary directories of the application.
      */
-    virtual void GetAllTempDir(std::vector<std::string> &tempPaths);
+    void GetAllTempBase(std::vector<std::string> &tempPaths);
 
     /**
      * @brief Obtains the directory for storing files for the application on the device's internal storage.
@@ -564,6 +564,7 @@ private:
     void ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl);
     bool UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
         float density, std::string direction);
+    std::string GetBaseDir(const std::string &area) const;
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif

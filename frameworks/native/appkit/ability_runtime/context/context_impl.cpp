@@ -346,34 +346,18 @@ std::string ContextImpl::GetResourceDir(const std::string &moduleName)
     return constructAndCheckDir(hapModuleInfoPtr->moduleName);
 }
 
-void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
+void ContextImpl::GetAllTempBase(std::vector<std::string> &tempPaths)
 {
-    // Application temp dir
-    auto appTemp = GetTempDir();
-    if (OHOS::FileExists(appTemp)) {
-        tempPaths.push_back(appTemp);
-    }
-    // Module dir
     if (applicationInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
         return;
     }
-
-    std::string baseDir;
-    if (IsCreateBySystemApp()) {
-        baseDir = CONTEXT_DATA_APP + currArea_ + CONTEXT_FILE_SEPARATOR + std::to_string(GetCurrentAccountId()) +
-            CONTEXT_FILE_SEPARATOR + CONTEXT_BASE + CONTEXT_FILE_SEPARATOR + GetBundleName();
-    } else {
-        baseDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_BASE;
-    }
-    for (const auto &moduleItem: applicationInfo_->moduleInfos) {
-        auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moduleItem.moduleName + CONTEXT_TEMP;
-        if (!OHOS::FileExists(moudleTemp)) {
-            TAG_LOGW(AAFwkTag::APPKIT, "module [%{public}s] temp path not exist,path: %{public}s",
-                moduleItem.moduleName.c_str(), moudleTemp.c_str());
-            continue;
+    for (const auto &area : CONTEXT_ELS) {
+        auto baseDir = GetBaseDir(area);
+        tempPaths.push_back(baseDir);
+        for (const auto &moduleItem: applicationInfo_->moduleInfos) {
+            tempPaths.push_back(baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moduleItem.moduleName);
         }
-        tempPaths.push_back(moudleTemp);
     }
 }
 
@@ -808,12 +792,17 @@ std::string ContextImpl::GetProcessName()
 
 std::string ContextImpl::GetBaseDir() const
 {
+    return GetBaseDir(currArea_);
+}
+
+std::string ContextImpl::GetBaseDir(const std::string &area) const
+{
     std::string baseDir;
     if (IsCreateBySystemApp()) {
-        baseDir = CONTEXT_DATA_APP + currArea_ + CONTEXT_FILE_SEPARATOR + std::to_string(GetCurrentAccountId()) +
+        baseDir = CONTEXT_DATA_APP + area + CONTEXT_FILE_SEPARATOR + std::to_string(GetCurrentAccountId()) +
             CONTEXT_FILE_SEPARATOR + CONTEXT_BASE + CONTEXT_FILE_SEPARATOR + GetBundleName();
     } else {
-        baseDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_BASE;
+        baseDir = CONTEXT_DATA_STORAGE + area + CONTEXT_FILE_SEPARATOR + CONTEXT_BASE;
     }
     if (parentContext_ != nullptr && !isPlugin_) {
         baseDir = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR +

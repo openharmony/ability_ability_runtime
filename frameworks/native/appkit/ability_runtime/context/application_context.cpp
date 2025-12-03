@@ -808,13 +808,13 @@ bool ApplicationContext::IsModuleExist(const std::string &moduleName)
     return (contextImpl_ != nullptr) ? contextImpl_->IsModuleExist(moduleName) : false;
 }
 
-void ApplicationContext::GetAllTempDir(std::vector<std::string> &tempPaths)
+void ApplicationContext::GetAllTempBase(std::vector<std::string> &tempPaths)
 {
     if (contextImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
-    contextImpl_->GetAllTempDir(tempPaths);
+    contextImpl_->GetAllTempBase(tempPaths);
 }
 
 std::string ApplicationContext::GetFilesDir()
