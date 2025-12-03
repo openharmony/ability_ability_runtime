@@ -70,10 +70,12 @@ bool AbilityExperienceRule::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteBool(isBackSkuExempt)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write isBackSkuExempt failed");
+        return false;
     }
 
     if (!parcel.WriteInt32(embedResultCode)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write embedResultCode failed");
+        return false;
     }
 
     return true;
