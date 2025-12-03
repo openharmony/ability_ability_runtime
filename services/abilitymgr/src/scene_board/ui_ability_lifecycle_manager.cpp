@@ -4214,6 +4214,7 @@ bool UIAbilityLifecycleManager::UpdateSpecifiedFlag(UIAbilityRecordPtr uiAbility
         TAG_LOGE(AAFwkTag::ABILITYMGR, "session is nullptr");
         return false;
     }
+    sessionInfo->specifiedFlag = flag;
     session->UpdateFlag(flag);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call session UpdateFlag, specifiedFlag: %{public}s", flag.c_str());
     return true;
