@@ -22,6 +22,7 @@ ohos_unittest("auto_fill_manager_test") {
     "${ability_runtime_innerkits_path}/auto_fill_manager/include/",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
+    "mock/include",
   ]
 
   sources = [
@@ -29,6 +30,7 @@ ohos_unittest("auto_fill_manager_test") {
     "${ability_runtime_innerkits_path}/auto_fill_manager/src/auto_fill_manager.cpp",
     "${ability_runtime_innerkits_path}/auto_fill_manager/src/auto_fill_manager_util.cpp",
     "auto_fill_manager_test.cpp",
+    "mock/src/mock_parameters.cpp",
   ]
 
   deps = [
