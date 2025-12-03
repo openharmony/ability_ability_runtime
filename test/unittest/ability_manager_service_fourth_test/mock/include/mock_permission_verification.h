@@ -69,9 +69,9 @@ public:
 
     int CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo, bool isShell) const;
 
-    int CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const;
+    int CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo, uint32_t specifyTokenId = 0) const;
 
-    int CheckCallAbilityPermission(const VerificationInfo &verificationInfo) const;
+    int CheckCallAbilityPermission(const VerificationInfo &verificationInfo, bool isCallByShortcut) const;
 
     int CheckCallServiceExtensionPermission(const VerificationInfo &verificationInfo) const;
 

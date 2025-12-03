@@ -966,5 +966,27 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_009, TestSize.Leve
     abilityMs->RemoveScreenUnlockInterceptor();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_009 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Name: JudgeCallerIsAllowedToUseSystemAPIByTokenId_0100
+ * Function: JudgeCallerIsAllowedToUseSystemAPIByTokenId
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, JudgeCallerIsAllowedToUseSystemAPIByTokenId_0100, TestSize.Level2)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    uint64_t specifiedFullTokenId = 0;
+    bool ret = AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPIByTokenId(
+        specifiedFullTokenId);
+    EXPECT_EQ(ret, true);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::WINDOW;
+    abilityRequest.specifiedFullTokenId = 100001;
+    int32_t validUserId = 100;
+    int result = abilityMs->CheckCallOtherExtensionPermission(abilityRequest, validUserId);
+    EXPECT_NE(result, CHECK_PERMISSION_FAILED);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -77,13 +77,15 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
 {
     return MyFlag::flag_;
 }
-int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
+int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo,
+    uint32_t specifyTokenId) const
 {
     return MyFlag::flag_;
 }
-int PermissionVerification::CheckCallAbilityPermission(const VerificationInfo &verificationInfo) const
+int PermissionVerification::CheckCallAbilityPermission(const VerificationInfo &verificationInfo,
+    bool isCallByShortcut) const
 {
-    return MyFlag::flag_;
+    return MyFlag::errCode_;
 }
 int PermissionVerification::CheckCallServiceExtensionPermission(const VerificationInfo &verificationInfo) const
 {

@@ -283,8 +283,10 @@ HWTEST_F(AbilityAutoStartupServiceTest, QueryAllAutoStartupApplications_002, Tes
     EXPECT_NE(abilityAutoStartupService, nullptr);
     std::vector<AutoStartupInfo> infoList;
     int32_t userId = 100;
+    MyFlag::flag_ = 1;
     auto result = abilityAutoStartupService->QueryAllAutoStartupApplications(infoList, userId);
     EXPECT_EQ(result, ERR_OK);
+    MyFlag::flag_ = 0;
     AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplications_002 end";
 }
@@ -801,7 +803,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAbilityInfo_001, TestSize.Level1)
 HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SetApplicationAutoStartupByEDM_001 start";
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
@@ -823,7 +825,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_002, Test
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SetApplicationAutoStartupByEDM_002 start";
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
-    MyFlag::flag_ = 0;
+    MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
@@ -845,7 +847,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_002, Test
 HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartupByEDM_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CancelApplicationAutoStartupByEDM_001 start";
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
@@ -867,7 +869,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartupByEDM_002, T
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CancelApplicationAutoStartupByEDM_002 start";
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
-    MyFlag::flag_ = 0;
+    MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
@@ -933,7 +935,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerApplicationAutoStartupByEDM_002, Te
 HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForEDM_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_001 start";
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->CheckPermissionForEDM();
@@ -951,12 +953,13 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForEDM_002, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_002 start";
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
-    MyFlag::flag_ = 0;
+    MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->CheckPermissionForEDM();
     EXPECT_EQ(result, ERR_OK);
     AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
+    MyFlag::flag_ = 0;
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_002 end";
 }
 
