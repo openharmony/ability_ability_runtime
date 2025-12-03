@@ -290,7 +290,7 @@ std::string AppfreezeManager::WriteToFile(const std::string& fileName, const std
     }
     std::string realPath = AppfreezeUtil::FreezePathToRealPath(path);
     if (realPath.empty()) {
-        return "";
+        realPath = path;
     }
     std::string stackPath = realPath + "/" + fileName;
     constexpr mode_t defaultLogFileMode = 0644;
