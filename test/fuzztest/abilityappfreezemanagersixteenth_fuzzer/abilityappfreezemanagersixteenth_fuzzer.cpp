@@ -41,16 +41,16 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (!freeze) {
         return false;
     }
-    int32_t pid;
     int state;
     std::string errorName;
+    std::string key;
     FuzzedDataProvider fdp(data, size);
-    pid = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     state = fdp.ConsumeIntegralInRange(0, INPUT_SIZE);
     errorName = fdp.ConsumeRandomLengthString();
-    freeze->SetFreezeState(pid, state, errorName);
-    freeze->GetFreezeState(pid);
-    freeze->GetFreezeTime(pid);
+    key = fdp.ConsumeRandomLengthString();
+    freeze->SetFreezeState(key, state, errorName);
+    freeze->GetReportTimes(key);
+    freeze->GetLastOccurTime(key);
     return true;
 }
 }
