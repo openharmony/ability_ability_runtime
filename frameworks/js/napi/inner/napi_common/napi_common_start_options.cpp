@@ -30,6 +30,12 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr int32_t ARGC_TWO = 2;
+constexpr const char* FUNC_NAME_ON_REQUEST_SUCCESS = "onRequestSuccess";
+constexpr const char* FUNC_NAME_ON_REQUEST_FAILURE = "onRequestFailure";
+constexpr const char* COMPLETION_HANDLER = "completionHandler";
+}
 EXTERN_C_START
 
 bool UnwrapProcessOptions(napi_env env, napi_value param, std::shared_ptr<AAFwk::ProcessOptions> &processOptions)
@@ -266,5 +272,49 @@ bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptio
     return UnwrapStartOptions(env, param, startOptions);
 }
 EXTERN_C_END
+
+bool UnwrapCommonCompletionHandler(napi_env env, napi_value param,
+    AbilityRuntime::OnRequestResult &onRequestSucc, AbilityRuntime::OnRequestResult &onRequestFail)
+{
+    napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(env, param,
+        COMPLETION_HANDLER, napi_object);
+    if (completionHandler == nullptr) {
+        TAG_LOGD(AAFwkTag::JSNAPI, "null completionHandler");
+        return false;
+    }
+    napi_ref ref = nullptr;
+    if (napi_create_reference(env, completionHandler, 1, &ref) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to create ref");
+        return false;
+    }
+    auto completionHandlerRef = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
+    onRequestSucc = UnwrapCompletionHandlerOnRequestResult(env, FUNC_NAME_ON_REQUEST_SUCCESS,
+        completionHandlerRef);
+    onRequestFail = UnwrapCompletionHandlerOnRequestResult(env, FUNC_NAME_ON_REQUEST_FAILURE,
+        completionHandlerRef);
+    return true;
+}
+
+AbilityRuntime::OnRequestResult UnwrapCompletionHandlerOnRequestResult(napi_env env,
+    const char *funcName, std::shared_ptr<NativeReference> ref)
+{
+    if (ref == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ref");
+        return nullptr;
+    }
+    return [env, ref, funcName](const AppExecFwk::ElementName &element, const std::string &message) {
+        napi_value completionHandler = ref->GetNapiValue();
+        napi_value onRequestResultObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
+            funcName, napi_function);
+        size_t argc = ARGC_TWO;
+        napi_value argv[ARGC_TWO] = {
+            AppExecFwk::WrapElementName(env, element), AbilityRuntime::CreateJsValue(env, message)
+        };
+        napi_status status = napi_call_function(env, completionHandler, onRequestResultObj, argc, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "call %{public}s, failed: %{public}d", funcName, status);
+        }
+    };
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

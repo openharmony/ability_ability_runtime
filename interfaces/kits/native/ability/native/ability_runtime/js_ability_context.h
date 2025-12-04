@@ -187,8 +187,6 @@ private:
     static int32_t GenerateRequestCode();
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
-    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, OnRequestResult &onRequestSucc,
-    OnRequestResult &onRequestFail);
     void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
     OnRequestResult &onRequestFail);
     std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> CreateAtomicServiceCallBack(napi_env env,
