@@ -87,8 +87,8 @@ int32_t MediaPermissionManager::GrantUriPermission(const std::vector<std::string
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     flag &= (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION);
     auto photoPermissionType = FlagToFileOpenMode(flag);
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "uris: %{public}zu, flag: %{public}u, photoPermissionType: %{public}d", uris.size(),
-             flag, static_cast<int>(photoPermissionType));
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "uris:%{public}zu, flag:%{public}u, perType:%{public}d, senType:%{public}d",
+             uris.size(), flag, static_cast<int>(photoPermissionType), hideSensitiveType);
     auto mediaLibraryManager = GetMediaLibraryManager();
     if (mediaLibraryManager == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetMediaLibraryManager failed.");
