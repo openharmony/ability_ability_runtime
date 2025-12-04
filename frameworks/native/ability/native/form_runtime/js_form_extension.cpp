@@ -229,6 +229,7 @@ void JsFormExtension::OnDestroy(const int64_t formId)
 void JsFormExtension::OnStop()
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onStop", nullptr, nullptr, 0);
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
     if (ret) {
