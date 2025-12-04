@@ -1006,7 +1006,7 @@ public:
 
     bool GetPromotePriority();
 
-    void PromotePriority();
+    bool PromotePriority();
     
     std::string GetFirstCallerBundleName()
     {
@@ -1261,6 +1261,8 @@ private:
     std::atomic<bool> isAbilityConnectionReported_ = false;
     struct UIAbilityProperty {
         bool promotePriority = false;
+        int32_t byCallCallerSaUid = -1;
+        int32_t byCallCallerSaPid = -1;
     };
     std::shared_ptr<UIAbilityProperty> uiAbilityProperty_ = nullptr;
     std::string firstCallerBundleName_ = "";

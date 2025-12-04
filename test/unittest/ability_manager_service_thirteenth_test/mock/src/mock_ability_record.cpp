@@ -2037,8 +2037,9 @@ bool AbilityRecord::GetPromotePriority()
     return false;
 }
 
-void AbilityRecord::PromotePriority()
+bool AbilityRecord::PromotePriority()
 {
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
