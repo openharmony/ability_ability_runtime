@@ -1015,7 +1015,7 @@ void EtsUIAbility::RestorePageStack(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    window->NapiSetUIContent(pageStack, env, reinterpret_cast<ani_object>(localStorageRef),
+    window->AniSetUIContent(pageStack, env, reinterpret_cast<ani_object>(localStorageRef),
         Rosen::BackupAndRestoreType::CONTINUATION);
 }
 
