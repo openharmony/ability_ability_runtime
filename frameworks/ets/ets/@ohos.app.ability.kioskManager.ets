@@ -34,7 +34,7 @@ export default namespace kioskManager {
     function enterKioskMode(context: UIAbilityContext): Promise<void> {
       kioskManager.nativeEnterKioskModeCheck(context);
       let p: Promise<void> =
-        new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+        new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=> {
               if (err == null || err.code == 0) {
                 resolve(undefined);
@@ -51,7 +51,7 @@ export default namespace kioskManager {
     function exitKioskMode(context: UIAbilityContext): Promise<void> {
       kioskManager.nativeExitKioskModeCheck(context);
       let p: Promise<void> =
-        new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+        new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=> {
               if (err == null || err.code == 0) {
                 resolve(undefined);
@@ -67,7 +67,7 @@ export default namespace kioskManager {
     }
     function getKioskStatus(): Promise<KioskStatus> {
         let p: Promise<KioskStatus> =
-        new Promise<KioskStatus>((resolve: (data: KioskStatus) => void, reject: (err: BusinessError | null) => void): void => {
+        new Promise<KioskStatus>((resolve: (data: KioskStatus) => void, reject: (err: BusinessError) => void): void => {
             let myCall = new AsyncCallbackWrapper<KioskStatus>((err: BusinessError | null, data: KioskStatus | undefined)=> {
               if (err == null || err.code == 0) {
                 resolve(data as KioskStatus);

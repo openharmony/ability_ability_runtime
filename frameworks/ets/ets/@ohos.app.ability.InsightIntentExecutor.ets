@@ -32,64 +32,64 @@ export default class InsightIntentExecutor {
   public callOnExecuteInUIAbilityForegroundMode(name: string, param: Record<string, RecordData>,
     pageLoader: window.WindowStage): insightIntent.ExecuteResult {
     let p = this.onExecuteInUIAbilityForegroundMode(name, param, pageLoader);
-    if (p instanceof Promise) {
+    if (p instanceof insightIntent.ExecuteResult) {
+      this.isOnExecuteInUIAbilityForegroundModeAsync = false;
+      return p;
+    } else {
       this.isOnExecuteInUIAbilityForegroundModeAsync = true;
       p.then((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
-    } else {
-      this.isOnExecuteInUIAbilityForegroundModeAsync = false;
-      return p;
     }
   }
 
   public callOnExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult {
     let p = this.onExecuteInUIAbilityBackgroundMode(name, param);
-    if (p instanceof Promise) {
+    if (p instanceof insightIntent.ExecuteResult) {
+      this.isOnExecuteInUIAbilityBackgroundModeAsync = false;
+      return p;
+    } else {
       this.isOnExecuteInUIAbilityBackgroundModeAsync = true;
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
-    } else {
-      this.isOnExecuteInUIAbilityBackgroundModeAsync = false;
-      return p;
     }
   }
 
   public callOnExecuteInUIExtensionAbility(name: string, param: Record<string, RecordData>,
     pageLoader: UIExtensionContentSession): insightIntent.ExecuteResult {
     let p = this.onExecuteInUIExtensionAbility(name, param, pageLoader);
-    if (p instanceof Promise) {
+    if (p instanceof insightIntent.ExecuteResult) {
+      this.isOnExecuteInUIExtensionAbilityAsync = false;
+      return p;
+    } else {
       this.isOnExecuteInUIExtensionAbilityAsync = true;
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
-    } else {
-      this.isOnExecuteInUIExtensionAbilityAsync = false;
-      return p;
     }
   }
 
   public callOnExecuteInServiceExtensionAbility(name: string, param: Record<string, RecordData>):
     insightIntent.ExecuteResult {
     let p = this.onExecuteInServiceExtensionAbility(name, param);
-    if (p instanceof Promise) {
+    if (p instanceof insightIntent.ExecuteResult) {
+      this.isOnExecuteInServiceExtensionAbilityAsync = false;
+      return p;
+    } else {
       this.isOnExecuteInServiceExtensionAbilityAsync = true;
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
-    } else {
-      this.isOnExecuteInServiceExtensionAbilityAsync = false;
-      return p;
     }
   }
 

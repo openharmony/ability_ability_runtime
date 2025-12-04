@@ -281,8 +281,8 @@ export default class UIExtensionContentSession {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCallback, undefined);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -290,8 +290,8 @@ export default class UIExtensionContentSession {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCallback, options);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err  as BusinessError, undefined);
     });
   }
 
