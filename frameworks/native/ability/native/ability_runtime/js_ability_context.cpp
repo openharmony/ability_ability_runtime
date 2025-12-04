@@ -632,44 +632,6 @@ void JsAbilityContext::UnWrapCompletionHandlerForAtomicService(
     options.requestId_ = requestId;
 }
 
-bool JsAbilityContext::UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param,
-    OnRequestResult &onRequestSucc, OnRequestResult &onRequestFail)
-{
-    napi_value completionHandlerForOpenLink = AppExecFwk::GetPropertyValueByPropertyName(env, param,
-        "completionHandler", napi_object);
-    if (completionHandlerForOpenLink == nullptr) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "null completionHandlerForOpenLink");
-        return false;
-    }
-    napi_value onRequestSuccFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForOpenLink,
-        "onRequestSuccess", napi_function);
-    napi_value onRequestFailFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForOpenLink,
-        "onRequestFailure", napi_function);
-    if (onRequestSuccFunc == nullptr || onRequestFailFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null onRequestSuccFunc or onRequestFailFunc");
-        return false;
-    }
-    onRequestSucc = [env, completionHandlerForOpenLink, onRequestSuccFunc](
-        const AppExecFwk::ElementName &element, const std::string &message) {
-        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-        napi_status status = napi_call_function(
-            env, completionHandlerForOpenLink, onRequestSuccFunc, ARGC_TWO, argv, nullptr);
-        if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestSuccess, failed: %{public}d", status);
-        }
-    };
-    onRequestFail = [env, completionHandlerForOpenLink, onRequestFailFunc](
-        const AppExecFwk::ElementName &element, const std::string &message) {
-        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-        napi_status status = napi_call_function(
-            env, completionHandlerForOpenLink, onRequestFailFunc, ARGC_TWO, argv, nullptr);
-        if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestFailure, failed: %{public}d", status);
-        }
-    };
-    return true;
-}
-
 void JsAbilityContext::AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
     OnRequestResult &onRequestFail)
 {
@@ -1088,7 +1050,7 @@ napi_value JsAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
     OnRequestResult onRequestSucc;
     OnRequestResult onRequestFail;
     if (CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object) &&
-        UnwrapCompletionHandlerForOpenLink(env, info.argv[INDEX_ONE], onRequestSucc, onRequestFail)) {
+        AppExecFwk::UnwrapCommonCompletionHandler(env, info.argv[INDEX_ONE], onRequestSucc, onRequestFail)) {
         AddCompletionHandlerForOpenLink(want, onRequestSucc, onRequestFail);
     }
 
