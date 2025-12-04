@@ -2320,23 +2320,25 @@ ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
 
 ErrCode AbilityManagerClient::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetAllInsightIntentInfo");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->GetAllInsightIntentInfo(flag, infos);
+    return abms->GetAllInsightIntentInfo(flag, infos, userId);
 }
 
 ErrCode AbilityManagerClient::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByBundleName");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    return abms->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
 }
 
 ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
@@ -2344,12 +2346,13 @@ ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForQuery &info)
+    InsightIntentInfoForQuery &info,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByIntentName");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    return abms->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
 }
 
 ErrCode AbilityManagerClient::RestartSelfAtomicService(sptr<IRemoteObject> callerToken)

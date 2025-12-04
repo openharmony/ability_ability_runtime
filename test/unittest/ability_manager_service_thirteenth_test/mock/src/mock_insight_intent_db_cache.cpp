@@ -120,14 +120,15 @@ int32_t InsightIntentDbCache::DeleteInsightIntentByUserId(const int32_t userId)
     return DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->DeleteStorageInsightIntentByUserId(userId);
 }
 
-void InsightIntentDbCache::GetAllInsightIntentGenericInfo(std::vector<ExtractInsightIntentGenericInfo> &genericInfos)
+void InsightIntentDbCache::GetAllInsightIntentGenericInfo(const int32_t userId,
+    std::vector<ExtractInsightIntentGenericInfo> &genericInfos)
 {
     ExtractInsightIntentGenericInfo info;
     info.bundleName = "bundleName";
     genericInfos.emplace_back(info);
 }
 
-void InsightIntentDbCache::GetInsightIntentGenericInfoByName(const std::string &bundleName,
+void InsightIntentDbCache::GetInsightIntentGenericInfoByName(const std::string &bundleName, const int32_t userId,
     std::vector<ExtractInsightIntentGenericInfo> &genericInfos)
 {
     ExtractInsightIntentGenericInfo info;
@@ -136,7 +137,7 @@ void InsightIntentDbCache::GetInsightIntentGenericInfoByName(const std::string &
 }
 
 void InsightIntentDbCache::GetInsightIntentGenericInfo(const std::string &bundleName, const std::string &moduleName,
-    const std::string &intentName, ExtractInsightIntentGenericInfo &genericInfo)
+    const std::string &intentName, const int32_t userId, ExtractInsightIntentGenericInfo &genericInfo)
 {
     std::lock_guard<std::mutex> lock(genericInfosMutex_);
     for (auto info : intentGenericInfos_[bundleName]) {

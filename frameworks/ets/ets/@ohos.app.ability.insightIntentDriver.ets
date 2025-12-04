@@ -33,6 +33,7 @@ export default namespace insightIntentDriver {
     displayId?: long;
     uris?: Array<string>;
     flags?: int;
+    userId?: int;
   }
   enum InsightIntentType {
     LINK = '@InsightIntentLink',
@@ -210,6 +211,14 @@ export default namespace insightIntentDriver {
     readonly parentClassName: string;
   }
 
+  interface InsightIntentInfoFilter {
+    intentFlags: int;
+    bundleName?: string;
+    moduleName?: string;
+    intentName?: string;
+    userId?: int;
+  }
+
   export native function nativeExecuteSync(param: ExecuteParam,
     callback: AsyncCallbackWrapper<insightIntent.ExecuteResult>,
     isCallback: boolean): void;
@@ -219,6 +228,9 @@ export default namespace insightIntentDriver {
   export native function nativeGetInfoByBundleNameCheck(bundleName: string, intentFlags: int): void;
   export native function nativeGetInsightIntentInfoByIntentName(bundleName: string, moduleName: string, intentName: string, intentFlags: int, callback: AsyncCallbackWrapper<InsightIntentInfo>): void;
   export native function nativeGetInfoByIntentNameCheck(bundleName: string, moduleName: string, intentName: string, intentFlags: int): void;
+  export native function nativeGetInsightIntentInfoByFilterCheck(filter: InsightIntentInfoFilter): void;
+  export native function nativeGetInsightIntentInfoByFilter(filter: InsightIntentInfoFilter,
+    callback: AsyncCallbackWrapper<Array<InsightIntentInfo>>): void;
 
   export function execute(param: ExecuteParam, callback: AsyncCallback<insightIntent.ExecuteResult>): void {
     let pCallback = new AsyncCallbackWrapper<insightIntent.ExecuteResult>(callback);
@@ -296,6 +308,25 @@ export default namespace insightIntentDriver {
       });
       taskpool.execute((): void => {
         nativeGetInsightIntentInfoByIntentName(bundleName, moduleName, intentName, intentFlags, asyncCall);
+      });
+    });
+  }
+
+  export function getInsightIntentInfoByFilter(filter: InsightIntentInfoFilter):
+    Promise<Array<InsightIntentInfo>> {
+    nativeGetInsightIntentInfoByFilterCheck(filter);
+    return new Promise<Array<InsightIntentInfo>>((resolve: (data: Array<InsightIntentInfo>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<Array<InsightIntentInfo>>((err: BusinessError | null,
+        data: Array<InsightIntentInfo> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<InsightIntentInfo>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        nativeGetInsightIntentInfoByFilter(filter, asyncCall);
       });
     });
   }

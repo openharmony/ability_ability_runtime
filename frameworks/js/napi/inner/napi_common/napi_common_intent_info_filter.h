@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "insight_intent_utils.h"
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_INTENT_INFO_FILTER_H
+#define OHOS_ABILITY_RUNTIME_NAPI_COMMON_INTENT_INFO_FILTER_H
+
+#include "napi_common_data.h"
+#include "insight_intent_info_filter.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode, int32_t userId)
-{
-    srcEntry = "test.srcEntry";
-    return ERR_OK;
-}
-} // namespace AbilityRuntime
-} // namespace OHOS
+
+bool UnwrapIntentInfoFilter(napi_env env, napi_value param, AppExecFwk::InsightIntentInfoFilter &filter);
+
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_INTENT_INFO_FILTER_H
