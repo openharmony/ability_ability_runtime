@@ -82,6 +82,8 @@ std::atomic<bool> g_hasSetContinueState = false;
 constexpr int64_t MAX_REQUEST_CODE = 562949953421311;
 constexpr size_t MAX_REQUEST_CODE_LENGTH = 15;
 constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
+constexpr const char* FUNC_NAME_ON_REQUEST_SUCCESS = "onRequestSuccess";
+constexpr const char* FUNC_NAME_ON_REQUEST_FAILURE = "onRequestFailure";
 
 void* DetachNewAbilityContext(napi_env, void* nativeObject, void*)
 {
@@ -492,6 +494,26 @@ void JsAbilityContext::ClearFailedCallConnection(
     context->ClearFailedCallConnection(callback);
 }
 
+OnRequestResult JsAbilityContext::UnwrapCompletionHandlerOnRequestResult(napi_env env,
+    const char *funcName, std::shared_ptr<NativeReference> ref)
+{
+    if (ref == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null ref");
+        return nullptr;
+    }
+    return [env, ref, funcName](const AppExecFwk::ElementName &element, const std::string &message) {
+        napi_value completionHandler = ref->GetNapiValue();
+        napi_value onRequestResultObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
+            funcName, napi_function);
+        size_t argc = ARGC_TWO;
+        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
+        napi_status status = napi_call_function(env, completionHandler, onRequestResultObj, argc, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "call %{public}s, failed: %{public}d", funcName, status);
+        }
+    };
+}
+
 void JsAbilityContext::UnwrapCompletionHandlerInStartOptions(napi_env env, napi_value param,
     AAFwk::StartOptions &options)
 {
@@ -502,32 +524,16 @@ void JsAbilityContext::UnwrapCompletionHandlerInStartOptions(napi_env env, napi_
         return;
     }
     TAG_LOGI(AAFwkTag::CONTEXT, "completionHandler exists");
-    napi_value onRequestSuccObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
-        "onRequestSuccess", napi_function);
-    napi_value onRequestFailObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
-        "onRequestFailure", napi_function);
-    if (onRequestSuccObj == nullptr || onRequestFailObj == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null onRequestSuccObj or onRequestFailObj");
+    napi_ref ref = nullptr;
+    if (napi_create_reference(env, completionHandler, 1, &ref) != napi_ok || ref == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed to create ref");
         return;
     }
-    OnRequestResult onRequestSucc = [env, completionHandler, onRequestSuccObj](const AppExecFwk::ElementName &element,
-        const std::string &message) {
-        size_t argc = ARGC_TWO;
-        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-        napi_status status = napi_call_function(env, completionHandler, onRequestSuccObj, argc, argv, nullptr);
-        if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestSuccess, failed: %{public}d", status);
-        }
-    };
-    OnRequestResult onRequestFail = [env, completionHandler, onRequestFailObj](const AppExecFwk::ElementName &element,
-        const std::string &message) {
-        size_t argc = ARGC_TWO;
-        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-        napi_status status = napi_call_function(env, completionHandler, onRequestFailObj, argc, argv, nullptr);
-        if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestFailure, failed: %{public}d", status);
-        }
-    };
+    auto completionHandlerRef = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
+    OnRequestResult onRequestSucc = UnwrapCompletionHandlerOnRequestResult(env, FUNC_NAME_ON_REQUEST_SUCCESS,
+        completionHandlerRef);
+    OnRequestResult onRequestFail = UnwrapCompletionHandlerOnRequestResult(env, FUNC_NAME_ON_REQUEST_FAILURE,
+        completionHandlerRef);
     auto context = context_.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
