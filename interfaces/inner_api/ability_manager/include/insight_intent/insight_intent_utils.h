@@ -28,9 +28,11 @@
 namespace OHOS {
 namespace AbilityRuntime {
 class InsightIntentUtils {
+    static const int32_t DEFAULT_INVAL_VALUE = -1;
 public:
     static uint32_t GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-        const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode = nullptr);
+        const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode = nullptr,
+        int32_t userId = DEFAULT_INVAL_VALUE);
     static uint32_t ConvertExtractInsightIntentGenericInfo(
         ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForQuery &queryInfo);
     static uint32_t ConvertExtractInsightIntentInfo(

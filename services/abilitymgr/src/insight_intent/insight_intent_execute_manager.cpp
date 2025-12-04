@@ -502,7 +502,7 @@ int32_t InsightIntentExecuteManager::GenerateWant(
     std::string srcEntry;
     std::string arkTSMode;
     auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(want.GetElement(), param->insightIntentName_,
-        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry, &arkTSMode);
+        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry, &arkTSMode, param->userId_);
     if (!arkTSMode.empty()) {
         want.SetParam(INSIGHT_INTENT_ARKTS_MODE, arkTSMode);
     }

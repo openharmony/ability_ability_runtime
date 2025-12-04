@@ -42,6 +42,7 @@ bool InsightIntentExecuteParam::ReadFromParcel(Parcel &parcel)
     displayId_ = parcel.ReadInt32();
     parcel.ReadStringVector(&uris_);
     flags_ = parcel.ReadInt32();
+    userId_ = parcel.ReadInt32();
     decoratorType_ = parcel.ReadInt8();
     srcEntrance_ = Str16ToStr8(parcel.ReadString16());
     className_ = Str16ToStr8(parcel.ReadString16());
@@ -79,6 +80,7 @@ bool InsightIntentExecuteParam::Marshalling(Parcel &parcel) const
     parcel.WriteInt32(displayId_);
     parcel.WriteStringVector(uris_);
     parcel.WriteInt32(flags_);
+    parcel.WriteInt32(userId_);
     parcel.WriteInt8(decoratorType_);
     parcel.WriteString16(Str8ToStr16(srcEntrance_));
     parcel.WriteString16(Str8ToStr16(className_));
