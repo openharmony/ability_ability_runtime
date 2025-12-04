@@ -58,7 +58,7 @@ export default namespace missionManager {
 
   export function clearAllMissions(): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -130,7 +130,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
 
   export function clearMission(missionId: int): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -154,7 +154,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
 
   export function lockMission(missionId: int): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -178,7 +178,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
 
   export function unlockMission(missionId: int): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -288,7 +288,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   export function moveMissionsToForeground(missionIds: Array<int>, topMission?: int): Promise<void> {
     missionManager.nativeArrayLengthCheck(missionIds);
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -323,7 +323,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
 
   export function moveMissionToFront(missionId: int, options?: StartOptions): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -355,7 +355,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
 
   export function offMission(listenerId: long): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
