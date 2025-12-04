@@ -36,6 +36,106 @@ constexpr const char *ETS_NATIVE_WANT_PARAMS_CLASS_NAME = "L@ohos/app/ability/Wa
 constexpr const char *ETS_NATIVE_WANT_PARAMS_CLEANER_CLASS_NAME = "L@ohos/app/ability/Want/NativeWantParamsCleaner;";
 } // namespace
 
+ani_ref g_booleanCls {};
+ani_ref g_doubleCls {};
+ani_ref g_intCls {};
+ani_ref g_longCls {};
+
+ani_method unboxBoolean {};
+ani_method unboxDouble {};
+ani_method unboxInt {};
+ani_method unboxLong {};
+
+template<typename T>
+ani_status unbox(ani_env *env, ani_object obj, T *result)
+{
+    return ANI_INVALID_TYPE;
+}
+
+template<>
+ani_status unbox<ani_double>(ani_env *env, ani_object obj, ani_double *result)
+{
+    if (g_doubleCls == nullptr) {
+        ani_class doubleCls {};
+        auto status = env->FindClass("std.core.Double", &doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(doubleCls, &g_doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(doubleCls, "unboxed", ":d", &unboxDouble);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Double(obj, unboxDouble, result);
+}
+
+template<>
+ani_status unbox<ani_boolean>(ani_env *env, ani_object obj, ani_boolean *result)
+{
+    if (g_booleanCls == nullptr) {
+        ani_class booleanCls {};
+        auto status = env->FindClass("std.core.Boolean", &booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(booleanCls, &g_booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(booleanCls, "unboxed", ":z", &unboxBoolean);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Boolean(obj, unboxBoolean, result);
+}
+
+template<>
+ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
+{
+    if (g_intCls == nullptr) {
+        ani_class intCls {};
+        auto status = env->FindClass("std.core.Integer", &intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(intCls, &g_intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Int(obj, unboxInt, result);
+}
+
+template<>
+ani_status unbox<ani_long>(ani_env *env, ani_object obj, ani_long *result)
+{
+    if (g_longCls == nullptr) {
+        ani_class longCls {};
+        auto status = env->FindClass("std.core.Long", &longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(longCls, &g_longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(longCls, "unboxed", ":l", &unboxLong);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Long(obj, unboxLong, result);
+}
+
 ani_long EtsWantParams::NativeCreate(ani_env *env, ani_object)
 {
     TAG_LOGD(AAFwkTag::WANT, "call");
@@ -315,12 +415,23 @@ bool EtsWantParams::SetArrayDouble(ani_env *env, const std::string &key, ani_obj
         return false;
     }
 
-    auto array = reinterpret_cast<ani_array_double>(value);
+    auto array = reinterpret_cast<ani_array>(value);
     std::vector<ani_double> nativeArray(length);
-    status = env->Array_GetRegion_Double(array, 0, length, nativeArray.data());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANT, "Array_GetRegion_Double status: %{public}d", status);
-        return false;
+
+    for (auto i = 0; i < length; ++i) {
+        ani_ref doubleRef {};
+        ani_double doubleValue {};
+        status = env->Array_Get(array, i, &doubleRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            return false;
+        }
+        status = unbox(env, static_cast<ani_object>(doubleRef), &doubleValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            return false;
+        }
+        nativeArray[i] = doubleValue;
     }
 
     sptr<AAFwk::IArray> ao = sptr<AAFwk::Array>::MakeSptr(length, AAFwk::g_IID_IDouble);
@@ -376,12 +487,23 @@ bool EtsWantParams::SetArrayInt(ani_env *env, const std::string &key, ani_object
         return false;
     }
 
-    auto array = reinterpret_cast<ani_array_int>(value);
+    auto array = reinterpret_cast<ani_array>(value);
     std::vector<ani_int> nativeArray(length);
-    status = env->Array_GetRegion_Int(array, 0, length, nativeArray.data());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANT, "Array_GetRegion_Int status: %{public}d", status);
-        return false;
+
+    for (auto i = 0; i < length; ++i) {
+        ani_ref intRef {};
+        ani_int intValue {};
+        status = env->Array_Get(array, i, &intRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            return false;
+        }
+        status = unbox(env, static_cast<ani_object>(intRef), &intValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            return false;
+        }
+        nativeArray[i] = intValue;
     }
 
     sptr<AAFwk::IArray> ao = sptr<AAFwk::Array>::MakeSptr(length, AAFwk::g_IID_IInteger);
@@ -437,12 +559,23 @@ bool EtsWantParams::SetArrayLong(ani_env *env, const std::string &key, ani_objec
         return false;
     }
 
-    auto array = reinterpret_cast<ani_array_long>(value);
+    auto array = reinterpret_cast<ani_array>(value);
     std::vector<ani_long> nativeArray(length);
-    status = env->Array_GetRegion_Long(array, 0, length, nativeArray.data());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANT, "Array_GetRegion_Long status: %{public}d", status);
-        return false;
+
+    for (auto i = 0; i < length; ++i) {
+        ani_ref longRef {};
+        ani_long longValue {};
+        status = env->Array_Get(array, i, &longRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            return false;
+        }
+        status = unbox(env, static_cast<ani_object>(longRef), &longValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            return false;
+        }
+        nativeArray[i] = longValue;
     }
 
     sptr<AAFwk::IArray> ao = sptr<AAFwk::Array>::MakeSptr(length, AAFwk::g_IID_ILong);
@@ -498,12 +631,23 @@ bool EtsWantParams::SetArrayBoolean(ani_env *env, const std::string &key, ani_ob
         return false;
     }
 
-    auto array = reinterpret_cast<ani_array_boolean>(value);
+    auto array = reinterpret_cast<ani_array>(value);
     std::vector<ani_boolean> nativeArray(length);
-    status = env->Array_GetRegion_Boolean(array, 0, length, nativeArray.data());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANT, "Array_GetRegion_Boolean status: %{public}d", status);
-        return false;
+
+    for (auto i = 0; i < length; ++i) {
+        ani_ref booleanRef {};
+        ani_boolean booleanValue {};
+        status = env->Array_Get(array, i, &booleanRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            return false;
+        }
+        status = unbox(env, static_cast<ani_object>(booleanRef), &booleanValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            return false;
+        }
+        nativeArray[i] = booleanValue;
     }
 
     sptr<AAFwk::IArray> ao = sptr<AAFwk::Array>::MakeSptr(length, AAFwk::g_IID_IBoolean);
@@ -559,12 +703,23 @@ bool EtsWantParams::SetArrayWantParams(ani_env *env, const std::string &key, ani
         return false;
     }
 
-    auto array = reinterpret_cast<ani_array_long>(value);
+    auto array = reinterpret_cast<ani_array>(value);
     std::vector<ani_long> nativeArray(length);
-    status = env->Array_GetRegion_Long(array, 0, length, nativeArray.data());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANT, "Array_GetRegion_Long status: %{public}d", status);
-        return false;
+
+    for (auto i = 0; i < length; ++i) {
+        ani_ref longRef {};
+        ani_long longValue {};
+        status = env->Array_Get(array, i, &longRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Get failed, status: %{public}d", status);
+            return false;
+        }
+        status = unbox(env, static_cast<ani_object>(longRef), &longValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Unbox failed, status: %{public}d", status);
+            return false;
+        }
+        nativeArray[i] = longValue;
     }
 
     sptr<AAFwk::IArray> ao = sptr<AAFwk::Array>::MakeSptr(length, AAFwk::g_IID_IWantParams);

@@ -365,7 +365,7 @@ private:
         }
         ani_ref ref = nullptr;
         for (ani_size i = 0; i < arrayLen; ++i) {
-            status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(missionIds), i, &ref);
+            status = env->Array_Get(reinterpret_cast<ani_array>(missionIds), i, &ref);
             if (status != ANI_OK || ref == nullptr) {
                 TAG_LOGE(AAFwkTag::MISSION, "Array_GetElement failed at index %{public}zu", i);
                 AsyncCallback(env, callback,
@@ -416,7 +416,7 @@ private:
         }
         ani_ref ref = nullptr;
         for (ani_size i = 0; i < arrayLen; ++i) {
-            status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(missionIds), i, &ref);
+            status = env->Array_Get(reinterpret_cast<ani_array>(missionIds), i, &ref);
             if (status != ANI_OK || ref == nullptr) {
                 TAG_LOGE(AAFwkTag::MISSION, "Array_GetElement failed at index %{public}zu", i);
                 AsyncCallback(env, callback,
