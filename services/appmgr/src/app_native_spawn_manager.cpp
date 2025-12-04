@@ -33,7 +33,7 @@ namespace AppExecFwk {
 namespace {
 //listen fd use
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
-constexpr const char* NATIVESPAWN_STARTED = "startup.service.ctl.nativespawn.pid";
+constexpr const char* NATIVESPAWN_EXIT = "startup.service.ctl.nativespawn";
 }
 
 AppNativeSpawnManager::~AppNativeSpawnManager() {}
@@ -93,21 +93,13 @@ int32_t AppNativeSpawnManager::UnregisterNativeChildExitNotify(const sptr<INativ
 
 static void AppNativeSpawnStartCallback(const char *key, const char *value, void *context)
 {
-    int nrFd = AppNativeSpawnManager::GetInstance().GetNRfd();
-    int nwFd = AppNativeSpawnManager::GetInstance().GetNWfd();
-    TAG_LOGI(AAFwkTag::APPMGR, "nrFd is: %{public}d, nwFd is: %{public}d", nrFd, nwFd);
-    // send fd
-    int ret = NativeSpawnListenFdSet(nwFd);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "send fd to native spawn failed, ret: %{public}d", ret);
-        close(nrFd);
-        close(nwFd);
-        return;
-    }
+    TAG_LOGI(AAFwkTag::APPMGR, "key is: %{public}s, value is: %{public}s", key, value);
     // set flag
-    ret = NativeSpawnListenCloseSet();
-    if (ret != 0) {
-        TAG_LOGI(AAFwkTag::APPMGR, "NativeSpawnListenCloseSet failed");
+    if (std::string(value) == "5") {
+        int ret = NativeSpawnListenCloseSet();
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "NativeSpawnListenCloseSet failed");
+        }
     }
 }
 
@@ -214,15 +206,27 @@ void AppNativeSpawnManager::InitNativeSpawnMsgPipe(std::shared_ptr<AppRunningMan
     }
     nrFd_ = pipeFd[0];
     nwFd_ = pipeFd[1];
-    int ret = WatchParameter(NATIVESPAWN_STARTED, AppNativeSpawnStartCallback, nullptr);
+    TAG_LOGI(AAFwkTag::APPMGR, "nrFd is: %{public}d, nwFd is: %{public}d", nrFd_, nwFd_);
+    // send fd
+    int ret = NativeSpawnListenFdSet(nwFd_);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "send fd to native spawn failed, ret: %{public}d", ret);
+        close(nwFd_);
+        close(nrFd_);
+        return;
+    }
+    ret = WatchParameter(NATIVESPAWN_EXIT, AppNativeSpawnStartCallback, nullptr);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "watch native parameter, ret :%{public}d", ret);
+        close(nwFd_);
+        close(nrFd_);
         return;
     }
     ffrt_qos_t taskQos = 0;
     ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, nrFd_, EPOLLIN, nullptr, ProcessSignalData);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "ffrt_epoll_ctl failed, ret :%{public}d", ret);
+        close(nwFd_);
         close(nrFd_);
         return;
     }
