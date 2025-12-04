@@ -4252,6 +4252,8 @@ int32_t AppMgrServiceInner::CreatNewStartMsg(const Want &want, const AbilityInfo
     CHECK_POINTER_AND_RETURN_VALUE(appInfo, ERR_NO_INIT);
     auto uid = appInfo->uid;
     auto bundleType = appInfo->bundleType;
+    bundleInfo.applicationInfo.accessTokenId = appInfo->accessTokenId;
+    bundleInfo.applicationInfo.accessTokenIdEx = appInfo->accessTokenIdEx;
     CreateStartMsgParam startMsgParam;
     startMsgParam.processName = processName;
     startMsgParam.startFlags = startFlags;
@@ -4531,6 +4533,8 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
 
     AppSpawnStartMsg startMsg;
     auto appInfo = appRecord->GetApplicationInfo();
+    auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(uid),
+        bundleInfo.name, appInfo->appIndex);
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
 #ifdef SUPPORT_CHILD_PROCESS
     PresetMaxChildProcess(appRecord, startMsg.maxChildProcess);
@@ -4540,6 +4544,8 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     startMsgParam.startFlags = startFlags;
     startMsgParam.uid = uid;
     startMsgParam.bundleInfo = bundleInfo;
+    startMsgParam.bundleInfo.applicationInfo.accessTokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
+    startMsgParam.bundleInfo.applicationInfo.accessTokenIdEx = accessTokenIdEx.tokenIDEx;
     startMsgParam.bundleIndex = bundleIndex;
     startMsgParam.bundleType = bundleType;
     startMsgParam.want = want;
@@ -8014,6 +8020,10 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
+    auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(appInfo->uid),
+        bundleInfo.name, appInfo->appIndex);
+    appInfo->accessTokenIdEx = accessTokenIdEx.tokenIDEx;
+    appInfo->accessTokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, 0)) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
         return ERR_INVALID_OPERATION;
