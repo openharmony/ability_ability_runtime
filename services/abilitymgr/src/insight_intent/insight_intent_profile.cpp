@@ -362,8 +362,6 @@ bool TransformToInsightIntentInfo(const InsightIntentProfileInfo &insightIntent,
     info.intentVersion = insightIntent.intentVersion;
     info.srcEntry = insightIntent.srcEntry;
     info.arkTSMode = insightIntent.arkTSMode;
-    info.inputParams = insightIntent.inputParams;
-    info.outputParams = insightIntent.outputParams;
     info.inputParams.assign(insightIntent.inputParams.begin(), insightIntent.inputParams.end());
     info.outputParams.assign(insightIntent.outputParams.begin(), insightIntent.outputParams.end());
     info.displayName = insightIntent.displayName;

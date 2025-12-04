@@ -34,10 +34,191 @@ export default namespace insightIntentDriver {
     uris?: Array<string>;
     flags?: int;
   }
+  enum InsightIntentType {
+    LINK = '@InsightIntentLink',
+    PAGE = '@InsightIntentPage',
+    ENTRY = '@InsightIntentEntry',
+    FUNCTION = '@InsightIntentFunctionMethod',
+    FORM = '@InsightIntentForm',
+  }
+
+  enum ExecuteModeForConfiguration {  
+    FOREGROUND = 0,
+    BACKGROUND = 1
+  }
+
+  interface UIAbilityIntentInfo {
+    readonly abilityName: string;
+    readonly executeMode: ExecuteModeForConfiguration[];
+  }
+
+  class UIAbilityIntentInfoInner implements UIAbilityIntentInfo {
+    readonly abilityName: string;
+    readonly executeMode: ExecuteModeForConfiguration[];
+  }
+
+  interface UIExtensionIntentInfo {  
+    readonly abilityName: string;
+  }
+
+  class UIExtensionIntentInfoInner implements UIExtensionIntentInfo {
+    readonly abilityName: string;
+  }
+
+  interface ServiceExtensionIntentInfo {  
+    readonly abilityName: string;
+  }
+
+  class ServiceExtensionIntentInfoInner implements ServiceExtensionIntentInfo {
+    readonly abilityName: string;
+  }
+
+  enum DevelopType {  
+    CONFIGURATION = 'configuration',
+    DECORATOR = 'decorator'
+  }
+
+  interface SubIntentInfoForConfiguration {
+    readonly srcEntry: string;
+    readonly uiAbility?: UIAbilityIntentInfo;
+    readonly uiExtension?: UIExtensionIntentInfo;
+    readonly serviceExtension?: ServiceExtensionIntentInfo;
+    readonly form?: FormIntentInfo;
+    readonly inputParams?: Array<Record<string, RecordData>>;
+    readonly outputParams?: Array<Record<string, RecordData>>;
+    readonly entities?: Record<string, RecordData>;
+  }
+
+  class SubIntentInfoForConfigurationInner implements SubIntentInfoForConfiguration {
+    readonly srcEntry: string;
+    readonly uiAbility?: UIAbilityIntentInfo;
+    readonly uiExtension?: UIExtensionIntentInfo;
+    readonly serviceExtension?: ServiceExtensionIntentInfo;
+    readonly form?: FormIntentInfo;
+    readonly inputParams?: Array<Record<string, RecordData>>;
+    readonly outputParams?: Array<Record<string, RecordData>>;
+    readonly entities?: Record<string, RecordData>;
+  }
+
+  interface InsightIntentInfo {
+    readonly bundleName: string;
+    readonly moduleName: string;
+    readonly intentName: string;
+    readonly domain: string;
+    readonly intentVersion: string;
+    readonly displayName: string;
+    readonly displayDescription: string;
+    readonly schema: string;
+    readonly icon: string;
+    readonly llmDescription: string;
+    readonly keywords: string[];
+    readonly intentType: InsightIntentType;
+    readonly subIntentInfo: LinkIntentInfo | PageIntentInfo | FunctionIntentInfo | FormIntentInfo | EntryIntentInfo;
+    readonly parameters: Record<string, RecordData>;
+    readonly result: Record<string, RecordData>;
+    readonly entities: Array<EntityInfo>;
+    readonly developType?: DevelopType;
+    readonly subIntentInfoForConfiguration?: SubIntentInfoForConfiguration;
+  }
+
+  class InsightIntentInfoInner implements InsightIntentInfo { 
+    readonly bundleName: string;
+    readonly moduleName: string;
+    readonly intentName: string;
+    readonly domain: string;
+    readonly intentVersion: string;
+    readonly displayName: string;
+    readonly displayDescription: string;
+    readonly schema: string;
+    readonly icon: string;
+    readonly llmDescription: string;
+    readonly keywords: string[];
+    readonly intentType: InsightIntentType;
+    readonly subIntentInfo: LinkIntentInfo | PageIntentInfo | FunctionIntentInfo | FormIntentInfo | EntryIntentInfo;
+    readonly parameters: Record<string, RecordData>;
+    readonly result: Record<string, RecordData>;
+    readonly entities: Array<EntityInfo>;
+    readonly developType?: DevelopType;
+    readonly subIntentInfoForConfiguration?: SubIntentInfoForConfiguration;
+  }
+
+  interface LinkIntentInfo {
+    readonly uri: string;
+  }
+
+  class LinkIntentInfoInner implements LinkIntentInfo {
+    readonly uri: string;
+  }
+
+  interface PageIntentInfo {
+    readonly uiAbility: string;
+    readonly pagePath: string;
+    readonly navigationId: string;
+    readonly navDestinationName: string;
+  }
+
+  class PageIntentInfoInner implements PageIntentInfo {
+    readonly uiAbility: string;
+    readonly pagePath: string;
+    readonly navigationId: string;
+    readonly navDestinationName: string;
+  }
+
+  interface FunctionIntentInfo {}
+
+  class FunctionIntentInfoInner implements FunctionIntentInfo {
+  }
+
+  interface FormIntentInfo {
+    readonly abilityName: string;
+    readonly formName: string;
+  }
+  class FormIntentInfoInner implements FormIntentInfo {
+    readonly abilityName: string;
+    readonly formName: string;
+  }
+
+  interface EntryIntentInfo {
+    readonly abilityName: string;
+    readonly executeMode: insightIntent.ExecuteMode[];
+  }
+
+  class EntryIntentInfoInner implements EntryIntentInfo {
+    readonly abilityName: string;
+    readonly executeMode: insightIntent.ExecuteMode[];
+  }
+
+  enum GetInsightIntentFlag {
+    GET_FULL_INSIGHT_INTENT = 0x00000001,
+    GET_SUMMARY_INSIGHT_INTENT = 0x00000002,
+    GET_ENTITY_INFO = 0x00000004,
+  }
+
+  interface EntityInfo {
+    readonly className: string;
+    readonly entityId: string;
+    readonly entityCategory: string;
+    readonly parameters: Record<string, RecordData>;
+    readonly parentClassName: string;
+  }
+
+  class EntityInfoInner implements EntityInfo {
+    readonly className: string;
+    readonly entityId: string;
+    readonly entityCategory: string;
+    readonly parameters: Record<string, RecordData>;
+    readonly parentClassName: string;
+  }
 
   export native function nativeExecuteSync(param: ExecuteParam,
     callback: AsyncCallbackWrapper<insightIntent.ExecuteResult>,
     isCallback: boolean): void;
+  export native function nativeGetAllInsightIntentInfo(intentFlags: int, callback: AsyncCallbackWrapper<Array<InsightIntentInfo>>): void;
+  export native function nativeGetAllInfoCheck(intentFlags: int): void;
+  export native function nativeGetInsightIntentInfoByBundleName(bundleName: string, intentFlags: int, callback: AsyncCallbackWrapper<Array<InsightIntentInfo>>): void;
+  export native function nativeGetInfoByBundleNameCheck(bundleName: string, intentFlags: int): void;
+  export native function nativeGetInsightIntentInfoByIntentName(bundleName: string, moduleName: string, intentName: string, intentFlags: int, callback: AsyncCallbackWrapper<InsightIntentInfo>): void;
+  export native function nativeGetInfoByIntentNameCheck(bundleName: string, moduleName: string, intentName: string, intentFlags: int): void;
 
   export function execute(param: ExecuteParam, callback: AsyncCallback<insightIntent.ExecuteResult>): void {
     let pCallback = new AsyncCallbackWrapper<insightIntent.ExecuteResult>(callback);
@@ -63,5 +244,59 @@ export default namespace insightIntentDriver {
       });
     });
     return pPromise;
+  }
+
+  function getAllInsightIntentInfo(intentFlags: int): Promise<Array<InsightIntentInfo>> {
+    nativeGetAllInfoCheck(intentFlags);
+    return new Promise<Array<InsightIntentInfo>>((resolve: (data: Array<InsightIntentInfo>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<Array<InsightIntentInfo>>((err: BusinessError | null,
+        data: Array<InsightIntentInfo> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<InsightIntentInfo>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        nativeGetAllInsightIntentInfo(intentFlags, asyncCall);
+      });
+    });
+  }
+
+  function getInsightIntentInfoByBundleName(bundleName: string, intentFlags: int): Promise<Array<InsightIntentInfo>> {
+    nativeGetInfoByBundleNameCheck(bundleName, intentFlags);
+    return new Promise<Array<InsightIntentInfo>>((resolve: (data: Array<InsightIntentInfo>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<Array<InsightIntentInfo>>((err: BusinessError | null,
+        data: Array<InsightIntentInfo> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<InsightIntentInfo>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        nativeGetInsightIntentInfoByBundleName(bundleName, intentFlags, asyncCall);
+      });
+    });
+  }
+
+  function getInsightIntentInfoByIntentName(bundleName: string, moduleName: string, intentName: string, intentFlags: int): Promise<InsightIntentInfo> {
+    nativeGetInfoByIntentNameCheck(bundleName, moduleName, intentName, intentFlags);
+    return new Promise<InsightIntentInfo>((resolve: (data: InsightIntentInfo) => void,
+      reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<InsightIntentInfo>((err: BusinessError | null,
+        data: InsightIntentInfo | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as InsightIntentInfo);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        nativeGetInsightIntentInfoByIntentName(bundleName, moduleName, intentName, intentFlags, asyncCall);
+      });
+    });
   }
 }
