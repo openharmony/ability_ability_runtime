@@ -58,10 +58,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(bundleName, moduleName,
         userId);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->DeleteInsightIntentByUserId(userId);
-    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(genericInfos);
-    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(bundleName, genericInfos);
+    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(userId, genericInfos);
+    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(bundleName, userId,
+        genericInfos);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(bundleName, moduleName,
-        intentName, genericInfo);
+        intentName, userId, genericInfo);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos, configInfos);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(bundleName, userId, intentInfos);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(bundleName, moduleName,

@@ -57,6 +57,7 @@ constexpr char INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME[] = "ohos.insightInt
 constexpr int32_t INVALID_DISPLAY_ID = -1;
 
 class InsightIntentExecuteParam : public Parcelable {
+    const int32_t DEFAULT_INVAL_VALUE = -1;
 public:
     InsightIntentExecuteParam() = default;
     ~InsightIntentExecuteParam() = default;
@@ -73,6 +74,7 @@ public:
     int32_t executeMode_ = -1;
     int32_t displayId_ = INVALID_DISPLAY_ID;
     int32_t flags_ = 0;
+    int32_t userId_ = DEFAULT_INVAL_VALUE;
     uint64_t insightIntentId_ = 0;
     std::shared_ptr<WantParams> insightIntentParam_;
     std::string bundleName_;

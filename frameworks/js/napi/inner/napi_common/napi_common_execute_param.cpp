@@ -110,6 +110,14 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
         }
         executeParam.flags_ = flags;
     }
+    if (IsExistsByPropertyName(env, param, "userId")) {
+        int32_t userId = DEFAULT_INVAL_VALUE;
+        if (!UnwrapInt32ByPropertyName(env, param, "userId", userId)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument userId fail");
+            return false;
+        }
+        executeParam.userId_ = userId;
+    }
 
     return true;
 }
