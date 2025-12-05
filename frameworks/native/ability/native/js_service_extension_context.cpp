@@ -1729,6 +1729,7 @@ void JSServiceExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     // wrap ElementName
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
 
@@ -1780,6 +1781,7 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
     int resultCode)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "called, resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
     napi_value argv[] = {napiElementName};
     if (jsConnectionObject_ == nullptr) {

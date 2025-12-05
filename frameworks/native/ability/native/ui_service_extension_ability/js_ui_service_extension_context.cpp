@@ -577,6 +577,7 @@ void JSUIServiceExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     // wrap ElementName
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
 
@@ -624,6 +625,7 @@ void JSUIServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExec
     int resultCode)
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "HandleOnAbilityDisconnectDone, resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
     napi_value argv[] = {napiElementName};
     if (jsConnectionObject_ == nullptr) {
