@@ -54,7 +54,7 @@ const std::string INSIGHT_INTENTS_DEVELOP_TYPE_DECORATOR = "decorator";
 } // namespace
 
 uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode)
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::INTENT, "get srcEntry, elementName: %{public}s, intentName: %{public}s, mode: %{public}d",
         elementName.GetURI().c_str(), intentName.c_str(), executeMode);
@@ -72,9 +72,12 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     }
 
     // Get json profile firstly
+    if (userId < 0) {
+        userId = AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId();
+    }
     std::string profile;
     auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE, bundleName, moduleName,
-        profile, AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId()));
+        profile, userId));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "failed code: %{public}d", ret);
         return AAFwk::ERR_INSIGHT_INTENT_GET_PROFILE_FAILED;

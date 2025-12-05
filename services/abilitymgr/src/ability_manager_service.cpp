@@ -12879,12 +12879,13 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
         return ret;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "execute insight intent, bundleName: %{public}s, moduleName: %{public}s, "
-        "intentName: %{public}s, intentId:%{public}" PRIu64", openLinkExecuteFlag: %{public}d, executeMode: %{public}d",
+        "intentName: %{public}s, intentId:%{public}" PRIu64", openLinkExecuteFlag: %{public}d, executeMode: %{public}d, "
+        "userId: %{public}d",
         param.bundleName_.c_str(), param.moduleName_.c_str(), param.insightIntentName_.c_str(), param.insightIntentId_,
-        openLinkExecuteFlag, param.executeMode_);
+        openLinkExecuteFlag, param.executeMode_, param.userId_);
 
     if (openLinkExecuteFlag) {
-        return IntentOpenLinkInner(paramPtr, infos, -1);
+        return IntentOpenLinkInner(paramPtr, infos, param.userId_);
     }
 
     Want want;
@@ -12897,7 +12898,7 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     switch (param.executeMode_) {
         case AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND:
             TAG_LOGD(AAFwkTag::ABILITYMGR, "ExecuteMode UI_ABILITY_FOREGROUND.");
-            ret = StartAbilityWithInsightIntent(want);
+            ret = StartAbilityWithInsightIntent(want, param.userId_);
             if (ret != ERR_OK) {
                 eventInfo.errReason = "StartAbilityWithInsightIntent error";
                 SendIntentReport(eventInfo, ret, param.insightIntentName_);
@@ -12905,7 +12906,7 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
             break;
         case AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND: {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "ExecuteMode UI_ABILITY_BACKGROUND.");
-            ret = StartAbilityByCallWithInsightIntent(want, callerToken, param);
+            ret = StartAbilityByCallWithInsightIntent(want, callerToken, param, param.userId_);
             if (ret != ERR_OK) {
                 eventInfo.errReason = "StartAbilityByCallWithInsightIntent error";
                 SendIntentReport(eventInfo, ret, param.insightIntentName_);
@@ -12918,7 +12919,7 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
             break;
         case AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY:
             TAG_LOGD(AAFwkTag::ABILITYMGR, "ExecuteMode SERVICE_EXTENSION_ABILITY.");
-            ret = StartExtensionAbilityWithInsightIntent(want, AppExecFwk::ExtensionAbilityType::SERVICE);
+            ret = StartExtensionAbilityWithInsightIntent(want, AppExecFwk::ExtensionAbilityType::SERVICE, param.userId_);
             if (ret != ERR_OK) {
                 eventInfo.errReason = "StartExtensionAbilityWithInsightIntent error";
                 SendIntentReport(eventInfo, ret, param.insightIntentName_);
@@ -12991,14 +12992,14 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
 }
 
 int32_t AbilityManagerService::StartExtensionAbilityWithInsightIntent(const Want &want,
-    AppExecFwk::ExtensionAbilityType extensionType)
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    return StartExtensionAbilityInner(want, nullptr, DEFAULT_INVAL_VALUE, extensionType, true);
+    return StartExtensionAbilityInner(want, nullptr, userId, extensionType, true);
 }
 
 int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &want,
-    const sptr<IRemoteObject> &callerToken, const InsightIntentExecuteParam &param)
+    const sptr<IRemoteObject> &callerToken, const InsightIntentExecuteParam &param, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     sptr<IAbilityConnection> connect = sptr<AbilityBackgroundConnection>::MakeSptr();
@@ -13016,20 +13017,30 @@ int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &w
     abilityRequest.startSetting = nullptr;
     abilityRequest.want = want;
     abilityRequest.connect = connect;
-    int32_t result = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, GetValidUserId(DEFAULT_INVAL_VALUE));
+    int32_t result = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, GetValidUserId(userId));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
         return result;
     }
     std::shared_ptr<AbilityRecord> targetRecord;
-    int32_t oriValidUserId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t oriValidUserId = GetValidUserId(userId);
     auto missionListMgr = GetMissionListManagerByUserId(oriValidUserId);
+    if(IsCrossUserCall(oriValidUserId)) {
+        if (VerifyAccountPermission(oriValidUserId) == CHECK_PERMISSION_FAILED) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verification failed");
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (!JudgeMultiUserConcurrency(oriValidUserId)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
+            return ERR_CROSS_USER;
+        }
+    }
     if (IsAbilityStarted(abilityRequest, targetRecord, oriValidUserId)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ability has already started");
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
         result = OnExecuteIntent(abilityRequest, targetRecord);
     }  else {
-        result = StartAbilityByCall(want, connect, callerToken);
+        result = StartAbilityByCall(want, connect, callerToken, oriValidUserId);
     }
     ResSchedUtil::GetInstance().ReportAbilityIntentExemptionInfoToRSS(abilityRequest.uid, 0);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->SetIntentExemptionInfo(
@@ -14686,7 +14697,7 @@ AbilityRuntime::ExtractInsightIntentGenericInfo AbilityManagerService::GetInsigh
 {
     AbilityRuntime::ExtractInsightIntentGenericInfo infos;
     DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
-        param.bundleName_, param.moduleName_, param.insightIntentName_, infos);
+        param.bundleName_, param.moduleName_, param.insightIntentName_, GetValidUserId(param.userId_), infos);
     TAG_LOGD(AAFwkTag::INTENT,
         "getLinkInfo:bundleName:%{public}s,moduleName:%{public}s,"
         "intentName:%{public}s,decoratorType:%{public}s",
@@ -15411,7 +15422,8 @@ int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteOb
 
 int32_t AbilityManagerService::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetAllInsightIntentInfo");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
@@ -15419,11 +15431,22 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
+
+    if(IsCrossUserCall(userId)) {
+        if (VerifyAccountPermission(userId) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "permission verification failed");
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (!JudgeMultiUserConcurrency(userId)) {
+            TAG_LOGE(AAFwkTag::INTENT, "multi-user non-concurrent unsatisfied");
+            return ERR_CROSS_USER;
+        }
+    }
+
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
         std::vector<InsightIntentInfo> configInfos;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos, configInfos);
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(GetValidUserId(userId), intentInfos, configInfos);
         if (intentInfos.empty() && configInfos.empty()) {
             TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
             return ERR_OK;
@@ -15444,9 +15467,8 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
     } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
         std::vector<InsightIntentInfo> configInfos;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllConfigInsightIntentInfo(userId, configInfos);
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(genericInfos);
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllConfigInsightIntentInfo(GetValidUserId(userId), configInfos);
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(GetValidUserId(userId), genericInfos);
         if (genericInfos.empty() && configInfos.empty()) {
             return ERR_OK;
         }
@@ -15461,7 +15483,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
         if (getEntity) {
             std::vector<ExtractInsightIntentInfo> intentInfos;
             std::vector<InsightIntentInfo> configInfosWithEntity;
-            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos, configInfosWithEntity);
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(GetValidUserId(userId), intentInfos, configInfosWithEntity);
             if (intentInfos.empty() && configInfosWithEntity.empty()) {
                 TAG_LOGI(AAFwkTag::INTENT, "InsightIntentInfos empty");
                 return ERR_OK;
@@ -15489,7 +15511,8 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
 int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByBundleName");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
@@ -15497,14 +15520,25 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
+
+    if(IsCrossUserCall(userId)) {
+        if (VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+            TAG_LOGE(AAFwkTag::INTENT, "permission verification failed");
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (!JudgeMultiUserConcurrency(userId)) {
+            TAG_LOGE(AAFwkTag::INTENT, "multi-user non-concurrent unsatisfied");
+            return ERR_CROSS_USER;
+        }
+    }
+
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
         std::vector<InsightIntentInfo> configInfos;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
-            bundleName, userId, intentInfos);
+            bundleName, GetValidUserId(userId), intentInfos);
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfoByName(
-            bundleName, userId, configInfos);
+            bundleName, GetValidUserId(userId), configInfos);
         if (intentInfos.empty() && configInfos.empty()) {
             TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfos and configInsightIntentInfos empty");
             return ERR_OK;
@@ -15524,11 +15558,10 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
     } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
         std::vector<InsightIntentInfo> configInfos;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfoByName(
-            bundleName, userId, configInfos);
+            bundleName, GetValidUserId(userId), configInfos);
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(
-            bundleName, genericInfos);
+            bundleName, GetValidUserId(userId), genericInfos);
         if (genericInfos.empty() && configInfos.empty()) {
             return ERR_OK;
         }
@@ -15543,7 +15576,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
         if (getEntity) {
             std::vector<ExtractInsightIntentInfo> intentInfos;
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
-                bundleName, userId, intentInfos);
+                bundleName, GetValidUserId(userId), intentInfos);
             if (intentInfos.empty()) {
                 TAG_LOGI(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
                 return ERR_OK;
@@ -15571,7 +15604,8 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForQuery &info)
+    InsightIntentInfoForQuery &info,
+    int32_t userId)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByIntentName");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
@@ -15579,32 +15613,42 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
+
+    if(IsCrossUserCall(userId)) {
+        if (VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+            TAG_LOGE(AAFwkTag::INTENT, "permission verification failed");
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (!JudgeMultiUserConcurrency(userId)) {
+            TAG_LOGE(AAFwkTag::INTENT, "multi-user non-concurrent unsatisfied");
+            return ERR_CROSS_USER;
+        }
+    }
+
     if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         ExtractInsightIntentInfo intentInfo;
         InsightIntentInfo configIntentInfo;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfo(
-            bundleName, moduleName, intentName, userId, configIntentInfo);
+            bundleName, moduleName, intentName, GetValidUserId(userId), configIntentInfo);
         InsightIntentUtils::ConvertConfigInsightIntentInfo(configIntentInfo, info, getEntity);
         
         if (info.bundleName.empty()) {
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-                bundleName, moduleName, intentName, userId, intentInfo);
+                bundleName, moduleName, intentName, GetValidUserId(userId), intentInfo);
             InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info, getEntity);
         }
     } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
-        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         InsightIntentInfo configIntentInfo;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfo(
-            bundleName, moduleName, intentName, userId, configIntentInfo);
+            bundleName, moduleName, intentName, GetValidUserId(userId), configIntentInfo);
         InsightIntentUtils::ConvertConfigInsightIntentInfo(configIntentInfo, info, getEntity);
         if (info.bundleName.empty()) {
             if (getEntity) {
                 ExtractInsightIntentInfo intentInfo;
                 DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-                    bundleName, moduleName, intentName, userId, intentInfo);
+                    bundleName, moduleName, intentName, GetValidUserId(userId), intentInfo);
                 InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(intentInfo, info);
                 
                 return ERR_OK;
@@ -15612,7 +15656,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
         
             ExtractInsightIntentGenericInfo genericInfo;
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
-                bundleName, moduleName, intentName, genericInfo);
+                bundleName, moduleName, intentName, GetValidUserId(userId), genericInfo);
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
         }
 

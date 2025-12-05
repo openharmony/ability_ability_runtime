@@ -6846,7 +6846,8 @@ int32_t AbilityManagerProxy::StartAbilityWithWait(Want &want, sptr<IAbilityStart
 
 int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6860,6 +6861,11 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
 
     if (!data.WriteUint32(static_cast<uint32_t>(flag))) {
         TAG_LOGE(AAFwkTag::INTENT, "write flag fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::INTENT, "write userId fail");
         return ERR_INVALID_VALUE;
     }
 
@@ -6884,7 +6890,8 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
 int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForQuery> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos,
+    int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6902,6 +6909,11 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
 
     if (!data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::INTENT, "write bundleName fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::INTENT, "write userId fail");
         return ERR_INVALID_VALUE;
     }
 
@@ -6928,7 +6940,8 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForQuery &info)
+    InsightIntentInfoForQuery &info,
+    int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6956,6 +6969,11 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
 
     if (!data.WriteString(intentName)) {
         TAG_LOGE(AAFwkTag::INTENT, "write intentName fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::INTENT, "write userId fail");
         return ERR_INVALID_VALUE;
     }
 

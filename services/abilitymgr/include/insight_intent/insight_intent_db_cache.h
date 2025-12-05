@@ -28,11 +28,12 @@ class InsightIntentDbCache : public std::enable_shared_from_this<InsightIntentDb
     DECLARE_DELAYED_SINGLETON(InsightIntentDbCache)
 public:
     void InitInsightIntentCache(const int32_t userId);
-    void GetAllInsightIntentGenericInfo(std::vector<ExtractInsightIntentGenericInfo> &genericInfos);
-    void GetInsightIntentGenericInfoByName(const std::string &bundleName,
+    void GetAllInsightIntentGenericInfo(const int32_t userId,
         std::vector<ExtractInsightIntentGenericInfo> &genericInfos);
+    void GetInsightIntentGenericInfoByName(const std::string &bundleName, const int32_t userId,
+         std::vector<ExtractInsightIntentGenericInfo> &genericInfos);
     void GetInsightIntentGenericInfo(const std::string &bundleName, const std::string &moduleName,
-        const std::string &intentName, ExtractInsightIntentGenericInfo &genericInfos);
+        const std::string &intentName, const int32_t userId, ExtractInsightIntentGenericInfo &genericInfo);
     void GetAllInsightIntentInfo(const int32_t userId, std::vector<ExtractInsightIntentInfo> &infos,
         std::vector<InsightIntentInfo> &configInfos);
     void GetInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
