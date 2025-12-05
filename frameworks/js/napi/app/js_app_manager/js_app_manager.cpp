@@ -63,6 +63,7 @@ constexpr const char* ON_OFF_TYPE = "applicationState";
 constexpr const char* ON_OFF_TYPE_SYNC = "applicationStateEvent";
 constexpr const char* ON_OFF_TYPE_APP_FOREGROUND_STATE = "appForegroundState";
 constexpr const char* ON_OFF_TYPE_ABILITY_FIRST_FRAME_STATE = "abilityFirstFrameState";
+static std::mutex observerLock_;
 
 class JsAppManager final {
 public:
@@ -335,23 +336,26 @@ private:
                 isUsingFilter = true;
             }
         }
-        int32_t ret = appManager_->RegisterApplicationStateObserverWithFilter(observer_,
-            bundleNameList, appStateFilter, isUsingFilter);
-        if (ret == 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "success");
-            int64_t observerId = serialNumber_;
-            observer_->AddJsObserverObject(observerId, argv[INDEX_ONE]);
-            if (serialNumber_ < INT32_MAX) {
-                serialNumber_++;
+        std::lock_guard<std::mutex> lock(observerLock_);
+        if (observer_->GetJsObserverMapSize() == 0) {
+            int32_t ret = appManager_->RegisterApplicationStateObserverWithFilter(observer_,
+                bundleNameList, appStateFilter, isUsingFilter);
+            if (ret == 0) {
+                TAG_LOGD(AAFwkTag::APPMGR, "success");
             } else {
-                serialNumber_ = 0;
+                TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
+                ThrowErrorByNativeErr(env, ret);
+                return CreateJsUndefined(env);
             }
-            return CreateJsValue(env, observerId);
-        } else {
-            TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
-            ThrowErrorByNativeErr(env, ret);
-            return CreateJsUndefined(env);
         }
+        int64_t observerId = serialNumber_;
+        observer_->AddJsObserverObject(observerId, argv[INDEX_ONE]);
+        if (serialNumber_ < INT32_MAX) {
+            serialNumber_++;
+        } else {
+            serialNumber_ = 0;
+        }
+        return CreateJsValue(env, observerId);
     }
 
     napi_value OnOnNew(napi_env env, size_t argc, napi_value* argv)
@@ -379,22 +383,25 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-        int32_t ret = appManager_->RegisterApplicationStateObserver(observerSync_, bundleNameList);
-        if (ret == 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "success");
-            int32_t observerId = serialNumber_;
-            observerSync_->AddJsObserverObject(observerId, argv[INDEX_ONE]);
-            if (serialNumber_ < INT32_MAX) {
-                serialNumber_++;
+        std::lock_guard<std::mutex> lock(observerLock_);
+        if (observerSync_->GetJsObserverMapSize() == 0) {
+            int32_t ret = appManager_->RegisterApplicationStateObserver(observerSync_, bundleNameList);
+            if (ret == 0) {
+                TAG_LOGD(AAFwkTag::APPMGR, "success");
             } else {
-                serialNumber_ = 0;
+                TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
+                ThrowErrorByNativeErr(env, ret);
+                return CreateJsUndefined(env);
             }
-            return CreateJsValue(env, observerId);
-        } else {
-            TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
-            ThrowErrorByNativeErr(env, ret);
-            return CreateJsUndefined(env);
         }
+        int32_t observerId = serialNumber_;
+        observerSync_->AddJsObserverObject(observerId, argv[INDEX_ONE]);
+        if (serialNumber_ < INT32_MAX) {
+            serialNumber_++;
+        } else {
+            serialNumber_ = 0;
+        }
+        return CreateJsValue(env, observerId);
     }
 
     napi_value OnOnForeground(napi_env env, size_t argc, napi_value *argv)
@@ -546,14 +553,18 @@ private:
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
         }
-        int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
-        if (ret == 0 && observer->RemoveJsObserverObject(observerId)) {
-            task->ResolveWithNoError(env, CreateJsUndefined(env));
-            TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu", observer->GetJsObserverMapSize());
-        } else {
-            TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
-            task->Reject(env, CreateJsErrorByNativeErr(env, ret));
+        std::lock_guard<std::mutex> lock(observerLock_);
+        observer->RemoveJsObserverObject(observerId);
+        if (observer->GetJsObserverMapSize() == 0) {
+            int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
+            if (ret != 0) {
+                TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
+                task->Reject(env, CreateJsErrorByNativeErr(env, ret));
+                return;
+            }
         }
+        TAG_LOGI(AAFwkTag::APPMGR, "unregister success size:%{public}zu", observer->GetJsObserverMapSize());
+        task->ResolveWithNoError(env, CreateJsUndefined(env));
     }
 
     napi_value OnOffOld(napi_env env, size_t argc, napi_value* argv)
@@ -583,7 +594,6 @@ private:
             return CreateJsUndefined(env);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "find observer exist:%{public}d", static_cast<int32_t>(observerId));
-
         napi_value lastParam = (argc > ARGC_TWO) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -621,20 +631,23 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
+        std::lock_guard<std::mutex> lock(observerLock_);
         if (!observerSync_->FindObserverByObserverId(observerId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
             ThrowInvalidParamError(env, "not find observerId.");
             return CreateJsUndefined(env);
         }
-        int32_t ret = appManager_->UnregisterApplicationStateObserver(observerSync_);
-        if (ret == 0 && observerSync_->RemoveJsObserverObject(observerId)) {
-            TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu", observerSync_->GetJsObserverMapSize());
-            return CreateJsUndefined(env);
-        } else {
-            TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-            return CreateJsUndefined(env);
+        observerSync_->RemoveJsObserverObject(observerId);
+        if (observerSync_->GetJsObserverMapSize() == 0) {
+            int32_t ret = appManager_->UnregisterApplicationStateObserver(observerSync_);
+            if (ret != 0) {
+                TAG_LOGE(AAFwkTag::APPMGR, "err:%{public}d", ret);
+                ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+                return CreateJsUndefined(env);
+            }
         }
+        TAG_LOGI(AAFwkTag::APPMGR, "unregister success size:%{public}zu", observerSync_->GetJsObserverMapSize());
+        return CreateJsUndefined(env);
     }
 
     napi_value OnOffForeground(napi_env env, size_t argc, napi_value *argv)
