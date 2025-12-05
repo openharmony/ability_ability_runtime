@@ -689,7 +689,7 @@ private:
         calls->callerCallBack->SetOnRelease(GetReleaseListen());
 
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "async wait execute");
-        NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", env,
+        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStartAbilityByCall", env,
             CreateAsyncTaskWithLastParam(env, nullptr, GetCallExecute(calls, want, context_),
                 GetCallComplete(calls), &result));
       
