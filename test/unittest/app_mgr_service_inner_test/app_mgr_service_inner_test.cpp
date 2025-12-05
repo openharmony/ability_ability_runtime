@@ -30,10 +30,12 @@
 #include "ipc_skeleton.h"
 #include "mock_ability_token.h"
 #include "mock_app_scheduler.h"
+#include "mock_app_utils.h"
 #include "mock_bundle_manager.h"
 #include "mock_configuration_observer.h"
 #include "mock_iapp_state_callback.h"
 #include "mock_kia_interceptor.h"
+#include "mock_my_app_utils_flag.h"
 #include "mock_my_flag.h"
 #include "mock_native_token.h"
 #include "mock_permission_verification.h"
@@ -6012,6 +6014,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0001, TestSize.Level1)
     std::string flag = "uiext_flag";
     want.SetParam("ohoSpecifiedProcessFlag", flag);
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = true;
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, flag);
 }
@@ -6075,6 +6078,52 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0004, TestSize.Level1)
     std::string flag = "uiext_flag";
     want.SetParam("ohoSpecifiedProcessFlag", flag);
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0005
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns the correct flag when AbilityInfo is a UIExtension and
+ * isolationProcess is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0005, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = true;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = true;
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, flag);
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0006
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns the correct flag when AbilityInfo is a UIExtension and
+ * isolationProcess is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0006, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = true;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = false;
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, "");
 }
