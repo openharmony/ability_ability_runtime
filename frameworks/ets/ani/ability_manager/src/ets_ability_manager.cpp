@@ -61,6 +61,7 @@ constexpr const char *CLEAR_PRELOAD_UI_EXTENSION_ABILITY_SIGNATURE = "ILutils/Ab
 constexpr const char *CLEAR_PRELOAD_UI_EXTENSION_ABILITIES_SIGNATURE = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr int32_t ERR_FAILURE = -1;
 const std::string MAX_UINT64_VALUE = "18446744073709551615";
+std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 
 sptr<AAFwk::AcquireShareDataCallbackStub> CreateShareDataCallbackStub(
     ani_env *env, ani_ref callbackRef)
@@ -79,8 +80,10 @@ sptr<AAFwk::AcquireShareDataCallbackStub> CreateShareDataCallbackStub(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null shareDataCallbackStub");
         return nullptr;
     }
-    auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    shareDataCallbackStub->SetHandler(handler);
+    if (mainHandler_ == nullptr) {
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    }
+    shareDataCallbackStub->SetHandler(mainHandler_);
     AAFwk::ShareRuntimeTask task =
         [aniVM, callbackRef](int32_t resultCode, const AAFwk::WantParams &wantParam) {
             ani_env *env = nullptr;
