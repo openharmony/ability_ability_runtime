@@ -46,11 +46,10 @@ errMap.set(ERROR_CODE_INNER_ERROR, ERROR_MSG_INNER_ERROR);
 errMap.set(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND, ERROR_MSG_TRANSFER_CLASS_NOT_FOUND);
 
 function buildError(code: int): BusinessError {
-  let msg = ERROR_MSG_INNER_ERROR;
   if (errMap.has(code)) {
-    msg = errMap.get(code) as string;;
+    return new BusinessError(code, new Error(errMap.get(code) as string));
   }
-  return new BusinessError(code, new Error(msg));
+  return new BusinessError(ERROR_CODE_INNER_ERROR, new Error(ERROR_MSG_INNER_ERROR));
 }
 
 class EstParcelable {
@@ -58,31 +57,31 @@ class EstParcelable {
   constructor(etsObj: rpc.Parcelable) {
     this.etsObj = etsObj;
   }
-  marshalling(dataOut: rpc.MessageSequence): boolean {
+  marshalling(dataOut: Any): boolean {
     let data = transfer.transferStatic(dataOut, 'rpc.MessageSequence') as rpc.MessageSequence;
     return this.etsObj.marshalling(data);
   }
-  unmarshalling(dataIn: rpc.MessageSequence): boolean {
+  unmarshalling(dataIn: Any): boolean {
     let data = transfer.transferStatic(dataIn, 'rpc.MessageSequence') as rpc.MessageSequence;
     return this.etsObj.unmarshalling(data);
   }
 }
 
 class CalleeFromJs implements Callee {
-  jsObj: Any;
+  esObj: ESValue;
   constructor(jsObj: Any) {
-    this.jsObj = jsObj;
+    this.esObj = ESValue.wrap(jsObj);
   }
   on(method: string, callback: CalleeCallback): void {
     if (CoroutineExtras.isMainWorker()) {
-      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
+      this.esObj.invokeMethod('on', method, (seq: Any): EstParcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
         return new EstParcelable(callback(data));
       });
       return;
     }
     EAWorker.postToMain<void>((): void => {
-      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
+      this.esObj.invokeMethod('on', method, (seq: Any): EstParcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
         return new EstParcelable(callback(data));
       });
@@ -91,28 +90,28 @@ class CalleeFromJs implements Callee {
 
   off(method: string): void {
     if (CoroutineExtras.isMainWorker()) {
-      ESValue.wrap(this.jsObj).invokeMethod('off', method);
+      this.esObj.invokeMethod('off', method);
       return;
     }
     EAWorker.postToMain<void>((): void => {
-      ESValue.wrap(this.jsObj).invokeMethod('off', method);
+      this.esObj.invokeMethod('off', method);
     });
   }
 }
 
 class JsParcelable implements rpc.Parcelable {
-  private jsObj: Any;
+  private esObj: ESValue;
   constructor(jsObj: Any) {
-    this.jsObj = jsObj;
+    this.esObj = ESValue.wrap(jsObj);
   }
   marshalling(dataOut: rpc.MessageSequence): boolean {
     if (CoroutineExtras.isMainWorker()) {
-      let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
+      let ret = this.esObj.invokeMethod('marshalling',
         ESValue.wrap(transfer.transferDynamic(dataOut, 'rpc.MessageSequence')));
       return ret.toBoolean();
     }
     let job = EAWorker.postToMain<boolean>((): boolean => {
-      let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
+      let ret = this.esObj.invokeMethod('marshalling',
         ESValue.wrap(transfer.transferDynamic(dataOut, 'rpc.MessageSequence')));
       return ret.toBoolean();
     });
@@ -120,12 +119,12 @@ class JsParcelable implements rpc.Parcelable {
   }
   unmarshalling(dataIn: rpc.MessageSequence): boolean {
     if (CoroutineExtras.isMainWorker()) {
-      let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
+      let ret = this.esObj.invokeMethod('unmarshalling',
         ESValue.wrap(transfer.transferDynamic(dataIn, 'rpc.MessageSequence')));
       return ret.toBoolean();
     }
     let job = EAWorker.postToMain<boolean>((): boolean => {
-      let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
+      let ret = this.esObj.invokeMethod('unmarshalling',
         ESValue.wrap(transfer.transferDynamic(dataIn, 'rpc.MessageSequence')));
       return ret.toBoolean();
     });
@@ -182,7 +181,7 @@ export class CalleeImpl extends rpc.RemoteObject implements Callee {
   static transferDynamic(input: Object): Any {
     hilog.info(domainID, TAG, 'Callee::transferDynamic');
     if (input instanceof CalleeFromJs) {
-      return input.jsObj;
+      return input.esObj.unwrap();
     }
     if (input instanceof CalleeImpl) {
       return new CalleeFromEts(input);
