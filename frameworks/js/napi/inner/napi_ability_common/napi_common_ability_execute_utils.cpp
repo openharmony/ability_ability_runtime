@@ -16,6 +16,7 @@
 #include "napi_common_ability_execute_utils.h"
 
 #include "hilog_tag_wrapper.h"
+#include "js_runtime_utils.h"
 #include "napi_common_ability_wrap_utils.h"
 
 namespace OHOS {
@@ -820,6 +821,7 @@ void GetWantExecuteCB(napi_env, void *data)
 
 napi_value GetWantAsync(napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
     if (args == nullptr || asyncCallbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null params");
@@ -837,6 +839,7 @@ napi_value GetWantAsync(napi_env env, napi_value *args, const size_t argCallback
     napi_create_async_work(env, nullptr, resourceName, GetWantExecuteCB,
         [](napi_env env, napi_status, void *data) {
             TAG_LOGI(AAFwkTag::JSNAPI, "called");
+            AbilityRuntime::HandleScope handleScope(env);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value callback = nullptr;
             napi_value undefined = nullptr;
@@ -867,7 +870,7 @@ napi_value GetWantAsync(napi_env env, napi_value *args, const size_t argCallback
     napi_value result = nullptr;
     napi_get_null(env, &result);
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value GetWantPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)

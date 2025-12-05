@@ -491,6 +491,7 @@ void JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(napi_env env,
         &observer = freeInstallObserver_](int resultCode, const AAFwk::Want& want, bool isInner) {
         std::string bundleName = element.GetBundleName();
         std::string abilityName = element.GetAbilityName();
+        HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");

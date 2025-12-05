@@ -78,6 +78,7 @@ napi_value JsPhotoEditorExtensionContext::SaveEditedContentWithImage(napi_env en
 
 napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env env, NapiCallbackInfo &info)
 {
+    HandleEscape handleEscape(env);
     TAG_LOGD(AAFwkTag::UI_EXT, "called: param size: %{public}d",
              static_cast<int32_t>(info.argc));
 
@@ -108,6 +109,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
 
         AAFwk::Want newWant;
         PhotoEditorErrorCode errCode = context->SaveEditedContent(uri, newWant);
+        HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(errCode), newWant);
         if (abilityResult == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "null abilityResult");
@@ -122,7 +124,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithUri", env,
                                    CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env env, NapiCallbackInfo &info)
@@ -161,6 +163,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
 
         AAFwk::Want newWant;
         PhotoEditorErrorCode errCode = context->SaveEditedContent(image, packOption, newWant);
+        HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(errCode), newWant);
         if (abilityResult == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "null abilityResult");

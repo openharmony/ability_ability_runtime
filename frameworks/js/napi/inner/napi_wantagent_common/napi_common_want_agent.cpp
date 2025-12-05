@@ -89,6 +89,7 @@ napi_value AttachWantAgentFunc(napi_env env, void *value, void *)
 napi_value WrapWantAgent(napi_env env, AbilityRuntime::WantAgent::WantAgent* wantAgent, napi_finalize finalizeCb)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    HandleEscape handleEscape(env);
     napi_value wantAgentClass = nullptr;
     napi_define_class(
         env,
@@ -129,7 +130,7 @@ napi_value WrapWantAgent(napi_env env, AbilityRuntime::WantAgent::WantAgent* wan
         TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
         return nullptr;
     }
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void UnwrapWantAgent(napi_env env, napi_value jsParam, void **result)

@@ -453,6 +453,7 @@ void JSFormExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::Ele
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called, resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     // wrap ElementName
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
 
@@ -500,6 +501,7 @@ void JSFormExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::
     int resultCode)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called, resultCode:%{public}d", resultCode);
+    HandleScope handleScope(env_);
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env_, element);
     napi_value argv[] = {napiElementName};
     if (jsConnectionObject_ == nullptr) {
