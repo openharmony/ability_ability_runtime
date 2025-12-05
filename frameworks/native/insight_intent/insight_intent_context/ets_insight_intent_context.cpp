@@ -73,21 +73,25 @@ void EtsInsightIntentContext::SetReturnModeForUIAbilityForeground(ani_env *env,
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "get context failed.");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     auto nativeContext = context->GetNativeContext();
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "get context failed.");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(nativeContext->GetExecuteMode());
     if (mode != InsightIntentExecuteMode::UIABILITY_FOREGROUND) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     ani_int returnMode = 0;
     if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniMode, returnMode)) {
         TAG_LOGE(AAFwkTag::APPMGR, "param mode err");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     nativeContext->SetDelayReturnMode(static_cast<InsightIntentReturnMode>(returnMode));
 }
@@ -99,21 +103,25 @@ void EtsInsightIntentContext::SetReturnModeForUIExtensionAbility(ani_env *env, a
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "get context failed.");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     auto nativeContext = context->GetNativeContext();
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "get context failed.");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(nativeContext->GetExecuteMode());
     if (mode != InsightIntentExecuteMode::UIEXTENSION_ABILITY) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     ani_int returnMode = 0;
     if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniMode, returnMode)) {
         TAG_LOGE(AAFwkTag::APPMGR, "param mode err");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
     }
     nativeContext->SetDelayReturnMode(static_cast<InsightIntentReturnMode>(returnMode));
 }
