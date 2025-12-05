@@ -135,15 +135,18 @@ private:
     static void KillProcessWithAccountInner(ani_env *env, ani_object callback, ani_string aniBundleName,
         ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
     static void OnOnAbilityFirstFrameStateInner(ani_env *env, ani_object aniObserver, const std::string &strBundleName);
+    static void OnOffInner(ani_env *env, ani_int etsObserverId, ani_object callback);
     static int32_t GetObserverId();
     static int32_t serialNumber_;
     static sptr<AbilityRuntime::EtsAppStateObserver> appStateObserver_;
     static sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> observerForeground_;
+    static std::mutex observerLock_;
 };
 
 int32_t EtsAppManager::serialNumber_ = 0;
 sptr<AbilityRuntime::EtsAppStateObserver> EtsAppManager::appStateObserver_ = nullptr;
 sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> EtsAppManager::observerForeground_ = nullptr;
+std::mutex EtsAppManager::observerLock_;
 
 sptr<AppExecFwk::IAppMgr> EtsAppManager::GetAppManagerInstance()
 {
@@ -491,16 +494,19 @@ ani_int EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, 
     if (appStateObserver_ == nullptr) {
         appStateObserver_ = new (std::nothrow) AbilityRuntime::EtsAppStateObserver(aniVM);
     }
-    int32_t ret = appManager->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
-    TAG_LOGD(AAFwkTag::APPMGR, "err:%{public}d", ret);
-    if (ret == ERR_OK) {
-        int32_t observerId = GetObserverId();
-        appStateObserver_->AddEtsObserverObject(env, observerId, observer);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOnApplicationStateInner end");
-        return observerId;
+    std::lock_guard<std::mutex> lock(observerLock_);
+    if (appStateObserver_->GetEtsObserverMapSize() == 0) {
+        int32_t ret = appManager->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
+        TAG_LOGD(AAFwkTag::APPMGR, "err:%{public}d", ret);
+        if (ret != ERR_OK) {
+            AbilityRuntime::EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
+            return ANI_ERROR;
+        }
     }
-    AbilityRuntime::EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
-    return ANI_ERROR;
+    int32_t observerId = GetObserverId();
+    appStateObserver_->AddEtsObserverObject(env, observerId, observer);
+    TAG_LOGD(AAFwkTag::APPMGR, "OnOnApplicationStateInner end");
+    return observerId;
 }
 
 ani_int EtsAppManager::OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
@@ -556,17 +562,6 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "observerId:%{public}d", etsObserverId);
-    int32_t observerId = static_cast<int32_t>(etsObserverId);
-
-    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
-    if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
-        AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateError(env,
-                static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
-            nullptr);
-        return;
-    }
     if (appStateObserver_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         AppExecFwk::AsyncCallback(env, callback,
@@ -574,6 +569,13 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
                 env, "observer is nullptr, please register first."), nullptr);
         return;
     }
+    std::lock_guard<std::mutex> lock(observerLock_);
+    OnOffInner(env, etsObserverId, callback);
+}
+
+void EtsAppManager::OnOffInner(ani_env *env, ani_int etsObserverId, ani_object callback)
+{
+    int32_t observerId = static_cast<int32_t>(etsObserverId);
     if (!appStateObserver_->FindObserverByObserverId(observerId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
         AppExecFwk::AsyncCallback(env, callback,
@@ -581,11 +583,29 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
                 env, "not find observerId."), nullptr);
         return;
     }
-    int32_t ret = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
-    if (ret == 0 && appStateObserver_->RemoveEtsObserverObject(observerId)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOff success");
-    } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "OnOff err:%{public}d", ret);
+    if (!appStateObserver_->RemoveEtsObserverObject(observerId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnOff RemoveEtsObserverObject err:");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+                static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
+            nullptr);
+        return;
+    }
+    int32_t ret = 0;
+    if (appStateObserver_->GetEtsObserverMapSize() == 0) {
+        sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+        if (appMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
+            AppExecFwk::AsyncCallback(env, callback,
+                AbilityRuntime::EtsErrorUtil::CreateError(env,
+                    static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
+                nullptr);
+            return;
+        }
+        ret = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "OnOff err:%{public}d", ret);
+        }
     }
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
