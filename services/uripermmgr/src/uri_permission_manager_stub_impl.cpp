@@ -1004,7 +1004,9 @@ void UriPermissionManagerStubImpl::RevokeMapUriPermission(uint32_t tokenId)
     if (!uriList.empty()) {
         DeleteShareFile(tokenId, uriList);
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "revoke map: %{public}d", deleteCount);
+    if (deleteCount > 0) {
+        TAG_LOGI(AAFwkTag::URIPERMMGR, "revoke map: %{public}d", deleteCount);
+    }
 }
 
 ErrCode UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId, int32_t& funcResult)
@@ -1259,9 +1261,8 @@ ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "clear %{private}d permission", tokenId);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear %{public}d permission", tokenId);
     auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission end");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
         return WrapErrorCode(ERR_OK, funcResult);
