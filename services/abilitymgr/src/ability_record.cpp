@@ -4080,10 +4080,16 @@ bool AbilityRecord::ReportAbilityConnectionRelations()
 
 void AbilityRecord::SetPromotePriority(bool promotePriority)
 {
+    if (!promotePriority) {
+        uiAbilityProperty_.reset();
+        return;
+    }
     if (uiAbilityProperty_ == nullptr) {
         uiAbilityProperty_ = std::make_shared<UIAbilityProperty>();
     }
     uiAbilityProperty_->promotePriority = promotePriority;
+    uiAbilityProperty_->byCallCallerSaUid = IPCSkeleton::GetCallingUid();
+    uiAbilityProperty_->byCallCallerSaPid = IPCSkeleton::GetCallingPid();
 }
 
 bool AbilityRecord::GetPromotePriority()
@@ -4091,13 +4097,15 @@ bool AbilityRecord::GetPromotePriority()
     return uiAbilityProperty_ != nullptr && uiAbilityProperty_->promotePriority && GetPid() > 0;
 }
 
-void AbilityRecord::PromotePriority()
+bool AbilityRecord::PromotePriority()
 {
-    if (IsStartedByCall() && GetPromotePriority() && GetCallerInfo() != nullptr) {
+    if (IsStartedByCall() && GetPromotePriority()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "promoting priority: %{public}s", GetAbilityInfo().bundleName.c_str());
-        ResSchedUtil::GetInstance().PromotePriorityToRSS(GetCallerInfo()->callerUid, GetCallerInfo()->callerPid,
-            GetAbilityInfo().bundleName, GetUid(), GetPid());
+        ResSchedUtil::GetInstance().PromotePriorityToRSS(uiAbilityProperty_->byCallCallerSaUid,
+            uiAbilityProperty_->byCallCallerSaPid, GetAbilityInfo().bundleName, GetUid(), GetPid());
+        return true;
     }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

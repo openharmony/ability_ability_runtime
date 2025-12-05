@@ -533,7 +533,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
         return ERR_INVALID_VALUE;
     }
     if (abilityRecord->IsStartedByCall()) {
-        abilityRecord->PromotePriority();
+        (void)abilityRecord->PromotePriority();
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
@@ -1502,7 +1502,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     uiAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     uiAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
     uiAbilityRecord->SetPromotePriority(abilityRequest.promotePriority);
-    uiAbilityRecord->PromotePriority();
+    (void)uiAbilityRecord->PromotePriority();
 
 #ifdef SUPPORT_UPMS
     if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {

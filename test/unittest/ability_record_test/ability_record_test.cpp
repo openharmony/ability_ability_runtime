@@ -3503,11 +3503,16 @@ HWTEST_F(AbilityRecordTest, SetPromotePriority_001, TestSize.Level1)
     abilityRecord_->SetPromotePriority(true);
     EXPECT_NE(abilityRecord_->uiAbilityProperty_, nullptr);
     EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->promotePriority);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->byCallCallerSaUid >= 0);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->byCallCallerSaPid >= 0);
 
     abilityRecord_->uiAbilityProperty_ = nullptr;
     abilityRecord_->SetPromotePriority(false);
-    EXPECT_NE(abilityRecord_->uiAbilityProperty_, nullptr);
-    EXPECT_FALSE(abilityRecord_->uiAbilityProperty_->promotePriority);
+    EXPECT_EQ(abilityRecord_->uiAbilityProperty_, nullptr);
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->SetPromotePriority(false);
+    EXPECT_EQ(abilityRecord_->uiAbilityProperty_, nullptr);
     GTEST_LOG_(INFO) << "SetPromotePriority_001 end";
 }
 
@@ -3555,16 +3560,51 @@ HWTEST_F(AbilityRecordTest, PromotePriority_001, TestSize.Level1)
 
     abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
     abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaUid = 300000;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaPid = 1000;
     abilityRecord_->pid_ = 1000;
     EXPECT_TRUE(abilityRecord_->GetPromotePriority());
 
-    abilityRecord_->callerList_.clear();
-    auto callerInfo = std::make_shared<CallerRecord>(100, abilityRecord_);
-    abilityRecord_->callerList_.emplace_back(callerInfo);
-    EXPECT_NE(abilityRecord_->GetCallerInfo(), nullptr);
-
-    abilityRecord_->PromotePriority();
+    EXPECT_TRUE(abilityRecord_->PromotePriority());
     GTEST_LOG_(INFO) << "PromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PromotePriority
+ * SubFunction: PromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PromotePriority
+ */
+HWTEST_F(AbilityRecordTest, PromotePriority_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PromotePriority_002 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->isStartedByCall_ = false;
+    EXPECT_FALSE(abilityRecord_->IsStartedByCall());
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->isStartedByCall_ = true;
+    EXPECT_TRUE(abilityRecord_->IsStartedByCall());
+    abilityRecord_->uiAbilityProperty_.reset();
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->uiAbilityProperty_->promotePriority = false;
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->pid_ = 0;
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaUid = 300000;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaPid = 1000;
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+
+    EXPECT_TRUE(abilityRecord_->PromotePriority());
+    GTEST_LOG_(INFO) << "PromotePriority_002 end";
 }
 
 /*
