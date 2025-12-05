@@ -28,21 +28,26 @@ const ERROR_CODE_INVALID_PARAM: int = 401;
 const ERROR_CODE_CALLER_RELEASED: int = 16200001;
 const ERROR_CODE_CALLEE_INVALID: int = 16200002;
 const ERROR_CODE_INNER_ERROR: int = 16000050;
+const ERROR_CODE_TRANSFER_CLASS_NOT_FOUND: int = 10200067;
 
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
 const ERROR_MSG_CALLER_RELEASED = 'Caller released. The caller has been released.';
 const ERROR_MSG_CALLEE_INVALID = 'The callee does not exist.';
 const ERROR_MSG_INNER_ERROR = 'Inner Error.';
+const ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = 'Unable to find the class for transferring.';
 
 let errMap = new Map<int, string>();
 errMap.set(ERROR_CODE_INVALID_PARAM, ERROR_MSG_INVALID_PARAM);
 errMap.set(ERROR_CODE_CALLER_RELEASED, ERROR_MSG_CALLER_RELEASED);
 errMap.set(ERROR_CODE_CALLEE_INVALID, ERROR_MSG_CALLEE_INVALID);
 errMap.set(ERROR_CODE_INNER_ERROR, ERROR_MSG_INNER_ERROR);
+errMap.set(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND, ERROR_MSG_TRANSFER_CLASS_NOT_FOUND);
 
 function buildError(code: int): BusinessError {
-  let msg: string = errMap.has(code) ? errMap.get(code) as string : ERROR_MSG_INNER_ERROR;
-  return new BusinessError(code, new Error(msg));
+  if (errMap.has(code)) {
+    return new BusinessError(code, new Error(errMap.get(code) as string));
+  }
+  return new BusinessError(ERROR_CODE_INNER_ERROR, new Error(ERROR_MSG_INNER_ERROR));
 }
 
 function buildInvalidParamError(msg: string): BusinessError {
@@ -68,26 +73,23 @@ export class CallerImpl implements Caller {
     let esObj = ESValue.wrap(input);
     let releaseState = esObj.getProperty('releaseState').toBoolean();
     hilog.info(domainID, TAG, `Caller::transferStatic releaseState: ${releaseState}`);
-    let ret = new CallerImpl(0);
     if (releaseState) {
-      ret.releaseState = releaseState;
-    } else {
-      ret = CallerImpl.nativeTransferStatic(esObj.getProperty('__call_obj__')) as CallerImpl;
+      throw buildError(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND);
     }
-
+    let ret = CallerImpl.nativeTransferStatic(esObj.getProperty('__call_obj__')) as CallerImpl;
     ret.esObj = esObj;
     return ret;
   }
 
   static transferDynamic(input: Object): Any {
     let caller = input as CallerImpl;
+    if (caller.releaseState) {
+      throw buildError(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND);
+    }
     if (caller.esObj != null) {
       return (caller.esObj as ESValue).unwrap();
     }
     let esObj = CallerImpl.nativeTransferDynamic(input);
-    if (esObj.hasProperty('releaseState')) {
-      esObj.setProperty('releaseState', ESValue.wrapBoolean(caller.releaseState));
-    }
     caller.esObj = esObj;
     return esObj.unwrap();
   }
