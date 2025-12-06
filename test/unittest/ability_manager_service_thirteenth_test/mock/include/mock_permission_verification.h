@@ -44,7 +44,11 @@ public:
 
     bool IsSACall() const;
 
+    bool IsSACallByTokenId(uint32_t callerTokenId) const;
+
     bool IsShellCall() const;
+
+    bool IsShellCallByTokenId(uint32_t callerTokenId) const;
 
     bool CheckSpecificSystemAbilityAccessPermission() const;
 

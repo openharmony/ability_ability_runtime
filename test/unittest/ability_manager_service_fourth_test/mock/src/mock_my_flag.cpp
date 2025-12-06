@@ -18,5 +18,6 @@
 namespace OHOS {
 namespace AAFwk {
 int MyFlag::flag_ = 1;
+int MyFlag::errCode_ = 0;
 } // namespace AAFwk
 } // namespace OHOS
