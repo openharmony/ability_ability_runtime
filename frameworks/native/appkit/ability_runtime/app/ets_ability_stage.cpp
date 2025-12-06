@@ -59,6 +59,8 @@ constexpr const char* MEMORY_LEVEL_ENUM_NAME =
     "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
 constexpr const char *PREPARE_TERMINATION_CLASS_NAME =
     ":L@ohos/app/ability/AbilityConstant/AbilityConstant/PrepareTermination;";
+constexpr const char *PREPARE_TERMINATION_PROMISE_CALLBACK_METHOD_NAME =
+    "L@ohos/app/ability/AbilityConstant/AbilityConstant/PrepareTermination;:V";
 
 void OnPrepareTerminatePromiseCallback(ani_env* env, ani_object aniObj, ani_object dataObj)
 {
@@ -595,7 +597,8 @@ bool ETSAbilityStage::BindNativeMethods()
         ani_native_function{
             "nativeOnNewProcessRequestCallback", "Lstd/core/String;:V",
             reinterpret_cast<void *>(ETSAbilityStage::OnNewProcessRequestCallback)},
-        ani_native_function{"nativeOnPrepareTerminatePromiseCallback", ":V",
+        ani_native_function{"nativeOnPrepareTerminatePromiseCallback",
+            PREPARE_TERMINATION_PROMISE_CALLBACK_METHOD_NAME,
             reinterpret_cast<void *>(OnPrepareTerminatePromiseCallback)},
     };
     ani_class cls {};
