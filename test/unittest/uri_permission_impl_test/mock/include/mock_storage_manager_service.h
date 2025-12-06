@@ -449,6 +449,11 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t ListUserdataDirInfo(std::vector<UserdataDirInfo> &scanDirs) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
