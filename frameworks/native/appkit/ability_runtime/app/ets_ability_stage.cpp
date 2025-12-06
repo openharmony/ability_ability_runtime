@@ -416,7 +416,7 @@ bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
         ani_boolean res = ANI_FALSE;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Boolean(etsAbilityStageObj_->aniObj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Boolean_V(etsAbilityStageObj_->aniObj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
             etsRuntime_.HandleUncaughtError();
         }
@@ -460,7 +460,7 @@ ani_object ETSAbilityStage::CallObjectMethod(const char *name, const char *signa
     ani_ref res {};
     va_list args;
     va_start(args, signature);
-    if ((status = env->Object_CallMethod_Ref(obj, method, &res, args)) != ANI_OK) {
+    if ((status = env->Object_CallMethod_Ref_V(obj, method, &res, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status : %{public}d", status);
         etsRuntime_.HandleUncaughtError();
         return nullptr;
