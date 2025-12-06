@@ -23,7 +23,7 @@ export default class AbilityStage {
     context: AbilityStageContext = new AbilityStageContext();
 
     private prepareTerminationCallbackPoint: long;
-    private native nativeOnPrepareTerminatePromiseCallback(): void;
+    private native nativeOnPrepareTerminatePromiseCallback(data:AbilityConstant.PrepareTermination): void;
     private callOnPrepareTermination(): boolean {
       const derivedClassType = AbilityUtils.getClassType(this);
       if (derivedClassType === undefined) {
@@ -34,7 +34,9 @@ export default class AbilityStage {
           return false;
       }
       if (AbilityUtils.isOverride(derivedClassType, "onPrepareTerminationAsync", classType)) {
-          this.onPrepareTerminationAsync().then((data:AbilityConstant.PrepareTermination) => this.nativeOnPrepareTerminatePromiseCallback());
+          this.onPrepareTerminationAsync().then((data:AbilityConstant.PrepareTermination) => {
+            this.nativeOnPrepareTerminatePromiseCallback(data);
+          });
           return true;
       }
       return false;
