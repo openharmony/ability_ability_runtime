@@ -1182,9 +1182,10 @@ void EtsUIExtensionContentSession::StartAbilityForResultDoTask(ani_vm *etsVm,
             isInner ? observer->OnInstallFinished(bundleName, abilityName, startTime, resultCode) :
                 observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
         }
+        auto data = isInner ? nullptr : abilityResult;
         auto errCode = isInner ? resultCode : 0;
         AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
-            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
+            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), data);
     };
 
     want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
