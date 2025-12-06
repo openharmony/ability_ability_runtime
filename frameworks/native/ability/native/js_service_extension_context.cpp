@@ -676,36 +676,18 @@ private:
             return CreateJsUndefined(env);
         }
 
-        std::shared_ptr<StartAbilityByCallParameters> calls = std::make_shared<StartAbilityByCallParameters>();
-        napi_value retsult = nullptr;
+        auto calls = std::make_shared<StartAbilityByCallParameters>();
+        napi_value result = nullptr;
         calls->callerCallBack = std::make_shared<CallerCallBack>();
         calls->callerCallBack->SetCallBack(GetCallBackDone(calls));
         calls->callerCallBack->SetOnRelease(GetReleaseListen());
 
-        auto context = context_.lock();
-        if (context == nullptr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-            return CreateJsUndefined(env);
-        }
-
-        auto ret = context->StartAbilityByCall(want, calls->callerCallBack, accountId);
-        if (ret) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "OnStartAbilityByCall failed");
-            ThrowErrorByNativeErr(env, ret);
-            return CreateJsUndefined(env);
-        }
-
-        if (calls->remoteCallee == nullptr) {
-            TAG_LOGD(AAFwkTag::SERVICE_EXT, "async wait execute");
-            NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", env,
-                CreateAsyncTaskWithLastParam(
-                    env, nullptr, GetCallExecute(calls), GetCallComplete(calls), &retsult));
-        } else {
-            NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStartAbilityByCall", env,
-                CreateAsyncTaskWithLastParam(env, nullptr, nullptr, GetCallComplete(calls), &retsult));
-        }
-        return retsult;
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "async wait execute");
+        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStartAbilityByCall", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, GetCallExecute(calls, want, context_),
+                GetCallComplete(calls), &result));
+      
+        return result;
     }
 
     bool CheckStartAbilityByCallInputParam(
@@ -746,10 +728,11 @@ private:
     {
         auto callComplete = [weak = context_, calldata = calls] (
             napi_env env, NapiAsyncTask& task, int32_t) {
+            HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "ServiceCxt::callComplete");
             if (calldata->err != 0) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "callComplete err: %{public}d", calldata->err);
                 ClearFailedCallConnection(weak, calldata->callerCallBack);
-                task.Reject(env, CreateJsError(env, calldata->err, "callComplete err."));
+                task.Reject(env, CreateJsErrorByNativeErr(env, calldata->err, "callComplete err."));
                 return;
             }
 
@@ -779,9 +762,24 @@ private:
         return callComplete;
     }
 
-    NapiAsyncTask::ExecuteCallback GetCallExecute(std::shared_ptr<StartAbilityByCallParameters> calls)
+    NapiAsyncTask::ExecuteCallback GetCallExecute(std::shared_ptr<StartAbilityByCallParameters> calls,
+        const AAFwk::Want &want, std::weak_ptr<ServiceExtensionContext> wContext)
     {
-        auto callExecute = [calldata = calls] () {
+        auto callExecute = [calldata = calls, want, wContext] () {
+            HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "ServiceCxt::callExecute");
+            auto context = wContext.lock();
+            if (context == nullptr) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+                calldata->err = ERR_INVALID_VALUE;
+                return;
+            }
+
+            auto ret = context->StartAbilityByCall(want, calldata->callerCallBack, -1);
+            if (ret) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "OnStartAbilityByCall failed");
+                calldata->err = ret;
+                return;
+            }
             constexpr int callerTimeOut = 10; // 10s
             std::unique_lock<std::mutex> lock(calldata->mutexlock);
             if (calldata->remoteCallee != nullptr) {
@@ -791,9 +789,9 @@ private:
 
             if (calldata->condition.wait_for(lock, std::chrono::seconds(callerTimeOut)) == std::cv_status::timeout) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "waiting callee timeout");
-                calldata->err = -1;
+                calldata->err = ERR_INVALID_VALUE;
             }
-            TAG_LOGD(AAFwkTag::SERVICE_EXT, "exit");
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "callExecute exit");
         };
         return callExecute;
     }

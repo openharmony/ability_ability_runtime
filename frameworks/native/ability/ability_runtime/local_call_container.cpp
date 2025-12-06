@@ -61,9 +61,13 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connect");
         return ERR_INVALID_VALUE;
     }
-    connections_.emplace(connect);
+    {
+        std::lock_guard lock(connectionsMutex_);
+        connections_.emplace(connect);
+        TAG_LOGD(AAFwkTag::LOCAL_CALL, "connections_.size is %{public}zu", connections_.size());
+    }
+    
     connect->SetRecordAndContainer(localCallRecord, shared_from_this());
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "connections_.size is %{public}zu", connections_.size());
     auto retval = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByCall(want, connect,
         callerToken, oriValidUserId);
     if (retval != ERR_OK) {
@@ -112,8 +116,10 @@ int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callb
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "Remove call local record failed");
         return retval;
     }
-
-    connections_.erase(connect);
+    {
+        std::lock_guard lock(connectionsMutex_);
+        connections_.erase(connect);
+    }
     connect->ClearCallRecord();
     localCallRecord->ClearData();
     if (abilityClient->ReleaseCall(connect, localCallRecord->GetElementName()) != ERR_OK) {
@@ -143,15 +149,11 @@ void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerC
         return;
     }
     std::string deviceId = localCallRecord->GetElementName().GetDeviceID();
-    if (deviceId.empty()) {
-        connections_.erase(connect);
-        return;
+    if (!deviceId.empty()) {
+        TAG_LOGI(AAFwkTag::LOCAL_CALL, "try releaseCall");
+        AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(connect, localCallRecord->GetElementName());
     }
-    TAG_LOGI(AAFwkTag::LOCAL_CALL, "try releaseCall");
-    auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityClient != nullptr) {
-        abilityClient->ReleaseCall(connect, localCallRecord->GetElementName());
-    }
+    std::lock_guard lock(connectionsMutex_);
     connections_.erase(connect);
 }
 
