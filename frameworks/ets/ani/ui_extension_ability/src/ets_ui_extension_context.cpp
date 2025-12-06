@@ -500,9 +500,10 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
             env->GlobalReference_Delete(callbackRef);
             return;
         }
+        auto data = isInner ? nullptr : abilityResult;
         auto errCode = isInner ? resultCode : 0;
         AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
-            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
+            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), data);
         env->GlobalReference_Delete(callbackRef);
     };
     want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
