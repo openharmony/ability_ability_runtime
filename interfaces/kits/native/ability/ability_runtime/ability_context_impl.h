@@ -172,10 +172,7 @@ public:
      *
      * @return Returns the LocalCallContainer.
      */
-    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override
-    {
-        return localCallContainer_;
-    }
+    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override;
 
     void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config) override;
 
@@ -423,6 +420,7 @@ private:
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
     void *etsContentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
+    std::mutex callContainerMutex_;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     std::atomic<bool> isTerminating_ = false;

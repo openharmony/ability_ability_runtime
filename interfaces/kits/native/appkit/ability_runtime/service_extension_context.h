@@ -74,6 +74,7 @@ public:
      */
     ErrCode StartAbilityByCall(const AAFwk::Want& want, const std::shared_ptr<CallerCallBack> &callback,
         int32_t accountId = DEFAULT_INVAL_VALUE);
+    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() const;
 
     ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer);
 
@@ -199,6 +200,7 @@ protected:
 
 private:
     static int ILLEGAL_REQUEST_CODE;
+    mutable std::mutex callContainerMutex_;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
 
     /**
