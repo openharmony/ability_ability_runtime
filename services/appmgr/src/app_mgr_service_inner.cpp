@@ -1278,6 +1278,10 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
     }
     if (!abilityInfo->process.empty() && (isCallerSetProcess || specifiedProcessFlag.empty())) {
         TAG_LOGD(AAFwkTag::APPMGR, "Process not null");
+        if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+            processName = abilityInfo->process;
+            return;
+        }
         if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel) {
             processName = appInfo->bundleName + abilityInfo->process;
         } else {
