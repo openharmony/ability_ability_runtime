@@ -138,6 +138,8 @@ public:
         const std::shared_ptr<Media::PixelMap>& icon), (override));
     MOCK_METHOD(WMError, GetMainWindowInfoByToken, (const sptr<IRemoteObject>& abilityToken,
         MainWindowInfo& windowInfo), (override));
+    MOCK_METHOD(void, GetAllGroupInfo, ((std::unordered_map<DisplayId, DisplayGroupId> &),
+        (std::vector<sptr<FocusChangeInfo>> &)), (override));
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H
