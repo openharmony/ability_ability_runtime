@@ -375,12 +375,13 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         TAG_LOGW(AAFwkTag::CONTEXT, "is hook and hook off, skip TerminateSession");
         return ERR_OK;
     }
-    auto sessionToken = GetSessionToken();
-    if (sessionToken == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "withResult null sessionToken");
-    }
 #ifdef SUPPORT_SCREEN
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sessionToken = GetSessionToken();
+        if (sessionToken == nullptr) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "withResult null sessionToken");
+            return ERR_INVALID_VALUE;
+        }
         sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
         info->want = want;
         info->resultCode = resultCode;
