@@ -92,6 +92,7 @@ public:
         fudUtilsGenerateFUDAppInfoRet_ = true;
         tokenInfos = {};
         isUdmfOrPasteboardCallRet_ = false;
+        isDFSCallRet_ = false;
     }
 
     static int flag_;
@@ -133,6 +134,7 @@ public:
     static std::string bundleName_;
     static TokenInfoMap tokenInfos;
     static bool isUdmfOrPasteboardCallRet_;
+    static bool isDFSCallRet_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

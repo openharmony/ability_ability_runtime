@@ -56,5 +56,6 @@ bool MyFlag::fudUtilsGenerateFUDAppInfoRet_ = true;
 std::string MyFlag::bundleName_ = "";
 TokenInfoMap MyFlag::tokenInfos = {};
 bool MyFlag::isUdmfOrPasteboardCallRet_ = false;
+bool MyFlag::isDFSCallRet_ = false;
 } // namespace AAFwk
 } // namespace OHOS

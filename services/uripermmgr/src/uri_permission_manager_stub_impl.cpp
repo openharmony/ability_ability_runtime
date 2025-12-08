@@ -72,36 +72,38 @@ ErrCode UriPermissionManagerStubImpl::VerifyUriPermission(const Uri& uri, uint32
     // verify if tokenId have uri permission record
     TAG_LOGI(AAFwkTag::URIPERMMGR, "uri:%{private}s, flag:%{public}u, tokenId:%{public}u",
         uri.ToString().c_str(), flag, tokenId);
-    if (!FUDUtils::IsSAOrSystemAppCall()) {
+    if (!FUDUtils::IsDFSCall()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
         funcResult = false;
         return ERR_OK;
     }
+    funcResult = VerifyUriPermissionInner(uri, flag, tokenId);
+    return ERR_OK;
+}
+
+bool UriPermissionManagerStubImpl::VerifyUriPermissionInner(const Uri& uri, uint32_t flag, uint32_t tokenId)
+{
     if ((flag & FLAG_READ_WRITE_URI) == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Flag invalid");
-        funcResult = false;
-        return ERR_OK;
+        return false;
     }
     // only reserve read and write file flag
     flag &= FLAG_READ_WRITE_URI;
     auto uriInner = uri;
     if (uriInner.GetScheme() != FUDConstants::FILE_SCHEME) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "type of uri is valid");
-        funcResult = false;
-        return ERR_OK;
+        return false;
     }
     if (uriInner.GetAuthority() == FUDConstants::MEDIA_AUTHORITY) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "not support media uri");
-        funcResult = false;
-        return ERR_OK;
+        return false;
     }
     std::vector<Uri> uriVec = { uriInner };
     auto result = VerifyUriPermissionByMap(uriVec, flag, tokenId);
     if (!result[0]) {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "uri permission not exists");
     }
-    funcResult = result[0];
-    return ERR_OK;
+    return result[0];
 }
 
 std::vector<bool> UriPermissionManagerStubImpl::VerifyUriPermissionByMap(std::vector<Uri> &uriVec,
@@ -966,9 +968,7 @@ void UriPermissionManagerStubImpl::CheckProxyUriPermission(TokenIdPermission &to
         // media no need to check proxy permission, has checked by medialibrary
         auto uriInner = Uri(uriVec[i]);
         if (uriInner.GetAuthority() != FUDConstants::MEDIA_AUTHORITY) {
-            bool funcResult = false;
-            VerifyUriPermission(uriInner, flag, tokenId, funcResult);
-            result[i] = funcResult;
+            result[i] = VerifyUriPermissionInner(uriInner, flag, tokenId);
         }
     }
 }
@@ -1342,14 +1342,13 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto tokenId = IPCSkeleton::GetCallingTokenID();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
     auto permissionName = PermissionConstants::PERMISSION_FILE_ACCESS_PERSIST;
     if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, permissionName)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
         funcResult = SANDBOX_MANAGER_PERMISSION_DENIED;
         return ERR_OK;
     }
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "active %{public}d permission", tokenId);
     std::vector<PolicyInfo> policy;
     auto result = RawDataToPolicyInfo(policyRawData, policy);
     if (result != ERR_OK) {
@@ -1360,7 +1359,6 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     auto ret = SandboxManagerKit::StartAccessingPolicy(policy, res, false, tokenId, timeNow);
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "active permission end");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "StartAccessingPolicy failed, ret is %{public}d", ret);
         funcResult = ret;

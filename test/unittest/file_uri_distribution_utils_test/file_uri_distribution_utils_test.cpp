@@ -185,5 +185,16 @@ HWTEST_F(FileUriDistributionUtilsTest, IsUdmfOrPasteboardCall_001, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
+/*
+ * Feature: FUDUtils
+ * Function: IsDFSCall
+ * SubFunction: NA
+ * FunctionPoints: FUDUtils IsDFSCall
+ */
+HWTEST_F(FileUriDistributionUtilsTest, IsDFSCall_001, TestSize.Level1)
+{
+    bool ret = FUDUtils::IsDFSCall();
+    EXPECT_EQ(ret, false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
