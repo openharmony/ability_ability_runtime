@@ -1147,28 +1147,11 @@ public:
     int32_t GetShareDataPairAndReturnData(std::shared_ptr<AbilityRecord> abilityRecord,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
 
-    int32_t StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId,
-        int32_t requestCode, bool hideFailureTipDialog = false, bool isFreeInstallFromService = false,
-        uint64_t specifiedFullTokenId = 0);
+    int32_t StartAbilityByFreeInstall(const StartAbilityWrapParam &param);
 
     int StartAbilityWrap(const StartAbilityWrapParam &startAbilityWrapParam);
 
-    int StartAbilityInner(
-        const Want &want,
-        const sptr<IRemoteObject> &callerToken,
-        int requestCode,
-        bool isPendingWantCaller,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        bool isStartAsCaller = false,
-        uint32_t specifyTokenId = 0,
-        bool isForegroundToRestartApp = false,
-        bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false,
-        bool hideFailureTipDialog = false,
-        bool isBySCB = false,
-        bool isFreeInstallFromService = false,
-        uint64_t specifiedFullTokenId = 0);
+    int StartAbilityInner(StartAbilityWrapParam &param);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -2282,9 +2265,7 @@ public:
      */
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex) override;
 
-    int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t userId, int requestCode, bool removeInsightIntentFlag,
-        bool hideFailureTipDialog = false, bool isFreeInstallFromService = false, uint64_t specifiedFullTokenId = 0);
+    int StartAbilityWithRemoveIntentFlag(const StartAbilityWrapParam &param);
     
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;

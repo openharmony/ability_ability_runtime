@@ -17,24 +17,25 @@
 #define private public
 #define protected public
 #include "ability_manager_service.h"
-#include "ability_event_handler.h"
 #include "ability_connect_manager.h"
+#include "ability_event_handler.h"
 #include "ams_configuration_parameter.h"
 #include "mission_list_manager.h"
 #undef private
 #undef protected
 
-#include "app_process_data.h"
-#include "system_ability_definition.h"
 #include "ability_manager_errors.h"
 #include "ability_scheduler.h"
+#include "app_process_data.h"
 #include "bundlemgr/mock_bundle_manager.h"
-#include "sa_mgr_client.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "os_account_manager_wrapper.h"
+#include "sa_mgr_client.h"
+#include "start_ability_utils.h"
+#include "system_ability_definition.h"
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
@@ -480,7 +481,8 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_001, TestSi
     Want want;
     ElementName element("", "com.ix.hiSingleMusicInfo", "SingleMusicAbility");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false);
+    StartAbilityWrapParam param = { want };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_EQ(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_001 end";
 }
@@ -500,7 +502,8 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_002, TestSi
     Want want;
     ElementName element("", "com.ix.hiBackgroundMusic", "hiBackgroundMusic");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false);
+    StartAbilityWrapParam param = { want };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_EQ(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_002 end";
 }
@@ -520,7 +523,11 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_003, TestSi
     Want want;
     ElementName element("", "com.ix.hiSingleMusicInfo", "SingleMusicAbility");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, USER_ID_U100);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = USER_ID_U100,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_EQ(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_003 end";
 }
@@ -540,7 +547,11 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_004, TestSi
     Want want;
     ElementName element("", "com.ix.hiBackgroundData", "hiBackgroundData");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, USER_ID_U100);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = USER_ID_U100,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_EQ(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_004 end";
 }
@@ -560,7 +571,11 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_005, TestSi
     Want want;
     ElementName element("", "com.ix.hiSingleMusicInfo", "SingleMusicAbility");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, ERROR_USER_ID_U256);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = ERROR_USER_ID_U256,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_NE(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_005 end";
 }
@@ -580,7 +595,11 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbilityInner_006, TestSi
     Want want;
     ElementName element("", "com.ix.hiBackgroundMusic", "hiBackgroundMusic");
     want.SetElement(element);
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, ERROR_USER_ID_U256);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = ERROR_USER_ID_U256,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     EXPECT_NE(OHOS::ERR_OK, result);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbilityInner_006 end";
 }
