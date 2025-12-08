@@ -192,7 +192,7 @@ public:
      *
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      */
-    void ScheduleMemoryLevel(const int level) override;
+    void ScheduleMemoryLevel(const int level, bool isShellCall = false) override;
 
     /**
      *
