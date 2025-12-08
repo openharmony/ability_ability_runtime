@@ -1256,7 +1256,13 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_001, TestSize
     sptr<IRemoteObject> callerToken;
     int32_t userId = 0;
     int32_t requestCode = 0;
-    auto result = abilityMs->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .userId = userId,
+        .requestCode = requestCode,
+    };
+    auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
@@ -1273,7 +1279,13 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_002, TestSize
     sptr<IRemoteObject> callerToken;
     int32_t userId = 0;
     int32_t requestCode = 0;
-    auto result = abilityMs->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .userId = userId,
+        .requestCode = requestCode,
+    };
+    auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_INVALID_CONTINUATION_FLAG);
 }
 

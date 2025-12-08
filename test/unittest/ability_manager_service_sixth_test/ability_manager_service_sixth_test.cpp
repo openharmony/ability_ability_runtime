@@ -34,13 +34,14 @@
 #include "insight_intent_db_cache.h"
 #include "insight_intent_utils.h"
 #include "mock_ability_token.h"
+#include "mock_bundle_manager_proxy.h"
 #include "mock_my_flag.h"
 #include "mock_parameters.h"
-#include "mock_bundle_manager_proxy.h"
 #include "mock_task_handler_wrap.h"
 #include "process_options.h"
 #include "recovery_param.h"
 #include "scene_board_judgement.h"
+#include "start_ability_utils.h"
 #include "ui_service_extension_connection_constants.h"
 
 using namespace testing;
@@ -344,7 +345,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_002, TestSize.Level1)
     abilityMs->afterCheckExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     Want want;
     want.SetFlags(Want::FLAG_ABILITY_PREPARE_CONTINUATION);
-    auto ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, -1, false, -1, true);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .isForegroundToRestartApp = true,
+    };
+    auto ret = abilityMs->StartAbilityInner(param);
     EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
 
     /**
@@ -354,7 +359,14 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_002, TestSize.Level1)
     auto callerToken = sptr<MockAbilityToken>::MakeSptr();
     Want want2;
     want2.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    ret = abilityMs->StartAbilityInner(want2, callerToken, -1, false, -1, true, 1, true);
+    StartAbilityWrapParam param2 = {
+        .want = want2,
+        .callerToken = callerToken,
+        .isStartAsCaller = true,
+        .specifyTokenId = 1,
+        .isForegroundToRestartApp = true,
+    };
+    ret = abilityMs->StartAbilityInner(param);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_002 end");
 }
 
@@ -2285,7 +2297,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_001, TestSize.Level1)
     Want want;
     want.SetParam("dialogSessionId", dialogSessionId);
     want.SetParam("isSelector", true);
-    int ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = 100,
+    };
+    auto ret = abilityMs->StartAbilityInner(param);
     EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_001 end");
 }
@@ -2301,11 +2317,15 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_003, TestSize.Level1)
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     Want want;
-    int ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .userId = 100,
+    };
+    auto ret = abilityMs->StartAbilityInner(param);
     EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     std::string dialogSessionId = "dialogSessionIdTest";
-    want.SetParam("dialogSessionId", dialogSessionId);
-    ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, 100, false, 0, false);
+    param.want.SetParam("dialogSessionId", dialogSessionId);
+    ret = abilityMs->StartAbilityInner(param);
     EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityInner_003 end");
 }
