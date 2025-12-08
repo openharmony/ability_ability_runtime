@@ -4534,7 +4534,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     AppSpawnStartMsg startMsg;
     auto appInfo = appRecord->GetApplicationInfo();
     auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(uid),
-        bundleInfo.name, appInfo->appIndex);
+        bundleInfo.name, bundleInfo.appIndex);
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
 #ifdef SUPPORT_CHILD_PROCESS
     PresetMaxChildProcess(appRecord, startMsg.maxChildProcess);
