@@ -94,6 +94,8 @@ public:
         ani_object callback);
     static void WantCheck(ani_env *env, ani_object aniObj, ani_object wantObj);
     static void DisconnectUIServiceExtensionCheck(ani_env *env, ani_object aniObj, ani_object proxyObj);
+    static void StartUIAbilitiesInSplitWindowModeCheck(ani_env *env, ani_object aniObj,
+        ani_int primaryWindowId, ani_object wantObj);
     static void StartUIAbilitiesInSplitWindowMode(ani_env *env, ani_object aniObj,
         ani_int primaryWindowId, ani_object wantObj, ani_object callback);
     static void OpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,

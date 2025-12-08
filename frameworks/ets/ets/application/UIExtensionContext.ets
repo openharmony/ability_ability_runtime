@@ -101,6 +101,7 @@ export default class UIExtensionContext extends ExtensionContext {
   private native nativeWantCheck(want: Want): void;
   private native nativeDisconnectUIServiceExtensionCheck(proxy: UIServiceProxy) : void;
   private native nativeStartUIAbilities(wantList: Array<Want>, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeStartUIAbilitiesInSplitWindowModeCheck(primaryWindowId: int, secondaryWant: Want) : void;
   private native nativeStartUIAbilitiesInSplitWindowMode(primaryWindowId: int, secondaryWant: Want, callback:AsyncCallbackWrapper<void>) : void;
   private native nativeOpenLinkSync(link: string, syncCallback:AsyncCallbackWrapper<void>,
     options?: OpenLinkOptions, callback?: AsyncCallbackWrapper<AbilityResult>): void;
@@ -413,7 +414,7 @@ export default class UIExtensionContext extends ExtensionContext {
   }
 
   startUIAbilitiesInSplitWindowMode(primaryWindowId: int, secondaryWant: Want): Promise<void> {
-    this.nativeWantCheck(secondaryWant);
+    this.nativeStartUIAbilitiesInSplitWindowModeCheck(primaryWindowId, secondaryWant);
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {

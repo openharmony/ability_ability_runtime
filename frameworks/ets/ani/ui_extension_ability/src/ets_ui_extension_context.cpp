@@ -54,6 +54,8 @@ constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION =
     "Lapplication/UIServiceProxy/UIServiceProxy;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *SIGNATURE_WANT_CHK = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK = "Lapplication/UIServiceProxy/UIServiceProxy;:V";
+constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE_CHECK =
+    "IL@ohos/app/ability/Want/Want;:V";
 constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE =
     "IL@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr int32_t ARGC_ONE = 1;
@@ -1361,6 +1363,27 @@ void EtsUIExtensionContext::OnDisconnectUIServiceExtension(ani_env *env, ani_obj
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
 }
 
+void EtsUIExtensionContext::StartUIAbilitiesInSplitWindowModeCheck(ani_env *env, ani_object aniObj,
+    ani_int primaryWindowId, ani_object wantObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartUIAbilitiesInSplitWindowModeCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or aniObj");
+        return;
+    }
+    if (primaryWindowId <= 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid primaryWindowId");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want");
+        return;
+    }
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWant failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want");
+        return;
+    }
+}
+
 void EtsUIExtensionContext::StartUIAbilitiesInSplitWindowMode(ani_env *env, ani_object aniObj,
     ani_int primaryWindowId, ani_object wantObj, ani_object callback)
 {
@@ -1388,6 +1411,10 @@ void EtsUIExtensionContext::OnStartUIAbilitiesInSplitWindowMode(ani_env *env, an
     AAFwk::Want want;
     if (!want.HasParameter(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
         want.SetParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
+    }
+    if (primaryWindowId <= 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid primaryWindowId");
+        return;
     }
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWant failed");
@@ -1550,6 +1577,9 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         ani_native_function {"nativeStartUIAbilities",
             "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartUIAbilities)},
+        ani_native_function{"nativeStartUIAbilitiesInSplitWindowModeCheck",
+            SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE_CHECK,
+            reinterpret_cast<void*>(EtsUIExtensionContext::StartUIAbilitiesInSplitWindowModeCheck)},
         ani_native_function{"nativeStartUIAbilitiesInSplitWindowMode",
             SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE,
             reinterpret_cast<void*>(EtsUIExtensionContext::StartUIAbilitiesInSplitWindowMode)},
