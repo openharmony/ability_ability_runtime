@@ -97,6 +97,28 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level2)
 }
 
 /**
+ * @tc.number: ResSchedUtilTest_0400
+ * @tc.desc: Test ReportUIExtensionProcColdStartToRss works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0400, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0400 called.");
+    int32_t pickerType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER);
+    int32_t hostPid = 102;
+    std::string hostBundleName = "hostBundleName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AAFwk::ResSchedUtil::GetInstance().ReportUIExtensionProcColdStartToRss(pickerType,
+        hostPid, hostBundleName, bundleName, abilityName, moduleName);
+    SUCCEED();
+    int64_t resSchedType = AAFwk::RES_TYPE_SCB_START_ABILITY;
+    int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
+    EXPECT_EQ(resSchedType, ret);
+}
+
+/**
  * @tc.number: GetThawReasonByAbilityType
  * @tc.desc: Test GetThawReasonByAbilityType
  * @tc.type: FUNC

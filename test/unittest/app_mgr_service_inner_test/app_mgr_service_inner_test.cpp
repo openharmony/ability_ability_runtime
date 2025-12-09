@@ -40,6 +40,7 @@
 #include "mock_native_token.h"
 #include "mock_permission_verification.h"
 #include "mock_render_scheduler.h"
+#include "mock_res_sched_util.h"
 #include "mock_sa_call.h"
 #include "mock_task_handler_wrap.h"
 #include "param.h"
@@ -445,6 +446,77 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
 
     appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
+}
+
+/**
+ * @tc.name: CheckLoadAbilityConditions_001
+ * @tc.desc: check load ability conditions.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    // do test1
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr);
+
+    int32_t hostPid = 102;
+    // fill want
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<Want>();
+    want->SetParam("ability.want.params.uiExtensionRootHostPid", hostPid);
+    want->SetElementName("bundleName", "abilityName");
+    want->SetModuleName("moduleName");
+
+    // do test2
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want);
+    // do test3
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr);
+
+    // fill extensionAbilityType
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR; // 504
+    // EXPECT_CALL
+    EXPECT_CALL(ResSchedUtil::GetInstance(), ReportUIExtensionProcColdStartToRss(
+        Eq(static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR)),
+        Eq(hostPid),
+        StrEq(""),
+        StrEq("bundleName"),
+        StrEq("abilityName"),
+        StrEq("moduleName")
+    )).Times(1);
+    // do test4
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+
+    // fill appRunningManager_
+    std::string hostBundleName = "wantHostBundleName";
+    std::shared_ptr<ApplicationInfo> infoHost = std::make_shared<ApplicationInfo>();
+    infoHost->bundleName = hostBundleName;
+    int32_t recordIdHost = RECORD_ID + 1;
+    std::string processNameHost = "appRunningRecordProcessNameHost";
+    auto appRunningRecordHost = std::make_shared<AppRunningRecord>(infoHost, recordIdHost, processNameHost);
+    ASSERT_NE(appRunningRecordHost, nullptr);
+    appRunningRecordHost->priorityObject_->pid_ = hostPid;
+    appMgrServiceInner->appRunningManager_->appRunningRecordMap_.emplace(recordIdHost, appRunningRecordHost);
+
+    // fill abilityInfo_
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER; // 404
+
+    // EXPECT_CALL
+    EXPECT_CALL(ResSchedUtil::GetInstance(), ReportUIExtensionProcColdStartToRss(
+        Eq(static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR)),
+        Eq(hostPid),
+        StrEq(hostBundleName),
+        StrEq("bundleName"),
+        StrEq("abilityName"),
+        StrEq("moduleName")
+    )).Times(1);
+    // do test5
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+
+    // fill abilityInfo_ with not UIExtension
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    // do test6
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
 }
 
 /**
