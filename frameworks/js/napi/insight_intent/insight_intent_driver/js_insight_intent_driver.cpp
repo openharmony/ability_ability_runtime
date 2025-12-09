@@ -306,10 +306,15 @@ private:
 
     napi_value OnGetInsightIntentInfoByFilter(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::INTENT, "called");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
             ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        if (!CheckValidIntentInfoFilter(env, info.argv[INDEX_ZERO])) {
+            TAG_LOGE(AAFwkTag::INTENT, "check filter failed");
+            ThrowInvalidParamError(env, "Param error: filter must be a valid InsightIntentInfoFilter.");
             return CreateJsUndefined(env);
         }
 
@@ -331,12 +336,12 @@ private:
                 *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
                     filter.intentFlags_, filter.bundleName_, filter.moduleName_,
                     filter.intentName_, *intentInfo, filter.userId_);
-                infos->push_back(*intentInfo);
+                if (intentInfo != nullptr && (!intentInfo->intentType.empty() || intentInfo->isConfig)) {
+                    infos->push_back(*intentInfo);
+                }
             } else if (filter.moduleName_.empty() && filter.intentName_.empty()) {
                 *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
                     filter.intentFlags_, filter.bundleName_, *infos, filter.userId_);
-            } else {
-                TAG_LOGE(AAFwkTag::INTENT, "Invaild filter");
             }
         };
         NapiAsyncTask::CompleteCallback complete =

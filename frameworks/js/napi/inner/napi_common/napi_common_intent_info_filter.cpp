@@ -81,5 +81,30 @@ bool UnwrapIntentInfoFilter(napi_env env, napi_value param, AppExecFwk::InsightI
 
     return true;
 }
+
+bool CheckValidIntentInfoFilter(napi_env env, napi_value param)
+{
+    if (!IsTypeForNapiValue(env, param, napi_object)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid params");
+        return false;
+    }
+
+    if (IsExistsByPropertyName(env, param, "bundleName") &&
+        IsExistsByPropertyName(env, param, "moduleName") &&
+        IsExistsByPropertyName(env, param, "intentName")) {
+        return true;
+    }
+
+    if (IsExistsByPropertyName(env, param, "bundleName")) {
+        return true;
+    }
+
+    if (!IsExistsByPropertyName(env, param, "bundleName") &&
+        !IsExistsByPropertyName(env, param, "moduleName") &&
+        !IsExistsByPropertyName(env, param, "intentName")) {
+        return true;
+    }
+    return false;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
