@@ -19,6 +19,7 @@
 #include "application_context.h"
 #include "cj_application_context.h"
 #include "cj_utils_ffi.h"
+#include "cj_common_ffi.h"
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
 
@@ -28,6 +29,7 @@ using namespace OHOS::FFI;
 using namespace OHOS::AbilityRuntime;
 
 constexpr int COMMON_FAILED = 16000100;
+constexpr int INNER_ERROR = 16000050;
 constexpr int INCORRECT_PARAMETERS = 401;
 
 std::map<int64_t, std::shared_ptr<CJAbilityMonitor>> g_monitorRecord;
@@ -632,12 +634,12 @@ int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
     auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "cjDelegatorImpl is null");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cj delegator");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     return cjDelegator->GetID();
 }
@@ -647,7 +649,7 @@ int32_t FFIAbilityDelegatorStartAbility(int64_t id, WantHandle want)
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
-        return INVALID_CODE;
+        return INNER_ERROR;
     }
     auto actualWant = reinterpret_cast<AAFwk::Want*>(want);
     return cjDelegator->StartAbility(*actualWant);
@@ -658,12 +660,12 @@ int32_t FFIAbilityDelegatorExecuteShellCommand(int64_t id, const char* cmd, int6
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(cjDelegator->ExecuteShellCommand(cmd, timeoutSec));
     if (cJShellCmdResult == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     return cJShellCmdResult->GetID();
 }
@@ -673,7 +675,7 @@ int32_t FFIGetExitCode(int64_t id)
     auto cjShellCmdResult = FFI::FFIData::GetData<CJShellCmdResult>(id);
     if (cjShellCmdResult == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj shellcommand result");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     return cjShellCmdResult->GetExitCode();
 }
@@ -705,12 +707,12 @@ int32_t FFIAbilityDelegatorApplicationContext(int64_t id)
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(cjDelegator->GetAppContext());
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null app context");
-        return INVALID_CODE;
+        return ERR_INVALID_INSTANCE_CODE;
     }
     return appContext->GetID();
 }

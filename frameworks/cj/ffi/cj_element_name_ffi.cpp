@@ -25,7 +25,7 @@ extern "C" {
 ElementNameHandle FFICJElementNameCreateWithContent(
     char* deviceId, char* bundleName, char* abilityName, char* moduleName)
 {
-    return new ElementName(deviceId, bundleName, abilityName, moduleName);
+    return new (std::nothrow) ElementName(deviceId, bundleName, abilityName, moduleName);
 }
 
 void FFICJElementNameDelete(ElementNameHandle elementNameHandle)
