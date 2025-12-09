@@ -1064,6 +1064,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
                 appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
             }
         }
+        ReportUIExtensionProcColdStartToRss(abilityInfo, want);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
             AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag, loadParam->isStartupHide);
@@ -1126,6 +1127,29 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     }
     guard.appRecord_ = appRecord;
     AfterLoadAbility(appRecord, abilityInfo, loadParam);
+}
+
+void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
+    const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (abilityInfo == nullptr || want == nullptr) {
+        return;
+    }
+
+    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
+        int hostPid = want->GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1);
+        auto hostAppRecord = appRunningManager_->GetAppRunningRecordByPid(hostPid);
+        std::string hostBundleName;
+        if (hostAppRecord) {
+            hostBundleName = hostAppRecord->GetBundleName();
+        }
+        std::string bundleName = want->GetElement().GetBundleName();
+        std::string abilityName = want->GetElement().GetAbilityName();
+        std::string moduleName = want->GetElement().GetModuleName();
+        AAFwk::ResSchedUtil::GetInstance().ReportUIExtensionProcColdStartToRss(extensionAbilityType,
+            hostPid, hostBundleName, bundleName, abilityName, moduleName);
+    }
 }
 
 void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord,
