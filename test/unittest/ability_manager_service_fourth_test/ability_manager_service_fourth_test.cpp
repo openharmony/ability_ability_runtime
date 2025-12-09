@@ -32,6 +32,7 @@
 #include "mock_ability_token.h"
 #include "ability_bundle_event_callback.h"
 #include "session/host/include/session.h"
+#include "start_ability_utils.h"
 #include "system_ability_definition.h"
 #include "ability_util.h"
 
@@ -589,7 +590,14 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityWithRemoveIntentFlag_003, 
     int32_t userId{0};
     int requestCode{0};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs_->StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, true);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .userId = userId,
+        .requestCode = requestCode,
+        .removeInsightIntentFlag = true,
+    };
+    auto ret = abilityMs_->StartAbilityWithRemoveIntentFlag(param);
     EXPECT_EQ(ret, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityWithRemoveIntentFlag_003 end");
 }
@@ -609,17 +617,23 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByFreeInstall_001, TestSiz
     want.SetParam(START_ABILITY_TYPE, true);
     auto callerToken = MockToken(AbilityType::PAGE);
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .userId = userId,
+        .requestCode = requestCode,
+    };
+    auto ret = abilityMs_->StartAbilityByFreeInstall(param);
     EXPECT_EQ(ret, ERR_INVALID_CALLER);
 
-    want.SetParam(START_ABILITY_TYPE, false);
-    want.AddFlags(Want::FLAG_ABILITY_CONTINUATION);
-    auto ret1 = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    param.want.SetParam(START_ABILITY_TYPE, false);
+    param.want.AddFlags(Want::FLAG_ABILITY_CONTINUATION);
+    auto ret1 = abilityMs_->StartAbilityByFreeInstall(param);
     EXPECT_EQ(ret1, ERR_INVALID_CONTINUATION_FLAG);
 
-    want.SetParam(START_ABILITY_TYPE, false);
-    want.RemoveFlags(Want::FLAG_ABILITY_CONTINUATION);
-    auto ret2 = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    param.want.SetParam(START_ABILITY_TYPE, false);
+    param.want.RemoveFlags(Want::FLAG_ABILITY_CONTINUATION);
+    auto ret2 = abilityMs_->StartAbilityByFreeInstall(param);
     EXPECT_EQ(ret2, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityByFreeInstall_001 end");
 }
