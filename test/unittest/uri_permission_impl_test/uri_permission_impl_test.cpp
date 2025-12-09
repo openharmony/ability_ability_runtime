@@ -83,7 +83,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_001, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
-    unsigned int flag = 0;
+    uint32_t flag = 0;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
@@ -103,7 +103,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_002, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
-    unsigned int flag = 1;
+    uint32_t flag = 1;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
@@ -123,7 +123,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_003, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     MockSystemAbilityManager::isNullptr = false;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
@@ -145,7 +145,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_004, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     std::string targetBundleName = "name2";
     MockSystemAbilityManager::isNullptr = false;
     StorageManager::StorageManagerServiceMock::isZero = false;
@@ -167,7 +167,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_005, TestSize.Level1)
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -194,7 +194,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_006, TestSize.Level1)
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -204,7 +204,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_006, TestSize.Level1)
     upms->uriMap_.emplace(uriStr, infoList);
     Uri uri(uriStr);
     MockSystemAbilityManager::isNullptr = false;
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
     EXPECT_EQ(funcResult, INNER_ERR);
@@ -222,7 +222,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -232,7 +232,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     upms->uriMap_.emplace(uriStr, infoList);
     Uri uri(uriStr);
     MockSystemAbilityManager::isNullptr = false;
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
     EXPECT_EQ(funcResult, INNER_ERR);
@@ -280,7 +280,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_009, TestSize.Level1)
     stubRawData.size = rawData.size;
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
-    unsigned int flag = 0;
+    uint32_t flag = 0;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
@@ -308,7 +308,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_010, TestSize.Level1)
     stubRawData.size = rawData.size;
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
-    unsigned int flag = 1;
+    uint32_t flag = 1;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
@@ -336,7 +336,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_011, TestSize.Level1)
     stubRawData.size = rawData.size;
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     MockSystemAbilityManager::isNullptr = false;
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
@@ -366,7 +366,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_012, TestSize.Level1)
     stubRawData.size = rawData.size;
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     std::string targetBundleName = "name2";
     MockSystemAbilityManager::isNullptr = false;
     StorageManager::StorageManagerServiceMock::isZero = false;
@@ -389,7 +389,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_013, TestSize.Level1)
     ASSERT_NE(upms, nullptr);
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -424,7 +424,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_014, TestSize.Level1)
     ASSERT_NE(upms, nullptr);
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -441,7 +441,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_014, TestSize.Level1)
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
     MockSystemAbilityManager::isNullptr = false;
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
     EXPECT_EQ(funcResult, INNER_ERR);
@@ -460,7 +460,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_015, TestSize.Level1)
     ASSERT_NE(upms, nullptr);
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
+    uint32_t tmpFlag = 1;
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
@@ -477,7 +477,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_015, TestSize.Level1)
     EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
 
     MockSystemAbilityManager::isNullptr = false;
-    unsigned int flag = 2;
+    uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
     EXPECT_EQ(funcResult, INNER_ERR);
@@ -578,6 +578,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_001, TestSize.L
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
     uint32_t targetTokenId = 1002;
@@ -611,6 +612,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_002, TestSize.L
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
     uint32_t targetTokenId = 1002;
@@ -640,6 +642,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_003, TestSize.L
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
     uint32_t targetTokenId = 1002;
@@ -705,6 +708,7 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isDFSCallRet_ = true;
     auto callerTokenId = 1001;
     auto targetTokenId = 1002;
     auto invalidTokenId = 1003;
