@@ -47,6 +47,7 @@ public:
     static bool IsDocsCloudUri(Uri &uri);
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
     static bool IsUdmfOrPasteboardCall();
+    static bool IsDFSCall();
 };
 } // OHOS
 } // AAFwk
