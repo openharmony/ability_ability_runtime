@@ -84,9 +84,9 @@ struct StartAbilityInfoWrap {
 
 struct StartAbilityWrapParam {
     Want want;
-    sptr<IRemoteObject> callerToken;
-    int requestCode;
-    bool isPendingWantCaller;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = -1;
+    bool isPendingWantCaller = false;
     int32_t userId = -1;
     bool isStartAsCaller = false;
     uint32_t specifyTokenId = 0;
@@ -95,8 +95,10 @@ struct StartAbilityWrapParam {
     bool isUIAbilityOnly = false;
     bool isAppCloneSelector = false;
     bool hideFailureTipDialog = false;
+    bool isBySCB = false;
     bool isFreeInstallFromService = false;
     uint64_t specifiedFullTokenId = 0;
+    bool removeInsightIntentFlag = false;
 };
 }
 }

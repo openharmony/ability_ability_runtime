@@ -24,6 +24,7 @@
 #include "insight_intent_utils.h"
 #include "ipc_capacity_wrap.h"
 #include "permission_constants.h"
+#include "start_ability_utils.h"
 #include "support_system_ability_permission.h"
 #include "utils/app_mgr_util.h"
 #include "uri_utils.h"
@@ -402,8 +403,15 @@ void FreeInstallManager::StartAbilityByFreeInstall(FreeInstallInfo &info, std::s
     }
     if (result == ERR_OK) {
         if (info.startOptions == nullptr) {
-            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(info.want,
-                info.callerToken, info.userId, info.requestCode, false, info.isFreeInstallFromService);
+            StartAbilityWrapParam param = {
+                .want = info.want,
+                .callerToken = info.callerToken,
+                .requestCode = info.requestCode,
+                .userId = info.userId,
+                .hideFailureTipDialog = false,
+                .isFreeInstallFromService = info.isFreeInstallFromService,
+            };
+            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(param);
         } else {
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityForOptionWrap(info.want,
                 *info.startOptions, info.callerToken, false, info.userId, info.requestCode);
@@ -460,8 +468,16 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
         result = UpdateElementName(info.want, info.userId);
     }
     if (result == ERR_OK) {
-        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(info.want,
-            info.callerToken, info.userId, info.requestCode, true, false, info.isFreeInstallFromService);
+        StartAbilityWrapParam param = {
+            .want = info.want,
+            .callerToken = info.callerToken,
+            .requestCode = info.requestCode,
+            .userId = info.userId,
+            .removeInsightIntentFlag = true,
+            .hideFailureTipDialog = false,
+            .isFreeInstallFromService = info.isFreeInstallFromService,
+        };
+        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(param);
     }
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
