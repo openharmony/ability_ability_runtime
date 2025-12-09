@@ -114,6 +114,25 @@ void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityIn
 #endif
 }
 
+void ResSchedUtil::ReportUIExtensionProcColdStartToRss(
+    int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_START_UIEXTENSION_PROC;
+    std::unordered_map<std::string, std::string> payload {
+        {"extensionAbilityType", std::to_string(extensionAbilityType)},
+        {"hostPid", std::to_string(hostPid)},
+        {"hostBundleName", hostBundleName},
+        {"bundleName", bundleName},
+        {"abilityName", abilityName},
+        {"moduleName", moduleName},
+    };
+    TAG_LOGD(AAFwkTag::DEFAULT, "resType:%{public}u, call", resType);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, 0, payload);
+#endif
+}
+
 std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityInfo)
 {
     std::string reason;
