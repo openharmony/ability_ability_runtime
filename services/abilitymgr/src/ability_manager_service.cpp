@@ -671,8 +671,11 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
     DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
 #endif
     StartAbilityWrapParam startAbilityWrapParam = {
-        want, nullptr, requestCode, false, userId, false, 0, false, false, false, false, false,
-        false, specifiedFullTokenId};
+        .want = want,
+        .requestCode = requestCode,
+        .userId = userId,
+        .specifiedFullTokenId = specifiedFullTokenId,
+    };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);
     if (ret != ERR_OK) {
@@ -779,7 +782,13 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
         "specifyTokenId:%{public}u, appIndex:%{public}d", want.GetElement().GetAbilityName().c_str(), userId,
         specifyTokenId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, requestCode, isPendingWantCaller, userId, false, specifyTokenId };
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .isPendingWantCaller = isPendingWantCaller,
+        .userId = userId,
+        .specifyTokenId = specifyTokenId,
+    };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with specified token error:%{public}d", ret);
@@ -936,7 +945,11 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
         "start, ability: %{public}s, userId: %{public}d, specifyTokenId: %{public}u",
         want.GetElement().GetAbilityName().c_str(), DEFAULT_INVAL_VALUE, specifyTokenId);
     StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, specifyTokenId, false, false, true };
+        .want = want,
+        .callerToken = callerToken,
+        .specifyTokenId = specifyTokenId,
+        .isUIAbilityOnly = true,
+    };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityOnlyUIAbility error:%{public}d", ret);
@@ -996,8 +1009,16 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
             callerPkg.c_str(), targetPkg.c_str());
         AbilityUtil::AddAbilityJumpRuleToBms(callerPkg, targetPkg, GetValidUserId(userId));
     }
-    StartAbilityWrapParam startAbilityWrapParam = { newWant, callerToken, requestCode, false, userId, true,
-        callerAccessTokenId, false, isImplicit, false, isAppCloneSelector };
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = newWant,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+        .isStartAsCaller = true,
+        .specifyTokenId = callerAccessTokenId,
+        .isImplicit = isImplicit,
+        .isAppCloneSelector = isAppCloneSelector,
+    };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability as caller failed:%{public}d", ret);
@@ -1978,7 +1999,13 @@ int AbilityManagerService::StartAbilityForResultAsCaller(
     CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
     auto asCallerSourceToken = connectManager->GetUIExtensionSourceToken(callerToken);
     UpdateCallerInfoUtil::GetInstance().UpdateAsCallerSourceInfo(newWant, asCallerSourceToken, callerToken);
-    StartAbilityWrapParam startAbilityWrapParam = { newWant, callerToken, requestCode, false, userId, true };
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = newWant,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+        .isStartAsCaller = true,
+    };
     return StartAbilityWrap(startAbilityWrapParam);
 }
 
@@ -12994,7 +13021,11 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-    StartAbilityWrapParam startAbilityWrapParam = { want, nullptr, requestCode, false, userId };
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = want,
+        .requestCode = requestCode,
+        .userId = userId
+    };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityError:%{public}d", ret);
@@ -13780,7 +13811,9 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     (const_cast<Want &>(want)).SetParam(AAFwk::Want::APP_INSTANCE_KEY, processInfo.instanceKey);
     (const_cast<Want &>(want)).RemoveParam(Want::CREATE_APP_INSTANCE_KEY);
     StartAbilityWrapParam startAbilityWrapParam = {
-        want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, true };
+        .want = want,
+        .isForegroundToRestartApp = true,
+    };
     result = StartAbilityWrap(startAbilityWrapParam);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility error");
