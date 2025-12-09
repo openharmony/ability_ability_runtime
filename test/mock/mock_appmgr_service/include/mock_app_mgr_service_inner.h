@@ -91,6 +91,10 @@ public:
     MOCK_METHOD3(CheckPreloadAppRecordExist, bool(const std::string&, int32_t, int32_t));
     MOCK_CONST_METHOD0(IsFoundationCall, bool());
     MOCK_METHOD2(QueryRunningSharedBundles, int32_t(pid_t pid, std::map<std::string, uint32_t> &sharedBundles));
+    MOCK_METHOD2(NotifyPageShow, int32_t(const sptr<IRemoteObject> &token, const PageStateData &pageStateData));
+    MOCK_METHOD1(RegisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
+    MOCK_METHOD2(RegisterApplicationStateObserver, int32_t(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList));
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
