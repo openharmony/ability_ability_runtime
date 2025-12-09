@@ -22,6 +22,7 @@
 #include "ani_common_start_options.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
+#include "ani_task.h"
 #include "remote_object_taihe_ani.h"
 #include "app_utils.h"
 #include "cJSON.h"
@@ -2400,13 +2401,6 @@ void EtsAbilityContext::OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj
         return;
     }
 
-    auto context = context_.lock();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-        return;
-    }
-
     std::string label;
     if (!AppExecFwk::GetStdString(env, labelObj, label) || label.empty()) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
@@ -2415,20 +2409,74 @@ void EtsAbilityContext::OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj
     }
 
     auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, iconObj);
-    if (icon == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to unwrap PixelMap");
-        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param icon failed");
+
+    ani_object errorObj = nullptr;
+    ani_vm *etsVm = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
         return;
     }
 
-    ErrCode ret = context->SetAbilityInstanceInfo(label, icon);
-    ani_object errorObj = nullptr;
-    if (ret == ERR_OK) {
-        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
-    } else {
-        errorObj = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+    ani_ref callbackRef = nullptr;
+    if ((status = env->GlobalReference_Create(callback, &callbackRef)) != ANI_OK || callbackRef == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
+        return;
     }
-    AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
+
+    OnSetAbilityInstanceInfoInner(env, label, icon, callback, etsVm, callbackRef);
+}
+
+void EtsAbilityContext::OnSetAbilityInstanceInfoInner(ani_env *env, std::string& label,
+    std::shared_ptr<OHOS::Media::PixelMap> icon, ani_object callback, ani_vm *etsVm, ani_ref callbackRef)
+{
+    if (env == nullptr || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or etsVm");
+        return;
+    }
+    if (icon == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to unwrap PixelMap");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param icon failed");
+        env->GlobalReference_Delete(callbackRef);
+        return;
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        env->GlobalReference_Delete(callbackRef);
+        return;
+    }
+    ani_object errorObj = nullptr;
+    auto task = [context, label, icon, etsVm, callbackRef]() {
+        ani_status status = ANI_ERROR;
+        ani_env *env = nullptr;
+        if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+            return;
+        }
+        ani_object errorObj = nullptr;
+        ErrCode ret = context->SetAbilityInstanceInfo(label, icon);
+        if (ret == ERR_OK) {
+            errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef), errorObj, nullptr);
+            env->GlobalReference_Delete(callbackRef);
+        } else {
+            errorObj = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef), errorObj, nullptr);
+            env->GlobalReference_Delete(callbackRef);
+        }
+    };
+    if (AniTask::AniSendEvent(task) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to sendEvent");
+        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
+        env->GlobalReference_Delete(callbackRef);
+    }
 }
 
 void EtsAbilityContext::OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
