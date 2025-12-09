@@ -1898,6 +1898,9 @@ private:
 
     void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
 
+    void ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
+        const std::shared_ptr<AAFwk::Want>& want);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
