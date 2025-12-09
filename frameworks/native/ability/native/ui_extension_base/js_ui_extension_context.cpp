@@ -1850,11 +1850,11 @@ std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> JsUIExtensionContext::
         napi_value onRequestSuccFunc = onRequestSuccRef->GetNapiValue();
         napi_valuetype type = napi_undefined;
         if (napi_typeof(env, onRequestSuccFunc, &type) != napi_ok || type != napi_function) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "onRequestSuccFunc is not function");
+            TAG_LOGE(AAFwkTag::UI_EXT, "onRequestSuccFunc is not function");
             return;
         }
         if (napi_typeof(env, completionHandlerForAtomicService, &type) != napi_ok || type != napi_object) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "completionHandlerForAtomicService is not napi_object");
+            TAG_LOGE(AAFwkTag::UI_EXT, "completionHandlerForAtomicService is not napi_object");
             return;
         }
         napi_status status = napi_call_function(
@@ -1871,11 +1871,11 @@ std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> JsUIExtensionContext::
         napi_value onRequestFailFunc = onRequestFailRef->GetNapiValue();
         napi_valuetype type = napi_undefined;
         if (napi_typeof(env, onRequestFailFunc, &type) != napi_ok || type != napi_function) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "onRequestFailFunc is not function");
+            TAG_LOGE(AAFwkTag::UI_EXT, "onRequestFailFunc is not function");
             return;
         }
         if (napi_typeof(env, completionHandlerForAtomicService, &type) != napi_ok || type != napi_object) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "completionHandlerForAtomicService is not napi_object");
+            TAG_LOGE(AAFwkTag::UI_EXT, "completionHandlerForAtomicService is not napi_object");
             return;
         }
         napi_status status = napi_call_function(
@@ -1893,7 +1893,7 @@ void JsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
     std::shared_ptr<NativeReference> atomicServiceRef = AppExecFwk::CreateNativeRef(env, param,
         "completionHandlerForAtomicService", napi_object);
     if (atomicServiceRef == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "create reference failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "create reference failed");
         return;
     }
     TAG_LOGI(AAFwkTag::UI_EXT, "completionHandlerForAtomicService exists");
@@ -1902,7 +1902,7 @@ void JsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
     std::shared_ptr<NativeReference> onRequestFailRef = AppExecFwk::CreateNativeRef(
         env, atomicServiceRef->GetNapiValue(), "onAtomicServiceRequestFailure", napi_function);
     if (onRequestSuccRef == nullptr || onRequestFailRef == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestSuccRef or onRequestFailRef failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "create onRequestSuccRef or onRequestFailRef failed");
         return;
     }
     auto atomicRequestCallback = CreateAtomicServiceCallBack(
