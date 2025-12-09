@@ -203,7 +203,7 @@ void GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallParameters> calls,
 
 void StartAbilityByCallExecuteDone(StartAbilityByCallParameters &callData,
     std::shared_ptr<CallerCallBack> callerCallback, const AAFwk::Want &want,
-    std::weak_ptr<AbilityContext> wContext)
+    std::weak_ptr<AbilityContext> wContext, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityByCallExecuteDone begin");
@@ -213,7 +213,7 @@ void StartAbilityByCallExecuteDone(StartAbilityByCallParameters &callData,
         callData.err = AAFwk::ERR_INVALID_CONTEXT;
         return;
     }
-    auto ret = context->StartAbilityByCall(want, callerCallback, -1);
+    auto ret = context->StartAbilityByCall(want, callerCallback, userId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "startAbility failed");
         callData.err = ret;
@@ -1353,8 +1353,8 @@ napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo
     auto calls = std::make_shared<StartAbilityByCallParameters>();
     auto callerCallBack = std::make_shared<CallerCallBack>();
     GenerateCallerCallBack(calls, callerCallBack);
-    auto callExecute = [calls, callerCallBack, want, weak = context_] () {
-        StartAbilityByCallExecuteDone(*calls, callerCallBack, want, weak);
+    auto callExecute = [calls, callerCallBack, want, weak = context_, userId] () {
+        StartAbilityByCallExecuteDone(*calls, callerCallBack, want, weak, userId);
     };
     auto callComplete = [weak = context_, calldata = calls, callerCallBack] (
         napi_env env, NapiAsyncTask& task, int32_t status) {
