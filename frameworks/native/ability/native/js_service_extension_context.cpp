@@ -684,7 +684,7 @@ private:
 
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "async wait execute");
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStartAbilityByCall", env,
-            CreateAsyncTaskWithLastParam(env, nullptr, GetCallExecute(calls, want, context_),
+            CreateAsyncTaskWithLastParam(env, nullptr, GetCallExecute(calls, want, context_, accountId),
                 GetCallComplete(calls), &result));
       
         return result;
@@ -763,9 +763,9 @@ private:
     }
 
     NapiAsyncTask::ExecuteCallback GetCallExecute(std::shared_ptr<StartAbilityByCallParameters> calls,
-        const AAFwk::Want &want, std::weak_ptr<ServiceExtensionContext> wContext)
+        const AAFwk::Want &want, std::weak_ptr<ServiceExtensionContext> wContext, int32_t accountId)
     {
-        auto callExecute = [calldata = calls, want, wContext] () {
+        auto callExecute = [calldata = calls, want, wContext, accountId] () {
             HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "ServiceCxt::callExecute");
             auto context = wContext.lock();
             if (context == nullptr) {
@@ -774,9 +774,9 @@ private:
                 return;
             }
 
-            auto ret = context->StartAbilityByCall(want, calldata->callerCallBack, -1);
-            if (ret) {
-                TAG_LOGE(AAFwkTag::SERVICE_EXT, "OnStartAbilityByCall failed");
+            auto ret = context->StartAbilityByCall(want, calldata->callerCallBack, accountId);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "OnStartAbilityByCall failed %{public}d", ret);
                 calldata->err = ret;
                 return;
             }
