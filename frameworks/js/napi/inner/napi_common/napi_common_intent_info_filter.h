@@ -23,6 +23,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 bool UnwrapIntentInfoFilter(napi_env env, napi_value param, AppExecFwk::InsightIntentInfoFilter &filter);
+bool CheckValidIntentInfoFilter(napi_env env, napi_value param);
 
 }  // namespace AbilityRuntime
 }  // namespace OHOS

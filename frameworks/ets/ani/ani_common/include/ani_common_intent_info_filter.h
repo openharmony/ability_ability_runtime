@@ -23,6 +23,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 bool UnwrapIntentInfoFilter(ani_env *env, ani_object param, AppExecFwk::InsightIntentInfoFilter &filter);
+bool CheckValidIntentInfoFilter(ani_env *env, ani_object param);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_INTENT_INFO_FILTER_H
