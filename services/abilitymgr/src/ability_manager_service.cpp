@@ -13148,7 +13148,7 @@ int32_t AbilityManagerService::GetForegroundUIAbilities(std::vector<AppExecFwk::
         abilityData.bundleName = info.ability.GetBundleName();
         abilityData.moduleName = info.ability.GetModuleName();
         abilityData.abilityName = info.ability.GetAbilityName();
-        abilityData.abilityState = info.abilityState;
+        abilityData.abilityState = static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND);
         abilityData.pid = info.pid;
         abilityData.uid = info.uid;
         abilityData.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
