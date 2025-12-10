@@ -51,8 +51,8 @@ bool UnWrapBoolFromJS(napi_env env, napi_value param, bool defaultValue = false)
 bool UnwrapBoolFromJS2(napi_env env, napi_value param, bool &value);
 
 napi_value WrapDoubleToJS(napi_env env, double value);
-double UnWrapDoubleFromJS(napi_env env, napi_value param, double defaultValue = 0.0);
-bool UnWrapDoubleFromJS2(napi_env env, napi_value param, double &value);
+double UnwrapDoubleFromJS(napi_env env, napi_value param, double defaultValue = 0.0);
+bool UnwrapDoubleFromJS2(napi_env env, napi_value param, double &value);
 
 napi_value WrapStringToJS(napi_env env, const std::string &value);
 std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string &defaultValue = "");
