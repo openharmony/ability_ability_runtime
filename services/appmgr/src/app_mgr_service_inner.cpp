@@ -5048,7 +5048,7 @@ void AppMgrServiceInner::HandleTimeOut(const AAFwk::EventWrap &event)
     const char *hook_mode = "startup:";
     int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
     if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
-        TAG_LOGD(AAFwkTag::APPMGR, "HandleTimeOut, Hook_mode: no handle time out");
+        TAG_LOGI(AAFwkTag::APPMGR, "HandleTimeOut, Hook_mode: no handle time out");
         return;
     }
     auto appRecord = AppEventUtil::GetInstance().RemoveEvent(event.GetEventId(), event.GetParam());
@@ -6417,7 +6417,7 @@ void AppMgrServiceInner::SendHiSysEvent(int32_t innerEventId, std::shared_ptr<Ap
     const char *hook_mode = "startup:";
     int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
     if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
-        TAG_LOGD(AAFwkTag::APPMGR, "SendHiSysEvent, Hook_mode: no handle time out");
+        TAG_LOGI(AAFwkTag::APPMGR, "SendHiSysEvent, Hook_mode: no handle time out");
         return;
     }
 
