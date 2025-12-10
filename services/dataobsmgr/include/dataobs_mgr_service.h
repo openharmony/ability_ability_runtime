@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <list>
+#include <shared_mutex>
 #include <singleton.h>
 #include <thread_ex.h>
 #include "cpp/mutex.h"
@@ -102,12 +103,14 @@ private:
     int32_t RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
         DataObsOption opt, bool isExtension);
     std::pair<Status, std::string> GetUriPermission(Uri &uri, bool isRead, ObserverInfo &info);
-    std::vector<DataGroupInfo> GetGroupInfosFromCache(const std::string &bundleName, const uint32_t userId);
+    std::vector<DataGroupInfo> GetGroupInfosFromCache(const std::string &bundleName,
+        const uint32_t userId, const std::string &schemeType);
     std::string GetCallingName(uint32_t callingTokenid);
     int32_t VerifyDataShareExtension(Uri &uri, ObserverInfo &info);
     int32_t VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info);
     void CheckSchemePermission(Uri &uri, const uint32_t tokenId, const uint32_t userId, const std::string &method);
-    void VerifyUriPermission(Uri &uri, const uint32_t tokenId, const uint32_t userId, const std::string &uriType);
+    void VerifyUriPermission(Uri &uri, const uint32_t tokenId, const uint32_t userId,
+        const std::string &schemeType, const std::string &method);
     int32_t ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         uint32_t token, int32_t userId, int32_t pid);
     Status VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
@@ -125,7 +128,7 @@ private:
     std::uint32_t taskCount_ = 0;
     std::shared_ptr<TaskHandlerWrap> handler_;
     std::shared_ptr<DataShare::DataSharePermission> permission_;
-    std::mutex groupsIdMutex_;
+    std::shared_mutex groupsIdMutex_;
     std::list<std::pair<std::string, std::vector<DataGroupInfo>>> groupsIdCache_;
     DataObsServiceRunningState state_;
 

@@ -51,7 +51,7 @@ using namespace AppExecFwk;
 static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
-static const int32_t CACHE_SIZE_THRESHOLD = 10;
+static const int32_t CACHE_SIZE_THRESHOLD = 50;
 static const int32_t DATA_MANAGER_SERVICE_UID = 3012;
 
 const bool REGISTER_RESULT =
@@ -342,13 +342,13 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
         Security::AccessToken::HapTokenInfo tokenInfo;
         result = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenid, tokenInfo);
         if (result == Security::AccessToken::RET_SUCCESS) {
-            callingName = tokenInfo.bundleName;
+            callingName = std::move(tokenInfo.bundleName);
         }
     } else if (tokenType == Security::AccessToken::TOKEN_NATIVE || tokenType == Security::AccessToken::TOKEN_SHELL) {
         Security::AccessToken::NativeTokenInfo tokenInfo;
         result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenid, tokenInfo);
         if (result == Security::AccessToken::RET_SUCCESS) {
-            callingName = tokenInfo.processName;
+            callingName = std::move(tokenInfo.processName);
         }
     } else {
         LOG_ERROR("tokenType is invalid, tokenType:%{public}d", tokenType);
@@ -360,66 +360,65 @@ void DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
     const uint32_t userId, const std::string &method)
 {
     if (uri.GetScheme() == RELATIONAL_STORE) {
-        VerifyUriPermission(uri, tokenId, userId, RELATIONAL_STORE + method);
+        VerifyUriPermission(uri, tokenId, userId, RELATIONAL_STORE, method);
     } else if (uri.GetScheme() == SHARE_PREFERENCES) {
-        VerifyUriPermission(uri, tokenId, userId, SHARE_PREFERENCES + method);
+        VerifyUriPermission(uri, tokenId, userId, SHARE_PREFERENCES, method);
     }
 }
 
 std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
-    const uint32_t userId)
+    const uint32_t userId, const std::string &schemeType)
 {
-    auto key = bundleName + ":" + std::to_string(userId);
-    auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
-        [&key](const auto& pair) { return pair.first == key; });
-    if (it == groupsIdCache_.end()) {
-        std::vector<DataGroupInfo> infos;
-        auto bmsHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
-        bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
-        if (!res) {
-            LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
-            return infos;
+    auto key = bundleName + ":" + std::to_string(userId) + ":" + schemeType;
+    {
+        std::shared_lock<std::shared_mutex> readLock(groupsIdMutex_);
+        auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
+            [&key](const auto& pair) { return pair.first == key; });
+        if (it != groupsIdCache_.end()) {
+            return it->second;
         }
-        std::lock_guard<std::mutex> lock(groupsIdMutex_);
-        if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
-            LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
-            groupsIdCache_.pop_front();
-        }
-        groupsIdCache_.emplace_back(key, infos);
+    }
+
+    std::vector<DataGroupInfo> infos;
+    auto bmsHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
+    if (!res) {
+        LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
         return infos;
     }
-    return it->second;
+    std::unique_lock<std::shared_mutex> writeLock(groupsIdMutex_);
+    if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
+        LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
+        groupsIdCache_.pop_front();
+    }
+    groupsIdCache_.emplace_back(key, infos);
+    return infos;
 }
 
 void DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
-    const uint32_t userId, const std::string &uriType)
+    const uint32_t userId, const std::string &schemeType, const std::string &method)
 {
     std::string authority = uri.GetAuthority();
     std::string callingName = GetCallingName(tokenId);
-    std::string errMsg = uriType;
+    std::string errMsg = schemeType + method;
+    auto invalidUri = (schemeType == RELATIONAL_STORE) ? DATAOBS_RDB_INVALID_URI : DATAOBS_PREFERENCE_INVALID_URI;
     if (callingName.empty()) {
-        errMsg = "callingNmae is empty";
-        DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
+        errMsg += "callingNmae is empty";
+        DataShare::DataSharePermission::ReportExtensionFault(invalidUri, tokenId, callingName, errMsg);
         return;
     }
     if (authority == callingName) {
         return;
     }
-    std::vector<DataGroupInfo> infos = GetGroupInfosFromCache(callingName, userId);
-    if (infos.empty()) {
-        LOG_ERROR("%{public}s group infos is empty.", uriType.c_str());
-        errMsg = errMsg + " callingName check failed";
-        DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
-        return;
-    }
+    std::vector<DataGroupInfo> infos = GetGroupInfosFromCache(callingName, userId, schemeType);
     for (auto &groupId : infos) {
         if (authority == groupId.dataGroupId) {
             return;
         }
     }
-    LOG_ERROR("%{public}s OBS permission check is failed", uriType.c_str());
-    errMsg = errMsg + " group id check failed";
-    DataShare::DataSharePermission::ReportExtensionFault(DATAOBS_INVALID_URI, tokenId, callingName, errMsg);
+    LOG_ERROR("%{public}s OBS permission check is failed", errMsg.c_str());
+    errMsg += " group id check failed or infos empty:" + std::string(infos.empty() ? "empty" : "notEmpty");
+    DataShare::DataSharePermission::ReportExtensionFault(invalidUri, tokenId, callingName, errMsg);
 }
 
 int32_t DataObsMgrService::ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
