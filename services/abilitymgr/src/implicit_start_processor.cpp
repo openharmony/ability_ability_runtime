@@ -308,7 +308,8 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
         auto uri = want.GetUriString();
         auto suffixIndex = uri.rfind('.');
         if (suffixIndex == std::string::npos) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, uri: %{public}s", uri.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, uri:%{public}s-%{private}s",
+                want.GetUri().GetScheme().c_str(), uri.c_str());
             return "";
         }
         type = uri.substr(suffixIndex);
@@ -316,7 +317,8 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
         if (Security::DlpPermission::DlpFileKits::IsDlpFileBySuffix(type)) {
             auto suffixDlpIndex = uri.rfind('.', suffixIndex - 1);
             if (suffixDlpIndex == std::string::npos) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, uri: %{public}s", uri.c_str());
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, uri: %{public}s-%{private}s",
+                    want.GetUri().GetScheme().c_str(), uri.c_str());
                 return "";
             }
             type = uri.substr(suffixDlpIndex, suffixIndex - suffixDlpIndex);
