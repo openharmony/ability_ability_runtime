@@ -258,7 +258,7 @@ namespace wantAgent {
         try {
           nativeTrigger(agent, triggerInfo, call);
         } catch (err: BusinessError) {
-          callback(err, {} as CompleteData);
+          callback(err, {info: new Object(), want: new Want(), finalCode: 0, finalData: 'undefined'} as CompleteData);
         }
       }
     });
