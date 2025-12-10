@@ -1201,7 +1201,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNormalExtensio
 /**
  * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber
  * @tc.number: ExtensionAbilityThreadTest_001
- * @tc.desc  : 测试当 extensionAbilityType 为 STATICSUBSCRIBER 时,abilityName 被正确设置
+ * @tc.desc  : test extensionAbilityType is STATICSUBSCRIBER
  */
 HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber, TestSize.Level0) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
@@ -1217,7 +1217,7 @@ HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorr
 /**
  * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver
  * @tc.number: ExtensionAbilityThreadTest_002
- * @tc.desc  : 测试当 extensionAbilityType 为 DRIVER 时,abilityName 被正确设置
+ * @tc.desc  : test extensionAbilityType is DRIVER
  */
 HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver, TestSize.Level0) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
@@ -1233,7 +1233,7 @@ HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorr
 /**
  * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed
  * @tc.number: ExtensionAbilityThreadTest_018
- * @tc.desc  : 测试当 extensionAbilityType 为 CONTENT_EMBED 时,abilityName 被正确设置
+ * @tc.desc  : test extensionAbilityType is CONTENT_EMBED
  */
 HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed, TestSize.Level0) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
