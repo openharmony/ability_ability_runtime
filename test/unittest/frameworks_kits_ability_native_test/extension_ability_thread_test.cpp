@@ -16,6 +16,7 @@
 #include <thread>
 #include <functional>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #define private public
 #define protected public
 #include "ability_loader.h"
@@ -1155,6 +1156,94 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityReque
     extensionabilitythread->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
 }
-
+/**
+ * @tc.name  : ExtensionAbilityThread_HandleNormalExtensionAttach_0100
+ * @tc.number: HandleNormalExtensionAttachTest_001
+ * @tc.desc  : Test that when mainRunner is nullptr, the HandleNormalExtensionAttach function.
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNormalExtensionAttach_0100,
+    Function | MediumTest | Level1) {
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->name = "ContentEmbedExtensionAbility";
+    abilityInfo->type = AbilityType::EXTENSION;
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
+    std::string abilityName = "TestAbility";
+ 
+    ExtensionAbilityThread thread;
+    thread.HandleNormalExtensionAttach(abilityRecord, nullptr, abilityName);
+ 
+    EXPECT_EQ(thread.runner_, nullptr);
+    EXPECT_NE(thread.abilityHandler_, nullptr);
+}
+ 
+/**
+ * @tc.name  : ExtensionAbilityThread_HandleNormalExtensionAttach_0200
+ * @tc.number: HandleNormalExtensionAttachTest_002
+ * @tc.desc  : Test that when mainRunner not nullptr, the HandleNormalExtensionAttach function.
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNormalExtensionAttach_0200,
+    Function | MediumTest | Level1) {
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->name = "ContentEmbedExtensionAbility";
+    abilityInfo->type = AbilityType::EXTENSION;
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
+    std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
+    std::string abilityName = "TestAbility";
+ 
+    ExtensionAbilityThread thread;
+    thread.HandleNormalExtensionAttach(abilityRecord, mainRunner, abilityName);
+ 
+    EXPECT_NE(thread.abilityHandler_, nullptr);
+}
+ 
+/**
+ * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber
+ * @tc.number: ExtensionAbilityThreadTest_001
+ * @tc.desc  : 测试当 extensionAbilityType 为 STATICSUBSCRIBER 时,abilityName 被正确设置
+ */
+HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber, TestSize.Level0) {
+    auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER;
+    std::string abilityName;
+ 
+    ExtensionAbilityThread thread;
+    thread.CreateExtensionAbilityName(abilityInfo, abilityName);
+ 
+    EXPECT_EQ(abilityName, "StaticSubscriberExtension");
+}
+ 
+/**
+ * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver
+ * @tc.number: ExtensionAbilityThreadTest_002
+ * @tc.desc  : 测试当 extensionAbilityType 为 DRIVER 时,abilityName 被正确设置
+ */
+HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver, TestSize.Level0) {
+    auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::DRIVER;
+    std::string abilityName;
+ 
+    ExtensionAbilityThread thread;
+    thread.CreateExtensionAbilityName(abilityInfo, abilityName);
+ 
+    EXPECT_EQ(abilityName, "DriverExtension");
+}
+ 
+/**
+ * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed
+ * @tc.number: ExtensionAbilityThreadTest_018
+ * @tc.desc  : 测试当 extensionAbilityType 为 CONTENT_EMBED 时,abilityName 被正确设置
+ */
+HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed, TestSize.Level0) {
+    auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::CONTENT_EMBED;
+    std::string abilityName;
+ 
+    ExtensionAbilityThread thread;
+    thread.CreateExtensionAbilityName(abilityInfo, abilityName);
+ 
+    EXPECT_EQ(abilityName, "ContentEmbedExtension");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
