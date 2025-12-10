@@ -2393,7 +2393,6 @@ ErrCode AbilityManagerClient::ExitKioskMode(sptr<IRemoteObject> callerToken)
 
 ErrCode AbilityManagerClient::GetKioskStatus(AAFwk::KioskStatus &kioskStatus)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "get Kiosk info");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetKioskStatus(kioskStatus);
