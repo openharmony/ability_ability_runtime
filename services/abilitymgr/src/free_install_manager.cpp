@@ -98,7 +98,7 @@ bool FreeInstallManager::IsTopAbility(sptr<IRemoteObject> callerToken)
 
     auto type = caller->GetAbilityInfo().type;
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "service or extension");
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "service or extension");
         return true;
     }
 
