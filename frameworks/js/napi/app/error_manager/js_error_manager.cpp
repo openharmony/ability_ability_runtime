@@ -339,26 +339,38 @@ static void DoFunctionCallback(uv_work_t *reqwork, int status)
         TAG_LOGI(AAFwkTag::JSNAPI, "Get WorkItem Failed");
         return;
     }
+    napi_handle_scope scope_ = nullptr;
+    napi_status scopeStatus = napi_open_handle_scope(newItem->env, &scope_);
+    if (scopeStatus != napi_ok || scope_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_open_handle_scope failed");
+    }
     napi_value global = nullptr;
     if (napi_get_global(newItem->env, &global) != napi_ok) {
         TAG_LOGI(AAFwkTag::JSNAPI, "Get Global Failed");
+        napi_close_handle_scope(newItem->env, scope_);
+        delete newItem;
+        newItem = nullptr;
         return;
     }
-
     size_t argc = ARGC_ONE;
     napi_value args[] = {CreateGlobalObject(newItem->env, newItem)};
-
     napi_value function = nullptr;
     if (napi_get_reference_value(newItem->env, newItem->ref, &function) != napi_ok) {
         TAG_LOGI(AAFwkTag::JSNAPI, "Get Callback Failed");
+        napi_close_handle_scope(newItem->env, scope_);
+        delete newItem;
+        newItem = nullptr;
         return;
     }
-
     napi_value result = nullptr;
     if (napi_call_function(newItem->env, global, function, argc, args, &result) != napi_ok) {
         TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed");
+        napi_close_handle_scope(newItem->env, scope_);
+        delete newItem;
+        newItem = nullptr;
         return;
     }
+    napi_close_handle_scope(newItem->env, scope_);
     delete newItem;
     newItem = nullptr;
 }
