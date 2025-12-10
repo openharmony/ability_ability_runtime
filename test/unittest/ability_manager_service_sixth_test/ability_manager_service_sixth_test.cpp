@@ -2086,11 +2086,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, IsUIAbilityAlreadyExist_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsUIAbilityAlreadyExist_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
-    std::string abilityName;
+    Want want;
     std::string specifiedFlag;
     int32_t appIndex = 0;
     std::string instanceKey;
-    auto ret = abilityMs->IsUIAbilityAlreadyExist(abilityName, specifiedFlag, appIndex,
+    auto ret = abilityMs->IsUIAbilityAlreadyExist(want, specifiedFlag, appIndex,
         instanceKey, AppExecFwk::LaunchMode::SPECIFIED);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsUIAbilityAlreadyExist_001 end");
