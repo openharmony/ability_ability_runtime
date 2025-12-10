@@ -114,6 +114,7 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     sptr<IRemoteObject> callerToken, std::shared_ptr<FreeInstallParams> param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "StartFreeInstall:%{public}s", want.GetElement().GetBundleName().c_str());
     if (!VerifyStartFreeInstallPermission(callerToken)) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "permission denied");
         return NOT_TOP_ABILITY;
@@ -129,7 +130,6 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
     if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)) {
-        TAG_LOGD(AAFwkTag::FREE_INSTALL, "not foundation call, callingUid=%{public}d", IPCSkeleton::GetCallingUid());
         info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
     }
     int result = SetAppRunningState(info.want);

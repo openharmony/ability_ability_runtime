@@ -36,7 +36,7 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
     const char *hook_mode = "startup:";
     int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
     if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Hook_mode: no process time out");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Hook_mode: no process time out");
         return;
     }
     switch (event.GetEventId()) {
