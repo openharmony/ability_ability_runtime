@@ -1660,7 +1660,7 @@ bool EtsUIExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
         return false;
     }
 
-    ani_array_ref wantListArray = reinterpret_cast<ani_array_ref>(wantListObj);
+    ani_array wantListArray = reinterpret_cast<ani_array>(wantListObj);
     ani_size arrayLength = 0;
     if (env->Array_GetLength(wantListArray, &arrayLength) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get array length.");
@@ -1672,7 +1672,7 @@ bool EtsUIExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
     }
     for (ani_size i = 0; i < arrayLength; i++) {
         ani_ref wantRef  = nullptr;
-        if (env->Array_Get_Ref(wantListArray, i, &wantRef) != ANI_OK || wantRef == nullptr) {
+        if (env->Array_Get(wantListArray, i, &wantRef) != ANI_OK || wantRef == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get want object");
             return false;
         }

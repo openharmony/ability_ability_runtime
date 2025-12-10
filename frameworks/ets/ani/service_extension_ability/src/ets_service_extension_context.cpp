@@ -1004,7 +1004,7 @@ void EtsServiceExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *en
 bool EtsServiceExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
     std::vector<AAFwk::Want> &wantList)
 {
-    ani_array_ref wantListArray = reinterpret_cast<ani_array_ref>(wantListObj);
+    ani_array wantListArray = reinterpret_cast<ani_array>(wantListObj);
     ani_size arrayLength = 0;
     if (env->Array_GetLength(wantListArray, &arrayLength) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get array length.");
