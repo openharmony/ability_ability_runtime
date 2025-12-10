@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 #include <chrono>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <thread>
 
 #define private public
 #include "uri_permission_manager_client.h"
 #include "uri_permission_load_callback.h"
-#undef private
 #include "ability_manager_errors.h"
 #include "mock_sa_call.h"
+#include "mock_system_ability_manager.h"
+#include "iservice_registry.h"
 #include "want.h"
 using namespace testing;
 using namespace testing::ext;
@@ -58,15 +60,17 @@ void UriPermissionManagerTest::TearDown() {}
  */
 HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_001, TestSize.Level1)
 {
+    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbilityManager =
+        new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
+    ASSERT_NE(mockSystemAbilityManager, nullptr);
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbilityManager;
+    EXPECT_CALL(*mockSystemAbilityManager,
+        LoadSystemAbility(::testing::An<int32_t>(), ::testing::An<const sptr<ISystemAbilityLoadCallback>&>()))
+        .WillOnce(::testing::Return(1));
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
-    upmc.GetInstance().ClearProxy();
-    upmc.saLoadFinished_ = true;
-    sptr<IRemoteObject> remoteObject = new (std::nothrow) UriPermissionLoadCallback();
-    upmc.SetUriPermMgr(remoteObject);
-    EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
     EXPECT_EQ(ret, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
 }
 
 /*
@@ -77,32 +81,18 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_001, TestSize.Level1)
  */
 HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_002, TestSize.Level1)
 {
+    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbilityManager =
+        new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
+    ASSERT_NE(mockSystemAbilityManager, nullptr);
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbilityManager;
+    EXPECT_CALL(*mockSystemAbilityManager,
+        LoadSystemAbility(::testing::An<int32_t>(), ::testing::An<const sptr<ISystemAbilityLoadCallback>&>()))
+        .WillOnce(::testing::Return(0));
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
-    upmc.GetInstance().ClearProxy();
     upmc.saLoadFinished_ = true;
-    sptr<IRemoteObject> remoteObject = nullptr;
-    upmc.SetUriPermMgr(remoteObject);
-    EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
     EXPECT_EQ(ret, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-}
-
-/*
- * Feature: UriPermissionManagerClient
- * Function: ConnectUriPermService
- * SubFunction: NA
- * FunctionPoints: UriPermissionManagerClient ConnectUriPermService
- */
-HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_003, TestSize.Level1)
-{
-    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
-    upmc.GetInstance().ClearProxy();
-    upmc.saLoadFinished_ = true;
-    EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
-    auto ret = upmc.ConnectUriPermService();
-    EXPECT_EQ(ret, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
 }
 
 /*
