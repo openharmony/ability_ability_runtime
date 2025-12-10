@@ -108,6 +108,7 @@ struct ForegroundOptions {
     std::string targetGrantBundleName;
     pid_t callingPid = -1;
     uint64_t loadAbilityCallbackId = 0;
+    pid_t selfPid = -1;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -2747,7 +2747,7 @@ private:
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
     AAFwk::EventInfo BuildEventInfoByAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
-    ErrCode IsUIAbilityAlreadyExist(const std::string &abilityName, const std::string &specifiedFlag,
+    ErrCode IsUIAbilityAlreadyExist(const Want &want, const std::string &specifiedFlag,
         int32_t appIndex, const std::string &instanceKey, AppExecFwk::LaunchMode launchMode);
     
     bool IsAppCloneOrMultiInstance(const Want &want, const std::shared_ptr<AbilityRecord> callerRecord,

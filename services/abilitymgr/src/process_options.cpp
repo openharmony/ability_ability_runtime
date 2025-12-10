@@ -29,6 +29,7 @@ bool ProcessOptions::ReadFromParcel(Parcel &parcel)
     isPreloadStart = parcel.ReadBool();
     loadAbilityCallbackId = parcel.ReadUint64();
     callingPid = parcel.ReadInt32();
+    selfPid = parcel.ReadInt32();
     return true;
 }
 
@@ -79,6 +80,10 @@ bool ProcessOptions::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteInt32(callingPid)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callingPid write failed");
+        return false;
+    }
+    if (!parcel.WriteInt32(selfPid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "selfPid write failed");
         return false;
     }
     return true;
