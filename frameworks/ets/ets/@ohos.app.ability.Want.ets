@@ -17,7 +17,7 @@ import hilog from '@ohos.hilog'
 import rpc from '@ohos.rpc';
 import { RecordData } from '@ohos.base';
 
-type valueType = NullishType;
+type valueType = Any;
 const DOMAIN_ID = 0xD001300;
 const TAG = 'RecordSerializeTool';
 const int32Max: number = Math.pow(2, 31) - 1;
@@ -62,7 +62,7 @@ class RecordWriter {
     }
   }
 
-  private writeObject(obj: NullishType): void {
+  private writeObject(obj: Any): void {
     if (obj === null) {
       this.buffer.append('null');
     } else if (obj === undefined) {
