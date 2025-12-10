@@ -783,6 +783,5 @@ void ExtensionAbilityThread::DumpOtherInfo(std::vector<std::string> &info)
     runner->DumpRunnerInfo(dumpInfo);
     info.push_back(dumpInfo);
 }
-
 } // namespace AbilityRuntime
 } // namespace OHOS
