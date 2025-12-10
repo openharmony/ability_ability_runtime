@@ -511,22 +511,15 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         params.wants.emplace_back(want);
     }
 
-    ani_boolean isActionTypeUndefined = true;
+    ani_boolean isUndefined = true;
     ani_ref actionTypeRef = nullptr;
-    GetPropertyRef(env, info, "actionType", actionTypeRef, isActionTypeUndefined);
-    if (!isActionTypeUndefined) {
-        if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
-            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType)) {
-                return PARAMETER_ERROR;
-        }
+    if (!GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionType GetPropertyRef failed");
+        return PARAMETER_ERROR;
     }
-    ani_boolean isOperationTypeUndefined = true;
-    GetPropertyRef(env, info, "operationType", actionTypeRef, isOperationTypeUndefined);
-    if (isActionTypeUndefined && !isOperationTypeUndefined) {
-        if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
-            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType)) {
-                return PARAMETER_ERROR;
-        }
+    if (!isUndefined) {
+        AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
+            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType);
     }
 
     ani_int requestCode = 0;
@@ -536,11 +529,13 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
     }
     params.requestCode = requestCode;
 
-    ani_boolean isActionFlagsRefUndefined = true;
     ani_ref actionFlagsRef = nullptr;
-    GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isActionFlagsRefUndefined);
-    if (!isActionFlagsRefUndefined) {
-        ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
+    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionFlags GetPropertyRef failed");
+        return PARAMETER_ERROR;
+    }
+    if (!isUndefined) {
+        ani_array actionFlagsArr = reinterpret_cast<ani_array>(actionFlagsRef);
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Array_GetLength failed status: %{public}d", status);
@@ -560,14 +555,18 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         }
     }
 
-    ani_boolean isExtraInfosUndefined = true;
-    ani_boolean isExtraInfoUndefined = true;
     ani_ref extraInfoRef = nullptr;
-    GetPropertyRef(env, info, "extraInfos", extraInfoRef, isExtraInfosUndefined);
-    if (isExtraInfosUndefined) {
-        GetPropertyRef(env, info, "extraInfo", extraInfoRef, isExtraInfoUndefined);
+    if (!GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfos GetPropertyRef failed");
+        return PARAMETER_ERROR;
     }
-    if (!isExtraInfosUndefined || !isExtraInfoUndefined) {
+    if (isUndefined) {
+        if (!GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfo GetPropertyRef failed");
+            return PARAMETER_ERROR;
+        }
+    }
+    if (!isUndefined) {
         if (!UnwrapWantParams(env, extraInfoRef, params.extraInfo)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
             return PARAMETER_ERROR;
