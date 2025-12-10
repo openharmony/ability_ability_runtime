@@ -2957,8 +2957,8 @@ int32_t AppMgrServiceInner::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLe
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
         return ERR_INVALID_VALUE;
     }
-
-    return appRunningManager_->NotifyProcMemoryLevel(procLevelMap);
+    TAG_LOGD(AAFwkTag::APPMGR, "isShellCall %{public}d", isShellCall);
+    return appRunningManager_->NotifyProcMemoryLevel(procLevelMap, isShellCall);
 }
 
 int32_t AppMgrServiceInner::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
