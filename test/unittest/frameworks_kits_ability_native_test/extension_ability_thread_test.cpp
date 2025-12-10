@@ -1155,5 +1155,6 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityReque
     extensionabilitythread->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
 }
+
 } // namespace AbilityRuntime
 } // namespace OHOS
