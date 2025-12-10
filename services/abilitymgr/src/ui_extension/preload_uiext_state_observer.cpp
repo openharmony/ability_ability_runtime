@@ -27,20 +27,20 @@ PreLoadUIExtStateObserver::PreLoadUIExtStateObserver(
 void PreLoadUIExtStateObserver::OnProcessDied(const AppExecFwk::ProcessData &processData)
 {
     auto diedProcessName = processData.processName;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "pname:%{public}s", diedProcessName.c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "pname:%{public}s", diedProcessName.c_str());
     auto extensionRecord = extensionRecord_.lock();
     if (extensionRecord != nullptr) {
         auto hostPid = extensionRecord->hostPid_;
         int32_t diedPid = processData.pid;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Host pid is %{public}d, died pid is %{public}d.", hostPid, diedPid);
+        TAG_LOGD(AAFwkTag::UI_EXT, "Host pid is %{public}d, died pid is %{public}d.", hostPid, diedPid);
         if (static_cast<int32_t>(hostPid) != diedPid) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Host pid is not equals to died pid.");
+            TAG_LOGD(AAFwkTag::UI_EXT, "Host pid is not equals to died pid.");
             return;
         }
         extensionRecord->UnloadUIExtensionAbility();
         AbilityManagerClient::GetInstance()->UnRegisterPreloadUIExtensionHostClient(diedPid);
     } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "extensionRecord null");
+        TAG_LOGW(AAFwkTag::UI_EXT, "extensionRecord null");
     }
 }
 
