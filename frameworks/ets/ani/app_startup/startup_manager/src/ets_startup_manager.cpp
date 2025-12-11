@@ -33,7 +33,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr const char *ETS_STARTUP_MANAGER_CLASS_NAME = "L@ohos/app/appstartup/startupManager/startupManager;";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_CREATE_STARTUP_TASK_MANAGER =
-    "Lescompat/Array;ZL@ohos/app/appstartup/StartupConfig/StartupConfig;"
+    "Lstd/core/Array;ZL@ohos/app/appstartup/StartupConfig/StartupConfig;"
     "Lapplication/AbilityStageContext/AbilityStageContext;:I";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_RUN_ASYNCCALLBACK =
     "ILutils/AbilityUtils/AsyncCallbackWrapper;:V";

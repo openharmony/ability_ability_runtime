@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace AbilityManagerEts {
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char *CLASSNAME_ARRAY = "Lstd/core/Array;";
 constexpr const char *SET_OBJECT_VOID_SIGNATURE = "ILstd/core/Object;:V";
 constexpr const char *CLASSNAME_ABILITY_RRUNNINGINFO = "Lapplication/AbilityRunningInfo/AbilityRunningInfoImpl;";
 constexpr const char *ABILITY_STATE_ENUM_NAME = "L@ohos/app/ability/abilityManager/abilityManager/AbilityState;";

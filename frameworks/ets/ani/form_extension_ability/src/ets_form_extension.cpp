@@ -35,7 +35,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr const char* FORM_BINDING_DATA_CLASS_NAME =
     "L@ohos/app/form/formBindingData/formBindingData/FormBindingDataInner;";
-constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char* RECORD_CLASS_NAME = "Lstd/core/Record;";
 constexpr const char *FORM_LOCATION_STATE_ENUM_NAME = "L@ohos/app/form/formInfo/formInfo/FormLocation;";
 constexpr const char *FORM_LOCATION_CHANGED_STATE_NAME =
     "Lstd/core/String;L@ohos/app/form/formInfo/formInfo/FormLocation;:V";
@@ -505,7 +505,7 @@ void ETSFormExtension::OnUpdate(const int64_t formId, const AAFwk::WantParams &w
 
     ani_method function;
     if ((status = env->Class_FindMethod(
-        etsAbilityObj_->aniCls, "onUpdateForm", "Lstd/core/String;Lescompat/Record;:V", &function))) {
+        etsAbilityObj_->aniCls, "onUpdateForm", "Lstd/core/String;Lstd/core/Record;:V", &function))) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod status : %{public}d", status);
         return;
     }
@@ -561,7 +561,7 @@ void ETSFormExtension::OnVisibilityChange(const std::map<int64_t, int32_t> &form
 
     ani_method function;
     ani_status status =
-        env->Class_FindMethod(etsAbilityObj_->aniCls, "onChangeFormVisibility", "Lescompat/Record;:V", &function);
+        env->Class_FindMethod(etsAbilityObj_->aniCls, "onChangeFormVisibility", "Lstd/core/Record;:V", &function);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod status: %{public}d", status);
         return;

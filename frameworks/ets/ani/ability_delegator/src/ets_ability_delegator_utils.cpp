@@ -23,7 +23,7 @@ namespace OHOS {
 namespace AbilityDelegatorEts {
 namespace {
 constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
-constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char* RECORD_CLASS_NAME = "Lstd/core/Record;";
 constexpr const char* VOID_CONTEXT = ":Lapplication/Context/Context;";
 constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STRING_VOID = "Lstd/core/String;:V";
@@ -220,7 +220,7 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_ref parameterRef = nullptr;
-    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lescompat/Record;",
+    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lstd/core/Record;",
         &parameterRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethodByName_Ref failed status: %{public}d", status);

@@ -29,7 +29,7 @@ constexpr const char* BUSINESS_TYPE_ENUM_NAME =
     "L@ohos/app/businessAbilityRouter/businessAbilityRouter/BusinessType;";
 constexpr const char* CLASSNAME_APPLICATIONINFO =
     "LbundleManager/ApplicationInfoInner/ApplicationInfoInner;";
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char *CLASSNAME_ARRAY = "Lstd/core/Array;";
 }
 
 bool UnwrapBusinessAbilityFilter(ani_env *env, ani_object param, BusinessAbilityFilter &filter)

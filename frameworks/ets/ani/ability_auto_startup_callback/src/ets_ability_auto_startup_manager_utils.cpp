@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char *CLASSNAME_ARRAY = "Lstd/core/Array;";
 constexpr const char *SIGNATURE_AUTO_STARTUP_INFO = "Lapplication/AutoStartupInfo/AutoStartupInfoInner;";
 }
 bool UnwrapAutoStartupInfo(ani_env *env, ani_object param, AutoStartupInfo &info)

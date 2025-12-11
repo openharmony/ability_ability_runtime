@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_ARRAY = "Lstd/core/Array;";
 constexpr const char* EXECUTE_MODE_FOR_CONFIGURATION =
     "L@ohos/app/ability/insightIntentDriver/insightIntentDriver/ExecuteModeForConfiguration;";
 constexpr const char* EXECUTE_MODE = "L@ohos/app/ability/insightIntent/insightIntent/ExecuteMode;";
@@ -454,7 +454,7 @@ bool CreateEmptyRecordObject(ani_env *env, ani_object &recordObject)
     ani_class recordCls = nullptr;
     ani_method recordCtorMethod = nullptr;
     AppExecFwk::AniCommonMethodCacheKey recordCtor = std::make_pair("<ctor>", ":V");
-    if (!AppExecFwk::AniCommonCacheMgr::GetCachedClassAndMethod(env, "Lescompat/Record;", recordCtor,
+    if (!AppExecFwk::AniCommonCacheMgr::GetCachedClassAndMethod(env, "Lstd/core/Record;", recordCtor,
         recordCls, recordCtorMethod)) {
         return false;
     }

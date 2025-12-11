@@ -191,7 +191,7 @@ ani_object CreateEtsMissionInfos(ani_env *env, const std::vector<AAFwk::MissionI
     }
     ani_class arrayCls = nullptr;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    status = env->FindClass("Lstd/core/Array;", &arrayCls);
     if (status != ANI_OK || arrayCls == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "FindClass failed, status : %{public}d", status);
         return nullptr;

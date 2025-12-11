@@ -840,27 +840,27 @@ ani_status BindNativeFunctions(ani_env *aniEnv)
             reinterpret_cast<void *>(EtsWantParams::NativeSetWantParams)
         },
         ani_native_function{
-            "nativeSetArrayStringParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayStringParam", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayStringParam)
         },
         ani_native_function{
-            "nativeSetArrayDoubleParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayDoubleParam", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayDoubleParam)
         },
         ani_native_function{
-            "nativeSetArrayIntParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayIntParam", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayIntParam)
         },
         ani_native_function{
-            "nativeSetArrayLongParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayLongParam", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayLongParam)
         },
         ani_native_function{
-            "nativeSetArrayBooleanParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayBooleanParam", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayBooleanParam)
         },
         ani_native_function{
-            "nativeSetArrayWantParams", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayWantParams", "JLstd/core/String;Lstd/core/Array;:Z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayWantParams)
         },
         ani_native_function{

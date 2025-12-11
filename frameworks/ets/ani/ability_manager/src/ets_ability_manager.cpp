@@ -50,7 +50,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *ETS_ABILITY_MANAGER_NAMESPACE = "L@ohos/app/ability/abilityManager/abilityManager;";
-constexpr const char *ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":Lescompat/Array;";
+constexpr const char *ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":Lstd/core/Array;";
 constexpr const char *ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *ETS_ABILITY_MANAGER_SIGNATURE_VOID = ":V";
 constexpr const char *ON_OFF_TYPE_ABILITY_FOREGROUND_STATE = "abilityForegroundState";
