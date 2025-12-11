@@ -2818,7 +2818,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_001, TestS
     EXPECT_NE(abilityMs, nullptr);
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_001 end");
 }
@@ -2837,7 +2838,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_002, TestS
     auto flag = static_cast<GetInsightIntentFlag>(AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT |
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_002 end");
 }
@@ -2856,7 +2858,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_003, TestS
     auto flag = static_cast<GetInsightIntentFlag>(AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT |
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_003 end");
 }
@@ -2874,7 +2877,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_004, TestS
     EXPECT_NE(abilityMs, nullptr);
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO;
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_004 end");
 }
@@ -2893,7 +2897,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName end");
 }
@@ -2913,7 +2918,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_002 end");
 }
@@ -2933,7 +2939,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_003 end");
 }
@@ -2952,7 +2959,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO;
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_004 end");
 }
@@ -2973,7 +2981,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_001 end");
 }
@@ -2995,7 +3004,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_002 end");
 }
@@ -3017,7 +3027,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_003 end");
 }
@@ -3038,7 +3049,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_004 end");
 }

@@ -87,5 +87,34 @@ bool UnwrapIntentInfoFilter(ani_env *env, ani_object param, AppExecFwk::InsightI
     }
     return true;
 }
+
+bool CheckValidIntentInfoFilter(ani_env *env, ani_object param)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null env");
+        return false;
+    }
+    if (param == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null param");
+        return false;
+    }
+
+    if (IsExistsProperty(env, param, "bundleName") &&
+        IsExistsProperty(env, param, "moduleName") &&
+        IsExistsProperty(env, param, "intentName")) {
+        return true;
+    }
+
+    if (IsExistsProperty(env, param, "bundleName")) {
+        return true;
+    }
+
+    if (!IsExistsProperty(env, param, "bundleName") &&
+        !IsExistsProperty(env, param, "moduleName") &&
+        !IsExistsProperty(env, param, "intentName")) {
+        return true;
+    }
+    return false;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

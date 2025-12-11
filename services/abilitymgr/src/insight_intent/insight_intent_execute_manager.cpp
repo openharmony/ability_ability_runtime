@@ -89,7 +89,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode,
+int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode, int32_t userId,
     std::string callerBundleName)
 {
     auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
@@ -118,7 +118,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
         elementName, intentName, executeMode, srcEntry, &arkTSMode);
     if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGW(AAFwkTag::INTENT, "empty srcEntry");
-        if (UpdateEntryDecoratorParams(want, executeMode) != ERR_OK) {
+        if (UpdateEntryDecoratorParams(want, executeMode, userId) != ERR_OK) {
             return ERR_INVALID_VALUE;
         }
     }
@@ -131,11 +131,10 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(Want &want, ExecuteMode executeMode)
+int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(Want &want, ExecuteMode executeMode, int32_t userId)
 {
     std::string intentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
     ExtractInsightIntentInfo info;
-    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
         want.GetBundle(), want.GetModuleName(), intentName, userId, info);
     if (info.genericInfo.decoratorType != AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
@@ -437,9 +436,8 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateDecoratorParams(
 {
     // ExtractInsightIntentGenericInfo don't satisfy for now
     ExtractInsightIntentInfo info;
-    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-        param->bundleName_, param->moduleName_, param->insightIntentName_, userId, info);
+        param->bundleName_, param->moduleName_, param->insightIntentName_, param->userId_, info);
 
     InsightIntentType type = InsightIntentType::DECOR_NONE;
     std::string decoratorType = info.genericInfo.decoratorType;
