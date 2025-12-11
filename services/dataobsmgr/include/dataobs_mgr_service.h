@@ -104,12 +104,12 @@ private:
         DataObsOption opt, bool isExtension);
     std::pair<Status, std::string> GetUriPermission(Uri &uri, bool isRead, ObserverInfo &info);
     std::vector<DataGroupInfo> GetGroupInfosFromCache(const std::string &bundleName,
-        const uint32_t userId, const std::string &schemeType);
+        int32_t userId, const std::string &schemeType);
     std::string GetCallingName(uint32_t callingTokenid);
     int32_t VerifyDataShareExtension(Uri &uri, ObserverInfo &info);
     int32_t VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info);
-    void CheckSchemePermission(Uri &uri, const uint32_t tokenId, const uint32_t userId, const std::string &method);
-    void VerifyUriPermission(Uri &uri, const uint32_t tokenId, const uint32_t userId,
+    void CheckSchemePermission(Uri &uri, const uint32_t tokenId, int32_t userId, const std::string &method);
+    void VerifyUriPermission(Uri &uri, const uint32_t tokenId, int32_t userId,
         const std::string &schemeType, const std::string &method);
     int32_t ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         uint32_t token, int32_t userId, int32_t pid);
