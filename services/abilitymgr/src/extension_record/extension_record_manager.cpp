@@ -256,16 +256,25 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
         case PROCESS_MODE_INSTANCE: {
             std::string process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name
                 + SEPARATOR + std::to_string(abilityRecord->GetUIExtensionAbilityId());
+            if (abilityRecord->GetAppIndex() > 0) {
+                process += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+            }
             abilityRecord->SetProcessName(process);
             break;
         }
         case PROCESS_MODE_TYPE: {
             std::string process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name;
+            if (abilityRecord->GetAppIndex() > 0) {
+                process += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+            }
             abilityRecord->SetProcessName(process);
             break;
         }
         case PROCESS_MODE_CUSTOM: {
             std::string process = abilityRequest.abilityInfo.bundleName + abilityRequest.customProcess;
+            if (abilityRecord->GetAppIndex() > 0) {
+                process += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+            }
             abilityRecord->SetProcessName(process);
             abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
             break;
@@ -290,20 +299,36 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid name, %{public}s", processName.c_str());
                 return ERR_INVALID_VALUE;
             }
+            if (abilityRecord->GetAppIndex() > 0) {
+                processName += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+            }
             abilityRecord->SetProcessName(processName);
             abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
             break;
         }
         case PROCESS_MODE_RUN_WITH_MAIN_PROCESS: {
+            std::string process = "";
             if (!abilityRequest.appInfo.process.empty()) {
-                abilityRecord->SetProcessName(abilityRequest.appInfo.process);
+                process = abilityRequest.appInfo.process;
             } else {
-                abilityRecord->SetProcessName(abilityRequest.abilityInfo.bundleName);
+                process = abilityRequest.abilityInfo.bundleName;
             }
+            if (abilityRecord->GetAppIndex() > 0) {
+                process += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+            }
+            abilityRecord->SetProcessName(process);
             break;
         }
         default: // AppExecFwk::ExtensionProcessMode::UNDEFINED or AppExecFwk::ExtensionProcessMode::BUNDLE
             // no need to update
+            if (!abilityRequest.moduleProcess.empty()) {
+                std::string process = abilityRequest.moduleProcess;
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "moduleProcess: %{public}s", process.c_str());
+                if (abilityRecord->GetAppIndex() > 0) {
+                    process += std::to_string(abilityRecord->GetAppIndex());
+                }
+                abilityRecord->SetProcessName(process);
+            }
             break;
     }
     return ERR_OK;
