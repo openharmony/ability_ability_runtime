@@ -80,6 +80,7 @@ public:
         uint64_t dumpFinishTime = 0;
         std::string dumpResult;
         int32_t appStatus = -1;
+        bool isRepeatKilledThread = false;
     };
 
     AppfreezeManager();
@@ -133,6 +134,7 @@ private:
         int pid = 0;
         int reportTimes = DEFAULT_APPFREEZE_REPORT_TIMES;
         int64_t occurTime = 0;
+        bool isRepeatKilledThread = false;
     };
 
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;

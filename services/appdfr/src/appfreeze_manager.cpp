@@ -240,6 +240,7 @@ void AppfreezeManager::RecordAppFreezeBehavior(FaultData& faultData, uint64_t du
         freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpStartTime = faultData.samplerStartTime;
         freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpFinishTime = faultData.samplerFinishTime;
         freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpResult = std::to_string(faultData.samplerCount);
+        freezeEventMap_[faultData.pid][KILL_EVENT_NAME].isRepeatKilledThread = false;
     }
 }
 
@@ -1003,7 +1004,8 @@ void AppfreezeManager::ReportAppFreezeSysEvents(int32_t pid, const std::string& 
         "SAMPLER_FINISH", freezeEventMap_[pid][KILL_EVENT_NAME].dumpFinishTime,
         "SAMPLER_COUNT", freezeEventMap_[pid][KILL_EVENT_NAME].dumpResult,
         "BUNDLE_NAME", bundleName,
-        "APP_PID", pid);
+        "APP_PID", pid,
+        "REPEAT_KILLED_THREAD", freezeEventMap_[pid][KILL_EVENT_NAME].isRepeatKilledThread);
     freezeEventMap_.erase(pid);
 }
 
@@ -1113,15 +1115,33 @@ bool AppfreezeManager::CheckThreadKilled(int32_t pid, int32_t uid, const std::st
 {
     std::string key = bundleName + AppfreezeUtil::KEY_SEPARATOR + std::to_string(pid) +
         AppfreezeUtil::KEY_SEPARATOR + std::to_string(uid);
-    std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
-    if (freezeKillThreadMap_.empty()) {
-        return false;
+    bool result = false;
+    bool isRepeatKilledThread = false;
+    {
+        std::lock_guard<std::mutex> mapLock(freezeKillThreadMutex_);
+        if (freezeKillThreadMap_.empty()) {
+            return result;
+        }
+        auto it = freezeKillThreadMap_.find(key);
+        if (it != freezeKillThreadMap_.end()) {
+            result = it->second.state >= 0;
+            if (result && !it->second.isRepeatKilledThread) {
+                it->second.isRepeatKilledThread = true;
+                isRepeatKilledThread = true;
+            }
+        }
     }
-    auto it = freezeKillThreadMap_.find(key);
-    if (it != freezeKillThreadMap_.end()) {
-        return it->second.state >= 0;
+
+    if (isRepeatKilledThread) {
+        {
+            std::lock_guard<std::mutex> mapLock(freezeMapMutex_);
+            if (freezeEventMap_.find(pid) != freezeEventMap_.end()) {
+                freezeEventMap_[pid][KILL_EVENT_NAME].isRepeatKilledThread = true;
+            }
+        }
+        ReportAppFreezeSysEvents(pid, bundleName);
     }
-    return false;
+    return result;
 }
 
 bool AppfreezeManager::IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,
