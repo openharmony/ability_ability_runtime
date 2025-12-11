@@ -22,7 +22,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 constexpr const char* CLASSNAME_CHILDPROCESSARGS = "L@ohos/app/ability/ChildProcessArgs/ChildProcessArgsImpl;";
-constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char* RECORD_CLASS_NAME = "Lstd/core/Record;";
 }
 
 bool SetFds(ani_env* env, ani_object object, std::map<std::string, int32_t> &fds)

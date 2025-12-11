@@ -84,7 +84,7 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         ani_native_function { "nativeWantCheck", "L@ohos/app/ability/Want/Want;:V",
             reinterpret_cast<void *>(EtsServiceExtensionContext::WantCheck) },
         ani_native_function {"nativeStartUIAbilities",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StartUIAbilities)},
         ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
             reinterpret_cast<void *>(EtsServiceExtensionContext::OpenAtomicService) },

@@ -34,7 +34,7 @@ namespace {
 constexpr const char* VERTICAL_PANEL_MANAGER_CLASS_NAME =
     "L@ohos/app/ability/verticalPanelManager/verticalPanelManager;";
 constexpr const char* SIGNATURE_START_VERTICAL_PANEL =
-    "Lapplication/UIAbilityContext/UIAbilityContext;Lescompat/Record;"
+    "Lapplication/UIAbilityContext/UIAbilityContext;Lstd/core/Record;"
     "L@ohos/app/ability/verticalPanelManager/verticalPanelManager/PanelConfig;"
     "L@ohos/app/ability/verticalPanelManager/verticalPanelManager/PanelStartCallback;:L@ohos/base/BusinessError;";
 constexpr const char* VERTICAL_TOOL_CLASS = "L@ohos/app/ability/Want/RecordSerializeTool;";

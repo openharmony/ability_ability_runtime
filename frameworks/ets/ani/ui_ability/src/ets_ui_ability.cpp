@@ -73,9 +73,9 @@ constexpr const char *ON_SAVE_RESULT_ENUM_NAME = "@ohos.app.ability.AbilityConst
 constexpr int32_t ON_SAVESTATE_INDEX = 2;
 constexpr int32_t ON_SAVESTATE_INDEX_ONE = 1;
 constexpr const int32_t CALL_BACK_ERROR = -1;
-constexpr const char *ON_SHARE_SIGNATURE = "Lescompat/Record;:V";
+constexpr const char *ON_SHARE_SIGNATURE = "Lstd/core/Record;:V";
 constexpr const char *ON_COLLABORATE =
-    "Lescompat/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/CollaborateResult;";
+    "Lstd/core/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/CollaborateResult;";
 
 #define DISPATCH_ABILITY_INTEROP(type, applicationContext, etsRuntime, ability)                      \
     do {                                                                                            \

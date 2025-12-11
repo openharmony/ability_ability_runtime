@@ -1276,7 +1276,7 @@ bool CreateArrayFromJson(ani_env *env, const nlohmann::json &jsonArray, ani_obje
     }
 
     ani_class arrayCls = nullptr;
-    ani_status status = env->FindClass("Lescompat/Array;", &arrayCls);
+    ani_status status = env->FindClass("Lstd/core/Array;", &arrayCls);
     if (status != ANI_OK || arrayCls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "failed to find array class, status: %{public}d", status);
         return false;

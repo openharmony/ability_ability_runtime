@@ -27,7 +27,7 @@ namespace quickFixManager {
 namespace {
 
 constexpr const int32_t ERR_OK = 0;
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char *CLASSNAME_ARRAY = "Lstd/core/Array;";
 constexpr const char *QUICK_FIX_INFO_CLASS_NAME =
     "L@ohos/app/ability/quickFixManager/quickFixManager/ApplicationQuickFixInfoImpl;";
 constexpr const char *HAP_MODULE_QUICK_FIX_INFO_IMPL_CLASS_NAME =
@@ -362,7 +362,7 @@ void EtsQuickFixManagerInit(ani_env *env)
     std::array functions = {
         ani_native_function {
             "applyQuickFixSync",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(applyQuickFixSync)
         },
         ani_native_function {

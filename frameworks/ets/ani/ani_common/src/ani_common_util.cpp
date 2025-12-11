@@ -28,7 +28,7 @@ namespace AppExecFwk {
 namespace {
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
-constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_ARRAY = "Lstd/core/Array;";
 constexpr const char* CLASSNAME_LONG = "Lstd/core/Long;";
 constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
 constexpr const char* CLASSNAME_ASYNC_CALLBACK_WRAPPER = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
@@ -1530,7 +1530,7 @@ ani_object CreateIntAniArray(ani_env *env, const std::vector<int32_t> &dataArry)
         return nullptr;
     }
 
-    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    status = env->FindClass("Lstd/core/Array;", &arrayCls);
     if (status != ANI_OK || arrayCls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "FindClass failed, status : %{public}d", status);
         return nullptr;

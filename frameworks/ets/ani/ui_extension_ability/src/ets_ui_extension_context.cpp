@@ -1575,7 +1575,7 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         ani_native_function{"nativeDisconnectUIServiceExtensionCheck", SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK,
             reinterpret_cast<void*>(EtsUIExtensionContext::DisconnectUIServiceExtensionCheck)},
         ani_native_function {"nativeStartUIAbilities",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartUIAbilities)},
         ani_native_function{"nativeStartUIAbilitiesInSplitWindowModeCheck",
             SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE_CHECK,

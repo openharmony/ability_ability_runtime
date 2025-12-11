@@ -708,17 +708,17 @@ void EtsMissionManagerInit(ani_env *env)
         },
         ani_native_function {
             "nativeArrayLengthCheck",
-            "Lescompat/Array;:V",
+            "Lstd/core/Array;:V",
             reinterpret_cast<void *>(EtsMissionManager::ArrayLengthCheck)
         },
         ani_native_function {
             "nativeMoveMissionsToBackground",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToBackground)
         },
         ani_native_function {
             "nativeMoveMissionsToForeground",
-            "Lescompat/Array;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/Array;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToForeground)
         },
         ani_native_function {

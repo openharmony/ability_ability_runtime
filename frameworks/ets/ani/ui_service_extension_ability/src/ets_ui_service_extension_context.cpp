@@ -51,9 +51,9 @@ constexpr const char *SIGNATURE_START_ABILITY = "Lutils/AbilityUtils/AsyncCallba
 constexpr const char *SIGNATURE_START_ABILITY_CHK = "L@ohos/app/ability/Want/Want;"
     "L@ohos/app/ability/StartOptions/StartOptions;:V";
 constexpr const char *SIGNATURE_TERMINATE_SELF = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE = "Lstd/core/String;Lescompat/Record;"
+constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE = "Lstd/core/String;Lstd/core/Record;"
     "Lapplication/AbilityStartCallback/AbilityStartCallback;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE_CHK = "Lstd/core/String;Lescompat/Record;:V";
+constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE_CHK = "Lstd/core/String;Lstd/core/Record;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";

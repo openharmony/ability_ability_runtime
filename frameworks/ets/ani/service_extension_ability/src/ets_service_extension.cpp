@@ -60,7 +60,7 @@ constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Promise;:Z";
 constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Z";
 constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;I:V";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "L@ohos/app/ability/Configuration/Configuration;:V";
-constexpr const char *ON_DUMP_SIGNATURE = "Lescompat/Array;:Lescompat/Array;";
+constexpr const char *ON_DUMP_SIGNATURE = "Lstd/core/Array;:Lstd/core/Array;";
 
 void DisconnectPromiseCallback(ani_env *env, ani_object aniObj)
 {

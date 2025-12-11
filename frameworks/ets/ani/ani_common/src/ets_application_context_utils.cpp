@@ -43,7 +43,7 @@ constexpr double ERROR_CODE_NULL_CONTEXT = -3;
 constexpr double ERROR_CODE_INVALID_PARAM = -4;
 const std::string TYPE_ABILITY_LIFECYCLE = "abilityLifecycle";
 #ifdef SUPPORT_SCREEN
-constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_ARRAY = "Lstd/core/Array;";
 #endif
 }
 

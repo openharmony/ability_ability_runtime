@@ -30,7 +30,7 @@ constexpr const char *CLASSNAME_LONG = "Lstd/core/Long;";
 constexpr const char *CLASSNAME_FLOAT = "Lstd/core/Float;";
 constexpr const char *CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char *CLASSNAME_STRING = "Lstd/core/String;";
-constexpr const char *CLASSNAME_RECORD = "Lescompat/Record;";
+constexpr const char *CLASSNAME_RECORD = "Lstd/core/Record;";
 
 using AniCommonMethodCacheKey = std::pair<const char *, const char *>;
 

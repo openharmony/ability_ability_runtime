@@ -123,7 +123,7 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    static const char *className = "Lescompat/Array;";
+    static const char *className = "Lstd/core/Array;";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);
