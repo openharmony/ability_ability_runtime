@@ -51,7 +51,7 @@ using namespace AppExecFwk;
 static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
-static const int32_t CACHE_SIZE_THRESHOLD = 50;
+static const int32_t CACHE_SIZE_THRESHOLD = 20;
 static const int32_t DATA_MANAGER_SERVICE_UID = 3012;
 
 const bool REGISTER_RESULT =
@@ -367,10 +367,10 @@ bool DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
     return true;
 }
 
-std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
+std::vector<std::string> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
     int32_t userId, const std::string &schemeType)
 {
-    auto key = bundleName + ":" + std::to_string(userId) + ":" + schemeType;
+    std::string key = bundleName + ":" + std::to_string(userId) + ":" + schemeType;
     {
         std::shared_lock<std::shared_mutex> readLock(groupsIdMutex_);
         auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
@@ -382,21 +382,34 @@ std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::
 
     std::vector<DataGroupInfo> infos;
     auto bmsHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bmsHelper == nullptr) {
+        LOG_ERROR("bmsHelper is nullptr");
+        return {};
+    }
     bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
     if (!res) {
         LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
-        return infos;
+        return {};
     }
     std::unique_lock<std::shared_mutex> writeLock(groupsIdMutex_);
+    auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
+        [&key](const auto& pair) { return pair.first == key; });
+    if (it != groupsIdCache_.end()) {
+        return it->second;
+    }
+    std::vector<std::string> groupIds;
+    for (auto it : infos) {
+        groupIds.push_back(it.dataGroupId);
+    }
     if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
         LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
         groupsIdCache_.pop_front();
     }
-    groupsIdCache_.emplace_back(key, infos);
-    return infos;
+    groupsIdCache_.emplace_back(key, groupIds);
+    return groupIds;
 }
 
-void DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
+bool DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
     int32_t userId, const std::string &schemeType, const std::string &method)
 {
     std::string authority = uri.GetAuthority();
@@ -406,20 +419,21 @@ void DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
     if (callingName.empty()) {
         errMsg += "callingNmae is empty";
         DataShare::DataSharePermission::ReportExtensionFault(invalidUri, tokenId, callingName, errMsg);
-        return;
+        return true;
     }
     if (authority == callingName) {
-        return;
+        return true;
     }
-    std::vector<DataGroupInfo> infos = GetGroupInfosFromCache(callingName, userId, schemeType);
-    for (auto &groupId : infos) {
-        if (authority == groupId.dataGroupId) {
-            return;
+    std::vector<std::string> groupIds = GetGroupInfosFromCache(callingName, userId, schemeType);
+    for (auto &groupId : groupIds) {
+        if (authority == groupId) {
+            return true;
         }
     }
     LOG_ERROR("%{public}s OBS permission check is failed", errMsg.c_str());
-    errMsg += " group id check failed or infos empty:" + std::string(infos.empty() ? "empty" : "notEmpty");
+    errMsg += " group id check failed or infos empty:" + std::string(groupIds.empty() ? "empty" : "notEmpty");
     DataShare::DataSharePermission::ReportExtensionFault(invalidUri, tokenId, callingName, errMsg);
+    return true;
 }
 
 int32_t DataObsMgrService::ConstructRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
