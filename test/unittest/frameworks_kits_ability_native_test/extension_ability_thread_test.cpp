@@ -1173,7 +1173,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNormalExtensio
     ExtensionAbilityThread thread;
     thread.HandleNormalExtensionAttach(abilityRecord, nullptr, abilityName);
  
-    EXPECT_EQ(thread.runner_, nullptr);
+    EXPECT_NE(thread.runner_, nullptr);
     EXPECT_NE(thread.abilityHandler_, nullptr);
 }
  
@@ -1199,11 +1199,12 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNormalExtensio
 }
  
 /**
- * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber
- * @tc.number: ExtensionAbilityThreadTest_001
+ * @tc.name  : ExtensionAbilityThread_CreateExtensionAbilityName_0100
+ * @tc.number: CreateExtensionAbilityNameTest_001
  * @tc.desc  : test extensionAbilityType is STATICSUBSCRIBER
  */
-HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsStaticSubscriber, TestSize.Level0) {
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_CreateExtensionAbilityName_0100,
+    Function | MediumTest | Level1) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER;
     std::string abilityName;
@@ -1215,11 +1216,12 @@ HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorr
 }
  
 /**
- * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver
- * @tc.number: ExtensionAbilityThreadTest_002
+ * @tc.name  : ExtensionAbilityThread_CreateExtensionAbilityName_0200
+ * @tc.number: CreateExtensionAbilityNameTest_002
  * @tc.desc  : test extensionAbilityType is DRIVER
  */
-HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsDriver, TestSize.Level0) {
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_CreateExtensionAbilityName_0200,
+    Function | MediumTest | Level1) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::DRIVER;
     std::string abilityName;
@@ -1231,11 +1233,12 @@ HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorr
 }
  
 /**
- * @tc.name  : CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed
- * @tc.number: ExtensionAbilityThreadTest_018
+ * @tc.name  : ExtensionAbilityThread_CreateExtensionAbilityName_0300
+ * @tc.number: CreateExtensionAbilityNameTest_003
  * @tc.desc  : test extensionAbilityType is CONTENT_EMBED
  */
-HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorrectName_WhenExtensionAbilityTypeIsContentEmbed, TestSize.Level0) {
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_CreateExtensionAbilityName_0300,
+    Function | MediumTest | Level1) {
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::CONTENT_EMBED;
     std::string abilityName;
@@ -1244,6 +1247,24 @@ HWTEST_F(ExtensionAbilityThreadTest,ATC_CreateExtensionAbilityName_ShouldSetCorr
     thread.CreateExtensionAbilityName(abilityInfo, abilityName);
  
     EXPECT_EQ(abilityName, "ContentEmbedExtension");
+}
+
+/**
+ * @tc.name  : ExtensionAbilityThread_HandleNativeExtensionAttach_0100
+ * @tc.number: HandleNativeExtensionAttachTest_001
+ * @tc.desc  : test contentEmbedEventRunner_ not nullptr
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleNativeExtensionAttach_0100,
+    Function | MediumTest | Level1) {
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->name = "ContentEmbedExtensionAbility";
+    abilityInfo->type = AbilityType::EXTENSION;
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
+    std::string abilityName = "TestAbility";
+    ExtensionAbilityThread thread;
+    thread.HandleNativeExtensionAttach(abilityRecord, abilityName);
+    EXPECT_NE(thread.contentEmbedEventRunner_, nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
