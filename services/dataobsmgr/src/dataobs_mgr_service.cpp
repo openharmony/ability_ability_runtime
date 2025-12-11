@@ -356,18 +356,19 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
     return callingName;
 }
 
-void DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
-    const uint32_t userId, const std::string &method)
+bool DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
+    int32_t userId, const std::string &method)
 {
     if (uri.GetScheme() == RELATIONAL_STORE) {
         VerifyUriPermission(uri, tokenId, userId, RELATIONAL_STORE, method);
     } else if (uri.GetScheme() == SHARE_PREFERENCES) {
         VerifyUriPermission(uri, tokenId, userId, SHARE_PREFERENCES, method);
     }
+    return true;
 }
 
 std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::string &bundleName,
-    const uint32_t userId, const std::string &schemeType)
+    int32_t userId, const std::string &schemeType)
 {
     auto key = bundleName + ":" + std::to_string(userId) + ":" + schemeType;
     {
@@ -396,7 +397,7 @@ std::vector<DataGroupInfo> DataObsMgrService::GetGroupInfosFromCache(const std::
 }
 
 void DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
-    const uint32_t userId, const std::string &schemeType, const std::string &method)
+    int32_t userId, const std::string &schemeType, const std::string &method)
 {
     std::string authority = uri.GetAuthority();
     std::string callingName = GetCallingName(tokenId);
