@@ -83,13 +83,14 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     Minfos->CheckAndUpdateParam(key, callerToken, paramPtr);
     Want want;
     ExecuteMode executeMode = UI_ABILITY_FOREGROUND;
-    Minfos->CheckAndUpdateWant(want, executeMode);
+    int32_t userId = 100;
+    Minfos->CheckAndUpdateWant(want, executeMode, userId);
     executeMode = UI_ABILITY_BACKGROUND;
-    Minfos->CheckAndUpdateWant(want, executeMode);
+    Minfos->CheckAndUpdateWant(want, executeMode, userId);
     executeMode = UI_EXTENSION_ABILITY;
-    Minfos->CheckAndUpdateWant(want, executeMode);
+    Minfos->CheckAndUpdateWant(want, executeMode, userId);
     executeMode = SERVICE_EXTENSION_ABILITY;
-    Minfos->CheckAndUpdateWant(want, executeMode);
+    Minfos->CheckAndUpdateWant(want, executeMode, userId);
 
     Minfos->RemoveExecuteIntent(intentId);
     int32_t resultCode = static_cast<int32_t>(GetU32Data(data));
