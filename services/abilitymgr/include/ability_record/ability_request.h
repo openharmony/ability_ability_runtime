@@ -86,6 +86,7 @@ struct AbilityRequest {
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     std::string specifiedFlag;
     std::string customProcess;
+    std::string moduleProcess;
     std::string reservedBundleName;
     std::string appId;
     std::string startTime;
