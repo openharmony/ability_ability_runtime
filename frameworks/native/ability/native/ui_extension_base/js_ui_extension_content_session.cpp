@@ -1074,12 +1074,12 @@ void JsUIExtensionContentSession::CallReceiveDataCallback(napi_env env,
         TAG_LOGW(AAFwkTag::UI_EXT, "null callback");
         return;
     }
+    HandleScope handleScope(env);
     napi_value method = callback->GetNapiValue();
     if (method == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "null method");
         return;
     }
-    HandleScope handleScope(env);
     napi_value napiWantParams = AppExecFwk::WrapWantParams(env, wantParams);
     if (napiWantParams == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null napiWantParams");
