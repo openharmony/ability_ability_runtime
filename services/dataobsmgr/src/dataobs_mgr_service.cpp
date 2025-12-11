@@ -359,9 +359,10 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
 bool DataObsMgrService::CheckSchemePermission(Uri &uri, const uint32_t tokenId,
     int32_t userId, const std::string &method)
 {
-    if (uri.GetScheme() == RELATIONAL_STORE) {
+    auto scheme = uri.GetScheme();
+    if (scheme == RELATIONAL_STORE) {
         VerifyUriPermission(uri, tokenId, userId, RELATIONAL_STORE, method);
-    } else if (uri.GetScheme() == SHARE_PREFERENCES) {
+    } else if (scheme == SHARE_PREFERENCES) {
         VerifyUriPermission(uri, tokenId, userId, SHARE_PREFERENCES, method);
     }
     return true;
@@ -391,18 +392,18 @@ std::vector<std::string> DataObsMgrService::GetGroupInfosFromCache(const std::st
         LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
         return {};
     }
+    std::vector<std::string> groupIds;
+    for (auto &it : infos) {
+        groupIds.push_back(std::move(it.dataGroupId));
+    }
     std::unique_lock<std::shared_mutex> writeLock(groupsIdMutex_);
     auto it = std::find_if(groupsIdCache_.begin(), groupsIdCache_.end(),
         [&key](const auto& pair) { return pair.first == key; });
     if (it != groupsIdCache_.end()) {
         return it->second;
     }
-    std::vector<std::string> groupIds;
-    for (auto it : infos) {
-        groupIds.push_back(it.dataGroupId);
-    }
     if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
-        LOG_INFO("groups id cache is full:%{public}d", groupsIdCache_.size());
+        LOG_INFO("groups id cache is full:%{public}zu", groupsIdCache_.size());
         groupsIdCache_.pop_front();
     }
     groupsIdCache_.emplace_back(key, groupIds);
