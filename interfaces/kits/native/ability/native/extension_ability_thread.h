@@ -137,7 +137,17 @@ public:
 
     void ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode) override;
 
+    void HandleNativeExtensionAttach(
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
+        const std::string &abilityName);
+        
+    void HandleNormalExtensionAttach(
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
+        const std::shared_ptr<AppExecFwk::EventRunner> &mainRunner,
+        const std::string &abilityName);
+
 private:
+
     /**
      * @brief Dump Ability Info Inner
      * @param params the params need to be Dumped
@@ -234,6 +244,7 @@ private:
 
     std::shared_ptr<ExtensionImpl> extensionImpl_ = nullptr;
     std::shared_ptr<Extension> currentExtension_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> contentEmbedEventRunner_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

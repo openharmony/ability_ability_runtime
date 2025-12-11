@@ -61,6 +61,7 @@ constexpr static char FENCE_EXTENSION[] = "FenceExtension";
 constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 constexpr static char ASSET_ACCELERATION_EXTENSION[] = "AssetAccelerationExtension";
 constexpr static char SELECTION_EXTENSION[] = "SelectionExtensionAbility";
+constexpr static char CONTENT_EMBED_EXTENSION[] = "ContentEmbedExtension";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -176,6 +177,9 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
         abilityName = abilityInfo->extensionTypeName + CUSTOM_EXTENSION;
     }
 #endif // SUPPORT_GRAPHICS
+    else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
+        abilityName = CONTENT_EMBED_EXTENSION;
+    }
 }
 
 void ExtensionAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -227,31 +231,23 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
 
     TAG_LOGD(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
     FreezeUtil::GetInstance().AddLifecycleEvent(abilityRecord->GetToken(), "ExtensionAbilityThread::HandleAttach");
-    if (mainRunner == nullptr) {
-        runner_ = AppExecFwk::EventRunner::Create(abilityName);
-        if (runner_ == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "null runner_");
-            return;
-        }
-        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
-        if (abilityHandler_ == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "null abilityHandler_");
-            return;
-        }
-    } else {
-        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(mainRunner);
-        if (abilityHandler_ == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "null abilityHandler_");
-            return;
-        }
-    }
-
-    // 2.new ability
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null abilityInfo");
         return;
     }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
+        HandleNativeExtensionAttach(abilityRecord, abilityName);
+    } else {
+        HandleNormalExtensionAttach(abilityRecord, mainRunner, abilityName);
+    }
+ 
+    if (abilityHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "Failed to create abilityHandler_");
+        return;
+    }
+ 
+    // 2.new ability
     auto extension = AppExecFwk::AbilityLoader::GetInstance().GetExtensionByName(abilityName,
         abilityInfo->arkTSMode);
     if (extension == nullptr) {
@@ -262,6 +258,48 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
     token_ = abilityRecord->GetToken();
     abilityRecord->SetAbilityThread(this);
     HandleAttachInner(application, abilityRecord);
+}
+
+void ExtensionAbilityThread::HandleNativeExtensionAttach(
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
+    const std::string &abilityName)
+{
+    TAG_LOGD(AAFwkTag::EXT, "HandleNativeExtensionAttach");
+    if (contentEmbedEventRunner_ != nullptr) {
+        runner_ = contentEmbedEventRunner_;
+        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
+        TAG_LOGD(AAFwkTag::EXT, "Reusing existing Content Embed EventRunner");
+    } else {
+        runner_ = AppExecFwk::EventRunner::Create(abilityName + "_CONTENT_EMBED");
+        if (runner_ == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "Failed to create Content Embed EventRunner");
+            return;
+        }
+        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
+        if (abilityHandler_ == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "Failed to create Content Embed AbilityHandler");
+            return;
+        }
+        contentEmbedEventRunner_ = runner_;
+        TAG_LOGI(AAFwkTag::EXT, "Created new Content Embed EventRunner");
+    }
+}
+ 
+void ExtensionAbilityThread::HandleNormalExtensionAttach(
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
+    const std::shared_ptr<AppExecFwk::EventRunner> &mainRunner,
+    const std::string &abilityName)
+{
+    if (mainRunner == nullptr) {
+        runner_ = AppExecFwk::EventRunner::Create(abilityName);
+        if (runner_ == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "null runner_");
+            return;
+        }
+        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
+    } else {
+        abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(mainRunner);
+    }
 }
 
 void ExtensionAbilityThread::HandleAttachInner(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
