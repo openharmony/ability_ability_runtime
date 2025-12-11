@@ -291,6 +291,7 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
                 return ERR_INVALID_VALUE;
             }
             abilityRecord->SetProcessName(processName);
+            abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
             break;
         }
         case PROCESS_MODE_RUN_WITH_MAIN_PROCESS: {
