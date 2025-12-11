@@ -236,7 +236,6 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
         TAG_LOGE(AAFwkTag::EXT, "null abilityInfo");
         return;
     }
-    TAG_LOGD(AAFwkTag::EXT, "abilityInfo: %{public}s", abilityInfo->name.c_str());
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
         HandleNativeExtensionAttach(abilityRecord, abilityName);
     } else {
@@ -265,11 +264,11 @@ void ExtensionAbilityThread::HandleNativeExtensionAttach(
     const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
     const std::string &abilityName)
 {
-    TAG_LOGI(AAFwkTag::EXT, "HandleNativeExtensionAttach");
+    TAG_LOGD(AAFwkTag::EXT, "HandleNativeExtensionAttach");
     if (contentEmbedEventRunner_ != nullptr) {
         runner_ = contentEmbedEventRunner_;
         abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
-        TAG_LOGI(AAFwkTag::EXT, "Reusing existing Content Embed EventRunner");
+        TAG_LOGD(AAFwkTag::EXT, "Reusing existing Content Embed EventRunner");
     } else {
         runner_ = AppExecFwk::EventRunner::Create(abilityName + "_CONTENT_EMBED");
         if (runner_ == nullptr) {
