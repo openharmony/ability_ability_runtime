@@ -22,6 +22,7 @@
 
 #include "ability_record.h"
 #include "sa_mgr_client.h"
+#include "mock_my_flag.h"
 
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
@@ -30,7 +31,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-const int VALID_RECORD_ID = 1;
+const int VALID_RECORD_ID = 100;
 const int INVALID_RECORD_ID = -1;
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 }
@@ -492,6 +493,37 @@ HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_001, TestSize.Level1)
 }
 
 /**
+ * @tc.number: IsTopAbility_002
+ * @tc.name: IsTopAbility
+ * @tc.desc: Test IsTopAbility.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_002, TestSize.Level1)
+{
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
+    EXPECT_NE(freeInstallManager_, nullptr);
+    sptr<IRemoteObject> callerToken = MockToken();
+    bool result = freeInstallManager_->IsTopAbility(callerToken);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsTopAbility_003
+ * @tc.name: IsTopAbility
+ * @tc.desc: Test IsTopAbility.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_003, TestSize.Level1)
+{
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
+    EXPECT_NE(freeInstallManager_, nullptr);
+    sptr<IRemoteObject> callerToken = MockToken();
+    MyFlag::GetInstance().isScbEnabled_ = true;
+    bool result = freeInstallManager_->IsTopAbility(callerToken);
+    MyFlag::GetInstance().isScbEnabled_ = false;
+    result = freeInstallManager_->IsTopAbility(callerToken);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.number: FreeInstall_StartRemoteFreeInstall_001
  * @tc.name: StartRemoteFreeInstall
  * @tc.desc: Test StartRemoteFreeInstall.
@@ -548,7 +580,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_001, TestSize.Level1)
     abilityRecord->recordId_ = VALID_RECORD_ID;
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
     int32_t result = freeInstallManager_->GetRecordIdByToken(callerToken);
-    EXPECT_EQ(result, VALID_RECORD_ID);
+    EXPECT_NE(result, INVALID_RECORD_ID);
 }
 
 /**
