@@ -38,6 +38,9 @@
 #include "reverse_continuation_scheduler_primary_stage.h"
 #include "runtime.h"
 #include "resource_config_helper.h"
+#ifdef WITH_DLP
+#include "set_dlp_config.h"
+#endif // WITH_DLP
 #ifdef SUPPORT_GRAPHICS
 #include "wm_common.h"
 #endif
@@ -244,6 +247,9 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
     }
 
 #ifdef WITH_DLP
+    if (want.HasParameter(DLP_PARAMS_SECURITY_FLAG)) {
+        Security::DlpPermission::DlpSetConfig::SetDlpConfig(want);
+    }
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
 #endif // WITH_DLP
