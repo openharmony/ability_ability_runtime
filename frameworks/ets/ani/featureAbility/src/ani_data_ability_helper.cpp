@@ -38,7 +38,7 @@ void PutDouble(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani
 void PutInt(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani_object aniValue)
 {
     ani_int value = 0;
-    ani_status status = env->Object_CallMethodByName_Int(aniValue, "unboxed", nullptr, &value);
+    ani_status status = env->Object_CallMethodByName_Int(aniValue, "toInt", nullptr, &value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FA, "Object_CallMethodByName_Int status: %{public}d", status);
         return;
