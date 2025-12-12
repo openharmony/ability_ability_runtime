@@ -165,7 +165,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::GetAbilityRecInProcList(cons
 {
     auto findProcInfo = procLruMap_.find(abilityRequest.appInfo.accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "can't found bundleName");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "can't found bundleName");
         return nullptr;
     }
     ProcRecordsInfo &procRecordsInfo = findProcInfo->second;
