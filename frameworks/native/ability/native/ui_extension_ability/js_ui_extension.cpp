@@ -772,7 +772,12 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     }
 #endif // SUPPORT_GRAPHICS
     foregroundWindows_.erase(componentId);
-    contentSessions_.erase(componentId);
+    if (contentSessions_.find(componentId) != contentSessions_.end()) {
+        if (contentSessions_[componentId] != nullptr) {
+            jsRuntime_.FreeNativeReference(std::move(contentSessions_[componentId]));
+        }
+        contentSessions_.erase(componentId);
+    }
     if (abilityResultListeners_) {
         abilityResultListeners_->RemoveListener(componentId);
     }
