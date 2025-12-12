@@ -362,7 +362,8 @@ void UIAbilityLifecycleManager::CheckPrelaunchTag(const AbilityRequest &abilityR
         TAG_LOGI(AAFwkTag::ABILITYMGR, " %{public}s not sceneboard start after prelaunch, kill and restart",
             abilityRequest.abilityInfo.bundleName.c_str());
         AppExecFwk::RunningProcessInfo processInfo = {};
-        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(iter->second->GetToken(),
+            processInfo);
         iter->second->SetKillReason("Prelaunch Kill");
         iter->second->SetIsKillPrecedeStart(true);
         std::vector<int32_t> pidToBeKilled {processInfo.pid_};
@@ -562,7 +563,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
             abilityRecord->PostForegroundTimeoutTask();
             abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
-        } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND){
+        } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
             abilityRecord->SetStartToBackground(true);
             MoveToBackground(abilityRecord);
         }
