@@ -542,7 +542,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
     AddAppLifecycleEvent("AppRunningRecord::LaunchPendingAbilities");
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
@@ -2077,7 +2077,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
 
     for (const auto &info : windowVisibilityInfos) {
         if (info == nullptr || info->pid_ != GetPid()) {
-            TAG_LOGW(AAFwkTag::APPMGR, "null info or info pid is not matched");
+            TAG_LOGD(AAFwkTag::APPMGR, "null info or info pid is not matched");
             continue;
         }
         std::lock_guard windowIdsLock(windowIdsLock_);
