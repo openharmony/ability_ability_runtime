@@ -352,13 +352,14 @@ UIAbilityRecordPtr UIAbilityLifecycleManager::HandleAbilityRecordReused(
 void UIAbilityLifecycleManager::CheckPrelaunchTag(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo)
 {
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
-    bool isPrelaunch = false;
     if (iter == sessionAbilityMap_.end() || iter->second == nullptr) {
         return;
     }
-    isPrelaunch = iter->second->GetPrelaunchFlag();
+    if (!iter->second->GetPrelaunchFlag()) {
+        return;
+    }
     auto callerAbilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (isPrelaunch && callerAbilityRecord != nullptr && !callerAbilityRecord->IsSceneBoard()) {
+    if (callerAbilityRecord != nullptr && !callerAbilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, " %{public}s not sceneboard start after prelaunch, kill and restart",
             abilityRequest.abilityInfo.bundleName.c_str());
         AppExecFwk::RunningProcessInfo processInfo = {};
@@ -1414,7 +1415,8 @@ void UIAbilityLifecycleManager::MoveToBackground(const UIAbilityRecordPtr &abili
 
 int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "prelaunch ability: %{public}s", abilityRequest.abilityInfo.bundleName.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "prelaunch ability: %{public}s %{public}s", abilityRequest.abilityInfo.bundleName.c_str(),
+        abilityRequest.abilityInfo.name.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
 
