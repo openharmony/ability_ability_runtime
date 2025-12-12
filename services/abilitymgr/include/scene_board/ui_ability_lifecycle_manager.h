@@ -1238,6 +1238,7 @@ private:
      */
     void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
     bool HandleRestartUIAbility(sptr<SessionInfo> sessionInfo);
+    void CheckPrelaunchTag(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
