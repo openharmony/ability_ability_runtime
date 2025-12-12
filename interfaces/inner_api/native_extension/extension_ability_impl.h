@@ -32,9 +32,6 @@ struct AbilityRuntime_ExtensionInstance {
 
 typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ExtensionInstanceGetContext(
-    AbilityRuntime_ExtensionInstanceHandle instance, AbilityRuntime_ContextHandle context);
-
 #ifdef __cplusplus
 } // extern "C"
 #endif
