@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
+#include "app_utils.h"
 #include "fd_guard.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -2002,6 +2003,10 @@ int AbilityManagerStub::CloseUIAbilityBySCBInner(MessageParcel &data, MessagePar
 
 int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &reply)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: GetWantSenderInner");
+        return AAFwk::INNER_ERR;
+    }
     std::unique_ptr<WantSenderInfo> wantSenderInfo(data.ReadParcelable<WantSenderInfo>());
     if (wantSenderInfo == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSenderInfo null");
