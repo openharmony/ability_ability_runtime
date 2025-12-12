@@ -58,6 +58,8 @@ enum Status : int32_t {
     URI_NOT_EXIST,
     DATAOBS_PERMISSION_DENY,
     DATAOBS_INVALID_URI,
+    DATAOBS_RDB_INVALID_URI,
+    DATAOBS_PREFERENCE_INVALID_URI,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
