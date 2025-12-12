@@ -80,6 +80,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/runtime/ohos_js_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/ohos_loop_handler.cpp",
     "${ability_runtime_native_path}/runtime/runtime.cpp",
+    "${ability_runtime_native_path}/runtime/native_runtime.cpp",
   ]
 
   configs = [ ":runtime_config" ]
@@ -121,6 +122,7 @@ ohos_shared_library("runtime") {
     "i18n:intl_register",
     "init:syscap_ts",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",

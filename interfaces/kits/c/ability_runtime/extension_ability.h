@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @addtogroup AbilityRuntime
+ * @{
+ *
+ * @brief Provide the definition of the C interface for the extension ability AbilityRuntime
+ *
+ * @syscap SystemCapability.Ability.AbilityRuntime.Core
+ * @since 23
+ */
+
+/**
+ * @file extension_ability.h
+ *
+ * @brief Declare the common types for the extension ability AbilityRuntime.
+ *
+ * @library libability_runtime.so
+ * @kit AbilityKit
+ * @syscap SystemCapability.Ability.AbilityRuntime.Core
+ * @since 23
+ */
+
+#ifndef ABILITY_RUNTIME_EXTENSION_ABILITY_H
+#define ABILITY_RUNTIME_EXTENSION_ABILITY_H
+
+#include "ability_runtime_common.h"
+#include "extension_context.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Define the AbilityRuntime_ExtensionInstance structure type.
+ *
+ * @since 23
+ */
+struct AbilityRuntime_ExtensionInstance;
+typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
+
+#ifdef __cplusplus
+}
+#endif
+
+/** @} */
+#endif // ABILITY_RUNTIME_EXTENSION_ABILITY_H
