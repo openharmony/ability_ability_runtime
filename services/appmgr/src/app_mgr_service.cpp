@@ -25,6 +25,7 @@
 #include "ability_manager_xcollie.h"
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
+#include "app_utils.h"
 #include "application_state_filter.h"
 #include "datetime_ex.h"
 #include "fd_guard.h"
@@ -416,6 +417,10 @@ int32_t AppMgrService::GetAllRunningProcesses(std::vector<RunningProcessInfo> &i
 int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
     RunningMultiAppInfo &info)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: GetRunningMultiAppInfoByBundleName");
+        return AAFwk::INNER_ERR;
+    }
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }

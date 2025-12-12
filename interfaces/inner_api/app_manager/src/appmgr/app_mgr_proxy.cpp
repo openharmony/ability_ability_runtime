@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_chain_utils.h"
 #include "hitrace_meter.h"
@@ -583,6 +584,10 @@ int AppMgrProxy::GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcel
 int AppMgrProxy::RegisterApplicationStateObserver(
     const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: RegisterApplicationStateObserver");
+        return AAFwk::INNER_ERR;
+    }
     if (!observer) {
         TAG_LOGE(AAFwkTag::APPMGR, "observer null");
         return ERR_INVALID_VALUE;
@@ -1191,6 +1196,10 @@ int32_t AppMgrProxy::UnregisterConfigurationObserver(const sptr<IConfigurationOb
 
 bool AppMgrProxy::GetAppRunningStateByBundleName(const std::string &bundleName)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: GetAppRunningStateByBundleName");
+        return false;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1666,6 +1675,10 @@ int32_t AppMgrProxy::NotifyPageHide(const sptr<IRemoteObject> &token, const Page
 int32_t AppMgrProxy::SendRequest(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply,
     MessageOption& option)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: SendRequest");
+        return AAFwk::INNER_ERR;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Remote() is NULL");

@@ -22,6 +22,7 @@
 #include "app_malloc_info.h"
 #include "app_mgr_proxy.h"
 #include "app_scheduler_interface.h"
+#include "app_utils.h"
 #include "appexecfwk_errors.h"
 #include "bundle_info.h"
 #ifdef SUPPORT_CHILD_PROCESS
@@ -551,6 +552,10 @@ int32_t AppMgrStub::HandleGetAllRunningProcesses(MessageParcel &data, MessagePar
 
 int32_t AppMgrStub::HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: HandleGetRunningMultiAppInfoByBundleName");
+        return AAFwk::INNER_ERR;
+    }
     std::string bundleName = data.ReadString();
     RunningMultiAppInfo info;
     int32_t result = GetRunningMultiAppInfoByBundleName(bundleName, info);
