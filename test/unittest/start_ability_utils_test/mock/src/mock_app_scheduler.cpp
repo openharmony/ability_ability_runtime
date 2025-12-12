@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_STATUS_H
-#define MOCK_MY_STATUS_H
-
-#include "running_process_info.h"
+#include "app_scheduler.h"
+#include "mock_my_status.h"
 
 namespace OHOS {
 namespace AAFwk {
-class MyStatus {
-public:
-    static MyStatus& GetInstance();
-    ~MyStatus() = default;
-    bool retValue_ = false;
-    OHOS::AppExecFwk::RunningProcessInfo processInfo_;
-private:
-    MyStatus() = default;
-};
+AppScheduler::AppScheduler()
+{}
+
+AppScheduler::~AppScheduler()
+{}
+
+void AppScheduler::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const
+{
+    info = MyStatus::GetInstance().processInfo_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif // MOCK_MY_STATUS_H

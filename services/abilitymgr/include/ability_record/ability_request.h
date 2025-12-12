@@ -99,6 +99,7 @@ struct AbilityRequest {
     bool promotePriority = false;
     uint64_t specifiedFullTokenId = 0;
     std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
+    bool isFromOpenLink = false;
     std::pair<bool, LaunchReason> IsContinuation() const;
 
     bool IsAcquireShareData() const
