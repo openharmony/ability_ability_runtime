@@ -17,17 +17,3 @@
 
 #include "extension_ability_impl.h"
 #include "hilog_tag_wrapper.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ExtensionInstanceGetContext(
-    AbilityRuntime_ExtensionInstanceHandle instance, AbilityRuntime_ContextHandle context)
-{
-    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
-}
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
