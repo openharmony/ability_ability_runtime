@@ -46,6 +46,7 @@ ohos_shared_library("dataobsms") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_services_path}/common:task_handler_wrap",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
   ]
 
   external_deps = [
@@ -95,6 +96,7 @@ ohos_static_library("dataobsms_static") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
   ]
 
   external_deps = [
