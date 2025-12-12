@@ -327,9 +327,10 @@ HWTEST_F(AmsMgrSchedulerTest, RegisterApplicationStateObserver_001, TestSize.Lev
 {
     TAG_LOGD(AAFwkTag::TEST, "RegisterApplicationStateObserver_001 start");
     sptr<IApplicationStateObserver> observer = new ApplicationStateObserverStub();
+    std::vector<std::string> bundleNameList;
     auto mockAppMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
-    mockAppMgrServiceInner->RegisterApplicationStateObserver(observer);
-    int32_t err = mockAppMgrServiceInner->RegisterApplicationStateObserver(observer);
+    mockAppMgrServiceInner->RegisterApplicationStateObserver(observer, bundleNameList);
+    int32_t err = mockAppMgrServiceInner->RegisterApplicationStateObserver(observer, bundleNameList);
     // repeat register return ERR_INVALID_VALUE
     EXPECT_EQ(1, err);
     TAG_LOGD(AAFwkTag::TEST, "RegisterApplicationStateObserver_001 end");
