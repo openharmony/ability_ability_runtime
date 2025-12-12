@@ -585,5 +585,32 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_IsNeedIgnoreFreezeEvent_Test
     ret = appfreezeManager->IsNeedIgnoreFreezeEvent(eventName, eventName, reportTimes);
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.number: AppfreezeManagerTest CheckThreadKilled Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckThreadKilled_Test001, TestSize.Level1)
+{
+    int pid = getpid();
+    int uid = getuid();
+    std::string bundleName = "AppfreezeManagerTest_CheckThreadKilled_Test001";
+    bool result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_EQ(result, false);
+    int32_t state = 0;
+    appfreezeManager->InsertKillThread(state, pid, uid, bundleName);
+    result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_EQ(result, true);
+    bundleName = "AppfreezeManagerTest_CheckThreadKilled_Test001111111";
+    result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_EQ(result, false);
+    state = -1;
+    appfreezeManager->InsertKillThread(state, pid, uid, bundleName);
+    result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
+    EXPECT_EQ(result, false);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
