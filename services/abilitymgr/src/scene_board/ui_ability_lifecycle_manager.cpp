@@ -1415,8 +1415,8 @@ void UIAbilityLifecycleManager::MoveToBackground(const UIAbilityRecordPtr &abili
 
 int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "prelaunch ability: %{public}s %{public}s", abilityRequest.abilityInfo.bundleName.c_str(),
-        abilityRequest.abilityInfo.name.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "prelaunch ability: %{public}s %{public}s",
+        abilityRequest.abilityInfo.bundleName.c_str(), abilityRequest.abilityInfo.name.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
 
