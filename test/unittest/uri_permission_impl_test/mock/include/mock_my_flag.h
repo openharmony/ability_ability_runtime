@@ -73,6 +73,7 @@ public:
         getTokenIdByBundleNameStatus_ = 0;
         isSAOrSystemAppCall_ = false;
         isSystemAppCall_ = false;
+        IsPrivilegedSACall_ = false;
         isUriTypeValid_ = false;
         isDocsCloudUri_ = false;
         permissionGrantUriPermissionAsCaller_ = false;
@@ -115,6 +116,7 @@ public:
     static bool isSAOrSystemAppCall_;
     static bool isUriTypeValid_;
     static bool isSystemAppCall_;
+    static bool IsPrivilegedSACall_;
     static bool isDocsCloudUri_;
     static int32_t getTokenIdByBundleNameStatus_;
     static int32_t processUdmfKeyRet_;

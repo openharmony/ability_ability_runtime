@@ -33,6 +33,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
+constexpr int32_t COLLABORATION_FWK_UID = 5520;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t UDMF_UID = 3012;
 constexpr int32_t PASTEBOARD_UID = 3816;
@@ -136,6 +137,12 @@ bool FUDUtils::IsSAOrSystemAppCall()
 bool FUDUtils::IsSystemAppCall()
 {
     return PermissionVerification::GetInstance()->IsSystemAppCall();
+}
+
+bool FUDUtils::IsPrivilegedSACall()
+{
+    uint32_t uid = IPCSkeleton::GetCallingUid();
+    return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID || uid == COLLABORATION_FWK_UID;
 }
 
 bool FUDUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
