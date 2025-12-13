@@ -44,19 +44,19 @@ constexpr int32_t ERROR_CODE_ONE = 1;
 constexpr int32_t ERROR_CODE_TWO = 2;
 constexpr int32_t INVALID_PARAM = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
 constexpr const char *UI_SERVICE_CONTEXT_CLASS_NAME =
-    "Lapplication/UIServiceExtensionContext/UIServiceExtensionContext;";
-const char *UI_SERVICE_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "Lapplication/UIServiceExtensionContext/Cleaner;";
-constexpr const char *SIGNATURE_START_ABILITY = "Lutils/AbilityUtils/AsyncCallbackWrapper;"
-    "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;:V";
-constexpr const char *SIGNATURE_START_ABILITY_CHK = "L@ohos/app/ability/Want/Want;"
-    "L@ohos/app/ability/StartOptions/StartOptions;:V";
-constexpr const char *SIGNATURE_TERMINATE_SELF = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE = "Lstd/core/String;Lstd/core/Record;"
-    "Lapplication/AbilityStartCallback/AbilityStartCallback;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE_CHK = "Lstd/core/String;Lstd/core/Record;:V";
+    "application.UIServiceExtensionContext.UIServiceExtensionContext";
+const char *UI_SERVICE_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "application.UIServiceExtensionContext.Cleaner";
+constexpr const char *SIGNATURE_START_ABILITY = "C{utils.AbilityUtils.AsyncCallbackWrapper}"
+    "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}:";
+constexpr const char *SIGNATURE_START_ABILITY_CHK = "C{@ohos.app.ability.Want.Want}"
+    "C{@ohos.app.ability.StartOptions.StartOptions}:";
+constexpr const char *SIGNATURE_TERMINATE_SELF = "C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE = "C{std.core.String}C{std.core.Record}"
+    "C{application.AbilityStartCallback.AbilityStartCallback}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE_CHK = "C{std.core.String}C{std.core.Record}:";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 
@@ -511,7 +511,7 @@ ani_object CreateEtsUIServiceExtensionContext(ani_env *env, std::shared_ptr<UISe
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "status: %{public}d", status);
         return nullptr;
     }

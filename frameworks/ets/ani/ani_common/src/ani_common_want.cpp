@@ -39,10 +39,10 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
-constexpr const char *ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
-constexpr const char *TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
-constexpr const char *INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
-constexpr const char *ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
+constexpr const char *ABILITY_WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
+constexpr const char *TOOL_CLASS_NAME = "@ohos.app.ability.Want.RecordSerializeTool";
+constexpr const char *INNER_CLASS_NAME = "ability.abilityResult.AbilityResultInner";
+constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 constexpr const char *RECORD_SET_NAME =
     "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}C{std.core.Object}:";
 const int PROPERTIES_SIZE = 2;
@@ -81,7 +81,7 @@ bool InnerCreateRecordObject(ani_env *env, ani_object &recordObject)
 {
     ani_class recordCls = nullptr;
     ani_method recordCtorMethod = nullptr;
-    AniCommonMethodCacheKey recordCtor = std::make_pair("<ctor>", ":V");
+    AniCommonMethodCacheKey recordCtor = std::make_pair("<ctor>", ":");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordCtor,
         recordCls, recordCtorMethod)) {
         return false;
@@ -139,7 +139,7 @@ bool InnerCreateBooleanObject(ani_env *env, ani_boolean value, ani_object &objec
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "Z:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "z:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_BOOLEAN, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -201,7 +201,7 @@ bool InnerCreateShortObject(ani_env *env, ani_short value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "S:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "s:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_SHORT, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -241,7 +241,7 @@ bool InnerCreateIntObject(ani_env *env, ani_int value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "I:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "i:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_INT, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -281,7 +281,7 @@ bool InnerCreateLongObject(ani_env *env, ani_long value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "J:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "l:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_LONG, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -321,7 +321,7 @@ bool InnerCreateFloatObject(ani_env *env, ani_float value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "F:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "f:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_FLOAT, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -361,7 +361,7 @@ bool InnerCreateDoubleObject(ani_env *env, ani_double value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "D:V");
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "d:");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_DOUBLE, ctorKey,
         cls, ctorMethod)) {
         return false;
@@ -1108,7 +1108,7 @@ bool InnerCreateArrayRecordFromJson(ani_env *env, const nlohmann::json &jsonArra
 
         if (elementValue != nullptr) {
             ani_status status = env->Object_CallMethodByName_Void(arrayObject, "$_set",
-                "ILstd/core/Object;:V", index, elementValue);
+                "iY:", index, elementValue);
             if (status != ANI_OK) {
                 TAG_LOGE(AAFwkTag::ANI, "failed to set array element, status: %{public}d", status);
                 return false;
@@ -1193,7 +1193,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::ANI, "null wantCls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
@@ -1276,14 +1276,14 @@ bool CreateArrayFromJson(ani_env *env, const nlohmann::json &jsonArray, ani_obje
     }
 
     ani_class arrayCls = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Array;", &arrayCls);
+    ani_status status = env->FindClass("std.core.Array", &arrayCls);
     if (status != ANI_OK || arrayCls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "failed to find array class, status: %{public}d", status);
         return false;
     }
 
     ani_method arrayCtor = nullptr;
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK || arrayCtor == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "failed to find array constructor, status: %{public}d", status);
         return false;
@@ -1571,7 +1571,7 @@ ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementN
         TAG_LOGE(AAFwkTag::ANI, "FindClass status: %{public}d or null elementNameObj", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d or null method", status);
         return nullptr;
     }

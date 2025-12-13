@@ -33,9 +33,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* PERMISSION_GET_BUNDLE_INFO = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
-constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
-constexpr const char* APPLICATION_SPACE_NAME = "L@ohos/app/ability/application/application;";
-constexpr const char* APP_PRELOAD_TYPE_NAME = "L@ohos/app/ability/application/application/AppPreloadType;";
+constexpr const char* CONTEXT_CLASS_NAME = "application.Context.Context";
+constexpr const char* APPLICATION_SPACE_NAME = "@ohos.app.ability.application.application";
+constexpr const char* APP_PRELOAD_TYPE_NAME = "@ohos.app.ability.application.application.AppPreloadType";
 }
 
 void EtsApplication::DemoteCurrentFromCandidateMasterProcess(ani_env *env, ani_object callback)
@@ -100,7 +100,7 @@ ani_object CreateEmptyContextObject(ani_env *env)
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
         return nullptr;
@@ -140,7 +140,7 @@ bool SetNativeContextLong(ani_env *env, std::shared_ptr<Context> context, ani_cl
     }
     ani_status status = ANI_ERROR;
     ani_method method {};
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return false;
     }
@@ -659,78 +659,78 @@ void ApplicationInit(ani_env *env)
     std::array methods = {
         ani_native_function {
             "nativeCreateModuleContext",
-            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.Context.Context}C{std.core.String}C{std.core.String}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::CreateModuleContext)
         },
         ani_native_function {
             "nativeCreateModuleContextCheck",
-            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;:V",
+            "C{application.Context.Context}C{std.core.String}C{std.core.String}:",
             reinterpret_cast<void *>(EtsApplication::CreateModuleContextCheck)
         },
         ani_native_function {
             "nativeCreateBundleContext",
-            "Lapplication/Context/Context;Lstd/core/String;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.Context.Context}C{std.core.String}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::CreateBundleContext)
         },
         ani_native_function {
             "nativeCreateBundleContextCheck",
-            "Lapplication/Context/Context;Lstd/core/String;:V",
+            "C{application.Context.Context}C{std.core.String}:",
             reinterpret_cast<void *>(EtsApplication::CreateBundleContextCheck)
         },
         ani_native_function {
             "nativeCreatePluginModuleContext",
-            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.Context.Context}C{std.core.String}C{std.core.String}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContext)
         },
         ani_native_function {
             "nativeCreatePluginModuleContextCheck",
-            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;:V",
+            "C{application.Context.Context}C{std.core.String}C{std.core.String}:",
             reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContextCheck)
         },
         ani_native_function {
             "nativeGetApplicationContext",
-            ":Lapplication/ApplicationContext/ApplicationContext;",
+            ":C{application.ApplicationContext.ApplicationContext}",
             reinterpret_cast<void *>(EtsApplication::GetApplicationContext)
         },
         ani_native_function {
             "nativeDemoteCurrentFromCandidateMasterProcess",
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::DemoteCurrentFromCandidateMasterProcess)
         },
         ani_native_function {
             "nativePromoteCurrentToCandidateMasterProcess",
-            "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "zC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::PromoteCurrentToCandidateMasterProcess)
         },
         ani_native_function {
             "nativeGetApplicationContextInstance",
-            ":Lapplication/ApplicationContext/ApplicationContext;",
+            ":C{application.ApplicationContext.ApplicationContext}",
             reinterpret_cast<void *>(EtsApplication::GetApplicationContextInstance)
         },
         ani_native_function {
             "nativeGetAppPreloadType",
-            ":L@ohos/app/ability/application/application/AppPreloadType;",
+            ":C{@ohos.app.ability.application.application.AppPreloadType}",
             reinterpret_cast<void *>(EtsApplication::GetAppPreloadType)
         },
         ani_native_function {
             "nativeExitMasterProcessRole",
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::ExitMasterProcessRole)
         },
         ani_native_function {
             "nativeCreatePluginModuleContextForHostBundle",
-            "Lapplication/Context/Context;Lstd/core/String;"
-            "Lstd/core/String;Lstd/core/String;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.Context.Context}C{std.core.String}"
+            "C{std.core.String}C{std.core.String}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContextForHostBundle)
         },
         ani_native_function {
             "nativeCreatePluginModuleContextForHostBundleCheck",
-            "Lapplication/Context/Context;Lstd/core/String;"
-            "Lstd/core/String;Lstd/core/String;:V",
+            "C{application.Context.Context}C{std.core.String}"
+            "C{std.core.String}C{std.core.String}:",
             reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContextForHostBundleCheck)
         },
     };

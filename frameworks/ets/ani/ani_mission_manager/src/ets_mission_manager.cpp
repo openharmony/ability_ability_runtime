@@ -36,7 +36,7 @@ namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 using AbilityManagerClient = AAFwk::AbilityManagerClient;
 namespace {
-constexpr const char* ETS_MISSION_MANAGER_NAME = "L@ohos/app/ability/missionManager/missionManager;";
+constexpr const char* ETS_MISSION_MANAGER_NAME =  "@ohos.app.ability.missionManager.missionManager";
 constexpr const char* ON_OFF_TYPE = "mission";
 constexpr const char* ON_OFF_TYPE_SYNC = "missionEvent";
 }
@@ -296,13 +296,13 @@ private:
         }
         ani_class cls = nullptr;
         ani_status status = ANI_ERROR;
-        status = env->FindClass("Lapplication/MissionSnapshot/MissionSnapshotImpl;", &cls);
+        status = env->FindClass("application.MissionSnapshot.MissionSnapshotImpl", &cls);
         if (status != ANI_OK || cls == nullptr) {
             TAG_LOGE(AAFwkTag::MISSION, "FindClass failed status = %{public}d", status);
             return nullptr;
         }
         ani_method method = nullptr;
-        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+        status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
         if (status != ANI_OK || method == nullptr) {
             TAG_LOGE(AAFwkTag::MISSION, "Class_FindMethod failed status = %{public}d", status);
             return nullptr;
@@ -671,74 +671,74 @@ void EtsMissionManagerInit(ani_env *env)
     }
     std::array methods = {
         ani_native_function {
-            "nativeClearAllMissions", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "nativeClearAllMissions", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::ClearAllMissions)
         },
         ani_native_function {
             "nativeGetMissionInfo",
-            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::GetMissionInfo)
         },
         ani_native_function {
             "nativeGetMissionInfos",
-            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::GetMissionInfos)
         },
         ani_native_function {
-            "nativeClearMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "nativeClearMission", "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::ClearMission)
         },
         ani_native_function {
-            "nativeLockMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "nativeLockMission", "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::LockMission)
         },
         ani_native_function {
-            "nativeUnlockMission", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "nativeUnlockMission", "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::UnlockMission)
         },
         ani_native_function {
             "nativeGetMissionSnapShot",
-            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::GetMissionSnapShot)
         },
         ani_native_function {
             "nativeGetLowResolutionMissionSnapShot",
-            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::GetLowResolutionMissionSnapShot)
         },
         ani_native_function {
             "nativeArrayLengthCheck",
-            "Lstd/core/Array;:V",
+            "C{std.core.Array}:",
             reinterpret_cast<void *>(EtsMissionManager::ArrayLengthCheck)
         },
         ani_native_function {
             "nativeMoveMissionsToBackground",
-            "Lstd/core/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.Array}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToBackground)
         },
         ani_native_function {
             "nativeMoveMissionsToForeground",
-            "Lstd/core/Array;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.Array}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionsToForeground)
         },
         ani_native_function {
             "nativeMoveMissionToFront",
-            "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionToFront)
         },
         ani_native_function {
             "nativeMoveMissionToFront",
-            "IL@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "iC{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::MoveMissionToFrontWithOptions)
         },
         ani_native_function {
             "nativeOn",
-            "Lstd/core/String;Lapplication/MissionListener/MissionListener;:J",
+            "C{std.core.String}C{application.MissionListener.MissionListener}:l",
             reinterpret_cast<void *>(EtsMissionManager::On)
         },
         ani_native_function {
             "nativeOff",
-            "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}lC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::Off)
         }
     };

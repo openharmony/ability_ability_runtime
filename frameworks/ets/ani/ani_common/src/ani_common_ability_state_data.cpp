@@ -90,14 +90,14 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &data)
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    static const char *className = "Lapplication/AbilityStateData/AbilityStateData;";
+    static const char *className = "application.AbilityStateData.AbilityStateData";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK || ctor == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK || ctor == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod status : %{public}d or null ctor", status);
         return nullptr;
     }
@@ -123,14 +123,14 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    static const char *className = "Lstd/core/Array;";
+    static const char *className = "std.core.Array";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK || ctor == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "i:", &ctor)) != ANI_OK || ctor == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod status : %{public}d or null ctor", status);
         return nullptr;
     }
@@ -147,7 +147,7 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
             TAG_LOGE(AAFwkTag::ABILITYMGR, "null obj");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "ILstd/core/Object;:V", index, obj)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "iC{std.core.Object}:", index, obj)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed");
             return nullptr;
         }

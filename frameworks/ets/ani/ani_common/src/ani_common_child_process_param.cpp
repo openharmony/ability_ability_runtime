@@ -21,8 +21,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* CLASSNAME_CHILDPROCESSARGS = "L@ohos/app/ability/ChildProcessArgs/ChildProcessArgsImpl;";
-constexpr const char* RECORD_CLASS_NAME = "Lstd/core/Record;";
+constexpr const char* CLASSNAME_CHILDPROCESSARGS = "@ohos.app.ability.ChildProcessArgs.ChildProcessArgsImpl";
+constexpr const char* RECORD_CLASS_NAME = "std.core.Record";
 }
 
 bool SetFds(ani_env* env, ani_object object, std::map<std::string, int32_t> &fds)
@@ -39,7 +39,7 @@ bool SetFds(ani_env* env, ani_object object, std::map<std::string, int32_t> &fds
         return false;
     }
     ani_method objectMethod = nullptr;
-    status = env->Class_FindMethod(recordCls, "<ctor>", ":V", &objectMethod);
+    status = env->Class_FindMethod(recordCls, "<ctor>", ":", &objectMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Class_FindMethod constructor failed: %{public}d", status);
         return false;
@@ -191,7 +191,7 @@ ani_object WrapChildProcessArgs(ani_env* env, ChildProcessArgs &args)
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(className, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(className, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "find method failed status: %{public}d", status);
         return nullptr;
@@ -236,7 +236,7 @@ bool UnwrapChildProcessOptions(ani_env* env, ani_object object, ChildProcessOpti
         return true;
     }
     ani_boolean flag = false;
-    status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(propRef), "valueOf", ":Z", &flag);
+    status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(propRef), "valueOf", ":z", &flag);
     if (status != ANI_OK) {
         errorMsg = "Failed to get boolean value for isolationMode.";
         return false;

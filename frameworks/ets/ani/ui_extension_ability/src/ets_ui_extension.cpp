@@ -55,7 +55,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
-constexpr const char* UIEXTENSION_CLASS_NAME = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
+constexpr const char* UIEXTENSION_CLASS_NAME = "@ohos.app.ability.UIExtensionAbility.UIExtensionAbility";
 
 void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
@@ -178,7 +178,7 @@ bool EtsUIExtension::BindNativeMethods()
         return false;
     }
     std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
+        ani_native_function { "nativeOnDestroyCallback", ":", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
     };
     ani_class cls {};
     ani_status status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls);
@@ -265,7 +265,7 @@ void EtsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
         EtsExtensionContext::ConfigurationUpdated(env, shellContextRef_, context->GetConfiguration());
     }
     const char *signature =
-        "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
+        "C{@ohos.app.ability.AbilityConstant.AbilityConstant.LaunchParam}:";
     auto launchParam = Extension::GetLaunchParam();
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
@@ -344,7 +344,7 @@ void EtsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
 
-    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":z");
     if (!isAsyncCallback) {
         OnStopCallBack();
         return;

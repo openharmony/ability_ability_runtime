@@ -41,9 +41,9 @@ std::mutex g_mtxStageMonitorRecord;
 std::mutex g_mutexAbilityRecord;
 
 namespace {
-constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
-constexpr const char* SHELL_CMD_RESULT_CLASS_NAME = "Lapplication/shellCmdResult/ShellCmdResultImpl;";
-constexpr const char* ABILITY_STAGE_CLASS_NAME = "L@ohos/app/ability/AbilityStage/AbilityStage;";
+constexpr const char* CONTEXT_CLASS_NAME = "application.Context.Context";
+constexpr const char* SHELL_CMD_RESULT_CLASS_NAME = "application.shellCmdResult.ShellCmdResultImpl";
+constexpr const char* ABILITY_STAGE_CLASS_NAME = "@ohos.app.ability.AbilityStage.AbilityStage";
 constexpr int COMMON_FAILED = 16000100;
 constexpr ani_double INVALID_LIFECYCLE_STATE = -1;
 }
@@ -89,7 +89,7 @@ ani_object EtsAbilityDelegator::SetAppContext(ani_env *env, const std::shared_pt
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
@@ -127,7 +127,7 @@ ani_object EtsAbilityDelegator::WrapShellCmdResult(ani_env *env, std::unique_ptr
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
         return nullptr;
@@ -1220,7 +1220,7 @@ bool EtsAbilityDelegator::CheckPropertyValue(ani_env *env, int &resultCode, ani_
             TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status: %{public}d", status);
         }
         ani_method method = nullptr;
-        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+        status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
         }

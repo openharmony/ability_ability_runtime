@@ -25,7 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *ATOMIC_SERVICE_STARTUP_RULE_IMPL_CLASS_NAME =
-    "L@ohos/app/ability/abilityManager/abilityManager/AtomicServiceStartupRuleImpl;";
+    "@ohos.app.ability.abilityManager.abilityManager.AtomicServiceStartupRuleImpl";
 }
 EtsQueryERMSObserver::EtsQueryERMSObserver(ani_vm *etsVm) : etsVm_(etsVm) {}
 
@@ -145,7 +145,7 @@ bool EtsQueryERMSObserver::WrapAtomicServiceStartupRule(ani_env *env,
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::QUERY_ERMS, "status : %{public}d", status);
         return false;
     }

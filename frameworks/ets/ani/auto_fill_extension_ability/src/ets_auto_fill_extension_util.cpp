@@ -24,15 +24,15 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *FILL_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/FillRequestInner;";
-constexpr const char *SAVE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/SaveRequestInner;";
-constexpr const char *UPDATE_REQUEST_CLASS_NAME = "Lapplication/AutoFillRequest/UpdateRequestInner;";
-constexpr const char *VIEW_DATA_CLASS_NAME = "Lapplication/ViewData/ViewDataImpl;";
-constexpr const char *ARRAY_CLASS_NAME = "Lstd/core/Array;";
-constexpr const char *PAGE_NODE_INFO_CLASS_NAME = "Lapplication/PageNodeInfo/PageNodeInfoImpl;";
-constexpr const char *AUTO_FILL_RECT_CLASS_NAME = "Lapplication/AutoFillRect/AutoFillRectImpl;";
-constexpr const char *CUSTOM_DATA_CLASS_NAME = "Lapplication/CustomData/CustomDataInner;";
-constexpr const char *AUTO_FILL_TYPE_ENUM_NAME = "Lapplication/AutoFillType/AutoFillType;";
+constexpr const char *FILL_REQUEST_CLASS_NAME = "application.AutoFillRequest.FillRequestInner";
+constexpr const char *SAVE_REQUEST_CLASS_NAME = "application.AutoFillRequest.SaveRequestInner";
+constexpr const char *UPDATE_REQUEST_CLASS_NAME = "application.AutoFillRequest.UpdateRequestInner";
+constexpr const char *VIEW_DATA_CLASS_NAME = "application.ViewData.ViewDataImpl";
+constexpr const char *ARRAY_CLASS_NAME = "std.core.Array";
+constexpr const char *PAGE_NODE_INFO_CLASS_NAME = "application.PageNodeInfo.PageNodeInfoImpl";
+constexpr const char *AUTO_FILL_RECT_CLASS_NAME = "application.AutoFillRect.AutoFillRectImpl";
+constexpr const char *CUSTOM_DATA_CLASS_NAME = "application.CustomData.CustomDataInner";
+constexpr const char *AUTO_FILL_TYPE_ENUM_NAME = "application.AutoFillType.AutoFillType";
 constexpr const char *VIEW_DATA_BUNDLE_NAME = "bundleName";
 constexpr const char *VIEW_DATA_MODULE_NAME = "moduleName";
 constexpr const char *VIEW_DATA_ABILITY_NAME = "abilityName";
@@ -68,7 +68,7 @@ constexpr const char *RECT_HEIGHT = "height";
 constexpr uint32_t PAGE_NODE_COUNT_MAX = 100;
 constexpr const char *WANT_PARAMS_AUTO_FILL_TRIGGER_TYPE_KEY = "ability.want.params.AutoFillTriggerType";
 constexpr const char *TRIGGER_TYPE = "triggerType";
-constexpr const char *AUTO_FILL_TRIGGER_TYPE_ENUM_NAME = "Lapplication/AutoFillTriggerType/AutoFillTriggerType;";
+constexpr const char *AUTO_FILL_TRIGGER_TYPE_ENUM_NAME = "application.AutoFillTriggerType.AutoFillTriggerType";
 } // namespace
 
 ani_object EtsAutoFillExtensionUtil::WrapFillRequest(ani_env *env, const AAFwk::Want &want)
@@ -328,7 +328,7 @@ bool EtsAutoFillExtensionUtil::CreateObject(ani_env *env, ani_object &object, co
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status : %{public}d", status);
         return false;
     }
@@ -507,7 +507,7 @@ void EtsAutoFillExtensionUtil::SetViewDataArray(ani_env *env, ani_object &object
         return;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "i:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status : %{public}d", status);
         return;
     }
@@ -531,7 +531,7 @@ void EtsAutoFillExtensionUtil::SetViewDataArray(ani_env *env, ani_object &object
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null etsSubValue");
             break;
         }
-        if ((status = env->Object_CallMethodByName_Void(object, "$_set", "ILstd/core/Object;:V", index,
+        if ((status = env->Object_CallMethodByName_Void(object, "$_set", "iC{std.core.Object}:", index,
             etsSubValue)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status : %{public}d", status);
             break;
