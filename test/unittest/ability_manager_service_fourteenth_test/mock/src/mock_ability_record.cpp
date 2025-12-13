@@ -300,7 +300,8 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid, uint64_t callbackId)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid,
+    uint64_t callbackId, pid_t selfPid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());

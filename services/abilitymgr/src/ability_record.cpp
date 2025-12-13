@@ -274,7 +274,7 @@ void AbilityRecord::LoadUIAbility()
 }
 
 int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid,
-    uint64_t loadAbilityCallbackId)
+    uint64_t loadAbilityCallbackId, pid_t selfPid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -315,6 +315,7 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     loadParam.loadAbilityCallbackId = loadAbilityCallbackId;
     loadParam.isPrelaunch = isPrelaunch_;
     loadParam.isPreloadStart = isPreloadStart_;
+    loadParam.selfPid = selfPid;
     auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
         MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
@@ -449,7 +450,8 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = options.sceneFlag;
-        LoadAbility(options.isShellCall, options.isStartupHide, options.callingPid, options.loadAbilityCallbackId);
+        LoadAbility(options.isShellCall, options.isStartupHide, options.callingPid,
+            options.loadAbilityCallbackId, options.selfPid);
         return;
     }
 

@@ -99,7 +99,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int LoadAbility(bool isShellCall = false, bool isStartupHide = false, pid_t callingPid = -1,
-        uint64_t loadAbilityCallbackId = 0);
+        uint64_t loadAbilityCallbackId = 0, pid_t selfPid = -1);
 
     /**
      * foreground the ability.

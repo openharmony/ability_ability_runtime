@@ -7149,7 +7149,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0001, TestSize.L
     record->SetInstanceKey(instanceKey);
     mgr->sessionAbilityMap_[1] = record;
 
-    auto ret = mgr->IsUIAbilityAlreadyExist(abilityName, "", appIndex, instanceKey, AppExecFwk::LaunchMode::STANDARD);
+    Want want;
+    want.SetElementName("device", bundleName, abilityName, moduleName);
+    auto ret = mgr->IsUIAbilityAlreadyExist(want, "", appIndex, instanceKey, AppExecFwk::LaunchMode::STANDARD);
     EXPECT_EQ(ret, ERROR_UIABILITY_IS_ALREADY_EXIST);
 }
 
@@ -7182,7 +7184,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0002, TestSize.L
     record->SetSpecifiedFlag(specifiedFlag);
     mgr->sessionAbilityMap_[10] = record;
 
-    auto ret = mgr->IsUIAbilityAlreadyExist(abilityName, specifiedFlag, appIndex, instanceKey,
+    Want want;
+    want.SetElementName("device", bundleName, abilityName, moduleName);
+    auto ret = mgr->IsUIAbilityAlreadyExist(want, specifiedFlag, appIndex, instanceKey,
         AppExecFwk::LaunchMode::SPECIFIED);
     EXPECT_EQ(ret, ERROR_UIABILITY_IS_ALREADY_EXIST);
 }
@@ -7196,7 +7200,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0003, TestSize.L
 {
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(mgr, nullptr);
-    auto ret = mgr->IsUIAbilityAlreadyExist("NoExistAbility", "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
+    Want want;
+    want.SetElementName("device", "com.example.test", "NoExistAbility", "entry");
+    auto ret = mgr->IsUIAbilityAlreadyExist(want, "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
     EXPECT_EQ(ret, ERR_OK);
 
     AbilityRequest abilityRequest;
@@ -7208,7 +7214,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0003, TestSize.L
     record->SetAppIndex(0);
     record->SetInstanceKey("key");
     mgr->sessionAbilityMap_[5] = record;
-    ret = mgr->IsUIAbilityAlreadyExist("NoExistAbility", "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
+    ret = mgr->IsUIAbilityAlreadyExist(want, "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk
