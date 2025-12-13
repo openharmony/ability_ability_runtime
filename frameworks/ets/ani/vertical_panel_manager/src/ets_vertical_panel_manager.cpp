@@ -32,12 +32,12 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* VERTICAL_PANEL_MANAGER_CLASS_NAME =
-    "L@ohos/app/ability/verticalPanelManager/verticalPanelManager;";
+    "@ohos.app.ability.verticalPanelManager.verticalPanelManager";
 constexpr const char* SIGNATURE_START_VERTICAL_PANEL =
-    "Lapplication/UIAbilityContext/UIAbilityContext;Lstd/core/Record;"
-    "L@ohos/app/ability/verticalPanelManager/verticalPanelManager/PanelConfig;"
-    "L@ohos/app/ability/verticalPanelManager/verticalPanelManager/PanelStartCallback;:L@ohos/base/BusinessError;";
-constexpr const char* VERTICAL_TOOL_CLASS = "L@ohos/app/ability/Want/RecordSerializeTool;";
+    "C{application.UIAbilityContext.UIAbilityContext}C{std.core.Record}"
+    "C{@ohos.app.ability.verticalPanelManager.verticalPanelManager.PanelConfig}"
+    "C{@ohos.app.ability.verticalPanelManager.verticalPanelManager.PanelStartCallback}:C{@ohos.base.BusinessError}";
+constexpr const char* VERTICAL_TOOL_CLASS = "@ohos.app.ability.Want.RecordSerializeTool";
 }  // namespace
 class EtsVerticalPanelManager {
 public:

@@ -34,9 +34,9 @@ namespace {
 constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
 constexpr int32_t PARAMETER_ERROR = -1;
-constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
-constexpr const char* WANT_AGENT_NAMESPACE = "L@ohos/app/ability/wantAgent/wantAgent;";
-constexpr const char* CLEANER_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/Cleaner;";
+constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "@ohos.app.ability.wantAgent.wantAgent.CompleteDataImpl";
+constexpr const char* WANT_AGENT_NAMESPACE = "@ohos.app.ability.wantAgent.wantAgent";
+constexpr const char* CLEANER_CLASS = "@ohos.app.ability.wantAgent.wantAgent.Cleaner";
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -141,7 +141,7 @@ bool OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
         return false;
     }
@@ -798,7 +798,7 @@ ani_object EtsWantAgent::CreateEtsCompletedData(ani_env *env, const CompletedDis
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
         return nullptr;
     }
@@ -972,7 +972,7 @@ ani_status BindNativeFunctions(ani_env *env)
             reinterpret_cast<void *>(EtsWantAgent::CreateLocalWantAgent) },
         ani_native_function { "nativeIsLocalWantAgent", nullptr,
             reinterpret_cast<void *>(EtsWantAgent::IsLocalWantAgent) },
-        ani_native_function { "nativeTriggerCheck", "Lstd/core/Object;LwantAgent/triggerInfo/TriggerInfo;:V",
+        ani_native_function { "nativeTriggerCheck", "C{std.core.Object}C{wantAgent.triggerInfo.TriggerInfo}:",
             reinterpret_cast<void *>(EtsWantAgent::TriggerCheck) },
         ani_native_function { "nativeTriggerAsync", nullptr, reinterpret_cast<void *>(EtsWantAgent::TriggerAsync) },
     };

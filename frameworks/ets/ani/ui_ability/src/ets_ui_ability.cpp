@@ -66,16 +66,16 @@ const std::string METHOD_NAME = "WindowScene::GoForeground";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t BASE_DISPLAY_ID_NUM(10);
 #endif
-constexpr const char *UI_ABILITY_CLASS_NAME = "L@ohos/app/ability/UIAbility/UIAbility;";
-constexpr const char *UI_ABILITY_SIGNATURE_VOID = ":V";
-constexpr const char *MEMORY_LEVEL_ENUM_NAME = "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
+constexpr const char *UI_ABILITY_CLASS_NAME = "@ohos.app.ability.UIAbility.UIAbility";
+constexpr const char *UI_ABILITY_SIGNATURE_VOID = ":";
+constexpr const char *MEMORY_LEVEL_ENUM_NAME = "@ohos.app.ability.AbilityConstant.AbilityConstant.MemoryLevel";
 constexpr const char *ON_SAVE_RESULT_ENUM_NAME = "@ohos.app.ability.AbilityConstant.AbilityConstant.OnSaveResult";
 constexpr int32_t ON_SAVESTATE_INDEX = 2;
 constexpr int32_t ON_SAVESTATE_INDEX_ONE = 1;
 constexpr const int32_t CALL_BACK_ERROR = -1;
-constexpr const char *ON_SHARE_SIGNATURE = "Lstd/core/Record;:V";
+constexpr const char *ON_SHARE_SIGNATURE = "C{std.core.Record}:";
 constexpr const char *ON_COLLABORATE =
-    "Lstd/core/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/CollaborateResult;";
+    "C{std.core.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
 
 #define DISPATCH_ABILITY_INTEROP(type, applicationContext, etsRuntime, ability)                      \
     do {                                                                                            \
@@ -296,8 +296,8 @@ bool EtsUIAbility::BindNativeMethods()
     }
     std::call_once(singletonFlag_, [&status, env, cls]() {
         std::array functions = {
-            ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void *>(OnDestroyPromiseCallback) },
-            ani_native_function { "nativeOnPrepareToTerminateCallback", "Z:V",
+            ani_native_function { "nativeOnDestroyCallback", ":", reinterpret_cast<void *>(OnDestroyPromiseCallback) },
+            ani_native_function { "nativeOnPrepareToTerminateCallback", "z:",
                 reinterpret_cast<void *>(OnPrepareTerminatePromiseCallback) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
@@ -587,7 +587,7 @@ void EtsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
         TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Long status: %{public}d", status);
         return;
     }
-    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":z");
     TAG_LOGD(AAFwkTag::UIABILITY, "callOnDestroy isAsyncCallback: %{public}d", isAsyncCallback);
     if (!isAsyncCallback) {
         OnStopCallback();

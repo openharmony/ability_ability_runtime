@@ -25,11 +25,11 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *SIGNATURE_APP_STATE_DATA = "Lapplication/AppStateData/AppStateData;:V";
-constexpr const char *SIGNATURE_ABILITY_STATE_DATA = "Lapplication/AbilityStateData/AbilityStateData;:V";
-constexpr const char *SIGNATURE_PROCESS_DATA = "Lapplication/ProcessData/ProcessData;:V";
+constexpr const char *SIGNATURE_APP_STATE_DATA = "C{application.AppStateData.AppStateData}:";
+constexpr const char *SIGNATURE_ABILITY_STATE_DATA = "C{application.AbilityStateData.AbilityStateData}:";
+constexpr const char *SIGNATURE_PROCESS_DATA = "C{application.ProcessData.ProcessData}:";
 constexpr const char *CLASS_NAME_APPLIACTION_STATE_OBSERVER =
-    "Lapplication/ApplicationStateObserver/ApplicationStateObserverImpl;";
+    "application.ApplicationStateObserver.ApplicationStateObserverImpl";
 }
 
 EtsAppStateObserver::EtsAppStateObserver(ani_vm *etsVm) : etsVm_(etsVm) {}

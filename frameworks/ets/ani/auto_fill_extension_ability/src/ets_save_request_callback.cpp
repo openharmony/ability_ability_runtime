@@ -26,8 +26,8 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *SAVE_REQUEST_CALL_BACK_CLASS_NAME = "Lapplication/AutoFillRequest/SaveRequestCallbackInner;";
-constexpr const char *CLEANER_CLASS = "Lapplication/AutoFillRequest/Cleaner;";
+constexpr const char *SAVE_REQUEST_CALL_BACK_CLASS_NAME = "application.AutoFillRequest.SaveRequestCallbackInner";
+constexpr const char *CLEANER_CLASS = "application.AutoFillRequest.Cleaner";
 }
 
 EtsSaveRequestCallback::EtsSaveRequestCallback(
@@ -53,7 +53,7 @@ ani_object EtsSaveRequestCallback::SetEtsSaveRequestCallback(ani_env *env, sptr<
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "find method status: %{public}d", status);
         return nullptr;
     }
@@ -187,9 +187,9 @@ ani_object EtsSaveRequestCallback::CreateEtsSaveRequestCallback(ani_env *env,
         return nullptr;
     }
     std::array functions = {
-        ani_native_function { "onSuccess", ":V",
+        ani_native_function { "onSuccess", ":",
             reinterpret_cast<void*>(EtsSaveRequestCallback::SaveRequestSuccess) },
-        ani_native_function { "onFailure", ":V",
+        ani_native_function { "onFailure", ":",
             reinterpret_cast<void*>(EtsSaveRequestCallback::SaveRequestFailed) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK

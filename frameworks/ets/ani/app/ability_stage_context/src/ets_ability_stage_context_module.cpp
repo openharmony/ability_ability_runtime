@@ -329,9 +329,9 @@ void EtsAbilityStageContextModuleInit(ani_env *aniEnv)
     }
 
     std::array nativeFuncs = {
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;Lstd/core/String;:Lstd/core/Object;",
+        ani_native_function { "nativeTransferStatic", "C{std.interop.ESValue}C{std.core.String}:C{std.core.Object}",
             reinterpret_cast<void*>(EtsAbilityStageContextModule::NativeTransferStatic) },
-        ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+        ani_native_function { "nativeTransferDynamic", "C{std.core.Object}:C{std.interop.ESValue}",
             reinterpret_cast<void*>(EtsAbilityStageContextModule::NativeTransferDynamic) },
     };
     status = aniEnv->Class_BindNativeMethods(abilityStageContextCls, nativeFuncs.data(), nativeFuncs.size());

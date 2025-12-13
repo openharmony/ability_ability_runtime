@@ -37,8 +37,8 @@ constexpr const char *CONFIG_POPUP_SIZE = "popupSize";
 constexpr const char *CONFIG_POPUP_PLACEMENT = "placement";
 constexpr const char *WANT_PARAMS_FILL_CONTENT = "ohos.ability.params.fillContent";
 constexpr const char *ERROR_MSG_INVALID_EMPTY = "JsonString is empty.";
-constexpr const char *FILL_REQUEST_CALL_BACK_CLASS_NAME = "Lapplication/AutoFillRequest/FillRequestCallbackInner;";
-constexpr const char *CLEANER_CLASS = "Lapplication/AutoFillRequest/Cleaner;";
+constexpr const char *FILL_REQUEST_CALL_BACK_CLASS_NAME = "application.AutoFillRequest.FillRequestCallbackInner";
+constexpr const char *CLEANER_CLASS = "application.AutoFillRequest.Cleaner";
 }
 
 EtsFillRequestCallback::EtsFillRequestCallback(
@@ -64,7 +64,7 @@ ani_object EtsFillRequestCallback::SetEtsFillRequestCallback(ani_env *env, sptr<
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "find method status: %{public}d", status);
         return nullptr;
     }
@@ -315,13 +315,13 @@ ani_object EtsFillRequestCallback::CreateEtsFillRequestCallback(ani_env *env,
         return nullptr;
     }
     std::array functions = {
-        ani_native_function { "onSuccess", "Lapplication/AutoFillRequest/FillResponse;:V",
+        ani_native_function { "onSuccess", "C{application.AutoFillRequest.FillResponse}:",
             reinterpret_cast<void*>(EtsFillRequestCallback::FillRequestSuccess) },
-        ani_native_function { "onFailure", ":V",
+        ani_native_function { "onFailure", ":",
             reinterpret_cast<void*>(EtsFillRequestCallback::FillRequestFailed) },
-        ani_native_function { "onCancel", "Lstd/core/String;:V",
+        ani_native_function { "onCancel", "C{std.core.String}:",
             reinterpret_cast<void*>(EtsFillRequestCallback::FillRequestCanceled) },
-        ani_native_function { "setAutoFillPopupConfig", "Lapplication/AutoFillPopupConfig/AutoFillPopupConfig;:V",
+        ani_native_function { "setAutoFillPopupConfig", "C{application.AutoFillPopupConfig.AutoFillPopupConfig}:",
             reinterpret_cast<void*>(EtsFillRequestCallback::FillRequestAutoFillPopupConfig) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK

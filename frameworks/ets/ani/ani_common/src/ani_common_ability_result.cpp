@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char *ABILITY_RESULT_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
+constexpr const char *ABILITY_RESULT_CLASS_NAME = "ability.abilityResult.AbilityResultInner";
 } // namespace
 
 ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want)

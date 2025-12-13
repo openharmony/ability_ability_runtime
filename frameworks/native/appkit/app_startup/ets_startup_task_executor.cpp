@@ -44,7 +44,7 @@ int32_t ETSStartupTaskExecutor::RunOnTaskPool(ani_env *env, ani_ref startupTask,
     ani_method ctor = nullptr;
     ani_object object = nullptr;
     
-    if ((status = env->FindClass("Lappstartup/StartupTaskExecutor/StartupTaskExecutor;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("appstartup.StartupTaskExecutor.StartupTaskExecutor", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "FindClass failed, status: %{public}d", status);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -53,7 +53,7 @@ int32_t ETSStartupTaskExecutor::RunOnTaskPool(ani_env *env, ani_ref startupTask,
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "findMethod failed, status: %{public}d", status);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -73,8 +73,8 @@ int32_t ETSStartupTaskExecutor::RunOnTaskPool(ani_env *env, ani_ref startupTask,
     }
     ani_long nativeCallbackLong = reinterpret_cast<ani_long>(weakCallback);
     if ((status = env->Object_CallMethodByName_Void(object, "asyncPushTask",
-        "L@ohos/app/appstartup/StartupTask/StartupTask;Lapplication/AbilityStageContext/AbilityStageContext;"
-        "J:V", startupTaskObj, contextObj, nativeCallbackLong)) != ANI_OK) {
+        "C{@ohos.app.appstartup.StartupTask.StartupTask}C{application.AbilityStageContext.AbilityStageContext}"
+        "l:", startupTaskObj, contextObj, nativeCallbackLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "failed to call asyncPushTask, status: %{public}d", status);
         delete weakCallback;
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
@@ -98,7 +98,7 @@ int32_t ETSStartupTaskExecutor::RunOnMainThread(ani_env *env, ani_ref startupTas
     ani_class cls = nullptr;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    if ((status = env->FindClass("Lappstartup/StartupTaskExecutor/StartupTaskExecutor;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("appstartup.StartupTaskExecutor.StartupTaskExecutor", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "status : %{public}d", status);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -107,7 +107,7 @@ int32_t ETSStartupTaskExecutor::RunOnMainThread(ani_env *env, ani_ref startupTas
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "findMethod failed, status : %{public}d", status);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -126,8 +126,8 @@ int32_t ETSStartupTaskExecutor::RunOnMainThread(ani_env *env, ani_ref startupTas
     ani_object contextObj = reinterpret_cast<ani_object>(context);
     ani_long nativeCallbackLong = reinterpret_cast<ani_long>(weakCallback);
     if ((status = env->Object_CallMethodByName_Void(object, "executeStartupTaskOnMainThread",
-        "L@ohos/app/appstartup/StartupTask/StartupTask;Lapplication/AbilityStageContext/AbilityStageContext;"
-        "J:V", startupTaskObj, contextObj, nativeCallbackLong)) != ANI_OK) {
+        "C{@ohos.app.appstartup.StartupTask.StartupTask}C{application.AbilityStageContext.AbilityStageContext}"
+        "l:", startupTaskObj, contextObj, nativeCallbackLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "failed to call executeStartupTaskOnMainThread, status:%{public}d", status);
         delete weakCallback;
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
@@ -235,16 +235,16 @@ void ETSStartupTaskExecutorInit(ani_env *env)
         return;
     }
     ani_class startupTaskExecutorCls = nullptr;
-    auto status = env->FindClass("Lappstartup/StartupTaskExecutor/StartupTaskExecutor;", &startupTaskExecutorCls);
+    auto status = env->FindClass("appstartup.StartupTaskExecutor.StartupTaskExecutor", &startupTaskExecutorCls);
     if (status != ANI_OK || startupTaskExecutorCls == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "find StartupTaskExecutor class failed");
         return;
     }
 
     std::array startupTaskExecutorNativeFuncs = {
-        ani_native_function { "nativeOnTaskSuccess", "JLstd/core/Object;:V",
+        ani_native_function { "nativeOnTaskSuccess", "lC{std.core.Object}:",
             reinterpret_cast<void*>(ETSStartupTaskExecutor::NativeOnTaskSuccess) },
-        ani_native_function { "nativeOnTaskFailure", "JLstd/core/String;:V",
+        ani_native_function { "nativeOnTaskFailure", "lC{std.core.String}:",
             reinterpret_cast<void*>(ETSStartupTaskExecutor::NativeOnTaskFailure) },
     };
 

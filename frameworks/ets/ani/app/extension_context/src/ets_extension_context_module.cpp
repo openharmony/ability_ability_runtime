@@ -37,15 +37,15 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *ETS_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/ExtensionContext/ExtensionContext;";
+constexpr const char *ETS_EXTENSION_CONTEXT_CLASS_NAME = "application.ExtensionContext.ExtensionContext";
 
 std::string GetClassNameByContextType(const std::string &contextType)
 {
     std::string className;
     static const std::unordered_map<std::string, std::string> mapping = {
-        {"ExtensionContext", "Lapplication/ExtensionContext/ExtensionContext;"},
-        {"UIExtensionContext", "Lapplication/UIExtensionContext/UIExtensionContext;"},
-        {"AutoFillExtensionContext", "Lapplication/AutoFillExtensionContext/AutoFillExtensionContext;"}
+        {"ExtensionContext", "application.ExtensionContext.ExtensionContext"},
+        {"UIExtensionContext", "application.UIExtensionContext.UIExtensionContext"},
+        {"AutoFillExtensionContext", "application.AutoFillExtensionContext.AutoFillExtensionContext"}
     };
     auto it = mapping.find(contextType);
     if (it != mapping.end()) {
@@ -360,7 +360,7 @@ void EtsExtensionContextModule::RegisterContextObjectCreator()
         [](ani_env *aniEnv, std::shared_ptr<Context> context) -> ani_object {
             ani_class cls {};
             ani_status status = ANI_ERROR;
-            if ((status = aniEnv->FindClass("Lapplication/Context/Context;", &cls)) != ANI_OK) {
+            if ((status = aniEnv->FindClass("application.Context.Context", &cls)) != ANI_OK) {
                 TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
                 return nullptr;
             }
@@ -374,7 +374,7 @@ void EtsExtensionContextModule::RegisterContextObjectCreator()
                 TAG_LOGE(AAFwkTag::CONTEXT, "invalid extensionContext");
                 return nullptr;
             }
-            if ((status = aniEnv->FindClass("Lapplication/ExtensionContext/ExtensionContext;", &cls)) != ANI_OK) {
+            if ((status = aniEnv->FindClass("application.ExtensionContext.ExtensionContext", &cls)) != ANI_OK) {
                 TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
                 return nullptr;
             }
@@ -484,9 +484,9 @@ void EtsExtensionContextModuleInit(ani_env *aniEnv)
     }
 
     std::array nativeFuncs = {
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;Lstd/core/String;:Lstd/core/Object;",
+        ani_native_function { "nativeTransferStatic", "C{std.interop.ESValue}C{std.core.String}:C{std.core.Object}",
             reinterpret_cast<void*>(EtsExtensionContextModule::NativeTransferStatic) },
-        ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+        ani_native_function { "nativeTransferDynamic", "C{std.core.Object}:C{std.interop.ESValue}",
             reinterpret_cast<void*>(EtsExtensionContextModule::NativeTransferDynamic) },
     };
     status = aniEnv->Class_BindStaticNativeMethods(extensionContextCls, nativeFuncs.data(), nativeFuncs.size());
