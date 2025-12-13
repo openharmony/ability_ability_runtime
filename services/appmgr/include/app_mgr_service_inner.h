@@ -1901,6 +1901,11 @@ private:
     void ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
         const std::shared_ptr<AAFwk::Want>& want);
 
+    void HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,
+        std::shared_ptr<AbilityInfo> abilityInfo, const HapModuleInfo &hapModuleInfo,
+        std::shared_ptr<AAFwk::Want> want, bool isProcCache,
+        const std::shared_ptr<AbilityRuntime::LoadParam> &loadParam);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.

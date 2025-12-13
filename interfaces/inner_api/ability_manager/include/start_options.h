@@ -147,7 +147,7 @@ private:
     int32_t minWindowHeight_ = 0;
     int32_t maxWindowWidth_ = 0;
     int32_t maxWindowHeight_ = 0;
-    std::string currentProcessName_;
+    std::string currentProcessName_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

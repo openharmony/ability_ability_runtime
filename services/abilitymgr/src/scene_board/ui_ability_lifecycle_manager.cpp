@@ -271,6 +271,9 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         options.callingPid = abilityRequest.processOptions->callingPid;
         options.loadAbilityCallbackId = abilityRequest.processOptions->loadAbilityCallbackId;
     }
+    if (sessionInfo->processOptions != nullptr) {
+        options.selfPid = sessionInfo->processOptions->selfPid;
+    }
     uiAbilityRecord->ProcessForegroundAbility(callerTokenId, options);
     if (uiAbilityRecord->GetSpecifiedFlag().empty() && !sessionInfo->specifiedFlag.empty()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "update specified: %{public}d--%{public}s", sessionInfo->requestId,
@@ -407,10 +410,6 @@ UIAbilityRecordPtr UIAbilityLifecycleManager::GenerateAbilityRecord(AbilityReque
         }
         MoreAbilityNumbersSendEventInfo(
             abilityRequest.userId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
-        if (!abilityRequest.startOptions.GetCurrentProcessName().empty()) {
-            uiAbilityRecord->SetProcessName(abilityRequest.abilityInfo.process);
-            uiAbilityRecord->SetCallerSetProcess(true);
-        }
         if (isLowMemKill) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
                 "replacing old record id=%{public}d, new record id=%{public}d",
@@ -4340,7 +4339,7 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
     return ERR_OK;
 }
 
-ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &abilityName,
+ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const Want &want,
     const std::string &specifiedFlag, int32_t appIndex,
     const std::string &instanceKey, AppExecFwk::LaunchMode launchMode)
 {
@@ -4349,18 +4348,22 @@ ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &ab
         std::lock_guard<ffrt::mutex> guard(sessionLock_);
         tempSessionAbilityMap = sessionAbilityMap_;
     }
+    std::string moduleName = want.GetElement().GetModuleName();
+    std::string abilityName = want.GetElement().GetAbilityName();
 
     for (auto it = tempSessionAbilityMap.begin(); it != tempSessionAbilityMap.end(); it++) {
         if (it->second == nullptr) {
             continue;
         }
         if (launchMode == AppExecFwk::LaunchMode::SPECIFIED && it->second->GetSpecifiedFlag() == specifiedFlag &&
-            it->second->GetAbilityInfo().name == abilityName && it->second->GetAppIndex() == appIndex &&
-            it->second->GetInstanceKey() == instanceKey) {
+            it->second->GetAbilityInfo().name == abilityName &&
+            (moduleName.empty() || it->second->GetAbilityInfo().moduleName == moduleName) &&
+            it->second->GetAppIndex() == appIndex && it->second->GetInstanceKey() == instanceKey) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag is already exist");
             return ERROR_UIABILITY_IS_ALREADY_EXIST;
         }
         if (launchMode != AppExecFwk::LaunchMode::SPECIFIED && it->second->GetAbilityInfo().name == abilityName &&
+            (moduleName.empty() || it->second->GetAbilityInfo().moduleName == moduleName) &&
             it->second->GetInstanceKey() == instanceKey && it->second->GetAppIndex() == appIndex) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "UIAbility is already exist");
             return ERROR_UIABILITY_IS_ALREADY_EXIST;

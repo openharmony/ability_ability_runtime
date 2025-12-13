@@ -934,6 +934,24 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
         return;
     }
+    BundleInfo bundleInfo;
+    bool isProcCache = false;
+    HapModuleInfo hapModuleInfo;
+    int32_t appIndex = 0;
+    if (loadParam->selfPid > 0) {
+        if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
+            return;
+        }
+        std::shared_ptr<AppRunningRecord> appRecord = GetAppRunningRecordByPid(loadParam->selfPid);
+        if (appRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "appRecord not found by pid %{public}d", loadParam->selfPid);
+            return;
+        }
+        isProcCache = DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
+        HandleExistingAppRecordAfterFound(appRecord, abilityInfo, hapModuleInfo, want, isProcCache, loadParam);
+        return;
+    }
     LoadAbilityCallbackGuard guard(loadParam->loadAbilityCallbackId, loadParam->callingPid, weak_from_this());
     if (!CheckLoadAbilityConditions(loadParam->token, abilityInfo, appInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
@@ -954,9 +972,6 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         return;
     }
 
-    BundleInfo bundleInfo;
-    HapModuleInfo hapModuleInfo;
-    int32_t appIndex = 0;
     std::string callerKey;
     std::string processName;
     std::string specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want); // for isolation process
@@ -965,7 +980,6 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isWatermarkEnabled = false;
     bool isFileUri = false;
     std::string customProcessFlag = loadParam->customProcessFlag;
-    bool isProcCache = false;
     bool isExtensionSandBox = false;
     if (want != nullptr) {
         if (want->HasParameter(DLP_INDEX)) {
@@ -1073,41 +1087,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             return;
         }
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
-        if (!appRecord->IsKeepAliveDkv()) {
-            TAG_LOGD(AAFwkTag::APPMGR, "appRecord setKeepAlive");
-            appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
-        }
-        if (!appRecord->IsMainElementRunning()) {
-            TAG_LOGD(AAFwkTag::APPMGR, "appRecord SetMainElementRunning");
-            appRecord->SetMainElementRunning(loadParam->isMainElementRunning);
-        }
-        if (appRecord->GetProcessType() == ProcessType::EXTENSION &&
-            appRecord->GetExtensionType() != abilityInfo->extensionAbilityType) {
-            appRecord->SetProcessType(ProcessType::NORMAL);
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessTypeChanged(appRecord);
-        }
-        ReportEventToRSS(*abilityInfo, appRecord);
-        appRunningManager_->UpdateConfigurationDelayed(appRecord);
-        if (!isProcCache) {
-            SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
-        } else {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
-        }
-        if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
-            appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
-        }
-        if (appRecord->IsPreloaded()) {
-            appRecord->SetPreloadState(PreloadState::NONE);
-            appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
-        }
-        int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
-        if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
-            appRecord->SetRequestProcCode(requestProcCode);
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
-        }
-        StartAbility(loadParam->token, loadParam->preToken, abilityInfo, appRecord, hapModuleInfo, want,
-            loadParam->abilityRecordId);
+        HandleExistingAppRecordAfterFound(appRecord, abilityInfo, hapModuleInfo, want, isProcCache, loadParam);
         if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
             AddUIExtensionBindItem(want, appRecord, loadParam->token);
             AddUIExtensionLauncherItem(want, appRecord, loadParam->token);
@@ -1189,6 +1169,47 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
         UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     }
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
+}
+
+void AppMgrServiceInner::HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,
+    std::shared_ptr<AbilityInfo> abilityInfo, const HapModuleInfo &hapModuleInfo,
+    std::shared_ptr<AAFwk::Want> want, bool isProcCache, const std::shared_ptr<AbilityRuntime::LoadParam> &loadParam)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
+    if (!appRecord->IsKeepAliveDkv()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "appRecord setKeepAlive");
+        appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
+    }
+    if (!appRecord->IsMainElementRunning()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "appRecord SetMainElementRunning");
+        appRecord->SetMainElementRunning(loadParam->isMainElementRunning);
+    }
+    if (appRecord->GetProcessType() == ProcessType::EXTENSION &&
+        appRecord->GetExtensionType() != abilityInfo->extensionAbilityType) {
+        appRecord->SetProcessType(ProcessType::NORMAL);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessTypeChanged(appRecord);
+    }
+    ReportEventToRSS(*abilityInfo, appRecord);
+    appRunningManager_->UpdateConfigurationDelayed(appRecord);
+    if (!isProcCache) {
+        SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
+    } else {
+        SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
+    }
+    if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
+        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+    }
+    if (appRecord->IsPreloaded()) {
+        appRecord->SetPreloadState(PreloadState::NONE);
+        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+    }
+    int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
+    if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
+        appRecord->SetRequestProcCode(requestProcCode);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
+    }
+    StartAbility(loadParam->token, loadParam->preToken, abilityInfo, appRecord, hapModuleInfo, want,
+        loadParam->abilityRecordId);
 }
 
 void AppMgrServiceInner::AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want,
