@@ -251,11 +251,7 @@ bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest 
     AbilityBase::AutoFillType autoFillType = request.autoFillType;
     if (request.autoFillTriggerType == AutoFill::AutoFillTriggerType::MANUAL_REQUEST ||
         request.autoFillTriggerType == AutoFill::AutoFillTriggerType::PASTE_REQUEST) {
-        if (system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
-            autoFillWindowType = AutoFill::AutoFillWindowType::POPUP_WINDOW;
-        } else {
-            autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
-        }
+        autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
         isSmartAutoFill = false;
     } else if (autoFillType >= AbilityBase::AutoFillType::FULL_STREET_ADDRESS &&
         autoFillType <= AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER) {

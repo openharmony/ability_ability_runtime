@@ -297,20 +297,31 @@ HWTEST_F(AutoFillManagerTest, ConvertAutoFillWindowType_0200, TestSize.Level1)
     GTEST_LOG_(INFO) << "AutoFillManagerTest, ConvertAutoFillWindowType_0200, TestSize.Level1";
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.autoFillTriggerType = AbilityRuntime::AutoFill::AutoFillTriggerType::PASTE_REQUEST;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::PERSON_FULL_NAME;
     bool isSmartAutoFill = true;
     AbilityRuntime::AutoFill::AutoFillWindowType autoFillWindowType
         = AbilityRuntime::AutoFill::AutoFillWindowType::POPUP_WINDOW;
     auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
-    system::SetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false);
     manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill, autoFillWindowType);
     EXPECT_FALSE(isSmartAutoFill);
     EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::MODAL_WINDOW);
     isSmartAutoFill = true;
     autoFillRequest.autoFillTriggerType = AbilityRuntime::AutoFill::AutoFillTriggerType::MANUAL_REQUEST;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
+    manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill, autoFillWindowType);
+    EXPECT_FALSE(isSmartAutoFill);
+    EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::MODAL_WINDOW);
     system::SetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, true);
+    autoFillRequest.autoFillTriggerType = AbilityRuntime::AutoFill::AutoFillTriggerType::AUTO_REQUEST;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::USER_NAME;
     manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill, autoFillWindowType);
     EXPECT_FALSE(isSmartAutoFill);
     EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::POPUP_WINDOW);
+    autoFillRequest.autoFillTriggerType = AbilityRuntime::AutoFill::AutoFillTriggerType::UNSPECIFIED;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
+    manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill, autoFillWindowType);
+    EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::MODAL_WINDOW);
+    system::SetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false);
 }
 
 /*
