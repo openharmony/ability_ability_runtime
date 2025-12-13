@@ -616,7 +616,7 @@ ani_object CreateEtsConfigIntentInfo(ani_env *env, const InsightIntentInfoForQue
     }
     ani_object formIntentInfo = CreateEtsFormIntentInfoForQuery(env, info.formIntentInfo);
     if (formIntentInfo != nullptr) {
-        env->Object_SetPropertyByName_Ref(objValue, "formIntent", formIntentInfo);
+        env->Object_SetPropertyByName_Ref(objValue, "form", formIntentInfo);
     }
     if (!info.cfgEntities.empty()) {
         env->Object_SetPropertyByName_Ref(objValue, "entities", CreateInsightIntentInfoParam(env, info.cfgEntities));
