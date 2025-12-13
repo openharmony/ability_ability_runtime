@@ -36,6 +36,7 @@ public:
     static bool IsFoundationCall();
     static bool IsSAOrSystemAppCall();
     static bool IsSystemAppCall();
+    static bool IsPrivilegedSACall();
     static bool CheckIsSystemAppByTokenId(uint32_t tokenId);
     static bool GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName);
     static bool GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);
