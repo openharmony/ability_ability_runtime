@@ -81,33 +81,5 @@ HWTEST_F(AbilityRecordDumpTest, AbilityRecordDump_DumpAbilityState_0100, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityRecordDump_DumpAbilityState_0100 end");
 }
 
-/**
- * @tc.name: AbilityRecordDump_DumpService_0100
- * @tc.desc: DumpService
- * @tc.type: FUNC
- * @tc.require: SR000GH1GO
- */
-HWTEST_F(AbilityRecordDumpTest, AbilityRecordDump_DumpService_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityRecordDump_DumpService_0100 start");
-
-    Want want;
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    EXPECT_NE(abilityRecord, nullptr);
-
-    std::vector<std::string> info;
-    bool isClient = false;
-    abilityRecord->DumpService(info, isClient);
-    EXPECT_GT(info.size(), SIZE_ONE);
-
-    TAG_LOGI(AAFwkTag::TEST, "info.size() = %{public}zu", info.size());
-    for (auto item : info) {
-        TAG_LOGI(AAFwkTag::TEST, "item = %{public}s", item.c_str());
-    }
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityRecordDump_DumpService_0100 end");
-}
 }  // namespace AAFwk
 }  // namespace OHOS

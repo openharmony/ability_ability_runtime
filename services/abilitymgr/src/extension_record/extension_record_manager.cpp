@@ -156,7 +156,7 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
 }
 
 int32_t ExtensionRecordManager::GetOrCreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
-    const std::string &hostBundleName, std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, bool &isLoaded)
+    const std::string &hostBundleName, std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord, bool &isLoaded)
 {
     CHECK_POINTER_AND_RETURN(abilityRequest.sessionInfo, ERR_INVALID_VALUE);
     abilityRecord = GetAbilityRecordBySessionInfo(abilityRequest.sessionInfo);
@@ -188,7 +188,7 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecord(const AAFwk::AbilityR
     return ERR_OK;
 }
 
-std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetAbilityRecordBySessionInfo(
+std::shared_ptr<AAFwk::BaseExtensionRecord> ExtensionRecordManager::GetAbilityRecordBySessionInfo(
     const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
@@ -202,7 +202,7 @@ std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetAbilityRecordBy
         if (it.second == nullptr) {
             continue;
         }
-        std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = it.second->abilityRecord_;
+        std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord = it.second->abilityRecord_;
         if (abilityRecord == nullptr) {
             continue;
         }
@@ -348,7 +348,8 @@ int32_t ExtensionRecordManager::GetHostPidForExtensionId(int32_t extensionRecord
     return ERR_INVALID_VALUE;
 }
 
-int32_t ExtensionRecordManager::AddPreloadUIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> abilityRecord)
+int32_t ExtensionRecordManager::AddPreloadUIExtensionRecord(
+    const std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     std::lock_guard<std::mutex> lock(mutex_);
@@ -495,7 +496,7 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecordInner(const AAFwk::Abi
         return result;
     }
     CHECK_POINTER_AND_RETURN(extensionRecord, ERR_NULL_OBJECT);
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = extensionRecord->abilityRecord_;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord = extensionRecord->abilityRecord_;
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
     isLoaded = false;
     // Reuse id or not has been checked, so alloc a new id here.
@@ -517,7 +518,8 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecordInner(const AAFwk::Abi
 }
 
 int32_t ExtensionRecordManager::SetAbilityProcessName(const AAFwk::AbilityRequest &abilityRequest,
-    const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord)
+    const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord,
+    std::shared_ptr<ExtensionRecord> &extensionRecord)
 {
     if (abilityRequest.abilityInfo.isolationProcess &&
         AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
@@ -601,7 +603,7 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
         return result;
     }
     CHECK_POINTER_AND_RETURN(extensionRecord, ERR_NULL_OBJECT);
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = extensionRecord->abilityRecord_;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord = extensionRecord->abilityRecord_;
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
     extensionRecordId = GenerateExtensionRecordId(extensionRecordId);
     extensionRecord->extensionRecordId_ = extensionRecordId;

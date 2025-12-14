@@ -577,7 +577,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, TerminateUIServiceExtensionAbility_001
     std::string bundleName = "com.ix.hiservcie";
     std::string moduleName = "entry";
     abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     token = abilityRecord->GetToken();
     auto connectManager = std::make_shared<AbilityConnectManager>(1);
     connectManager->sceneBoardTokenId_ = 1;

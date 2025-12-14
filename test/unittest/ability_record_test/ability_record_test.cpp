@@ -327,63 +327,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_IsLauncherAbility, TestSize.Level1)
 
 /*
  * Feature: AbilityRecord
- * Function: Add connection record to ability record' list
- * SubFunction: NA
- * FunctionPoints: AddConnectRecordToList
- * EnvConditions: NA
- * CaseDescription: AddConnectRecordToList UT.
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_AddConnectRecordToList, TestSize.Level1)
-{
-    // test1 for input param is null
-    abilityRecord_->AddConnectRecordToList(nullptr);
-    auto connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(0, static_cast<int>(connList.size()));
-
-    // test2 for adding new connection record to empty list
-    OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
-    auto newConnRecord1 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback1, nullptr);
-    abilityRecord_->AddConnectRecordToList(newConnRecord1);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(1, static_cast<int>(connList.size()));
-
-    // test3 for adding new connection record to non-empty list
-    OHOS::sptr<IAbilityConnection> callback2 = new AbilityConnectCallback();
-    auto newConnRecord2 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
-    abilityRecord_->AddConnectRecordToList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test4 for adding old connection record to non-empty list
-    abilityRecord_->AddConnectRecordToList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test5 for delete nullptr from list
-    abilityRecord_->RemoveConnectRecordFromList(nullptr);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test6 for delete no-match member from list
-    auto newConnRecord3 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
-    abilityRecord_->RemoveConnectRecordFromList(newConnRecord3);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test7 for delete match member from list
-    abilityRecord_->RemoveConnectRecordFromList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(1, static_cast<int>(connList.size()));
-
-    // test8 for get ability unknown type
-    EXPECT_EQ(OHOS::AppExecFwk::AbilityType::UNKNOWN, abilityRecord_->GetAbilityInfo().type);
-}
-
-/*
- * Feature: AbilityRecord
  * Function: ConvertAbilityState
  * SubFunction: NA
  * FunctionPoints: NA
@@ -572,21 +515,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_GetAbilityTypeString, TestSize.Level
     recordData = std::make_shared<AbilityRecord>(wantData, abilityData, appInfoData);
     recordData->GetAbilityTypeString(typeStr);
     EXPECT_EQ(typeStr, "DATA");
-}
-
-/*
- * Feature: AbilityRecord
- * Function: SetConnRemoteObject GetConnRemoteObject
- * SubFunction: SetConnRemoteObject GetConnRemoteObject
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify SetConnRemoteObject GetConnRemoteObject UT
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ConnRemoteObject, TestSize.Level1)
-{
-    OHOS::sptr<OHOS::IRemoteObject> remote;
-    abilityRecord_->SetConnRemoteObject(remote);
-    EXPECT_EQ(remote, abilityRecord_->GetConnRemoteObject());
 }
 
 /*
@@ -1636,30 +1564,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddSystemAbilityCallerRecord_001, Test
 
 /*
  * Feature: AbilityRecord
- * Function: GetConnectingRecordList
- * SubFunction: GetConnectingRecordList
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord GetConnectingRecordList
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_GetConnectingRecordList_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    EXPECT_NE(abilityRecord, nullptr);
-    OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
-    std::shared_ptr<ConnectionRecord> connection1 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    std::shared_ptr<ConnectionRecord> connection2 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    connection1->SetConnectState(ConnectionState::CONNECTING);
-    connection2->SetConnectState(ConnectionState::CONNECTED);
-    abilityRecord->connRecordList_.push_back(connection1);
-    abilityRecord->connRecordList_.push_back(connection2);
-    abilityRecord->GetConnectingRecordList();
-}
-
-/*
- * Feature: AbilityRecord
  * Function: DumpAbilityState
  * SubFunction: DumpAbilityState
  * FunctionPoints: NA
@@ -1692,30 +1596,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetStartTime_001, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     abilityRecord->startTime_ = 1;
     abilityRecord->SetStartTime();
-}
-
-/*
- * Feature: AbilityRecord
- * Function: DumpService
- * SubFunction: DumpService
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord DumpService
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_DumpService_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    EXPECT_NE(abilityRecord, nullptr);
-    std::vector<std::string> info;
-    std::vector<std::string> params;
-    bool isClient = false;
-    OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
-    std::shared_ptr<ConnectionRecord> connection =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    abilityRecord->isLauncherRoot_ = true;
-    abilityRecord->connRecordList_.push_back(nullptr);
-    abilityRecord->connRecordList_.push_back(connection);
-    abilityRecord->DumpService(info, params, isClient);
 }
 
 /*
@@ -2613,24 +2493,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1
     abilityRecord->SetIsNewWant(isNewWant);
     abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
     EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: PostUIExtensionAbilityTimeoutTask
- * SubFunction: PostUIExtensionAbilityTimeoutTask
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord PostUIExtensionAbilityTimeoutTask
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    ASSERT_NE(abilityRecord, nullptr);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
-    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
