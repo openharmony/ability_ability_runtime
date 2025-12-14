@@ -494,7 +494,7 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
         int32_t requestCode = DEFAULT_INVAL_VALUE) override;
 
-    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, pid_t &hostPid);
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord, pid_t &hostPid);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -1275,7 +1275,7 @@ public:
     virtual int GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info) override;
     int GetProcessRunningInfosByUserId(std::vector<AppExecFwk::RunningProcessInfo> &info, int32_t userId);
     void GetAbilityRunningInfo(std::vector<AbilityRunningInfo> &info, std::shared_ptr<AbilityRecord> abilityRecord);
-    void GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord, const int32_t userId,
+    void GetExtensionRunningInfo(std::shared_ptr<BaseExtensionRecord> &abilityRecord, const int32_t userId,
         std::vector<ExtensionRunningInfo> &info);
 
     int GetMissionSaveTime() const;
@@ -2364,7 +2364,7 @@ protected:
      * @return Returns whether the caller is allowed to start AppServiceExtension.
      */
     int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
-        std::shared_ptr<AbilityRecord> targetService, bool isFromConnect);
+        std::shared_ptr<BaseExtensionRecord> targetService, bool isFromConnect);
 
     static void HandleAutoStartupReadyCallback(const char *key, const char *value, void *context);
 
@@ -2776,7 +2776,7 @@ private:
     bool CheckUserIdActive(int32_t userId);
 
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
-        std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility,
+        std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<BaseExtensionRecord> &targetAbility,
         bool needCheck = false);
 
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;

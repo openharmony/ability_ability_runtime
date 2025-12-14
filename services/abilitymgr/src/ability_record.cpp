@@ -524,40 +524,6 @@ void AbilityRecord::RemoveLoadTimeoutTask()
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
 }
 
-void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
-{
-    if (IsDebug()) {
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "post timeout %{public}d, id %{public}d", messageId, recordId_);
-    switch (messageId) {
-        case AbilityManagerService::LOAD_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
-            SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
-            SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout, recordId_, true);
-            break;
-        }
-        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
-            if (InsightIntentExecuteParam::IsInsightIntentExecute(GetWant())) {
-                timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                    static_cast<uint32_t>(INSIGHT_INTENT_TIMEOUT_MULTIPLE);
-            }
-            SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
-            SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout, recordId_, true);
-            ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
-                timeout, GetAbilityRecordId());
-            break;
-        }
-        default: {
-            break;
-        }
-    }
-}
-
 std::string AbilityRecord::GetLabel()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -1800,52 +1766,6 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
     lifecycleDeal_->ShareData(uniqueId);
 }
 
-void AbilityRecord::ConnectAbility()
-{
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "%{public}s called.", __func__);
-    Want want = GetWant();
-    UpdateDmsCallerInfo(want);
-    ConnectAbilityWithWant(want);
-}
-
-void AbilityRecord::ConnectAbilityWithWant(const Want &want)
-{
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Connect ability.");
-    CHECK_POINTER(lifecycleDeal_);
-    if (isConnected) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT, "state err");
-    }
-    lifecycleDeal_->ConnectAbility(want);
-    isConnected = true;
-}
-
-void AbilityRecord::DisconnectAbility()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "DisconnectAbility, bundle:%{public}s, ability:%{public}s.",
-        abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
-    CHECK_POINTER(lifecycleDeal_);
-    lifecycleDeal_->DisconnectAbility(GetWant());
-    if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        if (GetInProgressRecordCount() == 0) {
-            isConnected = false;
-        }
-    } else {
-        isConnected = false;
-    }
-}
-
-void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "DisconnectAbilityWithWant:%{public}s.", abilityInfo_.name.c_str());
-    CHECK_POINTER(lifecycleDeal_);
-    lifecycleDeal_->DisconnectAbility(want);
-    if (GetInProgressRecordCount() == 0) {
-        isConnected = false;
-    }
-}
-
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
@@ -2146,42 +2066,6 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
     }
 }
 
-bool AbilityRecord::NeedConnectAfterCommand()
-{
-    return !IsConnectListEmpty() && !isConnected;
-}
-
-void AbilityRecord::AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord)
-{
-    CHECK_POINTER(connRecord);
-    std::lock_guard guard(connRecordListMutex_);
-    auto it = std::find(connRecordList_.begin(), connRecordList_.end(), connRecord);
-    // found it
-    if (it != connRecordList_.end()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Found it in list, so no need to add same connection");
-        return;
-    }
-    // no found then add new connection to list
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "No found in list, so add new connection to list");
-    connRecordList_.push_back(connRecord);
-}
-
-std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectRecordList() const
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return connRecordList_;
-}
-
-void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<ConnectionRecord> &connRecord)
-{
-    CHECK_POINTER(connRecord);
-    std::lock_guard guard(connRecordListMutex_);
-    connRecordList_.remove(connRecord);
-    if (connRecordList_.empty()) {
-        isConnected = false;
-    }
-}
-
 void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
 {
     std::lock_guard guard(wantLock_);
@@ -2337,73 +2221,6 @@ std::shared_ptr<CallerAbilityInfo> AbilityRecord::GetCallerInfo() const
     return callerList_.back()->GetCallerInfo();
 }
 
-bool AbilityRecord::IsConnectListEmpty()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return connRecordList_.empty();
-}
-
-size_t AbilityRecord::GetConnectedListSize()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-        return record && record->GetConnectState() == ConnectionState::CONNECTED;
-    });
-}
-
-size_t AbilityRecord::GetConnectingListSize()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-        return record && record->GetConnectState() == ConnectionState::CONNECTING;
-    });
-}
-
-std::shared_ptr<ConnectionRecord> AbilityRecord::GetConnectingRecord() const
-{
-    std::lock_guard guard(connRecordListMutex_);
-    auto connect =
-        std::find_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-            return record->GetConnectState() == ConnectionState::CONNECTING;
-        });
-    return (connect != connRecordList_.end()) ? *connect : nullptr;
-}
-
-std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordList()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    std::list<std::shared_ptr<ConnectionRecord>> connectingList;
-    for (auto record : connRecordList_) {
-        if (record && record->GetConnectState() == ConnectionState::CONNECTING) {
-            connectingList.push_back(record);
-        }
-    }
-    return connectingList;
-}
-
-uint32_t AbilityRecord::GetInProgressRecordCount()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    uint32_t count = 0;
-    for (auto record : connRecordList_) {
-        if (record && (record->GetConnectState() == ConnectionState::CONNECTING ||
-            record->GetConnectState() == ConnectionState::CONNECTED)) {
-            count++;
-        }
-    }
-    return count;
-}
-
-std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
-{
-    std::lock_guard guard(connRecordListMutex_);
-    auto connect =
-        std::find_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-            return record->GetConnectState() == ConnectionState::DISCONNECTING;
-        });
-    return (connect != connRecordList_.end()) ? *connect : nullptr;
-}
-
 void AbilityRecord::GetAbilityTypeString(std::string &typeStr)
 {
     AppExecFwk::AbilityType type = GetAbilityInfo().type;
@@ -2503,34 +2320,6 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     }
 }
 
-void AbilityRecord::DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const
-{
-    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
-        // Dump host info only for uiextension.
-        return;
-    }
-
-    sptr<IRemoteObject> token = GetToken();
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
-        return;
-    }
-
-    UIExtensionHostInfo hostInfo;
-    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed: %{public}d", ret);
-        return;
-    }
-
-    std::string dumpInfo = "      root host bundle name [" + hostInfo.elementName_.GetBundleName() + "]";
-    info.emplace_back(dumpInfo);
-    dumpInfo = "      root host module name [" + hostInfo.elementName_.GetModuleName() + "]";
-    info.emplace_back(dumpInfo);
-    dumpInfo = "      root host ability name [" + hostInfo.elementName_.GetAbilityName() + "]";
-    info.emplace_back(dumpInfo);
-}
-
 void AbilityRecord::DumpAbilityState(
     std::vector<std::string> &info, bool isClient, const std::vector<std::string> &params)
 {
@@ -2589,75 +2378,6 @@ void AbilityRecord::SetStartTime()
 int64_t AbilityRecord::GetStartTime() const
 {
     return startTime_;
-}
-
-void AbilityRecord::DumpService(std::vector<std::string> &info, bool isClient) const
-{
-    std::vector<std::string> params;
-    DumpService(info, params, isClient);
-}
-
-void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient) const
-{
-    info.emplace_back("      AbilityRecord ID #" + std::to_string(GetRecordId()) + "   state #" +
-                      AbilityRecord::ConvertAbilityState(GetAbilityState()) + "   start time [" +
-                      std::to_string(GetStartTime()) + "]");
-    info.emplace_back("      main name [" + GetAbilityInfo().name + "]");
-    info.emplace_back("      bundle name [" + GetAbilityInfo().bundleName + "]");
-    bool isUIExtension = UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType);
-    if (isUIExtension) {
-        info.emplace_back("      ability type [UIEXTENSION]");
-    } else {
-        if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-            info.emplace_back("      ability type [UI_SERVICE]");
-            info.emplace_back("      windowConfig windowType [" +
-                std::to_string(GetAbilityWindowConfig().windowType) + "]");
-            info.emplace_back("      windowConfig windowId [" +
-                std::to_string(GetAbilityWindowConfig().windowId) + "]");
-        } else {
-            info.emplace_back("      ability type [SERVICE]");
-        }
-    }
-    info.emplace_back("      app state #" + AbilityRecord::ConvertAppState(appState_));
-
-    std::string isKeepAlive = GetKeepAlive() ? "true" : "false";
-    info.emplace_back("        isKeepAlive: " + isKeepAlive);
-    if (isLauncherRoot_) {
-        info.emplace_back("      can restart num #" + std::to_string(restartCount_));
-    }
-    decltype(connRecordList_) connRecordListCpy;
-    {
-        std::lock_guard guard(connRecordListMutex_);
-        connRecordListCpy = connRecordList_;
-    }
-
-    info.emplace_back("      Connections: " + std::to_string(connRecordListCpy.size()));
-    for (auto &&conn : connRecordListCpy) {
-        if (conn) {
-            conn->Dump(info);
-        }
-    }
-    // add dump client info
-    DumpClientInfo(info, params, isClient);
-    DumpUIExtensionRootHostInfo(info);
-    DumpUIExtensionPid(info, isUIExtension);
-}
-
-void AbilityRecord::DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const
-{
-    if (!isUIExtension) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Not ui extension type.");
-        return;
-    }
-
-    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
-    if (appScheduler == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
-        return;
-    }
-    AppExecFwk::RunningProcessInfo processInfo;
-    appScheduler->GetRunningProcessInfoByToken(GetToken(), processInfo);
-    info.emplace_back("      pid: " + std::to_string(processInfo.pid_));
 }
 
 void AbilityRecord::RemoveAbilityDeathRecipient() const
@@ -2782,16 +2502,6 @@ void AbilityRecord::NotifyAnimationAbilityDied()
         }
 #endif // SUPPORT_SCREEN
     }
-}
-
-void AbilityRecord::SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject)
-{
-    connRemoteObject_ = remoteObject;
-}
-
-sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
-{
-    return connRemoteObject_;
 }
 
 bool AbilityRecord::IsNeverStarted() const

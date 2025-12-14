@@ -53,6 +53,7 @@ enum class AbilityRecordType {
     BASE_ABILITY,
     UI_ABILITY,
     MISSION_ABILITY,
+    EXTENSION_ABILITY,
 };
 
 /**

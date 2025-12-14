@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #define private public
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "connection_state_item.h"
 #include "connection_record.h"
 #undef private
@@ -49,7 +49,7 @@ public:
     std::shared_ptr<ConnectionStateItem> Init();
     std::shared_ptr<AbilityRecord> InitAbilityRecord();
     std::shared_ptr<DataAbilityRecord> InitDataAbilityRecord();
-    std::shared_ptr<AbilityRecord> InitAbilityRecord1();
+    std::shared_ptr<BaseExtensionRecord> InitExtensionRecordBase();
 };
 
 void ConnectionStateItemTest::SetUpTestCase(void)
@@ -76,13 +76,13 @@ std::shared_ptr<AbilityRecord> ConnectionStateItemTest::InitAbilityRecord()
     return AbilityRecord::CreateAbilityRecord(abilityRequest);
 }
 
-std::shared_ptr<AbilityRecord> ConnectionStateItemTest::InitAbilityRecord1()
+std::shared_ptr<BaseExtensionRecord> ConnectionStateItemTest::InitExtensionRecordBase()
 {
     AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.unittest1";
-    abilityRequest.abilityInfo.name = "MainAbility1";
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::PAGE;
-    return AbilityRecord::CreateAbilityRecord(abilityRequest);
+    return BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
 }
 
 std::shared_ptr<DataAbilityRecord> ConnectionStateItemTest::InitDataAbilityRecord()
@@ -121,7 +121,7 @@ HWTEST_F(ConnectionStateItemTest, CreateConnectionStateItem_001, TestSize.Level1
 HWTEST_F(ConnectionStateItemTest, CreateConnectionStateItem_002, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback;
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -175,7 +175,7 @@ HWTEST_F(ConnectionStateItemTest, AddConnection_002, TestSize.Level1)
 {
     auto connectionStateItem = Init();
     sptr<IRemoteObject> callerToken;
-    std::shared_ptr<AbilityRecord> abilityRecord;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord;
     sptr<IAbilityConnection> connCallback;
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         callerToken, abilityRecord, connCallback, nullptr);
@@ -196,7 +196,7 @@ HWTEST_F(ConnectionStateItemTest, AddConnection_002, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, AddConnection_003, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback;
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -217,7 +217,7 @@ HWTEST_F(ConnectionStateItemTest, AddConnection_003, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, AddConnection_004, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -238,7 +238,7 @@ HWTEST_F(ConnectionStateItemTest, AddConnection_004, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, AddConnection_005, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -279,7 +279,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_002, TestSize.Level1)
 {
     auto connectionStateItem = Init();
     sptr<IRemoteObject> callerToken;
-    std::shared_ptr<AbilityRecord> abilityRecord;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord;
     sptr<IAbilityConnection> connCallback;
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         callerToken, abilityRecord, connCallback, nullptr);
@@ -300,7 +300,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_002, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_003, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback;
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -321,7 +321,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_003, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_004, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -342,7 +342,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_004, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_005, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -364,7 +364,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_005, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_006, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -386,7 +386,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_006, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_007, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -410,7 +410,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_007, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_008, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -438,7 +438,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_008, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_009, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -465,7 +465,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_009, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_010, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -491,7 +491,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_010, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_011, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -518,7 +518,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_011, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, RemoveConnection_012, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -562,7 +562,7 @@ HWTEST_F(ConnectionStateItemTest, SuspendConnection_001, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, SuspendConnection_002, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -584,7 +584,7 @@ HWTEST_F(ConnectionStateItemTest, SuspendConnection_002, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, SuspendConnection_003, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -607,7 +607,7 @@ HWTEST_F(ConnectionStateItemTest, SuspendConnection_003, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, SuspendConnection_004, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, nullptr, nullptr);
     ConnectionData data;
@@ -626,7 +626,7 @@ HWTEST_F(ConnectionStateItemTest, SuspendConnection_004, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, SuspendConnection_005, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -646,7 +646,7 @@ HWTEST_F(ConnectionStateItemTest, SuspendConnection_005, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, SuspendConnection_006, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -686,7 +686,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_001, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_002, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -708,7 +708,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_002, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_003, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -731,7 +731,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_003, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_004, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, nullptr, nullptr);
     ConnectionData data;
@@ -750,7 +750,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_004, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_005, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -774,7 +774,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_005, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_006, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -794,7 +794,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_006, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_007, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -817,7 +817,7 @@ HWTEST_F(ConnectionStateItemTest, ResumeConnection_007, TestSize.Level1)
 HWTEST_F(ConnectionStateItemTest, ResumeConnection_008, TestSize.Level1)
 {
     auto connectionStateItem = Init();
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
@@ -1162,7 +1162,7 @@ HWTEST_F(ConnectionStateItemTest, GenerateAllConnectionData_001, TestSize.Level1
 {
     auto connectionStateItem = Init();
     std::vector<AbilityRuntime::ConnectionData> datas;
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = InitExtensionRecordBase();
     sptr<IAbilityConnection> connCallback = new MyAbilityConnection();
     std::shared_ptr<ConnectionRecord> record = std::make_shared<ConnectionRecord>(
         abilityRecord->GetToken(), abilityRecord, connCallback, nullptr);
