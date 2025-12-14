@@ -53,6 +53,11 @@ bool FUDUtils::IsSystemAppCall()
     return MyFlag::isSystemAppCall_;
 }
 
+bool FUDUtils::IsPrivilegedSACall()
+{
+    return MyFlag::IsPrivilegedSACall_;
+}
+
 bool FUDUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
 {
     return true;

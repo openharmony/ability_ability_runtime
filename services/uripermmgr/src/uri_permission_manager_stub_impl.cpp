@@ -223,7 +223,7 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
         return WrapErrorCode(ret, funcResult);
     }
     uint32_t callerTokenId = initiatorTokenId;
-    if (!(FUDUtils::IsFoundationCall() || FUDUtils::IsUdmfOrPasteboardCall())) {
+    if (!(FUDUtils::IsFoundationCall() || FUDUtils::IsPrivilegedSACall())) {
         callerTokenId = IPCSkeleton::GetCallingTokenID();
     }
     funcResult = GrantUriPermissionInner(uriVec, flag, callerTokenId, targetTokenId, targetBundleName);
