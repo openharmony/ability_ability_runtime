@@ -1026,7 +1026,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->HandleOnProcessStateChanged(nullptr, false, AppProcessState::APP_STATE_CREATE);
+    manager->HandleOnProcessStateChanged(nullptr);
 }
 
 /*
@@ -1047,7 +1047,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleOnProcessStateChanged(appRecord, false, AppProcessState::APP_STATE_CREATE);
+    manager->HandleOnProcessStateChanged(appRecord);
 }
 
 /*
@@ -1067,7 +1067,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level2)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleOnProcessStateChanged(appRecord, false, AppProcessState::APP_STATE_CREATE);
+    manager->HandleOnProcessStateChanged(appRecord);
 }
 
 /*
@@ -1089,7 +1089,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleOnProcessStateChanged(appRecord, false, AppProcessState::APP_STATE_CREATE);
+    manager->HandleOnProcessStateChanged(appRecord);
 }
 
 /*
@@ -1110,7 +1110,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleOnProcessStateChanged(appRecord, false, AppProcessState::APP_STATE_CREATE);
+    manager->HandleOnProcessStateChanged(appRecord);
 }
 
 /*
