@@ -225,7 +225,7 @@ class RecordWriter {
       wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Char) {
-      wantParams?.setParam(key, obj);
+      wantParams?.setParam(key, Char.toByte(obj));
       return true;
     } else if (obj instanceof Short) {
       wantParams?.setParam(key, obj);
