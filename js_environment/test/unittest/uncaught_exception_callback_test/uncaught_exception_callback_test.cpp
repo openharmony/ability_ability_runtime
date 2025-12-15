@@ -72,7 +72,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_01
     EXPECT_NE(env, nullptr);
 
     // Test with null object
-    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
         summary += "test";
     };
     NapiUncaughtExceptionCallback callback(task, nullptr, env);
@@ -120,7 +120,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_01
     EXPECT_NE(env, nullptr);
 
     // Test with null object
-    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
         summary += "test";
     };
 
@@ -149,7 +149,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_02
     auto env = jsRuntime->GetNapiEnv();
     EXPECT_NE(env, nullptr);
     // Test with null object
-    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
         summary += "test";
     };
     napi_value nullValue = nullptr;
@@ -197,7 +197,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_03
     napi_create_string_utf8(env, errorStack.c_str(), errorStack.length(), &nativeErrorStack);
     napi_set_named_property(env, object, "code", nativeErrorCode);
     napi_set_named_property(env, object, "stack", nativeErrorStack);
-    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
         summary += "test";
     };
     NapiUncaughtExceptionCallback callback(task, nullptr, env);
@@ -232,7 +232,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_04
         return thisVar;
     };
 
-    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
         summary += "test";
     };
     napi_value nativeErrorCode = nullptr;

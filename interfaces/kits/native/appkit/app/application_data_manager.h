@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_APPLICATION_DATA_MANAGER_H
 
 #include <string>
+#include "napi/native_api.h"
 
 #include "ierror_observer.h"
 #include "nocopyable.h"
@@ -25,6 +26,15 @@ namespace OHOS {
 namespace AppExecFwk {
 class ApplicationDataManager {
 public:
+    struct ExceptionParams {
+        napi_env env;
+        napi_env mainEnv;
+        napi_value exception;
+        std::string summary;
+        bool isUncatchable;
+    };
+
+    static std::atomic<bool> jsErrorHasReport_;
     static ApplicationDataManager &GetInstance();
     void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
     bool NotifyUnhandledException(const std::string &errMsg);
@@ -36,10 +46,11 @@ public:
     bool NotifyETSExceptionObject(const AppExecFwk::ErrorObject &errorObj);
     void SetIsUncatchable(bool isUncatchable);
     bool GetIsUncatchable();
-
+    static bool NotifyUncaughtException(const ExceptionParams &params, const AppExecFwk::ErrorObject &errorObj);
 private:
     ApplicationDataManager();
     ~ApplicationDataManager();
+    static std::string GetFuncNameFromError(napi_env env, napi_value error);
     DISALLOW_COPY_AND_MOVE(ApplicationDataManager);
     std::shared_ptr<IErrorObserver> errorObserver_;
     std::atomic_bool isUncatchable_;
