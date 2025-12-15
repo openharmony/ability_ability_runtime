@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_NATIVE_RUNTIME_H
-#define OHOS_ABILITY_RUNTIME_NATIVE_RUNTIME_H
+#ifndef ABILITY_RUNTIME_CONTEXT_IMPL_H
+#define ABILITY_RUNTIME_CONTEXT_IMPL_H
 
-#include <string>
-#include "extension_ability.h"
+#include "context/context.h"
 
-namespace OHOS {
-namespace AbilityRuntime {
-class NativeRuntime {
-public:
-    static bool LoadModule(const std::string& bundleModuleName, const std::string& fileName,
-        const std::string& abilityName, AbilityRuntime_ExtensionInstance &instance);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct AbilityRuntime_Context {
+    OHOS::AppExecFwk::ExtensionAbilityType type;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> context;
 };
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_NATIVE_RUNTIME_H
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // ABILITY_RUNTIME_CONTEXT_IMPL_H

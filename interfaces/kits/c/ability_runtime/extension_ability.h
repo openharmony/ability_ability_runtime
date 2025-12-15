@@ -38,7 +38,6 @@
 #define ABILITY_RUNTIME_EXTENSION_ABILITY_H
 
 #include "ability_runtime_common.h"
-#include "extension_context.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +50,11 @@ extern "C" {
  */
 struct AbilityRuntime_ExtensionInstance;
 typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
+
+typedef void AbilityRuntime_Extension_CreateFunc(
+    AbilityRuntime_ExtensionInstanceHandle handle, const char *abilityName);
+
+AbilityRuntime_Extension_CreateFunc OH_AbilityRuntime_OnNativeExtenSionCreate;
 
 #ifdef __cplusplus
 }

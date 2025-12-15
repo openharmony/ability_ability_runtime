@@ -13,22 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_EXTENSIOM_CONTEXT_IMPL_H
-#define ABILITY_RUNTIME_EXTENSIOM_CONTEXT_IMPL_H
+#ifndef MOCK_NATIVE_MODULE_MANAGER_H
+#define MOCK_NATIVE_MODULE_MANAGER_H
 
-#include "context.h"
+#include "module_manager/native_module_manager.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void MockGetLdNamespaceName(bool namespaceRet);
+void MockDefaultNamespaceName(bool defaultNamespaceRet);
+void MockGetLdNamespaceNameStr(std::string namespaceNameStr);
+void MockResetModuleManagerState();
 
-struct AbilityRuntime_Context {
-    OHOS::AppExecFwk::ExtensionAbilityType type;
-    std::weak_ptr<OHOS::AbilityRuntime::Context> context;
-};
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-#endif // ABILITY_RUNTIME_EXTENSIOM_CONTEXT_IMPL_H
+#endif // MOCK_NATIVE_MODULE_MANAGER_H
