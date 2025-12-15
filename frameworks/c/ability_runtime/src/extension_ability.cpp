@@ -15,5 +15,5 @@
 
 #include "extension_ability.h"
 
-#include "extension_ability_impl.h"
+#include "native_extension/extension_ability_impl.h"
 #include "hilog_tag_wrapper.h"

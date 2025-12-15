@@ -17,16 +17,16 @@
  * @addtogroup AbilityRuntime
  * @{
  *
- * @brief Provide the definition of the C interface for the extension context AbilityRuntime
+ * @brief Provide the definition of the C interface for the context AbilityRuntime
  *
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
  * @since 23
  */
 
 /**
- * @file extension_context.h
+ * @file context.h
  *
- * @brief Declare the common types for the extension context AbilityRuntime.
+ * @brief Declare the common types for the context AbilityRuntime.
  *
  * @library libability_runtime.so
  * @kit AbilityKit
@@ -34,8 +34,8 @@
  * @since 23
  */
 
-#ifndef ABILITY_RUNTIME_EXTENSION_ABILITY_H
-#define ABILITY_RUNTIME_EXTENSION_ABILITY_H
+#ifndef ABILITY_RUNTIME_CONTEXT_H
+#define ABILITY_RUNTIME_CONTEXT_H
 
 #include <stdint.h>
 #include "ability_runtime_common.h"
@@ -68,7 +68,7 @@ typedef struct AbilityRuntime_Context* AbilityRuntime_ContextHandle;
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCacheDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCacheDir(
     AbilityRuntime_ContextHandle context, char* buffer, int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -86,7 +86,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCacheDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetTempDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -104,7 +104,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetTempDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetFilesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -122,7 +122,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetFilesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDatabaseDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDatabaseDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -140,7 +140,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDatabaseDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetPreferencesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetPreferencesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -158,7 +158,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetPreferencesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetBundleCodeDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetBundleCodeDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -176,7 +176,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetBundleCodeDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDistributedFilesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDistributedFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -194,7 +194,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDistributedFilesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetResourceDir(AbilityRuntime_ContextHandle context,
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetResourceDir(AbilityRuntime_ContextHandle context,
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -212,7 +212,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetResourceDir(AbilityRuntime_
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCloudFileDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCloudFileDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -226,7 +226,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCloudFileDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetAreaMode(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode);
 
 /**
@@ -240,7 +240,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetAreaMode(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextSetAreaMode(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode);
 
 /**
@@ -258,7 +258,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextSetAreaMode(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetLogFileDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetLogFileDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
@@ -276,7 +276,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetLogFileDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
  * @since 23
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetProcessName(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetProcessName(
     AbilityRuntime_ContextHandle context, char* buffer, int32_t bufferSize, int32_t* writeLength);
 
 #ifdef __cplusplus
@@ -284,4 +284,4 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetProcessName(
 #endif
 
 /** @} */
-#endif // ABILITY_RUNTIME_EXTENSION_ABILITY_H
+#endif // ABILITY_RUNTIME_CONTEXT_H

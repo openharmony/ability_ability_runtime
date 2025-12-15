@@ -313,6 +313,32 @@ ohos_unittest("ets_runtime_test") {
   }
 }
 
+ohos_unittest("native_runtime_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_native_path}/runtime",
+    "${ability_runtime_native_path}/runtime/utils/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+  ]
+
+  sources = [
+    "mock_native_module_manager.cpp",
+    "native_runtime_test.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/c/ability_runtime:ability_runtime",
+  ]
+
+  external_deps = [
+    "napi:ace_napi",
+  ]
+}
+
 group("unittest") {
   testonly = true
 
@@ -325,5 +351,6 @@ group("unittest") {
     ":js_worker_test",
     ":ohos_js_environment_test",
     ":runtime_test",
+    ":native_runtime_test",
   ]
 }

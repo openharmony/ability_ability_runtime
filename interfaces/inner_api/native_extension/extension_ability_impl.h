@@ -19,7 +19,6 @@
 #include "ability_runtime_common.h"
 #include "extension.h"
 #include "extension_ability_info.h"
-#include "extension_context_impl.h"
 
 #ifdef __cplusplus
 extern "C" {

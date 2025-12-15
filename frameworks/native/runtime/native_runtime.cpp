@@ -16,6 +16,7 @@
 #include "native_runtime.h"
 
 #include "hilog_tag_wrapper.h"
+#include "module_manager/native_module_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -25,7 +26,7 @@ const char *OH_ABILITY_RUNTIME_ON_NATIVE_EXTENSION_CREATE = "OH_AbilityRuntime_O
 bool NativeRuntime::LoadModule(const std::string& bundleModuleName, const std::string& fileName,
     const std::string& abilityName, AbilityRuntime_ExtensionInstance &instance)
 {
-    auto moduleManager = NAtiveModuleManager::GetInstance();
+    auto moduleManager = NativeModuleManager::GetInstance();
     if (moduleManager == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null moduleManager");
         return false;

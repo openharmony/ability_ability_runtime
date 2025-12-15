@@ -13,88 +13,88 @@
  * limitations under the License.
  */
 
-#include "ability_runtime/extension_context.h"
+#include "ability_runtime/context.h"
 
-#include "extension_context_impl.h"
+#include "native_extension/context_impl.h"
 #include "hilog_tag_wrapper.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCacheDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCacheDir(
     AbilityRuntime_ContextHandle context, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetTempDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetFilesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDatabaseDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDatabaseDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetPreferencesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetPreferencesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetBundleCodeDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetBundleCodeDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetDistributedFilesDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDistributedFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetResourceDir(AbilityRuntime_ContextHandle context,
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetResourceDir(AbilityRuntime_ContextHandle context,
     char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetCloudFileDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCloudFileDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetAreaMode(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextSetAreaMode(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetLogFileDir(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetLogFileDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ContextGetProcessName(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetProcessName(
     AbilityRuntime_ContextHandle context, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
