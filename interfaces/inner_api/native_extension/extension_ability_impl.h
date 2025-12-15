@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_EXTENSIOM_ABILITY_IMPL_H
-#define ABILITY_RUNTIME_EXTENSIOM_ABILITY_IMPL_H
+#ifndef ABILITY_RUNTIME_EXTENSION_ABILITY_IMPL_H
+#define ABILITY_RUNTIME_EXTENSION_ABILITY_IMPL_H
 
 #include "ability_runtime_common.h"
 #include "extension.h"
@@ -35,4 +35,4 @@ typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanc
 } // extern "C"
 #endif
 
-#endif // ABILITY_RUNTIME_EXTENSION_ABILITY_H
+#endif // ABILITY_RUNTIME_EXTENSION_ABILITY_IMPL_H
