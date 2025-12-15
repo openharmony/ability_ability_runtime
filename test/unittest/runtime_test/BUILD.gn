@@ -211,6 +211,11 @@ ohos_unittest("ohos_js_environment_test") {
 
   configs = []
 
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
+
   external_deps = [
     "ability_runtime:js_environment",
     "ability_runtime:runtime",

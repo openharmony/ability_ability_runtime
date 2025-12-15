@@ -22,29 +22,29 @@
 #include "ohos_loop_handler.h"
 #include "sys_timer.h"
 #include "worker_info.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
     std::shared_ptr<AppExecFwk::EventHandler> g_eventHandler = nullptr;
 }
-void OHOSJsEnvironmentImpl::PostTaskToHandler(const char* taskName, uv_io_cb func, void* work, int status,
-                                              int priority)
+void OHOSJsEnvironmentImpl::PostTaskToHandler(const uv_task_info_t* taskInfo)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    if (!func || !work) {
+    if (!taskInfo || !taskInfo->func || !taskInfo->work) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
     }
 
-    auto task = [func, work, status]() {
+    auto task = [func = taskInfo->func, work = taskInfo->work, status = taskInfo->status]() {
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Do uv work");
         func(work, status);
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Do uv work end");
     };
 
     AppExecFwk::EventQueue::Priority prio = AppExecFwk::EventQueue::Priority::IMMEDIATE;
-    switch (priority) {
+    switch (taskInfo->prio) {
         case uv_qos_t::uv_qos_user_interactive:
             prio = AppExecFwk::EventQueue::Priority::VIP;
             break;
@@ -66,12 +66,23 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(const char* taskName, uv_io_cb fun
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
     }
-    if (taskName == nullptr) {
-        g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
+    if (taskInfo->location == UV_POST_TASK_TO_HEAD) {
+        g_eventHandler->PostTaskAtFront(task, taskInfo->name ? taskInfo->name : "uv_loop_task", prio);
     } else {
-        g_eventHandler->PostTask(task, taskName, 0, prio);
+        g_eventHandler->PostTask(task, taskInfo->name ? taskInfo->name : "uv_io_cb", 0, prio);
     }
 }
+
+int OHOSJsEnvironmentImpl::CheckPendingHigherEvent(int priority)
+{
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
+    if (g_eventHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "g_eventHandler is null");
+        return -1;
+    }
+    return g_eventHandler->HasPendingHigherEvent(priority) ? 0 : -1;
+}
+
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
@@ -153,7 +164,9 @@ bool OHOSJsEnvironmentImpl::InitLoop(NativeEngine* engine, bool isStage)
         eventHandler_->AddFileDescriptorListener(fd, events, std::make_shared<OHOSLoopHandler>(uvLoop), "uvLoopTask");
         TAG_LOGD(AAFwkTag::JSRUNTIME, "uv_register_task_to_event, isStage: %{public}d", isStage);
         if (isStage && (eventHandler_->GetEventRunner()).get() == AppExecFwk::EventRunner::GetMainEventRunner().get()) {
-            uv_register_task_to_event(uvLoop, PostTaskToHandler, nullptr);
+            static const bool canInterrupt = system::GetBoolParameter("persist.sys.uv_can_interrupt", true);
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "uv_register_task_to_event with canInterrupt: %{public}d", canInterrupt);
+            uv_register_task_to_event(uvLoop, PostTaskToHandler, canInterrupt ? CheckPendingHigherEvent : nullptr);
             // send signal here to trigger uv tasks generated during initialization.
             uv_async_send(&uvLoop->wq_async);
         }
