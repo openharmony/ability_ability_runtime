@@ -79,7 +79,7 @@ const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_
 #endif //SUPPORT_GRAPHICS
 };
 
-std::shared_ptr<AppExecFwk::EventRunner> contentEmbedEventRunner_;
+std::shared_ptr<AppExecFwk::EventRunner> contentEmbedEventRunner_ = nullptr;
 
 ExtensionAbilityThread::ExtensionAbilityThread() : extensionImpl_(nullptr), currentExtension_(nullptr) {}
 
