@@ -51,9 +51,19 @@ extern "C" {
 struct AbilityRuntime_ExtensionInstance;
 typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
 
+/**
+ * @brief Define the function that must be in the native code to instantiate the native extension ability.
+ *
+ * @since 23
+ */
 typedef void AbilityRuntime_Extension_CreateFunc(
     AbilityRuntime_ExtensionInstanceHandle handle, const char *abilityName);
 
+/**
+ * @brief The name of the function that native extension ability instace looks foe when launching its native code.
+ *
+ * @since 23
+ */
 AbilityRuntime_Extension_CreateFunc OH_AbilityRuntime_OnNativeExtenSionCreate;
 
 #ifdef __cplusplus

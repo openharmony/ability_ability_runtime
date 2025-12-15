@@ -57,7 +57,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_utils_path}/global/constant",
-    "${ability_runtime_native_path}/ability_runtime",
+    "${ability_runtime_ndk_path}/ability_runtime",
   ]
 
   sources = [
