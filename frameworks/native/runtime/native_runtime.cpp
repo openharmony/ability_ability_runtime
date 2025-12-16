@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 const std::string DEFAULT_NAMESPACE = "default";
-const char *OH_ABILITY_RUNTIME_ON_NATIVE_EXTENSION_CREATE = "OH_AbilityRuntime_OnNativeExtenSionCreate";
+const char *OH_ABILITY_RUNTIME_ON_NATIVE_EXTENSION_CREATE = "OH_AbilityRuntime_OnNativeExtensionCreate";
 
 bool NativeRuntime::LoadModule(const std::string& bundleModuleName, const std::string& fileName,
     const std::string& abilityName, AbilityRuntime_ExtensionInstance &instance)

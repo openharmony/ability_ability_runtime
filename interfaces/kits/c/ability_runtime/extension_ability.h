@@ -64,7 +64,7 @@ typedef void AbilityRuntime_Extension_CreateFunc(
  *
  * @since 23
  */
-AbilityRuntime_Extension_CreateFunc OH_AbilityRuntime_OnNativeExtenSionCreate;
+AbilityRuntime_Extension_CreateFunc OH_AbilityRuntime_OnNativeExtensionCreate;
 
 #ifdef __cplusplus
 }
