@@ -335,6 +335,7 @@ ohos_unittest("native_runtime_test") {
   ]
 
   external_deps = [
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }
