@@ -92,11 +92,8 @@ HWTEST_F(MissionListManagerDumpTest, MissionListManager_DumpMissionListByRecordI
 {
     TAG_LOGI(AAFwkTag::TEST, "MissionListManager_DumpMissionListByRecordId_0100 start");
 
-    Want want;
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    EXPECT_NE(abilityRecord, nullptr);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->recordId_ = RECORD_ID;
 
     auto mission = std::make_shared<Mission>(MISSION_ID, abilityRecord);
@@ -137,12 +134,9 @@ HWTEST_F(MissionListManagerDumpTest, MissionListManager_OnAppStateChanged_0100, 
 {
     TAG_LOGI(AAFwkTag::TEST, "MissionListManager_OnAppStateChanged_0100 start");
 
-    Want want;
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.process = STRING_PROCESS_NAME;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    EXPECT_NE(abilityRecord, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.process = STRING_PROCESS_NAME;
+    std::shared_ptr<AbilityRecord> abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     auto missionListManager = std::make_shared<MissionListManager>(USER_ID);
     EXPECT_NE(missionListManager, nullptr);

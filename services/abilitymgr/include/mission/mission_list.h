@@ -112,9 +112,9 @@ public:
     /**
      * @brief Get the Top Ability object
      *
-     * @return std::shared_ptr<AbilityRecord> the top ability
+     * @return MissionAbilityRecordPtr the top ability
      */
-    std::shared_ptr<AbilityRecord> GetTopAbility() const;
+    MissionAbilityRecordPtr GetTopAbility() const;
 
     /**
      * @brief Get the Mission By Id object
@@ -144,7 +144,7 @@ public:
      *
      * @return launcher root
      */
-    std::shared_ptr<AbilityRecord> GetLauncherRoot() const;
+    MissionAbilityRecordPtr GetLauncherRoot() const;
 
     /**
      * @brief get ability record by id

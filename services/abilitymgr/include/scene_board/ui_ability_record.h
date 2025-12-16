@@ -40,8 +40,53 @@ public:
     {
         return exitReasonLoaded_;
     }
+
+    inline void SetIsKillPrecedeStart(bool isKillPrecedeStart)
+    {
+        isKillPrecedeStart_.store(isKillPrecedeStart);
+    }
+    inline bool IsKillPrecedeStart()
+    {
+        return isKillPrecedeStart_.load();
+    }
+
+    bool GetPrelaunchFlag() const
+    {
+        return isPrelaunch_;
+    }
+    void SetPrelaunchFlag(bool isPrelaunch)
+    {
+        isPrelaunch_ = isPrelaunch;
+    }
+
+    void ScheduleCollaborate(const Want &want);
+
+    bool IsHook () const
+    {
+        return isHook_;
+    }
+    inline void SetIsHook(bool isHook)
+    {
+        isHook_ = isHook;
+    }
+
+    bool GetHookOff () const
+    {
+        return hookOff_;
+    }
+    inline void SetHookOff(bool hookOff)
+    {
+        hookOff_ = hookOff;
+    }
+
+    inline bool IsLastWantBackgroundDriven() const
+    {
+        return isLastWantBackgroundDriven_.load();
+    }
 private:
     bool exitReasonLoaded_ = false;
+    bool hookOff_ = false;
+    std::atomic_bool isKillPrecedeStart_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

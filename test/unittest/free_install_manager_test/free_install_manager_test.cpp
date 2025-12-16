@@ -15,10 +15,12 @@
 
 #include <gtest/gtest.h>
 
+#define protected public
 #define private public
 #include "ability_manager_service.h"
 #include "task_handler_wrap.h"
 #undef private
+#undef protected
 
 #include "ability_record.h"
 #include "sa_mgr_client.h"

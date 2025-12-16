@@ -59,13 +59,11 @@ void MissionListTest::TearDown(void)
  */
 HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_001, TestSize.Level1)
 {
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.deviceId = DEVICE_ID;
-    abilityInfo.bundleName = BUNDLE_NAME;
-    abilityInfo.name = NAME;
-    Want want;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = DEVICE_ID;
+    abilityRequest.abilityInfo.bundleName = BUNDLE_NAME;
+    abilityRequest.abilityInfo.name = NAME;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     auto mission = std::make_shared<Mission>(0, abilityRecord, "launcher");
     auto missionList = std::make_shared<MissionList>();
@@ -85,13 +83,11 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_001, TestSize.
  */
 HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_002, TestSize.Level1)
 {
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.deviceId = DEVICE_ID;
-    abilityInfo.bundleName = BUNDLE_NAME;
-    abilityInfo.name = NAME;
-    Want want;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = DEVICE_ID;
+    abilityRequest.abilityInfo.bundleName = BUNDLE_NAME;
+    abilityRequest.abilityInfo.name = NAME;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     auto mission = std::make_shared<Mission>(0, abilityRecord, "launcher");
     auto missionList = std::make_shared<MissionList>();
@@ -111,13 +107,11 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_002, TestSize.
  */
 HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_003, TestSize.Level1)
 {
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.deviceId = DEVICE_ID;
-    abilityInfo.bundleName = BUNDLE_NAME;
-    abilityInfo.name = NAME;
-    Want want;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = DEVICE_ID;
+    abilityRequest.abilityInfo.bundleName = BUNDLE_NAME;
+    abilityRequest.abilityInfo.name = NAME;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     auto mission = std::make_shared<Mission>(0, abilityRecord, "launcher");
     auto missionList = std::make_shared<MissionList>();
@@ -137,13 +131,11 @@ HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_003, TestSize.
  */
 HWTEST_F(MissionListTest, mission_list_get_ability_record_by_name_004, TestSize.Level1)
 {
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.deviceId = DEVICE_ID;
-    abilityInfo.bundleName = BUNDLE_NAME;
-    abilityInfo.name = NAME;
-    Want want;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = DEVICE_ID;
+    abilityRequest.abilityInfo.bundleName = BUNDLE_NAME;
+    abilityRequest.abilityInfo.name = NAME;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     auto mission = std::make_shared<Mission>(0, abilityRecord, "launcher");
     auto missionList = std::make_shared<MissionList>();
