@@ -1689,5 +1689,29 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_005, Test
 
     AppMgrUtil::appMgr_ = originAppMgr;
 }
+
+/**
+ * @tc.name: SetLastExitReasonAsync_001
+ * @tc.desc: SetLastExitReasonAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SetLastExitReasonAsync_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->SetLastExitReasonAsync(nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->exitReasonLoaded_ = false;
+    mgr->SetLastExitReasonAsync(abilityRecord);
+    EXPECT_TRUE(abilityRecord->exitReasonLoaded_);
+
+    abilityRecord->exitReasonLoaded_ = true;
+    mgr->SetLastExitReasonAsync(abilityRecord);
+    EXPECT_TRUE(abilityRecord->exitReasonLoaded_);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

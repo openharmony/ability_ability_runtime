@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_UI_ABILITY_RECORD_H
 
 #include "ability_record.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -31,6 +32,29 @@ public:
     static std::shared_ptr<UIAbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest);
 
     AbilityRecordType GetAbilityRecordType() override;
+
+    void SetExitReasonLoaded()
+    {
+        exitReasonLoaded_ = true;
+    }
+    bool IsExitReasonLoaded() const
+    {
+        return exitReasonLoaded_;
+    }
+    void SetLoadExitReasonTask(ffrt::task_handle &&taskHandle)
+    {
+        exitReasonTask_ = std::make_shared<ffrt::task_handle>(std::move(taskHandle));
+    }
+    void SyncLoadExitReason()
+    {
+        if (exitReasonTask_) {
+            ffrt::wait({*exitReasonTask_});
+            exitReasonTask_ = nullptr;
+        }
+    }
+private:
+    bool exitReasonLoaded_ = false;
+    std::shared_ptr<ffrt::task_handle> exitReasonTask_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -907,7 +907,8 @@ private:
      * @brief Set last exit reason for ability
      * @param abilityRecord The ability record
      */
-    void SetLastExitReason(UIAbilityRecordPtr abilityRecord) const;
+    static void SetLastExitReason(UIAbilityRecordPtr abilityRecord);
+    static void SetLastExitReasonAsync(UIAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Set receiver info for ability
