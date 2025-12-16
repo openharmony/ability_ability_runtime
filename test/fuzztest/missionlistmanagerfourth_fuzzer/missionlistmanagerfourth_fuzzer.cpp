@@ -51,25 +51,20 @@ uint32_t GetU32Data(const char *ptr)
     return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
 }
 
-std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
+MissionAbilityRecordPtr GetFuzzAbilityRecord()
 {
     sptr<Token> token = nullptr;
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        AbilityRecord::CreateAbilityRecord(abilityRequest);
-    if (!abilityRecord) {
-        return nullptr;
-    }
-    return abilityRecord;
+    return MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 }
 
 sptr<Token> GetFuzzAbilityToken()
 {
     sptr<Token> token = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    auto abilityRecord = GetFuzzAbilityRecord();
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
@@ -88,7 +83,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
             return false;
         }
     }
-    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    auto abilityRecord = GetFuzzAbilityRecord();
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     auto missionListManager = std::make_shared<MissionListManager>(intParam);
     auto launcherList = std::make_shared<MissionList>(MissionListType::LAUNCHER);

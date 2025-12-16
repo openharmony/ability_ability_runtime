@@ -534,44 +534,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SetScheduler, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord ForegroundAbility
  */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    uint32_t sceneFlag = 0;
-    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    abilityRecord->SetIsNewWant(true);
-    abilityRecord->SetPreAbilityRecord(abilityRecord_);
-    abilityRecord->ForegroundAbility(sceneFlag);
-    EXPECT_TRUE(abilityRecord != nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_002, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    uint32_t sceneFlag = 0;
-    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    abilityRecord->SetIsNewWant(true);
-    abilityRecord->SetPreAbilityRecord(nullptr);
-    abilityRecord->ForegroundAbility(sceneFlag);
-    EXPECT_TRUE(abilityRecord != nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
- */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_003, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();

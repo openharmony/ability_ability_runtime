@@ -77,44 +77,6 @@ std::shared_ptr<AbilityRecord> AbilityRecordFirstTest::GetAbilityRecord()
     return std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
 }
 
-class MockWMSHandler : public IWindowManagerServiceHandler {
-public:
-    virtual void NotifyWindowTransition(sptr<AbilityTransitionInfo> fromInfo, sptr<AbilityTransitionInfo> toInfo,
-        bool& animaEnabled)
-    {}
-
-    virtual int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken)
-    {
-        return 0;
-    }
-
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info,
-        std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor) {}
-
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) {}
-
-    virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken)
-    {}
-
-    virtual void NotifyAnimationAbilityDied(sptr<AbilityTransitionInfo> info)
-    {}
-
-    virtual int32_t MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId)
-    {
-        return 0;
-    }
-
-    virtual int32_t MoveMissionsToBackground(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result)
-    {
-        return 0;
-    }
-
-    virtual sptr<IRemoteObject> AsObject()
-    {
-        return nullptr;
-    }
-};
-
 /*
  * Feature: AbilityRecord
  * Function: SetWant

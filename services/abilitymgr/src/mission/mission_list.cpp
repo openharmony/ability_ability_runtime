@@ -181,7 +181,7 @@ bool MissionList::IsEmpty()
     return missions_.empty();
 }
 
-std::shared_ptr<AbilityRecord> MissionList::GetTopAbility() const
+MissionAbilityRecordPtr MissionList::GetTopAbility() const
 {
     if (missions_.empty()) {
         return nullptr;
@@ -204,14 +204,14 @@ MissionListType MissionList::GetType() const
     return type_;
 }
 
-std::shared_ptr<AbilityRecord> MissionList::GetLauncherRoot() const
+MissionAbilityRecordPtr MissionList::GetLauncherRoot() const
 {
     for (auto mission : missions_) {
         if (!mission) {
             continue;
         }
 
-        std::shared_ptr<AbilityRecord> ability = mission->GetAbilityRecord();
+        auto ability = mission->GetAbilityRecord();
         if (ability && ability->IsLauncherRoot()) {
             return ability;
         }

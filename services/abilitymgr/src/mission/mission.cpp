@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-Mission::Mission(int32_t id, const std::shared_ptr<AbilityRecord> abilityRecord, const std::string &missionName,
+Mission::Mission(int32_t id, MissionAbilityRecordPtr abilityRecord, const std::string &missionName,
     int32_t startMethod)
     : missionId_(id), startMethod_(startMethod), abilityRecord_(abilityRecord), missionName_(missionName)
 {
@@ -43,7 +43,7 @@ Mission::Mission(const std::shared_ptr<Mission> &mission)
 Mission::~Mission()
 {}
 
-std::shared_ptr<AbilityRecord> Mission::GetAbilityRecord() const
+MissionAbilityRecordPtr Mission::GetAbilityRecord() const
 {
     return abilityRecord_;
 }

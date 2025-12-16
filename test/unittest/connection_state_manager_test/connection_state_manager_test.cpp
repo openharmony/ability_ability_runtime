@@ -14,9 +14,11 @@
  */
 
 #include <gtest/gtest.h>
+#define protected public
 #define private public
 #include "connection_state_manager.h"
 #undef private
+#undef protected
 #include "ability_connection.h"
 #include "base_extension_record.h"
 #include "connection_observer_errors.h"

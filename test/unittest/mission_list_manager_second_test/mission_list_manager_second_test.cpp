@@ -37,7 +37,7 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    std::shared_ptr<AbilityRecord> InitAbilityRecord();
+    MissionAbilityRecordPtr InitAbilityRecord();
 };
 
 void MissionListManagerSecondTest::SetUpTestCase(void)
@@ -49,14 +49,13 @@ void MissionListManagerSecondTest::SetUp(void)
 void MissionListManagerSecondTest::TearDown(void)
 {}
 
-std::shared_ptr<AbilityRecord> MissionListManagerSecondTest::InitAbilityRecord()
+MissionAbilityRecordPtr MissionListManagerSecondTest::InitAbilityRecord()
 {
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::PAGE;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    return abilityRecord;
+    return MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 }
 
 /*
@@ -73,7 +72,7 @@ HWTEST_F(MissionListManagerSecondTest, PrepareClearMissionLocked_001, TestSize.L
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     int missionId = 1;
     std::string missionName = "missionName";
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    auto abilityRecord = InitAbilityRecord();
     std::shared_ptr<Mission> mission;
 
     auto result = missionListManager->PrepareClearMissionLocked(missionId, mission);
@@ -102,7 +101,7 @@ HWTEST_F(MissionListManagerSecondTest, CheckPrepareTerminateEnable_001, TestSize
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     int missionId = 1;
     std::string missionName = "missionName";
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    auto abilityRecord = InitAbilityRecord();
     std::shared_ptr<Mission> mission;
     auto result = missionListManager->CheckPrepareTerminateEnable(mission);
     EXPECT_EQ(false, result);
@@ -123,20 +122,20 @@ HWTEST_F(MissionListManagerSecondTest, CheckPrepareTerminateEnable_001, TestSize
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::PAGE;
     abilityRequest.abilityInfo.isStageBasedModel = false;
-    abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     mission = std::make_shared<Mission>(missionId, abilityRecord, missionName);
     result = missionListManager->CheckPrepareTerminateEnable(mission);
     EXPECT_EQ(false, result);
     abilityRequest.abilityInfo.isStageBasedModel = true;
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
-    abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     mission = std::make_shared<Mission>(missionId, abilityRecord, missionName);
     result = missionListManager->CheckPrepareTerminateEnable(mission);
     EXPECT_EQ(false, result);
 
     abilityRequest.abilityInfo.isStageBasedModel = true;
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     mission = std::make_shared<Mission>(missionId, abilityRecord, missionName);
     result = missionListManager->CheckPrepareTerminateEnable(mission);
     EXPECT_EQ(false, result);
@@ -155,7 +154,7 @@ HWTEST_F(MissionListManagerSecondTest, SignRestartAppFlag_001, TestSize.Level1)
     int userId = 0;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     int32_t uid = 100;
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    auto abilityRecord = InitAbilityRecord();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(1, abilityRecord, "missionName");
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<MissionList> missionList2;

@@ -102,18 +102,14 @@ public:
 HWTEST_F(MissionListManagerTest, MissionListManager_001, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MissionListManager_001 begin";
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-
     int32_t callerUid;
     sptr<IAbilityConnection> connCallback = new (std::nothrow) MissionListManagerTestStub();
     sptr<IRemoteObject> callToken = nullptr;
     AppExecFwk::ElementName element;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord =
         std::make_shared<CallRecord>(callerUid, abilityRecord, connCallback, callToken);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
@@ -142,18 +138,14 @@ HWTEST_F(MissionListManagerTest, MissionListManager_001, Function | MediumTest |
 HWTEST_F(MissionListManagerTest, MissionListManager_002, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MissionListManager_002 begin";
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-
     int32_t callerUid;
     sptr<IAbilityConnection> connCallback = new (std::nothrow) MissionListManagerTestStub();
     sptr<IRemoteObject> callToken = nullptr;
     AppExecFwk::ElementName element;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord =
         std::make_shared<CallRecord>(callerUid, abilityRecord, connCallback, callToken);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
@@ -182,18 +174,14 @@ HWTEST_F(MissionListManagerTest, MissionListManager_002, Function | MediumTest |
 HWTEST_F(MissionListManagerTest, MissionListManager_003, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MissionListManager_003 begin";
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-
     sptr<IAbilityConnection> connCallback = new (std::nothrow) MissionListManagerTestStub();
     sptr<IAbilityConnection> connCallback1 = new (std::nothrow) MissionListManagerTestStub();
     sptr<IRemoteObject> callToken = nullptr;
     AppExecFwk::ElementName element;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord =
         std::make_shared<CallRecord>(1, abilityRecord, connCallback, callToken);
     std::shared_ptr<CallRecord> callRecord1 =
@@ -250,17 +238,13 @@ HWTEST_F(MissionListManagerTest, MissionListManager_005, Function | MediumTest |
     abilityRequest.abilityInfo.moduleName = "test_moduleName";
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
 
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo = abilityRequest.abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     int32_t id;
     std::string missionName = "#" + abilityRequest.abilityInfo.bundleName + ":" +
         abilityRequest.abilityInfo.moduleName + ":" + abilityRequest.abilityInfo.name;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
     missionListMgr->Init();
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(id, abilityRecord, missionName);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
@@ -298,16 +282,12 @@ HWTEST_F(MissionListManagerTest, MissionListManager_006, Function | MediumTest |
     abilityRequest.abilityInfo.moduleName = "test_moduleName";
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     abilityRequest.connect = connCallback;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo = abilityRequest.abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     int32_t id;
     std::string missionName = "#" + abilityRequest.abilityInfo.bundleName + ":" +
         abilityRequest.abilityInfo.moduleName + ":" + abilityRequest.abilityInfo.name;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(id, abilityRecord, missionName);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
@@ -337,13 +317,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_007, Function | MediumTest |
 
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 
     int testRet = missionListMgr->ResolveAbility(abilityRecord, abilityRequest);
 
@@ -360,9 +336,6 @@ HWTEST_F(MissionListManagerTest, MissionListManager_007, Function | MediumTest |
 HWTEST_F(MissionListManagerTest, MissionListManager_008, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "MissionListManager_008 begin";
-
-    AbilityRequest abilityRequest;
-    abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     AppExecFwk::ElementName element;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
@@ -390,14 +363,10 @@ HWTEST_F(MissionListManagerTest, MissionListManager_009, Function | MediumTest |
 
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     AppExecFwk::ElementName element;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(0, abilityRecord, "");
 
@@ -423,13 +392,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_010, Function | MediumTest |
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.connect = connCallback;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord = std::make_shared<CallRecord>(0, abilityRecord, connCallback, nullptr);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
 
@@ -458,13 +423,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_011, Function | MediumTest |
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.connect = connCallback;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord = std::make_shared<CallRecord>(0, abilityRecord, connCallback, nullptr);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
 
@@ -495,13 +456,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_012, Function | MediumTest |
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.connect = connCallback;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord = std::make_shared<CallRecord>(0, abilityRecord, connCallback, nullptr);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
 
@@ -556,16 +513,12 @@ HWTEST_F(MissionListManagerTest, MissionListManager_014, Function | MediumTest |
     abilityRequest.abilityInfo.moduleName = "test_moduleName";
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     abilityRequest.connect = connCallback;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo = abilityRequest.abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     int32_t id;
     std::string missionName = "#" + abilityRequest.abilityInfo.bundleName + ":" +
         abilityRequest.abilityInfo.moduleName + ":" + abilityRequest.abilityInfo.name;
 
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(id, abilityRecord, missionName);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();
@@ -593,21 +546,16 @@ HWTEST_F(MissionListManagerTest, MissionListManager_015, Function | MediumTest |
 {
     GTEST_LOG_(INFO) << "MissionListManager_015 begin";
     Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    abilityInfo.applicationInfo = applicationInfo;
     want.SetElementName("test.bundle.name", "test.ability.name");
     AbilityRequest abilityRequest;
     abilityRequest.want = want;
-    abilityRequest.abilityInfo = abilityInfo;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.abilityInfo.bundleName = "test_bundle";
     abilityRequest.abilityInfo.name = "test_name";
     abilityRequest.abilityInfo.moduleName = "test_moduleName";
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
     abilityRequest.startRecent = true;
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, abilityInfo.applicationInfo);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->isReady_ = true;
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
@@ -628,12 +576,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_016, Function | MediumTest |
 {
     GTEST_LOG_(INFO) << "MissionListManager_016 begin";
     AppExecFwk::ElementName element;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(0, abilityRecord, "");
     missionList->AddMissionToTop(mission);
@@ -670,12 +615,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_018, Function | MediumTest |
 {
     GTEST_LOG_(INFO) << "MissionListManager_018 begin";
     AppExecFwk::ElementName element;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(0, abilityRecord, "");
     missionListMgr->defaultSingleList_ = missionList;
@@ -712,12 +654,9 @@ HWTEST_F(MissionListManagerTest, MissionListManager_020, Function | MediumTest |
     sptr<IAbilityConnection> connect = new (std::nothrow) MissionListManagerTestStub();
     sptr<IRemoteObject> callToken = nullptr;
     AppExecFwk::ElementName element;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
-    std::shared_ptr<AbilityRecord> abilityRecord =
-        std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<CallRecord> callRecord =
         std::make_shared<CallRecord>(2, abilityRecord, connect, callToken);
     std::shared_ptr<CallContainer> callContainer = std::make_shared<CallContainer>();

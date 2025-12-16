@@ -246,34 +246,6 @@ HWTEST_F(AbilityRecordModuleTest, TerminateAbility_001, TestSize.Level3)
 
 /*
  * Feature: AbilityRecord
- * Function: Pre and Next Abilities
- * SubFunction: SetPreAbilityRecord/GetPreAbility/SetNextAbilityRecord/GetNextAbilityRecord
- * FunctionPoints: Pre and Next ability record getter and setter
- * CaseDescription: Check the pre and next ability record getter and setter.
- */
-HWTEST_F(AbilityRecordModuleTest, PreNextAbilities_001, TestSize.Level1)
-{
-    auto& abilityRequest = MakeDefaultAbilityRequest();
-
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    EXPECT_TRUE(abilityRecord);
-
-    auto preAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    EXPECT_TRUE(preAbilityRecord);
-
-    auto nextAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    EXPECT_TRUE(nextAbilityRecord);
-
-    for (int i = 0; i < COUNT; ++i) {
-        abilityRecord->SetPreAbilityRecord(preAbilityRecord);
-        abilityRecord->SetNextAbilityRecord(nextAbilityRecord);
-        EXPECT_EQ(abilityRecord->GetPreAbilityRecord(), preAbilityRecord);
-        EXPECT_EQ(abilityRecord->GetNextAbilityRecord(), nextAbilityRecord);
-    }
-}
-
-/*
- * Feature: AbilityRecord
  * Function: AbilityState
  * SubFunction: SetAbilityState/GetAbilityState
  * FunctionPoints: Ability state getter and setter
