@@ -54,7 +54,6 @@ ohos_shared_library("ability_runtime") {
     "src/start_options.cpp",
     "src/start_options_impl.cpp",
     "src/want_utils.cpp",
-    "src/extension_ability.cpp",
     "src/context.cpp",
   ]
 
@@ -65,7 +64,6 @@ ohos_shared_library("ability_runtime") {
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:app_context",
-    "${ability_runtime_native_path}/ability/native:extensionkit_native",
   ]
 
   external_deps = [
