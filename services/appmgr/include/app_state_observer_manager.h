@@ -134,8 +134,8 @@ private:
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
         const ApplicationState state, bool isFromWindowFocusChanged = false);
     void HandleOnProcessCreated(const ProcessData &data, BundleType bundleType = BundleType::APP);
-    void HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
-        bool isFromWindowFocusChanged, AppProcessState state);
+    void HandleOnProcessStateChanged(
+        const std::shared_ptr<AppRunningRecord> &appRecordm, bool isFromWindowFocusChanged = false);
     void HandleOnProcessDied(const ProcessData &data, BundleType bundleType = BundleType::APP);
     void HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnPageShow(const PageStateData pageStateData);
