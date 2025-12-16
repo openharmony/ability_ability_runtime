@@ -3601,8 +3601,8 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     }
     
     for (auto hapInfo : bundleInfo.hapModuleInfos) {
-        if (processInfo_ == nullptr || hapInfo.hqfInfo.hqfFilePath.empty()) {
-            break;
+        if (hapInfo.hqfInfo.hqfFilePath.empty()) {
+            continue;
         }
         std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
         std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
