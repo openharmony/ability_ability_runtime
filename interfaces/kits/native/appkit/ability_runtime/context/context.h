@@ -21,6 +21,7 @@
 
 #include "application_info.h"
 #include "bindable.h"
+#include "configuration.h"
 #include "hap_module_info.h"
 #include "iremote_object.h"
 #include "resource_manager.h"
@@ -34,10 +35,8 @@ class ResourceManager;
 enum DeviceType : int32_t;
 }
 }
-namespace AppExecFwk {
-class Configuration;
-}
 namespace AbilityRuntime {
+using AppExecFwk::ConfigUpdateReason;
 class ApplicationContext;
 
 class Context : public Bindable,
@@ -304,6 +303,11 @@ public:
      * @return Returns the context with the specified area mode.
      */
     virtual std::shared_ptr<Context> CreateAreaModeContext(int areaMode) = 0;
+
+    virtual ConfigUpdateReason GetConfigUpdateReason()
+    {
+        return ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
+    }
 
 #ifdef SUPPORT_GRAPHICS
     /**

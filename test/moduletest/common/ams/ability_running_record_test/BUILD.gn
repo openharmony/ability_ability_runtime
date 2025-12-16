@@ -36,6 +36,7 @@ ohos_moduletest("AmsAbilityRunningRecordModuleTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "access_token:libaccesstoken_sdk",
     "appspawn:appspawn_client",
     "bundle_framework:appexecfwk_base",
