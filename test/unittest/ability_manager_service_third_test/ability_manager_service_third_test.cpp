@@ -3271,5 +3271,18 @@ HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_
     auto result = abilityMs_->UnRegisterPreloadUIExtensionHostClient(callerPid);
     EXPECT_NE(result, ERR_OK);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ParseVpnWhiteListJson
+ * FunctionPoints: ParseVpnWhiteListJson
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnWhiteListJson_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    abilityMs_->ParseVpnWhiteListJson("/system/etc/vpn_startability_whitelist.json", "bundleNames");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

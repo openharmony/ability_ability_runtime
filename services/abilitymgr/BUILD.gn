@@ -388,6 +388,12 @@ ohos_prebuilt_etc("start_ability_without_caller_token.json") {
   part_name = "ability_runtime"
 }
 
+ohos_prebuilt_etc("vpn_startability_whitelist.json") {
+  source = "resource/vpn_startability_whitelist.json"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 ohos_shared_library("mission_list") {
   sanitize = {
     integer_overflow = true
@@ -553,5 +559,6 @@ group("ams_service_config") {
     ":deeplink_reserve_config.json",
     ":start_ability_without_caller_token.json",
     ":uiextension_picker_config.json",
+    ":vpn_startability_whitelist.json",
   ]
 }
