@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1329,7 +1329,7 @@ HWTEST_F(AmsAppLifeCycleModuleTest, UpdateConfiguration_001, TestSize.Level1)
     CheckState(appRunningRecord_1, token_1, AbilityState::ABILITY_STATE_READY, ApplicationState::APP_STATE_READY);
 
     auto testLanguge = std::string("ch-zh");
-    auto configUpdate = [testLanguge](const Configuration& config) {
+    auto configUpdate = [testLanguge](const Configuration& config, ConfigUpdateReason reason) {
         auto l = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
         EXPECT_TRUE(testLanguge == l);
     };
@@ -1464,7 +1464,7 @@ HWTEST_F(AmsAppLifeCycleModuleTest, UpdateConfiguration_003, TestSize.Level1)
 
     auto testLanguge = std::string("ch-zh");
     auto displayId = 10;
-    auto configUpdate = [testLanguge, displayId](const Configuration& config) {
+    auto configUpdate = [testLanguge, displayId](const Configuration& config, ConfigUpdateReason reason) {
         auto ld = config.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
         auto l = config.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
         EXPECT_TRUE(testLanguge == ld);

@@ -25,7 +25,6 @@ namespace AppExecFwk {
 struct RunningProcessInfo;
 class BundleMgrHelper;
 class OverlayEventSubscriber;
-class Configuration;
 }
 namespace AAFwk {
 class Want;
@@ -442,6 +441,10 @@ public:
 
     std::string GetLatestParameter();
 
+    ConfigUpdateReason GetConfigUpdateReason() override;
+
+    void SetConfigUpdateReason(ConfigUpdateReason reason);
+
 #ifdef SUPPORT_SCREEN
     /**
      * @brief Query all UIAbilities of the current process.
@@ -598,6 +601,8 @@ private:
     std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
     std::mutex latestParameterMutex_;
     std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
+    std::mutex configUpdateReasonLock_;
+    ConfigUpdateReason configUpdateReason_ = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
 
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;

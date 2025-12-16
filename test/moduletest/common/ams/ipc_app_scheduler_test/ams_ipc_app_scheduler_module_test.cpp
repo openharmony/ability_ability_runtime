@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,12 +282,12 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_010, TestSi
         sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler);
         bool testResult = false;
 
-        auto mockHandler = [&](const Configuration& config) {
+        auto mockHandler = [&](const Configuration& config, ConfigUpdateReason reason) {
             testResult = (val == config.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
             sem.Post();
         };
 
-        EXPECT_CALL(*mockAppScheduler, ScheduleConfigurationUpdated(_)).Times(1).WillOnce(Invoke(mockHandler));
+        EXPECT_CALL(*mockAppScheduler, ScheduleConfigurationUpdated(_, _)).Times(1).WillOnce(Invoke(mockHandler));
 
         client->ScheduleConfigurationUpdated(testConfig);
 

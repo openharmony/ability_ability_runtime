@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1741,7 +1741,7 @@ HWTEST_F(AmsAppRunningRecordTest, RemoveModuleRecord_001, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, UpdateConfiguration_001, TestSize.Level1)
 {
     auto testLanguge = std::string("ch-zh");
-    auto configUpdate = [testLanguge](const Configuration& config) {
+    auto configUpdate = [testLanguge](const Configuration& config, ConfigUpdateReason reason) {
         auto l = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
         EXPECT_TRUE(testLanguge == l);
     };
@@ -1749,7 +1749,7 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateConfiguration_001, TestSize.Level1)
     Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, testLanguge);
     auto record = GetTestAppRunningRecord();
-    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleConfigurationUpdated(_))
+    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleConfigurationUpdated(_, _))
         .Times(1)
         .WillOnce(testing::Invoke(configUpdate));
 
@@ -1767,7 +1767,7 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateConfiguration_001, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, UpdateConfiguration_002, TestSize.Level1)
 {
     auto test = std::string("colour");
-    auto configUpdate = [test](const Configuration& config) {
+    auto configUpdate = [test](const Configuration& config, ConfigUpdateReason reason) {
         auto l = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         EXPECT_TRUE(test == l);
     };
@@ -1775,7 +1775,7 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateConfiguration_002, TestSize.Level1)
     Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, test);
     auto record = GetTestAppRunningRecord();
-    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleConfigurationUpdated(_))
+    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleConfigurationUpdated(_, _))
         .Times(1)
         .WillOnce(testing::Invoke(configUpdate));
 

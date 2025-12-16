@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,9 @@ public:
     MockApplication();
     virtual ~MockApplication() = default;
 
-    virtual void OnConfigurationUpdated(const Configuration& config);
+    virtual void OnConfigurationUpdated(Configuration config,
+        AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System,
+        ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
     virtual void OnMemoryLevel(int level);
     virtual void OnForeground();
     virtual void OnBackground();
