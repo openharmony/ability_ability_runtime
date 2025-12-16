@@ -20,7 +20,7 @@
 
 void MockGetLdNamespaceName(bool namespaceRet);
 void MockDefaultNamespaceName(bool defaultNamespaceRet);
-void MockGetLdNamespaceNameStr(std::string namespaceNameStr);
+void MockGetLdNamespaceNameStr(const std::string &namespaceNameStr);
 void MockResetModuleManagerState();
 
 #endif // MOCK_NATIVE_MODULE_MANAGER_H

@@ -32,7 +32,7 @@ void MockDefaultNamespaceName(bool defaultNamespaceRet)
     g_mockDefaultNamespaceName = defaultNamespaceRet;
 }
 
-void MockGetLdNamespaceNameStr(std::string namespaceNameStr)
+void MockGetLdNamespaceNameStr(const std::string &namespaceNameStr)
 {
     g_mockGetLdNamespaceNameNameStr = namespaceNameStr;
 }
