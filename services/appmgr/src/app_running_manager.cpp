@@ -1186,8 +1186,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
             if (appRecord->NeedUpdateConfigurationBackground() ||
                 appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
-                ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
-                result = appRecord->UpdateConfiguration(config, reason);
+                result = appRecord->UpdateConfiguration(config);
             } else {
                 auto delayConfig = appRecord->GetDelayConfiguration();
                 std::vector<std::string> diffVe;
