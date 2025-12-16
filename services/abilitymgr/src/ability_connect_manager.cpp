@@ -160,7 +160,7 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
 
 int AbilityConnectManager::StopServiceAbility(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::EXT, "call");
+    TAG_LOGD(AAFwkTag::EXT, "call");
     std::lock_guard guard(serialMutex_);
     return StopServiceAbilityLocked(abilityRequest);
 }
