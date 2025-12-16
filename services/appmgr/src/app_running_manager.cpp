@@ -1183,15 +1183,9 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
         if (appRecord) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
-            bool needUpdate = appRecord->NeedUpdateConfigurationBackground();
-            ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
-            if (needUpdate) {
-                TAG_LOGD(AAFwkTag::APPMGR, "[%{public}s] update config", appRecord->GetName().c_str());
-                reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_EXT_SERVICE;
-            }
-            if (needUpdate ||
-                appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
+            if (appRecord->NeedUpdateConfigurationBackground() || appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
+                ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
                 result = appRecord->UpdateConfiguration(config, reason);
             } else {
                 auto delayConfig = appRecord->GetDelayConfiguration();
