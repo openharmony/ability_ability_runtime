@@ -22,6 +22,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 const std::string DEFAULT_NAMESPACE = "default";
 const char *OH_ABILITY_RUNTIME_ON_NATIVE_EXTENSION_CREATE = "OH_AbilityRuntime_OnNativeExtensionCreate";
+using CreateFuncType = void(*)(AbilityRuntime_ExtensionInstanceHandle, const char*);
 
 bool NativeRuntime::LoadModule(const std::string& bundleModuleName, const std::string& fileName,
     const std::string& abilityName, AbilityRuntime_ExtensionInstance &instance)
@@ -55,7 +56,7 @@ bool NativeRuntime::LoadModule(const std::string& bundleModuleName, const std::s
         LIBFREE(nativeHandle);
         return false;
     }
-    auto func = reinterpret_cast<void(*)(AbilityRuntime_ExtensionInstanceHandle, const char*)>(symbol);
+    auto func = reinterpret_cast<CreateFuncType>(symbol);
     AbilityRuntime_ExtensionInstanceHandle handle = &instance;
     func(handle, abilityName.c_str());
     return true;
