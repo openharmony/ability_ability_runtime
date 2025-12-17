@@ -58,6 +58,7 @@ public:
     MOCK_METHOD1(OnSaveData, bool(WantParams &saveData));
     MOCK_METHOD3(OnContinue, int32_t(AAFwk::WantParams &wantParams, bool &isAsyncOnContinue,
         const AppExecFwk::AbilityInfo &abilityInfo));
+    MOCK_METHOD1(IsContinuePageStack, bool(WantParams &wantParams));
 
     const std::shared_ptr<AbilityInfo> GetAbilityInfo()
     {

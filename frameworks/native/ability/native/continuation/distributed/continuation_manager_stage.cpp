@@ -179,18 +179,18 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
         TAG_LOGE(AAFwkTag::CONTINUATION, "null ability");
         return ERR_INVALID_VALUE;
     }
-#ifdef SUPPORT_GRAPHICS
-    if (IsContinuePageStack(wantParams)) {
-        bool ret = GetContentInfo(wantParams);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed!");
-            return CONTINUE_GET_CONTENT_FAILED;
-        }
-    }
-#endif
     int32_t status = ability->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
     switch (status) {
         case OnContinueResult::AGREE:
+#ifdef SUPPORT_GRAPHICS
+            if (!isAsyncOnContinue && IsContinuePageStack(wantParams)) {
+                bool ret = GetContentInfo(wantParams);
+                if (!ret) {
+                    TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed!");
+                    return CONTINUE_GET_CONTENT_FAILED;
+                }
+            }
+#endif
             TAG_LOGI(AAFwkTag::CONTINUATION, "GetContentInfo has been successfully");
             return ERR_OK;
         case OnContinueResult::REJECT:

@@ -48,11 +48,16 @@ void AniExecuteFunc(ani_vm* vm, const std::function<void(ani_env*)> func)
         TAG_LOGE(AAFwkTag::MISSION, "AniExecutePromise, vm error");
         return;
     }
+    ani_boolean unhandleException = false;
     ani_env *currentEnv = nullptr;
     ani_status aniResult = vm->GetEnv(ANI_VERSION_1, &currentEnv);
     if (ANI_OK == aniResult && currentEnv != nullptr) {
         TAG_LOGI(AAFwkTag::MISSION, "AniExecutePromise, env exist");
         func(currentEnv);
+        if (currentEnv->ExistUnhandledError(&unhandleException) && unhandleException) {
+            TAG_LOGE(AAFwkTag::MISSION, "AniExecuteFunc, unhandleException, reset");
+            currentEnv->ResetError();
+        }
         return;
     }
 
@@ -64,6 +69,10 @@ void AniExecuteFunc(ani_vm* vm, const std::function<void(ani_env*)> func)
         return;
     }
     func(newEnv);
+    if (newEnv->ExistUnhandledError(&unhandleException) && unhandleException) {
+        TAG_LOGE(AAFwkTag::MISSION, "AniExecuteFunc, unhandleException, reset");
+        newEnv->ResetError();
+    }
     aniResult = vm->DetachCurrentThread();
     if (ANI_OK != aniResult) {
         TAG_LOGE(AAFwkTag::MISSION, "AniExecutePromise, DetachCurrentThread error");

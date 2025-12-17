@@ -124,8 +124,7 @@ void MissionObserver::OnCallbackInMainThread(const ::ohos::distributedmissionman
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         callbackListTemp = callbackList_;
     }
-    for (auto iter = callbackListTemp.begin(); iter != callbackListTemp.end();) {
-        auto &jsfunc = *iter;
+    for (auto &jsfunc : callbackListTemp) {
         jsfunc(info);
     }
 }

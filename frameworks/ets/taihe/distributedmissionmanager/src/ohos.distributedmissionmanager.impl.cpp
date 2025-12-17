@@ -233,7 +233,7 @@ OHOS::AAFwk::ContinueMissionInfo ParseContinueMissionInfoFromTaihe(ani_env* env,
 }
 
 void ContinueMissionWithMissionInfoCallback(::ContinueMissionInfo::ContinueMissionInfo const& parameter,
-    ::taihe::callback_view<void(uintptr_t err)> callback)
+    ::taihe::callback_view<void(uintptr_t err, uintptr_t data)> callback)
 {
     TAG_LOGI(AAFwkTag::MISSION, "ContinueMissionWithMissionInfoCallbackSync");
     ani_env *env = taihe::get_env();

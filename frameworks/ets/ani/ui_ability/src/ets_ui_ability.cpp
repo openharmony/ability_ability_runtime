@@ -75,9 +75,7 @@ constexpr int32_t ON_SAVESTATE_INDEX_ONE = 1;
 constexpr const int32_t CALL_BACK_ERROR = -1;
 constexpr const char *ON_SHARE_SIGNATURE = "C{std.core.Record}:";
 constexpr const char *ON_COLLABORATE =
-    "Lescompat/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/CollaborateResult;";
-constexpr const char *ON_CONTINUE_SIG =
-    "Lescompat/Record;:L@ohos/app/ability/AbilityConstant/AbilityConstant/OnContinueResult;";
+    "C{std.core.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
 
 #define DISPATCH_ABILITY_INTEROP(type, applicationContext, etsRuntime, ability)                      \
     do {                                                                                            \
@@ -334,8 +332,8 @@ bool EtsUIAbility::BindNativeMethods()
     }
     std::call_once(singletonFlag_, [&status, env, cls]() {
         std::array functions = {
-            ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void *>(OnDestroyPromiseCallback) },
-            ani_native_function { "nativeOnPrepareToTerminateCallback", "Z:V",
+            ani_native_function { "nativeOnDestroyCallback", ":", reinterpret_cast<void *>(OnDestroyPromiseCallback) },
+            ani_native_function { "nativeOnPrepareToTerminateCallback", "z:",
                 reinterpret_cast<void *>(OnPrepareTerminatePromiseCallback) },
             ani_native_function { "nativeOnContinueCallback", nullptr,
                 reinterpret_cast<void*>(OnContinuePromiseCallback) },
@@ -1664,7 +1662,7 @@ int32_t EtsUIAbility::OnContinue(AAFwk::WantParams &wantParams, bool &isAsyncOnC
         return ContinuationManagerStage::ON_CONTINUE_ERR;
     }
     ani_method method = nullptr;
-    ani_status status = aniEnv->Class_FindMethod(etsAbilityObj_->aniCls, "callOnContinue", ON_CONTINUE_SIG, &method);
+    ani_status status = aniEnv->Class_FindMethod(etsAbilityObj_->aniCls, "callOnContinue", nullptr, &method);
     if (status != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "FindMethod callOnContinue failed %{public}d, or null method", status);
         return ContinuationManagerStage::ON_CONTINUE_ERR;

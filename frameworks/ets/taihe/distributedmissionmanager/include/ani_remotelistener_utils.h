@@ -55,7 +55,7 @@ private:
 
 class AniMissionContinue : public AAFwk::MissionContinueStub {
 public:
-    explicit AniMissionContinue(::taihe::callback<void(uintptr_t err)> const& callback);
+    explicit AniMissionContinue(::taihe::callback<void(uintptr_t err, uintptr_t data)> const& callback);
     explicit AniMissionContinue(::ContinueCallback::ContinueCallback const& callback);
     explicit AniMissionContinue(ani_env *env, ani_resolver deferred);
     ~AniMissionContinue();
@@ -66,7 +66,7 @@ public:
 
 private:
     ani_vm *vm_ = nullptr;
-    std::optional<::taihe::callback<void(uintptr_t err)>> callbackByMissionInfo_;
+    std::optional<::taihe::callback<void(uintptr_t err, uintptr_t data)>> callbackByMissionInfo_;
     std::optional<::ContinueCallback::ContinueCallback> callbackByDeviceInfo_;
     ani_resolver deferred_ = nullptr;
 };

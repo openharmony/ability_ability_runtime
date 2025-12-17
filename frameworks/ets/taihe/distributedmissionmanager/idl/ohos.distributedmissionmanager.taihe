@@ -81,7 +81,7 @@ function RegisterMissionListenerSync(parameter: appMissionDeviceInfo.MissionDevi
 function UnRegisterMissionListenerSync(parameter: appMissionDeviceInfo.MissionDeviceInfo): void;
 
 @rename("continueMission")
-function ContinueMissionWithMissionInfoCallback(parameter: appContinueMissionInfo.ContinueMissionInfo, callback: (err: @sts_type("BusinessError<void>") Opaque) => void): void;
+function ContinueMissionWithMissionInfoCallback(parameter: appContinueMissionInfo.ContinueMissionInfo, callback: (err: @sts_type("BusinessError<void>") Opaque, data: Opaque) => void): void;
 
 @rename("continueMission")
 function ContinueMissionWithMissionInfoPromise(parameter: appContinueMissionInfo.ContinueMissionInfo): @sts_type("Promise<void>") Opaque;
