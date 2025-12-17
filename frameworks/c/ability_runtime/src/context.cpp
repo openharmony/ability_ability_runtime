@@ -261,7 +261,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetArea(
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode areaMode)
 {
     if (context == nullptr) {
