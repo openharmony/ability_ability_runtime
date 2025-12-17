@@ -3016,9 +3016,7 @@ private:
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
 
-    int32_t OpenLinkFreeInstallAtomicService(Want &convertedWant, const Want &originalWant,
-        sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag,
-        bool hideFailureTipDialog = false);
+    int32_t OpenLinkFreeInstallAtomicService(StartAbilityWrapParam &param, const Want &originalWant);
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);
