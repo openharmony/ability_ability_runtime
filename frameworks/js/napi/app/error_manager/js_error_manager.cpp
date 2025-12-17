@@ -1435,6 +1435,30 @@ private:
 };
 } // namespace
 
+napi_value ErrorManagerInstanceTypeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    if (napi_create_object(env, &objValue) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "create obj failed");
+        return nullptr;
+    }
+
+    if (objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "MAIN", CreateJsValue(env, InstanceType::MAIN));
+    napi_set_named_property(env, objValue, "WORKER", CreateJsValue(env, InstanceType::WORKER));
+    napi_set_named_property(env, objValue, "TASKPOOL", CreateJsValue(env, InstanceType::TASKPOOL));
+    napi_set_named_property(env, objValue, "CUSTOM", CreateJsValue(env, InstanceType::CUSTOM));
+    return objValue;
+}
 napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
@@ -1461,6 +1485,8 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsErrorManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsErrorManager::Off);
     BindNativeFunction(env, exportObj, "setDefaultErrorHandler", moduleName, JsErrorManager::SetDefaultErrorHandler);
+
+    napi_set_named_property(env, exportObj, "InstanceType", ErrorManagerInstanceTypeInit(env));
     return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime
