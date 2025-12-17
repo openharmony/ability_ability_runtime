@@ -98,7 +98,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
 /**
  * @brief Obtain the files directory of the extension context.
  *
- * @param context The context to get file directory from.
+ * @param context The context to get files directory from.
  * @param buffer A pointer to a buffer that receives the files directory of the extension context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
@@ -238,7 +238,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
 /**
  * @brief Set the area mode of the extension context.
  *
- * @param context The context to set the area mode from.
+ * @param context The context to set the area mode for.
  * @param areaMode The area mode.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
