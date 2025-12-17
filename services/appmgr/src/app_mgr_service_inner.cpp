@@ -1042,6 +1042,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         appRecord->SetProcessCacheBlocked(true);
         appRecord = nullptr;
     }
+    if (appRecord && appRecord->GetProcessCacheLocked()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "process %{public}s is locked", processName.c_str());
+        DelayedSingleton<CacheProcessManager>::GetInstance()->OnAppProcessCacheBlocked(appRecord);
+        appRecord = nullptr;
+    }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
     }
@@ -10032,6 +10037,29 @@ int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
     appRecord->SetEnableProcessCache(isSupport);
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::LockProcessCache(int32_t pid, bool isLock)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "lock process cache, pid:%{public}d, isLock:%{public}d", pid, isLock);
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, pid:%{public}d", pid);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "process cache feature disabled");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    appRecord->SetProcessCacheLocked(isLock);
     return ERR_OK;
 }
 

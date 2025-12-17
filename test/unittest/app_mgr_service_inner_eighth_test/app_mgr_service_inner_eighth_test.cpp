@@ -2331,6 +2331,122 @@ HWTEST_F(AppMgrServiceInnerEighthTest, SetSupportedProcessCache_004, TestSize.Le
 }
 
 /**
+ * @tc.name: LockProcessCache_001
+ * @tc.desc: test LockProcessCache_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->appRunningManager_ = nullptr;
+
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_001 end");
+}
+
+/**
+ * @tc.name: LockProcessCache_002
+ * @tc.desc: test LockProcessCache_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_002 end");
+}
+
+/**
+ * @tc.name: LockProcessCache_003
+ * @tc.desc: test LockProcessCache_003
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    DelayedSingleton<CacheProcessManager>::GetInstance()->maxProcCacheNum_ = 0;
+    DelayedSingleton<CacheProcessManager>::GetInstance()->warmStartProcesEnable_ = false;
+
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_003 end");
+}
+
+/**
+ * @tc.name: LockProcessCache_004
+ * @tc.desc: test LockProcessCache_004
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    DelayedSingleton<CacheProcessManager>::GetInstance()->maxProcCacheNum_ = 1;
+    DelayedSingleton<CacheProcessManager>::GetInstance()->warmStartProcesEnable_ = true;
+
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_004 end");
+}
+
+/**
+ * @tc.name: LockProcessCache_005
+ * @tc.desc: test LockProcessCache_005
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    DelayedSingleton<CacheProcessManager>::GetInstance()->maxProcCacheNum_ = 0;
+    DelayedSingleton<CacheProcessManager>::GetInstance()->warmStartProcesEnable_ = true;
+
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_005 end");
+}
+
+/**
+ * @tc.name: LockProcessCache_006
+ * @tc.desc: test LockProcessCache_006
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, LockProcessCache_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    DelayedSingleton<CacheProcessManager>::GetInstance()->maxProcCacheNum_ = 1;
+    DelayedSingleton<CacheProcessManager>::GetInstance()->warmStartProcesEnable_ = false;
+
+    int32_t pid = 0;
+    bool isLock = false;
+    auto ret = appMgrServiceInner->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "LockProcessCache_006 end");
+}
+
+/**
  * @tc.name: IsAppProcessesAllCached_001
  * @tc.desc: test IsAppProcessesAllCached_001
  * @tc.type: FUNC

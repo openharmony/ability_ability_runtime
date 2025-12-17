@@ -424,6 +424,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleKillProcessByPidForExit(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID):
             return HandleKillChildProcessByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::LOCK_PROCESS_CACHE):
+            return HandleLockProcessCache(data, reply);
     }
     return INVALID_FD;
 }
@@ -1885,6 +1887,19 @@ int32_t AppMgrStub::HandleSetProcessCacheEnable(MessageParcel &data, MessageParc
     int32_t pid = data.ReadInt32();
     bool enable = data.ReadBool();
     auto ret = SetProcessCacheEnable(pid, enable);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleLockProcessCache(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleLockProcessCache called");
+    int32_t pid = data.ReadInt32();
+    bool isLock = data.ReadBool();
+    auto ret = SetProcessCacheEnable(pid, isLock);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;

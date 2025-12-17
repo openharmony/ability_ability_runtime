@@ -927,6 +927,8 @@ public:
 
     int32_t SetProcessCacheEnable(int32_t pid, bool enable);
 
+    int32_t LockProcessCache(int32_t pid, bool isLock);
+
     /**
      * set browser channel for caller
      */

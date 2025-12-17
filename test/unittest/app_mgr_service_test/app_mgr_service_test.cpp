@@ -2400,6 +2400,25 @@ HWTEST_F(AppMgrServiceTest, SetProcessCacheEnable_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LockProcessCache_001
+ * @tc.desc: LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, LockProcessCache_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+    appMgrService->appMgrServiceInner_ = std::make_shared<AppMgrServiceInner>();
+    int32_t pid = 1;
+    bool isLock = false;
+    auto ret = appMgrService->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+}
+
+/**
  * @tc.name: QueryRunningSharedBundles_001
  * @tc.desc: verify QueryRunningSharedBundles works.
  * @tc.type: FUNC

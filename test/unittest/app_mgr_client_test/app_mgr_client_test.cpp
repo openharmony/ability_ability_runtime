@@ -1614,6 +1614,39 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_002, TestSize.Leve
 }
 
 /**
+ * @tc.name: AppMgrClient_LockProcessCache_001
+ * @tc.desc: LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_LockProcessCache_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    int32_t pid = 1;
+    bool isLock = false;
+    appMgrClient->mgrHolder_ = nullptr;
+    auto ret = appMgrClient->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_LockProcessCache_002
+ * @tc.desc: LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_LockProcessCache_002, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    auto ret = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+    int32_t pid = 1;
+    bool isLock = false;
+    auto result = appMgrClient->LockProcessCache(pid, isLock);
+    EXPECT_NE(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
  * @tc.name: AppMgrClient_GetConfiguration_001
  * @tc.desc: GetConfiguration.
  * @tc.type: FUNC

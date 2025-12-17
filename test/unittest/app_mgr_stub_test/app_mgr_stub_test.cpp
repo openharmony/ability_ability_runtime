@@ -916,6 +916,30 @@ HWTEST_F(AppMgrStubTest, HandleSetProcessCacheEnable_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleLockProcessCache_001
+ * @tc.desc: Test HandleLockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleLockProcessCache_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1;
+    bool isLock = false;
+    data.WriteInt32(pid);
+    data.WriteBool(isLock);
+
+    EXPECT_CALL(*mockAppMgrService_, LockProcessCache(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::LOCK_PROCESS_CACHE), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
  * @tc.name: HandleQueryRunningSharedBundles_0100
  * @tc.desc: Test HandleQueryRunningSharedBundles.
  * @tc.type: FUNC
