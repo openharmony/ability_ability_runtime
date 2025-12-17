@@ -18,6 +18,6 @@
 struct MissionParameter {
   deviceId: String;
   fixConflict: bool;
-  tag: i64;
+  tag: i32;
 }
 

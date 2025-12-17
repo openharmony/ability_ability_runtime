@@ -35,7 +35,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     ani_status status = ANI_OK;
     if (ANI_OK != ohos::distributedmissionmanager::ANIRegister(env)) {
-        std::cerr << "Error from ohos::data::distributedkvstore::ANIRegister" << std::endl;
+        std::cerr << "Error from ohos::data::distributedmissionmanager::ANIRegister" << std::endl;
         status = ANI_ERROR;
     }
     if (ANI_OK != ContinueCallback::ANIRegister(env)) {

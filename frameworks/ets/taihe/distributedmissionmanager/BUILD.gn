@@ -68,10 +68,10 @@ taihe_shared_library("distributedmissionmanager_ani") {
   sources = get_target_outputs(":run_taihe")
   sources += [
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_constructor.cpp",
-    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_utils.cpp",
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_error_utils.cpp",
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_observer_utils.cpp",
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_remotelistener_utils.cpp",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ani_utils.cpp",
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/src/ohos.distributedmissionmanager.impl.cpp",
     "${ability_runtime_path}/frameworks/js/napi/mission_manager/dms_sa_client.cpp",
     "${ability_runtime_path}/frameworks/js/napi/mission_manager/mission_continue_stub.cpp",

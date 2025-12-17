@@ -135,7 +135,7 @@ void AniRemoteMissionListener::Release()
     released_ = true;
 }
 
-AniMissionContinue::AniMissionContinue(::taihe::callback<void(uintptr_t err)> const& callback)
+AniMissionContinue::AniMissionContinue(::taihe::callback<void(uintptr_t err, uintptr_t data)> const& callback)
     :callbackByMissionInfo_(callback)
 {
     TAG_LOGI(AAFwkTag::MISSION, "AniMissionContinue constructor");
@@ -210,15 +210,18 @@ void AniMissionContinue::OnContinueDoneInMainThread(int32_t result)
     std::string errMessage = ani_errorutils::ErrorMessageReturn(result);
     if (callbackByDeviceInfo_.has_value()) {
         callbackByDeviceInfo_.value().onContinueDone(errCode);
+        callbackByDeviceInfo_.reset();
     } else if (callbackByMissionInfo_.has_value()) {
+        ani_ref undefined = nullptr;
+        env->GetUndefined(&undefined);
+        uintptr_t undefinedPtr = reinterpret_cast<uintptr_t>(undefined);
         if (result == 0) {
-            ani_ref undefined = nullptr;
-            env->GetUndefined(&undefined);
-            callbackByMissionInfo_.value()(reinterpret_cast<uintptr_t>(undefined));
+            callbackByMissionInfo_.value()(undefinedPtr, undefinedPtr);
         } else {
             ani_ref errobj = ani_errorutils::ToBusinessError(env, errCode, errMessage);
-            callbackByMissionInfo_.value()(reinterpret_cast<uintptr_t>(errobj));
+            callbackByMissionInfo_.value()(reinterpret_cast<uintptr_t>(errobj), undefinedPtr);
         }
+        callbackByMissionInfo_.reset();
     }
 }
 
