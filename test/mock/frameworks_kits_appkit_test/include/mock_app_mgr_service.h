@@ -98,6 +98,7 @@ public:
     MOCK_METHOD2(IsProcessCacheSupported, int32_t(int32_t pid, bool &isSupported));
     MOCK_METHOD2(SetProcessCacheEnable, int32_t(int32_t pid, bool enable));
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
+    MOCK_METHOD2(LockProcessCache, int32_t(int32_t pid, bool isLock));
 #ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD3(CreateNativeChildProcess, int32_t(const std::string &libName,
         const sptr<IRemoteObject> &callback, const ChildProcessRequest &request));

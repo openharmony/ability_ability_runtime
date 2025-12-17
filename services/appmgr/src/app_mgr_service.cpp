@@ -1781,6 +1781,21 @@ int32_t AppMgrService::SetProcessCacheEnable(int32_t pid, bool enable)
     return appMgrServiceInner_->SetProcessCacheEnable(pid, enable);
 }
 
+int32_t AppMgrService::LockProcessCache(int32_t pid, bool isLock)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "lock process cache");
+    if (appMgrServiceInner_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
+        FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller not foundation");
+        return AAFwk::ERR_NO_PERMISSION_CALLER;
+    }
+    return appMgrServiceInner_->LockProcessCache(pid, isLock);
+}
+
 void AppMgrService::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");

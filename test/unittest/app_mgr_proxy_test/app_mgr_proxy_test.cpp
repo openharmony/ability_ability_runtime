@@ -1033,6 +1033,20 @@ HWTEST_F(AppMgrProxyTest, SetProcessCacheEnable_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LockProcessCache_001
+ * @tc.desc: Test LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, LockProcessCache_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
+    int32_t pid = 1;
+    bool isLock = false;
+    auto ret = appMgrProxy_->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, NO_ERROR);
+}
+
+/**
  * @tc.name: QueryRunningSharedBundles_0100
  * @tc.desc: Test QueryRunningSharedBundles.
  * @tc.type: FUNC
