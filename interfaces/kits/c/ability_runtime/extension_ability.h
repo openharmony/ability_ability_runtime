@@ -49,6 +49,12 @@ extern "C" {
  * @since 23
  */
 struct AbilityRuntime_ExtensionInstance;
+
+/**
+ * @brief Defines the pointer to AbilityRuntime_ExtensionInstance.
+ *
+ * @since 23
+ */
 typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
 
 /**
@@ -60,7 +66,7 @@ typedef void AbilityRuntime_Extension_CreateFunc(
     AbilityRuntime_ExtensionInstanceHandle handle, const char *abilityName);
 
 /**
- * @brief The name of the function that native extension ability instace looks foe when launching its native code.
+ * @brief The name of the function that native extension ability instance looks for when launching its native code.
  *
  * @since 23
  */
