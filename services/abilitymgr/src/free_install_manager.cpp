@@ -473,9 +473,9 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
             .callerToken = info.callerToken,
             .requestCode = info.requestCode,
             .userId = info.userId,
-            .removeInsightIntentFlag = true,
             .hideFailureTipDialog = false,
             .isFreeInstallFromService = info.isFreeInstallFromService,
+            .removeInsightIntentFlag = true,
         };
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(param);
     }
