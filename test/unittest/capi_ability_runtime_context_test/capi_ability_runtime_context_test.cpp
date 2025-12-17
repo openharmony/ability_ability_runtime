@@ -182,7 +182,7 @@ public:
     void TearDown() override;
 
     AbilityRuntime_ContextHandle context = new AbilityRuntime_Context;
-    static std::shared_ptr<Context> sharedContext = std::make_shared<TestContextImpl>(TEST_BUNDLE_NAME);
+    std::shared_ptr<Context> sharedContext = std::make_shared<TestContextImpl>(TEST_BUNDLE_NAME);
 };
 
 void CapiAbilityRuntimeContextTest::SetUpTestCase()
