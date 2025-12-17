@@ -208,9 +208,6 @@ class EventHub {
         cloneArray[i].apply(this, args);
       }
     }
-    if (this.nativeEventHubRef != null) {
-      this.nativeEventHubRef.emitByDynamicContext(event, ...args);
-    }
   }
 }
 
