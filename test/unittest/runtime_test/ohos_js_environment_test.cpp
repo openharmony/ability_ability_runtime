@@ -161,6 +161,8 @@ void UvTaskWrapper(void* work, int status) {}
  */
 HWTEST_F(OHOSJsEnvironmentTest, PostTaskToHandler_0100, TestSize.Level0)
 {
+    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>(AppExecFwk::EventRunner::GetMainEventRunner());
+    ASSERT_NE(jsEnvImpl, nullptr);
     uv_task_info_t taskInfo;
     uv_loop_s uvLoop;
     taskInfo.func = UvTaskWrapper;
@@ -180,7 +182,7 @@ HWTEST_F(OHOSJsEnvironmentTest, PostTaskToHandler_0100, TestSize.Level0)
  */
 HWTEST_F(OHOSJsEnvironmentTest, PostTaskToHandler_0200, TestSize.Level0)
 {
-    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>();
+    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>(AppExecFwk::EventRunner::GetMainEventRunner());
     ASSERT_NE(jsEnvImpl, nullptr);
 
     uv_task_info_t taskInfo;
@@ -204,7 +206,7 @@ HWTEST_F(OHOSJsEnvironmentTest, PostTaskToHandler_0200, TestSize.Level0)
  */
 HWTEST_F(OHOSJsEnvironmentTest, PostTaskToHandler_0300, TestSize.Level0)
 {
-    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>();
+    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>(AppExecFwk::EventRunner::GetMainEventRunner());
     ASSERT_NE(jsEnvImpl, nullptr);
 
     uv_task_info_t taskInfo;
@@ -238,6 +240,23 @@ HWTEST_F(OHOSJsEnvironmentTest, CheckPendingHigherEvent_0100, TestSize.Level0)
 
     ASSERT_EQ(OHOSJsEnvironmentImpl::CheckPendingHigherEvent(0), -1);
     ASSERT_EQ(OHOSJsEnvironmentImpl::CheckPendingHigherEvent(1), -1);
+}
+
+/**
+ * @tc.name: PostSyncTask_0100
+ * @tc.desc: Js environment InitLoop.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(OHOSJsEnvironmentTest, InitLoop_0100, TestSize.Level0)
+{
+    auto jsEnvImpl = std::make_shared<OHOSJsEnvironmentImpl>(AppExecFwk::EventRunner::GetMainEventRunner());
+    ASSERT_NE(jsEnvImpl, nullptr);
+    AbilityRuntime::Runtime::Options options;
+    auto runtime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(runtime, nullptr);
+    auto jsEngine = runtime->GetNativeEnginePointer();
+    jsEnvImpl->InitLoop(jsEngine, true);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
