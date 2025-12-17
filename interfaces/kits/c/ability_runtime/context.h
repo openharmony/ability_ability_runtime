@@ -99,7 +99,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
  * @brief Obtain the files directory of the extension context.
  *
  * @param context The context to get file directory from.
- * @param buffer A pointer to a buffer that receives the files directory of the extesnsion context.
+ * @param buffer A pointer to a buffer that receives the files directory of the extension context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
