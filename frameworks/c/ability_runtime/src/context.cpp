@@ -261,13 +261,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
-    AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode)
+AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetArea(
+    AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode areaMode)
 {
-    if (areaMode == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "areaMode is null");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
-    }
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
@@ -277,7 +273,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
         TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
-    weakContext->SwitchArea(static_cast<int32_t>(*areaMode));
+    weakContext->SwitchArea(static_cast<int>(areaMode));
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 

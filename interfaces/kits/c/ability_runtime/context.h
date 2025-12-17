@@ -51,6 +51,12 @@ extern "C" {
  * @since 23
  */
 struct AbilityRuntime_Context;
+
+/**
+ * @brief Defines the pointer to AbilityRuntime_Context.
+ *
+ * @since 23
+ */
 typedef struct AbilityRuntime_Context* AbilityRuntime_ContextHandle;
 
 /**
@@ -233,7 +239,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
  * @brief Set the area mode of the extension context.
  *
  * @param context The context to set the area mode from.
- * @param areaMode A pointer to the area mode.
+ * @param areaMode The area mode.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the areaMode is null.
@@ -241,7 +247,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
-    AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode);
+    AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode areaMode);
 
 /**
  * @brief Obtain the log file directory of the extension context.
