@@ -60,10 +60,10 @@ struct AbilityRuntime_Context;
 typedef struct AbilityRuntime_Context* AbilityRuntime_ContextHandle;
 
 /**
- * @brief Obtain the cache directory of the extension context.
+ * @brief Obtain the cache directory of the context.
  *
  * @param context The context to get cache directory from.
- * @param buffer A pointer to a buffer that receives the cache directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the cache directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -71,17 +71,17 @@ typedef struct AbilityRuntime_Context* AbilityRuntime_ContextHandle;
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCacheDir(
     AbilityRuntime_ContextHandle context, char* buffer, int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the temp directory of the extension context.
+ * @brief Obtain the temp directory of the context.
  *
  * @param context The context to get temp directory from.
- * @param buffer A pointer to a buffer that receives the temp directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the temp directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -89,17 +89,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCacheDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the files directory of the extension context.
+ * @brief Obtain the files directory of the context.
  *
  * @param context The context to get files directory from.
- * @param buffer A pointer to a buffer that receives the files directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the files directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -107,17 +107,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the database directory of the extension context.
+ * @brief Obtain the database directory of the context.
  *
  * @param context The context to get database directory from.
- * @param buffer A pointer to a buffer that receives the database directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the database directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -125,17 +125,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetFilesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDatabaseDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the preferences directory of the extension context.
+ * @brief Obtain the preferences directory of the context.
  *
  * @param context The context to get preferences directory from.
- * @param buffer A pointer to a buffer that receives the preferences directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the preferences directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -143,17 +143,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDatabaseDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetPreferencesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the bundle code directory of the extension context.
+ * @brief Obtain the bundle code directory of the context.
  *
  * @param context The context to get bundle code directory from.
- * @param buffer A pointer to a buffer that receives the bundle code directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the bundle code directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -161,17 +161,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetPreferencesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetBundleCodeDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the distributed files directory of the extension context.
+ * @brief Obtain the distributed files directory of the context.
  *
  * @param context The context to get distributed files directory from.
- * @param buffer A pointer to a buffer that receives the distributed files directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the distributed files directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -179,17 +179,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetBundleCodeDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDistributedFilesDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the resource directory of the extension context.
+ * @brief Obtain the resource directory of the context.
  *
  * @param context The context to get resource directory from.
- * @param buffer A pointer to a buffer that receives the resource directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the resource directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -197,17 +197,17 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDistributedFilesDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetResourceDir(AbilityRuntime_ContextHandle context,
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the cloud file directory of the extension context.
+ * @brief Obtain the cloud file directory of the context.
  *
  * @param context The context to get cloud file directory from.
- * @param buffer A pointer to a buffer that receives the cloud file directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the cloud file directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -215,45 +215,45 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetResourceDir(AbilityRuntime
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCloudFileDir(
     AbilityRuntime_ContextHandle context, char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the area mode of the extension context.
+ * @brief Obtain the area mode of the context.
  *
  * @param context The context to get the area mode from.
  * @param areaMode A pointer to the area mode.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the areaMode is null.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode* areaMode);
 
 /**
- * @brief Set the area mode of the extension context.
+ * @brief Set the area mode of the context.
  *
  * @param context The context to set the area mode for.
  * @param areaMode The area mode.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the areaMode is null.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
     AbilityRuntime_ContextHandle context, AbilityRuntime_AreaMode areaMode);
 
 /**
- * @brief Obtain the log file directory of the extension context.
+ * @brief Obtain the log file directory of the context.
  *
  * @param context The context to get log file directory from.
- * @param buffer A pointer to a buffer that receives the log file directory of the extension context.
+ * @param buffer A pointer to a buffer that receives the log file directory of the context.
  * @param bufferSize The length of the buffer.
  * @param writeLength The string length actually written to the buffer,
  *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
@@ -261,7 +261,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetLogFileDir(
@@ -279,7 +279,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetLogFileDir(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the extension context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
  * @since 23
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetProcessName(
