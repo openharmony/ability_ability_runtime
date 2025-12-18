@@ -74,9 +74,6 @@ constexpr const char* CLASSNAME_LINKER = "std.core.AbcRuntimeLinker";
 } // namespace
 
 static void PostTaskWrapper(void(*task)(void *), void *data, const char *taskName, int64_t delayMs);
-
-using namespace arkts::ani_signature;
-
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
 std::unique_ptr<ETSEnvironment> instance_ = nullptr;
 
