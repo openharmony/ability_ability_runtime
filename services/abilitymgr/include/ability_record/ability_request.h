@@ -26,6 +26,7 @@
 #include "process_options.h"
 #include "session_info.h"
 #include "start_options.h"
+#include "start_specified_ability_params.h"
 #include "want.h"
 
 namespace OHOS {
@@ -97,6 +98,7 @@ struct AbilityRequest {
     bool hideFailureTipDialog = false;
     bool promotePriority = false;
     uint64_t specifiedFullTokenId = 0;
+    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
     std::pair<bool, LaunchReason> IsContinuation() const;
 
     bool IsAcquireShareData() const

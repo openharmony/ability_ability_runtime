@@ -801,7 +801,7 @@ void AbilityManagerClient::SetRootSceneSession(sptr<IRemoteObject> rootSceneSess
 void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
 {}
 
-int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
 {
     return 0;
 }

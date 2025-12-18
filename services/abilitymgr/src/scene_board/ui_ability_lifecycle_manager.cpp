@@ -1677,6 +1677,10 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Assign start setting to session.");
         sessionInfo->startSetting = abilityRequest.startSetting;
     }
+    if (abilityRequest.startSpecifiedParams != nullptr) {
+        sessionInfo->persistentId = abilityRequest.startSpecifiedParams->persistentId;
+        sessionInfo->specifiedReason = static_cast<int32_t>(abilityRequest.startSpecifiedParams->specifiedReason);
+    }
     sessionInfo->callingTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
         IPCSkeleton::GetCallingTokenID()));
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
@@ -2704,7 +2708,6 @@ int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &sp
         sessionInfo->processOptions = abilityRequest.processOptions;
     }
     sessionInfo->startWindowOption = nullptr;
-    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
     sessionInfo->userId = userId_;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveAbilityToFront: %{public}d-%{public}s", requestId,
@@ -2811,7 +2814,6 @@ int32_t UIAbilityLifecycleManager::StartAbilityBySpecifed(const SpecifiedRequest
     const auto &abilityRequest = specifiedRequest.abilityRequest;
     auto sessionInfo = CreateSessionInfo(abilityRequest, specifiedRequest.requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;
-    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "specified flag:%{public}s", abilityRequest.specifiedFlag.c_str());
     if (specifiedRequest.requestListId != REQUEST_LIST_ID_INIT) {
@@ -2831,7 +2833,6 @@ int32_t UIAbilityLifecycleManager::StartAbilityBySpecified(const AbilityRequest 
 {
     auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;
-    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
     auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
     return SendSessionInfoToSCB(callerAbility, sessionInfo);
@@ -4036,7 +4037,6 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             auto sessionInfo = CreateSessionInfo(request, specifiedRequest.requestId);
             sessionInfo->requestCode = request.requestCode;
             sessionInfo->userId = userId_;
-            sessionInfo->isFromIcon = request.isFromIcon;
             TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
             std::string errMsg;
             auto result = NotifySCBPendingActivation(sessionInfo, request, errMsg);

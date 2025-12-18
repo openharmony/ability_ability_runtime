@@ -51,6 +51,7 @@
 #include "sa_interceptor_interface.h"
 #include "sender_info.h"
 #include "start_options.h"
+#include "start_specified_ability_params.h"
 #include "user_callback.h"
 #include "system_memory_attr.h"
 #include "ui_extension/ui_extension_ability_connect_info.h"
@@ -1640,9 +1641,10 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @param params The parameters to start specified ability.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want)
+    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
     {
         return 0;
     }
