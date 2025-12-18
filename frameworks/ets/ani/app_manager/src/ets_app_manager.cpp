@@ -140,13 +140,11 @@ private:
     static int32_t serialNumber_;
     static sptr<AbilityRuntime::EtsAppStateObserver> appStateObserver_;
     static sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> observerForeground_;
-    static std::mutex observerLock_;
 };
 
 int32_t EtsAppManager::serialNumber_ = 0;
 sptr<AbilityRuntime::EtsAppStateObserver> EtsAppManager::appStateObserver_ = nullptr;
 sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> EtsAppManager::observerForeground_ = nullptr;
-std::mutex EtsAppManager::observerLock_;
 
 sptr<AppExecFwk::IAppMgr> EtsAppManager::GetAppManagerInstance()
 {
@@ -494,7 +492,6 @@ ani_int EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, 
     if (appStateObserver_ == nullptr) {
         appStateObserver_ = new (std::nothrow) AbilityRuntime::EtsAppStateObserver(aniVM);
     }
-    std::lock_guard<std::mutex> lock(observerLock_);
     if (appStateObserver_->GetEtsObserverMapSize() == 0) {
         int32_t ret = appManager->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
         TAG_LOGD(AAFwkTag::APPMGR, "err:%{public}d", ret);
@@ -569,7 +566,6 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
                 env, "observer is nullptr, please register first."), nullptr);
         return;
     }
-    std::lock_guard<std::mutex> lock(observerLock_);
     OnOffInner(env, etsObserverId, callback);
 }
 
