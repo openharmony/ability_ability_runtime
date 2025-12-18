@@ -2581,7 +2581,8 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB
 {
     proxy_ = std::make_shared<AbilityManagerProxy>(nullptr);
     Want want;
-    proxy_->StartSpecifiedAbilityBySCB(want);
+    StartSpecifiedAbilityParams params;
+    proxy_->StartSpecifiedAbilityBySCB(want, params);
     EXPECT_TRUE(proxy_ != nullptr);
 }
 
@@ -2599,7 +2600,8 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB
     EXPECT_TRUE(proxy_ != nullptr);
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).Times(1).WillOnce(Return(NO_ERROR));
     Want want;
-    proxy_->StartSpecifiedAbilityBySCB(want);
+    StartSpecifiedAbilityParams params;
+    proxy_->StartSpecifiedAbilityBySCB(want, params);
 }
 
 /*

@@ -1797,7 +1797,8 @@ HWTEST_F(AbilityManagerClientBranchTest, SetLockedState_0100, TestSize.Level1)
 HWTEST_F(AbilityManagerClientBranchTest, StartSpecifiedAbilityBySCB_0100, TestSize.Level1)
 {
     Want want;
-    client_->StartSpecifiedAbilityBySCB(want);
+    StartSpecifiedAbilityParams params;
+    client_->StartSpecifiedAbilityBySCB(want, params);
     EXPECT_TRUE(client_ != nullptr);
 }
 

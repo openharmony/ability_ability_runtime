@@ -4846,7 +4846,7 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     isColdStart = reply.ReadBool();
 }
 
-int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -4860,6 +4860,11 @@ int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
 
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+
+    if (!data.WriteParcelable(&params)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params write fail");
         return ERR_NATIVE_IPC_PARCEL_FAILED;
     }
 

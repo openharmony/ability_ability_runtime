@@ -1797,13 +1797,14 @@ void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, boo
     TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB, isColdStart: %{public}d", isColdStart);
 }
 
-int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartSpecifiedAbilityBySCB, target: %{public}s/%{public}s",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
-    return abms->StartSpecifiedAbilityBySCB(want);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartSpecifiedAbilityBySCB, target: %{public}s/%{public}s, "
+        "persistentId:%{public}d, reason:%{public}d", want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str(), params.persistentId, static_cast<int32_t>(params.specifiedReason));
+    return abms->StartSpecifiedAbilityBySCB(want, params);
 }
 
 ErrCode AbilityManagerClient::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
