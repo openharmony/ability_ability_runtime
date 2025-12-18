@@ -164,10 +164,19 @@ void ETSTestRunner::Run()
             TAG_LOGI(AAFwkTag::DELEGATOR, "invalid onRun property");
             return;
         }
-
+        ani_boolean errorExists;
+        env->ExistUnhandledError(&errorExists);
+        
+        TAG_LOGE(AAFwkTag::DELEGATOR, "onrun error check : %{public}d", (int)errorExists);
         ani_ref result;
         status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ZERO, nullptr, &result);
         if (status != ANI_OK) {
+            std::ostringstream buffer;
+            std::streambuf *oldStderr = std::cerr.rdbuf(buffer.rdbuf());
+            ani_status status = env->DescribeError();
+            std::cerr.rdbuf(oldStderr);
+            std::string output = buffer.str();
+            TAG_LOGE(AAFwkTag::DELEGATOR, "onrun error check : %{public}s", output.c_str());
             TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onRun failed status : %{public}d", status);
         } else {
             TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onRun success");
