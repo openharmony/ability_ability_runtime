@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -891,20 +891,20 @@ void MainThread::ScheduleProfileChanged(const Profile &profile)
  * @brief send the new config to the application.
  *
  * @param config The updated config.
- *
+ * @param reason The updated configuration scene flag.
  */
-void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
+void MainThread::ScheduleConfigurationUpdated(const Configuration &config, ConfigUpdateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     wptr<MainThread> weak = this;
-    auto task = [weak, config]() {
+    auto task = [weak, config, reason]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        appThread->HandleConfigurationUpdated(config);
+        appThread->HandleConfigurationUpdated(config, reason);
     };
     if (!mainHandler_->PostTask(task, "MainThread:ConfigurationUpdated")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
@@ -2876,9 +2876,10 @@ void MainThread::HandleMemoryLevel(int level)
  * @brief send the new config to the application.
  *
  * @param config The updated config.
+ * @param reason The updated scene flag.
  *
  */
-void MainThread::HandleConfigurationUpdated(const Configuration &config)
+void MainThread::HandleConfigurationUpdated(const Configuration &config, ConfigUpdateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (applicationImpl_ == nullptr) {
@@ -2886,7 +2887,7 @@ void MainThread::HandleConfigurationUpdated(const Configuration &config)
         return;
     }
 
-    applicationImpl_->PerformConfigurationUpdated(config);
+    applicationImpl_->PerformConfigurationUpdated(config, reason);
 }
 
 void MainThread::TaskTimeoutDetected(const std::shared_ptr<EventRunner> &runner)

@@ -1848,6 +1848,18 @@ std::string ContextImpl::GetLatestParameter()
     return "";
 }
 
+void ContextImpl::SetConfigUpdateReason(ConfigUpdateReason reason)
+{
+    std::lock_guard<std::mutex> lock(configUpdateReasonLock_);
+    configUpdateReason_ = reason;
+}
+
+ConfigUpdateReason ContextImpl::GetConfigUpdateReason()
+{
+    std::lock_guard<std::mutex> lock(configUpdateReasonLock_);
+    return configUpdateReason_;
+}
+
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> ContextImpl::CreateDisplayContext(uint64_t displayId)
 {

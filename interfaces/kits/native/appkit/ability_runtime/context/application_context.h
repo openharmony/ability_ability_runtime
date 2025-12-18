@@ -198,6 +198,8 @@ public:
     void SetLatestParameter(const AAFwk::Want &want);
     std::string GetLaunchParameter() const;
     std::string GetLatestParameter() const;
+    ConfigUpdateReason GetConfigUpdateReason() override;
+    void SetConfigUpdateReason(ConfigUpdateReason reason);
 
 protected:
     bool IsContext(size_t contextTypeId) override

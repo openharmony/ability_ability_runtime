@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,7 +119,8 @@ public:
     {
         scheduled_ |= PROFILE_CHANGED_SCHEDULED;
     }
-    void ScheduleConfigurationUpdated(const Configuration& config)
+    void ScheduleConfigurationUpdated(
+        const Configuration& config, ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT)
     {
         scheduled_ |= SCHEDULE_CONFIGURATION_UPDATED;
     }
