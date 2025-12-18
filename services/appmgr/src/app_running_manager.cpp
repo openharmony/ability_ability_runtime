@@ -1199,7 +1199,8 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
     return result;
 }
 
-bool AppRunningManager::UpdateConfiguration(std::shared_ptr<AppRunningRecord>& appRecord, Rosen::ConfigMode configMode)
+bool AppRunningManager::UpdateConfiguration(std::shared_ptr<AppRunningRecord>& appRecord,
+    Rosen::ConfigMode configMode, ConfigUpdateReason reason)
 {
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null ptr");
@@ -1226,11 +1227,12 @@ bool AppRunningManager::UpdateConfiguration(std::shared_ptr<AppRunningRecord>& a
         TAG_LOGI(AAFwkTag::APPKIT, "colorMode: %{public}s", value.c_str());
     }
     delayConfig->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    appRecord->UpdateConfiguration(config);
+    appRecord->UpdateConfiguration(config, reason);
     return true;
 }
 
-void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId)
+void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId,
+    ConfigUpdateReason reason)
 {
     auto appRunningMap = GetAppRunningRecordMap();
 
@@ -1251,7 +1253,7 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         }
         if (info.bandleName == appRecord->GetBundleName() && info.appIndex == appRecord->GetAppIndex() && item.second
             && appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
-            if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE)) {
+            if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE, reason)) {
                 item.second = false;
             }
         }
@@ -1293,7 +1295,8 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
                 TAG_LOGE(AAFwkTag::APPMGR, "appRuningMgr null");
                 return;
             }
-            appRuningMgr->ExecuteConfigurationTask(info, userId);
+            appRuningMgr->ExecuteConfigurationTask(
+                info, userId, ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
         };
         AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(policyTask,
             info.bandleName.c_str() + std::to_string(info.appIndex), intervalTime * batchCount);

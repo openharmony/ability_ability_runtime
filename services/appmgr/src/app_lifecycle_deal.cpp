@@ -293,7 +293,7 @@ void AppLifeCycleDeal::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
     appThread->ScheduleNewProcessRequest(want, moduleName);
 }
 
-int32_t AppLifeCycleDeal::UpdateConfiguration(const Configuration &config)
+int32_t AppLifeCycleDeal::UpdateConfiguration(const Configuration &config, ConfigUpdateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "call");
@@ -302,7 +302,7 @@ int32_t AppLifeCycleDeal::UpdateConfiguration(const Configuration &config)
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
-    appThread->ScheduleConfigurationUpdated(config);
+    appThread->ScheduleConfigurationUpdated(config, reason);
     return ERR_OK;
 }
 
