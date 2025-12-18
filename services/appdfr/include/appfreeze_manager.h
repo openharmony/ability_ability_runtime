@@ -40,6 +40,7 @@ static const std::vector<std::string> APP_FREEZE_EVENT_NAME = {
     "LIFECYCLE_HALF_TIMEOUT",
     "LIFECYCLE_TIMEOUT",
 };
+static constexpr int DEFAULT_APPFREEZE_REPORT_TIMES = 1;
 
 class AppfreezeManager : public std::enable_shared_from_this<AppfreezeManager> {
 public:
@@ -63,13 +64,6 @@ public:
         APPFREEZE_STATE_CANCELED = 3,
     };
 
-    struct AppFreezeInfo {
-        int32_t pid = 0;
-        int state = 0;
-        int64_t occurTime = 0;
-        std::string errorName = "";
-    };
-
     struct ParamInfo {
         bool needKillProcess = true;
         int typeId = TypeAttribute::NORMAL_TIMEOUT;
@@ -86,6 +80,7 @@ public:
         uint64_t dumpFinishTime = 0;
         std::string dumpResult;
         int32_t appStatus = -1;
+        bool isRepeatKilledThread = false;
     };
 
     AppfreezeManager();
@@ -96,10 +91,9 @@ public:
     int AppfreezeHandle(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow = FreezeUtil::LifecycleFlow());
-    std::string WriteToFile(const std::string& fileName, std::string& content);
+    std::string WriteToFile(const std::string& fileName, const std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
     bool IsProcessDebug(int32_t pid, std::string bundleName);
-    bool IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& errorName);
     void DeleteStack(int pid);
     bool CancelAppFreezeDetect(int32_t pid, const std::string& bundleName);
     void RemoveDeathProcess(std::string bundleName);
@@ -109,7 +103,11 @@ public:
     void RegisterAppKillTime(int32_t pid, uint64_t killTime);
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     bool CheckInBackGround(const FaultData &faultData);
-    bool CheckAppfreezeHappend(int32_t pid, const std::string& eventName);
+    bool CheckAppfreezeHappend(const std::string& key, const std::string& eventName);
+    bool IsBetaVersion();
+    void InsertKillThread(int32_t state, int32_t pid, int32_t uid, const std::string& bundleName);
+    bool IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,
+        const std::string& eventName);
 
 private:
     struct PeerBinderInfo {
@@ -129,6 +127,14 @@ private:
         int32_t eventTid;
         int32_t pid;
         int layer;
+    };
+
+    struct AppFreezeInfo {
+        int state = 0;
+        int pid = 0;
+        int reportTimes = DEFAULT_APPFREEZE_REPORT_TIMES;
+        int64_t occurTime = 0;
+        bool isRepeatKilledThread = false;
     };
 
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
@@ -154,26 +160,31 @@ private:
     std::string GetAppfreezeInfoPath(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
         const std::string& binderInfo, const std::string& memoryContent);
-    int64_t GetFreezeCurrentTime();
-    void SetFreezeState(int32_t pid, int state, const std::string& errorName);
-    int GetFreezeState(int32_t pid);
-    int64_t GetFreezeTime(int32_t pid);
-    void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
     void RecordAppFreezeBehavior(FaultData& faultData, uint64_t dumpStartTime,
         uint64_t dumpFinishTime, const std::string& dumpResult);
     std::string ParseDecToHex(uint64_t id);
     std::string GetHitraceInfo();
+    AppFaultDataBySA GenerateFaultDataBySA(const ParamInfo& info, const FreezeUtil::LifecycleFlow& flow);
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
+    bool CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName);
+    std::string GetCatcherStack(const std::string& fileName, const std::string& catcherStack);
+    bool IsNeedIgnoreFreezeEvent(const std::string& key, const std::string& eventName,
+        int maxReportTimes = DEFAULT_APPFREEZE_REPORT_TIMES);
+    int64_t GetFreezeCurrentTime();
+    void SetFreezeState(const std::string& key, int state, const std::string& eventName);
+    int GetReportTimes(const std::string& key);
+    int64_t GetLastOccurTime(const std::string& key);
+    bool ClearOldInfo(std::map<std::string, AppFreezeInfo>& infoMap, size_t maxSize, int64_t maxTimelimit);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
     static ffrt::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeManager> instance_;
     static ffrt::mutex freezeMutex_;
-    std::map<int32_t, AppFreezeInfo> appfreezeInfo_;
+    std::map<std::string, AppFreezeInfo> appfreezeInfo_;
     static ffrt::mutex catchStackMutex_;
     static std::map<int, std::string> catchStackMap_;
     static ffrt::mutex freezeFilterMutex_;
@@ -183,6 +194,8 @@ private:
     static std::string appfreezeInfoPath_;
     std::mutex freezeMapMutex_;
     std::map<int32_t, std::map<std::string, AppfreezeEventRecord>> freezeEventMap_;
+    std::mutex freezeKillThreadMutex_;
+    std::map<std::string, AppFreezeInfo> freezeKillThreadMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

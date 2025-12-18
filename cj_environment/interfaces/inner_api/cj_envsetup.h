@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_CJ_ENVSETUP_H
 
 #include <string>
+#include <functional>
 
 namespace OHOS {
 using UpdateStackInfoFuncType = void(*)(unsigned long long, void *, unsigned int);

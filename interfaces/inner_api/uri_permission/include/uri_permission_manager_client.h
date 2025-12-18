@@ -44,7 +44,7 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
      */
-    int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName, int32_t appIndex = 0,
+    int GrantUriPermission(const Uri &uri, uint32_t flag, const std::string targetBundleName, int32_t appIndex = 0,
         uint32_t initiatorTokenId = 0);
 
     /**
@@ -53,7 +53,7 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
      */
-    int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag, const std::string targetBundleName,
+    int GrantUriPermission(const std::vector<Uri> &uriVec, uint32_t flag, const std::string targetBundleName,
         int32_t appIndex = 0, uint32_t initiatorTokenId = 0);
 
     /**

@@ -15,6 +15,7 @@
 
 #include "interceptor/screen_unlock_interceptor.h"
 
+#include "ability_record.h"
 #include "ability_util.h"
 #include "extension_config.h"
 #include "event_report.h"
@@ -29,6 +30,45 @@
 
 namespace OHOS {
 namespace AAFwk {
+void ScreenUnlockInterceptor::RecordExtensionEventWhenScreenUnlock(const AbilityInterceptorParam &param,
+    const AppExecFwk::AbilityInfo &targetAbilityInfo)
+{
+#ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
+    EventInfo eventInfo;
+    eventInfo.bundleName = param.want.GetElement().GetBundleName();
+    eventInfo.abilityName = param.want.GetElement().GetAbilityName();
+    eventInfo.moduleName = "StartAbilityScreenUnlock";
+    if (eventInfo.bundleName.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName empty, dont report");
+        return;
+    }
+    if (targetAbilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
+        DelayedSingleton<ExtensionConfig>::GetInstance()->IsScreenUnlockAllowAbility(
+            targetAbilityInfo.extensionTypeName, eventInfo.bundleName, eventInfo.abilityName)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s/%{public}s is in allowList, dont report",
+            eventInfo.bundleName.c_str(), eventInfo.abilityName.c_str());
+        return;
+    }
+    if (!OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
+        return;
+    }
+    std::string callerBundleName;
+    if (param.callerToken) {
+        auto callAbilityRecord = Token::GetAbilityRecordByToken(param.callerToken);
+        if (callAbilityRecord) {
+            callerBundleName = callAbilityRecord->GetAbilityInfo().bundleName;
+        }
+    }
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    eventInfo.callerBundleName = callerBundleName.empty() ? std::to_string(callerUid) : callerBundleName;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "report screen unlock ability: %{public}s/%{public}s:%{public}s",
+        eventInfo.bundleName.c_str(), eventInfo.abilityName.c_str(), eventInfo.callerBundleName.c_str());
+    EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
+#endif
+#endif
+}
+
 ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     // get target application info
@@ -45,6 +85,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         }
     }
     if (targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
+        RecordExtensionEventWhenScreenUnlock(param, targetAbilityInfo);
         return ERR_OK;
     }
 #ifdef SUPPORT_SCREEN
@@ -66,6 +107,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         !DelayedSingleton<ExtensionConfig>::GetInstance()->IsScreenUnlockIntercept(
             targetAbilityInfo.extensionTypeName, targetAbilityInfo.applicationInfo.isSystemApp,
             targetAbilityInfo.applicationInfo.bundleName)) {
+        RecordExtensionEventWhenScreenUnlock(param, targetAbilityInfo);
         return ERR_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup before device first unlock");

@@ -33,13 +33,14 @@ MockServiceAbilityManagerService::MockServiceAbilityManagerService()
 MockServiceAbilityManagerService::~MockServiceAbilityManagerService()
 {}
 
-int MockServiceAbilityManagerService::StartAbility(const Want& want, int32_t userId, int requestCode)
+int MockServiceAbilityManagerService::StartAbility(
+    const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     return 0;
 }
 
-int MockServiceAbilityManagerService::StartAbility(
-    const Want& want, const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode)
+int MockServiceAbilityManagerService::StartAbility(const Want& want, const sptr<IRemoteObject>& callerToken,
+    int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     return 0;
 }
@@ -52,7 +53,7 @@ int MockServiceAbilityManagerService::StartAbilityAsCaller(
 }
 
 int MockServiceAbilityManagerService::StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent)
+    const sptr<IRemoteObject>& callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     GTEST_LOG_(INFO) << "MockServiceAbilityManagerService::StartAbilityByCall begain";
     if (!connect) {

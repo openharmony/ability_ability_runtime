@@ -18,7 +18,7 @@
 
 #define private public
 #define protected public
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "connection_record.h"
 #undef private
 #undef protected
@@ -57,7 +57,7 @@ public:
 
     std::shared_ptr<ConnectionRecord> connectionRecord_{ nullptr };
     OHOS::sptr<AbilityConnectCallbackMock> callback_{ nullptr };
-    std::shared_ptr<AbilityRecord> service_{ nullptr };
+    std::shared_ptr<BaseExtensionRecord> service_{ nullptr };
 };
 
 AbilityRequest ConnectionRecordTest::GenerateAbilityRequest(const std::string& deviceName,
@@ -96,7 +96,7 @@ void ConnectionRecordTest::SetUp(void)
     std::string appName = "hiservcie";
     std::string bundleName = "com.ix.hiservcie";
     AbilityRequest abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
-    service_ = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    service_ = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     connectionRecord_ = std::make_shared<ConnectionRecord>(service_->GetToken(), service_, callback_, nullptr);
 }
 

@@ -1004,7 +1004,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             }
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "Terminate last ability in app:%{public}s.", appRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "Terminate last:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
@@ -1071,7 +1071,7 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "null");
+        TAG_LOGD(AAFwkTag::APPMGR, "null");
         return ERR_INVALID_OPERATION;
     }
 
@@ -1341,7 +1341,7 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
     return ERR_OK;
 }
 
-int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
+int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -1361,7 +1361,7 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
             TAG_LOGW(AAFwkTag::APPMGR, "pid%{public}d not found", pid);
         } else {
             TAG_LOGD(AAFwkTag::APPMGR, "pid%{public}d memory level = %{public}d", pid, it->second);
-            appRecord->ScheduleMemoryLevel(it->second);
+            appRecord->ScheduleMemoryLevel(it->second, isShellCall);
         }
     }
     return ERR_OK;
@@ -2261,18 +2261,6 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
         }
     }
     return true;
-}
-
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    auto appRunningMap = GetAppRunningRecordMap();
-    for (const auto& item : appRunningMap) {
-        const auto& appRecord = item.second;
-        if (appRecord && appRecord->GetSpecifiedRequestId() == specifiedId) {
-            TAG_LOGI(AAFwkTag::APPMGR, "set instanceKey:%{public}s", instanceKey.c_str());
-            appRecord->SetInstanceKey(instanceKey);
-        }
-    }
 }
 
 int32_t AppRunningManager::AddUIExtensionBindItem(

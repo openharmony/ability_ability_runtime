@@ -2759,5 +2759,20 @@ HWTEST_F(AbilityManagerClientBranchTest, StartSelfUIAbilityInCurrentProcess_0100
     StartOptions startOptions;
     EXPECT_EQ(client_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr), ERR_OK);
 }
+
+/*
+ * Feature: AbilityManagerClient
+ * Function: StartAbilityForPrelaunch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerClient StartAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify the StartAbilityForPrelaunch call normal
+ */
+HWTEST_F(AbilityManagerClientBranchTest, StartAbilityForPrelaunch_001, TestSize.Level1)
+{
+    Want want;
+    EXPECT_EQ(client_->StartAbilityForPrelaunch(want), 0);
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -28,9 +28,11 @@
 
 #include "ability_connect_callback_interface.h"
 #include "ability_info.h"
+#include "ability_record/ability_record_utils.h"
+#include "ability_record/ability_request.h"
+#include "ability_record/caller_record.h"
 #include "ability_start_setting.h"
 #include "ability_state.h"
-#include "ability_token_stub.h"
 #include "app_scheduler.h"
 #include "application_info.h"
 #include "bundlemgr/bundle_mgr_interface.h"
@@ -49,341 +51,15 @@
 #include "resource_manager.h"
 #include "start_options.h"
 #include "window_manager_service_handler.h"
-#endif
+#endif // SUPPORT_GRAPHICS
 
 namespace OHOS {
 namespace AAFwk {
 using Closure = std::function<void()>;
 
 class AbilityRecord;
-class ConnectionRecord;
 class CallContainer;
 struct EventInfo;
-
-constexpr const char* ABILITY_TOKEN_NAME = "AbilityToken";
-constexpr const char* LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
-
-/**
- * @class Token
- * Token is identification of ability and used to interact with kit and wms.
- */
-class Token : public AbilityTokenStub {
-public:
-    explicit Token(std::weak_ptr<AbilityRecord> abilityRecord);
-    virtual ~Token();
-
-    std::shared_ptr<AbilityRecord> GetAbilityRecord() const;
-    static std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token);
-
-private:
-    std::weak_ptr<AbilityRecord> abilityRecord_;  // ability of this token
-};
-
-/**
- * @class AbilityResult
- * Record requestCode of for-result start mode and result.
- */
-class AbilityResult {
-public:
-    AbilityResult() = default;
-    AbilityResult(int requestCode, int resultCode, const Want &resultWant)
-        : requestCode_(requestCode), resultCode_(resultCode), resultWant_(resultWant)
-    {}
-    virtual ~AbilityResult()
-    {}
-
-    int requestCode_ = -1;  // requestCode of for-result start mode
-    int resultCode_ = -1;   // resultCode of for-result start mode
-    Want resultWant_;       // for-result start mode ability will send the result to caller
-};
-
-/**
- * @class SystemAbilityCallerRecord
- * Record system caller ability of for-result start mode and result.
- */
-class SystemAbilityCallerRecord {
-public:
-    SystemAbilityCallerRecord(std::string &srcAbilityId, const sptr<IRemoteObject> &callerToken)
-        : srcAbilityId_(srcAbilityId), callerToken_(callerToken)
-    {}
-    virtual ~SystemAbilityCallerRecord()
-    {}
-
-    std::string GetSrcAbilityId()
-    {
-        return srcAbilityId_;
-    }
-    const sptr<IRemoteObject> GetCallerToken()
-    {
-        return callerToken_;
-    }
-    void SetResult(Want &want, int resultCode)
-    {
-        resultWant_ = want;
-        resultCode_ = resultCode;
-    }
-    Want &GetResultWant()
-    {
-        return resultWant_;
-    }
-    int &GetResultCode()
-    {
-        return resultCode_;
-    }
-    /**
-     * Set result to system ability.
-     *
-     */
-    void SetResultToSystemAbility(std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord,
-        Want &resultWant, int resultCode);
-    /**
-     * Send result to system ability.
-     *
-     */
-    void SendResultToSystemAbility(int requestCode,
-        const std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord,
-        int32_t callerUid, uint32_t accessToken, bool schedulerdied);
-
-private:
-    std::string srcAbilityId_;
-    sptr<IRemoteObject> callerToken_;
-    Want resultWant_;
-    int resultCode_ = -1;
-};
-
-/**
- * @struct CallerAbilityInfo
- * caller ability info.
- */
-struct CallerAbilityInfo {
-public:
-    int32_t callerTokenId = 0;
-    int32_t callerUid = 0;
-    int32_t callerPid = 0;
-    int32_t callerAppCloneIndex = 0;
-    std::string callerNativeName;
-    std::string callerBundleName;
-    std::string callerAbilityName;
-};
-
-/**
- * @class CallerRecord
- * Record caller ability of for-result start mode and result.
- */
-class CallerRecord {
-public:
-    CallerRecord() = default;
-    CallerRecord(int requestCode, std::weak_ptr<AbilityRecord> caller);
-    CallerRecord(int requestCode, std::shared_ptr<SystemAbilityCallerRecord> saCaller) : requestCode_(requestCode),
-        saCaller_(saCaller)
-    {}
-    virtual ~CallerRecord()
-    {}
-
-    int GetRequestCode()
-    {
-        return requestCode_;
-    }
-    std::shared_ptr<AbilityRecord> GetCaller()
-    {
-        return caller_.lock();
-    }
-    std::shared_ptr<SystemAbilityCallerRecord> GetSaCaller()
-    {
-        return saCaller_;
-    }
-    std::shared_ptr<CallerAbilityInfo> GetCallerInfo()
-    {
-        return callerInfo_;
-    }
-    bool IsHistoryRequestCode(int32_t requestCode)
-    {
-        return requestCodeSet_.count(requestCode) > 0;
-    }
-    void RemoveHistoryRequestCode(int32_t requestCode)
-    {
-        requestCodeSet_.erase(requestCode);
-    }
-    void AddHistoryRequestCode(int32_t requestCode)
-    {
-        requestCodeSet_.insert(requestCode);
-    }
-    void SetRequestCodeSet(const std::set<int32_t> &requestCodeSet)
-    {
-        requestCodeSet_ = requestCodeSet;
-    }
-    std::set<int32_t> GetRequestCodeSet()
-    {
-        return requestCodeSet_;
-    }
-
-private:
-    int requestCode_ = -1;  // requestCode of for-result start mode
-    std::weak_ptr<AbilityRecord> caller_;
-    std::shared_ptr<SystemAbilityCallerRecord> saCaller_ = nullptr;
-    std::shared_ptr<CallerAbilityInfo> callerInfo_ = nullptr;
-    std::set<int32_t> requestCodeSet_;
-};
-
-/**
- * @class AbilityRequest
- * Wrap parameters of starting ability.
- */
-enum AbilityCallType {
-    INVALID_TYPE = 0,
-    CALL_REQUEST_TYPE,
-    START_OPTIONS_TYPE,
-    START_SETTINGS_TYPE,
-    START_EXTENSION_TYPE,
-};
-
-enum CollaboratorType {
-    DEFAULT_TYPE = 0,
-    RESERVE_TYPE,
-    OTHERS_TYPE
-};
-
-struct AbilityRequest {
-    bool isStartInSplitMode = false;
-    bool restart = false;
-    bool startRecent = false;
-    bool uriReservedFlag = false;
-    bool isFromIcon = false;
-    bool isShellCall = false;
-    // ERMS embedded atomic service
-    bool isQueryERMS = false;
-    bool isEmbeddedAllowed = false;
-    bool callSpecifiedFlagTimeout = false;
-    bool hideStartWindow = false;
-    int32_t primaryWindowId = -1;
-    int32_t restartCount = -1;
-    int32_t uid = 0;
-    int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
-    int32_t callerTokenRecordId = -1;
-    int32_t userId = -1;
-    uint32_t callerAccessTokenId = 0;
-    uint32_t specifyTokenId = 0;
-    int callerUid = -1;         // call ability
-    int requestCode = -1;
-    AbilityCallType callType = AbilityCallType::INVALID_TYPE;           // call ability
-    int64_t restartTime = 0;
-    sptr<IRemoteObject> callerToken = nullptr;          // call ability
-    sptr<IRemoteObject> asCallerSourceToken = nullptr;          // call ability
-    sptr<IAbilityConnection> connect = nullptr;
-    sptr<IRemoteObject> abilityInfoCallback = nullptr;
-    sptr<SessionInfo> sessionInfo;
-    std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
-    std::shared_ptr<ProcessOptions> processOptions = nullptr;
-    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
-    std::string specifiedFlag;
-    std::string customProcess;
-    std::string reservedBundleName;
-    std::string appId;
-    std::string startTime;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo appInfo;
-    StartOptions startOptions;
-    bool hideFailureTipDialog = false;
-    std::pair<bool, LaunchReason> IsContinuation() const
-    {
-        auto flags = want.GetFlags();
-        if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
-            return {true, LaunchReason::LAUNCHREASON_CONTINUATION};
-        }
-        if ((flags & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION) {
-            return {true, LaunchReason::LAUNCHREASON_PREPARE_CONTINUATION};
-        }
-        return {false, LaunchReason::LAUNCHREASON_UNKNOWN};
-    }
-
-    bool IsAcquireShareData() const
-    {
-        return want.GetBoolParam(Want::PARAM_ABILITY_ACQUIRE_SHARE_DATA, false);
-    }
-
-    bool IsAppRecovery() const
-    {
-        return want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
-    }
-
-    bool IsCallType(const AbilityCallType & type) const
-    {
-        return (callType == type);
-    }
-
-    void Dump(std::vector<std::string> &state)
-    {
-        std::string dumpInfo = "      want [" + want.ToUri() + "]";
-        state.push_back(dumpInfo);
-        dumpInfo = "      app name [" + abilityInfo.applicationName + "]";
-        state.push_back(dumpInfo);
-        dumpInfo = "      main name [" + abilityInfo.name + "]";
-        state.push_back(dumpInfo);
-        dumpInfo = "      request code [" + std::to_string(requestCode) + "]";
-        state.push_back(dumpInfo);
-    }
-
-    void Voluation(const Want &srcWant, int srcRequestCode,
-        const sptr<IRemoteObject> &srcCallerToken, const std::shared_ptr<AbilityStartSetting> srcStartSetting = nullptr,
-        int srcCallerUid = -1)
-    {
-        want = srcWant;
-        requestCode = srcRequestCode;
-        callerToken = srcCallerToken;
-        startSetting = srcStartSetting;
-        callerUid = srcCallerUid == -1 ? IPCSkeleton::GetCallingUid() : srcCallerUid;
-    }
-};
-
-// new version
-enum ResolveResultType {
-    OK_NO_REMOTE_OBJ = 0,
-    OK_HAS_REMOTE_OBJ,
-    NG_INNER_ERROR,
-};
-
-enum class AbilityWindowState {
-    FOREGROUND = 0,
-    BACKGROUND,
-    TERMINATE,
-    FOREGROUNDING,
-    BACKGROUNDING,
-    TERMINATING
-};
-
-enum class AbilityVisibilityState {
-    INITIAL = 0,
-    FOREGROUND_HIDE,
-    FOREGROUND_SHOW,
-    UNSPECIFIED,
-};
-
-struct LaunchDebugInfo {
-public:
-    void Update(const Want &want);
-
-    bool isDebugAppSet = false;
-    bool isNativeDebugSet = false;
-    bool isPerfCmdSet = false;
-    bool debugApp = false;
-    bool nativeDebug = false;
-    std::string perfCmd;
-};
-
-struct ForegroundOptions {
-    uint32_t sceneFlag = 0;
-    bool isShellCall = false;
-    bool isStartupHide = false;
-    std::string targetGrantBundleName = "";
-    pid_t callingPid = -1;
-    uint64_t loadAbilityCallbackId = 0;
-};
-
-static ForegroundOptions DEFAULT_FOREGROUND_OPTIONS;
 
 /**
  * @class AbilityRecord
@@ -406,10 +82,9 @@ public:
 
     /**
      * Init ability record.
-     *
-     * @return Returns true on success, others on failure.
      */
-    bool Init();
+    virtual void Init(const AbilityRequest &abilityRequest);
+    virtual AbilityRecordType GetAbilityRecordType();
 
     /**
      * load UI ability.
@@ -423,7 +98,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int LoadAbility(bool isShellCall = false, bool isStartupHide = false, pid_t callingPid = -1,
-        uint64_t loadAbilityCallbackId = 0);
+        uint64_t loadAbilityCallbackId = 0, pid_t selfPid = -1);
 
     /**
      * foreground the ability.
@@ -436,7 +111,7 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t tokenId, const ForegroundOptions &options = DEFAULT_FOREGROUND_OPTIONS);
+    void ProcessForegroundAbility(uint32_t tokenId, const ForegroundOptions &options = {});
 
      /**
      * post foreground timeout task for ui ability.
@@ -447,8 +122,6 @@ public:
     void RemoveForegroundTimeoutTask();
 
     void RemoveLoadTimeoutTask();
-
-    void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
     /**
      * move the ability to back ground.
@@ -713,30 +386,6 @@ public:
     void Terminate(const Closure &task);
 
     /**
-     * connect the ability.
-     *
-     */
-    void ConnectAbility();
-
-    /**
-     * connect the ability with want.
-     *
-     */
-    void ConnectAbilityWithWant(const Want &want);
-
-    /**
-     * disconnect the ability.
-     *
-     */
-    void DisconnectAbility();
-
-    /**
-     * disconnect the ability with want
-     *
-     */
-    void DisconnectAbilityWithWant(const Want &want);
-
-    /**
      * Command the ability.
      *
      */
@@ -843,47 +492,6 @@ public:
      */
     void SaveResult(int resultCode, const Want *resultWant, std::shared_ptr<CallerRecord> caller);
 
-    bool NeedConnectAfterCommand();
-
-    /**
-     * add connect record to the list.
-     *
-     */
-    void AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord);
-
-    /**
-     * get the list of connect record.
-     *
-     */
-    std::list<std::shared_ptr<ConnectionRecord>> GetConnectRecordList() const;
-
-    /**
-     * get the list of connect record.
-     *
-     */
-    std::list<std::shared_ptr<ConnectionRecord>> GetConnectingRecordList();
-
-    /**
-     * get the count of In Progress record.
-     *
-     */
-    uint32_t GetInProgressRecordCount();
-    /**
-     * remove the connect record from list.
-     *
-     */
-    void RemoveConnectRecordFromList(const std::shared_ptr<ConnectionRecord> &connRecord);
-
-    /**
-     * check whether connect list is empty.
-     *
-     */
-    bool IsConnectListEmpty();
-
-    size_t GetConnectedListSize();
-
-    size_t GetConnectingListSize();
-
     void RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> callerAbilityRecord, int32_t requestCode);
 
     /**
@@ -901,18 +509,6 @@ public:
     std::shared_ptr<AbilityRecord> GetCallerRecord() const;
 
     std::shared_ptr<CallerAbilityInfo> GetCallerInfo() const;
-
-    /**
-     * get connecting record from list.
-     *
-     */
-    std::shared_ptr<ConnectionRecord> GetConnectingRecord() const;
-
-    /**
-     * get disconnecting record from list.
-     *
-     */
-    std::shared_ptr<ConnectionRecord> GetDisconnectingRecord() const;
 
     /**
      * convert ability state (enum type to string type).
@@ -962,30 +558,6 @@ public:
     void SetStartTime();
 
     int64_t GetStartTime() const;
-
-    /**
-     * dump service info.
-     *
-     */
-    void DumpService(std::vector<std::string> &info, bool isClient = false) const;
-
-    /**
-     * dump service info.
-     *
-     */
-    void DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient = false) const;
-
-    /**
-     * set connect remote object.
-     *
-     */
-    void SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject);
-
-    /**
-     * get connect remote object.
-     *
-     */
-    sptr<IRemoteObject> GetConnRemoteObject() const;
 
     /**
      * check whether the ability is never started.
@@ -1325,8 +897,19 @@ public:
     }
 
     bool ReportAbilityConnectionRelations();
-protected:
 
+    void SetPromotePriority(bool promotePriority);
+
+    bool GetPromotePriority();
+
+    bool PromotePriority();
+    
+    std::string GetFirstCallerBundleName()
+    {
+        return firstCallerBundleName_;
+    }
+
+protected:
     sptr<Token> token_ = {};                               // used to interact with kit and wms
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
     AbilityState currentState_ = AbilityState::INITIAL;    // current life state
@@ -1370,10 +953,6 @@ private:
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
 
     void NotifyMissionBindPid();
-
-    void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
-
-    void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
 
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
@@ -1457,7 +1036,6 @@ private:
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;
     bool isAppAutoStartup_ = false;
-    bool isConnected = false;
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
@@ -1498,12 +1076,6 @@ private:
      * Now we assume only one result generate when terminate.
      */
     std::shared_ptr<AbilityResult> result_ = {};
-
-    // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
-    mutable ffrt::mutex connRecordListMutex_;
-    std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
-    // service(ability) onConnect() return proxy of service ability
-    sptr<IRemoteObject> connRemoteObject_ = {};
 
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
@@ -1572,6 +1144,13 @@ private:
     std::atomic<bool> isPreloaded_ = false;
     std::atomic<bool> isFrozenByPreload_ = false;
     std::atomic<bool> isAbilityConnectionReported_ = false;
+    struct UIAbilityProperty {
+        bool promotePriority = false;
+        int32_t byCallCallerSaUid = -1;
+        int32_t byCallCallerSaPid = -1;
+    };
+    std::shared_ptr<UIAbilityProperty> uiAbilityProperty_ = nullptr;
+    std::string firstCallerBundleName_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

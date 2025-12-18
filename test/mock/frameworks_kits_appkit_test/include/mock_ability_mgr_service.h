@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@ namespace OHOS {
 namespace AAFwk {
 class MockAbilityMgrService : public AbilityManagerStub {
 public:
-    MOCK_METHOD3(StartAbility, int(const Want& want, int32_t userId, int requestCode));
-    MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken, int32_t userId,
-        int requestCode));
+    MOCK_METHOD4(StartAbility, int(const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId));
+    MOCK_METHOD5(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken, int32_t userId,
+        int requestCode, uint64_t specifiedFullTokenId));
     MOCK_METHOD5(StartAbility, int(const Want& want, const AbilityStartSetting& abilityStartSetting,
         const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
@@ -65,7 +65,8 @@ public:
     MOCK_METHOD3(StopServiceAbility, int(const Want&, int32_t userId, const sptr<IRemoteObject> &token));
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
 
-    MOCK_METHOD3(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
+    MOCK_METHOD4(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex,
+        const std::string& reason));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string& bundleName, int32_t uid, int32_t appIndex));
     MOCK_METHOD1(TerminateAbilityByRecordId, int(const int64_t recordId));

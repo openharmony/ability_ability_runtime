@@ -24,9 +24,9 @@ namespace OHOS {
 namespace AAFwk {
 class MockAbilityMgrService : public AbilityManagerStub {
 public:
-    MOCK_METHOD3(StartAbility, int(const Want& want, int32_t userId, int requestCode));
-    MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        int32_t userId, int requestCode));
+    MOCK_METHOD4(StartAbility, int(const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId));
+    MOCK_METHOD5(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        int32_t userId, int requestCode, uint64_t specifiedFullTokenId));
     MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
     MOCK_METHOD6(StartAbilityAsCaller, int(const Want &want, const StartOptions &startOptions,
@@ -63,7 +63,8 @@ public:
     MOCK_METHOD3(StopServiceAbility, int(const Want&, int32_t userId, const sptr<IRemoteObject> &token));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(GetAbilityTokenByCalleeObj, void(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token));
-    MOCK_METHOD3(KillProcess, int(const std::string&, const bool clearPageStack, int32_t appIndex));
+    MOCK_METHOD4(KillProcess, int(const std::string&, const bool clearPageStack, int32_t appIndex,
+        const std::string& reason));
     MOCK_METHOD2(UninstallApp, int(const std::string&, int32_t));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string&, int32_t, int32_t));
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
@@ -114,8 +115,8 @@ public:
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
     MOCK_METHOD2(GetExtensionRunningInfos, int(int upperLimit, std::vector<ExtensionRunningInfo>& info));
     MOCK_METHOD1(GetProcessRunningInfos, int(std::vector<AppExecFwk::RunningProcessInfo>& info));
-    MOCK_METHOD5(StartAbilityByCall,
-        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t, bool));
+    MOCK_METHOD6(StartAbilityByCall,
+        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t, bool, bool));
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));

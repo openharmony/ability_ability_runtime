@@ -34,7 +34,7 @@ static const std::string MARK_SYMBOL{ "_useless" };
 static const std::string PATH_SEPARATOR = { "/" };
 static const char FILE_SEPARATOR_CHAR = '/';
 static const std::string MARK_TEMP_DIR{ "temp_useless" };
-static const std::string CONTEXT_HAPS{ "/haps" };
+constexpr const char* TEMP_DIR_NAME = "/temp";
 
 static const size_t MARK_TEMP_LEN = 12;
 static const int PATH_MAX_SIZE = 256;
@@ -66,18 +66,18 @@ void ApplicationCleaner::RenameTempData()
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
-    std::vector<std::string> tempdir{};
-    context_->GetAllTempDir(tempdir);
-    if (tempdir.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "empty tempdir");
-        return;
-    }
+    std::vector<std::string> tempBases;
+    context_->GetAllTempBase(tempBases);
     int64_t now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count();
     std::ostringstream stream;
     stream << std::hex << now;
-    for (const auto &path : tempdir) {
+    for (const auto &baseDir : tempBases) {
+        auto path = baseDir + TEMP_DIR_NAME;
+        if (access(path.c_str(), F_OK) != 0) {
+            continue;
+        }
         auto newPath = path + MARK_SYMBOL + stream.str();
         if (rename(path.c_str(), newPath.c_str()) != 0) {
             TAG_LOGE(AAFwkTag::APPKIT, "msg: %{public}s", strerror(errno));
@@ -147,36 +147,15 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return RESULT_ERR;
     }
-
-    auto instance = AppExecFwk::OsAccountManagerWrapper::GetInstance();
-    if (instance == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null instance");
-        return RESULT_ERR;
-    }
-
-    int userId = -1;
-    if (instance->GetOsAccountLocalIdFromProcess(userId) != RESULT_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get account failed");
-        return RESULT_ERR;
-    }
-    TAG_LOGD(AAFwkTag::APPKIT, "userId: %{public}d", userId);
-
-    rootPath.clear();
-    auto baseDir = context_->GetBaseDir();
-    auto infos = context_->GetApplicationInfo();
-    if (infos == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null infos");
-        return RESULT_ERR;
-    }
-
-    rootPath.emplace_back(baseDir);
-    for (const auto &moudle : infos->moduleInfos) {
-        auto moudleDir = baseDir + CONTEXT_HAPS + PATH_SEPARATOR + moudle.moduleName;
-        if (access(moudleDir.c_str(), F_OK) != 0) {
+    std::vector<std::string> baseDirs;
+    context_->GetAllTempBase(baseDirs);
+    for (const auto &baseDir : baseDirs) {
+        if (access(baseDir.c_str(), F_OK) != 0) {
             continue;
         }
-        rootPath.emplace_back(moudleDir);
+        rootPath.push_back(baseDir);
     }
+
     return RESULT_OK;
 }
 

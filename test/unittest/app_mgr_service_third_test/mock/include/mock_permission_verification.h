@@ -34,6 +34,7 @@ public:
     bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
     bool VerifyRunningInfoPerm() const;
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
+    bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;
     bool IsSACall() const;
 
 };

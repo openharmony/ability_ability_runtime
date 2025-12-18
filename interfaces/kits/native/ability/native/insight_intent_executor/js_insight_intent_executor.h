@@ -109,6 +109,7 @@ private:
         napi_value resultJs);
 
     static napi_value ResolveCbCpp(napi_env env, napi_callback_info info);
+    static napi_value ResolveExecuteResultWithDelay(napi_env env, napi_callback_info info);
     static napi_value RejectCbCpp(napi_env env, napi_callback_info info);
 
     static void ReplyFailed(InsightIntentExecutorAsyncCallback* callback,
@@ -142,6 +143,8 @@ private:
     bool ExecuteInsightIntentServiceExtension(
         const std::string& name,
         const AAFwk::WantParams& param);
+    bool HandleSyncResult(napi_env env, napi_value resultJs, std::shared_ptr<InsightIntentContext> context);
+    bool HandlePromiseResult(napi_env env, napi_value resultJs, std::shared_ptr<InsightIntentContext> context);
 
     JsRuntime& runtime_;
     State state_ = State::CREATED;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -240,6 +240,8 @@ public:
 
     void CleanEmptyAbilityStage();
 
+    bool UpdateETSRuntime(AbilityRuntime::Runtime::Options &option);
+
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
@@ -298,6 +300,13 @@ private:
         std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const AppExecFwk::HapModuleInfo &hapModuleInfo,
         const std::function<void()> &callback);
+
+#ifdef SUPPORT_SCREEN
+    void RegisterGetAllUIAbilitiesCallback(
+        const std::shared_ptr<AbilityRuntime::ApplicationContext> &context,
+        const std::weak_ptr<OHOSApplication> &appWeakPtr);
+    void GetAllUIAbilities(std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> &uiAbility);
+#endif
 
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;

@@ -190,7 +190,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleConnectAbilityDone_001, TestSiz
     auto connectManager = std::make_shared<AbilityConnectManager>(0);
     abilityMs_->subManagersHelper_->connectManagers_[2000 / BASE_USER_RANGE] = connectManager;
     ret = abilityMs_->ScheduleConnectAbilityDone(callerToken, token);
-    ASSERT_NE(ret, ERR_INVALID_VALUE);
+    ASSERT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -283,7 +283,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleCommandAbilityDone_001, TestSiz
     auto connectManager = std::make_shared<AbilityConnectManager>(0);
     abilityMs_->subManagersHelper_->connectManagers_[2000 / BASE_USER_RANGE] = connectManager;
     ret = abilityMs_->ScheduleCommandAbilityDone(callerToken);
-    ASSERT_NE(ret, ERR_INVALID_VALUE);
+    ASSERT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -965,6 +965,28 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_009, TestSize.Leve
     abilityMs->StartAutoStartupApps(infoQueue, userId);
     abilityMs->RemoveScreenUnlockInterceptor();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_009 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: JudgeCallerIsAllowedToUseSystemAPIByTokenId_0100
+ * Function: JudgeCallerIsAllowedToUseSystemAPIByTokenId
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, JudgeCallerIsAllowedToUseSystemAPIByTokenId_0100, TestSize.Level2)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    uint64_t specifiedFullTokenId = 0;
+    bool ret = AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPIByTokenId(
+        specifiedFullTokenId);
+    EXPECT_EQ(ret, true);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::WINDOW;
+    abilityRequest.specifiedFullTokenId = 100001;
+    int32_t validUserId = 100;
+    int result = abilityMs->CheckCallOtherExtensionPermission(abilityRequest, validUserId);
+    EXPECT_NE(result, CHECK_PERMISSION_FAILED);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

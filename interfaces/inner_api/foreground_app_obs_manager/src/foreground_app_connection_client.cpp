@@ -15,8 +15,8 @@
 
 #include "foreground_app_connection_client.h"
 
+#include "connection_observer_errors.h"
 #include "foreground_app_connection_client_impl.h"
-#include "foreground_app_connection_errors.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {

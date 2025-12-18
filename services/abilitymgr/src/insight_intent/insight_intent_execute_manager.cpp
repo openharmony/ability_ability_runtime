@@ -89,7 +89,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode,
+int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode, int32_t userId,
     std::string callerBundleName)
 {
     auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
@@ -118,7 +118,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
         elementName, intentName, executeMode, srcEntry, &arkTSMode);
     if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGW(AAFwkTag::INTENT, "empty srcEntry");
-        if (UpdateEntryDecoratorParams(want, executeMode) != ERR_OK) {
+        if (UpdateEntryDecoratorParams(want, executeMode, userId) != ERR_OK) {
             return ERR_INVALID_VALUE;
         }
     }
@@ -131,11 +131,10 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(Want &want, ExecuteMode executeMode)
+int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(Want &want, ExecuteMode executeMode, int32_t userId)
 {
     std::string intentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
     ExtractInsightIntentInfo info;
-    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
         want.GetBundle(), want.GetModuleName(), intentName, userId, info);
     if (info.genericInfo.decoratorType != AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
@@ -437,9 +436,8 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateDecoratorParams(
 {
     // ExtractInsightIntentGenericInfo don't satisfy for now
     ExtractInsightIntentInfo info;
-    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-        param->bundleName_, param->moduleName_, param->insightIntentName_, userId, info);
+        param->bundleName_, param->moduleName_, param->insightIntentName_, param->userId_, info);
 
     InsightIntentType type = InsightIntentType::DECOR_NONE;
     std::string decoratorType = info.genericInfo.decoratorType;
@@ -502,7 +500,7 @@ int32_t InsightIntentExecuteManager::GenerateWant(
     std::string srcEntry;
     std::string arkTSMode;
     auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(want.GetElement(), param->insightIntentName_,
-        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry, &arkTSMode);
+        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry, &arkTSMode, param->userId_);
     if (!arkTSMode.empty()) {
         want.SetParam(INSIGHT_INTENT_ARKTS_MODE, arkTSMode);
     }
@@ -625,6 +623,38 @@ void InsightIntentExecuteManager::SendIntentReport(EventInfo &eventInfo, int32_t
 {
     eventInfo.errCode = errCode;
     EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
+}
+
+void InsightIntentExecuteManager::OnInsightAppDied(const std::string &bundleName)
+{
+    TAG_LOGI(AAFwkTag::INTENT, "app died: %{public}s", bundleName.c_str());
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    AppExecFwk::InsightIntentExecuteResult errorResult{};
+    errorResult.innerErr = AbilityRuntime::InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED;
+
+    std::vector<uint64_t> toRemove;
+    for (const auto &[intentId, record] : records_) {
+        if (record == nullptr || bundleName != record->bundleName) {
+            continue;
+        }
+        toRemove.push_back(intentId);
+        sptr<IInsightIntentExecuteCallback> remoteCallback =
+            iface_cast<IInsightIntentExecuteCallback>(record->callerToken);
+        if (remoteCallback != nullptr) {
+            TAG_LOGD(AAFwkTag::INTENT, "notify caller, intentId: %{public}" PRIu64, intentId);
+            remoteCallback->OnExecuteDone(record->key, errorResult.innerErr, errorResult);
+        }
+
+        if (record->callerToken != nullptr && record->deathRecipient != nullptr) {
+            record->callerToken->RemoveDeathRecipient(record->deathRecipient);
+        }
+    }
+
+    for (uint64_t intentId : toRemove) {
+        records_.erase(intentId);
+    }
+    TAG_LOGI(AAFwkTag::INTENT, "removed %{public}zu records, remaining: %{public}zu",
+        toRemove.size(), records_.size());
 }
 } // namespace AAFwk
 } // namespace OHOS

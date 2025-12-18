@@ -56,7 +56,7 @@ int32_t UIExtensionRecordFactory::PreCheck(
 int32_t UIExtensionRecordFactory::CreateRecord(
     const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &extensionRecord)
 {
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "create record failed");
         return ERR_NULL_OBJECT;
@@ -83,7 +83,7 @@ int32_t UIExtensionRecordFactory::CreateRecord(
 }
 
 void UIExtensionRecordFactory::CreateDebugRecord(
-    const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AAFwk::AbilityRecord> abilityRecord)
+    const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord)
 {
     auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (!callerRecord) {

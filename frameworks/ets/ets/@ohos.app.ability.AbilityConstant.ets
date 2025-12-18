@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import appManager from '@ohos.app.ability.appManager';
+
 namespace AbilityConstant {
 
   const REASON_MESSAGE_DESKTOP_SHORTCUT = 'ReasonMessage_DesktopShortcut';
@@ -34,6 +36,7 @@ namespace AbilityConstant {
     rss: int;
     pss: int;
     timestamp: long;
+    processState?: appManager.ProcessState;
   }
 
   export enum LaunchReason {
@@ -46,6 +49,7 @@ namespace AbilityConstant {
     AUTO_STARTUP = 8,
     INSIGHT_INTENT = 9,
     PREPARE_CONTINUATION = 10,
+    PRELOAD = 11,
   }
 
   export enum LastExitReason {
@@ -71,7 +75,11 @@ namespace AbilityConstant {
   export enum MemoryLevel {
     MEMORY_LEVEL_MODERATE = 0,
     MEMORY_LEVEL_LOW = 1,
-    MEMORY_LEVEL_CRITICAL = 2
+    MEMORY_LEVEL_CRITICAL = 2,
+    MEMORY_LEVEL_UI_HIDDEN = 3,
+    MEMORY_LEVEL_BACKGROUND_MODERATE = 4,
+    MEMORY_LEVEL_BACKGROUND_LOW = 5,
+    MEMORY_LEVEL_BACKGROUND_CRITICAL = 6
   }
 
   export enum WindowMode {
@@ -129,6 +137,7 @@ class LastExitDetailInfoImpl implements AbilityConstant.LastExitDetailInfo {
   rss: int = 0;
   pss: int = 0;
   timestamp: long = 0;
+  processState?: appManager.ProcessState = appManager.ProcessState.STATE_CREATE;
 }
 
 export default AbilityConstant;

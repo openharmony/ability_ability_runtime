@@ -28,9 +28,9 @@ class MockAbilityDelegatorStub : public AbilityManagerStub {
 public:
     MockAbilityDelegatorStub();
     int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) override;
-    MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        int32_t userId, int requestCode));
+        int requestCode = DEFAULT_INVAL_VALUE, uint64_t specifiedFullTokenId = 0) override;
+    MOCK_METHOD5(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        int32_t userId, int requestCode, uint64_t specifiedFullTokenId));
     MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
     MOCK_METHOD5(StartAbility, int(const Want& want, const AbilityStartSetting& abilityStartSetting,
@@ -69,7 +69,8 @@ public:
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
     MOCK_METHOD1(RemoveStack, int(int id));
-    MOCK_METHOD3(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
+    MOCK_METHOD4(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex,
+        const std::string& reason));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string& bundleName, int32_t uid, int32_t appIndex));
     MOCK_METHOD2(MoveMissionToEnd, int(const sptr<IRemoteObject>& token, const bool nonFirst));
@@ -136,7 +137,7 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
     int StartAbilityForPrelaunch(const Want &want) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     int ReleaseCall(const sptr<IAbilityConnection>& connect,
@@ -210,9 +211,10 @@ enum TESTCASE_BRANCH {
 class MockAbilityDelegatorStub2 : public AbilityManagerStub {
 public:
     MockAbilityDelegatorStub2();
-    int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1) override;
-    MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        int32_t userId, int requestCode));
+    int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1,
+        uint64_t specifiedFullTokenId = 0) override;
+    MOCK_METHOD5(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        int32_t userId, int requestCode, uint64_t specifiedFullTokenId));
     MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
     MOCK_METHOD5(StartAbility, int(const Want& want, const AbilityStartSetting& abilityStartSetting,
@@ -251,7 +253,8 @@ public:
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
     MOCK_METHOD1(RemoveStack, int(int id));
-    MOCK_METHOD3(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
+    MOCK_METHOD4(KillProcess, int(const std::string& bundleName, const bool clearPageStack, int32_t appIndex,
+        const std::string& reason));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string& bundleName, int32_t uid, int32_t appIndex));
     MOCK_METHOD2(MoveMissionToEnd, int(const sptr<IRemoteObject>& token, const bool nonFirst));
@@ -318,7 +321,7 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false) override;
+        bool isSilent = false, bool promotePriority = false) override;
     int StartAbilityForPrelaunch(const Want &want) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     virtual int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)

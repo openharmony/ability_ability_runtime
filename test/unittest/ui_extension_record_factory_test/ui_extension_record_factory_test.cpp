@@ -183,7 +183,7 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateRecord_0100, TestSize.Level1)
     auto sessionInfo = MockSessionInfo(1);
     abilityRequest.sessionInfo = sessionInfo;
     abilityRequest.sessionInfo->want.SetParam(UIEXTENSION_ABILITY_ID, 0);
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     auto extensionRecord = std::make_shared<ExtensionRecord>(abilityRecord);
     int32_t result = info.CreateRecord(abilityRequest, extensionRecord);
     EXPECT_EQ(result, ERR_OK);
@@ -204,7 +204,7 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateRecord_0200, TestSize.Level1)
     auto sessionInfo = MockSessionInfo(1);
     abilityRequest.sessionInfo = sessionInfo;
 
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = nullptr;
     OHOS::sptr<OHOS::IRemoteObject> token = new OHOS::AAFwk::Token(abilityRecord);
     abilityRequest.sessionInfo->callerToken = token;
     auto result = info.CreateRecord(abilityRequest, extensionRecord);
@@ -354,7 +354,7 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateDebugRecord_0200, TestSize.Level1)
     std::string bundleName = "com.ix.hiservcie";
     std::string moduleName = "entry";
     abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     OHOS::sptr<OHOS::IRemoteObject> token = new OHOS::AAFwk::Token(abilityRecord);
     abilityRequest.callerToken = token;
     EXPECT_NO_THROW(info.CreateDebugRecord(abilityRequest, abilityRecord));
@@ -375,7 +375,7 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateDebugRecord_0300, TestSize.Level1)
     std::string bundleName = "com.ix.hiservcie";
     std::string moduleName = "entry";
     abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     EXPECT_NO_THROW(info.CreateDebugRecord(abilityRequest, abilityRecord));
 }
 }

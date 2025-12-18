@@ -43,7 +43,7 @@ UriPermissionManagerClient& UriPermissionManagerClient::GetInstance()
     return instance;
 }
 
-int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
+int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, uint32_t flag,
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s", targetBundleName.c_str());
@@ -62,7 +62,7 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
     return funcResult;
 }
 
-int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
+int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, uint32_t flag,
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),

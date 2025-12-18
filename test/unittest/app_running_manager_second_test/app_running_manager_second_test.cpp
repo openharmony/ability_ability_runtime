@@ -1057,8 +1057,9 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
      * @tc.steps: step1. Initialize AppRunningManager instance
      * @tc.expected: expect first Foreground
      */
-    AppRunningRecord foregroundingRecord(appInfo_, 1, PROCESS_NAME);
+    AppRunningRecord foregroundingRecord(appInfo_, 0, PROCESS_NAME);
     foregroundingRecord.SetAppIndex(1);
+    foregroundingRecord.SetUid(record->GetUid());
     foregroundingRecord.extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     auto ret = appRunningManager->IsApplicationFirstForeground(foregroundingRecord);
     EXPECT_FALSE(ret);
@@ -1232,6 +1233,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationBackground_
      * @tc.expected: expect step1 not matched record return false
      */
     AppRunningRecord backgroundRecord(appInfo_, 1, PROCESS_NAME);
+    backgroundRecord.SetUid(record->GetUid());
     auto ret = appRunningManager->IsApplicationBackground(backgroundRecord);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationBackground_0500 end");
@@ -1412,6 +1414,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstFocuse
      */
     AppRunningRecord focusRecord(appInfo_, 1, PROCESS_NAME);
     focusRecord.appRecordId_ = record->GetRecordId() + 1;
+    focusRecord.SetUid(record->GetUid());
     auto ret = appRunningManager->IsApplicationFirstFocused(focusRecord);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_IsApplicationFirstFocused_0500 end");

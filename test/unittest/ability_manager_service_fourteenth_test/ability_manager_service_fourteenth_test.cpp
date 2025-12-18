@@ -30,7 +30,7 @@ using OHOS::AppExecFwk::ExtensionAbilityType;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-constexpr int32_t EXTENSION_MAX_LIMIT = 20;
+constexpr int32_t EXTENSION_MAX_LIMIT = 50;
 }
 class AbilityManagerServiceFourteenthTest : public testing::Test {
 public:
@@ -39,6 +39,7 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
+    std::shared_ptr<BaseExtensionRecord> MockExtensionRecordBase(AbilityType);
     sptr<Token> MockToken(AbilityType);
     sptr<SessionInfo> MockSessionInfo(int32_t persistentId);
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
@@ -63,6 +64,16 @@ std::shared_ptr<AbilityRecord> AbilityManagerServiceFourteenthTest::MockAbilityR
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = abilityType;
     return AbilityRecord::CreateAbilityRecord(abilityRequest);
+}
+
+std::shared_ptr<BaseExtensionRecord> AbilityManagerServiceFourteenthTest::MockExtensionRecordBase(
+    AbilityType abilityType)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = abilityType;
+    return BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
 }
 
 sptr<Token> AbilityManagerServiceFourteenthTest::MockToken(AbilityType abilityType)
@@ -822,7 +833,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_EQ(connectManager, nullptr);
     TAG_LOGI(AAFwkTag::TEST,
@@ -842,7 +853,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
              "AbilityManagerServiceFourteenthTest GetConnectManagerAndUIExtensionBySessionInfo_002 start");
     MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
     MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = nullptr;
-    MyStatus::GetInstance().acmGetUIExtensionBySessionFromServiceMap_ = MockAbilityRecord(AbilityType::SERVICE);
+    MyStatus::GetInstance().acmGetUIExtensionBySessionFromServiceMap_ = MockExtensionRecordBase(AbilityType::SERVICE);
 
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
@@ -856,7 +867,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
 
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_NE(connectManager, nullptr);
     EXPECT_NE(targetAbility, nullptr);
@@ -890,7 +901,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
 
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(
         MockSessionInfo(0), connectManager, targetAbility, false);
     EXPECT_NE(connectManager, nullptr);
@@ -926,7 +937,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
 
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_NE(connectManager, nullptr);
     EXPECT_EQ(targetAbility, nullptr);
@@ -960,7 +971,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
 
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, false);
     EXPECT_NE(connectManager, nullptr);
     EXPECT_EQ(targetAbility, nullptr);
@@ -985,7 +996,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
-    std::shared_ptr<AbilityRecord> targetAbility = nullptr;
+    std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, false);
     EXPECT_EQ(connectManager, nullptr);
     EXPECT_EQ(targetAbility, nullptr);
@@ -1024,7 +1035,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_002, T
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_002 start");
     MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
-    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockAbilityRecord(AbilityType::SERVICE);
+    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockExtensionRecordBase(AbilityType::SERVICE);
     MyStatus::GetInstance().ipcGetCallingTokenID_ = -1;
     MyStatus::GetInstance().arGetAbilityInfo_.applicationInfo.accessTokenId = 1;
     MyStatus::GetInstance().arGetAbilityRecord_ = nullptr;
@@ -1054,7 +1065,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_003, T
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_003 start");
     MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
-    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockAbilityRecord(AbilityType::SERVICE);
+    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockExtensionRecordBase(AbilityType::SERVICE);
     MyStatus::GetInstance().ipcGetCallingTokenID_ = 1;
     MyStatus::GetInstance().arGetAbilityInfo_.applicationInfo.accessTokenId = 1;
     MyStatus::GetInstance().arGetAbilityInfo_.visible = false;
@@ -1290,13 +1301,16 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_001, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 1;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_EQ(isLimit, false);
+    EXPECT_EQ(isLimit.limited, false);
     
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_001 end");
 }
@@ -1317,13 +1331,16 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_002, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
     auto isLimit = rateLimiter.CheckExtensionLimit(uid);
-    EXPECT_EQ(isLimit, true);
+    EXPECT_EQ(isLimit.limited, true);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_002 end");
 }
@@ -1344,12 +1361,15 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestS
     auto uid = 20010001;
     MyStatus::GetInstance().permPermission_ = 0;
     MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    Want want;
+    ElementName element("", "com.acts.testCheckExtensionRateLimit", "TestAbility");
+    want.SetElement(element);
     for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
-        abilityMs_->CheckExtensionRateLimit();
+        abilityMs_->CheckExtensionRateLimit(want);
     }
 
     auto &rateLimiter = RateLimiter::GetInstance();
-    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    auto isLimit = rateLimiter.CheckReportLimit(uid, 50);
     EXPECT_EQ(isLimit, true);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_003 end");

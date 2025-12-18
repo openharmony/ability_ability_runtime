@@ -49,6 +49,12 @@ void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityIn
 {
 }
 
+void ResSchedUtil::ReportUIExtensionProcColdStartToRss(
+    int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
+{
+}
+
 std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityInfo)
 {
     return "";

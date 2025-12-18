@@ -16,14 +16,15 @@
 import Want from '@ohos.app.ability.Want';
 import wantAgent from '@ohos.app.ability.wantAgent';
 import type abilityWantAgent from '@ohos.app.ability.wantAgent';
+import { RecordData } from '@ohos.base';
 
 export interface WantAgentInfo {
   wants: Array<Want>;
   actionType?: abilityWantAgent.OperationType;
   requestCode: int;
   actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  extraInfo?: Record<string,Object>;
-  extraInfos?: Record<string, Object>;
+  extraInfo?: Record<string, RecordData>;
+  extraInfos?: Record<string, RecordData>;
 }
 
 class WantAgentInfoImpl implements WantAgentInfo {
@@ -31,8 +32,8 @@ class WantAgentInfoImpl implements WantAgentInfo {
   public actionType?: abilityWantAgent.OperationType;
   public requestCode: int;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  public extraInfo?: Record<string,Object>;
-  public extraInfos?: Record<string, Object>;
+  public extraInfo?: Record<string, RecordData>;
+  public extraInfos?: Record<string, RecordData>;
 
   constructor(wants: Array<Want>) {
     this.wants = wants;

@@ -19,8 +19,7 @@ import type StartOptions from '@ohos.app.ability.StartOptions';
 import type AbilityStartCallback from 'application.AbilityStartCallback';
 import { ConnectOptions } from 'ability.connectOptions';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
-import { AsyncCallback } from '@ohos.base';
-import { BusinessError } from '@ohos.base';
+import { AsyncCallback, BusinessError, RecordData } from '@ohos.base';
 
 class Cleaner {
   static callback(cleaner: Cleaner): void {
@@ -77,12 +76,12 @@ export default class UIServiceExtensionContext extends ExtensionContext
   }
   native nativeStartAbility(callback: AsyncCallbackWrapper<void>, want: Want, options?: StartOptions): void;
   native nativeTerminateSelf(callback: AsyncCallbackWrapper<void>): void;
-  native nativeStartAbilityByType(type: string, wantParam: Record<string, Object>,
+  native nativeStartAbilityByType(type: string, wantParam: Record<string, RecordData>,
     abilityStartCallback: AbilityStartCallback, callback: AsyncCallbackWrapper<void>): void;
   native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
   native nativeDisconnectServiceExtensionAbility(connectionId: long, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbilityCheck(want: Want, options?: StartOptions): void;
-  native nativeStartAbilityByTypeCheck(type: string, wantParam: Record<string, Object>): void;
+  native nativeStartAbilityByTypeCheck(type: string, wantParam: Record<string, RecordData>): void;
 
   startAbility(want: Want, options?: StartOptions): Promise<void> {
     this.nativeStartAbilityCheck(want, options);
@@ -118,7 +117,7 @@ export default class UIServiceExtensionContext extends ExtensionContext
     return p;
   }
 
-  startAbilityByType(type: string, wantParam: Record<string, Object>, abilityStartCallback: AbilityStartCallback): Promise<void>
+  startAbilityByType(type: string, wantParam: Record<string, RecordData>, abilityStartCallback: AbilityStartCallback): Promise<void>
   {
     this.nativeStartAbilityByTypeCheck(type, wantParam);
     let p =

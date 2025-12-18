@@ -128,7 +128,7 @@ Token::Token(std::weak_ptr<AbilityRecord> abilityRecord) : abilityRecord_(abilit
 Token::~Token()
 {}
 
-std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
+std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(sptr<IRemoteObject> token)
 {
     return MyStatus::GetInstance().arGetAbilityRecord_;
 }
@@ -177,7 +177,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
     recordId_ = abilityRecordId++;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (abilityMgr) {
-        bool isRootLauncher = (abilityInfo_.applicationInfo.bundleName == LAUNCHER_BUNDLE_NAME);
+        bool isRootLauncher = (abilityInfo_.applicationInfo.bundleName == AbilityConfig::LAUNCHER_BUNDLE_NAME);
         restartMax_ = AmsConfigurationParameter::GetInstance().GetMaxRestartNum(isRootLauncher);
         bool flag = abilityMgr->GetStartUpNewRuleFlag();
         want_.SetParam(COMPONENT_STARTUP_NEW_RULES, flag);
@@ -226,10 +226,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     if (abilityRequest.sessionInfo != nullptr) {
         abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
     }
-    if (!abilityRecord->Init()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init");
-        return nullptr;
-    }
+    abilityRecord->Init(abilityRequest);
     if (abilityRequest.startSetting != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityRequest.startSetting...");
         abilityRecord->SetStartSetting(abilityRequest.startSetting);
@@ -255,18 +252,18 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     return abilityRecord;
 }
 
-bool AbilityRecord::Init()
+void AbilityRecord::Init(const AbilityRequest &)
 {
     lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    CHECK_POINTER_RETURN_BOOL(lifecycleDeal_);
-
     token_ = new (std::nothrow) Token(weak_from_this());
-    CHECK_POINTER_RETURN_BOOL(token_);
-
     if (abilityInfo_.applicationInfo.isLauncherApp) {
         isLauncherAbility_ = true;
     }
-    return true;
+}
+
+AbilityRecordType AbilityRecord::GetAbilityRecordType()
+{
+    return AbilityRecordType::BASE_ABILITY;
 }
 
 void AbilityRecord::SetUid(int32_t uid)
@@ -307,7 +304,8 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid, uint64_t callbackId)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid,
+    uint64_t callbackId, pid_t selfPid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -391,10 +389,6 @@ void AbilityRecord::RemoveForegroundTimeoutTask()
 }
 
 void AbilityRecord::RemoveLoadTimeoutTask()
-{
-}
-
-void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
 {
 }
 
@@ -744,29 +738,6 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
 {
 }
 
-void AbilityRecord::ConnectAbility()
-{
-}
-
-void AbilityRecord::ConnectAbilityWithWant(const Want &want)
-{
-}
-
-void AbilityRecord::DisconnectAbility()
-{
-}
-
-void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s.", abilityInfo_.name.c_str());
-    CHECK_POINTER(lifecycleDeal_);
-    lifecycleDeal_->DisconnectAbility(want);
-    if (GetInProgressRecordCount() == 0) {
-        isConnected = false;
-    }
-}
-
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
@@ -989,42 +960,6 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
     }
 }
 
-bool AbilityRecord::NeedConnectAfterCommand()
-{
-    return !IsConnectListEmpty() && !isConnected;
-}
-
-void AbilityRecord::AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord)
-{
-    CHECK_POINTER(connRecord);
-    std::lock_guard guard(connRecordListMutex_);
-    auto it = std::find(connRecordList_.begin(), connRecordList_.end(), connRecord);
-    // found it
-    if (it != connRecordList_.end()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Found it in list, so no need to add same connection");
-        return;
-    }
-    // no found then add new connection to list
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "No found in list, so add new connection to list");
-    connRecordList_.push_back(connRecord);
-}
-
-std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectRecordList() const
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return connRecordList_;
-}
-
-void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<ConnectionRecord> &connRecord)
-{
-    CHECK_POINTER(connRecord);
-    std::lock_guard guard(connRecordListMutex_);
-    connRecordList_.remove(connRecord);
-    if (connRecordList_.empty()) {
-        isConnected = false;
-    }
-}
-
 void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
 {
     std::lock_guard guard(wantLock_);
@@ -1176,68 +1111,6 @@ std::shared_ptr<CallerAbilityInfo> AbilityRecord::GetCallerInfo() const
     return callerList_.back()->GetCallerInfo();
 }
 
-bool AbilityRecord::IsConnectListEmpty()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return connRecordList_.empty();
-}
-
-size_t AbilityRecord::GetConnectedListSize()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-        return record && record->GetConnectState() == ConnectionState::CONNECTED;
-    });
-}
-
-size_t AbilityRecord::GetConnectingListSize()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-        return record && record->GetConnectState() == ConnectionState::CONNECTING;
-    });
-}
-
-std::shared_ptr<ConnectionRecord> AbilityRecord::GetConnectingRecord() const
-{
-    std::lock_guard guard(connRecordListMutex_);
-    auto connect =
-        std::find_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
-            return record->GetConnectState() == ConnectionState::CONNECTING;
-        });
-    return (connect != connRecordList_.end()) ? *connect : nullptr;
-}
-
-std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordList()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    std::list<std::shared_ptr<ConnectionRecord>> connectingList;
-    for (auto record : connRecordList_) {
-        if (record && record->GetConnectState() == ConnectionState::CONNECTING) {
-            connectingList.push_back(record);
-        }
-    }
-    return connectingList;
-}
-
-uint32_t AbilityRecord::GetInProgressRecordCount()
-{
-    std::lock_guard guard(connRecordListMutex_);
-    uint32_t count = 0;
-    for (auto record : connRecordList_) {
-        if (record && (record->GetConnectState() == ConnectionState::CONNECTING ||
-            record->GetConnectState() == ConnectionState::CONNECTED)) {
-            count++;
-        }
-    }
-    return count;
-}
-
-std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
-{
-    return nullptr;
-}
-
 void AbilityRecord::GetAbilityTypeString(std::string &typeStr)
 {
 }
@@ -1261,10 +1134,6 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
 {
 }
 
-void AbilityRecord::DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const
-{
-}
-
 void AbilityRecord::DumpAbilityState(
     std::vector<std::string> &info, bool isClient, const std::vector<std::string> &params)
 {
@@ -1282,18 +1151,6 @@ int64_t AbilityRecord::GetStartTime() const
     return startTime_;
 }
 
-void AbilityRecord::DumpService(std::vector<std::string> &info, bool isClient) const
-{
-}
-
-void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient) const
-{
-}
-
-void AbilityRecord::DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const
-{
-}
-
 void AbilityRecord::RemoveAbilityDeathRecipient() const
 {
 }
@@ -1308,16 +1165,6 @@ void AbilityRecord::OnProcessDied()
 
 void AbilityRecord::NotifyAnimationAbilityDied()
 {
-}
-
-void AbilityRecord::SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject)
-{
-    connRemoteObject_ = remoteObject;
-}
-
-sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
-{
-    return connRemoteObject_;
 }
 
 bool AbilityRecord::IsNeverStarted() const
@@ -2029,6 +1876,20 @@ void AbilityRecord::RemoveUIExtensionLaunchTimestamp()
 bool AbilityRecord::ReportAbilityConnectionRelations()
 {
     return true;
+}
+
+void AbilityRecord::SetPromotePriority(bool promotePriority)
+{
+}
+
+bool AbilityRecord::GetPromotePriority()
+{
+    return false;
+}
+
+bool AbilityRecord::PromotePriority()
+{
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

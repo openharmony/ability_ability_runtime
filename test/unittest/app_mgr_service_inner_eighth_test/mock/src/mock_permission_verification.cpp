@@ -80,7 +80,8 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
 {
     return 0;
 }
-int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
+int PermissionVerification::CheckCallServiceAbilityPermission(
+    const VerificationInfo &verificationInfo, uint32_t specifyTokenId) const
 {
     return 0;
 }
@@ -122,6 +123,10 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return AAFwk::MyStatus::GetInstance().judgeCallerIsAllowed_;
+}
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
 }
 bool PermissionVerification::IsSystemAppCall() const
 {

@@ -59,6 +59,15 @@ static const char *OFF_SIGNATURE_ABILITY_FIRST_FRAME_STATE
     = "Lstd/core/String;Lapplication/AbilityFirstFrameStateObserver/AbilityFirstFrameStateObserver;:V";
 static const char *OFF_SIGNATURE_APP_FOREGROUND_STATE
     = "Lstd/core/String;Lapplication/AppForegroundStateObserver/AppForegroundStateObserver;:V";
+constexpr const char *BUNDLE_NAME_CHECK_SIG = "Lstd/core/String;:V";
+constexpr const char *CLEAR_UP_APPLICATION_DATA_SIG = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *GET_KEEP_ALIVE_APP_SERVICE_EXTENSION_SIG = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *SET_KEEP_ALIVE_FOR_APP_SERVICE_EXTENSION_SIG =
+    "Lstd/core/String;ZLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *CLEAR_UP_APP_DATA_SIG = "Lutils/AbilityUtils/AsyncCallbackWrapper;"
+    "Lstd/core/String;Lstd/core/Int;:V";
+constexpr const char *TERMINATION_SIG = "ILutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *IS_APP_RUNNING_SIG = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 } // namespace
 
 class EtsAppManager final {
@@ -98,12 +107,22 @@ public:
         ani_object observer, ani_object etsBundleNameList);
     static ani_int OnOnApplicationState(ani_env *env, ani_string type, ani_object observer);
     static void OnOff(ani_env *env, ani_string type, ani_int etsObserverId, ani_object callback);
+    static void OffApplicationStateCheck(ani_env *env, ani_int etsObserverId);
     static void OnOnAppForegroundState(ani_env *env, ani_string type, ani_object observer);
     static void OnOffAppForegroundState(ani_env *env, ani_string type, ani_object observer);
     static void OnOnAbilityFirstFrameState(
         ani_env *env, ani_string type, ani_object aniObserver, ani_object aniBundleName);
     static void OnOffAbilityFirstFrameState(ani_env *env, ani_string type, ani_object aniObserver);
-
+    static void ClearUpApplicationDataCheck(ani_env *env, ani_string aniBundleName);
+    static void ClearUpApplicationData(ani_env *env, ani_string aniBundleName, ani_object callback);
+    static void GetKeepAliveAppServiceExtensions(ani_env *env, ani_object callback);
+    static void SetKeepAliveForAppServiceExtension(ani_env *env, ani_string aniBundleName, ani_boolean enable,
+        ani_object callback);
+    static void ClearUpAppDataCheck(ani_env *env, ani_string aniBundleName);
+    static void ClearUpAppData(ani_env *env, ani_object callback, ani_string aniBundleName, ani_object appCloneIndex);
+    static void TerminateMission(ani_env *env, ani_int missionId, ani_object callback);
+    static void IsApplicationRunning(ani_env *env, ani_string aniBundleName, ani_object callback);
+    static void GetRunningMultiAppInfoCheck(ani_env *env, ani_string aniBundleName);
 private:
     static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
     static sptr<AAFwk::IAbilityManager> GetAbilityManagerInstance();
@@ -116,15 +135,18 @@ private:
     static void KillProcessWithAccountInner(ani_env *env, ani_object callback, ani_string aniBundleName,
         ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
     static void OnOnAbilityFirstFrameStateInner(ani_env *env, ani_object aniObserver, const std::string &strBundleName);
+    static void OnOffInner(ani_env *env, ani_int etsObserverId, ani_object callback);
     static int32_t GetObserverId();
     static int32_t serialNumber_;
     static sptr<AbilityRuntime::EtsAppStateObserver> appStateObserver_;
     static sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> observerForeground_;
+    static std::mutex observerLock_;
 };
 
 int32_t EtsAppManager::serialNumber_ = 0;
 sptr<AbilityRuntime::EtsAppStateObserver> EtsAppManager::appStateObserver_ = nullptr;
 sptr<OHOS::AbilityRuntime::ETSAppForegroundStateObserver> EtsAppManager::observerForeground_ = nullptr;
+std::mutex EtsAppManager::observerLock_;
 
 sptr<AppExecFwk::IAppMgr> EtsAppManager::GetAppManagerInstance()
 {
@@ -155,8 +177,8 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
     if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "param bundlename err");
         AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(
-                env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication userId:%{public}d, bundleName %{public}s",
@@ -166,8 +188,8 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
     if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniMode, mode)) {
         TAG_LOGE(AAFwkTag::APPMGR, "param mode err");
         AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(
-                env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
         return;
     }
 
@@ -276,6 +298,30 @@ void EtsAppManager::GetForegroundApplications(ani_env *env, ani_object callback)
     TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundApplications end");
 }
 
+
+void EtsAppManager::GetRunningMultiAppInfoCheck(ani_env *env, ani_string aniBundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "GetRunningMultiAppInfoCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetStdString Failed");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+        return;
+    }
+#ifdef SUPPORT_SCREEN
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
+        AbilityRuntime::EtsErrorUtil::ThrowError(
+            env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+#endif
+}
+
 void EtsAppManager::GetRunningMultiAppInfo(ani_env *env, ani_string aniBundleName, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "GetRunningMultiAppInfo called");
@@ -287,19 +333,12 @@ void EtsAppManager::GetRunningMultiAppInfo(ani_env *env, ani_string aniBundleNam
 #ifdef SUPPORT_SCREEN
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
-        AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateError(
-                env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), emptyMultiAppInfo);
         return;
     }
 #endif
     std::string bundleName;
     if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetStdString Failed");
-        AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateError(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parse param bundleName failed, must be a string."), emptyMultiAppInfo);
         return;
     }
     auto appManager = GetAppManagerInstance();
@@ -343,16 +382,16 @@ void EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId(
     if (aniBundleName == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "aniBundleName null ptr");
         AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(
-                env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), emptyArray);
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM), emptyArray);
         return;
     }
     std::string bundleName;
     if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetStdString Failed");
         AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(
-                env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), emptyArray);
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM), emptyArray);
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId userid:%{public}d", aniUserId);
@@ -455,16 +494,19 @@ ani_int EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, 
     if (appStateObserver_ == nullptr) {
         appStateObserver_ = new (std::nothrow) AbilityRuntime::EtsAppStateObserver(aniVM);
     }
-    int32_t ret = appManager->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
-    TAG_LOGD(AAFwkTag::APPMGR, "err:%{public}d", ret);
-    if (ret == ERR_OK) {
-        int32_t observerId = GetObserverId();
-        appStateObserver_->AddEtsObserverObject(env, observerId, observer);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOnApplicationStateInner end");
-        return observerId;
+    std::lock_guard<std::mutex> lock(observerLock_);
+    if (appStateObserver_->GetEtsObserverMapSize() == 0) {
+        int32_t ret = appManager->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
+        TAG_LOGD(AAFwkTag::APPMGR, "err:%{public}d", ret);
+        if (ret != ERR_OK) {
+            AbilityRuntime::EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
+            return ANI_ERROR;
+        }
     }
-    AbilityRuntime::EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
-    return ANI_ERROR;
+    int32_t observerId = GetObserverId();
+    appStateObserver_->AddEtsObserverObject(env, observerId, observer);
+    TAG_LOGD(AAFwkTag::APPMGR, "OnOnApplicationStateInner end");
+    return observerId;
 }
 
 ani_int EtsAppManager::OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
@@ -484,6 +526,26 @@ ani_int EtsAppManager::OnOnApplicationState(ani_env *env, ani_string type, ani_o
     return OnOnApplicationStateInner(env, type, observer, static_cast<ani_object>(undefined));
 }
 
+void EtsAppManager::OffApplicationStateCheck(ani_env *env, ani_int etsObserverId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "OffApplicationStateCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return;
+    }
+    if (appStateObserver_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "observer is nullptr, please register first.");
+        return;
+    }
+    int32_t observerId = static_cast<int32_t>(etsObserverId);
+    if (!appStateObserver_->FindObserverByObserverId(observerId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "not find observerId.");
+        return;
+    }
+}
+
 void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "OnOff called");
@@ -500,17 +562,6 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "observerId:%{public}d", etsObserverId);
-    int32_t observerId = static_cast<int32_t>(etsObserverId);
-
-    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
-    if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
-        AppExecFwk::AsyncCallback(env, callback,
-            AbilityRuntime::EtsErrorUtil::CreateError(env,
-                static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
-            nullptr);
-        return;
-    }
     if (appStateObserver_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         AppExecFwk::AsyncCallback(env, callback,
@@ -518,6 +569,13 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
                 env, "observer is nullptr, please register first."), nullptr);
         return;
     }
+    std::lock_guard<std::mutex> lock(observerLock_);
+    OnOffInner(env, etsObserverId, callback);
+}
+
+void EtsAppManager::OnOffInner(ani_env *env, ani_int etsObserverId, ani_object callback)
+{
+    int32_t observerId = static_cast<int32_t>(etsObserverId);
     if (!appStateObserver_->FindObserverByObserverId(observerId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
         AppExecFwk::AsyncCallback(env, callback,
@@ -525,11 +583,29 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, 
                 env, "not find observerId."), nullptr);
         return;
     }
-    int32_t ret = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
-    if (ret == 0 && appStateObserver_->RemoveEtsObserverObject(observerId)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOff success");
-    } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "OnOff err:%{public}d", ret);
+    if (!appStateObserver_->RemoveEtsObserverObject(observerId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnOff RemoveEtsObserverObject err:");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateError(env,
+                static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
+            nullptr);
+        return;
+    }
+    int32_t ret = 0;
+    if (appStateObserver_->GetEtsObserverMapSize() == 0) {
+        sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+        if (appMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
+            AppExecFwk::AsyncCallback(env, callback,
+                AbilityRuntime::EtsErrorUtil::CreateError(env,
+                    static_cast<AbilityRuntime::AbilityErrorCode>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
+                nullptr);
+            return;
+        }
+        ret = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "OnOff err:%{public}d", ret);
+        }
     }
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
@@ -1297,6 +1373,263 @@ void EtsAppManager::OnOffAppForegroundState(ani_env *env, ani_string type, ani_o
     TAG_LOGD(AAFwkTag::APPMGR, "OnOffAppForegroundState end");
 }
 
+void EtsAppManager::ClearUpApplicationDataCheck(ani_env *env, ani_string aniBundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpApplicationDataCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+        return;
+    }
+}
+
+void EtsAppManager::ClearUpApplicationData(ani_env *env, ani_string aniBundleName, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpApplicationData called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        return;
+    }
+    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return;
+    }
+    int32_t ret = appMgr->ClearUpApplicationData(bundleName, 0);
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpApplicationData ret %{public}d", ret);
+    if (ret == 0) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+    } else if (ret == AAFwk::CHECK_PERMISSION_FAILED || ret == AAFwk::ERR_NOT_SYSTEM_APP) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret, "clear up application failed."), nullptr);
+    } else {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER),
+                "clear up application failed."), nullptr);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpApplicationData end");
+}
+
+void EtsAppManager::GetKeepAliveAppServiceExtensions(ani_env *env, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "GetKeepAliveAppServiceExtensions called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    ani_object emptyArray = CreateEmptyAniArray(env);
+    int32_t innerErrCode = static_cast<int32_t>(ERR_OK);
+    auto infoList = std::make_shared<std::vector<AbilityRuntime::KeepAliveInfo>>();
+    if (infoList == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), emptyArray);
+        return;
+    }
+    auto abilityManager = GetAbilityManagerInstance();
+    if (abilityManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityManager");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), emptyArray);
+        return;
+    }
+    innerErrCode = abilityManager->QueryKeepAliveAppServiceExtensions(*infoList);
+    ani_object arrayObj = CreateKeepAliveInfoArray(env, *infoList);
+    if (arrayObj == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), emptyArray);
+        return;
+    }
+    if (innerErrCode != ERR_OK) {
+        TAG_LOGD(AAFwkTag::APPMGR, "QueryKeepAliveAppServiceExtensions failed:%{public}d", innerErrCode);
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode), emptyArray);
+    } else {
+        TAG_LOGD(AAFwkTag::APPMGR, "QueryKeepAliveAppServiceExtensions succeeded.");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode), arrayObj);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "GetKeepAliveAppServiceExtensions end");
+}
+
+void EtsAppManager::SetKeepAliveForAppServiceExtension(ani_env *env, ani_string aniBundleName, ani_boolean enable,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "SetKeepAliveForAppServiceExtension called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateInvalidParamError(
+                env, "Parse param bundleName failed, must be a string."), nullptr);
+        return;
+    }
+    auto abilityManager = GetAbilityManagerInstance();
+    if (abilityManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityManager");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return;
+    }
+    int32_t innerErrCode = abilityManager->SetAppServiceExtensionKeepAlive(bundleName, enable);
+    TAG_LOGD(AAFwkTag::APPMGR, "SetAppServiceExtensionKeepAlive innerErrCode:%{public}d", innerErrCode);
+    AppExecFwk::AsyncCallback(env, callback,
+        AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode), nullptr);
+    TAG_LOGD(AAFwkTag::APPMGR, "SetKeepAliveForAppServiceExtension end");
+}
+
+void EtsAppManager::ClearUpAppDataCheck(ani_env *env, ani_string aniBundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpAppDataCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
+        return;
+    }
+}
+
+void EtsAppManager::ClearUpAppData(ani_env *env, ani_object callback, ani_string aniBundleName,
+    ani_object aniAppCloneIndex)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpAppData called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        return;
+    }
+    int32_t appCloneIndex = 0;
+    ani_boolean isUndefined = false;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Reference_IsUndefined(aniAppCloneIndex, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
+        return;
+    }
+    if (!isUndefined) {
+        if ((status = env->Object_CallMethodByName_Int(aniAppCloneIndex,
+            "toInt", nullptr, &appCloneIndex)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "aniAppCloneIndex: %{public}d", appCloneIndex);
+    }
+    sptr<OHOS::AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return;
+    }
+    int32_t ret = appMgr->ClearUpApplicationData(bundleName, appCloneIndex);
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpApplicationData ret:%{public}d", ret);
+    if (ret == 0) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+    } else {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret,  "clear up application failed."), nullptr);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "ClearUpAppData end");
+}
+
+void EtsAppManager::TerminateMission(ani_env *env, ani_int missionId, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "TerminateMission call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "missionId:%{public}d", missionId);
+    auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
+    if (amsClient == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return;
+    }
+    int32_t ret = amsClient->TerminateMission(missionId);
+    TAG_LOGD(AAFwkTag::APPMGR, "TerminateMission ret:%{public}d", ret);
+    if (ret == ERR_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+    } else {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, ret,  "Terminate mission failed."), nullptr);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "TerminateMission end");
+}
+
+void EtsAppManager::IsApplicationRunning(ani_env *env, ani_string aniBundleName, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "IsApplicationRunning called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateInvalidParamError(
+                env, "Parse param bundleName failed, must be a string."), AppExecFwk::CreateBoolean(env, false));
+        return;
+    }
+    sptr<OHOS::AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
+            AppExecFwk::CreateBoolean(env, false));
+        return;
+    }
+    bool isRunning = false;
+    int32_t innerErrorCode = appMgr->IsApplicationRunning(bundleName, isRunning);
+    TAG_LOGD(AAFwkTag::APPMGR, "IsApplicationRunning isRunning:%{public}d", isRunning);
+    if (innerErrorCode == ERR_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrorCode),
+            AppExecFwk::CreateBoolean(env, isRunning));
+    } else {
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, innerErrorCode),
+            AppExecFwk::CreateBoolean(env, false));
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "IsApplicationRunning end");
+}
+
 void EtsAppManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "EtsAppManagerRegistryInit call");
@@ -1325,6 +1658,8 @@ void EtsAppManagerRegistryInit(ani_env *env)
             "nativeGetRunningMultiAppInfo", nullptr, reinterpret_cast<void *>(EtsAppManager::GetRunningMultiAppInfo)},
         ani_native_function{"nativeGetRunningProcessInfoByBundleName", nullptr,
             reinterpret_cast<void *>(EtsAppManager::GetRunningProcessInfoByBundleName)},
+        ani_native_function{"nativeGetRunningMultiAppInfoCheck", nullptr,
+            reinterpret_cast<void *>(EtsAppManager::GetRunningMultiAppInfoCheck)},
         ani_native_function{"nativeGetRunningProcessInfoByBundleNameAndUserId", nullptr,
             reinterpret_cast<void *>(EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId)},
         ani_native_function {"nativeOn", APPLICATION_STATE_WITH_BUNDLELIST_ON_SIGNATURE,
@@ -1333,6 +1668,8 @@ void EtsAppManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAppManager::OnOnApplicationState)},
         ani_native_function {"nativeOff", APPLICATION_STATE_OFF_SIGNATURE,
             reinterpret_cast<void *>(EtsAppManager::OnOff)},
+        ani_native_function {"nativeOffApplicationStateCheck", "I:V",
+            reinterpret_cast<void *>(EtsAppManager::OffApplicationStateCheck)},
         ani_native_function {"nativeGetAppMemorySize", nullptr,
             reinterpret_cast<void *>(EtsAppManager::GetAppMemorySize)},
         ani_native_function {"nativeIsRamConstrainedDevice", nullptr,
@@ -1371,6 +1708,22 @@ void EtsAppManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAppManager::OnOnAbilityFirstFrameState)},
         ani_native_function {"nativeOffAbilityFirstFrameState", OFF_SIGNATURE_ABILITY_FIRST_FRAME_STATE,
             reinterpret_cast<void *>(EtsAppManager::OnOffAbilityFirstFrameState)},
+        ani_native_function {"nativeClearUpApplicationDataCheck", BUNDLE_NAME_CHECK_SIG,
+            reinterpret_cast<void *>(EtsAppManager::ClearUpApplicationDataCheck)},
+        ani_native_function {"nativeClearUpApplicationData", CLEAR_UP_APPLICATION_DATA_SIG,
+            reinterpret_cast<void *>(EtsAppManager::ClearUpApplicationData)},
+        ani_native_function {"nativeGetKeepAliveAppServiceExtensions", GET_KEEP_ALIVE_APP_SERVICE_EXTENSION_SIG,
+            reinterpret_cast<void *>(EtsAppManager::GetKeepAliveAppServiceExtensions)},
+        ani_native_function {"nativeSetKeepAliveForAppServiceExtension", SET_KEEP_ALIVE_FOR_APP_SERVICE_EXTENSION_SIG,
+            reinterpret_cast<void *>(EtsAppManager::SetKeepAliveForAppServiceExtension)},
+        ani_native_function {"nativeClearUpAppDataCheck", BUNDLE_NAME_CHECK_SIG,
+            reinterpret_cast<void *>(EtsAppManager::ClearUpAppDataCheck)},
+        ani_native_function {"nativeClearUpAppData", CLEAR_UP_APP_DATA_SIG,
+            reinterpret_cast<void *>(EtsAppManager::ClearUpAppData)},
+        ani_native_function {"nativeTerminateMission", TERMINATION_SIG,
+            reinterpret_cast<void *>(EtsAppManager::TerminateMission)},
+        ani_native_function {"nativeIsApplicationRunning", IS_APP_RUNNING_SIG,
+            reinterpret_cast<void *>(EtsAppManager::IsApplicationRunning)},
 	};
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {

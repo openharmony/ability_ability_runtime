@@ -64,9 +64,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     size_t sizeParam = static_cast<size_t>(GetU32Data(data));
     std::string stringParam(data, size);
     Parcel wantParcel;
-    Want* want = nullptr;
+    std::unique_ptr<Want> want;
     if (wantParcel.WriteBuffer(data, size)) {
-        want = Want::Unmarshalling(wantParcel);
+        want = std::unique_ptr<Want>(Want::Unmarshalling(wantParcel));
         if (!want) {
             return false;
         }
@@ -79,7 +79,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     pendingWantKey->SetBundleName(stringParam);
     pendingWantKey->SetRequestWho(stringParam);
     pendingWantKey->SetRequestCode(int32Param);
-    pendingWantKey->SetRequestWant(*want);
+    if (want) {
+        pendingWantKey->SetRequestWant(*want);
+    }
     pendingWantKey->SetRequestResolvedType(stringParam);
     std::vector<WantsInfo> allWantsInfos;
     pendingWantKey->SetAllWantsInfos(allWantsInfos);
@@ -114,7 +116,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<StartOptions> startoptions;
     pendingWantManager->PendingWantStartAbilitys(allWantsInfos, startoptions,
                                                  token, int32Param, int32Param, int32Param);
-    pendingWantManager->PendingWantPublishCommonEvent(*want, senderInfo, int32Param, int32Param);
+    if (want) {
+        pendingWantManager->PendingWantPublishCommonEvent(*want, senderInfo, int32Param, int32Param);
+    }
     pendingWantManager->PendingRecordIdCreate();
     pendingWantManager->GetPendingWantRecordByCode(int32Param);
     pendingWantManager->GetPendingWantUid(wantSenderPtr);
@@ -157,11 +161,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     taskDataPersistenceMgr->SaveMissionSnapshot(intParam, missionSnapshot);
     taskDataPersistenceMgr->GetSnapshot(intParam);
     taskDataPersistenceMgr->GetMissionSnapshot(intParam, missionSnapshot, boolParam);
-    if (want) {
-        delete want;
-        want = nullptr;
-    }
-
     return true;
 }
 }

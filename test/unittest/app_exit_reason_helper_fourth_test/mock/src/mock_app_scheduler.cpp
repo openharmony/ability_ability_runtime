@@ -102,7 +102,8 @@ void AppScheduler::OnAbilityRequestDone(const sptr<IRemoteObject>& token, const 
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAbilityRequestDone()");
 }
 
-int AppScheduler::KillApplication(const std::string& bundleName, bool clearPageStack, int32_t appIndex)
+int AppScheduler::KillApplication(const std::string& bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillApplication()");
     return ERR_OK;
@@ -195,7 +196,8 @@ int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName)
     return ERR_OK;
 }
 
-void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t) {}
+void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t,
+    const std::string&) {}
 
 int AppScheduler::StartUserTest(
     const Want& want, const sptr<IRemoteObject>& observer, const AppExecFwk::BundleInfo& bundleInfo, int32_t userId)

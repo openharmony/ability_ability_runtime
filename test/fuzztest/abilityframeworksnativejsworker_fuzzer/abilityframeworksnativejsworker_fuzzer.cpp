@@ -43,6 +43,7 @@ constexpr size_t OFFSET_ZERO = 24;
 constexpr size_t OFFSET_ONE = 16;
 constexpr size_t OFFSET_TWO = 8;
 constexpr uint8_t ENABLE = 2;
+constexpr size_t  MAX_INPUT_SIZE = 1024;
 }
 
 uint32_t GetU32Data(const char* ptr)
@@ -77,7 +78,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string jsonStr(data, size);
     uint8_t *buff = nullptr;
     size_t buffSize;
-    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    std::shared_ptr<AbilityBase::FileMapper> fileMapper = std::make_shared<AbilityBase::FileMapper>();
     void* mapper = static_cast<void*>(fileMapper.get());
     helper.GetSafeData(jsonStr, &buff, &buffSize, &mapper);
     helper.NormalizedFileName(jsonStr);
@@ -91,9 +92,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     bool isDebugApp = *data % ENABLE;
     bool isNativeStart = *data % ENABLE;
     AbilityRuntime::JsRuntimeCommon::GetInstance().StartDebuggerModule(isDebugApp, isNativeStart);
-    NativeEngine *nativeEngine = nullptr;
-    AbilityRuntime::InitWorkerFunc(nativeEngine);
-    AbilityRuntime::OffWorkerFunc(nativeEngine);
     int32_t id = static_cast<int32_t>(GetU32Data(data));
     AbilityRuntime::UpdateContainerScope(id);
     AbilityRuntime::RestoreContainerScope(id);
@@ -111,7 +109,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
+    if (size < OHOS::U32_AT_SIZE || size > OHOS::MAX_INPUT_SIZE) {
         return 0;
     }
 

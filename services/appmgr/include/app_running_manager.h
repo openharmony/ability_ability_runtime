@@ -275,7 +275,7 @@ public:
      * @param  procLevelMap , <pid_t, MemoryLevel>.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap);
+    int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall = false);
 
     /*
     * Get the application's memory allocation info.
@@ -436,7 +436,6 @@ public:
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);

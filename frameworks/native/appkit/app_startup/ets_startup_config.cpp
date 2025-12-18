@@ -317,6 +317,10 @@ ani_object ETSStartupConfig::BuildResult(ani_env *env, const std::shared_ptr<Sta
 
 extern "C" ETS_EXPORT StartupConfig* OHOS_CreateEtsStartupConfig(ani_env *env)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null env");
+        return nullptr;
+    }
     ani_vm *aniVM = nullptr;
     if (env->GetVM(&aniVM) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "get vm failed");

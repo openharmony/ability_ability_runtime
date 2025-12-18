@@ -29,7 +29,7 @@ public:
     static std::shared_ptr<ApplicationContext> GetInstance();
     std::string GetBaseDir();
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo();
-    void GetAllTempDir(std::vector<std::string> &tempPaths);
+    void GetAllTempBase(std::vector<std::string> &tempPaths);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

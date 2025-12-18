@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-ExtensionRecord::ExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord)
+ExtensionRecord::ExtensionRecord(const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord)
     : abilityRecord_(abilityRecord)
 {}
 
@@ -62,7 +62,7 @@ void ExtensionRecord::UnloadUIExtensionAbility()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "unRegisterObserver error");
     }
     auto result = DelayedSingleton<AAFwk::AbilityManagerService>::GetInstance()->UnloadUIExtensionAbility(
-        abilityRecord_, hostBundleName_);
+        abilityRecord_, hostPid_);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "UIExtension unload error");
     }

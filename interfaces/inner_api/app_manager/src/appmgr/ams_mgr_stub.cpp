@@ -424,12 +424,13 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
     std::string bundleName = data.ReadString();
     bool clearPageStack = data.ReadBool();
     auto appIndex = data.ReadInt32();
+    std::string reason = data.ReadString();
 
     TAG_LOGW(AAFwkTag::APPMGR,
-        "KillApplication,callingPid=%{public}d,bundleName=%{public}s,clearPageStack=%{public}d",
-        IPCSkeleton::GetCallingPid(), bundleName.c_str(), clearPageStack);
+        "KillApplication,callingPid=%{public}d,bundleName=%{public}s,clearPageStack=%{public}d,kill reason=%{public}s",
+        IPCSkeleton::GetCallingPid(), bundleName.c_str(), clearPageStack, reason.c_str());
 
-    int32_t result = KillApplication(bundleName, clearPageStack, appIndex);
+    int32_t result = KillApplication(bundleName, clearPageStack, appIndex, reason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

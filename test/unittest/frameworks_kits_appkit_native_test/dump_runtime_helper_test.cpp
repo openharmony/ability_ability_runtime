@@ -156,13 +156,13 @@ protected:
 
     void SetUp() override
     {
-        std::string testDir = "/data/local/tmp/test_dir";
+        std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
         RemoveTestDir(testDir);
     }
 
     void TearDown() override
     {
-        std::string testDir = "/data/local/tmp/test_dir";
+        std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
         RemoveTestDir(testDir);
     }
 
@@ -196,7 +196,7 @@ HWTEST_F(CreateDirTest, CreateDir_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "CreateDirTest CreateDir_0100 start";
 
-    std::string testDir = "/data/local/tmp/test_dir";
+    std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
     CreateTestDir(testDir);
     EXPECT_TRUE(DumpRuntimeHelper::IsFileExists(testDir));
     EXPECT_TRUE(DumpRuntimeHelper::CreateDir(testDir));
@@ -213,7 +213,7 @@ HWTEST_F(CreateDirTest, CreateDir_0200, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "CreateDirTest CreateDir_0200 start";
 
-    std::string testDir = "/data/local/tmp/test_dir";
+    std::string testDir = "/data/local/tmp/dump_runtime_helper_test";
     RemoveTestDir(testDir);
     EXPECT_FALSE(DumpRuntimeHelper::IsFileExists(testDir));
     EXPECT_TRUE(DumpRuntimeHelper::CreateDir(testDir));

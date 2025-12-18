@@ -58,7 +58,7 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level2)
     TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0100 called.");
     AbilityInfo abilityInfo;
     int64_t resSchedType = -1;
-    AAFwk::ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, -1, false, false);
+    AAFwk::ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, -1, false, false, -1);
     AAFwk::ResSchedUtil::GetInstance().ReportAbilityAssociatedStartInfoToRSS(abilityInfo, resSchedType, 0, 0);
     int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
     EXPECT_EQ(resSchedType, ret);
@@ -97,6 +97,28 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level2)
 }
 
 /**
+ * @tc.number: ResSchedUtilTest_0400
+ * @tc.desc: Test ReportUIExtensionProcColdStartToRss works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0400, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0400 called.");
+    int32_t pickerType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER);
+    int32_t hostPid = 102;
+    std::string hostBundleName = "hostBundleName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AAFwk::ResSchedUtil::GetInstance().ReportUIExtensionProcColdStartToRss(pickerType,
+        hostPid, hostBundleName, bundleName, abilityName, moduleName);
+    SUCCEED();
+    int64_t resSchedType = AAFwk::RES_TYPE_SCB_START_ABILITY;
+    int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
+    EXPECT_EQ(resSchedType, ret);
+}
+
+/**
  * @tc.number: GetThawReasonByAbilityType
  * @tc.desc: Test GetThawReasonByAbilityType
  * @tc.type: FUNC
@@ -123,5 +145,28 @@ HWTEST_F(ResSchedUtilTest, GetThawReasonByAbilityType, TestSize.Level2)
     EXPECT_EQ(reason, "THAW_BY_START_UI_EXTENSION");
 }
 
+/**
+ * @tc.number: PromotePriorityToRSS_0100
+ * @tc.desc: Test PromotePriorityToRSS works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedUtilTest, PromotePriorityToRSS_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PromotePriorityToRSS_0100 start");
+    std::string testName = "PromotePriorityToRSS";
+    int32_t callerUid = 1000;
+    int32_t callerPid = 10001;
+    std::string targetBundleName = "com.example.target";
+    int32_t targetUid = 2000;
+    int32_t targetPid = 20001;
+    AAFwk::ResSchedUtil::GetInstance().PromotePriorityToRSS(
+        callerUid, callerPid, targetBundleName, targetUid, targetPid);
+    EXPECT_EQ(callerUid, 1000);
+    EXPECT_EQ(callerPid, 10001);
+    EXPECT_EQ(targetBundleName, "com.example.target");
+    EXPECT_EQ(targetUid, 2000);
+    EXPECT_EQ(targetPid, 20001);
+    TAG_LOGI(AAFwkTag::TEST, "PromotePriorityToRSS_0100 end");
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

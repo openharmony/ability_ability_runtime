@@ -107,7 +107,7 @@ AppUtils::AppUtils()
         isSceneBoard_ = true;
     }
 #endif // SUPPORT_GRAPHICS
-#ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+#ifdef ABILITY_RUNTIME_FORBID_START_ENABLED
     if (WatchParameter(FORBID_START, AppUtils::ForbidStartCallback, nullptr) != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "want param failed: %{public}s", FORBID_START);
         isForbidStart_.isLoaded = false;
@@ -841,7 +841,7 @@ bool AppUtils::IsPreloadApplicationEnabled()
 
 bool AppUtils::IsForbidStart()
 {
-#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+#ifndef ABILITY_RUNTIME_FORBID_START_ENABLED
     return false;
 #else
     if (!isForbidStart_.isLoaded) {
@@ -879,6 +879,43 @@ bool AppUtils::IsStartUIAbilityInCurrentProcess()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "startAbilityInCurrentProcess: %{public}d", isStartUIAbilityInCurrentProcess_.value);
     return isStartUIAbilityInCurrentProcess_.value;
+}
+
+void AppUtils::LoadAppTransferList()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration("/system/etc/ability_runtime/app_transfer_list.json", object)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadAppTransferList failed");
+        return;
+    }
+    if (!object.contains("appTransferList") ||
+        !object.at("appTransferList").is_array()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appTransferList file invalid");
+        return;
+    }
+    for (auto &item : object.at("appTransferList").items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appTransferList bundleName failed");
+            return;
+        }
+        appTransferList_.value.emplace_back(jsonObject.get<std::string>());
+    }
+}
+
+bool AppUtils::InAppTransferList(const std::string &bundleName)
+{
+    std::lock_guard lock(appTransferListMutex_);
+    if (!appTransferList_.isLoaded) {
+        LoadAppTransferList();
+        appTransferList_.isLoaded = true;
+    }
+    for (const auto &item: appTransferList_.value) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

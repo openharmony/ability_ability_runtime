@@ -19,6 +19,7 @@
 #include "cj_photo_editor_extension_instance.h"
 #include "runtime.h"
 #include "photo_editor_extension_context.h"
+#include "ets_photo_editor_extension_instance.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,6 +34,8 @@ PhotoEditorExtension *PhotoEditorExtension::Create(const std::unique_ptr<Runtime
             return JsPhotoEditorExtension::Create(runtime);
         case Runtime::Language::CJ:
             return CreateCJPhotoEditorExtension(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSPhotoEditorExtension(runtime);
         default:
             return new PhotoEditorExtension();
     }

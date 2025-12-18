@@ -21,6 +21,7 @@ import window from '@ohos.window';
 import rpc from '@ohos.rpc';
 import { AbilityUtils } from './utils/AbilityUtils';
 import { CalleeImpl } from './application/Callee';
+import { RecordData } from '@ohos.base';
 
 export type OnReleaseCallback = (msg: string) => void;
 export type OnRemoteStateChangeCallback = (msg: string) => void;
@@ -32,8 +33,8 @@ export interface Caller {
   onRelease(callback: OnReleaseCallback): void;
   onRemoteStateChange(callback: OnRemoteStateChangeCallback): void;
   on(type: string, callback: OnReleaseCallback): void;
-  off(type: string, callback: OnReleaseCallback): void;
-  off(type: string): void;
+  offRelease(callback: OnReleaseCallback): void;
+  offRelease(): void;
 }
 export interface Callee {
   on(method: string, callback: CalleeCallback): void;
@@ -42,8 +43,10 @@ export interface Callee {
 
 export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
+  private prepareToTerminateCallbackPointer: long;
 
   private native nativeOnDestroyCallback(): void;
+  private native nativeOnPrepareToTerminateCallback(prepareTermination: boolean): void;
 
   private callOnDestroy(): boolean {
     let p = this.onDestroy();
@@ -54,10 +57,28 @@ export default class UIAbility extends Ability {
     return false;
   }
 
+  private callOnPrepareToTerminateAsync(): boolean {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
+      return false;
+    }
+    const uiAbilityClassType = AbilityUtils.getClassType(new UIAbility());
+    if (uiAbilityClassType === undefined) {
+      return false;
+    }
+    if (AbilityUtils.isOverride(derivedClassType, "onPrepareToTerminateAsync", uiAbilityClassType)) {
+      this.onPrepareToTerminateAsync()
+        .then((prepareTermination: boolean) => this.nativeOnPrepareToTerminateCallback(prepareTermination));
+      return true;
+    }
+    return false;
+  }
+
   context: UIAbilityContext = new UIAbilityContext();
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
   callee: Callee = new CalleeImpl() as Callee;
+  specifiedId?: string;
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
   }
@@ -100,7 +121,24 @@ export default class UIAbility extends Ability {
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
   }
 
-  onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, Object>): AbilityConstant.OnSaveResult {
+  onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, RecordData>): AbilityConstant.OnSaveResult {
     return AbilityConstant.OnSaveResult.RECOVERY_AGREE;
+  }
+
+  onPrepareToTerminate(): boolean {
+    return false;
+  }
+
+  onPrepareToTerminateAsync(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (a: boolean) => void,
+      reject: (err: Error) => void): boolean => {
+    });
+  }
+
+  onShare(wantParam: Record<string, RecordData>): void {
+  }
+
+  onCollaborate(wantParams: Record<string, RecordData>): AbilityConstant.CollaborateResult {
+    return AbilityConstant.CollaborateResult.REJECT;
   }
 }

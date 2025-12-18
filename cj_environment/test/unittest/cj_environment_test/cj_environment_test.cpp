@@ -372,28 +372,15 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppSDKNS_0100, TestSize.Level
 }
 
 /**
- * @tc.name: DumpCjHeap_0100
- * @tc.desc: Test DumpCjHeap.
+ * @tc.name: InitCJAppNS_0100
+ * @tc.desc: Test InitCJAppNS.
  * @tc.type: FUNC
  */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDumpCjHeap_0100, TestSize.Level2)
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_0100, TestSize.Level2)
 {
-    CJEnvironment::DumpCjHeap(1);
-    CJEnvironment::SetAppPath("path/to/hap");
-    CJEnvironment::DumpCjHeap(2);
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
-}
-
-/**
- * @tc.name: GC_0100
- * @tc.desc: Test GC.
- * @tc.type: FUNC
- */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestGC_0100, TestSize.Level2)
-{
-    CJEnvironment::GC();
-    CJEnvironment::SetAppPath("path/to/hap");
-    CJEnvironment::GC();
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJAppNS(appPath);
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 } // namespace OHOS

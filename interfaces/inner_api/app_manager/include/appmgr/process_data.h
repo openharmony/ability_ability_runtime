@@ -69,7 +69,6 @@ struct ProcessData : public Parcelable {
     int32_t childUid = -1;
     bool isPreload = false;
     bool isPreloadModule = false;
-    bool isPrelaunch = false;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
     std::string killReason;

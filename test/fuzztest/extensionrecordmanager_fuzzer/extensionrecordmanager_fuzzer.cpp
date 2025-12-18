@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 
-#include "ability_record.h"
+#include "base_extension_record.h"
 #include "extension_record_factory.h"
 #define private public
 #define inline
@@ -48,7 +48,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     int32_t recordNum;
     std::shared_ptr<AbilityRuntime::ExtensionRecord> record;
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord;
     std::list<sptr<IRemoteObject>> callerList;
     std::string hostBundleName;
     std::string bundleName;
@@ -65,7 +65,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<IRemoteObject> focusedCallerToken;
     sptr<IRemoteObject> token;
     sptr<IRemoteObject> focusToken;
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey;
+    std::tuple<std::string, std::string, std::string, int32_t> extensionRecordMapKey;
 
     FuzzedDataProvider fdp(data, size);
     userId = fdp.ConsumeIntegral<int32_t>();
@@ -95,10 +95,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     extensionRecordManager->GetAbilityRecordBySessionInfo(sessionInfo);
     extensionRecordManager->IsHostSpecifiedProcessValid(abilityRequest, record, process);
     extensionRecordManager->UpdateProcessName(abilityRequest, record);
-    extensionRecordManager->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName);
+    extensionRecordManager->GetHostPidForExtensionId(extensionRecordId, hostPid);
     extensionRecordManager->AddPreloadUIExtensionRecord(abilityRecord);
     extensionRecordManager->RemoveAllPreloadUIExtensionRecord(preLoadUIExtensionInfo);
-    extensionRecordManager->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extensionRecord, isLoaded);
+    extensionRecordManager->IsPreloadExtensionRecord(abilityRequest, hostPid, extensionRecord, isLoaded);
     extensionRecordManager->RemovePreloadUIExtensionRecordById(extensionRecordMapKey, extensionRecordId);
     extensionRecordManager->RemovePreloadUIExtensionRecord(extensionRecordMapKey);
     extensionRecordManager->GetOrCreateExtensionRecordInner(abilityRequest, hostBundleName, extensionRecord, isLoaded);
@@ -117,7 +117,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     extensionRecordManager->TerminateTimeout(extensionRecordId);
     extensionRecordManager->GetCallerTokenList(abilityRecord, callerList);
     extensionRecordManager->IsFocused(extensionRecordId, token, focusToken);
-    extensionRecordManager->QueryPreLoadUIExtensionRecord(element, moduleName, hostBundleName, recordNum);
+    extensionRecordManager->QueryPreLoadUIExtensionRecord(element, moduleName, hostPid, recordNum);
     return true;
 }
 } // namespace OHOS

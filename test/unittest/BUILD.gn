@@ -369,6 +369,7 @@ group("unittest") {
       "extension_control_interceptor_test:unittest",
       "extension_manager_client_test:unittest",
       "extension_permissions_util_test:unittest",
+      "extension_record_base_first_test:unittest",
       "extension_record_factory_test:unittest",
       "extension_record_test:unittest",
       "extract_insight_intent_profile_test:unittest",
@@ -510,6 +511,7 @@ group("unittest") {
       "window_focus_changed_listener_test:unittest",
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
+      "preload_ui_extension_execute_callback_test:unittest",
     ]
 
     if (ability_runtime_auto_fill) {
@@ -592,7 +594,6 @@ group("unittest") {
 
     if (ability_runtime_upms) {
       deps += [
-        "file_permission_manager_test:unittest",
         "file_uri_distribution_utils_test:unittest",
         "uri_perm_mgr_test:unittest",
         "uri_permission_manager_test:unittest",

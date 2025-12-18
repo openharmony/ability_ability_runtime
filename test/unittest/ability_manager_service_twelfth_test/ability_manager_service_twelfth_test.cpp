@@ -188,7 +188,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIExtensionAbilityBySCB_001, Tes
         std::string bundleName = "com.ix.hiservcie";
         std::string moduleName = "entry";
         abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-        std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
         callerToken = abilityRecord->GetToken();
         auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
         uiAbilityLifecycleManager->sessionAbilityMap_.emplace(TWO, abilityRecord);
@@ -229,7 +229,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIExtensionAbilityBySCB_002, Tes
         std::string moduleName = "entry";
         abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
         abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
-        std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
         callerToken = abilityRecord->GetToken();
         auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
         uiAbilityLifecycleManager->sessionAbilityMap_.emplace(TWO, abilityRecord);
@@ -290,8 +290,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIAbilityBySCB_001, TestSize.Lev
         std::string bundleName = "com.ix.hiservcie";
         std::string moduleName = "entry";
         abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-        std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-        abilityRecord->Init();
+        auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
         sessionInfo->persistentId = TWO;
         uiAbilityLifecycleManager->sessionAbilityMap_.emplace(TWO, abilityRecord);
         EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag), ERR_INVALID_VALUE);
@@ -334,7 +333,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_001, TestS
     AppExecFwk::ApplicationInfo appInfo;
     appInfo.accessTokenId = ONE;
     abilityRequest.appInfo = appInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
     extensionSessionInfo->callerToken = abilityRecord->GetToken();
     IPCSkeleton::SetCallingTokenID(ONE);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
@@ -377,7 +377,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_002, TestS
     AppExecFwk::ApplicationInfo appInfo;
     appInfo.accessTokenId = ONE;
     abilityRequest.appInfo = appInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
     extensionSessionInfo->callerToken = abilityRecord->GetToken();
     IPCSkeleton::SetCallingTokenID(ONE);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
@@ -616,7 +617,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, Test
     AppExecFwk::ApplicationInfo appInfo;
     appInfo.accessTokenId = ONE;
     abilityRequest.appInfo = appInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
     extensionSessionInfo->callerToken = abilityRecord->GetToken();
     IPCSkeleton::SetCallingTokenID(ONE);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);

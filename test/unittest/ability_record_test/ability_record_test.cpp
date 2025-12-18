@@ -100,7 +100,7 @@ void AbilityRecordTest::SetUp(void)
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     abilityResult_ = std::make_shared<AbilityResult>(-1, -1, want);
     abilityRequest_ = std::make_shared<AbilityRequest>();
-    abilityRecord_->Init();
+    abilityRecord_->Init(*abilityRequest_);
 }
 
 void AbilityRecordTest::TearDown(void)
@@ -321,65 +321,8 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_IsLauncherAbility, TestSize.Level1)
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     std::unique_ptr<AbilityRecord> launcherAbilityRecord =
         std::make_unique<AbilityRecord>(launcherWant, abilityInfo, applicationInfo);
-    launcherAbilityRecord->Init();
+    launcherAbilityRecord->Init(AbilityRequest());
     EXPECT_EQ(false, launcherAbilityRecord->IsLauncherAbility());
-}
-
-/*
- * Feature: AbilityRecord
- * Function: Add connection record to ability record' list
- * SubFunction: NA
- * FunctionPoints: AddConnectRecordToList
- * EnvConditions: NA
- * CaseDescription: AddConnectRecordToList UT.
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_AddConnectRecordToList, TestSize.Level1)
-{
-    // test1 for input param is null
-    abilityRecord_->AddConnectRecordToList(nullptr);
-    auto connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(0, static_cast<int>(connList.size()));
-
-    // test2 for adding new connection record to empty list
-    OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
-    auto newConnRecord1 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback1, nullptr);
-    abilityRecord_->AddConnectRecordToList(newConnRecord1);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(1, static_cast<int>(connList.size()));
-
-    // test3 for adding new connection record to non-empty list
-    OHOS::sptr<IAbilityConnection> callback2 = new AbilityConnectCallback();
-    auto newConnRecord2 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
-    abilityRecord_->AddConnectRecordToList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test4 for adding old connection record to non-empty list
-    abilityRecord_->AddConnectRecordToList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test5 for delete nullptr from list
-    abilityRecord_->RemoveConnectRecordFromList(nullptr);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test6 for delete no-match member from list
-    auto newConnRecord3 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
-    abilityRecord_->RemoveConnectRecordFromList(newConnRecord3);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(2, static_cast<int>(connList.size()));
-
-    // test7 for delete match member from list
-    abilityRecord_->RemoveConnectRecordFromList(newConnRecord2);
-    connList = abilityRecord_->GetConnectRecordList();
-    EXPECT_EQ(1, static_cast<int>(connList.size()));
-
-    // test8 for get ability unknown type
-    EXPECT_EQ(OHOS::AppExecFwk::AbilityType::UNKNOWN, abilityRecord_->GetAbilityInfo().type);
 }
 
 /*
@@ -572,21 +515,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_GetAbilityTypeString, TestSize.Level
     recordData = std::make_shared<AbilityRecord>(wantData, abilityData, appInfoData);
     recordData->GetAbilityTypeString(typeStr);
     EXPECT_EQ(typeStr, "DATA");
-}
-
-/*
- * Feature: AbilityRecord
- * Function: SetConnRemoteObject GetConnRemoteObject
- * SubFunction: SetConnRemoteObject GetConnRemoteObject
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify SetConnRemoteObject GetConnRemoteObject UT
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ConnRemoteObject, TestSize.Level1)
-{
-    OHOS::sptr<OHOS::IRemoteObject> remote;
-    abilityRecord_->SetConnRemoteObject(remote);
-    EXPECT_EQ(remote, abilityRecord_->GetConnRemoteObject());
 }
 
 /*
@@ -1581,7 +1509,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddCallerRecord_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     std::shared_ptr<AbilityRecord> callerAbilityRecord = GetAbilityRecord();
-    callerAbilityRecord->Init();
+    callerAbilityRecord->Init(AbilityRequest());
     sptr<IRemoteObject> callerToken = callerAbilityRecord->GetToken();
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(0, callerAbilityRecord);
     abilityRecord->callerList_.push_back(caller);
@@ -1609,7 +1537,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_IsSystemAbilityCall_001, TestSize.Leve
     sptr<IRemoteObject> callerToken = callerAbilityRecord->GetToken();
     bool res2 = abilityRecord->IsSystemAbilityCall(callerToken);
     EXPECT_FALSE(res2);
-    callerAbilityRecord->Init();
+    callerAbilityRecord->Init(AbilityRequest());
     callerToken = callerAbilityRecord->GetToken();
     bool res3 = abilityRecord->IsSystemAbilityCall(callerToken);
     EXPECT_FALSE(res3);
@@ -1632,30 +1560,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddSystemAbilityCallerRecord_001, Test
     std::string srcAbilityId = "srcAbility_id";
     abilityRecord->callerList_.clear();
     abilityRecord->AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: GetConnectingRecordList
- * SubFunction: GetConnectingRecordList
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord GetConnectingRecordList
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_GetConnectingRecordList_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    EXPECT_NE(abilityRecord, nullptr);
-    OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
-    std::shared_ptr<ConnectionRecord> connection1 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    std::shared_ptr<ConnectionRecord> connection2 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    connection1->SetConnectState(ConnectionState::CONNECTING);
-    connection2->SetConnectState(ConnectionState::CONNECTED);
-    abilityRecord->connRecordList_.push_back(connection1);
-    abilityRecord->connRecordList_.push_back(connection2);
-    abilityRecord->GetConnectingRecordList();
 }
 
 /*
@@ -1692,30 +1596,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetStartTime_001, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     abilityRecord->startTime_ = 1;
     abilityRecord->SetStartTime();
-}
-
-/*
- * Feature: AbilityRecord
- * Function: DumpService
- * SubFunction: DumpService
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord DumpService
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_DumpService_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    EXPECT_NE(abilityRecord, nullptr);
-    std::vector<std::string> info;
-    std::vector<std::string> params;
-    bool isClient = false;
-    OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
-    std::shared_ptr<ConnectionRecord> connection =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
-    abilityRecord->isLauncherRoot_ = true;
-    abilityRecord->connRecordList_.push_back(nullptr);
-    abilityRecord->connRecordList_.push_back(connection);
-    abilityRecord->DumpService(info, params, isClient);
 }
 
 /*
@@ -1795,7 +1675,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_CallRequestDone_001, TestSize.Level1)
     bool res1 = abilityRecord->CallRequestDone(nullptr);
     EXPECT_FALSE(res1);
     abilityRecord->callContainer_ = std::make_shared<CallContainer>();
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     sptr<IRemoteObject> callStub = abilityRecord->GetToken();
     bool res2 = abilityRecord->CallRequestDone(callStub);
     EXPECT_TRUE(res2);
@@ -2617,24 +2497,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1
 
 /*
  * Feature: AbilityRecord
- * Function: PostUIExtensionAbilityTimeoutTask
- * SubFunction: PostUIExtensionAbilityTimeoutTask
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord PostUIExtensionAbilityTimeoutTask
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    ASSERT_NE(abilityRecord, nullptr);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
-    EXPECT_TRUE(abilityRecord != nullptr);
-}
-
-/*
- * Feature: AbilityRecord
  * Function: IsHistoryRequestCode
  * SubFunction: IsHistoryRequestCode
  * FunctionPoints: NA
@@ -3338,6 +3200,21 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddUIExtensionLaunchTimestamp_002, Tes
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
  */
+HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_003, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->AddUIExtensionLaunchTimestamp();
+    EXPECT_EQ(abilityRecord_->want_.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveUIExtensionLaunchTimestamp
+ * SubFunction: RemoveUIExtensionLaunchTimestamp
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveUIExtensionLaunchTimestamp
+ */
 HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUIExtensionLaunchTimestamp_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
@@ -3470,6 +3347,144 @@ HWTEST_F(AbilityRecordTest, ReportAbilityConnectionRelations_002, TestSize.Level
     auto callerRecord_6 = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
     abilityRecord_->callerList_.push_back(callerRecord_6);
     EXPECT_EQ(abilityRecord_->ReportAbilityConnectionRelations(), false);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetPromotePriority
+ * SubFunction: SetPromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetPromotePriority
+ */
+HWTEST_F(AbilityRecordTest, SetPromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetPromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    abilityRecord_->SetPromotePriority(true);
+    EXPECT_NE(abilityRecord_->uiAbilityProperty_, nullptr);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->promotePriority);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->byCallCallerSaUid >= 0);
+    EXPECT_TRUE(abilityRecord_->uiAbilityProperty_->byCallCallerSaPid >= 0);
+
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    abilityRecord_->SetPromotePriority(false);
+    EXPECT_EQ(abilityRecord_->uiAbilityProperty_, nullptr);
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->SetPromotePriority(false);
+    EXPECT_EQ(abilityRecord_->uiAbilityProperty_, nullptr);
+    GTEST_LOG_(INFO) << "SetPromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetPromotePriority
+ * SubFunction: GetPromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPromotePriority
+ */
+HWTEST_F(AbilityRecordTest, ShouldPromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ShouldPromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->uiAbilityProperty_ = nullptr;
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->pid_ = -1;
+    EXPECT_FALSE(abilityRecord_->GetPromotePriority());
+
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+    GTEST_LOG_(INFO) << "ShouldPromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PromotePriority
+ * SubFunction: PromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PromotePriority
+ */
+HWTEST_F(AbilityRecordTest, PromotePriority_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PromotePriority_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->isStartedByCall_ = true;
+    EXPECT_TRUE(abilityRecord_->IsStartedByCall());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaUid = 300000;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaPid = 1000;
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+
+    EXPECT_TRUE(abilityRecord_->PromotePriority());
+    GTEST_LOG_(INFO) << "PromotePriority_001 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PromotePriority
+ * SubFunction: PromotePriority
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PromotePriority
+ */
+HWTEST_F(AbilityRecordTest, PromotePriority_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PromotePriority_002 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    abilityRecord_->isStartedByCall_ = false;
+    EXPECT_FALSE(abilityRecord_->IsStartedByCall());
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->isStartedByCall_ = true;
+    EXPECT_TRUE(abilityRecord_->IsStartedByCall());
+    abilityRecord_->uiAbilityProperty_.reset();
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_ = std::make_shared<AbilityRecord::UIAbilityProperty>();
+    abilityRecord_->uiAbilityProperty_->promotePriority = false;
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->promotePriority = true;
+    abilityRecord_->pid_ = 0;
+    EXPECT_FALSE(abilityRecord_->PromotePriority());
+
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaUid = 300000;
+    abilityRecord_->uiAbilityProperty_->byCallCallerSaPid = 1000;
+    abilityRecord_->pid_ = 1000;
+    EXPECT_TRUE(abilityRecord_->GetPromotePriority());
+
+    EXPECT_TRUE(abilityRecord_->PromotePriority());
+    GTEST_LOG_(INFO) << "PromotePriority_002 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetFirstCallerBundleName
+ * SubFunction: GetFirstCallerBundleName
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetFirstCallerBundleName
+ */
+HWTEST_F(AbilityRecordTest, GetFirstCallerBundleName_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetFirstCallerBundleName_001 start";
+    EXPECT_NE(abilityRecord_, nullptr);
+    auto callerBundleName = "testBundle";
+    abilityRecord_->firstCallerBundleName_ = callerBundleName;
+    EXPECT_EQ(abilityRecord_->GetFirstCallerBundleName(), callerBundleName);
+    GTEST_LOG_(INFO) << "GetFirstCallerBundleName_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

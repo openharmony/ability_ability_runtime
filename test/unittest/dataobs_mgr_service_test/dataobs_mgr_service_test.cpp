@@ -860,5 +860,54 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_ConstructObserverNod
     EXPECT_EQ(obsNode2.nodeId_, obsNode1.nodeId_ + 1);
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_ConstructObserverNode_0100 end");
 }
+
+/*
+ * Feature: DataObsMgrService with rdb uri
+ * Function: RegisterObserver
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService RegisterObserver
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService RegisterObserver is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RdbUriTest_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RdbUriTest_0100 start";
+    const int testVal = static_cast<int>(NO_ERROR);
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("rdb://device_id/com.domainname.dataability.persondata/person/10");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+
+    EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
+    EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserver(*uri, dataobsAbility));
+
+    testing::Mock::AllowLeak(dataobsAbility);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RdbUriTest_0100 end";
+}
+
+/*
+ * Feature: DataObsMgrService with sharepreferences uri
+ * Function: RegisterObserver
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService RegisterObserver
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService RegisterObserver is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_SharePreferencesUri_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_SharePreferencesUri_0100 start";
+    const int testVal = static_cast<int>(NO_ERROR);
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("sharepreferences://device_id/com.domainname.dataability.persondata/person/10");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+
+    EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
+    EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserver(*uri, dataobsAbility));
+
+    testing::Mock::AllowLeak(dataobsAbility);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_SharePreferencesUri_0100 end";
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

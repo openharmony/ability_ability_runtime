@@ -558,6 +558,33 @@ HWTEST_F(ContextImplTest, GetBaseDir_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAllTempBase_0100
+ * @tc.desc: Switch temp bases test.
+ * @tc.type: FUNC
+ * @tc.require: issueI61P7Y
+ */
+HWTEST_F(ContextImplTest, GetAllTempBase_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(contextImpl, nullptr);
+    contextImpl->applicationInfo_ = nullptr;
+    std::vector<std::string> tempBases;
+    contextImpl->GetAllTempBase(tempBases);
+    EXPECT_TRUE(tempBases.empty());
+
+    contextImpl->applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>();
+    AppExecFwk::ModuleInfo moduleInfo;
+    moduleInfo.moduleName = "testModuleName";
+    contextImpl->applicationInfo_->moduleInfos.push_back(moduleInfo);
+    contextImpl->GetAllTempBase(tempBases);
+    constexpr int32_t SING_MODULE_TEMP_BASE_SIZE = 10;
+    EXPECT_EQ(tempBases.size(), SING_MODULE_TEMP_BASE_SIZE);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: SwitchArea_0100
  * @tc.desc: Switch area basic test.
  * @tc.type: FUNC
@@ -1935,5 +1962,30 @@ HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_Bind_001, Function | MediumTest
 
     TAG_LOGI(AAFwkTag::TEST, "ContextImpl_Bind_001 end");
 }
+
+#ifdef SUPPORT_SCREEN
+/**
+ * @tc.number: RegisterGetAllUIAbilitiesCallback_001
+ * @tc.name: RegisterGetAllUIAbilitiesCallback
+ * @tc.desc: RegisterGetAllUIAbilitiesCallback test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, RegisterGetAllUIAbilitiesCallback_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> uIAbilities;
+    contextImpl_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 0);
+    contextImpl_->RegisterGetAllUIAbilitiesCallback(
+        [](std::vector<std::shared_ptr<AbilityRuntime::UIAbility>>& uIAbilities) -> void {
+            std::shared_ptr<AbilityRuntime::UIAbility> uiability = nullptr;
+            uIAbilities.emplace_back(uiability);
+        });
+    contextImpl_->GetAllUIAbilities(uIAbilities);
+    EXPECT_EQ(uIAbilities.size(), 1);
+    GTEST_LOG_(INFO) << "RegisterGetAllUIAbilitiesCallback_001 end";
+}
+#endif
 }  // namespace AppExecFwk
 }

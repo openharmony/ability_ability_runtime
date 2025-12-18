@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,8 @@ MockServiceAbilityManagerService::MockServiceAbilityManagerService()
 MockServiceAbilityManagerService::~MockServiceAbilityManagerService()
 {}
 
-int MockServiceAbilityManagerService::StartAbility(const Want& want, int32_t userId, int requestCode)
+int MockServiceAbilityManagerService::StartAbility(
+    const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     GTEST_LOG_(INFO) << "MockServiceAbilityManagerService::StartAbility";
     if (abilityScheduler_ != nullptr) {
@@ -47,8 +48,8 @@ int MockServiceAbilityManagerService::StartAbility(const Want& want, int32_t use
     return 0;
 }
 
-int MockServiceAbilityManagerService::StartAbility(
-    const Want& want, const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode)
+int MockServiceAbilityManagerService::StartAbility(const Want& want, const sptr<IRemoteObject>& callerToken,
+    int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     return 0;
 }

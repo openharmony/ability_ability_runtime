@@ -1150,8 +1150,9 @@ void NAPIRemoteMissionListener::NotifyMissionsChanged(const std::string &deviceI
     registerMissionCB->deviceId = deviceId;
     work->data = static_cast<void *>(registerMissionCB);
 
-    int rev = uv_queue_work_with_qos(
-        loop, work, [](uv_work_t *work) {}, UvWorkNotifyMissionChanged, uv_qos_user_initiated);
+    int rev = uv_queue_work_with_qos_internal(
+        loop, work, [](uv_work_t *work) {}, UvWorkNotifyMissionChanged, uv_qos_user_initiated,
+        "distributedsched:NotifyMissionsChanged");
     if (rev != 0) {
         delete registerMissionCB;
         registerMissionCB = nullptr;
@@ -1191,8 +1192,8 @@ void NAPIRemoteOnListener::OnCallback(const uint32_t continueState, const std::s
     onCB->srcBundleName = srcBundleName;
     work->data = static_cast<void *>(onCB);
 
-    int rev = uv_queue_work_with_qos(
-        loop, work, [](uv_work_t *work) {}, UvWorkOnCallback, uv_qos_user_initiated);
+    int rev = uv_queue_work_with_qos_internal(
+        loop, work, [](uv_work_t *work) {}, UvWorkOnCallback, uv_qos_user_initiated, "distributedsched:OnCallback");
     if (rev != 0) {
         delete onCB;
         onCB = nullptr;
@@ -1274,8 +1275,8 @@ void NAPIRemoteMissionListener::NotifySnapshot(const std::string &deviceId, int3
     registerMissionCB->missionId = missionId;
     work->data = static_cast<void *>(registerMissionCB);
 
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, UvWorkNotifySnapshot);
+    int rev = uv_queue_work_internal(
+        loop, work, [](uv_work_t *work) {}, UvWorkNotifySnapshot, "distributedsched:NotifySnapshot");
     if (rev != 0) {
         delete registerMissionCB;
         registerMissionCB = nullptr;
@@ -1348,8 +1349,8 @@ void NAPIRemoteMissionListener::NotifyNetDisconnect(const std::string &deviceId,
     registerMissionCB->state = state;
     work->data = static_cast<void *>(registerMissionCB);
 
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, UvWorkNotifyNetDisconnect);
+    int rev = uv_queue_work_internal(
+        loop, work, [](uv_work_t *work) {}, UvWorkNotifyNetDisconnect, "distributedsched:NotifyNetDisconnect");
     if (rev != 0) {
         delete registerMissionCB;
         registerMissionCB = nullptr;
@@ -2118,8 +2119,9 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
     continueAbilityCB->resultCode = result;
     work->data = static_cast<void *>(continueAbilityCB);
 
-    int rev = uv_queue_work_with_qos(
-        loop, work, [](uv_work_t *work) {}, UvWorkOnContinueDone, uv_qos_user_initiated);
+    int rev = uv_queue_work_with_qos_internal(
+        loop, work, [](uv_work_t *work) {}, UvWorkOnContinueDone, uv_qos_user_initiated,
+        "distributedsched:OnContinueDone");
     if (rev != 0) {
         delete continueAbilityCB;
         continueAbilityCB = nullptr;

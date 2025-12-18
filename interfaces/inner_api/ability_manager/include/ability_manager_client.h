@@ -152,10 +152,11 @@ public:
      *
      * @param want Ability want.
      * @param requestCode Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE, uint64_t specifiedFullTokenId = 0);
 
     /**
      * StartAbilityWithWait, send want and abilityStartWithWaitObserver to abms.
@@ -172,13 +173,15 @@ public:
      * @param want Ability want.
      * @param callerToken caller ability token.
      * @param requestCode Ability request code.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbility(
         const Want &want,
         sptr<IRemoteObject> callerToken,
         int requestCode = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0);
 
     /**
      * StartAbility by insight intent, send want to ability manager service.
@@ -393,11 +396,13 @@ public:
      *
      * @param want, the want of the ability to start.
      * @param hostBundleName, the caller application bundle name.
+     * @param requestCode the resultCode of the preload ui extension ability to start.
      * @param userId, the extension runs in.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
+        int32_t requestCode = DEFAULT_INVAL_VALUE);
 
     /**
      * Change the visibility state of an UIAbility.
@@ -594,13 +599,15 @@ public:
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken, caller ability token.
+     * @param specifiedFullTokenId, The specified full token ID.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectAbility(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        uint64_t specifiedFullTokenId = 0);
     
     /**
      * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.
@@ -728,7 +735,8 @@ public:
      * @param clearPageStack.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    ErrCode KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string& reason = "Abilityms::KillProcess");
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -977,10 +985,12 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false);
+        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false,
+        bool promotePriority = false);
 
     /**
      * Start Ability, connect session with common ability.
@@ -991,10 +1001,12 @@ public:
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
      * @param isSilent, whether show window when start fail.
+     * @param promotePriority, whether to promote priority for sa.
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
+        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false,
+        bool promotePriority = false);
 
     /**
      * Start Ability for prelaunch
@@ -1165,6 +1177,13 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAutoStartupStatusForSelf(bool &isAutoStartEnabled);
+
+    /**
+     * @brief Manual start auto startup apps, EDM use only.
+     * @param userId Indicates which user's auto startup apps to be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ManualStartAutoStartupApps(int32_t userId);
 
     /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
@@ -1851,14 +1870,14 @@ public:
      *
      * @param element, The uiextension ElementName.
      * @param moduleName, The uiextension moduleName.
-     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param hostPid, The uiextension caller pid.
      * @param recordNum, The returned count of uiextension.
      * @param userId, The User Id.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
                                           const std::string &moduleName,
-                                          const std::string &hostBundleName,
+                                          const int32_t hostPid,
                                           int32_t &recordNum,
                                           int32_t userId = DEFAULT_INVAL_VALUE);
 
@@ -1878,7 +1897,8 @@ public:
      */
     ErrCode GetAllInsightIntentInfo(
         AbilityRuntime::GetInsightIntentFlag flag,
-        std::vector<InsightIntentInfoForQuery> &infos);
+        std::vector<InsightIntentInfoForQuery> &infos,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * Get specified bundleName insight intent infos.
@@ -1890,7 +1910,8 @@ public:
     ErrCode GetInsightIntentInfoByBundleName(
         AbilityRuntime::GetInsightIntentFlag flag,
         const std::string &bundleName,
-        std::vector<InsightIntentInfoForQuery> &infos);
+        std::vector<InsightIntentInfoForQuery> &infos,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * Get specified intentName insight intent infos.
@@ -1906,7 +1927,8 @@ public:
         const std::string &bundleName,
         const std::string &moduleName,
         const std::string &intentName,
-        InsightIntentInfoForQuery &info);
+        InsightIntentInfoForQuery &info,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     ErrCode UpdateKioskApplicationList(const std::vector<std::string> &appList);
 
@@ -1968,6 +1990,39 @@ public:
      * @return Returns true on being limited.
      */
     bool IsRestartAppLimit();
+
+    /**
+     * UnPreload UIExtension with want, send want to ability manager service.
+     *
+     * @param extensionAbilityId The extension ability Id.
+     * @param userId The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearPreloadedUIExtensionAbility(int32_t extensionAbilityId, int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * clear all Preload UIExtension with want, send want to ability manager service.
+     *
+     * @param userId The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearPreloadedUIExtensionAbilities(int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Register preload ui extension host client.
+     * @param callerToken Caller ability token.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterPreloadUIExtensionHostClient(const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * @brief UnRegister preload ui extension host client.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

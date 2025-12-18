@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "application_context.h"
 #include "application_state_change_callback.h"
+#include "interop_ability_lifecycle_callback.h"
 #include "js_ability_auto_startup_callback.h"
 #include "js_ability_lifecycle_callback.h"
 #include "native_engine/native_engine.h"
@@ -63,6 +64,8 @@ public:
     napi_value OnOff(napi_env env, NapiCallbackInfo& info);
     napi_value OnOnAbilityLifecycle(napi_env env, NapiCallbackInfo& info, bool isSync);
     napi_value OnOffAbilityLifecycle(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
+    napi_value OnOnInteropAbilityLifecycle(napi_env env, NapiCallbackInfo& info);
+    napi_value OnOffInteropAbilityLifecycle(napi_env env, NapiCallbackInfo& info);
     napi_value OnOffAbilityLifecycleEventSync(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
     napi_value OnOnEnvironment(napi_env env, NapiCallbackInfo& info, bool isSync);
     napi_value OnOffEnvironment(napi_env env, NapiCallbackInfo& info, int32_t callbackId);
@@ -96,6 +99,7 @@ public:
     napi_value OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetAllWindowStages(napi_env env, NapiCallbackInfo& info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
@@ -126,6 +130,7 @@ public:
     static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
     static napi_value CreateAreaModeContext(napi_env env, napi_callback_info info);
     static napi_value CreateDisplayContext(napi_env env, napi_callback_info info);
+    static napi_value GetAllWindowStages(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
@@ -146,6 +151,7 @@ private:
     static void BindNativeApplicationContextOne(napi_env env, napi_value object);
     static void BindNativeApplicationContextTwo(napi_env env, napi_value object);
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
+    std::shared_ptr<InteropAbilityLifecycleCallback> interopCallback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
     std::shared_ptr<JsApplicationStateChangeCallback> applicationStateCallback_;
     std::mutex applicationStateCallbackLock_;

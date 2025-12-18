@@ -25,6 +25,9 @@ bool g_mockSaveStorageInsightIntentDataRet = true;
 bool g_mockLoadInsightIntentInfoRet = true;
 bool g_mockLoadInsightIntentInfoByNameRet = true;
 bool g_mockLoadInsightIntentInfosRet = true;
+bool g_mockLoadConfigInsightIntentInfoByNameRet = true;
+bool g_mockLoadConfigInsightIntentInfosRet = true;
+bool g_mockLoadConfigInsightIntentInfoRet = true;
 
 void MockDeleteData(bool mockRet)
 {
@@ -57,6 +60,20 @@ void MockLoadInsightIntentInfos(bool mockRet)
     g_mockLoadInsightIntentInfosRet = mockRet;
 }
 
+void MockLoadConfigInsightIntentInfos(bool ret)
+{
+    g_mockLoadConfigInsightIntentInfosRet = ret;
+}
+
+void MockLoadConfigInsightIntentInfoByName(bool mockRet)
+{
+    g_mockLoadConfigInsightIntentInfoByNameRet = mockRet;
+}
+
+void MockLoadConfigInsightIntentInfo(bool ret)
+{
+    g_mockLoadConfigInsightIntentInfoRet = ret;
+}
 }
 }
 
@@ -71,14 +88,33 @@ InsightRdbStorageMgr::~InsightRdbStorageMgr()
 }
 
 int32_t  InsightRdbStorageMgr::LoadInsightIntentInfos(const int32_t userId,
-    std::vector<ExtractInsightIntentInfo> &totalInfos)
+    std::vector<ExtractInsightIntentInfo> &totalInfos, std::vector<InsightIntentInfo> &configInfos)
 {
     ExtractInsightIntentInfo totalInfo;
+    InsightIntentInfo configInfo;
     totalInfos.push_back(totalInfo);
+    configInfos.push_back(configInfo);
     if (g_mockLoadInsightIntentInfosRet) {
         return ERR_OK;
     }
     return ERR_INVALID_VALUE;
+}
+
+int32_t InsightRdbStorageMgr::LoadConfigInsightIntentInfos(
+    const int32_t userId, std::vector<InsightIntentInfo> &configInfos)
+{
+    if (!g_mockLoadConfigInsightIntentInfosRet) {
+        configInfos.clear();
+        return ERR_INVALID_VALUE;
+    }
+    InsightIntentInfo info;
+    info.bundleName = "mock.bundle";
+    info.moduleName = "mockModule";
+    info.intentName = "mockConfigIntent";
+    info.displayName = "mockDisplayName";
+    info.displayDescription = "mockDescription";
+    configInfos.emplace_back(info);
+    return ERR_OK;
 }
 
 int32_t  InsightRdbStorageMgr::LoadInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
@@ -87,6 +123,15 @@ int32_t  InsightRdbStorageMgr::LoadInsightIntentInfoByName(const std::string &bu
     ExtractInsightIntentInfo totalInfo;
     totalInfos.push_back(totalInfo);
     if (g_mockLoadInsightIntentInfoByNameRet) {
+        return ERR_OK;
+    }
+    return ERR_INVALID_VALUE;
+}
+
+int32_t  InsightRdbStorageMgr::LoadConfigInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
+    const std::string &intentName, const int32_t userId, InsightIntentInfo &totalInfo)
+{
+    if (g_mockLoadInsightIntentInfoRet) {
         return ERR_OK;
     }
     return ERR_INVALID_VALUE;
@@ -102,7 +147,8 @@ int32_t  InsightRdbStorageMgr::LoadInsightIntentInfo(const std::string &bundleNa
 }
 
 int32_t  InsightRdbStorageMgr::SaveStorageInsightIntentData(const std::string &bundleName,
-    const std::string &moduleName, const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos)
+    const std::string &moduleName, const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos,
+    std::vector<InsightIntentInfo> &configInfos)
 {
     if (g_mockSaveStorageInsightIntentDataRet) {
         return ERR_OK;
@@ -124,6 +170,19 @@ int32_t  InsightRdbStorageMgr::DeleteStorageInsightIntentByUserId(const int32_t 
     if (g_mockDeleteStorageInsightIntentByUserIdRet) {
         return ERR_OK;
     }
+    return ERR_INVALID_VALUE;
+}
+
+int32_t InsightRdbStorageMgr::LoadConfigInsightIntentInfoByName(const std::string &bundleName,
+    const int32_t userId, std::vector<InsightIntentInfo> &infos)
+{
+    InsightIntentInfo info;
+    info.intentName = "configIntent";
+    infos.emplace_back(info);
+    if (g_mockLoadConfigInsightIntentInfoByNameRet) {
+        return ERR_OK;
+    }
+    infos.clear();
     return ERR_INVALID_VALUE;
 }
 }

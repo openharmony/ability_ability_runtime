@@ -35,7 +35,7 @@ std::shared_ptr<AppExecFwk::ApplicationInfo> ApplicationContext::GetApplicationI
     }
     return nullptr;
 }
-void ApplicationContext::GetAllTempDir(std::vector<std::string> &tempPaths)
+void ApplicationContext::GetAllTempBase(std::vector<std::string> &tempPaths)
 {
     tempPaths.emplace_back(AppExecFwk::MyStatus::GetInstance().tmpDir_);
 }

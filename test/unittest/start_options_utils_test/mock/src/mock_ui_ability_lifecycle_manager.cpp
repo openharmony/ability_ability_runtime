@@ -27,7 +27,7 @@ bool UIAbilityLifecycleManager::IsCallerInStatusBar(const std::string &instanceK
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByName(
-    const AppExecFwk::ElementName &element)
+    const AppExecFwk::ElementName &element, int32_t appIndex)
 {
     return MyFlag::GetInstance().abilityRecords_;
 }

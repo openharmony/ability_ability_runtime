@@ -17,6 +17,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONTEXT_H
 
+#include "insight_intent_constant.h"
 #include "iremote_object.h"
 #include "want.h"
 
@@ -51,11 +52,38 @@ public:
         return winMode_;
     }
 
+    uint64_t GetIntentId() const
+    {
+        return intentId_;
+    }
+
+    void SetExecuteMode(const int32_t executeMode)
+    {
+        executeMode_ = executeMode;
+    }
+
+    int32_t GetExecuteMode()
+    {
+        return executeMode_;
+    }
+
+    void SetDelayReturnMode(const InsightIntentReturnMode delayReturnMode)
+    {
+        delayReturnMode_ = delayReturnMode;
+    }
+
+    InsightIntentReturnMode GetDelayReturnMode() const
+    {
+        return delayReturnMode_;
+    }
+
 private:
     sptr<IRemoteObject> token_ = nullptr;
     std::string bundleName_ = "";
     int32_t winMode_ = 0;
     uint64_t intentId_ = 0;
+    int32_t executeMode_ = -1;
+    InsightIntentReturnMode delayReturnMode_ = InsightIntentReturnMode::CALLBACK;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

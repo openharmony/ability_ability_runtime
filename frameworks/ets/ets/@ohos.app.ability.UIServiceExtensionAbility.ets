@@ -18,6 +18,7 @@ import type Want from '@ohos.app.ability.Want';
 import type UIServiceExtensionContext from 'application.UIServiceExtensionContext';
 import type UIServiceHostProxy from 'application.UIServiceHostProxy';
 import window from '@ohos.window';
+import { RecordData } from '@ohos.base';
 
 export default class UIServiceExtensionAbility extends ExtensionAbility {
 
@@ -47,7 +48,7 @@ export default class UIServiceExtensionAbility extends ExtensionAbility {
 
   }
 
-  onData(proxy: UIServiceHostProxy, data: Record<string, Object>): void {
+  onData(proxy: UIServiceHostProxy, data: Record<string, RecordData>): void {
 
   }
 

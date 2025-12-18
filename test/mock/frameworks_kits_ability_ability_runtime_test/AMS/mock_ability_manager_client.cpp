@@ -114,7 +114,8 @@ ErrCode AbilityManagerClient::ScheduleCommandAbilityWindowDone(
     return abms->ScheduleCommandAbilityWindowDone(token, sessionInfo, winCmd, abilityCmd);
 }
 
-ErrCode AbilityManagerClient::StartAbility(const Want& want, int32_t userId, int requestCode)
+ErrCode AbilityManagerClient::StartAbility(const Want& want, int32_t userId, int requestCode,
+    uint64_t specifiedFullTokenId)
 {
     if (g_remoteObject == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
@@ -124,7 +125,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want& want, int32_t userId, int
 }
 
 ErrCode AbilityManagerClient::StartAbility(
-    const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode)
+    const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     if (g_remoteObject == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
@@ -134,7 +135,7 @@ ErrCode AbilityManagerClient::StartAbility(
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want& want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callerToken, int32_t accountId, bool isSilent)
+    sptr<IRemoteObject> callerToken, int32_t accountId, bool isSilent, bool promotePriority)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient::StartAbilityByCall start");
     if (g_remoteObject == nullptr) {
@@ -187,8 +188,8 @@ ErrCode AbilityManagerClient::TerminateAbility(
     return abms->TerminateAbility(token, resultCode, resultWant);
 }
 
-ErrCode AbilityManagerClient::ConnectAbility(
-    const Want& want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId)
+ErrCode AbilityManagerClient::ConnectAbility(const Want& want, sptr<IAbilityConnection> connect,
+    sptr<IRemoteObject> callerToken, int32_t userId, uint64_t specifiedFullTokenId)
 {
     if (g_remoteObject == nullptr) {
         g_remoteObject =

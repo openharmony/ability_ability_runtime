@@ -60,6 +60,10 @@ public:
 
     static std::string GetSubmitterStackLocal();
 
+#ifdef SUPPORT_GRAPHICS
+    static void GetCurrentUIStackInfo(std::string& target);
+#endif // SUPPORT_GRAPHICS
+
 private:
     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask_;
     std::shared_ptr<SourceMapOperator> sourceMapOperator_ = nullptr;

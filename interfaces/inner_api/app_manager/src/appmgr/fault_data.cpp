@@ -97,6 +97,10 @@ bool FaultData::ReadContent(Parcel &parcel)
 
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcessLifeTime read string failed.");
     processLifeTime = strValue;
+
+    markedId = parcel.ReadInt32();
+    processedId = parcel.ReadInt32();
+    dispatchedEventId = parcel.ReadInt32();
     return true;
 }
 
@@ -151,6 +155,18 @@ bool FaultData::WriteContent(Parcel &parcel) const
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(processLifeTime),
         "processLifeTime [%{public}s] write string failed.", processLifeTime.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(markedId),
+        "MarkedId [%{public}d] write int32 failed.", markedId
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(processedId),
+        "ProcessedId [%{public}d] write int32 failed.", processedId
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(dispatchedEventId),
+        "DispatchedEventId [%{public}d] write int32 failed.", dispatchedEventId
     );
     return true;
 }

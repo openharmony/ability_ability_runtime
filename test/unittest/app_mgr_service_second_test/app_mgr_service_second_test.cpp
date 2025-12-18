@@ -81,6 +81,22 @@ HWTEST_F(AppMgrServiceSecondTest, NotifyPageHide_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPageShow_0100
+ * @tc.desc: NotifyPageShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceSecondTest, NotifyPageShow_0100, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    sptr<OHOS::IRemoteObject> token = nullptr;
+    PageStateData pageStateData;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->NotifyPageShow(token, pageStateData);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: RegisterAppRunningStatusListener_0100
  * @tc.desc: RegisterAppRunningStatusListener.
  * @tc.type: FUNC

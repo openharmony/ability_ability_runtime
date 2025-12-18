@@ -63,7 +63,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptions_001, TestSize.Level1)
 
     Want want;
     StartOptions startOptions;
-    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, -1);
+    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, -1);
     EXPECT_EQ(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptions_001 end");
@@ -86,7 +86,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptions_002, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->isStartFromNDK = true;
-    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, -1);
+    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, -1);
     EXPECT_EQ(ret, StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(want, startOptions));
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptions_002 end");
@@ -107,7 +107,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptions_003, TestSize.Level1)
 
     Want want;
     StartOptions startOptions;
-    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, -1);
+    auto ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, -1);
     EXPECT_EQ(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptions_003 end");
@@ -280,7 +280,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_001 start");
     Want want;
     StartOptions startOptions;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_001 end");
 }
@@ -300,7 +300,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_002, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::UNSPECIFIED;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_002 end");
 }
@@ -322,7 +322,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_003, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_CAPABILITY_NOT_SUPPORT);
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_003 end");
 }
@@ -345,7 +345,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_004, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_CAPABILITY_NOT_SUPPORT);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_004 end");
@@ -369,7 +369,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_005, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_NOT_ALLOW_IMPLICIT_START);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_005 end");
@@ -395,7 +395,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_006, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->isRestartKeepAlive = true;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_006 end");
@@ -422,7 +422,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_007, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_NOT_SELF_APPLICATION);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_007 end");
@@ -450,7 +450,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_008, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_008 end");
@@ -479,7 +479,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_009, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::ATTACH_TO_STATUS_BAR_ITEM;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_START_OPTIONS_CHECK_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_009 end");
@@ -511,7 +511,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_010, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::ATTACH_TO_STATUS_BAR_ITEM;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_ABILITY_ALREADY_RUNNING);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_010 end");
@@ -541,7 +541,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckProcessOptionsInner_011, TestSize.Level1)
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->processMode = ProcessMode::ATTACH_TO_STATUS_BAR_ITEM;
-    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, -1);
+    auto retCode = StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, nullptr, -1);
     EXPECT_EQ(retCode, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckProcessOptionsInner_011 end");

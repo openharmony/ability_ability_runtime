@@ -237,6 +237,9 @@ void OHOSApplication::SetApplicationContext(
             }
             return applicationSptr->GetSpecifiedRuntime(codeLanguage);
         });
+#ifdef SUPPORT_SCREEN
+    RegisterGetAllUIAbilitiesCallback(abilityRuntimeContext_, applicationWptr);
+#endif
 }
 
 /**
@@ -1255,6 +1258,72 @@ bool OHOSApplication::GetDisplayConfig(uint64_t displayId, float &density, std::
     TAG_LOGD(AAFwkTag::APPKIT, "displayId: %{public}" PRIu64 ", density: %{public}f, direction: %{public}s",
         displayId, density, directionStr.c_str());
     return true;
+}
+#endif
+
+bool OHOSApplication::UpdateETSRuntime(AbilityRuntime::Runtime::Options &option)
+{
+    if (runtime_ == nullptr || runtime_->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime or wrong language");
+        return false;
+    }
+    option.lang = AbilityRuntime::Runtime::Language::ETS;
+    std::unique_ptr<AbilityRuntime::ETSRuntime> etsRuntime =
+        AbilityRuntime::ETSRuntime::Create(option, runtime_, false);
+    if (etsRuntime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "create etsRuntime failed");
+        return false;
+    }
+    etsRuntime->SetJsRuntime(runtime_);
+    runtime_ = std::move(etsRuntime);
+    return true;
+}
+
+#ifdef SUPPORT_SCREEN
+void OHOSApplication::RegisterGetAllUIAbilitiesCallback(
+    const std::shared_ptr<AbilityRuntime::ApplicationContext> &context,
+    const std::weak_ptr<OHOSApplication> &appWeakPtr)
+{
+    context->RegisterGetAllUIAbilitiesCallback(
+        [appWeakPtr](std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> &uIAbilities) {
+            std::shared_ptr<OHOSApplication> appSptr = appWeakPtr.lock();
+            if (appSptr == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null applicationSptr");
+                return;
+            }
+            appSptr->GetAllUIAbilities(uIAbilities);
+        });
+}
+
+void OHOSApplication::GetAllUIAbilities(std::vector<std::shared_ptr<AbilityRuntime::UIAbility>> &uiAbility)
+{
+    if (abilityRecordMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecordMgr_");
+        return;
+    }
+
+    for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
+        auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
+            continue;
+        }
+        auto abilityInfo = abilityRecord->GetAbilityInfo();
+        if (abilityInfo == nullptr || abilityInfo->type != AbilityType::PAGE) {
+            continue;
+        }
+        auto abilityThread = abilityRecord->GetAbilityThread();
+        if (abilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
+            continue;
+        }
+        auto ability = abilityThread->GetUIAbility();
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null uiAbility");
+            continue;
+        }
+        uiAbility.emplace_back(ability);
+    }
 }
 #endif
 }  // namespace AppExecFwk
