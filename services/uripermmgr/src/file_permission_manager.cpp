@@ -29,7 +29,6 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-using CheckUriFunc = int32_t (*)(const std::string&, uint32_t);
 constexpr int32_t PERMISSION_GRANTED = 1;
 constexpr int32_t PERMISSION_DENIED = 2;
 constexpr const char* URI_CHECK_SO_NAME = "libcollaborator_uri_permission_checker.z.so";
@@ -44,9 +43,53 @@ const std::string DOCUMENTS_PATH = "/storage/Users/currentUser/Documents";
 const std::string CURRENTUSER = "currentUser";
 const std::string BACKFLASH = "/";
 
+DllWrapper::~DllWrapper()
+{
+    if (handle_ != nullptr) {
+        dlclose(handle_);
+    }
+    func_ = nullptr;
+}
+
+bool DllWrapper::InitDlSymbol(const char* name, const char* funcName)
+{
+    std::lock_guard<std::mutex> lock(funcLock_);
+    if (func_ != nullptr) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "func is valid.");
+        return true;
+    }
+    if (handle_ == nullptr) {
+        handle_ = dlopen(name, RTLD_NOW);
+        if (handle_ == nullptr) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "dlopen failed %{public}s, %{public}s", name, dlerror());
+            return false;
+        }
+    }
+    func_ = reinterpret_cast<CheckUriFunc>(dlsym(handle_, funcName));
+    if (func_ == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "dlsym failed %{public}s, %{public}s", funcName, dlerror());
+        dlclose(handle_);
+        handle_ = nullptr;
+        return false;
+    }
+    return true;
+}
+
+CheckUriFunc DllWrapper::GetFunc()
+{
+    std::lock_guard<std::mutex> lock(funcLock_);
+    return func_;
+}
+
 static bool CheckPermission(uint32_t tokenCaller, const std::string &permission)
 {
     return PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenCaller, permission);
+}
+
+DllWrapper& FilePermissionManager::GetDllWrapper()
+{
+    static DllWrapper dll;
+    return dll;
 }
 
 bool FilePermissionManager::CheckDocsUriPermission(uint32_t callerTokenId, bool hasFileManagerPerm,
@@ -56,21 +99,16 @@ bool FilePermissionManager::CheckDocsUriPermission(uint32_t callerTokenId, bool 
         return hasSandboxManagerPerm;
     }
 
-    void* handle = dlopen(URI_CHECK_SO_NAME, RTLD_NOW);
-    if (handle != nullptr) {
-        CheckUriFunc checkUriFunc = reinterpret_cast<CheckUriFunc>(dlsym(handle, URI_CHECK_FUNC_NAME));
-        if (checkUriFunc != nullptr) {
-            int32_t ret = checkUriFunc(path, callerTokenId);
-            if (ret == PERMISSION_GRANTED) {
-                dlclose(handle);
-                return true;
-            }
-            if (ret == PERMISSION_DENIED) {
-                dlclose(handle);
-                return false;
-            }
+    auto& dll = GetDllWrapper();
+    CheckUriFunc func = dll.GetFunc();
+    if (func != nullptr) {
+        int32_t ret = func(path, callerTokenId);
+        if (ret == PERMISSION_GRANTED) {
+            return true;
         }
-        dlclose(handle);
+        if (ret == PERMISSION_DENIED) {
+            return false;
+        }
     }
 
     if (path.find(STORAGE_URI) == 0 && path.find(APPDATA_URI) != 0) {
@@ -131,6 +169,8 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
     std::vector<PolicyInfo> persistPolicys;
     bool hasFileManagerPerm = CheckPermission(callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
     bool hasSandboxManagerPerm = CheckPermission(callerTokenId, PermissionConstants::PERMISSION_SANDBOX_ACCESS_MANAGER);
+    auto& dll = GetDllWrapper();
+    (void)dll.InitDlSymbol(URI_CHECK_SO_NAME, URI_CHECK_FUNC_NAME);
     for (size_t i = 0; i < uriVec.size(); i++) {
         PolicyInfo policyInfo = GetPathPolicyInfoFromUri(uriVec[i], flag);
         pathPolicies.emplace_back(policyInfo);
