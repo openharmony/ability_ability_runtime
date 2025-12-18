@@ -61,7 +61,7 @@ void AbilityRecordTest::SetUp(void)
     abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     abilityResult_ = std::make_shared<AbilityResult>(-1, -1, want);
     abilityRequest_ = std::make_shared<AbilityRequest>();
-    abilityRecord_->Init();
+    abilityRecord_->Init(AbilityRequest());
 }
 
 void AbilityRecordTest::TearDown(void)
@@ -819,24 +819,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddSystemAbilityCallerRecord_002, Test
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(requestCode, saCaller);
     abilityRecord->callerList_.push_back(caller);
     abilityRecord->AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ConnectAbility
- * SubFunction: ConnectAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ConnectAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_ConnectAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->lifecycleDeal_ = nullptr;
-    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    bool isConnected = true;
-    abilityRecord->ConnectAbility();
-    EXPECT_NE(abilityRecord_, nullptr);
 }
 
 /*

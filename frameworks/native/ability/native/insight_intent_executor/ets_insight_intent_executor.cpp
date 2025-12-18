@@ -18,6 +18,7 @@
 #include "ability_transaction_callback_info.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_constant.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_execute_result.h"
 #include "ets_runtime.h"
 #include "ani_common_util.h"
@@ -118,6 +119,7 @@ bool EtsInsightIntentExecutor::Init(const InsightIntentExecutorInfo &insightInte
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
+    context->SetExecuteMode(insightIntentInfo.executeParam->executeMode_);
 
     return true;
 }
@@ -276,6 +278,17 @@ bool EtsInsightIntentExecutor::HandleResultReturnedFromEtsFunc(ani_env *env, ani
     }
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp =
         std::make_shared<AppExecFwk::InsightIntentExecuteResult>(resultInner);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
+        STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
+    }
+    if (context->GetDelayReturnMode() == InsightIntentReturnMode::FUNCTION) {
+        TAG_LOGD(AAFwkTag::INTENT, "GetDelayReturnMode FUNCTION");
+        resultCpp->isNeedDelayResult = true;
+    } else {
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(context->GetIntentId());
+    }
     if (isAsync) {
         TAG_LOGI(AAFwkTag::INTENT, "Is promise");
         auto *callback = callback_.release();

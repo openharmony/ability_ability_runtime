@@ -51,8 +51,8 @@ bool UnWrapBoolFromJS(napi_env env, napi_value param, bool defaultValue = false)
 bool UnwrapBoolFromJS2(napi_env env, napi_value param, bool &value);
 
 napi_value WrapDoubleToJS(napi_env env, double value);
-double UnWrapDoubleFromJS(napi_env env, napi_value param, double defaultValue = 0.0);
-bool UnWrapDoubleFromJS2(napi_env env, napi_value param, double &value);
+double UnwrapDoubleFromJS(napi_env env, napi_value param, double defaultValue = 0.0);
+bool UnwrapDoubleFromJS2(napi_env env, napi_value param, double &value);
 
 napi_value WrapStringToJS(napi_env env, const std::string &value);
 std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string &defaultValue = "");
@@ -103,6 +103,19 @@ napi_value GetPropertyValueByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, napi_valuetype expectType);
 
 bool SetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, napi_value value);
+
+/**
+ * @brief Get the JSValue of the specified name from the JS object and create a native reference.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the property.
+ * @param expectType Indicates expected JS data type.
+ *
+ * @return Return the property reference of the specified property name in jsObject on success, other return nullptr.
+ */
+std::shared_ptr<NativeReference> CreateNativeRef(
+    napi_env env, napi_value jsObject, const char *propertyName, napi_valuetype type);
 
 /**
  * @brief Get the native number(int32) from the JSObject of the given property name.

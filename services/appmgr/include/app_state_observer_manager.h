@@ -94,6 +94,7 @@ public:
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
     void OnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
+    void OnProcessTypeChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     void HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -146,6 +147,7 @@ private:
         const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
+    void HandleOnProcessTypeChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;

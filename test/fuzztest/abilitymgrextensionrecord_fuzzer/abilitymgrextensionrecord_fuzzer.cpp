@@ -54,7 +54,7 @@ sptr<Token> GetFuzzAbilityToken()
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<AbilityRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
@@ -63,7 +63,7 @@ sptr<Token> GetFuzzAbilityToken()
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord;
     AbilityRuntime::ExtensionRecord infos(abilityRecord);
     infos.GetCallToken();
     infos.GetRootCallerToken();

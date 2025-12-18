@@ -260,6 +260,33 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
 }
 
 /**
+ * @tc.name: AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300
+ * @tc.desc: Test GetSpecifiedProcessFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    const BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.isStageBasedModel = true;
+    hapModuleInfo.process = TEST_PROCESS_NAME;
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->SetEmptyKeepAliveAppState(true);
+
+    appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
+        "", bundleInfo, hapModuleInfo, nullptr, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
+    EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), "");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0300 end");
+}
+
+/**
  * @tc.name: AppMgrServiceInnerSecondTest_ForceKillApplicationInner_0100
  * @tc.desc: Test GetSpecifiedProcessFlag
  * @tc.type: FUNC
@@ -572,7 +599,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemory
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0100 start");
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    auto ret = appMgrServiceInner->NotifyMemoryLevel(4); // 4 means invalid level
+    auto ret = appMgrServiceInner->NotifyMemoryLevel(-1); // -1 means invalid level
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0200 end");
 }
@@ -584,7 +611,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemory
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0300, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0300 start");
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     auto ret = appMgrServiceInner->NotifyMemoryLevel(0);
@@ -594,6 +621,46 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemory
     ret = appMgrServiceInner->NotifyMemoryLevel(2);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0300 end");
+}
+
+/**
+ * @tc.name: AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0400
+ * @tc.desc: Test NotifyMemoryLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0400 start");
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto ret = appMgrServiceInner->NotifyMemoryLevel(3);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = appMgrServiceInner->NotifyMemoryLevel(4);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = appMgrServiceInner->NotifyMemoryLevel(5);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = appMgrServiceInner->NotifyMemoryLevel(6);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0400 end");
+}
+
+/**
+ * @tc.name: AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0500
+ * @tc.desc: Test NotifyMemoryLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0500 start");
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto ret = appMgrServiceInner->NotifyMemoryLevel(7); // 7 means invalid level
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->NotifyMemoryLevel(3);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0500 end");
 }
 
 /**
@@ -2546,23 +2613,23 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAlive
     ASSERT_NE(appRecord, nullptr);
 
     // case 1, bundleName is empty.
-    appMgrServiceInner->SetKeepAliveAppService("", true, 0);
+    appMgrServiceInner->SetKeepAliveAppService("", true, -1);
     EXPECT_FALSE(appRecord->isKeepAliveAppService_);
 
     // case 2, appRunningManager_ is nullptr.
     std::shared_ptr<AppRunningManager> appRunningManagerBack = appMgrServiceInner->appRunningManager_;
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, -1);
     EXPECT_FALSE(appRecord->isKeepAliveAppService_);
     appMgrServiceInner->appRunningManager_ = appRunningManagerBack;
 
     // case 3, not foundation call.
-    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, -1);
     EXPECT_FALSE(appRecord->isKeepAliveAppService_);
 
     // case 4, caller bundleName and appRecord bundleName are not equal.
     IPCSkeleton::SetCallingUid(FOUNDATION_UID);
-    appMgrServiceInner->SetKeepAliveAppService("InvalidBundleName", true, 0);
+    appMgrServiceInner->SetKeepAliveAppService("InvalidBundleName", true, -1);
     EXPECT_FALSE(appRecord->isKeepAliveAppService_);
 
     // case 5, set success.
@@ -2587,8 +2654,8 @@ HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_001, TestSize.Level1
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::string bundleName = "test.bundle.name";
     int32_t uid = UID_ONE;
-    std::shared_ptr<AAFwk::Want> want = nullptr;
-    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    int32_t appIndex = 0;
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, appIndex);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_001 end");
 }
@@ -2604,11 +2671,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_002, TestSize.Level1
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::string bundleName = "test.bundle.name";
     int32_t uid = UID_ONE;
-    std::shared_ptr<AAFwk::Want> want = nullptr;
     appMgrServiceInner->InsertUninstallOrUpgradeUidSet(UID_ONE);
     bool flag = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
     EXPECT_EQ(flag, true);
-    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    int32_t appIndex = 0;
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, appIndex);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_002 end");
 }

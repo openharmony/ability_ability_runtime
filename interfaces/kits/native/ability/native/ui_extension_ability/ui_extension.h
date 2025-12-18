@@ -89,6 +89,9 @@ public:
 
     void RegisterAbilityConfigUpdateCallback();
 
+    void RegisterUiExtensionDelayResultCallback(uint64_t intentId, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        bool isDecorator = false);
+
 protected:
     virtual void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     virtual void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -100,6 +103,7 @@ protected:
     std::mutex uiWindowMutex_;
     std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
     std::set<uint64_t> foregroundWindows_;
+    uint64_t intentId_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -286,6 +286,7 @@ private:
     int32_t CancelApplicationAutoStartupInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryAllAutoStartupApplicationsInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAutoStartupStatusForSelfInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ManualStartAutoStartupAppsInner(MessageParcel &data, MessageParcel &reply);
 
     int PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply);
@@ -355,6 +356,10 @@ private:
     int32_t SetOnNewWantSkipScenariosInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyStartupExceptionBySCBInner(MessageParcel &data, MessageParcel &reply);
     int32_t PreloadApplicationInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnPreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ClearAllPreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterPreloadUIExtensionHostClientInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnRegisterPreloadUIExtensionHostClientInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
@@ -399,6 +404,8 @@ private:
     int OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerTwentyFirst(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int OnRemoteRequestInnerTwentySecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

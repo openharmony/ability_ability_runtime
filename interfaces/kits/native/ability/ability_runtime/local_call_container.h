@@ -43,10 +43,8 @@ public:
 
     void DumpCalls(std::vector<std::string> &info);
 
-    void SetCallLocalRecord(
-        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
-    void SetMultipleCallLocalRecord(
-        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
+    void SetCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord);
+    void SetMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord);
 
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
 
@@ -66,6 +64,7 @@ private:
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> callProxyRecords_;
     // used to store multi instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
+    std::mutex connectionsMutex_;
     std::set<sptr<CallerConnection>> connections_;
     std::mutex mutex_;
     std::mutex multipleMutex_;

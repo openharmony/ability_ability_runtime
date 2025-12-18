@@ -423,7 +423,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_003, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -494,7 +494,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_005, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
 
@@ -530,7 +530,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_006, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::BACKGROUND;
     record->isAbilityForegrounding_ = false;
@@ -568,7 +568,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_007, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = false;
@@ -606,7 +606,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_008, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -645,7 +645,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_009, TestSiz
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -795,7 +795,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_005,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
 
@@ -834,7 +834,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_006,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::BACKGROUND;
     record->isAbilityForegrounding_ = false;
@@ -876,7 +876,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_007,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = false;
@@ -922,7 +922,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_008,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -968,7 +968,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_009,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -1015,7 +1015,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_010,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -1061,7 +1061,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_011,
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     record->currentState_ = AbilityState::FOREGROUND;
     record->isAbilityForegrounding_ = true;
@@ -2712,7 +2712,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, DoAbilityForeground_005, TestSize.
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> record = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto record = std::make_shared<UIAbilityRecord>(want, abilityInfo, applicationInfo, -1);
     EXPECT_NE(record, nullptr);
     MyStatus::GetInstance().ualmGetAbilityRecordByToken_ = record;
     MyStatus::GetInstance().smhGetUIAbilityManagerByUserId_ = true;
@@ -2818,7 +2818,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_001, TestS
     EXPECT_NE(abilityMs, nullptr);
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_001 end");
 }
@@ -2837,7 +2838,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_002, TestS
     auto flag = static_cast<GetInsightIntentFlag>(AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT |
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_002 end");
 }
@@ -2856,7 +2858,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_003, TestS
     auto flag = static_cast<GetInsightIntentFlag>(AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT |
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_003 end");
 }
@@ -2874,7 +2877,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetAllInsightIntentInfo_004, TestS
     EXPECT_NE(abilityMs, nullptr);
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO;
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetAllInsightIntentInfo(flag, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetAllInsightIntentInfo_004 end");
 }
@@ -2893,7 +2897,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName end");
 }
@@ -2913,7 +2918,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_002 end");
 }
@@ -2933,7 +2939,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
                 AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_003 end");
 }
@@ -2952,7 +2959,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByBundleName_0
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO;
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
-    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByBundleName_004 end");
 }
@@ -2973,7 +2981,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_001 end");
 }
@@ -2995,7 +3004,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_002 end");
 }
@@ -3017,7 +3027,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_003 end");
 }
@@ -3038,7 +3049,8 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     std::string moduleName = "entry";
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
-    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    int32_t userId = 1;
+    auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info, userId);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_004 end");
 }
@@ -3168,6 +3180,40 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_002, TestSiz
     MyStatus::GetInstance().ipcGetCallingUid_ = PENG_LAI_UID;
     auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: ManualStartAutoStartupApps_001
+ * Function: ManualStartAutoStartupApps
+ * SubFunction: NA
+ * FunctionPoints: CHECK_PERMISSION_FAILED
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, ManualStartAutoStartupApps_001, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_001 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().permPermission_ = 0;
+    int32_t userId = -1;
+    auto result = abilityManagerService->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_001 end");
+}
+
+/*
+ * Feature: ManualStartAutoStartupApps_002
+ * Function: ManualStartAutoStartupApps
+ * SubFunction: NA
+ * FunctionPoints: ERR_OK
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, ManualStartAutoStartupApps_002, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_002 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().permPermission_ = 1;
+    int32_t userId = -1;
+    auto result = abilityManagerService->ManualStartAutoStartupApps(userId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_002 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

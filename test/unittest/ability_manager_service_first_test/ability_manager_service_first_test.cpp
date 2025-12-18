@@ -24,8 +24,8 @@
 #include "ability_connection.h"
 #include "ability_scheduler.h"
 #include "ability_start_setting.h"
-#include "recovery_param.h"
 #include "app_utils.h"
+#include "recovery_param.h"
 #undef private
 #undef protected
 #include "ability_manager_errors.h"
@@ -34,14 +34,15 @@
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_execute_param.h"
 #include "mock_ability_connect_callback.h"
-#include "mock_ability_token.h"
 #include "mock_ability_controller.h"
-#include "mock_app_debug_listener_stub.h"
-#include "session/host/include/session.h"
 #include "mock_ability_manager_collaborator.h"
+#include "mock_ability_token.h"
+#include "mock_app_debug_listener_stub.h"
 #include "mock_prepare_terminate_callback.h"
 #include "mock_sa_call.h"
 #include "scene_board_judgement.h"
+#include "session/host/include/session.h"
+#include "start_ability_utils.h"
 #include "string_wrapper.h"
 #include "utils/window_options_utils.h"
 
@@ -176,7 +177,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
@@ -710,7 +711,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_002, TestSize.Leve
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     auto token = abilityRecord->token_;
     const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
     abilityMs->OnAbilityRequestDone(token, 0);
@@ -1233,7 +1234,8 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_001, TestS
     ElementName element("", "com.test.demo", "MainAbility", "");
     want.SetElement(element);
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, false);
+    StartAbilityWrapParam param = { want };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     abilityMs_->OnStop();
@@ -1261,7 +1263,13 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_002, TestS
     const int32_t userId = -1;
     const int requestCode = 0;
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
     EXPECT_EQ(RESOLVE_ABILITY_ERR, result);
@@ -1289,7 +1297,13 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_003, TestS
     const int32_t userId = -1;
     const int requestCode = 0;
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
     EXPECT_EQ(RESOLVE_ABILITY_ERR, result);
@@ -1317,7 +1331,13 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_004, TestS
     const int32_t userId = -1;
     const int requestCode = 0;
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
     EXPECT_EQ(RESOLVE_ABILITY_ERR, result);
@@ -1347,7 +1367,13 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_005, TestS
     const int32_t userId = -1;
     const int requestCode = 0;
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
     EXPECT_EQ(RESOLVE_ABILITY_ERR, result);
@@ -1378,7 +1404,13 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_006, TestS
     const int32_t userId = -1;
     const int requestCode = 0;
     MyFlag::flag_ = 1;
-    auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs_->StartAbilityInner(param);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
     EXPECT_EQ(ERR_OK, result);
@@ -2110,6 +2142,29 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
 }
 
 /**
+ * @tc.name: AbilityManagerServiceFirstTest_CheckStaticCfgPermission_0002
+ * @tc.desc: Test the state of CheckStaticCfgPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
+    AppExecFwk::AbilityRequest abilityRequest;
+    bool isStartAsCaller = false;
+    uint32_t callerTokenId = 0;
+    bool isData = false;
+    bool isSaCall = false;
+    bool isImplicit = false;
+    abilityRequest.abilityInfo.permissions.push_back("test.permission");
+
+    abilityRequest.specifiedFullTokenId = 1000001;
+    MyFlag::flag_ = 1;
+    int ret = abilityMs->CheckStaticCfgPermission(
+        abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
+    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
+}
+
+/**
  * @tc.name: AbilityManagerServiceFirstTest_CheckPermissionForUIService_0001
  * @tc.desc: Test the state of CheckPermissionForUIService
  * @tc.type: FUNC
@@ -2508,7 +2563,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_002, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);
@@ -2530,7 +2585,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_003, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = nullptr;
     EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);
@@ -2552,7 +2607,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_004, TestSiz
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
+    abilityRecord->Init(AbilityRequest());
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest, false), ERR_OK);

@@ -50,7 +50,8 @@ struct ForegroundAppConnectionInfo {
 class ForegroundAppConnectionManager : public std::enable_shared_from_this<ForegroundAppConnectionManager> {
     DECLARE_DELAYED_SINGLETON(ForegroundAppConnectionManager)
 public:
-
+    static bool IsForegroundAppConnection(
+        const AppExecFwk::AbilityInfo &targetAbilityInfo, std::shared_ptr<AbilityRecord> callerAbilityRecord);
     int32_t RegisterObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer);
     int32_t UnregisterObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer);
     void OnConnected(AbilityRuntime::ForegroundAppConnectionData &data);

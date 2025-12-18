@@ -72,6 +72,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     MessageOption option;
 
     std::shared_ptr<MissionListenerStub> missionlistenerstub = std::make_shared<MissionListenerStubFuzzTest>();
+    if (missionlistenerstub == nullptr) {
+        return false;
+    }
 
     missionlistenerstub->OnRemoteRequest(code, parcel, reply, option);
 

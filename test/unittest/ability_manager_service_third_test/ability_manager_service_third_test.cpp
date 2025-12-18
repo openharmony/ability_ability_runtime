@@ -74,6 +74,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
+    std::shared_ptr<BaseExtensionRecord> MockExtensionRecordBase(AbilityType abilityType);
     sptr<Token> MockToken(AbilityType);
     void SetUp();
     void TearDown();
@@ -127,6 +128,15 @@ std::shared_ptr<AbilityRecord> AbilityManagerServiceThirdTest::MockAbilityRecord
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = abilityType;
     return AbilityRecord::CreateAbilityRecord(abilityRequest);
+}
+
+std::shared_ptr<BaseExtensionRecord> AbilityManagerServiceThirdTest::MockExtensionRecordBase(AbilityType abilityType)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = abilityType;
+    return BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
 }
 
 sptr<Token> AbilityManagerServiceThirdTest::MockToken(AbilityType abilityType)
@@ -584,7 +594,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, DisconnectBeforeCleanupByUserId_001, Te
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs_->subManagersHelper_->InitConnectManager(100, false);
 
-    auto abilityRecord = MockAbilityRecord(AbilityType::SERVICE);
+    auto abilityRecord = MockExtensionRecordBase(AbilityType::SERVICE);
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
     std::shared_ptr<ConnectionRecord> connection1 =
@@ -1096,9 +1106,10 @@ HWTEST_F(AbilityManagerServiceThirdTest, UnloadUIExtensionAbility_001, TestSize.
     AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
     abilityRequest.want.SetElement(providerElement);
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto result = abilityMs->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
+    int32_t hostPid = 0;
+    auto result = abilityMs->UnloadUIExtensionAbility(abilityRecord, hostPid);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "finish.");
 }
@@ -1134,7 +1145,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreloadUIExtensionAbilityInner_001, Tes
     AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
     providerWant.SetElement(providerElement);
     std::string hostBundleName = "com.ohos.uiextensionuser";
-    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, DEFAULT_INVAL_VALUE);
+    int32_t preloadId = DEFAULT_INVAL_VALUE;
+    auto result = abilityMs->PreloadUIExtensionAbilityInner(providerWant, hostBundleName, preloadId);
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "finish.");
 }
@@ -1255,7 +1267,13 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_001, TestSize
     sptr<IRemoteObject> callerToken;
     int32_t userId = 0;
     int32_t requestCode = 0;
-    auto result = abilityMs->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
@@ -1272,7 +1290,13 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_002, TestSize
     sptr<IRemoteObject> callerToken;
     int32_t userId = 0;
     int32_t requestCode = 0;
-    auto result = abilityMs->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+    StartAbilityWrapParam param = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+    };
+    auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_INVALID_CONTINUATION_FLAG);
 }
 
@@ -1620,8 +1644,16 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWrap_001, TestSize.Level1)
     uint32_t specifyToken = 0;
     bool isForegroundToRestartApp = true;
     bool isImplicit = true;
-    StartAbilityWrapParam startAbilityWrapParam = { want, callerToken, requestCode, false, userId, isStartAsCaller,
-        specifyToken, isForegroundToRestartApp, isImplicit };
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+        .isStartAsCaller = isStartAsCaller,
+        .specifyTokenId = specifyToken,
+        .isForegroundToRestartApp = isForegroundToRestartApp,
+        .isImplicit = isImplicit,
+    };
     auto result = abilityMs->StartAbilityWrap(startAbilityWrapParam);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
@@ -2420,8 +2452,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_001, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_FAIL);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 end");
 }
@@ -2442,8 +2480,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_002, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_FAIL);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 end");
 }
@@ -2464,8 +2508,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_003, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_NOT_TOP_ABILITY);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 end");
 }
@@ -2486,8 +2536,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_004, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_ERR_OK);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 end");
 }
@@ -3017,6 +3073,235 @@ HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_004, TestSize.
 
     EXPECT_EQ(abilityMs_->RestartSelfAtomicService(callerRecord->GetToken()), NOT_TOP_ABILITY);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_004 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_001
+ * @tc.desc: Test ClearPreloadedUIExtensionAbility with non-system app caller
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t extensionAbilityId = 100;
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_001 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_002
+ * @tc.desc: Test ClearPreloadedUIExtensionAbility without permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t extensionAbilityId = 100;
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_002 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_003
+ * @tc.desc: Test ClearPreloadedUIExtensionAbility with null connectManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t extensionAbilityId = 100;
+    int32_t userId = -1;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_003 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbility_004
+ * @tc.desc: Test ClearPreloadedUIExtensionAbility with UnPreloadUIExtensionAbilityLocked failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbility_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t extensionAbilityId = 999;
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbility_004 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_001
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities with non-system app caller
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbilities(userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_001 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_002
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities without permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbilities(userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_002 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_003
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities with null connectManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    int32_t userId = -1;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbilities(userId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_003 end");
+}
+
+/**
+ * @tc.name: ClearPreloadedUIExtensionAbilities_004
+ * @tc.desc: Test ClearPreloadedUIExtensionAbilities with ClearAllPreloadUIExtensionAbilityLocked failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ClearPreloadedUIExtensionAbilities_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    int32_t userId = 0;
+    auto result = abilityMs_->ClearPreloadedUIExtensionAbilities(userId);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearPreloadedUIExtensionAbilities_004 end");
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_001
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient with non-system app caller
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    auto result = abilityMs_->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_002
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient without permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RegisterPreloadUIExtensionHostClient_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    auto result = abilityMs_->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClient_003
+ * @tc.desc: Test RegisterPreloadUIExtensionHostClient with null callerToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RegisterPreloadUIExtensionHostClient_003, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto result = abilityMs_->RegisterPreloadUIExtensionHostClient(callerToken);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_001
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient with non-system app caller
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    int32_t callerPid = 1234;
+    auto result = abilityMs_->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_002
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient without permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    int32_t callerPid = 1234;
+    auto result = abilityMs_->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClient_005
+ * @tc.desc: Test UnRegisterPreloadUIExtensionHostClient with invalid callerPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_005, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    int32_t callerPid = -1;
+    auto result = abilityMs_->UnRegisterPreloadUIExtensionHostClient(callerPid);
+    EXPECT_NE(result, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

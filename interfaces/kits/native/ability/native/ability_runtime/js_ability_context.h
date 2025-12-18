@@ -84,7 +84,7 @@ public:
     static napi_value RestartAppWithWindow(napi_env env, napi_callback_info info);
     static napi_value SetMissionWindowIcon(napi_env env, napi_callback_info info);
 
-    static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
+    static void ConfigurationUpdated(napi_env env, napi_value object,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<AbilityContext> GetAbilityContext()
@@ -179,16 +179,20 @@ private:
     void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback, napi_value* result,
         bool isAbilityResult = false, bool isOpenLink = false);
     void UnwrapCompletionHandlerInStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &options);
+    OnRequestResult UnwrapCompletionHandlerOnRequestResult(napi_env env, const char *funcName,
+        std::shared_ptr<NativeReference> ref);
     bool CheckStartAbilityByCallParams(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         int32_t &userId, napi_value &lastParam);
     napi_value SyncSetMissionContinueState(napi_env env, NapiCallbackInfo& info, const AAFwk::ContinueState& state);
     static int32_t GenerateRequestCode();
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
-    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
-    void AddCompletionHandlerForOpenLink(AAFwk::Want& want, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
+    void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
+    OnRequestResult &onRequestFail);
+    std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> CreateAtomicServiceCallBack(napi_env env,
+        const std::shared_ptr<NativeReference> &atomicServiceRef,
+        const std::shared_ptr<NativeReference> &onRequestSuccRef,
+        const std::shared_ptr<NativeReference> &onRequestFailRef);
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
 

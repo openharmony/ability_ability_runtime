@@ -262,7 +262,7 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
     return ERR_OK;
 }
 
-int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
+int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall)
 {
     return ERR_OK;
 }
@@ -466,10 +466,6 @@ int32_t AppRunningManager::CheckIsKiaProcess(pid_t pid, bool &isKia)
 bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     return true;
-}
-
-void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

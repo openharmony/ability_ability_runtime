@@ -402,8 +402,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
-        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID):
-            return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
             return HandleUpdateProcessMemoryState(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
@@ -2053,14 +2051,6 @@ int32_t AppMgrStub::HandleKillProcessByPidForExit(MessageParcel &data, MessagePa
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, MessageParcel &reply)
-{
-    auto specifiedId = data.ReadInt32();
-    auto instanceKey = data.ReadString();
-    UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
     return NO_ERROR;
 }
 

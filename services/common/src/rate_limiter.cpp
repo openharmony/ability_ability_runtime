@@ -22,7 +22,7 @@ namespace AAFwk {
 namespace {
 constexpr int64_t CLEAN_INTERVAL_MS = 60000; // 60s
 constexpr int64_t EXTENSION_LIMIT_INTERVAL_MS = 1000; // 1s
-constexpr int32_t EXTENSION_MAX_LIMIT = 20;
+const std::vector<int32_t> EXTENSION_TIERS = { 50, 100, 200 };
 constexpr int64_t REPORT_LIMIT_INTERVAL_MS = 5000; // 5s
 constexpr int32_t REPORT_MAX_LIMIT = 1;
 }
@@ -33,16 +33,70 @@ RateLimiter &RateLimiter::GetInstance()
     return instance;
 }
 
-bool RateLimiter::CheckExtensionLimit(int32_t uid)
+RateLimiter::LimitResult RateLimiter::CheckExtensionLimit(int32_t uid)
 {
     CleanCallMap();
-    return CheckSingleLimit(uid, extensionCallMap_, extensionCallMapLock_, EXTENSION_LIMIT_INTERVAL_MS,
-        EXTENSION_MAX_LIMIT);
+    int64_t currentTimeMillis = CurrentTimeMillis();
+    int64_t timeBefore = currentTimeMillis - EXTENSION_LIMIT_INTERVAL_MS;
+    std::lock_guard<std::mutex> guard(extensionCallMapLock_);
+    auto& timestamps = extensionCallMap_[uid];
+    auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
+    timestamps.erase(timestamps.begin(), it);
+    timestamps.emplace_back(currentTimeMillis);
+    int currentCount = timestamps.size();
+    LimitResult result{false, 0};
+    for (auto tierIt = EXTENSION_TIERS.rbegin(); tierIt != EXTENSION_TIERS.rend(); ++tierIt) {
+        int32_t limit = *tierIt;
+        if (currentCount >= limit) {
+            result = {true, limit};
+            break;
+        }
+    }
+    return result;
 }
 
-bool RateLimiter::CheckReportLimit(int32_t uid)
+bool RateLimiter::CheckReportLimit(int32_t uid, int32_t triggeredTier)
 {
-    return CheckSingleLimit(uid, reportCallMap_, reportCallMapLock_, REPORT_LIMIT_INTERVAL_MS, REPORT_MAX_LIMIT);
+    std::lock_guard<std::mutex> guard(tierReportCallMapLock_);
+    auto& userTierReports = tierReportCallMap_[uid];
+    auto& timestamps = userTierReports[triggeredTier];
+    int64_t currentTimeMillis = CurrentTimeMillis();
+    int64_t timeBefore = currentTimeMillis - REPORT_LIMIT_INTERVAL_MS;
+    auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
+    timestamps.erase(timestamps.begin(), it);
+    if (timestamps.size() >= static_cast<size_t>(REPORT_MAX_LIMIT)) {
+        return true;
+    }
+    timestamps.emplace_back(currentTimeMillis);
+    return false;
+}
+
+void RateLimiter::CleanNestedCallMap(
+    std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<int64_t>>>& nestedMap,
+    std::mutex& mapLock, int64_t limitInterval)
+{
+    int64_t timeBefore = CurrentTimeMillis() - limitInterval;
+    std::lock_guard<std::mutex> guard(mapLock);
+    auto userIt = nestedMap.begin();
+    while (userIt != nestedMap.end()) {
+        auto& innerMap = userIt->second;
+        auto innerIt = innerMap.begin();
+        while (innerIt != innerMap.end()) {
+            auto& timestamps = innerIt->second;
+            auto tsIt = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
+            timestamps.erase(timestamps.begin(), tsIt);
+            if (timestamps.empty()) {
+                innerIt = innerMap.erase(innerIt);
+            } else {
+                ++innerIt;
+            }
+        }
+        if (innerMap.empty()) {
+            userIt = nestedMap.erase(userIt);
+        } else {
+            ++userIt;
+        }
+    }
 }
 
 bool RateLimiter::CheckSingleLimit(int32_t uid, std::unordered_map<int32_t, std::vector<int64_t>> &callMap,
@@ -74,12 +128,13 @@ void RateLimiter::CleanCallMap()
         }
         lastCleanTimeMillis_ = currentTimeMillis;
     }
+    
     CleanSingleCallMap(extensionCallMap_, extensionCallMapLock_, EXTENSION_LIMIT_INTERVAL_MS);
-    CleanSingleCallMap(reportCallMap_, reportCallMapLock_, REPORT_LIMIT_INTERVAL_MS);
+    CleanNestedCallMap(tierReportCallMap_, tierReportCallMapLock_, REPORT_LIMIT_INTERVAL_MS);
 }
 
-void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>> &callMap, std::mutex &mapLock,
-    int64_t limitInterval)
+void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int64_t>>& callMap,
+    std::mutex& mapLock, int64_t limitInterval)
 {
     int64_t timeBefore = CurrentTimeMillis() - limitInterval;
     std::lock_guard<std::mutex> guard(mapLock);
@@ -99,7 +154,6 @@ void RateLimiter::CleanSingleCallMap(std::unordered_map<int32_t, std::vector<int
             ++it;
         }
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CleanSingleCallMap end, size:%{public}zu", callMap.size());
 }
 
 int64_t RateLimiter::CurrentTimeMillis()

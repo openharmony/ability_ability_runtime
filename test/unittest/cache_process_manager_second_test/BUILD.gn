@@ -179,8 +179,8 @@ ohos_unittest("cache_process_manager_second_test") {
 
     deps += []
     external_deps += [
-      "i18n:i18n_sa_client",
       "i18n:intl_util",
+      "preferences:native_preferences",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",

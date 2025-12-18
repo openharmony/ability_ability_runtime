@@ -27,6 +27,7 @@
 #include "js_insight_intent_driver_utils.h"
 #include "js_runtime_utils.h"
 #include "napi_common_execute_param.h"
+#include "napi_common_intent_info_filter.h"
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
 
@@ -109,6 +110,11 @@ public:
     static napi_value GetInsightIntentInfoByIntentName(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetInsightIntentInfoByIntentName);
+    }
+
+    static napi_value GetInsightIntentInfoByFilter(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetInsightIntentInfoByFilter);
     }
 
 private:
@@ -297,6 +303,60 @@ private:
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
         return result;
     }
+
+    napi_value OnGetInsightIntentInfoByFilter(napi_env env, NapiCallbackInfo& info)
+    {
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        if (!CheckValidIntentInfoFilter(env, info.argv[INDEX_ZERO])) {
+            TAG_LOGE(AAFwkTag::INTENT, "check filter failed");
+            ThrowInvalidParamError(env, "Param error: filter must be a valid InsightIntentInfoFilter.");
+            return CreateJsUndefined(env);
+        }
+
+        InsightIntentInfoFilter filter;
+        if (!UnwrapIntentInfoFilter(env, info.argv[INDEX_ZERO], filter)) {
+            TAG_LOGE(AAFwkTag::INTENT, "parse filter failed");
+            ThrowInvalidParamError(env, "Param error: filter must be a InsightIntentInfoFilter.");
+            return CreateJsUndefined(env);
+        }
+
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
+        NapiAsyncTask::ExecuteCallback execute = [infos, innerErrorCode, filter]() {
+            if (filter.bundleName_.empty()) {
+                *innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(
+                    filter.intentFlags_, *infos, filter.userId_);
+            } else if (!filter.moduleName_.empty() && !filter.intentName_.empty()) {
+                auto intentInfo = std::make_shared<InsightIntentInfoForQuery>();
+                *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
+                    filter.intentFlags_, filter.bundleName_, filter.moduleName_,
+                    filter.intentName_, *intentInfo, filter.userId_);
+                if (intentInfo != nullptr && (!intentInfo->intentType.empty() || intentInfo->isConfig)) {
+                    infos->push_back(*intentInfo);
+                }
+            } else if (filter.moduleName_.empty() && filter.intentName_.empty()) {
+                *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
+                    filter.intentFlags_, filter.bundleName_, *infos, filter.userId_);
+            }
+        };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (*innerErrorCode == 0) {
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
+                }
+            };
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByFilter",
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
 };
 
 static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, int32_t value)
@@ -358,6 +418,17 @@ static napi_value InitInsightIntentTypeObject(napi_env env)
     return napiObject;
 }
 
+static napi_value InitIntentDevelopTypeObject(napi_env env)
+{
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
+
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "CONFIGURATION", "configuration"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "DECORATOR", "decorator"));
+
+    return napiObject;
+}
+
 napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
@@ -377,14 +448,19 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
         "getInsightIntentInfoByBundleName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByBundleName);
     BindNativeFunction(env, exportObj,
         "getInsightIntentInfoByIntentName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByIntentName);
+    BindNativeFunction(env, exportObj,
+        "getInsightIntentInfoByFilter", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByFilter);
     napi_value getInsightIntentFlag = InitGetInsightIntentFlagObject(env);
     NAPI_ASSERT(env, getInsightIntentFlag != nullptr, "failed to create getInsightIntent flag object");
     napi_value insightIntentType = InitInsightIntentTypeObject(env);
     NAPI_ASSERT(env, insightIntentType != nullptr, "failed to create insightIntent type object");
+    napi_value intentDevelopType = InitIntentDevelopTypeObject(env);
+    NAPI_ASSERT(env, intentDevelopType != nullptr, "failed to create develop type object");
 
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("GetInsightIntentFlag", getInsightIntentFlag),
         DECLARE_NAPI_PROPERTY("InsightIntentType", insightIntentType),
+        DECLARE_NAPI_PROPERTY("DevelopType", intentDevelopType),
     };
     napi_status status = napi_define_properties(env, exportObj, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     NAPI_ASSERT(env, status == napi_ok, "failed to define properties for exportObj");

@@ -33,6 +33,18 @@ public:
     ETSStartupManager(ETSStartupManager&&) = delete;
     ETSStartupManager &operator=(const ETSStartupManager&) = delete;
     ETSStartupManager &operator=(ETSStartupManager&&) = delete;
+
+    /**
+     * Native method to create a startup task manager
+     *
+     * @param env The ANI environment
+     * @param startupTasks Array of startup tasks to run
+     * @param isDefaultContext IsDefaultContext for ability stage context
+     * @param startupConfig Configuration for startup tasks
+     * @param abilityStageContext The ability stage context
+     */
+    static int32_t NativeCreateStartupTaskManager(ani_env *env, ani_object startupTasks,
+        ani_boolean isDefaultContext, ani_object startupConfig, ani_object abilityStageContext);
     
     /**
      * Native method to run startup tasks asynchronously
@@ -44,8 +56,7 @@ public:
      * @param startupConfig Configuration for startup tasks
      * @param abilityStageContext The ability stage context
      */
-    static void NativeRun(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
-        ani_object callback, ani_object startupConfig, ani_object abilityStageContext);
+    static void NativeRun(ani_env *env, ani_int startupTaskManagerId, ani_object callback);
 
     /**
      * Native method to get the result of a specific startup task
@@ -82,7 +93,7 @@ public:
 
 private:
     /**
-     * Run startup tasks with the given configuration
+     * Get startup task manager with the given configuration
      *
      * @param env The ANI environment
      * @param startupTasks Array of startup tasks
@@ -92,7 +103,7 @@ private:
      * @param startupTaskManager Output parameter for the created startup task manager
      * @return Error code indicating success or failure
      */
-    static int32_t RunStartupTask(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
+    static int32_t GetStartupTaskManager(ani_env *env, ani_object startupTasks, ani_boolean isDefaultContext,
         ani_object startupConfig, ani_object abilityStageContext,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 

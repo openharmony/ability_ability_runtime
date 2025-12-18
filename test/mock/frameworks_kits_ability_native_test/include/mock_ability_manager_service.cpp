@@ -33,7 +33,8 @@ MockAbilityManagerService::MockAbilityManagerService() : abilityScheduler_(nullp
 MockAbilityManagerService::~MockAbilityManagerService()
 {}
 
-int MockAbilityManagerService::StartAbility(const Want& want, int32_t userId, int requestCode)
+int MockAbilityManagerService::StartAbility(
+    const Want& want, int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
     AbilityLifeCycleState state = AbilityLifeCycleState::ABILITY_STATE_INITIAL;
     RequestCode request = static_cast<RequestCode>(requestCode);
@@ -150,7 +151,8 @@ int MockAbilityManagerService::StopServiceAbility(const Want& want, int32_t user
     return ERR_OK;
 }
 
-int MockAbilityManagerService::KillProcess(const std::string& bundleName, bool clearPageStack, int32_t appIndex)
+int MockAbilityManagerService::KillProcess(const std::string& bundleName, bool clearPageStack, int32_t appIndex,
+    const std::string& reason)
 {
     return 0;
 }

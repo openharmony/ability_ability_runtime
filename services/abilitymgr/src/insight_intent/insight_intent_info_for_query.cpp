@@ -39,6 +39,10 @@ const std::map<std::string, AppExecFwk::ExecuteMode> STRING_EXECUTE_MODE_MAP = {
     {"UI_EXTENSION_ABILITY", AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY},
     {"SERVICE_EXTENSION_ABILITY", AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY}
 };
+const std::map<std::string, AppExecFwk::ExecuteMode> executeModeMap = {
+    {"foreground", AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND},
+    {"background", AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND}
+};
 }
 
 void from_json(const nlohmann::json &jsonObject, LinkInfoForQuery &linkInfo)
@@ -223,10 +227,178 @@ void to_json(nlohmann::json& jsonObject, const EntityInfoForQuery &info)
     };
 }
 
+void from_json(const nlohmann::json &jsonObject, UIAbilityIntentInfoForQuery &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+
+    if (jsonObject.find(INSIGHT_INTENT_EXECUTE_MODE) != jsonObjectEnd) {
+        const auto &modeArray = jsonObject[INSIGHT_INTENT_EXECUTE_MODE];
+        for (const auto &modeStr : modeArray) {
+            if (!modeStr.is_string()) {
+                TAG_LOGE(AAFwkTag::INTENT, "modestr not string");
+                continue;
+            }
+            std::string modeStrValue = modeStr.get<std::string>();
+            auto it = executeModeMap.find(modeStrValue);
+            if (it != executeModeMap.end()) {
+                info.supportExecuteMode.push_back(it->second);
+            } else {
+                TAG_LOGW(AAFwkTag::INTENT, "Unknown ExecuteMode: %{public}s", modeStr.dump().c_str());
+            }
+        }
+    }
+}
+
+void from_json(const nlohmann::json &jsonObject, UIExtensionIntentInfoForQuery &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+}
+
+void from_json(const nlohmann::json &jsonObject, ServiceExtensionIntentInfoForQuery &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+}
+
+void from_json(const nlohmann::json &jsonObject, FormIntentInfoForQuery &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM_NAME,
+        info.formName,
+        true,
+        g_parseResult);
+}
+
+void to_json(nlohmann::json& jsonObject, const UIAbilityIntentInfoForQuery& info)
+{
+    std::vector<std::string> modes;
+    for (auto m : info.supportExecuteMode) {
+        if (m == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) modes.emplace_back("foreground");
+        else if (m == AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND) modes.emplace_back("background");
+    }
+    jsonObject = {
+        {INSIGHT_INTENT_ABILITY, info.abilityName},
+        {INSIGHT_INTENT_EXECUTE_MODE, modes}
+    };
+}
+
+void to_json(nlohmann::json& jsonObject, const UIExtensionIntentInfoForQuery& info)
+{
+    jsonObject = {{INSIGHT_INTENT_ABILITY, info.abilityName}};
+}
+
+void to_json(nlohmann::json& jsonObject, const ServiceExtensionIntentInfoForQuery& info)
+{
+    jsonObject = {{INSIGHT_INTENT_ABILITY, info.abilityName}};
+}
+
+void to_json(nlohmann::json& jsonObject, const FormIntentInfoForQuery& info)
+{
+    jsonObject = nlohmann::json {
+        {INSIGHT_INTENT_ABILITY, info.abilityName},
+        {INSIGHT_INTENT_FORM_NAME, info.formName}
+    };
+}
+
+bool ParseParamsElement(const nlohmann::json &param, std::string &errorMsg)
+{
+    if (!param.is_object()) {
+        errorMsg = "type error: inputParams or outputParams element not object";
+        return false;
+    }
+    return true;
+}
+
+void ProcessIntputParams(const nlohmann::json &jsonObject,
+    InsightIntentInfoForQuery &insightIntentInfo, int32_t &g_parseResult)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    
+    if (jsonObject.find(INSIGHT_INTENT_INPUT_PARAMS) == jsonObjectEnd) {
+        return;
+    }
+    
+    const auto &inputParamsJson = jsonObject.at(INSIGHT_INTENT_INPUT_PARAMS);
+    if (!inputParamsJson.is_array()) {
+        TAG_LOGE(AAFwkTag::INTENT, "type error: inputParams not array");
+        g_parseResult = ERR_INVALID_VALUE;
+        return;
+    }
+    
+    insightIntentInfo.inputParams.clear();
+    std::string errorMsg;
+    for (const auto &param : inputParamsJson) {
+        if (!ParseParamsElement(param, errorMsg)) {
+            TAG_LOGE(AAFwkTag::INTENT, "%{public}s", errorMsg.c_str());
+            g_parseResult = ERR_INVALID_VALUE;
+            break;
+        }
+        insightIntentInfo.inputParams.emplace_back(param.dump());
+    }
+}
+
+void ProcessOutputParams(const nlohmann::json &jsonObject,
+    InsightIntentInfoForQuery &insightIntentInfo, int32_t &g_parseResult)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    
+    if (jsonObject.find(INSIGHT_INTENT_OUTPUT_PARAMS) == jsonObjectEnd) {
+        return;
+    }
+    
+    const auto &outputParamsJson = jsonObject.at(INSIGHT_INTENT_OUTPUT_PARAMS);
+    if (!outputParamsJson.is_array()) {
+        TAG_LOGE(AAFwkTag::INTENT, "type error: outputParams not array");
+        g_parseResult = ERR_INVALID_VALUE;
+        return;
+    }
+    
+    insightIntentInfo.outputParams.clear();
+    std::string errorMsg;
+    for (const auto &param : outputParamsJson) {
+        if (!ParseParamsElement(param, errorMsg)) {
+            TAG_LOGE(AAFwkTag::INTENT, "%{public}s", errorMsg.c_str());
+            g_parseResult = ERR_INVALID_VALUE;
+            break;
+        }
+        insightIntentInfo.outputParams.emplace_back(param.dump());
+    }
+}
+
 void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery from json");
     const auto &jsonObjectEnd = jsonObject.end();
+
+    auto isConfigIt = jsonObject.find("isConfig");
+    if (isConfigIt != jsonObjectEnd && isConfigIt->is_boolean()) {
+        insightIntentInfo.isConfig = isConfigIt->get<bool>();
+    }
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_BUNDLE_NAME,
@@ -262,6 +434,18 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
         INSIGHT_INTENT_DISPLAY_NAME,
         insightIntentInfo.displayName,
         true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_SRCENTRY,
+        insightIntentInfo.srcEntry,
+        false,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_DEVELOP_TYPE,
+        insightIntentInfo.develoType,
+        false,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -321,6 +505,50 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
         false,
         g_parseResult,
         ArrayType::OBJECT);
+    AppExecFwk::GetValueIfFindKey<UIAbilityIntentInfoForQuery>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_UI_ABILITY,
+        insightIntentInfo.uiAbilityIntentInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<UIExtensionIntentInfoForQuery>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_UI_EXTENSION,
+        insightIntentInfo.uiExtensionIntentInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<ServiceExtensionIntentInfoForQuery>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_SERVICE_EXTENSION,
+        insightIntentInfo.serviceExtensionIntentInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<FormIntentInfoForQuery>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM,
+        insightIntentInfo.formIntentInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+
+    ProcessIntputParams(jsonObject, insightIntentInfo, g_parseResult);
+    ProcessOutputParams(jsonObject, insightIntentInfo, g_parseResult);
+
+    if (jsonObject.find(INSIGHT_INTENT_ENTITES) != jsonObjectEnd) {
+        if (jsonObject.at(INSIGHT_INTENT_ENTITES).is_object()) {
+            insightIntentInfo.cfgEntities =  jsonObject[INSIGHT_INTENT_ENTITES].dump();
+        } else {
+            TAG_LOGE(AAFwkTag::INTENT, "type error: cfgEntities not object");
+            g_parseResult = ERR_INVALID_VALUE;
+        }
+    }
 
     if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_LINK) {
         AppExecFwk::GetValueIfFindKey<LinkInfoForQuery>(jsonObject,
@@ -361,14 +589,44 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
     }
 }
 
+void toJsonArray(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "toJsonArray to json");
+    nlohmann::json inputArray = nlohmann::json::array();
+    for (const auto &paramStr : info.inputParams) {
+        if (paramStr.empty()) {
+            continue;
+        }
+        auto paramJson = nlohmann::json::parse(paramStr, nullptr, false);
+        if (!paramJson.is_discarded()) {
+            inputArray.emplace_back(paramJson);
+        }
+    }
+    jsonObject[INSIGHT_INTENT_INPUT_PARAMS] = inputArray;
+    nlohmann::json outputArray = nlohmann::json::array();
+    for (const auto &paramStr : info.outputParams) {
+        if (paramStr.empty()) {
+            continue;
+        }
+        auto paramJson = nlohmann::json::parse(paramStr, nullptr, false);
+        if (!paramJson.is_discarded()) {
+            outputArray.emplace_back(paramJson);
+        }
+    }
+    jsonObject[INSIGHT_INTENT_OUTPUT_PARAMS] = outputArray;
+}
+
 void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery to json");
     jsonObject = nlohmann::json {
+        {INSIGHT_INTENT_ISCONFIG, info.isConfig},
         {INSIGHT_INTENT_BUNDLE_NAME, info.bundleName},
         {INSIGHT_INTENT_MODULE_NAME, info.moduleName},
         {INSIGHT_INTENT_INTENT_NAME, info.intentName},
         {INSIGHT_INTENT_DOMAIN, info.domain},
+        {INSIGHT_INTENT_SRCENTRY, info.srcEntry},
+        {INSIGHT_INTENT_DEVELOP_TYPE, info.develoType},
         {INSIGHT_INTENT_INTENT_VERSION, info.intentVersion},
         {INSIGHT_INTENT_DISPLAY_NAME, info.displayName},
         {INSIGHT_INTENT_DISPLAY_DESCRIPTION, info.displayDescription},
@@ -383,8 +641,22 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
         {INSIGHT_INTENT_PAGE_INFO, info.pageInfo},
         {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo},
         {INSIGHT_INTENT_FORM_INFO, info.formInfo},
+        {INSIGHT_INTENT_UI_ABILITY, info.uiAbilityIntentInfo},
+        {INSIGHT_INTENT_UI_EXTENSION, info.uiExtensionIntentInfo},
+        {INSIGHT_INTENT_SERVICE_EXTENSION, info.serviceExtensionIntentInfo},
+        {INSIGHT_INTENT_FORM, info.formIntentInfo},
         {INSIGHT_INTENT_ENTITY_INFO, info.entities}
     };
+    toJsonArray(jsonObject, info);
+    if (!info.cfgEntities.empty()) {
+        auto cfgEntities = nlohmann::json::parse(info.cfgEntities, nullptr, false);
+        if (cfgEntities.is_discarded()) {
+            TAG_LOGE(AAFwkTag::INTENT, "discarded entity parameters");
+            return;
+        }
+
+        jsonObject[INSIGHT_INTENT_ENTITES] = cfgEntities;
+    }
 }
 
 bool InsightIntentInfoForQuery::ReadFromParcel(Parcel &parcel)

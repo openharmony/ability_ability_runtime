@@ -82,6 +82,14 @@ public:
      */
     virtual void ScheduleUpdateConfiguration(const Configuration &config) = 0;
 
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Get the UIability of the current thread.
+     * @return Returns a null pointer if the UIAbility has not been created or has been destroyed.
+     */
+    virtual std::shared_ptr<AbilityRuntime::UIAbility> GetUIAbility();
+#endif
+
     /**
      * @brief notify this ability current memory level.
      * @param level Current memory level

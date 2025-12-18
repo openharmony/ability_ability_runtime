@@ -563,6 +563,8 @@ enum class AbilityManagerInterfaceCode {
     QUERY_ALL_AUTO_STARTUP_APPLICATION = 6105,
     // ipc id for retrieves the auto startup status of the current application.
     GET_AUTO_STARTUP_STATUS_FOR_SELF = 6106,
+    // ipc id for manual start auto startup apps.
+    MANUAL_START_AUTO_STARTUP_APPS = 6107,
 
     // ipc id for on auto starup on
     ON_AUTO_STARTUP_ON = 6111,
@@ -689,6 +691,18 @@ enum class AbilityManagerInterfaceCode {
 
     // restart app limit check
     IS_RESTART_APP_LIMIT = 6154,
+
+    // ipc id for un preload UIExtension ability by want and receives the preload Id
+    UN_PRELOAD_UI_EXTENSION_ABILITY = 6155,
+
+    // ipc id for claer all preload UIExtension ability
+    CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY = 6156,
+
+    // register preload UIExtension host client
+    REGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT = 6157,
+
+    // unregister preload UIExtension host client
+    UNREGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT = 6158,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -657,7 +657,7 @@ HWTEST_F(AmsAppRunningRecordTest, ScheduleProcessSecurityExit_001, TestSize.Leve
 HWTEST_F(AmsAppRunningRecordTest, ScheduleMemoryLevel_001, TestSize.Level1)
 {
     auto record = GetTestAppRunningRecord();
-    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleMemoryLevel(_)).Times(1);
+    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleMemoryLevel(_, _)).Times(1);
     record->ScheduleMemoryLevel(1);
 
     record->appLifeCycleDeal_ = nullptr;
@@ -2816,6 +2816,9 @@ HWTEST_F(AmsAppRunningRecordTest, CanRestartResidentProc_003, TestSize.Level1)
     record4->AbilityBackground(abilityRecord4);
 
     abilityRecord4->SetState(AbilityState::ABILITY_STATE_BACKGROUND);
+    record4->AbilityBackground(abilityRecord4);
+
+    abilityRecord4->SetState(AbilityState::ABILITY_STATE_READY);
     record4->AbilityBackground(abilityRecord4);
 
     auto abilityInfo5 = std::make_shared<AbilityInfo>();

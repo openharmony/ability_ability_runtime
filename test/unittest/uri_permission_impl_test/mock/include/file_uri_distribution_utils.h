@@ -36,6 +36,7 @@ public:
     static bool IsFoundationCall();
     static bool IsSAOrSystemAppCall();
     static bool IsSystemAppCall();
+    static bool IsPrivilegedSACall();
     static bool CheckIsSystemAppByTokenId(uint32_t tokenId);
     static bool GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName);
     static bool GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);
@@ -47,7 +48,7 @@ public:
     static bool IsDocsCloudUri(Uri &uri);
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
     static bool IsUdmfOrPasteboardCall();
-    static bool SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId);
+    static bool IsDFSCall();
 };
 } // OHOS
 } // AAFwk

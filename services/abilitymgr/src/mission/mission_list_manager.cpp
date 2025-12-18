@@ -644,7 +644,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
             return;
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Make new mission data.");
-        targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        targetRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         if (targetRecord == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "targetRecord null");
             return;
@@ -1039,6 +1039,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     abilityRecord->SetScheduler(scheduler);
 
     if (abilityRecord->IsStartedByCall()) {
+        (void)abilityRecord->PromotePriority();
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
@@ -2736,7 +2737,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
         return nullptr;
     }
 
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     mission = std::make_shared<Mission>(innerMissionInfo.missionInfo.id, abilityRecord, innerMissionInfo.missionName);
     abilityRecord->UpdateRecoveryInfo(innerMissionInfo.hasRecoverInfo);
     innerMissionInfo.hasRecoverInfo = false;
@@ -3379,6 +3380,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
+    targetAbilityRecord->SetPromotePriority(abilityRequest.promotePriority);
+    (void)targetAbilityRecord->PromotePriority();
 
 #ifdef SUPPORT_UPMS
     if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {
@@ -4196,7 +4199,7 @@ void MissionListManager::GetActiveAbilityList(int32_t uid, std::vector<std::stri
     }
 }
 
-void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord)
+void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");

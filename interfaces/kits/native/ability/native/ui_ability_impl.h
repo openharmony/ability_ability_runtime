@@ -40,10 +40,11 @@ public:
      * @param ability current uiability object.
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     void Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record, std::shared_ptr<UIAbility> &ability,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token);
+        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc);
 
     /**
      * @brief Prepare terminate the ability.
@@ -180,6 +181,14 @@ public:
         const std::string &message, int32_t resultCode = 0);
 
     void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
+
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Get the UIability of the current thread.
+     * @return Returns a null pointer if the UIAbility has not been created or has been destroyed.
+     */
+    std::shared_ptr<UIAbility> GetUIAbility();
+#endif
 
 #ifdef SUPPORT_GRAPHICS
 public:

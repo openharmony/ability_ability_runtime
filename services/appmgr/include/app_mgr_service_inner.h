@@ -341,7 +341,8 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillApplication");
 
     /**
      * ForceKillApplication, force kill the application.
@@ -926,7 +927,7 @@ public:
      * @param requestId request id to callback
      */
     void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0);
+        int32_t requestId = 0, const std::string &customProcess = "");
 
     /**
      * Start specified process.
@@ -1599,8 +1600,6 @@ public:
      */
     virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
-    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
-
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &isDebug);
 
     std::shared_ptr<AAFwk::TaskHandlerWrap> GetTaskHandler() const
@@ -1663,8 +1662,6 @@ private:
                         int32_t beginId, int32_t endId,
                         int32_t userId, int32_t &uid,
                         std::unordered_map<int32_t, int32_t> &lastIsolationIdMap);
-
-    bool GenerateRenderUid(int32_t &renderUid);
 
     /**
      * Build a process's name for service extension
@@ -1876,6 +1873,10 @@ private:
     int32_t GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
 
+    void RemoveRenderProcessIsolationUid(int32_t uid);
+
+    void OnRenderProcessDied(std::shared_ptr<RenderRecord> renderProcessRecord);
+
     void RemoveChildProcessIsolationUid(int32_t uid);
     
     void OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childProcessRecord);
@@ -1898,6 +1899,14 @@ private:
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
     void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
+
+    void ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
+        const std::shared_ptr<AAFwk::Want>& want);
+
+    void HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,
+        std::shared_ptr<AbilityInfo> abilityInfo, const HapModuleInfo &hapModuleInfo,
+        std::shared_ptr<AAFwk::Want> want, bool isProcCache,
+        const std::shared_ptr<AbilityRuntime::LoadParam> &loadParam);
 
 private:
     /**
@@ -2168,15 +2177,14 @@ private:
     void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
     bool IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId,
         int32_t appIndex);
-    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid,
-        std::shared_ptr<AAFwk::Want> &want);
+    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid, int32_t appIndex);
     void InsertUninstallOrUpgradeUidSet(int32_t uid);
     void RemoveUninstallOrUpgradeUidSet(int32_t uid);
     bool IsUninstallingOrUpgrading(int32_t uid);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
-    int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
+    std::unordered_map<int32_t, int32_t> lastRenderProcessIsolationIdMap_;
     std::unordered_map<int32_t, int32_t> lastChildProcessIsolationIdMap_;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
@@ -2187,7 +2195,7 @@ private:
     std::shared_ptr<AMSEventHandler> eventHandler_;
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
-    ffrt::mutex renderUidSetLock_;
+    ffrt::mutex renderProcessIsolationUidSetLock_;
     ffrt::mutex childProcessIsolationUidSetLock_;
     ffrt::mutex exceptionLock_;
     ffrt::mutex browserHostLock_;
@@ -2206,7 +2214,7 @@ private:
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
-    std::unordered_set<int32_t> renderUidSet_;
+    std::unordered_set<int32_t> renderProcessIsolationUidSet_;
     std::unordered_set<int32_t> childProcessIsolationUidSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};

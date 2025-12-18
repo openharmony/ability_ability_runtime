@@ -55,8 +55,9 @@ protected:
 
 class EtsAbilityContext final {
 public:
-    explicit EtsAbilityContext(std::shared_ptr<AbilityContext> context) : context_(std::move(context)) {}
-    ~EtsAbilityContext() = default;
+    explicit EtsAbilityContext(ani_env *env,
+        std::shared_ptr<AbilityContext> context) : env_(env), context_(std::move(context)) {}
+    ~EtsAbilityContext();
 
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbilityWithOptions(
@@ -104,30 +105,86 @@ public:
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_string aniSpecifiedFlag, ani_object call);
     static void StartSelfUIAbilityInCurrentProcessWithOptions(ani_env *env, ani_object aniObj,
         ani_object wantObj, ani_string aniSpecifiedFlag, ani_object opt, ani_object call);
+    static void RevokeDelegator(ani_env *env, ani_object aniObj, ani_object callback);
+    static ani_long ConnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object connectOptionsObj);
+    static void DisconnectAppServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+        ani_object callback);
+    static void StartAppServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackobj);
+    static void StopAppServiceExtensionAbility(
+        ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callbackobj);
+    static ani_long ConnectServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object connectOptionsObj);
+    static void StopServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object callbackObj);
+    static void StopServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj);
+    static void StartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object callbackObj);
+    static void StartAbilityForResultWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object callback);
+    static void StartAbilityForResultWithAccountVoid(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    static void StartAbilityForResultWithAccountResult(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    static void StartAbilityWithAccount(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object call);
+    static void StartAbilityWithAccountAndOptions(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
+    static void RestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorageObj);
     static void RestartAppWithWindow(ani_env *env, ani_object aniObj, ani_object wantObj);
 
     static void Clean(ani_env *env, ani_object object);
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
     static EtsAbilityContext *GetEtsAbilityContext(ani_env *env, ani_object aniObj);
-    static void ConfigurationUpdated(ani_env *env, std::shared_ptr<AppExecFwk::ETSNativeReference> etsContext,
+    static void ConfigurationUpdated(ani_env *env, ani_object aniObj,
         std::shared_ptr<AppExecFwk::Configuration> config);
+    static bool IsInstanceOf(ani_env *env, ani_object aniObj);
+    static void NativeOnSetRestoreEnabled(ani_env *env, ani_object aniObj, ani_boolean aniEnabled);
+    static void NativeChangeAbilityVisibility(ani_env *env, ani_object aniObj, ani_boolean isShow,
+        ani_object callbackObj);
+    static void StartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object startOptionsObj);
+    static void StartRecentAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object startOptionsObj);
+    static void OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink);
+    static void OpenAtomicServiceCheck(ani_env *env, ani_object aniObj);
+    static void StartAbilityForResultWithAccountCheck(ani_env *env, ani_object aniObj);
+
+#ifdef SUPPORT_GRAPHICS
+public:
+    static void SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
+        ani_object callback);
+    static void SetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
+    static void SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_string labelObj,
+        ani_object iconObj);
+    static void SetMissionIconCheck(ani_env *env, ani_object aniObj, ani_object pixelMapObj);
     static void SetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
         ani_object callbackobj);
 
 private:
-    void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
-    void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
+    void OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
+        ani_object callback);
+    void OnSetAbilityInstanceInfoInner(ani_env *env, std::string& label,
+        std::shared_ptr<OHOS::Media::PixelMap> icon, ani_object callback, ani_vm *etsVm, ani_ref callbackRef);
+    void OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
+#endif
+private:
+    void InheritWindowMode(AAFwk::Want &want);
+    void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call,
+        bool isStartRecent = false);
     void OnStartAbilityForResult(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
     void OnTerminateSelf(ani_env *env, ani_object aniObj, ani_object callback);
     void OnTerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     void OnReportDrawnCompleted(ani_env *env, ani_object aniObj, ani_object call);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
-        const std::shared_ptr<AbilityContext> &context, bool isAbilityResult = false, bool isOpenLink = false);
+        bool isAbilityResult = false, bool isOpenLink = false);
     void StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions, AAFwk::Want &want,
         std::shared_ptr<AbilityContext> context, ani_object startOptionsObj, ani_object callback);
     void OnStartServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
-        ani_object callbackobj);
+        ani_object callbackobj, AppExecFwk::ExtensionAbilityType extensionType);
     void OnOpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
         ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm);
     bool OnIsTerminating(ani_env *env, ani_object aniObj);
@@ -138,9 +195,11 @@ private:
         ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
     void OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object callbackObj);
     ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
-        ani_object connectOptionsObj);
+        ani_object connectOptionsObj, AppExecFwk::ExtensionAbilityType extensionType);
     void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
+    void OnStopServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackobj, AppExecFwk::ExtensionAbilityType extensionType);
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
     ani_object OnStartAbilityByType(
         ani_env *env, ani_object aniObj, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
@@ -148,11 +207,21 @@ private:
         ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj);
     void OnStartSelfUIAbilityInCurrentProcess(ani_env *env, ani_object aniObj,
         ani_object wantObj, ani_string aniSpecifiedFlag, ani_object opt, ani_object call);
+    ani_long OnConnectServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object connectOptionsObj);
+    void OnStopServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object callbackObj);
+    void OnStartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int aniAccountId, ani_object callbackObj);
+    void OnRevokeDelegator(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnStartAbilityForResultWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    void OnStartAbilityForResultWithAccountInner(ani_env *env, const AAFwk::StartOptions &startOptions,
+        AAFwk::Want &want, const int accountId, ani_object startOptionsObj, ani_object callback);
+    void OnRestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorageObj);
     void OnSetMissionWindowIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
         ani_object callbackObj);
 
-    void UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions,
-        AAFwk::Want &want);
     void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
         std::shared_ptr<AbilityContext> context, AAFwk::Want &want, int &requestCode);
     int32_t GenerateRequestCode();
@@ -164,10 +233,19 @@ private:
     void OnDisconnectUIServiceExtension(ani_env *env, ani_object proxyObj, ani_object callback);
     bool CheckConnectAlreadyExist(ani_env *env, const AAFwk::Want& want, ani_object callback, ani_object myCallback);
     void OnRequestDialogService(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
+    void OnStartAbilityWithAccount(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
+    void OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
+        ani_object callbackObj);
+    void UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &options);
+    void CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
+        OnRequestResult &onRequestCallback, const char *callbackName);
 
+    ani_env *env_ = nullptr;
     std::weak_ptr<AbilityContext> context_;
     static std::mutex requestCodeMutex_;
     sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;
+    ani_ref localStorageRef_ = nullptr;
 };
 
 struct EtsConnectionKey {

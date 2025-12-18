@@ -158,12 +158,16 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     const std::shared_ptr<Context> &stageContext)
 {
     // new abilityImpl
-    abilityImpl_ = std::make_shared<UIAbilityImpl>();
-    if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+    auto uiAbilityImpl = std::make_shared<UIAbilityImpl>();
+    bool createObjSuc = true;
+    uiAbilityImpl->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_, createObjSuc);
+    if (!createObjSuc) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "failed to create js obj");
+        std::string entry = "AbilityThread::CreateObjError";
+        FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         return;
     }
-    abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
+    abilityImpl_ = uiAbilityImpl;
 
     // ability attach : ipc
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
@@ -761,5 +765,17 @@ void UIAbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId
         return;
     }
 }
+
+#ifdef SUPPORT_SCREEN
+std::shared_ptr<UIAbility> UIAbilityThread::GetUIAbility()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (abilityImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+        return nullptr;
+    }
+    return abilityImpl_->GetUIAbility();
+}
+#endif
 } // namespace AbilityRuntime
 } // namespace OHOS

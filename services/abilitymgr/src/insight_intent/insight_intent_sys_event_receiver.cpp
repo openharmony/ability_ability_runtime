@@ -42,6 +42,7 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
     std::vector<std::string> moduleNameVec;
     std::string profile;
     AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
+    std::vector<InsightIntentInfo> configIntentInfos = {};
     TAG_LOGI(AAFwkTag::INTENT, "save insight intent infos, bundle:%{public}s module:%{public}s",
         bundleName.c_str(), moduleName.c_str());
     ErrCode ret;
@@ -62,15 +63,19 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
         }
 
         // Transform json string
-        if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) ||
-            infos.insightIntents.size() == 0) {
+        bool isTransformExtractIntent = (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) ||
+            infos.insightIntents.size() == 0);
+        bool isTransformConfigIntent = (
+            !AbilityRuntime::InsightIntentProfile::TransformTo(profile, configIntentInfos) ||
+            configIntentInfos.size() == 0);
+        if (isTransformExtractIntent && isTransformConfigIntent) {
             TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
             continue;
         }
 
         // save database
         ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
-            bundleName, moduleNameLocal, userId, infos);
+            bundleName, moduleNameLocal, userId, infos, configIntentInfos);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::INTENT, "save intent info failed, bundleName: %{public}s, moduleName: %{public}s, "
                 "userId: %{public}d", bundleName.c_str(), moduleNameLocal.c_str(), userId);

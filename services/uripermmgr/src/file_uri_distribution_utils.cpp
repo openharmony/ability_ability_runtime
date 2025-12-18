@@ -33,11 +33,13 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
+constexpr int32_t COLLABORATION_FWK_UID = 5520;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t UDMF_UID = 3012;
 constexpr int32_t PASTEBOARD_UID = 3816;
 constexpr int32_t BROKER_PASTEBOARD_UID = 5557;
-constexpr const char* NET_WORK_ID_MARK = "?networkid=";
+constexpr int32_t DFS_UID = 1009;
+constexpr const char *NET_WORK_ID_MARK = "?networkid=";
 }
 
 bool FUDUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t targetTokenId)
@@ -59,7 +61,8 @@ bool FUDUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t tar
 }
 
 bool FUDUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-    const std::vector<std::string> &uriVec, const std::vector<bool> &resVec)
+                                                    const std::vector<std::string> &uriVec,
+                                                    const std::vector<bool> &resVec)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event start.");
     EventInfo eventInfo;
@@ -78,22 +81,7 @@ bool FUDUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint
     return false;
 }
 
-bool FUDUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
-{
-    EventInfo eventInfo;
-    std::string callerBundleName;
-    GetBundleNameByTokenId(callerTokenId, callerBundleName);
-    eventInfo.callerBundleName = callerBundleName;
-    std::string targetBundleName;
-    GetBundleNameByTokenId(targetTokenId, targetBundleName);
-    eventInfo.bundleName = targetBundleName;
-    eventInfo.uri = "autoPersist";
-    EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
-    return true;
-}
-
-bool FUDUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
-    EventInfo &eventInfo)
+bool FUDUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo)
 {
     std::string callerBundleName;
     if (!GetBundleNameByTokenId(callerTokenId, callerBundleName)) {
@@ -121,8 +109,8 @@ bool FUDUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTo
 int32_t FUDUtils::GetCurrentAccountId()
 {
     std::vector<int32_t> osActiveAccountIds;
-    auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        QueryActiveOsAccountIds(osActiveAccountIds);
+    auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->QueryActiveOsAccountIds(
+        osActiveAccountIds);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "QueryActiveOsAccountIds error. ret: %{public}d", ret);
         return DEFAULT_USER_ID;
@@ -143,12 +131,18 @@ bool FUDUtils::IsFoundationCall()
 bool FUDUtils::IsSAOrSystemAppCall()
 {
     return PermissionVerification::GetInstance()->IsSystemAppCall() ||
-        PermissionVerification::GetInstance()->IsSACall();
+           PermissionVerification::GetInstance()->IsSACall();
 }
 
 bool FUDUtils::IsSystemAppCall()
 {
     return PermissionVerification::GetInstance()->IsSystemAppCall();
+}
+
+bool FUDUtils::IsPrivilegedSACall()
+{
+    uint32_t uid = IPCSkeleton::GetCallingUid();
+    return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID || uid == COLLABORATION_FWK_UID;
 }
 
 bool FUDUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
@@ -159,14 +153,14 @@ bool FUDUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
         return false;
     }
     AppExecFwk::ApplicationInfo appInfo;
-    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, GetCurrentAccountId(), appInfo))) {
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
+                                                             GetCurrentAccountId(), appInfo))) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "GetApplicationInfo failed");
         return false;
     }
     auto isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(appInfo.accessTokenIdEx);
     TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, isSystemApp:%{public}d", bundleName.c_str(),
-        static_cast<int32_t>(isSystemApp));
+             static_cast<int32_t>(isSystemApp));
     return isSystemApp;
 }
 
@@ -178,8 +172,8 @@ bool FUDUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t 
         return false;
     }
     AppExecFwk::ApplicationInfo appInfo;
-    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, GetCurrentAccountId(), appInfo))) {
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
+                                                             GetCurrentAccountId(), appInfo))) {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "Get application info failed.");
         return false;
     }
@@ -327,13 +321,18 @@ bool FUDUtils::CheckUriTypeIsValid(Uri &uri)
 bool FUDUtils::IsDocsCloudUri(Uri &uri)
 {
     return (uri.GetAuthority() == FUDConstants::DOCS_AUTHORITY &&
-        uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
+            uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
 }
 
 bool FUDUtils::IsUdmfOrPasteboardCall()
 {
     auto uid = IPCSkeleton::GetCallingUid();
     return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID;
+}
+
+bool FUDUtils::IsDFSCall()
+{
+    return IPCSkeleton::GetCallingUid() == DFS_UID;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -53,6 +53,11 @@ bool FUDUtils::IsSystemAppCall()
     return MyFlag::isSystemAppCall_;
 }
 
+bool FUDUtils::IsPrivilegedSACall()
+{
+    return MyFlag::IsPrivilegedSACall_;
+}
+
 bool FUDUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
 {
     return true;
@@ -115,9 +120,9 @@ bool FUDUtils::IsUdmfOrPasteboardCall()
     return MyFlag::isUdmfOrPasteboardCallRet_;
 }
 
-bool FUDUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+bool FUDUtils::IsDFSCall()
 {
-    return true;
+    return MyFlag::isDFSCallRet_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

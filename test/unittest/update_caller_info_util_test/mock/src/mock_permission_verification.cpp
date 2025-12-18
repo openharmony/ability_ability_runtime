@@ -18,7 +18,8 @@
 namespace OHOS {
 namespace AAFwk {
 
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+    const uint32_t specifyTokenId) const
 {
     return true;
 }
@@ -111,6 +112,10 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     return 0;
 }
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
+{
+    return true;
+}
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
 {
     return true;
 }

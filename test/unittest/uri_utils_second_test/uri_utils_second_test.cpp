@@ -70,7 +70,8 @@ HWTEST_F(UriUtilsSecondTest, PublishFileOpenEvent_001, TestSize.Level1)
     }
     want.SetParams(params);
     want.SetUri("file://data/storage/el2/distributedfiles/test.txt");
-    UriUtils::GetInstance().PublishFileOpenEvent(want);
+    GrantUriPermissionInfo grantInfo;
+    UriUtils::GetInstance().PublishFileOpenEvent(want, grantInfo);
     wangUri = want.GetUri();
     EXPECT_NE(wangUri.ToString(), "");
 }
@@ -84,7 +85,8 @@ HWTEST_F(UriUtilsSecondTest, PublishFileOpenEvent_001, TestSize.Level1)
 HWTEST_F(UriUtilsSecondTest, PublishFileOpenEvent_002, TestSize.Level1)
 {
     Want want;
-    UriUtils::GetInstance().PublishFileOpenEvent(want);
+    GrantUriPermissionInfo grantInfo;
+    UriUtils::GetInstance().PublishFileOpenEvent(want, grantInfo);
     auto wangUri = want.GetUri();
     EXPECT_EQ(wangUri.ToString(), "");
 }

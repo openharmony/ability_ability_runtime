@@ -52,10 +52,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<OHOSApplication> application,
-        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
+        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc) override;
 
     /**
      * @brief OnStart,Start EtssUIability
@@ -147,6 +148,13 @@ public:
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    /**
+     * @brief Callback when the ability is shared.You can override this function to implement your own sharing logic.
+     * @param wantParams Indicates the user data to be saved.
+     * @return the result of OnShare
+     */
+    int32_t OnShare(WantParams &wantParams) override;
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
@@ -229,6 +237,13 @@ public:
     bool OnBackPress() override;
 
     /**
+     * @brief Called when ability prepare terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     */
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
+
+    /**
      * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.
      *
      * @param want Want.
@@ -260,6 +275,38 @@ public:
     virtual void ExecuteInsightIntentBackground(const AAFwk::Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+    
+    /**
+     * @brief Called when startAbility request failed.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message, int32_t resultCode = 0) override;
+
+    /**
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
+     */
+    int32_t OnCollaborate(WantParams &wantParams) override;
+
+    /**
+     * @brief Called when startAbility request succeeded.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
+    /**
+     * @brief Get WindowStage.
+     * @return Returns the ani_object of WindowStage.
+     */
+    ani_object GetEtsWindowStage() override;
 
 protected:
     void DoOnForeground(const Want &want) override;
@@ -282,6 +329,8 @@ private:
 #endif
 
 private:
+    void OnStartInner(ani_env *env, const Want &want, sptr<AAFwk::SessionInfo> sessionInfo);
+    void SetSelfSpecifiedId(ani_env *env, sptr<AAFwk::SessionInfo> sessionInfo);
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
@@ -291,6 +340,7 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
+    void RemoveShareRouterByBundleType(const Want &want);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_;

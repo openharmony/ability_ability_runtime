@@ -154,8 +154,9 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateWant_0100, TestSiz
     Want want;
     auto executeMode = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
     std::string callerBundleName = "test";
+    int32_t userId = 100;
     auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
-        want, executeMode, callerBundleName);
+        want, executeMode, userId, callerBundleName);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -173,8 +174,9 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateWant_0200, TestSiz
     want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, std::string("com.example.test"));
     auto executeMode = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
     std::string callerBundleName = "test";
+    int32_t userId = 100;
     auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
-        want, executeMode, callerBundleName);
+        want, executeMode, userId, callerBundleName);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -192,8 +194,9 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateWant_0300, TestSiz
     want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, std::string("com.example.test"));
     auto executeMode = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
     std::string callerBundleName = "test";
+    int32_t userId = 100;
     auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
-        want, executeMode, callerBundleName);
+        want, executeMode, userId, callerBundleName);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -888,7 +891,8 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateEntryDecoratorParams_0100,
     TAG_LOGI(AAFwkTag::TEST, "begin.");
     Want want;
     auto mode = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
-    auto ret = InsightIntentExecuteManager::UpdateEntryDecoratorParams(want, mode);
+    int32_t userId = 100;
+    auto ret = InsightIntentExecuteManager::UpdateEntryDecoratorParams(want, mode, 100);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -1117,6 +1121,30 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateEntryDecoratorParams_0200,
     auto ret = InsightIntentExecuteManager::UpdateEntryDecoratorParams(paramPtr, info, want);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: OnInsightAppDied_001
+ * @tc.desc: OnInsightAppDied_001
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, OnInsightAppDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_001 start");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t key = 1;
+    sptr<IRemoteObject> callToken = new AppExecFwk::MockAbilityToken();
+    EXPECT_NE(callToken, nullptr);
+    std::string bundleName = "test.bundleName";
+    std::string callerBundleName = "test.callerBundleName";
+    uint64_t intentId = 1;
+    manager->AddRecord(key, callToken, bundleName, intentId, callerBundleName);
+    EXPECT_EQ(manager->records_.size(), 1);
+    manager->OnInsightAppDied(bundleName);
+    EXPECT_EQ(manager->records_.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

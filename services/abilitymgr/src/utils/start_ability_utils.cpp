@@ -37,12 +37,13 @@ thread_local bool StartAbilityUtils::skipErms = false;
 thread_local int32_t StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
 thread_local bool StartAbilityUtils::isWantWithAppCloneIndex = false;
 thread_local bool StartAbilityUtils::ermsSupportBackToCallerFlag = false;
+thread_local bool StartAbilityUtils::startSpecifiedBySCB = false;
 
 bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> callerToken, int32_t &appIndex)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
-        abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
+    if (abilityRecord && abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName() &&
+        abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         appIndex = abilityRecord->GetAppIndex();
         return true;
     }
@@ -101,25 +102,12 @@ std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bu
     return appIndexes;
 }
 
-int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, int32_t userId)
-{
-    AppExecFwk::ApplicationInfo appInfo;
-    if (!GetApplicationInfo(bundleName, userId, appInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
-        return ERR_INVALID_VALUE;
-    }
-    if (appInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        return ERR_NOT_IN_APP_PROVISION_MODE;
-    }
-    return ERR_OK;
-}
-
-int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId)
+int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId, sptr<IRemoteObject> callerToken)
 {
     auto abilityInfo = StartAbilityUtils::startAbilityInfo;
     if (!abilityInfo || abilityInfo->GetAppBundleName() != want.GetElement().GetBundleName()) {
         int32_t appIndex = 0;
-        if (!AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex)) {
+        if (!GetAppIndex(want, callerToken, appIndex)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
             return ERR_APP_CLONE_INDEX_INVALID;
         }
@@ -175,8 +163,8 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
 
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
-    if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY) && appIndex >= 0 &&
-        appIndex < AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+    if ((want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY) && appIndex >= 0 &&
+        appIndex < AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) || StartAbilityUtils::startSpecifiedBySCB) {
         StartAbilityUtils::isWantWithAppCloneIndex = true;
     }
 }
@@ -244,6 +232,7 @@ std::shared_ptr<StartAbilityInfo> QueryAbilityInfo(const Want &want, int32_t use
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "GetPluginAbilityInfo failed %{public}d", pluginRet);
                 request->status = RESOLVE_ABILITY_ERR;
             }
+            request->isTargetPlugin = true;
         } else {
             IN_PROCESS_CALL_WITHOUT_RET(bms->QueryAbilityInfo(want, abilityInfoFlag, userId, request->abilityInfo));
         }
@@ -339,6 +328,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
     }
     abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
     abilityInfo->customProcess = extensionInfo.customProcess;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionInfo customProcess: %{public}s", abilityInfo->customProcess.c_str());
     // For compatibility translates to AbilityInfo
     AbilityRuntime::StartupUtil::InitAbilityInfoFromExtension(extensionInfo, abilityInfo->abilityInfo);
 
@@ -361,6 +351,7 @@ void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_
         return;
     }
     abilityInfo->customProcess = extensionInfo.customProcess;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionInfo customProcess: %{public}s", abilityInfo->customProcess.c_str());
     if (AbilityRuntime::StartupUtil::IsSupportAppClone(extensionInfo.type)) {
         abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
         // For compatibility translates to AbilityInfo

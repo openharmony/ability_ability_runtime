@@ -41,7 +41,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     startOptions.processOptions = std::make_shared<AAFwk::ProcessOptions>();
     startOptions.processOptions->isStartFromNDK = true;
     int32_t userId = fdp.ConsumeIntegral<int32_t>();
-    int32_t ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, userId);
+    int32_t ret = StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, userId);
     return true;
 }
 } // namespace OHOS

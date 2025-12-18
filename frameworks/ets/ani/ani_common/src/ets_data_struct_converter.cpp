@@ -17,6 +17,7 @@
 
 #include "ani_enum_convert.h"
 #include "hilog_tag_wrapper.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -26,6 +27,32 @@ constexpr const char *CLASSNAME_LAUNCHREASON = "L@ohos/app/ability/AbilityConsta
 constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
 constexpr const char* LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
     "L@ohos/app/ability/AbilityConstant/LastExitDetailInfoImpl;";
+constexpr const char* ENUMNAME_PROCESS = "L@ohos/app/ability/appManager/appManager/ProcessState;";
+EtsAppProcessState ConvertToEtsAppProcessState(AppExecFwk::AppProcessState appProcessState, bool isFocused)
+{
+    EtsAppProcessState processState;
+    switch (appProcessState) {
+        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
+        case AppExecFwk::AppProcessState::APP_STATE_READY:
+            processState = STATE_CREATE;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
+            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
+            processState = STATE_BACKGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
+        case AppExecFwk::AppProcessState::APP_STATE_END:
+            processState = STATE_DESTROY;
+            break;
+        default:
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid state");
+            processState = STATE_DESTROY;
+            break;
+    }
+    return processState;
+}
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
     if (env == nullptr) {
@@ -80,6 +107,15 @@ ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
     env->Object_SetPropertyByName_Int(object, "pss", lastExitDetailInfo.pss);
     env->Object_SetPropertyByName_Long(object, "timestamp", lastExitDetailInfo.timestamp);
 
+    ani_enum_item stateItem {};
+    auto etsProcessState = ConvertToEtsAppProcessState(
+        static_cast<AppExecFwk::AppProcessState>(lastExitDetailInfo.processState), false);
+    AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env, ENUMNAME_PROCESS,
+        etsProcessState, stateItem);
+    if ((status = env->Object_SetPropertyByName_Ref(object, "processState", stateItem)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "processState failed status:%{public}d", status);
+        return nullptr;
+    }
     return object;
 }
 

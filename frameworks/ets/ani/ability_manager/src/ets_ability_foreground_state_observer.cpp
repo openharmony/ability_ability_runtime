@@ -213,18 +213,18 @@ bool ETSAbilityForegroundStateObserver::IsEmpty()
 bool ETSAbilityForegroundStateObserver::IsStrictEquals(ani_ref observerRef, const ani_object &etsObserverObject)
 {
     if (observerRef == nullptr || etsObserverObject == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "etsObserverObject or observerRef null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "etsObserverObject or observerRef null");
         return false;
     }
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetEnv failed status: %{public}d", status);
         return false;
     }
     ani_boolean isEquals = ANI_FALSE;
     if ((status = env->Reference_StrictEquals(observerRef, etsObserverObject, &isEquals)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Reference_StrictEquals failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Reference_StrictEquals failed status: %{public}d", status);
         return false;
     }
     return isEquals == ANI_TRUE;

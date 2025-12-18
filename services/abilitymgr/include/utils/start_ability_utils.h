@@ -46,6 +46,7 @@ struct StartAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     std::string customProcess;
+    bool isTargetPlugin = false;
 };
 
 struct StartAbilityUtils {
@@ -54,8 +55,7 @@ struct StartAbilityUtils {
         AppExecFwk::ApplicationInfo &appInfo);
     static bool GetCallerAbilityInfo(const sptr<IRemoteObject> &callerToken,
         AppExecFwk::AbilityInfo &abilityInfo);
-    static int32_t CheckAppProvisionMode(const Want& want, int32_t userId);
-    static int32_t CheckAppProvisionMode(const std::string& bundleName, int32_t userId);
+    static int32_t CheckAppProvisionMode(const Want& want, int32_t userId, sptr<IRemoteObject> callerToken);
     static std::vector<int32_t> GetCloneAppIndexes(const std::string &bundleName, int32_t userId);
 
     static bool IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &callerToken);
@@ -71,6 +71,7 @@ struct StartAbilityUtils {
     static thread_local int32_t ermsResultCode;
     static thread_local bool isWantWithAppCloneIndex;
     static thread_local bool ermsSupportBackToCallerFlag;
+    static thread_local bool startSpecifiedBySCB;
 };
 
 struct StartAbilityInfoWrap {
@@ -83,9 +84,9 @@ struct StartAbilityInfoWrap {
 
 struct StartAbilityWrapParam {
     Want want;
-    sptr<IRemoteObject> callerToken;
-    int requestCode;
-    bool isPendingWantCaller;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = -1;
+    bool isPendingWantCaller = false;
     int32_t userId = -1;
     bool isStartAsCaller = false;
     uint32_t specifyTokenId = 0;
@@ -94,7 +95,10 @@ struct StartAbilityWrapParam {
     bool isUIAbilityOnly = false;
     bool isAppCloneSelector = false;
     bool hideFailureTipDialog = false;
+    bool isBySCB = false;
     bool isFreeInstallFromService = false;
+    uint64_t specifiedFullTokenId = 0;
+    bool removeInsightIntentFlag = false;
 };
 }
 }

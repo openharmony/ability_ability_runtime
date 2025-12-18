@@ -41,6 +41,9 @@ constexpr const char* PARAMS_STREAM = "ability.params.stream";
 constexpr const char* CALLUI_ABILITY_NAME = "com.ohos.callui.ServiceAbility";
 constexpr const char* MISSION_NAME_MARK_HEAD = "#";
 constexpr const char* MISSION_NAME_SEPARATOR = ":";
+constexpr const char* DEBUG_APP = "debugApp";
+constexpr const char* NATIVE_DEBUG = "nativeDebug";
+constexpr const char* PERF_CMD = "perfCmd";
 }  // namespace AbilityConfig
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -430,6 +430,31 @@ public:
         return E_OK;
     }
 
+    virtual int32_t SetExtBundleStats(uint32_t userId, const ExtBundleStats &stats) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetExtBundleStats(uint32_t userId, ExtBundleStats &stats) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetAllExtBundleStats(uint32_t userId, std::vector<ExtBundleStats> &statsVec) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t EraseAllUserEncryptedKeys() override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t ListUserdataDirInfo(std::vector<UserdataDirInfo> &scanDirs) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t NotifyCreateBundleDataDirWithEl(uint32_t userId, uint8_t elx) override
     {
         return E_OK;

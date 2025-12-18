@@ -24,6 +24,7 @@
 #include "insight_intent_utils.h"
 #include "ipc_capacity_wrap.h"
 #include "permission_constants.h"
+#include "start_ability_utils.h"
 #include "support_system_ability_permission.h"
 #include "utils/app_mgr_util.h"
 #include "uri_utils.h"
@@ -39,6 +40,7 @@ const std::string PARAM_FREEINSTALL_UID = "ohos.freeinstall.params.callingUid";
 constexpr uint32_t IDMS_CALLBACK_ON_FREE_INSTALL_DONE = 0;
 constexpr uint32_t UPDATE_ATOMOIC_SERVICE_TASK_TIMER = 24 * 60 * 60 * 1000; /* 24h */
 constexpr const char* KEY_IS_APP_RUNNING = "com.ohos.param.isAppRunning";
+constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 
 void HandleDMSCallback(int32_t resultCode, const FreeInstallInfo &info)
 {
@@ -96,7 +98,7 @@ bool FreeInstallManager::IsTopAbility(sptr<IRemoteObject> callerToken)
 
     auto type = caller->GetAbilityInfo().type;
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "service or extension");
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "service or extension");
         return true;
     }
 
@@ -112,6 +114,7 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     sptr<IRemoteObject> callerToken, std::shared_ptr<FreeInstallParams> param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "StartFreeInstall:%{public}s", want.GetElement().GetBundleName().c_str());
     if (!VerifyStartFreeInstallPermission(callerToken)) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "permission denied");
         return NOT_TOP_ABILITY;
@@ -126,8 +129,9 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), isAsync, recordId);
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
-    info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
-
+    if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)) {
+        info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
+    }
     int result = SetAppRunningState(info.want);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "setAppRunningState failed");
@@ -399,8 +403,15 @@ void FreeInstallManager::StartAbilityByFreeInstall(FreeInstallInfo &info, std::s
     }
     if (result == ERR_OK) {
         if (info.startOptions == nullptr) {
-            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(info.want,
-                info.callerToken, info.userId, info.requestCode, false, info.isFreeInstallFromService);
+            StartAbilityWrapParam param = {
+                .want = info.want,
+                .callerToken = info.callerToken,
+                .requestCode = info.requestCode,
+                .userId = info.userId,
+                .hideFailureTipDialog = false,
+                .isFreeInstallFromService = info.isFreeInstallFromService,
+            };
+            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(param);
         } else {
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityForOptionWrap(info.want,
                 *info.startOptions, info.callerToken, false, info.userId, info.requestCode);
@@ -457,8 +468,16 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
         result = UpdateElementName(info.want, info.userId);
     }
     if (result == ERR_OK) {
-        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(info.want,
-            info.callerToken, info.userId, info.requestCode, true, false, info.isFreeInstallFromService);
+        StartAbilityWrapParam param = {
+            .want = info.want,
+            .callerToken = info.callerToken,
+            .requestCode = info.requestCode,
+            .userId = info.userId,
+            .hideFailureTipDialog = false,
+            .isFreeInstallFromService = info.isFreeInstallFromService,
+            .removeInsightIntentFlag = true,
+        };
+        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithRemoveIntentFlag(param);
     }
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);

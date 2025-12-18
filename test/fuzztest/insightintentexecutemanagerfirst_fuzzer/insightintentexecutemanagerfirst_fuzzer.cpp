@@ -42,6 +42,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::string callerBundleName;
     bool ignoreAbilityName;
     Want want;
+    int32_t userId = 100;
     ExtractInsightIntentInfo info;
     ExtractInsightIntentGenericInfo decoratorInfo;
     FuzzedDataProvider fdp(data, size);
@@ -53,21 +54,21 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(key, callerToken,
         param, callerBundleName, ignoreAbilityName);
     ExecuteMode executeMode = UI_ABILITY_FOREGROUND;
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode,
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode, userId,
         callerBundleName);
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode, userId);
     executeMode = UI_ABILITY_BACKGROUND;
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode,
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode, userId,
         callerBundleName);
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode, userId);
     executeMode = UI_EXTENSION_ABILITY;
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode,
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode, userId,
         callerBundleName);
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode, userId);
     executeMode = SERVICE_EXTENSION_ABILITY;
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode,
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(want, executeMode, userId,
         callerBundleName);
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode, userId);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->AddWantUirsAndFlagsFromParam(param, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateFuncDecoratorParams(param, info, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetMainElementName(param);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,15 @@ bool PermissionVerification::IsSACall() const
 {
     return (MyStatus::GetInstance().permPermission_ & FLAG::IS_SA_CALL);
 }
+bool PermissionVerification::IsSACallByTokenId(uint32_t callerTokenId) const
+{
+    return (MyStatus::GetInstance().permPermission_ & FLAG::IS_SA_CALL);
+}
 bool PermissionVerification::IsShellCall() const
+{
+    return (MyStatus::GetInstance().permPermission_ & FLAG::IS_SHELL_CALL);
+}
+bool PermissionVerification::IsShellCallByTokenId(uint32_t callerTokenId) const
 {
     return (MyStatus::GetInstance().permPermission_ & FLAG::IS_SHELL_CALL);
 }
@@ -122,6 +130,10 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
     return MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_;
+}
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
 }
 bool PermissionVerification::IsSystemAppCall() const
 {

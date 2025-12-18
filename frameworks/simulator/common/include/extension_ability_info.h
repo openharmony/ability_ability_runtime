@@ -58,6 +58,7 @@ enum class ExtensionAbilityType {
     APP_ACCOUNT_AUTHORIZATION = 19,
     FENCE = 24,
     DISTRIBUTED = 28,
+    CRYPTO = 35,
     UNSPECIFIED = 255,
     UI = 256,
     HMS_ACCOUNT = 257,

@@ -107,10 +107,12 @@ private:
         int requestCode, const std::string &startTime, const std::string &url, bool hideFailureTipDialog = false);
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
-    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
-    void AddCompletionHandlerForOpenLink(AAFwk::Want& want, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
-    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
+    void AddCompletionHandlerForOpenLink(AAFwk::Want &want, OnRequestResult &onRequestSucc,
+    OnRequestResult &onRequestFail);
+    std::pair<OnAtomicRequestSuccess, OnAtomicRequestFailure> CreateAtomicServiceCallBack(napi_env env,
+        const std::shared_ptr<NativeReference> &atomicServiceRef,
+        const std::shared_ptr<NativeReference> &onRequestSuccRef,
+        const std::shared_ptr<NativeReference> &onRequestFailRef);
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);
     void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);

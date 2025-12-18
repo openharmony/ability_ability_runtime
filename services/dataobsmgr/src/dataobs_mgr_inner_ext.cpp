@@ -124,6 +124,7 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo, int3
     std::vector<std::string> path;
     {
         std::lock_guard<ffrt::mutex> lock(nodeMutex_);
+        std::set<DataObsMgrInnerExt::Node *> nodeLogSet;
         int32_t count = 0;
         for (auto &uri : changeInfo.uris_) {
             path.clear();
@@ -131,7 +132,7 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo, int3
             path.emplace_back(uri.GetAuthority());
             uri.GetPathSegments(path);
             notifyInfo[count].uri = uri;
-            root_->GetObs(path, 0, notifyInfo[count], userId, changeRes);
+            root_->GetObs(path, 0, notifyInfo[count], userId, changeRes, nodeLogSet);
             count++;
         }
     }
@@ -210,10 +211,11 @@ void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
 DataObsMgrInnerExt::Node::Node(const std::string &name) : name_(name) {}
 
 void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint32_t index,
-    NotifyInfo &info, int32_t userId, ObsMap &obsRes)
+    NotifyInfo &info, int32_t userId, ObsMap &obsRes, std::set<DataObsMgrInnerExt::Node *> &nodeLogSet)
 {
     std::string obsStr = "";
     bool logFlag = false;
+    auto nodeLogPair = nodeLogSet.insert(this);
     if (path.size() == index) {
         for (auto entry : entrys_) {
             if (entry.userId != userId && entry.userId != 0 && userId != 0) {
@@ -226,7 +228,7 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
             notifyInfo.tokenId = entry.tokenId;
             notifyInfo.pid = entry.pid;
             obsStr += "p:" + std::to_string(entry.pid) + "Id:" + std::to_string(entry.entryId) + ",";
-            logFlag = true;
+            logFlag = nodeLogPair.second;
         }
         if (logFlag) {
             TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s entrys_:%{public}s",
@@ -246,8 +248,8 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
             notifyInfo.uriList.push_back(info);
             notifyInfo.tokenId = entry.tokenId;
             notifyInfo.pid = entry.pid;
-            obsStr += "p: " + std::to_string(entry.pid) + "Id: " + std::to_string(entry.entryId) + ",";
-            logFlag = true;
+            obsStr += "p:" + std::to_string(entry.pid) + "Id:" + std::to_string(entry.entryId) + ",";
+            logFlag = nodeLogPair.second;
         }
     }
     if (logFlag) {
@@ -259,9 +261,7 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
     if (it == childrens_.end()) {
         return;
     }
-    it->second->GetObs(path, ++index, info, userId, obsRes);
-
-    return;
+    it->second->GetObs(path, ++index, info, userId, obsRes, nodeLogSet);
 }
 
 bool DataObsMgrInnerExt::Node::IsLimit(const Entry &entry)

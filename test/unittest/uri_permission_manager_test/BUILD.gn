@@ -25,8 +25,11 @@ ohos_unittest("uri_permission_manager_test") {
     blocklist = "../../cfi_blocklist.txt"
   }
   branch_protector_ret = "pac_ret"
-  include_dirs = [ "${ability_runtime_test_path}/mock/mock_sa_call" ]
-
+  include_dirs = [
+    "${ability_runtime_test_path}/mock/mock_sa_call",
+    "${ability_runtime_test_path}/mock/common/include"
+  ]
+  
   sources = [ "uri_permission_manager_test.cpp" ]
 
   configs = [
@@ -46,6 +49,7 @@ ohos_unittest("uri_permission_manager_test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_core",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "storage_service:storage_manager_sa_proxy",
   ]

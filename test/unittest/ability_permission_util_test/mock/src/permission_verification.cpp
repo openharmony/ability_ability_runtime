@@ -48,6 +48,11 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
     return retJudgeCallerIsAllowedToUseSystemAPI;
 }
 
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
+{
+    return true;
+}
+
 bool PermissionVerification::VerifyStartRecentAbilityPermission() const
 {
     return retVerifyStartRecentAbilityPermission;

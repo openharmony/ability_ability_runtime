@@ -36,6 +36,7 @@ bool MyFlag::permissionGrantUriPermissionAsCaller_ = false;
 bool MyFlag::permissionSandboxAccessManager_ = false;
 bool MyFlag::isSAOrSystemAppCall_ = false;
 bool MyFlag::isSystemAppCall_ = false;
+bool MyFlag::IsPrivilegedSACall_ = false;
 bool MyFlag::isUriTypeValid_ = false;
 bool MyFlag::isDocsCloudUri_ = false;
 int32_t MyFlag::getTokenIdByBundleNameStatus_ = 0;
@@ -56,5 +57,6 @@ bool MyFlag::fudUtilsGenerateFUDAppInfoRet_ = true;
 std::string MyFlag::bundleName_ = "";
 TokenInfoMap MyFlag::tokenInfos = {};
 bool MyFlag::isUdmfOrPasteboardCallRet_ = false;
+bool MyFlag::isDFSCallRet_ = false;
 } // namespace AAFwk
 } // namespace OHOS

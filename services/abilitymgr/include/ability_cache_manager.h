@@ -23,7 +23,7 @@
 
 #include "ability_config.h"
 #include "ability_info.h"
-#include "ability_record.h"
+#include "base_extension_record.h"
 namespace OHOS {
 namespace AAFwk {
 /**
@@ -49,50 +49,50 @@ public:
     /**
      * Put a single ability record into ability cache manager.
      * @param abilityRecord the ability record to be putted into cache manager.
-     * @return AbilityRecord if one is eliminated, otherwise nullptr.
+     * @return BaseExtensionRecord if one is eliminated, otherwise nullptr.
      */
-    std::shared_ptr<AbilityRecord> Put(std::shared_ptr<AbilityRecord> abilityRecord);
+    std::shared_ptr<BaseExtensionRecord> Put(std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * Remove a single ability record from ability cache manager.
      * @param abilityRecord, the ability record to be removed into cache manager.
      */
-    void Remove(std::shared_ptr<AbilityRecord> abilityRecord);
+    void Remove(std::shared_ptr<BaseExtensionRecord> abilityRecord);
 
     /**
      * Get a single ability by abilityRequest record from ability cache manager,
-     * this will remove the AbilityRecord by default
+     * this will remove the BaseExtensionRecord by default
      * @param abilityRequest the ability request to be searched in cache manager.
-     * @return AbilityRecord if one is matched, otherwise nullptr.
+     * @return BaseExtensionRecord if one is matched, otherwise nullptr.
      */
-    std::shared_ptr<AbilityRecord> Get(const AbilityRequest &abilityRequest);
+    std::shared_ptr<BaseExtensionRecord> Get(const AbilityRequest &abilityRequest);
 
      /**
      * Get a single ability by token from ability cache manager.
      * @param token the ability token to be searched in cache manager.
-     * @return AbilityRecord if one is matched, otherwise nullptr.
+     * @return BaseExtensionRecord if one is matched, otherwise nullptr.
      */
-    std::shared_ptr<AbilityRecord> FindRecordByToken(const sptr<IRemoteObject> &token);
+    std::shared_ptr<BaseExtensionRecord> FindRecordByToken(const sptr<IRemoteObject> &token);
 
     /**
      * Get all the abilities of current ability cache manager.
-     * @return AbilityRecord list.
+     * @return BaseExtensionRecord list.
      */
-    std::list<std::shared_ptr<AbilityRecord>> GetAbilityList();
+    std::list<std::shared_ptr<BaseExtensionRecord>> GetAbilityList();
 
     /**
      * Get a single ability by sessionId from ability cache manager.
      * @param assertSessionId the ability assertSessionId to be searched in cache manager.
-     * @return AbilityRecord if one is matched, otherwise nullptr.
+     * @return BaseExtensionRecord if one is matched, otherwise nullptr.
      */
-    std::shared_ptr<AbilityRecord> FindRecordBySessionId(const std::string &assertSessionId);
+    std::shared_ptr<BaseExtensionRecord> FindRecordBySessionId(const std::string &assertSessionId);
 
     /**
      * Get a single ability by serviceKey from ability cache manager.
      * @param serviceKey the ability serviceKey to be searched in cache manager.
-     * @return AbilityRecord if one is matched, otherwise nullptr.
+     * @return BaseExtensionRecord if one is matched, otherwise nullptr.
      */
-    std::shared_ptr<AbilityRecord> FindRecordByServiceKey(const std::string &serviceKey);
+    std::shared_ptr<BaseExtensionRecord> FindRecordByServiceKey(const std::string &serviceKey);
 
     /**
      * Remove the launcher death recipient from ability cache manager.
@@ -116,22 +116,22 @@ public:
         AbilityCacheManager();
         ~AbilityCacheManager();
         struct ProcRecordsInfo {
-            std::list<std::shared_ptr<AbilityRecord>> recList;
+            std::list<std::shared_ptr<BaseExtensionRecord>> recList;
             uint32_t cnt;
         };
         uint32_t devLruCapacity_ = 0;
         uint32_t procLruCapacity_ = 0;
         uint32_t devLruCnt_ = 0;
         std::map<uint32_t, ProcRecordsInfo> procLruMap_;
-        std::list<std::shared_ptr<AbilityRecord>> devRecLru_;
-        std::shared_ptr<AbilityRecord> AddToProcLru(std::shared_ptr<AbilityRecord> abilityRecord);
-        std::shared_ptr<AbilityRecord> AddToDevLru(std::shared_ptr<AbilityRecord> abilityRecord,
-            std::shared_ptr<AbilityRecord> rec);
+        std::list<std::shared_ptr<BaseExtensionRecord>> devRecLru_;
+        std::shared_ptr<BaseExtensionRecord> AddToProcLru(std::shared_ptr<BaseExtensionRecord> abilityRecord);
+        std::shared_ptr<BaseExtensionRecord> AddToDevLru(std::shared_ptr<BaseExtensionRecord> abilityRecord,
+            std::shared_ptr<BaseExtensionRecord> rec);
         std::mutex mutex_;
-        void RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecord> abilityRecord);
-        void RemoveAbilityRecInProcList(std::shared_ptr<AbilityRecord> abilityRecord);
-        std::shared_ptr<AbilityRecord> GetAbilityRecInProcList(const AbilityRequest &abilityRequest);
-        bool IsRecInfoSame(const AbilityRequest& abilityRequest, std::shared_ptr<AbilityRecord> abilityRecord);
+        void RemoveAbilityRecInDevList(std::shared_ptr<BaseExtensionRecord> abilityRecord);
+        void RemoveAbilityRecInProcList(std::shared_ptr<BaseExtensionRecord> abilityRecord);
+        std::shared_ptr<BaseExtensionRecord> GetAbilityRecInProcList(const AbilityRequest &abilityRequest);
+        bool IsRecInfoSame(const AbilityRequest& abilityRequest, std::shared_ptr<BaseExtensionRecord> abilityRecord);
         DISALLOW_COPY_AND_MOVE(AbilityCacheManager);
 };
 } // namespace AAFwk

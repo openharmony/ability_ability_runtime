@@ -54,8 +54,8 @@ export default class AppServiceExtensionContext extends ExtensionContext {
     destroyRegister.unregister(unregisterToken);
   }
 
-  public native nativeConnectAppServiceExtensionAbility(want: Want, callback: ConnectOptions): long;
-  public native nativeDisconnectAppServiceExtensionAbility(connection: long,
+  public native nativeConnectServiceExtensionAbility(want: Want, callback: ConnectOptions): long;
+  public native nativeDisconnectServiceExtensionAbility(connection: long,
     callback: AsyncCallbackWrapper<void>): void;
   public native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
   public native nativeStartAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
@@ -64,11 +64,11 @@ export default class AppServiceExtensionContext extends ExtensionContext {
   private static native nativeTransferDynamic(input: Object): ESValue;
   private static contextType: string = 'AppServiceExtensionContext';
 
-  connectAppServiceExtensionAbility(want: Want, callback: ConnectOptions): long {
-    return this.nativeConnectAppServiceExtensionAbility(want, callback);
+  connectServiceExtensionAbility(want: Want, callback: ConnectOptions): long {
+    return this.nativeConnectServiceExtensionAbility(want, callback);
   }
 
-  disconnectAppServiceExtensionAbility(connection: long): Promise<void> {
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
     let p =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -79,7 +79,7 @@ export default class AppServiceExtensionContext extends ExtensionContext {
           }
         });
         taskpool.execute((): void => {
-          this.nativeDisconnectAppServiceExtensionAbility(connection, myCall);
+          this.nativeDisconnectServiceExtensionAbility(connection, myCall);
       });
     });
     return p;

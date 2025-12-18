@@ -177,7 +177,8 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     int32_t uid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "not block");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "not block, dType:%{public}d, cType:%{public}d, compType:%{public}d",
+        disposedRule.disposedType, disposedRule.controlType, disposedRule.componentType);
     if (disposedRule.want == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
         return ERR_OK;

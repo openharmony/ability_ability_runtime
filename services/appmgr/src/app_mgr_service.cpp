@@ -82,7 +82,7 @@ constexpr const char* TASK_ATTACH_CHILD_PROCESS = "AttachChildProcessTask";
 constexpr const char* TASK_EXIT_CHILD_PROCESS_SAFELY = "ExitChildProcessSafelyTask";
 #endif // SUPPORT_CHILD_PROCESS
 constexpr const char* FOUNDATION_PROCESS = "foundation";
-constexpr const char* BS_PROCESS_NAME = "bgtaskmgr_service";
+constexpr const char* BS_PROCESS_NAME = "resource_schedule_service";
 constexpr int32_t USER_UID = 2000;
 constexpr const char* HIVIEW_PROCESS_NAME = "hiview";
 constexpr const char* DEBUG_FROM = "ohos.param.debugFrom";
@@ -1916,19 +1916,6 @@ int32_t AppMgrService::KillProcessByPidForExit(int32_t pid, const std::string &r
         return AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL;
     }
     return appMgrServiceInner_->KillProcessByPidForExit(pid, reason);
-}
-
-void AppMgrService::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
-{
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
-        return;
-    }
-    if (!appMgrServiceInner_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
-        return;
-    }
-    appMgrServiceInner_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
 }
 
 int32_t AppMgrService::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,

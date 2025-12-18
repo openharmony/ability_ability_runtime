@@ -19,8 +19,8 @@
 #include <cstdint>
 
 #include "ability_manager_client.h"
-#include "ability_record.h"
 #include "ability_connect_manager.h"
+#include "base_extension_record.h"
 #include "data_ability_manager.h"
 
 using namespace OHOS::AAFwk;
@@ -54,6 +54,25 @@ sptr<Token> GetFuzzAbilityToken(AbilityType type)
 
     return token;
 }
+
+sptr<Token> GetFuzzExtensionAbilityToken(AbilityType type)
+{
+    sptr<Token> token = nullptr;
+
+    AbilityRequest abilityRequest;
+    abilityRequest.uid = UID_TEST;
+    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = type;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
+    if (abilityRecord) {
+        token = abilityRecord->GetToken();
+    }
+
+    return token;
+}
+
 uint32_t GetU32Data(const char* ptr)
 {
     // convert fuzz input data to an integer
@@ -80,7 +99,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     }
 
     // get serviceToken
-    sptr<IRemoteObject> serviceToken = GetFuzzAbilityToken(AbilityType::SERVICE);
+    sptr<IRemoteObject> serviceToken = GetFuzzExtensionAbilityToken(AbilityType::SERVICE);
     if (!serviceToken) {
         std::cout << "Get service ability token failed." << std::endl;
         return false;

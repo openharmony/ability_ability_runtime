@@ -30,14 +30,17 @@
 #include "ipc_skeleton.h"
 #include "mock_ability_token.h"
 #include "mock_app_scheduler.h"
+#include "mock_app_utils.h"
 #include "mock_bundle_manager.h"
 #include "mock_configuration_observer.h"
 #include "mock_iapp_state_callback.h"
 #include "mock_kia_interceptor.h"
+#include "mock_my_app_utils_flag.h"
 #include "mock_my_flag.h"
 #include "mock_native_token.h"
 #include "mock_permission_verification.h"
 #include "mock_render_scheduler.h"
+#include "mock_res_sched_util.h"
 #include "mock_sa_call.h"
 #include "mock_task_handler_wrap.h"
 #include "param.h"
@@ -398,6 +401,95 @@ HWTEST_F(AppMgrServiceInnerTest, PreStartNWebSpawnProcess_001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: HandleExistingAppRecordAfterFound_001
+ * @tc.desc: verify keepAlive/mainElement flags and preload reset without process cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, HandleExistingAppRecordAfterFound_001, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    HapModuleInfo hapModuleInfo;
+    auto want = std::make_shared<AAFwk::Want>();
+    BundleInfo info;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
+
+    appRecord->SetKeepAliveDkv(false);
+    appRecord->SetMainElementRunning(false);
+    appRecord->SetPreloadMode(PreloadMode::PRE_LAUNCH);
+    appRecord->SetPreloadState(PreloadState::PRELOADING);
+
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.isKeepAlive = true;
+    loadParam.isMainElementRunning = true;
+
+    appMgrServiceInner->HandleExistingAppRecordAfterFound(appRecord, abilityInfo_, hapModuleInfo, want, false,
+        std::make_shared<AbilityRuntime::LoadParam>(loadParam));
+
+    EXPECT_TRUE(appRecord->IsKeepAliveDkv());
+    EXPECT_TRUE(appRecord->IsMainElementRunning());
+    EXPECT_EQ(appRecord->GetPreloadMode(), PreloadMode::PRELOAD_NONE);
+}
+
+/**
+ * @tc.name: HandleExistingAppRecordAfterFound_002
+ * @tc.desc: verify request proc code propagation from want to record
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, HandleExistingAppRecordAfterFound_002, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    HapModuleInfo hapModuleInfo;
+    auto want = std::make_shared<AAFwk::Want>();
+    want->SetParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 5);
+    BundleInfo info;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
+
+    EXPECT_EQ(appRecord->GetRequestProcCode(), 0);
+
+    AbilityRuntime::LoadParam loadParam;
+    appMgrServiceInner->HandleExistingAppRecordAfterFound(appRecord, abilityInfo_, hapModuleInfo, want, false,
+        std::make_shared<AbilityRuntime::LoadParam>(loadParam));
+
+    EXPECT_EQ(appRecord->GetRequestProcCode(), 5);
+}
+
+/**
+ * @tc.name: HandleExistingAppRecordAfterFound_003
+ * @tc.desc: when extension type mismatches in EXTENSION process, reset to NORMAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, HandleExistingAppRecordAfterFound_003, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    HapModuleInfo hapModuleInfo;
+    auto want = std::make_shared<AAFwk::Want>();
+    BundleInfo info;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
+
+    appRecord->SetProcessType(ProcessType::EXTENSION);
+    appRecord->extensionType_ = ExtensionAbilityType::SERVICE;
+    abilityInfo_->extensionAbilityType = ExtensionAbilityType::UI_SERVICE;
+
+    AbilityRuntime::LoadParam loadParam;
+    appMgrServiceInner->HandleExistingAppRecordAfterFound(appRecord, abilityInfo_, hapModuleInfo, want, false,
+        std::make_shared<AbilityRuntime::LoadParam>(loadParam));
+
+    EXPECT_EQ(appRecord->GetProcessType(), ProcessType::NORMAL);
+}
+
+/**
  * @tc.name: PreStartNWebSpawnProcess_002
  * @tc.desc: prestart nwebspawn process.
  * @tc.type: FUNC
@@ -443,6 +535,77 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
 
     appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
+}
+
+/**
+ * @tc.name: CheckLoadAbilityConditions_001
+ * @tc.desc: check load ability conditions.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    // do test1
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr);
+
+    int32_t hostPid = 102;
+    // fill want
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<Want>();
+    want->SetParam("ability.want.params.uiExtensionRootHostPid", hostPid);
+    want->SetElementName("bundleName", "abilityName");
+    want->SetModuleName("moduleName");
+
+    // do test2
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want);
+    // do test3
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr);
+
+    // fill extensionAbilityType
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR; // 504
+    // EXPECT_CALL
+    EXPECT_CALL(ResSchedUtil::GetInstance(), ReportUIExtensionProcColdStartToRss(
+        Eq(static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR)),
+        Eq(hostPid),
+        StrEq(""),
+        StrEq("bundleName"),
+        StrEq("abilityName"),
+        StrEq("moduleName")
+    )).Times(1);
+    // do test4
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+
+    // fill appRunningManager_
+    std::string hostBundleName = "wantHostBundleName";
+    std::shared_ptr<ApplicationInfo> infoHost = std::make_shared<ApplicationInfo>();
+    infoHost->bundleName = hostBundleName;
+    int32_t recordIdHost = RECORD_ID + 1;
+    std::string processNameHost = "appRunningRecordProcessNameHost";
+    auto appRunningRecordHost = std::make_shared<AppRunningRecord>(infoHost, recordIdHost, processNameHost);
+    ASSERT_NE(appRunningRecordHost, nullptr);
+    appRunningRecordHost->priorityObject_->pid_ = hostPid;
+    appMgrServiceInner->appRunningManager_->appRunningRecordMap_.emplace(recordIdHost, appRunningRecordHost);
+
+    // fill abilityInfo_
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER; // 404
+
+    // EXPECT_CALL
+    EXPECT_CALL(ResSchedUtil::GetInstance(), ReportUIExtensionProcColdStartToRss(
+        Eq(static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR)),
+        Eq(hostPid),
+        StrEq(hostBundleName),
+        StrEq("bundleName"),
+        StrEq("abilityName"),
+        StrEq("moduleName")
+    )).Times(1);
+    // do test5
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+
+    // fill abilityInfo_ with not UIExtension
+    abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    // do test6
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
 }
 
 /**
@@ -4084,6 +4247,27 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_002, TestSize.Level2)
 #endif // WITH_DLP
 
 /**
+ * @tc.name: BuildStartFlags_003
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_003, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_003 start");
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    abilityInfo.applicationInfo.debug = true;
+    abilityInfo.applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << StartFlags::DEBUGGABLE);
+    EXPECT_EQ(result, flag);
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_003 end");
+}
+
+/**
  * @tc.name: RegisterFocusListener_001
  * @tc.desc: register focus listener.
  * @tc.type: FUNC
@@ -5244,7 +5428,6 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
-    EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
     appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
 }
 
@@ -5992,6 +6175,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0001, TestSize.Level1)
     std::string flag = "uiext_flag";
     want.SetParam("ohoSpecifiedProcessFlag", flag);
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = true;
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, flag);
 }
@@ -6055,6 +6239,52 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0004, TestSize.Level1)
     std::string flag = "uiext_flag";
     want.SetParam("ohoSpecifiedProcessFlag", flag);
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0005
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns the correct flag when AbilityInfo is a UIExtension and
+ * isolationProcess is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0005, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = true;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = true;
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, flag);
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0006
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns the correct flag when AbilityInfo is a UIExtension and
+ * isolationProcess is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0006, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = true;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    MockMyAppUtilsFlag::flag_ = false;
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, "");
 }

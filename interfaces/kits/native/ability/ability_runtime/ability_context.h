@@ -51,6 +51,7 @@ using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
 using RequestDialogResultTask = std::function<void(int32_t resultCode, const AAFwk::Want&)>;
 using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
+using BindingObjectConfigUpdateCallback = std::function<void(std::shared_ptr<AppExecFwk::Configuration> config)>;
 class LocalCallContainer;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 class AbilityContext : public Context {
@@ -174,6 +175,8 @@ public:
 
     virtual ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) = 0;
 
+    virtual ErrCode RestoreWindowStage(void *contentStorage) = 0;
+
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
@@ -287,6 +290,13 @@ public:
     virtual std::unique_ptr<NativeReference>& GetContentStorage() = 0;
 
     /**
+     * @brief Get EtsContentStorage.
+     *
+     * @return Returns the ContentStorage.
+     */
+    virtual void *GetEtsContentStorage() = 0;
+
+    /**
      * call function by callback object
      *
      * @param want Request info for ability.
@@ -392,6 +402,8 @@ public:
     virtual std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const = 0;
     virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config) = 0;
     virtual void SetAbilityColorMode(int32_t colorMode) = 0;
+    virtual void RegisterBindingObjectConfigUpdateCallback(BindingObjectConfigUpdateCallback callback) = 0;
+    virtual void NotifyBindingObjectConfigUpdate() = 0;
     virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) = 0;
     virtual bool GetHookOff() = 0;
     virtual void SetHookOff(bool hookOff) = 0;
@@ -517,7 +529,7 @@ public:
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) = 0;
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail) = 0;
 
     virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions) = 0;

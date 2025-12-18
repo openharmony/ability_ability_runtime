@@ -34,6 +34,10 @@ namespace AbilityRuntime {
 #ifdef SUPPORT_GRAPHICS
 using GetDisplayConfigCallback = std::function<bool(uint64_t displayId, float &density, std::string &directionStr)>;
 #endif
+#ifdef SUPPORT_SCREEN
+class UIAbility;
+using GetAllUIAbilitiesCallback = std::function<void(std::vector<std::shared_ptr<UIAbility>> &uiAbility)>;
+#endif
 class ContextImpl : public Context {
 public:
     ContextImpl();
@@ -93,7 +97,7 @@ public:
      *
      * @param tempPaths Return all temporary directories of the application.
      */
-    virtual void GetAllTempDir(std::vector<std::string> &tempPaths);
+    void GetAllTempBase(std::vector<std::string> &tempPaths);
 
     /**
      * @brief Obtains the directory for storing files for the application on the device's internal storage.
@@ -438,6 +442,20 @@ public:
 
     std::string GetLatestParameter();
 
+#ifdef SUPPORT_SCREEN
+    /**
+     * @brief Query all UIAbilities of the current process.
+     * @param uIAbilities Output parameters, return UIAbility list.
+     */
+    void GetAllUIAbilities(std::vector<std::shared_ptr<UIAbility>> &uiAbility);
+
+    /**
+     * @brief Register the callback function to get all UIAbilities of the current process.
+     * @param getAllUIAbilitiesCallback The registered callback function
+     */
+    void RegisterGetAllUIAbilitiesCallback(GetAllUIAbilitiesCallback getAllUIAbilitiesCallback);
+#endif
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Create a context by displayId. This Context updates the density and direction properties
@@ -546,6 +564,7 @@ private:
     void ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl);
     bool UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
         float density, std::string direction);
+    std::string GetBaseDir(const std::string &area) const;
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
@@ -584,6 +603,12 @@ private:
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;
 #endif
+
+#ifdef SUPPORT_SCREEN
+    static std::mutex getAllUIAbilitiesCallbackMutex_;
+    static GetAllUIAbilitiesCallback getAllUIAbilitiesCallback_;
+#endif
+
     std::shared_ptr<Context> WrapContext(const std::string &pluginBundleName, const std::string &moduleName,
         std::shared_ptr<Context> inputContext, AppExecFwk::PluginBundleInfo &pluginBundleInfo,
         const std::string &hostBundleName);

@@ -300,6 +300,7 @@ void ExtensionConfig::LoadScreenUnlockAccess(const nlohmann::json &object,
     screenUnlockAccess.interceptExcludeSystemApp =
         JsonUtils::GetInstance().JsonToBool(accessJson, INTERCEPT_EXCLUDE_SYSTEM_APP, false);
     JsonUtils::GetInstance().JsonToUnorderedStrSet(accessJson, BLOCK_LIST, screenUnlockAccess.blockList);
+    JsonUtils::GetInstance().JsonToUnorderedStrSet(accessJson, ALLOW_LIST, screenUnlockAccess.allowList);
     TAG_LOGD(AAFwkTag::ABILITYMGR,
         "The %{public}s extension's screen_unlock_access, intercept:%{public}d, excludeSystemApp:%{public}d",
         extensionTypeName.c_str(), screenUnlockAccess.intercept, screenUnlockAccess.interceptExcludeSystemApp);
@@ -450,6 +451,21 @@ bool ExtensionConfig::IsScreenUnlockIntercept(const std::string &extensionTypeNa
         return true;
     }
     return !screenUnlockAccess.interceptExcludeSystemApp;
+}
+
+bool ExtensionConfig::IsScreenUnlockAllowAbility(const std::string &extensionTypeName, const std::string &bundleName,
+    const std::string &abilityName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    const auto &screenUnlockAccess = iter->second.screenUnlockAccess;
+    if (!screenUnlockAccess.allowList.empty()) {
+        return screenUnlockAccess.allowList.find(bundleName + "/" + abilityName) != screenUnlockAccess.allowList.end();
+    }
+    return false;
 }
 
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)

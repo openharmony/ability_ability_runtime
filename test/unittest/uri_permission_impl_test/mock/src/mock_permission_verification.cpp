@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ constexpr const char* PERMISSION_READ_AUDIO = "ohos.permission.READ_AUDIO";
 constexpr const char* PERMISSION_PROXY_AUTHORIZATION_URI = "ohos.permission.PROXY_AUTHORIZATION_URI";
 constexpr const char* PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED = "ohos.permission.GRANT_URI_PERMISSION_PRIVILEGED";
 constexpr const char* PERMISSION_READ_WRITE_DOWNLOAD = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
-constexpr const char* PERMISSION_READ_WRITE_DESKTON = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
+constexpr const char* PERMISSION_READ_WRITE_DESKTOP = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DOCUMENTS = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
 constexpr const char* PERMISSION_FILE_ACCESS_PERSIST = "ohos.permission.FILE_ACCESS_PERSIST";
 constexpr const char* PERMISSION_GRANT_URI_PERMISSION_AS_CALLER = "ohos.permission.GRANT_URI_PERMISSION_AS_CALLER";
@@ -62,7 +62,7 @@ bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const
     if (permissionName == PERMISSION_READ_WRITE_DOWNLOAD) {
         return MyFlag::permissionReadWriteDownload_;
     }
-    if (permissionName == PERMISSION_READ_WRITE_DESKTON) {
+    if (permissionName == PERMISSION_READ_WRITE_DESKTOP) {
         return MyFlag::permissionReadWriteDesktop_;
     }
     if (permissionName == PERMISSION_READ_WRITE_DOCUMENTS) {
@@ -79,7 +79,8 @@ bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const
     }
     return false;
 }
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+    const uint32_t specifyTokenId) const
 {
     return !!(MyFlag::flag_);
 }
@@ -178,6 +179,10 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     return MyFlag::flag_;
 }
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
+{
+    return true;
+}
+bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const
 {
     return true;
 }

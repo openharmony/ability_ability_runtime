@@ -25,6 +25,7 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_delay_result_callback_mgr.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "js_ability_lifecycle_callback.h"
@@ -131,6 +132,7 @@ JsUIExtension::~JsUIExtension()
         jsRuntime_.FreeNativeReference(std::move(item.second));
     }
     contentSessions_.clear();
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
 }
 
 void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -515,12 +517,18 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
         return false;
     }
-
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executorInfo.executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
+    RegisterUiExtensionDelayResultCallback(executorInfo.executeParam->insightIntentId_, sessionInfo, isDecorator);
     int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
         // callback has removed, release in insight intent executor.
+        InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+            executorInfo.executeParam->insightIntentId_);
+    } else {
+        intentId_ = executorInfo.executeParam->insightIntentId_;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;
@@ -700,9 +708,9 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     bool hasHigh = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH);
     bool hasLow = want.HasParameter(UIEXTENSION_LAUNCH_TIMESTAMP_LOW);
     if (hasHigh && hasLow) {
-        int32_t high = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1);
-        int32_t low = want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1);
-        uint64_t temp = (static_cast<uint64_t>(high) << 32) | (static_cast<uint64_t>(low) & 0xFFFFFFFFLL);
+        uint32_t high = static_cast<uint32_t>(want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_HIGH, -1));
+        uint32_t low = static_cast<uint32_t>(want.GetIntParam(UIEXTENSION_LAUNCH_TIMESTAMP_LOW, -1));
+        uint64_t temp = (static_cast<uint64_t>(high) << 32) | low;
         launchTimestamp = static_cast<int64_t>(temp);
     }
     option->SetStartModalExtensionTimeStamp(launchTimestamp);
@@ -764,7 +772,12 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     }
 #endif // SUPPORT_GRAPHICS
     foregroundWindows_.erase(componentId);
-    contentSessions_.erase(componentId);
+    if (contentSessions_.find(componentId) != contentSessions_.end()) {
+        if (contentSessions_[componentId] != nullptr) {
+            jsRuntime_.FreeNativeReference(std::move(contentSessions_[componentId]));
+        }
+        contentSessions_.erase(componentId);
+    }
     if (abilityResultListeners_) {
         abilityResultListeners_->RemoveListener(componentId);
     }

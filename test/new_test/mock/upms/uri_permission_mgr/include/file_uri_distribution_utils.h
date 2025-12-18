@@ -110,6 +110,11 @@ public:
     {
         return false;
     }
+    
+    static bool IsDFSCall()
+    {
+        return false;
+    }
 };
 } // OHOS
 } // AAFwk

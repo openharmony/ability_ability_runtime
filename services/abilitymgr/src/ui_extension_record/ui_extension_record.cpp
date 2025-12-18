@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-UIExtensionRecord::UIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord)
+UIExtensionRecord::UIExtensionRecord(const std::shared_ptr<AAFwk::BaseExtensionRecord> &abilityRecord)
     : ExtensionRecord(abilityRecord)
 {}
 

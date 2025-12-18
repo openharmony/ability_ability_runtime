@@ -254,7 +254,7 @@ void AppRunningRecord::ScheduleTrimMemory()
 {
 }
 
-void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level, bool isShellCall)
 {
 }
 
@@ -873,6 +873,11 @@ void AppRunningRecord::SetParentAppRecord(std::shared_ptr<AppRunningRecord> appR
 std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
 {
     return parentAppRecord_.lock();
+}
+
+void AppRunningRecord::SetProcessType(ProcessType processType)
+{
+    processType_ = processType;
 }
 
 int32_t AppRunningRecord::ChangeAppGcState(int32_t state, uint64_t tid)

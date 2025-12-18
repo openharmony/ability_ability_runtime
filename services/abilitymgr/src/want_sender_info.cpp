@@ -43,6 +43,7 @@ bool WantSenderInfo::ReadFromParcel(Parcel &parcel)
     }
     flags = parcel.ReadUint32();
     userId = parcel.ReadInt32();
+    appIndex = parcel.ReadInt32();
     return true;
 }
 
@@ -77,6 +78,7 @@ bool WantSenderInfo::Marshalling(Parcel &parcel) const
     }
     parcel.WriteUint32(flags);
     parcel.WriteInt32(userId);
+    parcel.WriteInt32(appIndex);
     return true;
 }
 }  // namespace AAFwk

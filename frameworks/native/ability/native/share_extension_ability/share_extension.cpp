@@ -15,6 +15,7 @@
 
 #include "share_extension.h"
 
+#include "ets_share_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "js_share_extension.h"
 #include "cj_share_extension_instance.h"
@@ -34,6 +35,8 @@ ShareExtension *ShareExtension::Create(const std::unique_ptr<Runtime> &runtime)
             return JsShareExtension::Create(runtime);
         case Runtime::Language::CJ:
             return CreateCJShareExtension(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSShareExtension(runtime);
         default:
             return new ShareExtension();
     }

@@ -46,11 +46,11 @@ const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NA
 const std::string CJ_COMPATIBILITY_PATH = SANDBOX_LIB_PATH + "/runtime";
 const std::string CJ_MOCK_PATH = SANDBOX_LIB_PATH + "/ohos";
 #ifdef APP_USE_ARM
-const std::string CJ_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk:/system/lib/chipset-sdk";
+const std::string CJ_CHIPSDK_PATH = "/system/lib/chipset-sdk-sp:/system/lib/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib/platformsdk/cjsdk";
 const std::string CJ_RUNTIME_PATH = "/system/lib/platformsdk/cjsdk/runtime";
 #else
-const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk:/system/lib64/chipset-sdk";
+const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-sdk-sp:/system/lib64/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib64/platformsdk/cjsdk";
 const std::string CJ_RUNTIME_PATH = "/system/lib64/platformsdk/cjsdk/runtime";
 #endif
@@ -304,6 +304,7 @@ CJEnvironment* CJEnvironment::GetInstance()
     return instance_;
 }
 
+#ifdef __OHOS__
 bool CJEnvironment::RegisterCangjieCallback()
 {
     constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
@@ -349,6 +350,7 @@ void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
     auto dso = DynamicLoadLibrary(&sdk, runtimeLibName, 1);
     return dso;
 }
+#endif
 
 bool CJEnvironment::LoadRuntimeApis()
 {
@@ -713,7 +715,9 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         UnLoadCJLibrary(handle);
         return nullptr;
     }
+#ifdef __OHOS__
     CJEnvironment::RegisterCangjieCallback();
+#endif
     isLoadCJLibrary_ = true;
     return handle;
 }

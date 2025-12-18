@@ -85,6 +85,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_event_subscriber.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_stub.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_record/ability_request.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_running_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_start_with_wait_observer_manager/ability_start_with_wait_observer_manager.cpp",
@@ -116,6 +117,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/exit_info_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_config.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/extension_record/base_extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record_factory.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record_manager.cpp",
@@ -169,6 +171,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/restart_app_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sa_interceptor_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/screen_lock/unlock_screen_callback.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/screen_lock/unlock_screen_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
@@ -315,6 +318,10 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "window_manager:sms",
     "window_manager:window_animation_utils",
   ]
+
+  if (resource_schedule_service_enable) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+  }
 
   if (ability_runtime_dsoftbus_enable) {
     external_deps += [ "dsoftbus:softbus_client" ]

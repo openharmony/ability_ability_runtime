@@ -514,7 +514,9 @@ int32_t AppSpawnClient::AppspawnCreateDefaultMsg(const AppSpawnStartMsg &startMs
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             break;
         }
-        if (AppspawnSetExtMsg(startMsg, reqHandle)) {
+        ret = AppspawnSetExtMsg(startMsg, reqHandle);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             break;
         }
         return ret;

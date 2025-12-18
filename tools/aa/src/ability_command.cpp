@@ -46,6 +46,7 @@ constexpr int INDEX_OFFSET = 3;
 constexpr int EXTRA_ARGUMENTS_FOR_KEY_VALUE_PAIR = 1;
 constexpr int EXTRA_ARGUMENTS_FOR_NULL_STRING = 0;
 constexpr int OPTION_PARAMETER_VALUE_OFFSET = 1;
+constexpr int SHORT_OPTION_INDEX = 1;
 
 constexpr int OPTION_PARAMETER_INTEGER = 257;
 constexpr int OPTION_PARAMETER_STRING = 258;
@@ -68,6 +69,7 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
 const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNR";
+const std::string SHORT_OPTION_CHARS = "chdabetpsmAUCDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
@@ -130,7 +132,7 @@ const std::string ERR_INVALID_VALUE_SOLUTION_ONE =
 const std::string ERR_INVALID_PID_VALUE_SOLUTION_ONE =
     "Check if the pid specified by the application exists.";
 const std::string ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE =
-    "Check if the value range of level is [0, 1, 2].";
+    "Check if the value range of level is [0, 1, 2, 3, 4, 5, 6].";
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
@@ -756,7 +758,8 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
     std::string bundleName = argList_[0];
     TAG_LOGI(AAFwkTag::AA_TOOL, "Bundle name %{public}s", bundleName.c_str());
 
-    auto killReason = Reason::REASON_UNKNOWN;
+    auto reason = Reason::REASON_UNKNOWN;
+    std::string inputReason = "aa force-stop";
     pid_t pid = 0;
     for (auto index = INDEX_OFFSET; index < argc_; ++index) {
         TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
@@ -772,23 +775,23 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
             index++;
             if (index <= argc_) {
                 TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
-                std::string inputReason = argv_[index];
-                killReason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
+                inputReason = argv_[index];
+                reason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
             }
         }
     }
 
-    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}d", pid, killReason);
-    if (pid != 0 && killReason != Reason::REASON_UNKNOWN) {
-        ExitReason exitReason = {killReason, "aa force-stop"};
+    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}s", pid, inputReason.c_str());
+    if (pid != 0 && reason != Reason::REASON_UNKNOWN) {
+        ExitReason exitReason = {reason, "aa force-stop"};
         if (AbilityManagerClient::GetInstance()->RecordProcessExitReason(pid, exitReason) != ERR_OK) {
             TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s record reason %{public}d failed",
-                bundleName.c_str(), killReason);
+                bundleName.c_str(), reason);
         }
     }
 
     ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->KillProcess(bundleName);
+    result = AbilityManagerClient::GetInstance()->KillProcess(bundleName, false, 0, inputReason);
     if (result == OHOS::ERR_OK) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_FORCE_STOP_OK.c_str());
         resultReceiver_ = STRING_FORCE_STOP_OK + "\n";
@@ -1037,10 +1040,9 @@ ErrCode AbilityManagerShellCommand::RunAsSendMemoryLevelCommand()
         return ERR_INVALID_VALUE;
     }
 
-    if (!(inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE ||
-        inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_CRITICAL ||
-        inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_LOW)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "level value error. Valid values: 0-2 (0: Moderate, 1: Low, 2: Critical)");
+    if (!(inputLevel >= OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE &&
+        inputLevel <= OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_BACKGROUND_CRITICAL)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "level value error. Valid values: 0-6");
         resultReceiver_.append(STRING_SEND_MEMORY_LEVEL_NG + "\n");
         resultReceiver_.append(GetMessageFromCode(INVALID_LEVEL));
         return ERR_INVALID_VALUE;
@@ -1174,12 +1176,57 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     return true;
 }
 
+bool AbilityManagerShellCommand::IsLongStartOption(const std::string &argv)
+{
+    if (argv.find("--") != 0) {
+        return false;
+    }
+    static std::vector<std::string> longOptions;
+    if (longOptions.empty()) {
+        for (const auto &longOpt : LONG_OPTIONS) {
+            if (longOpt.name == nullptr) {
+                break;
+            }
+            longOptions.emplace_back(std::string("--") + longOpt.name);
+        }
+    }
+    for (const std::string &longOption : longOptions) {
+        if (argv.find(longOption) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AbilityManagerShellCommand::IsShortStartOption(const std::string &argv)
+{
+    std::string shortOption = "-c";
+    for (char c : SHORT_OPTION_CHARS) {
+        shortOption[SHORT_OPTION_INDEX] = c;
+        if (argv.find(shortOption) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AbilityManagerShellCommand::IsStartOption(const std::string &argv)
+{
+    if (argv.empty() || (argv.find("-") != 0 && argv.find("--") != 0)) {
+        return false;
+    }
+    if (IsLongStartOption(argv)) {
+        return true;
+    }
+    return IsShortStartOption(argv);
+}
+
 bool AbilityManagerShellCommand::CheckParameters(int extraArguments)
 {
     if (optind + extraArguments >= argc_) return false;
     int index = optind + 1; // optind is the index of 'start' which is right behind optarg
     int count = 0;
-    while (index < argc_ && argv_[index][0] != '-') {
+    while (index < argc_ && !IsStartOption(argv_[index])) {
         count++;
         index++;
     }
@@ -1190,15 +1237,21 @@ bool AbilityManagerShellCommand::CheckParameters(int extraArguments)
 ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi)
 {
     std::string key = optarg;
-    std::string intString = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
-    if (!std::regex_match(intString, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+    char *tmp = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
+    std::string intString = tmp;
+    argv_[optind + OPTION_PARAMETER_VALUE_OFFSET] = argv_[optind];
+    argv_[optind] = tmp;
+    ++optind;
+    int32_t intValue = 0;
+    auto res = std::from_chars(intString.c_str(), intString.c_str() + intString.size(), intValue);
+    if (res.ec != std::errc() || res.ptr != intString.c_str() + intString.size()) {
         resultReceiver_.append("invalid parameter ");
         resultReceiver_.append(intString);
         resultReceiver_.append(" for integer option\n");
 
         return OHOS::ERR_INVALID_VALUE;
     }
-    pi[key] = atoi(argv_[optind + OPTION_PARAMETER_VALUE_OFFSET]);
+    pi[key] = intValue;
     return OHOS::ERR_OK;
 }
 
@@ -1207,8 +1260,13 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersString& ps, bool isNull
 {
     std::string key = optarg;
     std::string value = "";
-    if (!isNull)
-        value = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
+    if (!isNull) {
+        char *tmp = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
+        value = tmp;
+        argv_[optind + OPTION_PARAMETER_VALUE_OFFSET] = argv_[optind];
+        argv_[optind] = tmp;
+        ++optind;
+    }
 
     ps[key] = value;
 
@@ -1219,7 +1277,11 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersString& ps, bool isNull
 ErrCode AbilityManagerShellCommand::ParseParam(ParametersBool& pb)
 {
     std::string key = optarg;
-    std::string boolString = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
+    char *tmp = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
+    std::string boolString = tmp;
+    argv_[optind + OPTION_PARAMETER_VALUE_OFFSET] = argv_[optind];
+    argv_[optind] = tmp;
+    ++optind;
     std::transform(boolString.begin(), boolString.end(), boolString.begin(), ::tolower);
     bool value;
     if (boolString == "true" || boolString == "t") {
@@ -1228,7 +1290,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersBool& pb)
         value = false;
     } else {
         resultReceiver_.append("invalid parameter ");
-        resultReceiver_.append(argv_[optind + OPTION_PARAMETER_VALUE_OFFSET]);
+        resultReceiver_.append(boolString);
         resultReceiver_.append(" for bool option\n");
 
         return OHOS::ERR_INVALID_VALUE;
@@ -1939,8 +2001,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // parse option arguments into a key-value map
                 result = ParseParam(parametersInteger);
 
-                optind++;
-
                 break;
             }
             case OPTION_PARAMETER_STRING: {
@@ -1954,8 +2014,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // parse option arguments into a key-value map
                 result = ParseParam(parametersString);
 
-                optind++;
-
                 break;
             }
             case OPTION_PARAMETER_BOOL: {
@@ -1968,8 +2026,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 // parse option arguments into a key-value map
                 result = ParseParam(parametersBool);
-
-                optind++;
 
                 break;
             }

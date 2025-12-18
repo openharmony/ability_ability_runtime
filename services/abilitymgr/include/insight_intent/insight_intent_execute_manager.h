@@ -78,7 +78,8 @@ public:
         const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName = "",
         const bool ignoreAbilityName = false);
 
-    int32_t CheckAndUpdateWant(Want &want, AppExecFwk::ExecuteMode executeMode, std::string callerBundleName = "");
+    int32_t CheckAndUpdateWant(Want &want, AppExecFwk::ExecuteMode executeMode, int32_t userId,
+        std::string callerBundleName = "");
 
     int32_t RemoveExecuteIntent(uint64_t intentId);
 
@@ -104,6 +105,8 @@ public:
     static int32_t CheckCallerPermission();
 
     static int32_t CheckGetInsightIntenInfoPermission();
+
+    void OnInsightAppDied(const std::string &bundleName);
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
@@ -128,7 +131,7 @@ private:
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
     static int32_t UpdateEntryDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
-    static int32_t UpdateEntryDecoratorParams(Want &want, AppExecFwk::ExecuteMode executeMode);
+    static int32_t UpdateEntryDecoratorParams(Want &want, AppExecFwk::ExecuteMode executeMode, int32_t userId);
     static std::string GetMainElementName(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param);
 
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);

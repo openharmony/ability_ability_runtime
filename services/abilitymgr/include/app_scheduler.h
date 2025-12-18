@@ -333,7 +333,8 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
+    int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0,
+        const std::string &reason = "KillApplication");
 
     /**
      * ForceKillApplication, force kill the application.
@@ -440,7 +441,7 @@ public:
      * @param requestId request id to callback
      */
     void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0);
+        int32_t requestId = 0, const std::string &customProcess = "");
 
     /**
      * @brief Get running process information.

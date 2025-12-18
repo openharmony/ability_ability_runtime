@@ -918,14 +918,36 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT) {
         return StartSelfUIAbilityWithPidResultInner(data, reply);
     }
+    return ERR_CODE_NOT_EXIST;
+}
+
+int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    AbilityManagerInterfaceCode interfaceCode = static_cast<AbilityManagerInterfaceCode>(code);
+    if (interfaceCode == AbilityManagerInterfaceCode::UN_PRELOAD_UI_EXTENSION_ABILITY) {
+        return UnPreloadUIExtensionAbilityInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::CLEAR_ALL_PRELOAD_UI_EXTENSION_ABILITY) {
+        return ClearAllPreloadUIExtensionAbilityInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT) {
+        return RegisterPreloadUIExtensionHostClientInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT) {
+        return UnRegisterPreloadUIExtensionHostClientInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
+        return UnregisterForegroundAppObserverInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::START_PRELAUNCH_ABILITY) {
         return StartAbilityForPrelaunchInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
         return RegisterForegroundAppObserverInner(data, reply);
     }
-    if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_FOREGROUND_APP_CONNECTION_OBSERVER) {
-        return UnregisterForegroundAppObserverInner(data, reply);
+    if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
+        return ManualStartAutoStartupAppsInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -1050,6 +1072,10 @@ int AbilityManagerStub::HandleOnRemoteRequestInnerThird(uint32_t code, MessagePa
 {
     int retCode = ERR_OK;
     retCode = OnRemoteRequestInnerTwentyFirst(code, data, reply, option);
+    if (retCode != ERR_CODE_NOT_EXIST) {
+        return retCode;
+    }
+    retCode = OnRemoteRequestInnerTwentySecond(code, data, reply, option);
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
@@ -1374,7 +1400,8 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
     std::string bundleName = Str16ToStr8(data.ReadString16());
     bool clearPageStack = data.ReadBool();
     auto appIndex = data.ReadInt32();
-    int result = KillProcess(bundleName, clearPageStack, appIndex);
+    std::string reason = Str16ToStr8(data.ReadString16());
+    int result = KillProcess(bundleName, clearPageStack, appIndex, reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
         return ERR_INVALID_VALUE;
@@ -1418,7 +1445,8 @@ int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &re
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartAbility(*want, userId, requestCode);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = StartAbility(*want, userId, requestCode, specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1554,7 +1582,8 @@ int AbilityManagerStub::PreloadUIExtensionAbilityInner(MessageParcel &data, Mess
     std::string hostBundleName = Str16ToStr8(data.ReadString16());
     int32_t userId = data.ReadInt32();
     int32_t hostPid = data.ReadInt32();
-    int32_t result = PreloadUIExtensionAbility(*want, hostBundleName, userId, hostPid);
+    int32_t requestCode = data.ReadInt32();
+    int32_t result = PreloadUIExtensionAbility(*want, hostBundleName, userId, hostPid, requestCode);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1707,7 +1736,8 @@ int AbilityManagerStub::StartAbilityAddCallerInner(MessageParcel &data, MessageP
 
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartAbility(*want, callerToken, userId, requestCode);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = StartAbility(*want, callerToken, userId, requestCode, specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1803,7 +1833,9 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     int32_t userId = data.ReadInt32();
     AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
     bool isQueryExtensionOnly = data.ReadBool();
-    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly);
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly,
+        specifiedFullTokenId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -2510,8 +2542,10 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
 
     int32_t accountId = data.ReadInt32();
     bool isSilent = data.ReadBool();
+    bool promotePriority = data.ReadBool();
     std::string errMsg = "";
-    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent);
+    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent,
+        promotePriority);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteString(errMsg);
@@ -3851,6 +3885,14 @@ int32_t AbilityManagerStub::GetAutoStartupStatusForSelfInner(MessageParcel &data
     return result;
 }
 
+int32_t AbilityManagerStub::ManualStartAutoStartupAppsInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    int32_t result = ManualStartAutoStartupApps(userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> handler = data.ReadRemoteObject();
@@ -4789,12 +4831,12 @@ int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &da
         return ERR_INVALID_VALUE;
     }
     std::string moduleName = data.ReadString();
-    std::string hostBundleName = data.ReadString();
+    int32_t hostPid = data.ReadInt32();
     int32_t userId = data.ReadInt32();
 
     int32_t recordNum;
     int32_t result = QueryPreLoadUIExtensionRecord(
-        *element, moduleName, hostBundleName, recordNum, userId);
+        *element, moduleName, hostPid, recordNum, userId);
     if (!reply.WriteInt32(recordNum)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "reply write recordNum fail");
         return INNER_ERR;
@@ -4847,8 +4889,9 @@ int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, Me
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAllInsightIntentInfoInner");
     auto flag = static_cast<AbilityRuntime::GetInsightIntentFlag>(data.ReadUint32());
+    auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
-    int32_t result = GetAllInsightIntentInfo(flag, infos);
+    int32_t result = GetAllInsightIntentInfo(flag, infos, userId);
     if (!reply.WriteInt32(infos.size())) {
         return INNER_ERR;
     }
@@ -4868,8 +4911,9 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByBundleNameInner(MessageParcel 
 {
     auto flag = static_cast<AbilityRuntime::GetInsightIntentFlag>(data.ReadUint32());
     auto bundleName = std::string(data.ReadString());
+    auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
-    int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+    int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
     if (!reply.WriteInt32(infos.size())) {
         return INNER_ERR;
     }
@@ -4891,8 +4935,9 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByIntentNameInner(MessageParcel 
     auto bundleName = std::string(data.ReadString());
     auto modlueName = std::string(data.ReadString());
     auto intentName = std::string(data.ReadString());
+    auto userId = data.ReadInt32();
     InsightIntentInfoForQuery info;
-    int32_t result = GetInsightIntentInfoByIntentName(flag, bundleName, modlueName, intentName, info);
+    int32_t result = GetInsightIntentInfoByIntentName(flag, bundleName, modlueName, intentName, info, userId);
     if (!reply.WriteParcelable(&info)) {
         return INNER_ERR;
     }
@@ -5113,6 +5158,43 @@ int AbilityManagerStub::StartSelfUIAbilityInCurrentProcessInner(MessageParcel &d
 int AbilityManagerStub::IsRestartAppLimitInner(MessageParcel &data, MessageParcel &reply)
 {
     reply.WriteBool(IsRestartAppLimit());
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::UnPreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t extensionAbilityId = data.ReadInt32();
+    int32_t userId = data.ReadInt32();
+    int32_t result = ClearPreloadedUIExtensionAbility(extensionAbilityId, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::ClearAllPreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    int32_t result = ClearPreloadedUIExtensionAbilities(userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterPreloadUIExtensionHostClientInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterPreloadUIExtensionHostClient(callerToken);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::UnRegisterPreloadUIExtensionHostClientInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t callerPid = data.ReadInt32();
+    int32_t result = UnRegisterPreloadUIExtensionHostClient(callerPid);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 } // namespace AAFwk

@@ -75,6 +75,11 @@ struct UncatchableTaskInfo {
     int32_t pid;
     std::string processName;
 };
+struct RuntimeUpdateParam {
+    AbilityRuntime::Runtime::Options option;
+    UncatchableTaskInfo uncatchableTaskInfo;
+    std::string hapPath;
+};
 class ContextDeal;
 struct ModuleTestRunner;
 // class Global::Resource::ResourceManager;
@@ -187,7 +192,7 @@ public:
      *
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      */
-    void ScheduleMemoryLevel(const int level) override;
+    void ScheduleMemoryLevel(const int level, bool isShellCall = false) override;
 
     /**
      *
@@ -687,6 +692,10 @@ private:
 
     bool IsPluginNamespaceInherited();
 
+    std::string ParsePluginDefaultNamespaceLdDictionary();
+
+    bool GetBundleAndHspListForUpdateRuntime(BundleInfo &bundleInfo, std::string bundleName, HspList &hspList);
+
     /**
      * @brief parse app configuration params
      *
@@ -743,6 +752,8 @@ private:
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
     bool isPluginNamespaceInherited_ = false;
+    std::string pluginDefaultNamespaceLdDictionary_ = "";
+    RuntimeUpdateParam runtimeUpdateParam_;
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
     std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
@@ -816,6 +827,7 @@ private:
     void RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData);
     bool GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
         AppExecFwk::ModuleTestRunner &tsTestRunner);
+    bool CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
     void SleepCleanKill();
 
     std::vector<std::string> fileEntries_;

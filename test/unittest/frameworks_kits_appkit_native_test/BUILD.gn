@@ -1173,9 +1173,11 @@ ohos_unittest("startup_manager_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_listener.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_task_result.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_utils.cpp",
     "app_startup_task_matcher_test.cpp",
     "startup_manager_test.cpp",
+    "startup_task_result_test.cpp",
   ]
 
   configs = [ ":module_context_config" ]
@@ -1260,6 +1262,7 @@ ohos_unittest("startup_manager_mock_test") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 

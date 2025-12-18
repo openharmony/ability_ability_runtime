@@ -29,7 +29,7 @@ AbilityStartWithWaitObserverManager& AbilityStartWithWaitObserverManager::GetIns
     static AbilityStartWithWaitObserverManager instance;
     return instance;
 }
- 
+
 int32_t AbilityStartWithWaitObserverManager::RegisterObserver(Want &want, sptr<IAbilityStartWithWaitObserver> observer)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityStartWithWaitObserverManager::RegisterObserver called");
@@ -37,7 +37,7 @@ int32_t AbilityStartWithWaitObserverManager::RegisterObserver(Want &want, sptr<I
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
         return ERR_NULL_OBJECT;
     }
- 
+
     std::lock_guard<std::mutex> guard(oberverMutex_);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "observer list size:%{public}zu", observerList_.size());
     for (auto& ob : observerList_) {

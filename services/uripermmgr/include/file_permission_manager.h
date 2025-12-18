@@ -40,13 +40,15 @@ typedef enum OperationMode {
 
 class FilePermissionManager {
 public:
-    static std::vector<bool>
-    CheckUriPersistentPermission(std::vector<Uri> &uriVec,
-                                 uint32_t callerTokenId, uint32_t flag,
-                                 std::vector<PolicyInfo> &pathPolicies, const std::string &bundleName);
+    static std::vector<bool> CheckUriPersistentPermission(std::vector<Uri> &uriVec, uint32_t callerTokenId,
+        uint32_t flag, std::vector<PolicyInfo> &pathPolicies, const std::string &bundleName);
 
     static PolicyInfo GetPathPolicyInfoFromUri(Uri &uri, uint32_t flag, const std::string &bundleName = "");
+
+private:
+    static bool CheckDocsUriPermission(uint32_t callerTokenId, bool hasFileManagerPerm, bool hasSandboxManagerPerm,
+        const std::string &path);
 };
-} // namespace AAFwk
-} // namespace OHOS
-#endif // OHOS_AAFWK_FILE_PERMISSION_MANAGER
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_AAFWK_FILE_PERMISSION_MANAGER

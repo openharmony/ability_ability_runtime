@@ -4217,5 +4217,143 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartSelfUIAbilityInCurrentP
     auto result = stub_->StartSelfUIAbilityInCurrentProcessInner(data, reply);
     EXPECT_EQ(result, NO_ERROR);
 }
+
+/**
+ * @tc.name: UnPreloadUIExtensionAbilityInner_0100
+ * @tc.desc: UnPreloadUIExtensionAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, UnPreloadUIExtensionAbilityInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    
+    int32_t extensionAbilityId = 12345;
+    ASSERT_TRUE(data.WriteInt32(extensionAbilityId));
+    
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    ASSERT_TRUE(data.WriteInt32(userId));
+    
+    auto result = stub_->UnPreloadUIExtensionAbilityInner(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: RegisterPreloadUIExtensionHostClientInner_0100
+ * @tc.desc: RegisterPreloadUIExtensionHostClientInner with invalid token
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, RegisterPreloadUIExtensionHostClientInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    ASSERT_TRUE(data.WriteString(hostBundleName));
+    
+    int32_t hostPid = 12345;
+    ASSERT_TRUE(data.WriteInt32(hostPid));
+    
+    auto result = stub_->RegisterPreloadUIExtensionHostClientInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: UnRegisterPreloadUIExtensionHostClientInner_0100
+ * @tc.desc: UnRegisterPreloadUIExtensionHostClientInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, UnRegisterPreloadUIExtensionHostClientInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    ASSERT_TRUE(data.WriteString(hostBundleName));
+    
+    int32_t hostPid = 12345;
+    ASSERT_TRUE(data.WriteInt32(hostPid));
+    
+    auto result = stub_->UnRegisterPreloadUIExtensionHostClientInner(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: ClearAllPreloadUIExtensionAbilityInner_0100
+ * @tc.desc: ClearAllPreloadUIExtensionAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ClearAllPreloadUIExtensionAbilityInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+    auto result = stub_->ClearAllPreloadUIExtensionAbilityInner(data, reply);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: ManualStartAutoStartupAppsInner_0100
+ * @tc.desc: ManualStartAutoStartupAppsInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+    auto result = stub_->ManualStartAutoStartupAppsInner(data, reply);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0100 end");
+}
+
+/**
+ * @tc.name: ManualStartAutoStartupAppsInner_0200
+ * @tc.desc: ManualStartAutoStartupAppsInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    ASSERT_TRUE(data.WriteInt32(userId));
+
+    auto result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS), data, reply, option);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

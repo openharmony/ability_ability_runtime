@@ -52,6 +52,7 @@ constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
 constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
+constexpr const char* UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 }
@@ -541,7 +542,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
     AddAppLifecycleEvent("AppRunningRecord::LaunchPendingAbilities");
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
@@ -620,10 +621,10 @@ void AppRunningRecord::ScheduleTrimMemory()
     }
 }
 
-void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level, bool isShellCall)
 {
     if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleMemoryLevel(level);
+        appLifeCycleDeal_->ScheduleMemoryLevel(level, isShellCall);
     }
 }
 
@@ -756,28 +757,44 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
             static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
             abilityStateData.appCloneIndex = appIndex_;
     }
+    FillAbilityStateDataWithWant(ability, abilityStateData);
+    if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
+        abilityStateData.isAtomicService = true;
+    }
+    abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
+    bool isUIExtension = AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType);
+    if (isAbility && isUIExtension) {
+        abilityStateData.isInnerNotify = true;
+    }
+    abilityStateData.processType = static_cast<int32_t>(processType_);
+    abilityStateData.preloadMode = static_cast<int32_t>(preloadMode_);
+    BundleType bundleType = applicationInfo ? applicationInfo->bundleType : AppExecFwk::BundleType::APP;
+    auto serviceInner = appMgrServiceInner_.lock();
+    if (serviceInner) {
+        serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
+    }
+}
+
+void AppRunningRecord::FillAbilityStateDataWithWant(const std::shared_ptr<AbilityRunningRecord> &ability,
+    AbilityStateData &abilityStateData)
+{
+    if (ability == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ability");
+        return;
+    }
     if (ability->GetWant() != nullptr) {
         abilityStateData.callerAbilityName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
         abilityStateData.callerBundleName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         abilityStateData.callerUid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1);
         abilityStateData.callerPid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1);
-    }
-    if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        abilityStateData.isAtomicService = true;
-    }
-    bool isUIExtension = AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType);
-    if (isUIExtension) {
-        if (!isAbility) {
-            abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
-        } else {
-            abilityStateData.isInnerNotify = true;
+        abilityStateData.hostPid = ability->GetWant()->GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1);
+        auto serviceInner = appMgrServiceInner_.lock();
+        if (serviceInner) {
+            auto hostAppRecord = serviceInner->GetAppRunningRecordByPid(abilityStateData.hostPid);
+            if (hostAppRecord) {
+                abilityStateData.hostBundleName = hostAppRecord->GetBundleName();
+            }
         }
-    }
-    abilityStateData.processType = static_cast<int32_t>(processType_);
-    BundleType bundleType = applicationInfo ? applicationInfo->bundleType : AppExecFwk::BundleType::APP;
-    auto serviceInner = appMgrServiceInner_.lock();
-    if (serviceInner) {
-        serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
     }
 }
 
@@ -961,8 +978,9 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
     StateChangedNotifyObserver(
         ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
-    if (curState_ != ApplicationState::APP_STATE_FOREGROUND && curState_ != ApplicationState::APP_STATE_CACHED) {
-        TAG_LOGW(AAFwkTag::APPMGR, "wrong state");
+    if (curState_ != ApplicationState::APP_STATE_FOREGROUND && curState_ != ApplicationState::APP_STATE_CACHED &&
+        curState_ != ApplicationState::APP_STATE_READY) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wrong state: %{public}d", curState_);
         return;
     }
     int32_t foregroundSize = 0;
@@ -2059,7 +2077,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
 
     for (const auto &info : windowVisibilityInfos) {
         if (info == nullptr || info->pid_ != GetPid()) {
-            TAG_LOGW(AAFwkTag::APPMGR, "null info or info pid is not matched");
+            TAG_LOGD(AAFwkTag::APPMGR, "null info or info pid is not matched");
             continue;
         }
         std::lock_guard windowIdsLock(windowIdsLock_);
@@ -2165,6 +2183,7 @@ ExtensionAbilityType AppRunningRecord::GetExtensionType() const
 
 ProcessType AppRunningRecord::GetProcessType() const
 {
+    std::shared_lock<std::shared_mutex> lock(processTypeLock_);
     return processType_;
 }
 
@@ -2196,6 +2215,12 @@ void AppRunningRecord::SetParentAppRecord(std::shared_ptr<AppRunningRecord> appR
 std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
 {
     return parentAppRecord_.lock();
+}
+
+void AppRunningRecord::SetProcessType(ProcessType processType)
+{
+    std::unique_lock<std::shared_mutex> lock(processTypeLock_);
+    processType_ = processType;
 }
 
 int32_t AppRunningRecord::ChangeAppGcState(int32_t state, uint64_t tid)

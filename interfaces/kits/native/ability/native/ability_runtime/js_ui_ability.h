@@ -67,10 +67,11 @@ public:
      * @param application Indicates the main process
      * @param handler the UIability EventHandler object
      * @param token the remote token
+     * @param createJsObjSuc the flag indicating whether object creation succeeded
      */
     void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<OHOSApplication> application,
-        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
+        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token, bool &createObjSuc) override;
 
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
@@ -216,6 +217,12 @@ public:
     void OnSceneCreated() override;
 
     /**
+     * @brief Get WindowStage.
+     * @return Returns the napi_value of WindowStage.
+     */
+    napi_value GetWindowStage() override;
+
+    /**
      * @brief Called after ability stoped.
      * You can override this function to implement your own processing logic.
      */
@@ -359,10 +366,12 @@ public:
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
     /**
-     * @brief Called when distributed system trying to collaborate remote ability.
-     * @param want want with collaborative info.
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
      */
-    void HandleCollaboration(const Want &want) override;
+    int32_t OnCollaborate(WantParams &wantParams) override;
 
     /**
      * @brief Called when startAbility request failed.
@@ -395,8 +404,8 @@ private:
     inline bool GetInsightIntentExecutorInfo(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
-    int32_t OnCollaborate(WantParams &wantParams);
     void SetInsightIntentParam(const Want &want, bool coldStart);
+    void RegisterDelayResultCallback(const std::shared_ptr<InsightIntentExecuteParam> &executeParam);
 
     std::shared_ptr<NativeReference> jsWindowStageObj_;
     int32_t windowMode_ = 0;
@@ -414,8 +423,8 @@ private:
     int32_t CallSaveStatePromise(napi_value result, CallOnSaveStateInfo info);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
-    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
-        std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath);
+    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
+        const std::string &moduleName, const std::string &srcPath, bool &createObjSuc);
     void DoOnForegroundForSceneIsNull(const Want &want);
     void GetDumpInfo(
         napi_env env, napi_value dumpInfo, napi_value onDumpInfo, std::vector<std::string> &info);

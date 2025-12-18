@@ -64,6 +64,8 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const override;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config) override;
     void SetAbilityColorMode(int32_t colorMode) override;
+    void RegisterBindingObjectConfigUpdateCallback(BindingObjectConfigUpdateCallback callback) override;
+    void NotifyBindingObjectConfigUpdate() override;
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
@@ -124,6 +126,8 @@ public:
 
     ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) override;
 
+    ErrCode RestoreWindowStage(void *contentStorage) override;
+
     void SetStageContext(const std::shared_ptr<AbilityRuntime::Context> &stageContext);
 
     /**
@@ -154,14 +158,21 @@ public:
     }
 
     /**
+     * @brief Get ContentStorage.
+     *
+     * @return Returns the ContentStorage.
+     */
+    void *GetEtsContentStorage() override
+    {
+        return etsContentStorage_;
+    }
+
+    /**
      * @brief Get LocalCallContainer.
      *
      * @return Returns the LocalCallContainer.
      */
-    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override
-    {
-        return localCallContainer_;
-    }
+    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override;
 
     void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config) override;
 
@@ -396,7 +407,7 @@ public:
         OnAtomicRequestFailure onRequestFail, const std::string &appId) override;
 
     ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
-        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) override;
+        OnRequestResult onRequestSucc, OnRequestResult onRequestFail) override;
 
     ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions) override;
@@ -407,7 +418,9 @@ private:
     std::shared_ptr<AbilityRuntime::Context> stageContext_ = nullptr;
     std::map<int, RuntimeTask> resultCallbacks_;
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
+    void *etsContentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
+    std::mutex callContainerMutex_;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     std::atomic<bool> isTerminating_ = false;
@@ -420,6 +433,7 @@ private:
     std::atomic<bool> restoreEnabled_ = false;
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
+    BindingObjectConfigUpdateCallback bindingObjectConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
     bool isHook_ = false;
     bool hookOff_ = false;
@@ -437,6 +451,7 @@ private:
     std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
     std::vector<std::shared_ptr<OnAtomicRequestResult>> onAtomicRequestResults_;
     std::vector<std::shared_ptr<AAFwk::OnOpenLinkRequestResult>> onOpenLinkRequestResults_;
+    std::mutex contentStorageMutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
