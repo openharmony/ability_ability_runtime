@@ -79,6 +79,7 @@
 #include "perf_profile.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "process_uid_define.h"
 #include "record_cost_time_util.h"
 #include "render_state_observer_manager.h"
 #include "res_sched_util.h"
@@ -6862,46 +6863,6 @@ bool AppMgrServiceInner::GenerateUid(std::unordered_set<int32_t> &assignedUids,
     return false;
 }
 
-bool AppMgrServiceInner::GenerateRenderUid(int32_t &renderUid)
-{
-    std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
-    int32_t uid = lastRenderUid_ + 1;
-    bool needSecondScan = true;
-    if (uid > Constants::END_UID_FOR_RENDER_PROCESS) {
-        uid = Constants::START_UID_FOR_RENDER_PROCESS;
-        needSecondScan = false;
-    }
-
-    if (renderUidSet_.empty()) {
-        renderUid = uid;
-        renderUidSet_.insert(renderUid);
-        lastRenderUid_ = renderUid;
-        return true;
-    }
-
-    for (int32_t i = uid; i <= Constants::END_UID_FOR_RENDER_PROCESS; i++) {
-        if (renderUidSet_.find(i) == renderUidSet_.end()) {
-            renderUid = i;
-            renderUidSet_.insert(renderUid);
-            lastRenderUid_ = renderUid;
-            return true;
-        }
-    }
-
-    if (needSecondScan) {
-        for (int32_t i = Constants::START_UID_FOR_RENDER_PROCESS; i <= lastRenderUid_; i++) {
-            if (renderUidSet_.find(i) == renderUidSet_.end()) {
-                renderUid = i;
-                renderUidSet_.insert(renderUid);
-                lastRenderUid_ = renderUid;
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
     const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU)
 {
@@ -6913,27 +6874,50 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     auto nwebSpawnClient = remoteClientManager_->GetNWebSpawnClient();
     if (!nwebSpawnClient) {
         TAG_LOGE(AAFwkTag::APPMGR, "nwebSpawnClient null");
-        AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
-            ProcessStartFailedReason::GET_SPAWN_CLIENT_FAILED, AAFwk::ERR_GET_SPAWN_CLIENT_FAILED);
+        AppMgrEventUtil::SendRenderProcessStartFailedEvent(
+            renderRecord, ProcessStartFailedReason::GET_SPAWN_CLIENT_FAILED, AAFwk::ERR_GET_SPAWN_CLIENT_FAILED);
         return ERR_INVALID_VALUE;
     }
-    int32_t renderUid = Constants::INVALID_UID;
-    if (!GenerateRenderUid(renderUid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "generate renderUid fail:%{public}d", ERR_INVALID_OPERATION);
-        AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
-            ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, AAFwk::ERR_GENERATE_UID_FAILED);
-        return ERR_INVALID_OPERATION;
+
+    int32_t userId = -1;
+    auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+    if (osAccountMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "osAccountMgr is nullptr");
+        return ERR_INVALID_VALUE;
     }
+    int32_t errCode = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), userId);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
+        return errCode;
+    }
+
+    int32_t renderUid = Constants::INVALID_UID;
+    {
+        std::lock_guard<ffrt::mutex> lock(renderProcessIsolationUidSetLock_);
+        if (!GenerateUid(renderProcessIsolationUidSet_,
+                START_ID_FOR_RENDER_PROCESS_ISOLATION,
+                END_ID_FOR_RENDER_PROCESS_ISOLATION,
+                userId,
+                renderUid,
+                lastRenderProcessIsolationIdMap_)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "generate renderUid fail");
+            AppMgrEventUtil::SendRenderProcessStartFailedEvent(
+                renderRecord, ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
+            return ERR_INVALID_OPERATION;
+        }
+    }
+
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     SetRenderStartMsg(startMsg, renderRecord, renderUid, isGPU);
+    startMsg.uid = renderUid;
+    startMsg.gid = renderUid;
     pid_t pid = 0;
-    ErrCode errCode = nwebSpawnClient->StartProcess(startMsg, pid);
-    if (FAILED(errCode)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "spawn new render process fail, errCode %{public}08x", errCode);
-        std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
-        renderUidSet_.erase(renderUid);
-        AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
-            ProcessStartFailedReason::APPSPAWN_FAILED, static_cast<int32_t>(errCode));
+    ErrCode spawnErr = nwebSpawnClient->StartProcess(startMsg, pid);
+    if (FAILED(spawnErr)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "spawn new render process fail, errCode %{public}08x", spawnErr);
+        RemoveRenderProcessIsolationUid(renderUid);
+        AppMgrEventUtil::SendRenderProcessStartFailedEvent(
+            renderRecord, ProcessStartFailedReason::APPSPAWN_FAILED, static_cast<int32_t>(spawnErr));
         return ERR_INVALID_VALUE;
     }
     renderPid = pid;
@@ -6947,8 +6931,14 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     appRecord->AddRenderRecord(renderRecord);
     bool isPreload = appRecord->IsNWebPreload();
     TAG_LOGI(AAFwkTag::APPMGR,
-        "startRenderProcess success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d"
-        "isPreload:%{public}d", renderRecord->GetHostPid(), renderRecord->GetHostUid(), pid, renderUid, isPreload);
+        "startRenderProcess success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d, "
+        "userId:%{public}d, isPreload:%{public}d",
+        renderRecord->GetHostPid(),
+        renderRecord->GetHostUid(),
+        pid,
+        renderUid,
+        userId,
+        isPreload);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord, isPreload);
     return 0;
 }
@@ -7033,10 +7023,10 @@ void AppMgrServiceInner::RemoveRenderRecordNoAttach(const std::shared_ptr<AppRun
     if (renderRecord->GetScheduler() == nullptr) {
         hostRecord->RemoveRenderRecord(renderRecord);
         {
-            std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
-            renderUidSet_.erase(renderRecord->GetUid());
+            std::lock_guard<ffrt::mutex> lock(renderProcessIsolationUidSetLock_);
+            renderProcessIsolationUidSet_.erase(renderRecord->GetUid());
         }
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+        OnRenderProcessDied(renderRecord);
     }
 }
 
@@ -7046,11 +7036,7 @@ void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
     if (appRunningManager_) {
         auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
         if (renderRecord) {
-            {
-                std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
-                renderUidSet_.erase(renderRecord->GetUid());
-            }
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+            OnRenderProcessDied(renderRecord);
         }
     }
 }
@@ -8166,11 +8152,7 @@ void AppMgrServiceInner::KillRenderProcess(const std::shared_ptr<AppRunningRecor
                 TAG_LOGI(AAFwkTag::APPMGR, "pid:%{public}d, uid:%{public}d",
                     pid, uid);
                 KillProcessByPid(pid, "KillRenderProcess");
-                {
-                    std::lock_guard lock(renderUidSetLock_);
-                    renderUidSet_.erase(uid);
-                }
-                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+                OnRenderProcessDied(renderRecord);
             }
         }
     }
@@ -9207,6 +9189,21 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
     } else {
         childScheduler->ScheduleRunNativeProc(childRecord->GetMainProcessCallback());
         childRecord->ClearMainProcessCallback();
+    }
+}
+
+void AppMgrServiceInner::RemoveRenderProcessIsolationUid(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> lock(renderProcessIsolationUidSetLock_);
+    TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", uid);
+    renderProcessIsolationUidSet_.erase(uid);
+}
+
+void AppMgrServiceInner::OnRenderProcessDied(std::shared_ptr<RenderRecord> renderProcessRecord)
+{
+    if (renderProcessRecord) {
+        RemoveRenderProcessIsolationUid(renderProcessRecord->GetUid());
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderProcessRecord);
     }
 }
 
