@@ -95,7 +95,9 @@ bool CheckValidIntentInfoFilter(napi_env env, napi_value param)
         return true;
     }
 
-    if (IsExistsByPropertyName(env, param, "bundleName")) {
+    if (IsExistsByPropertyName(env, param, "bundleName") &&
+        !IsExistsByPropertyName(env, param, "moduleName") &&
+        !IsExistsByPropertyName(env, param, "intentName")) {
         return true;
     }
 
