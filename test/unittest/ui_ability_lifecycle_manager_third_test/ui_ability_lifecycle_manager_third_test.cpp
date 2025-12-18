@@ -1713,5 +1713,23 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, SetLastExitReasonAsync_001, TestSiz
     mgr->SetLastExitReasonAsync(abilityRecord);
     EXPECT_TRUE(abilityRecord->exitReasonLoaded_);
 }
+
+/**
+ * @tc.name: SyncLoadAbilityTask_001
+ * @tc.desc: SyncLoadAbilityTask
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SyncLoadAbilityTask_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->exitReasonTasks_.clear();
+    mgr->SyncLoadAbilityTask(0);
+
+    mgr->exitReasonTasks_.emplace(0, ffrt::task_handle());
+    mgr->SyncLoadAbilityTask(0);
+
+    EXPECT_TRUE(mgr->exitReasonTasks_.empty());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

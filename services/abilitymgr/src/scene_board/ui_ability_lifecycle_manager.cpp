@@ -513,7 +513,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    abilityRecord->SyncLoadExitReason();
+    SyncLoadAbilityTask(abilityRecord->GetRecordId());
 
     auto callerRecord = abilityRecord->GetCallerRecord(); // this is a pointer
     if (abilityRecord->GetRequestCode() != DEFAULT_REQUEST_CODE &&
@@ -3017,9 +3017,26 @@ void UIAbilityLifecycleManager::SetLastExitReasonAsync(UIAbilityRecordPtr abilit
     }
     abilityRecord->SetExitReasonLoaded();
     std::weak_ptr<UIAbilityRecord> weakRecord(abilityRecord);
-    abilityRecord->SetLoadExitReasonTask(ffrt::submit_h([weakRecord]() {
+    std::lock_guard lock(exitReasonTaskMutex_);
+    exitReasonTasks_.emplace(abilityRecord->GetRecordId(), ffrt::submit_h([weakRecord]() {
         UIAbilityLifecycleManager::SetLastExitReason(weakRecord.lock());
         }));
+}
+
+void UIAbilityLifecycleManager::SyncLoadAbilityTask(int32_t abilityRecordId)
+{
+    std::optional<ffrt::task_handle> taskHandle;
+    {
+        std::lock_guard lock(exitReasonTaskMutex_);
+        auto it = exitReasonTasks_.find(abilityRecordId);
+        if (it != exitReasonTasks_.end()) {
+            auto taskHandle = it->second;
+            exitReasonTasks_.erase(it);
+        }
+    }
+    if (taskHandle.has_value()) {
+        ffrt::wait({taskHandle.value()});
+    }
 }
 
 bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
