@@ -105,7 +105,9 @@ bool CheckValidIntentInfoFilter(ani_env *env, ani_object param)
         return true;
     }
 
-    if (IsExistsProperty(env, param, "bundleName")) {
+    if (IsExistsProperty(env, param, "bundleName") &&
+        !IsExistsProperty(env, param, "moduleName") &&
+        !IsExistsProperty(env, param, "intentName")) {
         return true;
     }
 
