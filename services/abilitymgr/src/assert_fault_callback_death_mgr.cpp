@@ -113,7 +113,7 @@ void AssertFaultCallbackDeathMgr::CallAssertFaultCallback(uint64_t assertFaultSe
     }
 
     RemoveAssertFaultCallback(item.iremote_);
-    sptr<AssertFaultProxy> callback = iface_cast<AssertFaultProxy>(item.iremote_);
+    sptr<IAssertFaultInterface> callback = iface_cast<IAssertFaultInterface>(item.iremote_);
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
         return;
