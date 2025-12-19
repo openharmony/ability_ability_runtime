@@ -297,6 +297,7 @@ group("unittest") {
       "cache_process_manager_test:unittest",
       "call_record_test:unittest",
       "capi_ability_runtime_application_context_test:unittest",
+      "capi_ability_runtime_context_test:unittest",
       "child_process_record_first_test:unittest",
       "child_process_record_fifth_test:unittest",
       "child_process_record_fourth_test:unittest",
