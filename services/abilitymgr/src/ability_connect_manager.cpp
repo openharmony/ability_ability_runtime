@@ -616,7 +616,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(
     };
     UpdateUIExtensionBindInfo(
         targetService, hostBundleName, abilityRequest.want.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
-    LoadAbility(targetService, updateRecordCallback);
+    LoadAbility(targetService, updateRecordCallback, true);
     return ERR_OK;
 }
 
@@ -1672,7 +1672,7 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityConnectManager::GetConnectRe
 }
 
 void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
-    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback)
+    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback, bool isPreloadUIExtension)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
@@ -1714,6 +1714,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecor
     loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
     loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
     loadParam.extensionProcessMode = abilityRecord->GetExtensionProcessMode();
+    loadParam.isPreloadUIExtension = isPreloadUIExtension;
     SetExtensionLoadParam(loadParam, abilityRecord);
     AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam.token, "AbilityConnectManager::LoadAbility");
     HandleLoadAbilityOrStartSpecifiedProcess(loadParam, abilityRecord);

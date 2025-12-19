@@ -92,12 +92,6 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteInt32(callerPid)) {
         return false;
     }
-    if (!parcel.WriteInt32(hostPid)) {
-        return false;
-    }
-    if (!parcel.WriteString(hostBundleName)) {
-        return false;
-    }
     if (!parcel.WriteInt32(preloadMode)) {
         return false;
     }
@@ -137,8 +131,6 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     callerUid = parcel.ReadInt32();
     isInnerNotify = parcel.ReadBool();
     callerPid = parcel.ReadInt32();
-    hostPid = parcel.ReadInt32();
-    hostBundleName = parcel.ReadString();
     preloadMode = parcel.ReadInt32();
     return true;
 }

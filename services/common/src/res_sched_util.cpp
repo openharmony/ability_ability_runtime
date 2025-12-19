@@ -115,8 +115,8 @@ void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityIn
 }
 
 void ResSchedUtil::ReportUIExtensionProcColdStartToRss(
-    int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
-    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
+    int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName, bool isPreloadUIExtension)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_START_UIEXTENSION_PROC;
@@ -127,6 +127,7 @@ void ResSchedUtil::ReportUIExtensionProcColdStartToRss(
         {"bundleName", bundleName},
         {"abilityName", abilityName},
         {"moduleName", moduleName},
+        {"isPreloadUIExtension", std::to_string(isPreloadUIExtension)},
     };
     TAG_LOGD(AAFwkTag::DEFAULT, "resType:%{public}u, call", resType);
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, 0, payload);
