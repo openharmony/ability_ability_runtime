@@ -61,7 +61,9 @@ void ScreenUnlockInterceptor::RecordExtensionEventWhenScreenUnlock(const Ability
         }
     }
     int32_t callerUid = IPCSkeleton::GetCallingUid();
+    eventInfo.extensionType = static_cast<int32_t>(targetAbilityInfo.extensionAbilityType);
     eventInfo.callerBundleName = callerBundleName.empty() ? std::to_string(callerUid) : callerBundleName;
+    eventInfo.bundleName += (targetAbilityInfo.applicationInfo.isSystemApp ? ":1" : ":0");
     TAG_LOGD(AAFwkTag::ABILITYMGR, "report screen unlock ability: %{public}s/%{public}s:%{public}s",
         eventInfo.bundleName.c_str(), eventInfo.abilityName.c_str(), eventInfo.callerBundleName.c_str());
     EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
