@@ -1692,7 +1692,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecor
     if (abilityRecord->IsCreateByConnect()) {
         auto connectingRecord = abilityRecord->GetConnectingRecord();
         CHECK_POINTER(connectingRecord);
-        perToken = iface_cast<Token>(connectingRecord->GetToken());
+        perToken = static_cast<Token*>(connectingRecord->GetToken().GetRefPtr());
     } else {
         auto callerList = abilityRecord->GetCallerRecordList();
         if (!callerList.empty() && callerList.back()) {
