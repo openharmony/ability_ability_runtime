@@ -548,7 +548,7 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     // do test1
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr, false);
 
     int32_t hostPid = 102;
     // fill want
@@ -558,9 +558,9 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
     want->SetModuleName("moduleName");
 
     // do test2
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want, false);
     // do test3
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr, false);
 
     // fill extensionAbilityType
     abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR; // 504
@@ -571,10 +571,11 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
         StrEq(""),
         StrEq("bundleName"),
         StrEq("abilityName"),
-        StrEq("moduleName")
+        StrEq("moduleName"),
+        Eq(false)
     )).Times(1);
     // do test4
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 
     // fill appRunningManager_
     std::string hostBundleName = "wantHostBundleName";
@@ -597,15 +598,16 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
         StrEq(hostBundleName),
         StrEq("bundleName"),
         StrEq("abilityName"),
-        StrEq("moduleName")
+        StrEq("moduleName"),
+        Eq(false)
     )).Times(1);
     // do test5
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 
     // fill abilityInfo_ with not UIExtension
     abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     // do test6
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 }
 
 /**
@@ -5428,6 +5430,7 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
+    EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
     appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
 }
 
