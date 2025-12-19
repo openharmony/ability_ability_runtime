@@ -90,7 +90,7 @@ bool JsAbilityAutoStartupCallBack::IsCallbacksEmpty()
 
 void JsAbilityAutoStartupCallBack::JSCallFunction(const AutoStartupInfo &info, const std::string &methodName)
 {
-    wptr<JsAbilityAutoStartupCallBack> stub = iface_cast<JsAbilityAutoStartupCallBack>(AsObject());
+    wptr<JsAbilityAutoStartupCallBack> stub = static_cast<JsAbilityAutoStartupCallBack*>(AsObject().GetRefPtr());
     NapiAsyncTask::CompleteCallback complete = [stub, info, methodName](
                                                    napi_env env, NapiAsyncTask &task, int32_t status) {
         sptr<JsAbilityAutoStartupCallBack> obj = stub.promote();
