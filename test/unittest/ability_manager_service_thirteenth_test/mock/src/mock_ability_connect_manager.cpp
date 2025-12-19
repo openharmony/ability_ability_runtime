@@ -312,7 +312,8 @@ std::shared_ptr<BaseExtensionRecord> AbilityConnectManager::GetExtensionByTokenF
 }
 
 void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
-    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback)
+    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback,
+    bool isPreloadUIExtension)
 {
 }
 

@@ -58,8 +58,8 @@ public:
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
         const int32_t pid = -1, const int32_t callerPid = -1);
     void ReportUIExtensionProcColdStartToRss(
-        int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
-        const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
+        int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName, bool isPreloadUIExtension);
     void PromotePriorityToRSS(int32_t callerUid, int32_t callerPid, const std::string &targetBundleName,
         int32_t targetUid, int32_t targetPid);
     std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
