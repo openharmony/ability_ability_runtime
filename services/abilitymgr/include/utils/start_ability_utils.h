@@ -63,6 +63,8 @@ struct StartAbilityUtils {
     static void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
     static int32_t StartUIAbilitiesProcessAppIndex(Want &want,
         sptr<IRemoteObject> callerToken, int32_t &appIndex);
+    static int32_t HandleSelfRedirection(bool isFromOpenLink,
+        const std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
 
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;
@@ -101,6 +103,7 @@ struct StartAbilityWrapParam {
     uint64_t specifiedFullTokenId = 0;
     bool removeInsightIntentFlag = false;
     std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
+    bool isFromOpenLink = false;
 };
 }
 }

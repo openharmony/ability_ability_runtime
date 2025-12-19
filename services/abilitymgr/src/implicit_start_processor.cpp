@@ -16,6 +16,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "app_utils.h"
 #include "dialog_session_manager.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
@@ -523,6 +524,11 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
 
     if (!appLinkingOnly) {
         ProcessLinkType(abilityInfos);
+    }
+
+    if (auto ret = StartAbilityUtils::HandleSelfRedirection(request.isFromOpenLink, abilityInfos); ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "disallow self redirection");
+        return ret;
     }
 
 #ifdef WITH_DLP

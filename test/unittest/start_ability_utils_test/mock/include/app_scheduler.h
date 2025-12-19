@@ -13,22 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_STATUS_H
-#define MOCK_MY_STATUS_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H
+#define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H
+
+#include "singleton.h"
 
 #include "running_process_info.h"
 
 namespace OHOS {
 namespace AAFwk {
-class MyStatus {
+class AppScheduler {
+    DECLARE_DELAYED_SINGLETON(AppScheduler)
 public:
-    static MyStatus& GetInstance();
-    ~MyStatus() = default;
-    bool retValue_ = false;
-    OHOS::AppExecFwk::RunningProcessInfo processInfo_;
-private:
-    MyStatus() = default;
+    /**
+     * Get running process information by pid.
+     *
+     * @param pid process id.
+     * @param info Output parameters, return runningProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif // MOCK_MY_STATUS_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H

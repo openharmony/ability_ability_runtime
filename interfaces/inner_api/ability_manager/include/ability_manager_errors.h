@@ -1091,6 +1091,11 @@ enum {
     ERR_CODE_INVALID_ID = 2099201,
 
     /**
+     * Result (2099202) for self redirection is not allowed.
+     */
+    ERR_SELF_REDIRECTION_DISALLOWED = 2099202,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
