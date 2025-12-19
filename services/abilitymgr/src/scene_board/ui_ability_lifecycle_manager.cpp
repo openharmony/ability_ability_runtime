@@ -214,6 +214,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     abilityRequest.sessionInfo = sessionInfo;
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
+    SetLastExitReasonAsync(uiAbilityRecord);
     MarkStartingFlag(abilityRequest);
     if (sessionInfo->reuseDelegatorWindow) {
         uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
@@ -536,7 +537,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    SetLastExitReason(abilityRecord);
+    SyncLoadAbilityTask(abilityRecord->GetRecordId());
 
     auto callerRecord = abilityRecord->GetCallerRecord(); // this is a pointer
     if (abilityRecord->GetRequestCode() != DEFAULT_REQUEST_CODE &&
@@ -1653,6 +1654,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
 
     sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     uiAbilityRecord->SetSessionInfo(sessionInfo);
+    SetLastExitReasonAsync(uiAbilityRecord);
     if (sessionInfo->state == CallToState::BACKGROUND) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "set pending BACKGROUND");
         uiAbilityRecord->SetPendingState(AbilityState::BACKGROUND);
@@ -2992,7 +2994,7 @@ void UIAbilityLifecycleManager::SetReceiverInfo(const AbilityRequest &abilityReq
         DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityName);
 }
 
-void UIAbilityLifecycleManager::SetLastExitReason(UIAbilityRecordPtr abilityRecord) const
+void UIAbilityLifecycleManager::SetLastExitReason(UIAbilityRecordPtr abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
@@ -3030,6 +3032,36 @@ void UIAbilityLifecycleManager::SetLastExitReason(UIAbilityRecordPtr abilityReco
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set last exit reason, ability: %{public}s, reason: %{public}d.",
             abilityName.c_str(), exitReason.reason);
         abilityRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
+    }
+}
+
+void UIAbilityLifecycleManager::SetLastExitReasonAsync(UIAbilityRecordPtr abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    if (abilityRecord->IsExitReasonLoaded()) {
+        return;
+    }
+    abilityRecord->SetExitReasonLoaded();
+    std::weak_ptr<UIAbilityRecord> weakRecord(abilityRecord);
+    std::lock_guard lock(exitReasonTaskMutex_);
+    exitReasonTasks_.emplace(abilityRecord->GetRecordId(), ffrt::submit_h([weakRecord]() {
+        UIAbilityLifecycleManager::SetLastExitReason(weakRecord.lock());
+        }));
+}
+
+void UIAbilityLifecycleManager::SyncLoadAbilityTask(int32_t abilityRecordId)
+{
+    std::optional<ffrt::task_handle> taskHandle;
+    {
+        std::lock_guard lock(exitReasonTaskMutex_);
+        auto it = exitReasonTasks_.find(abilityRecordId);
+        if (it != exitReasonTasks_.end()) {
+            auto taskHandle = it->second;
+            exitReasonTasks_.erase(it);
+        }
+    }
+    if (taskHandle.has_value()) {
+        ffrt::wait({taskHandle.value()});
     }
 }
 
