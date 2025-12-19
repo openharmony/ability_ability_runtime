@@ -1603,5 +1603,36 @@ HWTEST_F(StartupManagerTest, OnTimeout, Function | MediumTest | Level1)
     EXPECT_EQ(called, true);
     GTEST_LOG_(INFO) << "OnTimeout_001 end";
 }
+
+/**
+ * @tc.name: StopAutoPreloadSoTask_0100
+ * @tc.type: FUNC
+ * @tc.Function: StopAutoPreloadSoTask
+ */
+HWTEST_F(StartupManagerTest, StopAutoPreloadSoTask_0100, Function | MediumTest | Level1)
+{
+    uint32_t firstTaskId = 0;
+    uint32_t secondTaskId = 1;
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    auto autoPreloadSoTaskManagerBak = startupManager->autoPreloadSoTaskManager_.lock();
+    auto autoPreloadSystemSoTaskManagerBak = startupManager->autoPreloadSystemSoTaskManager_.lock();
+    startupManager->autoPreloadSoTaskManager_.reset();
+    startupManager->autoPreloadSystemSoTaskManager_.reset();
+    startupManager->StopAutoPreloadSoTask();
+    EXPECT_TRUE(startupManager->autoPreloadSoTaskManager_.expired());
+    EXPECT_TRUE(startupManager->autoPreloadSystemSoTaskManager_.expired());
+
+    std::map<std::string, std::shared_ptr<StartupTask>> tasks;
+    auto taskManager1 = std::make_shared<StartupTaskManager>(firstTaskId, tasks);
+    auto taskManager2 = std::make_shared<StartupTaskManager>(secondTaskId, tasks);
+    startupManager->autoPreloadSoTaskManager_ = taskManager1;
+    startupManager->autoPreloadSystemSoTaskManager_ = taskManager2;
+    startupManager->StopAutoPreloadSoTask();
+    EXPECT_FALSE(startupManager->autoPreloadSoTaskManager_.expired());
+    EXPECT_FALSE(startupManager->autoPreloadSystemSoTaskManager_.expired());
+
+    startupManager->autoPreloadSoTaskManager_ = autoPreloadSoTaskManagerBak;
+    startupManager->autoPreloadSystemSoTaskManager_ = autoPreloadSystemSoTaskManagerBak;
+}
 }
 }
