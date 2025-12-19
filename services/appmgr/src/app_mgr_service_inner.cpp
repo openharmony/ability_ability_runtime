@@ -1080,7 +1080,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
                 appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
             }
         }
-        ReportUIExtensionProcColdStartToRss(abilityInfo, want);
+        ReportUIExtensionProcColdStartToRss(abilityInfo, want, loadParam->isPreloadUIExtension);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
             AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag, loadParam->isStartupHide);
@@ -1112,7 +1112,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
 }
 
 void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
-    const std::shared_ptr<AAFwk::Want>& want)
+    const std::shared_ptr<AAFwk::Want>& want, bool isPreloadUIExtension)
 {
     if (abilityInfo == nullptr || want == nullptr) {
         return;
@@ -1130,7 +1130,7 @@ void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_p
         std::string abilityName = want->GetElement().GetAbilityName();
         std::string moduleName = want->GetElement().GetModuleName();
         AAFwk::ResSchedUtil::GetInstance().ReportUIExtensionProcColdStartToRss(extensionAbilityType,
-            hostPid, hostBundleName, bundleName, abilityName, moduleName);
+            hostPid, hostBundleName, bundleName, abilityName, moduleName, isPreloadUIExtension);
     }
 }
 
@@ -1238,6 +1238,7 @@ void AppMgrServiceInner::AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want>
     appRunningManager_->AddUIExtensionLauncherItem(uiExtensionAbilityId, hostPid, providerPid);
 
     want->RemoveParam(UIEXTENSION_ABILITY_ID);
+    want->RemoveParam(UIEXTENSION_ROOT_HOST_PID);
 }
 
 void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunningRecord> appRecord,

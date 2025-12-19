@@ -1900,13 +1900,13 @@ private:
 
     void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
 
-    void ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
-        const std::shared_ptr<AAFwk::Want>& want);
-
     void HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,
         std::shared_ptr<AbilityInfo> abilityInfo, const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want, bool isProcCache,
         const std::shared_ptr<AbilityRuntime::LoadParam> &loadParam);
+
+    void ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
+        const std::shared_ptr<AAFwk::Want>& want, bool isPreloadUIExtension);
 
 private:
     /**
