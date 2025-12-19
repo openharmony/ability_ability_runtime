@@ -18,6 +18,7 @@ config("ability_runtime_ndk_config") {
   include_dirs = [
     "${ability_runtime_ndk_path}",
     "${ability_runtime_ndk_path}/ability_runtime",
+    "${ability_runtime_innerkits_path}",
   ]
 
   if (target_cpu == "arm") {
@@ -53,6 +54,7 @@ ohos_shared_library("ability_runtime") {
     "src/start_options.cpp",
     "src/start_options_impl.cpp",
     "src/want_utils.cpp",
+    "src/context.cpp",
   ]
 
   deps = [
