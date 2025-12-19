@@ -19,9 +19,15 @@ module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 ohos_unittest("free_install_manager_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include" ]
+  include_dirs = [
+    "mock/include",
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include",
+  ]
 
-  sources = [ "free_install_manager_test.cpp" ]
+  sources = [
+    "free_install_manager_test.cpp",
+    "mock/src/mock_scene_board_judgement.cpp",
+  ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
