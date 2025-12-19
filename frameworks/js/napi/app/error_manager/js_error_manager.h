@@ -23,6 +23,14 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+
+enum class InstanceType {
+    MAIN = 0,
+    WORKER = 1,
+    TASKPOOL = 2,
+    CUSTOM = 3,
+};
+
 enum class UnhandledRejectionEvent : uint32_t { REJECT = 0, HANDLE };
 napi_value JsErrorManagerInit(napi_env env, napi_value exportObj);
 }  // namespace AbilityRuntime
