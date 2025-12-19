@@ -17,6 +17,7 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "app_utils.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -421,6 +422,25 @@ int32_t StartAbilityUtils::StartUIAbilitiesProcessAppIndex(Want &want,
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     return ERR_OK;
+}
+
+int32_t StartAbilityUtils::HandleSelfRedirection(bool isFromOpenLink,
+    const std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (!isFromOpenLink || abilityInfos.empty() || abilityInfos.size() > 1) {
+        return ERR_OK;
+    }
+    const AppExecFwk::AbilityInfo &abilityInfo = abilityInfos[0];
+    if (abilityInfo.allowSelfRedirect) {
+        return ERR_OK;
+    }
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(
+        IPCSkeleton::GetCallingPid(), processInfo);
+    if (processInfo.uid_ != abilityInfo.applicationInfo.uid) {
+        return ERR_OK;
+    }
+    return ERR_SELF_REDIRECTION_DISALLOWED;
 }
 }
 }
