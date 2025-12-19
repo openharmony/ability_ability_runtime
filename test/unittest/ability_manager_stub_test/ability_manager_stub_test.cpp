@@ -3126,6 +3126,8 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartSpecifiedAbilityBySCBIn
     MessageParcel reply;
     Want want;
     data.WriteParcelable(&want);
+    StartSpecifiedAbilityParams params;
+    data.WriteParcelable(&params);
     EXPECT_EQ(stub_->StartSpecifiedAbilityBySCBInner(data, reply), NO_ERROR);
 }
 
