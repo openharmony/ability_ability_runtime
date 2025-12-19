@@ -31,6 +31,17 @@ public:
     static std::shared_ptr<UIAbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest);
 
     AbilityRecordType GetAbilityRecordType() override;
+
+    void SetExitReasonLoaded()
+    {
+        exitReasonLoaded_ = true;
+    }
+    bool IsExitReasonLoaded() const
+    {
+        return exitReasonLoaded_;
+    }
+private:
+    bool exitReasonLoaded_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

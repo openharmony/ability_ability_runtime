@@ -21,9 +21,9 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
-#include "cpp/mutex.h"
 
 #include "ability_manager_constants.h"
+#include "ffrt.h"
 #include "isession_handler_interface.h"
 #include "ui_ability_record.h"
 
@@ -907,7 +907,11 @@ private:
      * @brief Set last exit reason for ability
      * @param abilityRecord The ability record
      */
-    void SetLastExitReason(UIAbilityRecordPtr abilityRecord) const;
+    static void SetLastExitReason(UIAbilityRecordPtr abilityRecord);
+
+    void SetLastExitReasonAsync(UIAbilityRecordPtr abilityRecord);
+
+    void SyncLoadAbilityTask(int32_t abilityRecordId);
 
     /**
      * @brief Set receiver info for ability
@@ -1280,6 +1284,9 @@ private:
     std::map<int32_t, std::shared_ptr<AbilitiesRequest>> abilitiesRequestMap_;
     std::mutex startingPidsMutex_;
     std::vector<pid_t> startingPids_;
+
+    std::mutex exitReasonTaskMutex_;
+    std::unordered_map<int32_t, ffrt::task_handle> exitReasonTasks_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
