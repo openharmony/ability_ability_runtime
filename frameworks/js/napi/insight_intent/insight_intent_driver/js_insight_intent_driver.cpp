@@ -127,13 +127,13 @@ private:
             auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
             if (handle == nullptr) {
                 TAG_LOGE(AAFwkTag::INTENT, "dlopen %{public}s error: %{public}s", DISTRIBUTE_LIBNAME, dlerror());
-                return CreateJsUndefined(env);
+                return;
             }
             auto symbol = dlsym(handle, "Distribute");
             if (symbol == nullptr) {
                 TAG_LOGE(AAFwkTag::INTENT, "dlsym error: %{public}s", dlerror());
                 dlclose(handle);
-                return CreateJsUndefined(env);
+                return;
             }
 
             g_distributeFunc = reinterpret_cast<Distribute>(symbol);
