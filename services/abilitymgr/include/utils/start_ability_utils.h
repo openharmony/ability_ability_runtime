@@ -104,6 +104,7 @@ struct StartAbilityWrapParam {
     bool removeInsightIntentFlag = false;
     std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
     bool isFromOpenLink = false;
+    bool isServiceMatch = false;
 };
 }
 }
