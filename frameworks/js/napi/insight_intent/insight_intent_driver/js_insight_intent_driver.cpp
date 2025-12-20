@@ -121,7 +121,8 @@ public:
     }
 
 private:
-    napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
+    napi_value OnExecute(napi_env env,
+        NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::INTENT, "on execute");
         if (info.argc < ARGC_ONE) {
@@ -166,12 +167,12 @@ private:
             if (g_distributeFunc == nullptr) {
                 auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
                 if (handle == nullptr) {
-                    TAG_LOGE(AAFwkTag::INTENT, "dlopen failed %{public}s, %{public}s", DISTRIBUTE_LIBNAME, dlerror());
+                    TAG_LOGE(AAFwkTag::INTENT, "dlopen failed: %{public}s, %{public}s", DISTRIBUTE_LIBNAME, dlerror());
                     return CreateJsUndefined(env);
                 }
                 auto symbol = dlsym(handle, "Distribute");
                 if (symbol == nullptr) {
-                    TAG_LOGE(AAFwkTag::INTENT, "dlsym failed %{public}s", dlerror());
+                    TAG_LOGE(AAFwkTag::INTENT, "dlsym failed: %{public}s", dlerror());
                     dlclose(handle);
                     return CreateJsUndefined(env);
                 }
