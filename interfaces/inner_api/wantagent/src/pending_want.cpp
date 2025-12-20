@@ -307,7 +307,7 @@ int PendingWant::SendAndReturnResult(int resultCode, const std::shared_ptr<Want>
         return res;
     }
     if (onCompleted != nullptr) {
-        onCompleted = iface_cast<CompletedDispatcher>(obj);
+        onCompleted = static_cast<CompletedDispatcher*>(senderInfo.finishedReceiver.GetRefPtr());
     }
     return res;
 }
