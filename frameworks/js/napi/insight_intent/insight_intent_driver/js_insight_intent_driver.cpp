@@ -30,7 +30,6 @@
 #include "napi_common_intent_info_filter.h"
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
-#include "distribute_manager.h"
 
 #include <mutex>
 
@@ -183,7 +182,7 @@ private:
         }
         return result;
     }
-    
+
     napi_value OnGetAllInsightIntentInfo(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::INTENT, "OnGetAllInsightIntentInfo");
