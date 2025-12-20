@@ -431,7 +431,7 @@ int32_t StartAbilityUtils::HandleSelfRedirection(bool isFromOpenLink,
         return ERR_OK;
     }
     const AppExecFwk::AbilityInfo &abilityInfo = abilityInfos[0];
-    if (abilityInfo.allowSelfRedirect) {
+    if (abilityInfo.allowSelfRedirect || abilityInfo.linkType != AppExecFwk::LinkType::APP_LINK) {
         return ERR_OK;
     }
     AppExecFwk::RunningProcessInfo processInfo;
