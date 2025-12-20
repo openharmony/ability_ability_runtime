@@ -69,7 +69,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCacheDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string cacheDir = contextPtr->GetCacheDir();
@@ -89,7 +89,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetTempDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string tempDir = contextPtr->GetTempDir();
@@ -109,7 +109,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetFilesDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string filesDir = contextPtr->GetFilesDir();
@@ -129,7 +129,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDatabaseDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string databaseDir = contextPtr->GetDatabaseDir();
@@ -149,7 +149,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetPreferencesDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string preferencesDir = contextPtr->GetPreferencesDir();
@@ -169,7 +169,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetBundleCodeDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string bundleCodeDir = contextPtr->GetBundleCodeDir();
@@ -189,7 +189,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetDistributedFilesDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string distributedFilesDir = contextPtr->GetDistributedFilesDir();
@@ -209,7 +209,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetResourceDir(AbilityRuntime
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string resourceDir = contextPtr->GetResourceDir();
@@ -229,7 +229,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetCloudFileDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string cloudFileDir = contextPtr->GetCloudFileDir();
@@ -253,7 +253,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetAreaMode(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     int32_t area = contextPtr->GetArea();
@@ -270,7 +270,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_SetAreaMode(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     contextPtr->SwitchArea(static_cast<int>(areaMode));
@@ -286,7 +286,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetLogFileDir(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string logFileDir = contextPtr->GetLogFileDir();
@@ -306,7 +306,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_Context_GetProcessName(
     }
     auto contextPtr = context->context.lock();
     if (contextPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "weak context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string processName = contextPtr->GetProcessName();
