@@ -20,7 +20,7 @@
  * @brief Provide the definition of the C interface for the extension ability AbilityRuntime
  *
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
- * @since 23
+ * @since 24
  */
 
 /**
@@ -31,7 +31,7 @@
  * @library libability_runtime.so
  * @kit AbilityKit
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
- * @since 23
+ * @since 24
  */
 
 #ifndef ABILITY_RUNTIME_EXTENSION_ABILITY_H
