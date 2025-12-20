@@ -1232,7 +1232,7 @@ void AbilityManagerService::CheckExtensionRateLimit(const Want &want)
     if (!limitResult.limited) {
         return;
     }
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Rate limited triggered, limit:%{public}d, uid:%{public}d", 
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Rate limited triggered, limit:%{public}d, uid:%{public}d",
         limitResult.triggeredLimit, uid);
     if (RateLimiter::GetInstance().CheckReportLimit(uid, limitResult.triggeredLimit)) {
         return;
@@ -4832,7 +4832,7 @@ int AbilityManagerService::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject
 
     sptr<Rosen::ISession> sessionProxy = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
     if (sessionProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get session proxy failed, ability: %{public}s/%{public}s", 
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get session proxy failed, ability: %{public}s/%{public}s",
             abilityRecord->GetElementName().GetBundleName().c_str(),
             abilityRecord->GetElementName().GetAbilityName().c_str());
         return ERR_INVALID_VALUE;
@@ -7792,7 +7792,7 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, uint64_t 
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "start highest priority extension ability bundleName:%{public}s, ability:%{public}s,"
             "BMScntTime:%{public}" PRId64 " ms, queryTime:%{public}" PRId64 " ms",
-            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str(), 
+            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str(),
             bmsCntTime - startTime, queryTime - bmsCntTime);
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
@@ -9230,7 +9230,7 @@ int AbilityManagerService::StartAbilityForPrelaunch(const Want &want)
     abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
     auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
     if (uiAbilityManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityManager null, userId is invalid:%{public}d", oriValidUserId); 
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityManager null, userId is invalid:%{public}d", oriValidUserId);
         return ERR_INVALID_VALUE;
     }
     return uiAbilityManager->PrelaunchAbilityLocked(abilityRequest);
@@ -11843,7 +11843,7 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
             abilityRequest.appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
         verificationInfo.isProcessInStatusBar = IsInStatusBar(accessTokenId, callerUid, isMultiInstance);
     }
-    if (isFreeInstallFromService || (callerAbilityRecord != nullptr && 
+    if (isFreeInstallFromService || (callerAbilityRecord != nullptr &&
         callerAbilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE)) {
         verificationInfo.isBackgroundCall = false;
     } else if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall, isSelector,
@@ -12916,6 +12916,9 @@ int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentE
     AppExecFwk::ElementName element("", param.bundleName_, param.abilityName_);
     want.SetElement(element);
     auto Iparam = param.insightIntentParam_;
+    if (IParam == nullptr) {
+        return ERR_INVALID_VALUE;
+    }
     want.SetParams(*IParam);
     want.SetUri(Uri(IParam->GetStringParam(static_cast<std::string>("uri"))));
     want.SetAction(IParam->GetStringParam(static_cast<std::string>("action")));
@@ -15726,7 +15729,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfo(
             bundleName, moduleName, intentName, GetValidUserId(userId), configIntentInfo);
         InsightIntentUtils::ConvertConfigInsightIntentInfo(configIntentInfo, info, getEntity);
-        
+
         if (info.bundleName.empty()) {
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
                 bundleName, moduleName, intentName, GetValidUserId(userId), intentInfo);
@@ -15744,10 +15747,10 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
                 DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
                     bundleName, moduleName, intentName, GetValidUserId(userId), intentInfo);
                 InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(intentInfo, info);
-                
+
                 return ERR_OK;
             }
-        
+
             ExtractInsightIntentGenericInfo genericInfo;
             DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
                 bundleName, moduleName, intentName, GetValidUserId(userId), genericInfo);
@@ -15879,7 +15882,7 @@ int32_t AbilityManagerService::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInt
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission call");
         return CHECK_PERMISSION_FAILED;
     }
-    
+
     return SAInterceptorManager::GetInstance().AddSAInterceptor(interceptor);
 }
 
