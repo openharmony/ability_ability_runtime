@@ -30,6 +30,7 @@
 #include "napi_common_intent_info_filter.h"
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
+#include "distribute_manager.h"
 
 #include <mutex>
 
@@ -44,6 +45,9 @@ constexpr int32_t INDEX_THREE = 3;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_FOUR = 4;
+constexpr const char *DISTRIBUTE_LIBNAME = "libhmos_distribute.z.so";
+using Distribute = void(*)(InsightIntentExecuteParam&);
+Distribute g_distributeFunc = nullptr;
 }
 class JsInsightIntentExecuteCallbackClient : public InsightIntentExecuteCallbackInterface,
     public std::enable_shared_from_this<JsInsightIntentExecuteCallbackClient> {
@@ -157,6 +161,20 @@ private:
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
+        auto IParam = param.insightIntentParam_;
+        param.isServiceMatch_ = false;
+        if (IParam != nullptr && IParam->GetStringParam("executeFlag") == "service_match") {
+            if (g_distributeFunc == nullptr) {
+                auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
+                if (handle == nullptr) {
+                    TAG_LOGE(AAFwkTag::INTENT, "dlopen failed %{public}s, %{public}s", DISTRIBUTE_LIBNAME, dlerror());
+                    return CreateJsUndefined(env);
+                } else {
+                    auto symbol = dlsym(handle, "Distribute");
+
+                }
+            }
+        }
         auto err = AbilityManagerClient::GetInstance()->ExecuteIntent(key,
             InsightIntentHostClient::GetInstance(), param);
         if (err != 0) {

@@ -124,6 +124,17 @@ public:
     ServiceRunningState QueryServiceState() const;
 
     /**
+     * StartAbilityWithServiceMatch with param, send param to ability manager service.
+     *
+     * @param param, the param of the ability to start.
+     * @param requestCode, Ability request code.
+     * @param userId, Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartAbilityWithServiceMatch(const InsightIntentExecuteParam &param,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE);
+
+    /**
      * StartSelfUIAbility with want, start self uiability only on 2-in-1 devices.
      *
      * @param want, the want of the ability to start.

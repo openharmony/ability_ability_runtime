@@ -1501,7 +1501,7 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
         result = CheckCallPermission(param.want, abilityInfo, abilityRequest, param.isForegroundToRestartApp,
             isSendDialogResult, param.specifyTokenId, callerBundleName, param.isImplicit,
             param.isFreeInstallFromService);
-        if (result != ERR_OK) {
+        if (result != ERR_OK && !isPendingWantCaller) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "checkCallPermission error, result:%{public}d", result);
             AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "checkCallPermission error");
             return result;
@@ -12910,10 +12910,40 @@ std::string AbilityManagerService::InsightIntentGetcallerBundleName()
     return callerBundlename;
 }
 
+int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentExecuteParam &param, int32_t userId, int requestCode)
+{
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", param.bundleName_, param.abilityName_);
+    want.SetElement(element);
+    auto Iparam = param.insightIntentParam_;
+    want.SetParams(*IParam);
+    want.SetUri(Uri(IParam->GetStringParam(static_cast<std::string>("uri"))));
+    want.SetAction(IParam->GetStringParam(static_cast<std::string>("action")));
+
+    EventInfo eventInfo = BuildEventInfo(want, userId);
+    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = want,
+        .requestCode = requestCode,
+        .userId = userId,
+        .isPendingWantCaller = true,
+    };
+    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+    AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityError:%{public}d", eventInfo.errCode);
+    }
+    return ret;
+
+}
+
 int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
     const InsightIntentExecuteParam &param)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    if (param.isServiceMatch_) {
+        return StartAbilityWithServiceMatch(param);
+    }
     auto callerBundlename = InsightIntentGetcallerBundleName();
     if (callerBundlename.empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "callerBundlename is null");
