@@ -71,6 +71,10 @@ napi_value WrapDialogAbilityInfo(napi_env env, const AAFwk::DialogAbilityInfo &d
     jsValue = WrapMultiAppModeData(env, dialogAbilityInfo.multiAppMode);
     SetPropertyValueByPropertyName(env, jsObject, "multiAppMode", jsValue);
 
+    jsValue = WrapStringToJS(env, dialogAbilityInfo.codePath);
+    SetPropertyValueByPropertyName(env, jsObject, "codePath", jsValue);
+    jsValue = WrapStringToJS(env, dialogAbilityInfo.installSource);
+    SetPropertyValueByPropertyName(env, jsObject, "installSource", jsValue);
     return jsObject;
 }
 
