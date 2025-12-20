@@ -126,12 +126,12 @@ private:
         if (g_distributeFunc == nullptr) {
             auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
             if (handle == nullptr) {
-                TAG_LOGE(AAFwkTag::INTENT, "dlopen %{public}s failed, error: %{public}s", DISTRIBUTE_LIBNAME, dlerror());
+                TAG_LOGE(AAFwkTag::INTENT, "dlopen %{public}s error: %{public}s", DISTRIBUTE_LIBNAME, dlerror());
                 return CreateJsUndefined(env);
             }
             auto symbol = dlsym(handle, "Distribute");
             if (symbol == nullptr) {
-                TAG_LOGE(AAFwkTag::INTENT, "dlsym failed, error: %{public}s", dlerror());
+                TAG_LOGE(AAFwkTag::INTENT, "dlsym error: %{public}s", dlerror());
                 dlclose(handle);
                 return CreateJsUndefined(env);
             }
@@ -181,7 +181,8 @@ private:
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
         param.isServiceMatch_ = false;
-        if (param.insightIntentParam_ != nullptr && param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
+        if (param.insightIntentParam_ != nullptr &&
+            param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
             ParseParam(param);
             if (!param.isServiceMatch_) {
                 ThrowInvalidParamError(env, "Invalid service_match param");
