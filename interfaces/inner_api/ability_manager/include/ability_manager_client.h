@@ -1286,7 +1286,7 @@ public:
      */
     ErrCode GetTopAbility(sptr<IRemoteObject> &token);
 
-    ErrCode CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused);
+    ErrCode CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId = 0);
 
     /**
      * DelegatorDoAbilityForeground, the delegator calls this interface to move the ability to the foreground.
