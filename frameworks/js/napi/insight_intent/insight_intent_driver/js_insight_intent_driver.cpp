@@ -44,6 +44,9 @@ constexpr int32_t INDEX_THREE = 3;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_FOUR = 4;
+constexpr const char *DISTRIBUTE_LIBNAME = "libhmos_distribute.z.so";
+using Distribute = void(*)(InsightIntentExecuteParam&);
+Distribute g_distributeFunc = nullptr;
 }
 class JsInsightIntentExecuteCallbackClient : public InsightIntentExecuteCallbackInterface,
     public std::enable_shared_from_this<JsInsightIntentExecuteCallbackClient> {
@@ -118,6 +121,26 @@ public:
     }
 
 private:
+    void ParseParam(InsightIntentExecuteParam &param)
+    {
+        if (g_distributeFunc == nullptr) {
+            auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
+            if (handle == nullptr) {
+                TAG_LOGE(AAFwkTag::INTENT, "dlopen %{public}s error: %{public}s", DISTRIBUTE_LIBNAME, dlerror());
+                return;
+            }
+            auto symbol = dlsym(handle, "Distribute");
+            if (symbol == nullptr) {
+                TAG_LOGE(AAFwkTag::INTENT, "dlsym error: %{public}s", dlerror());
+                dlclose(handle);
+                return;
+            }
+
+            g_distributeFunc = reinterpret_cast<Distribute>(symbol);
+        }
+
+        g_distributeFunc(param);
+    }
     napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::INTENT, "on execute");
@@ -157,6 +180,15 @@ private:
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
+        param.isServiceMatch_ = false;
+        if (param.insightIntentParam_ != nullptr &&
+            param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
+            ParseParam(param);
+            if (!param.isServiceMatch_) {
+                ThrowInvalidParamError(env, "Invalid service_match param");
+                return CreateJsUndefined(env);
+            }
+        }
         auto err = AbilityManagerClient::GetInstance()->ExecuteIntent(key,
             InsightIntentHostClient::GetInstance(), param);
         if (err != 0) {
@@ -165,7 +197,7 @@ private:
         }
         return result;
     }
-    
+
     napi_value OnGetAllInsightIntentInfo(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::INTENT, "OnGetAllInsightIntentInfo");
