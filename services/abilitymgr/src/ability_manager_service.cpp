@@ -1274,7 +1274,7 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
     int result = ERR_OK;
     // prevent the app from dominating the screen
     if (param.callerToken == nullptr && !IsCallerSceneBoard() && !isSendDialogResult &&
-        !param.isForegroundToRestartApp &&
+        !param.isForegroundToRestartApp && !param.isServiceMatch &&
         AbilityPermissionUtil::GetInstance().IsDominateScreen(param.want, param.isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, ERR_INVALID_CALLER, "caller invalid");
@@ -1501,7 +1501,7 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
         result = CheckCallPermission(param.want, abilityInfo, abilityRequest, param.isForegroundToRestartApp,
             isSendDialogResult, param.specifyTokenId, callerBundleName, param.isImplicit,
             param.isFreeInstallFromService);
-        if (result != ERR_OK && !isPendingWantCaller) {
+        if (result != ERR_OK && !param.isServiceMatch) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "checkCallPermission error, result:%{public}d", result);
             AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, result, "checkCallPermission error");
             return result;
@@ -12929,7 +12929,7 @@ int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentE
         .want = want,
         .requestCode = requestCode,
         .userId = userId,
-        .isPendingWantCaller = true,
+        .isServiceMatch = true,
     };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);

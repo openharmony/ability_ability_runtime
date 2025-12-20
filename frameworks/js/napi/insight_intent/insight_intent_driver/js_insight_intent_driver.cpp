@@ -121,8 +121,27 @@ public:
     }
 
 private:
-    napi_value OnExecute(napi_env env,
-        NapiCallbackInfo& info)
+    void ParseParam(InsightIntentExecuteParam &param)
+    {
+        if (g_distributeFunc == nullptr) {
+            auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
+            if (handle == nullptr) {
+                TAG_LOGE(AAFwkTag::INTENT, "dlopen %{public}s failed, error: %{public}s", DISTRIBUTE_LIBNAME, dlerror());
+                return CreateJsUndefined(env);
+            }
+            auto symbol = dlsym(handle, "Distribute");
+            if (symbol == nullptr) {
+                TAG_LOGE(AAFwkTag::INTENT, "dlsym failed, error: %{public}s", dlerror());
+                dlclose(handle);
+                return CreateJsUndefined(env);
+            }
+
+            g_distributeFunc = reinterpret_cast<Distribute>(symbol);
+        }
+
+        g_distributeFunc(param);
+    }
+    napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::INTENT, "on execute");
         if (info.argc < ARGC_ONE) {
@@ -164,23 +183,7 @@ private:
         auto IParam = param.insightIntentParam_;
         param.isServiceMatch_ = false;
         if (IParam != nullptr && IParam->GetStringParam("executeFlag") == "service_match") {
-            if (g_distributeFunc == nullptr) {
-                auto handle = dlopen(DISTRIBUTE_LIBNAME, RTLD_LAZY);
-                if (handle == nullptr) {
-                    TAG_LOGE(AAFwkTag::INTENT, "dlopen failed: %{public}s, %{public}s", DISTRIBUTE_LIBNAME, dlerror());
-                    return CreateJsUndefined(env);
-                }
-                auto symbol = dlsym(handle, "Distribute");
-                if (symbol == nullptr) {
-                    TAG_LOGE(AAFwkTag::INTENT, "dlsym failed: %{public}s", dlerror());
-                    dlclose(handle);
-                    return CreateJsUndefined(env);
-                }
-
-                g_distributeFunc = reinterpret_cast<Distribute>(symbol);
-            }
-
-            g_distributeFunc(param);
+            ParseParam(param);
             if (!param.isServiceMatch_) {
                 ThrowInvalidParamError(env, "Invalid service_match param");
                 return CreateJsUndefined(env);
