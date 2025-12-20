@@ -168,10 +168,21 @@ private:
                 if (handle == nullptr) {
                     TAG_LOGE(AAFwkTag::INTENT, "dlopen failed %{public}s, %{public}s", DISTRIBUTE_LIBNAME, dlerror());
                     return CreateJsUndefined(env);
-                } else {
-                    auto symbol = dlsym(handle, "Distribute");
-
                 }
+                auto symbol = dlsym(handle, "Distribute");
+                if (symbol == nullptr) {
+                    TAG_LOGE(AAFwkTag::INTENT, "dlsym failed %{public}s", dlerror());
+                    dlclose(handle);
+                    return CreateJsUndefined(env);
+                }
+
+                g_distributeFunc = reinterpret_cast<Distribute>(symbol);
+            }
+
+            g_distributeFunc(param);
+            if (!param.isServiceMatch_) {
+                ThrowInvalidParamError(env, "Invalid service_match param");
+                return CreateJsUndefined(env);
             }
         }
         auto err = AbilityManagerClient::GetInstance()->ExecuteIntent(key,
