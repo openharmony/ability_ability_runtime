@@ -180,9 +180,8 @@ private:
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
-        auto IParam = param.insightIntentParam_;
         param.isServiceMatch_ = false;
-        if (IParam != nullptr && IParam->GetStringParam("executeFlag") == "service_match") {
+        if (param.insightIntentParam_ != nullptr && param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
             ParseParam(param);
             if (!param.isServiceMatch_) {
                 ThrowInvalidParamError(env, "Invalid service_match param");
