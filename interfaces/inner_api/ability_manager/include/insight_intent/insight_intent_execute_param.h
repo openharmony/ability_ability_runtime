@@ -84,6 +84,7 @@ public:
     std::vector<std::string> uris_;
     int8_t decoratorType_ = 0; // default is InsightIntentType::DECOR_NONE
     std::string srcEntrance_;
+    bool isServiceMatch_ = false;
 
     // params below belongs to InsightIntentFunc
     std::string className_;
