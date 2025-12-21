@@ -36,6 +36,8 @@ export default namespace dialogSession {
     visible: boolean;
     appIndex: int;
     multiAppMode: MultiAppMode;
+    codePath?: string;
+    installSource?: string;
   }
 
   export interface DialogSessionInfo {
@@ -55,6 +57,8 @@ export default namespace dialogSession {
     visible: boolean;
     appIndex: int;
     multiAppMode: MultiAppMode;
+    codePath?: string;
+    installSource?: string;
   }
 
   export class DialogSessionInfoInner implements DialogSessionInfo {
