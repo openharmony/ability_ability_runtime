@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -280,11 +280,15 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_006, TestSize.Level2)
     DialogAbilityInfo dialogAbilityInfo;
     std::string validUri = dialogAbilityInfo.GetURI();
     parcel.WriteString16(Str8ToStr16(validUri));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.codePath));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.installSource));
     int32_t validSize = 1;
     parcel.WriteInt32(validSize);
     dialogSessionInfo.targetAbilityInfos.emplace_back(dialogAbilityInfo);
     std::string invalidUri = dialogAbilityInfo.GetURI();
     parcel.WriteString16(Str8ToStr16(invalidUri));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.codePath));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.installSource));
     AAFwk::WantParams params;
     Parcelable *parcelable = &params;
     parcel.WriteParcelable(parcelable);
@@ -333,11 +337,15 @@ HWTEST_F(DialogAbilityInfoTest, Unmarshalling_002, TestSize.Level2)
     DialogSessionInfo dialogSessionInfo;
     std::string validUri = dialogAbilityInfo.GetURI();
     parcel.WriteString16(Str8ToStr16(validUri));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.codePath));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.installSource));
     int32_t validSize = 1;
     parcel.WriteInt32(validSize);
     dialogSessionInfo.targetAbilityInfos.emplace_back(dialogAbilityInfo);
     std::string invalidUri = dialogAbilityInfo.GetURI();
     parcel.WriteString16(Str8ToStr16(invalidUri));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.codePath));
+    parcel.WriteString16(Str8ToStr16(dialogAbilityInfo.installSource));
     AAFwk::WantParams params;
     Parcelable *parcelable = &params;
     parcel.WriteParcelable(parcelable);
