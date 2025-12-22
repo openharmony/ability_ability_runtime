@@ -165,13 +165,11 @@ HWTEST_F(EtsEnvironmentTest, RegisterUncaughtExceptionHandler_0100, TestSize.Lev
 HWTEST_F(EtsEnvironmentTest, GetAniEnv_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
-    ETSEnvironment::VMEntry vMEntryOld = etsEnv->vmEntry_;
-    ETSEnvironment::VMEntry vmEntry;
-    vmEntry.aniEnv_ = nullptr;
-    etsEnv->vmEntry_ = vmEntry;
+    ASSERT_NE(etsEnv, nullptr);
+    etsEnv->vmEntry_.aniVm_ = nullptr;
+    etsEnv->vmEntry_.aniEnv_ = nullptr;
     auto result = etsEnv->GetAniEnv();
     EXPECT_EQ(result, nullptr);
-    etsEnv->vmEntry_ = vMEntryOld;
 }
 
 /**
@@ -394,6 +392,50 @@ HWTEST_F(EtsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level2)
     std::string option5 = "ark:123@456@Debugger";
     int result5 = etsEnv->ParseHdcRegisterOption(option5);
     ASSERT_EQ(result5, 456);
+}
+
+/**
+ * @tc.name: SetHspAbcFiles_0100
+ * @tc.desc: Ets environment SetHspAbcFiles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, SetHspAbcFiles_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    ani_env *env = nullptr;
+    ani_object obj = nullptr;
+    auto result = etsEnv->SetHspAbcFiles(env, obj);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InitAbcLinker_0100
+ * @tc.desc: Ets environment InitAbcLinker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, InitAbcLinker_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    ani_env *env = nullptr;
+    auto result = etsEnv->InitAbcLinker(env);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AddAbcFiles_0100
+ * @tc.desc: Ets environment AddAbcFiles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, AddAbcFiles_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    ani_env *env = nullptr;
+    std::string obj = "";
+    auto result = etsEnv->AddAbcFiles(env, obj);
+    EXPECT_FALSE(result);
 }
 } // namespace StsEnv
 } // namespace OHOS
