@@ -402,14 +402,14 @@ bool AbilityPermissionUtil::NeedCheckStatusBar(std::shared_ptr<AbilityRecord> ab
     bool isMultiInstance =
         abilityRequest.appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     auto callerInstanceKey = abilityRecord->GetInstanceKey();
+    // if not creating new instance, requestInstanceKey should be updated by CheckMultiInstanceAndAppClone.
     auto requestInstanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
     if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::PAGE ||
         abilityRequest.abilityInfo.uid != callerUid) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "not uiAbility or not the same uid.");
             return false;
     }
-    bool isSelfMultiInstance = (requestInstanceKey == "") || (callerInstanceKey == requestInstanceKey);
-    if (isMultiInstance && !isSelfMultiInstance) {
+    if (isMultiInstance && callerInstanceKey != requestInstanceKey) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is multiInstance but not the same instanceKey.");
         return false;
     }
