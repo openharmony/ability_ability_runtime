@@ -29,7 +29,7 @@ namespace OHOS {
 namespace AAFwk {
 using namespace AbilityRuntime;
 
-constexpr const char *UI_SERVICE_HOST_PROXY_CLASS_NAME = "Lapplication/UIServiceHostProxy/UIServiceHostProxyImpl;";
+constexpr const char *UI_SERVICE_HOST_PROXY_CLASS_NAME = "application.UIServiceHostProxy.UIServiceHostProxyImpl";
 
 ani_object EtsUIServiceHostProxy::CreateEtsUIServiceHostProxy(ani_env *env, const sptr<IRemoteObject> &impl)
 {
@@ -46,7 +46,7 @@ ani_object EtsUIServiceHostProxy::CreateEtsUIServiceHostProxy(ani_env *env, cons
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
         return nullptr;

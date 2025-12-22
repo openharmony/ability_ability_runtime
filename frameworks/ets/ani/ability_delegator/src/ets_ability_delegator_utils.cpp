@@ -22,33 +22,33 @@
 namespace OHOS {
 namespace AbilityDelegatorEts {
 namespace {
-constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
-constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
-constexpr const char* VOID_CONTEXT = ":Lapplication/Context/Context;";
-constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* STRING_VOID = "Lstd/core/String;:V";
+constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "application.AbilityDelegator.AbilityDelegatorInner";
+constexpr const char* RECORD_CLASS_NAME = "std.core.Record";
+constexpr const char* VOID_CONTEXT = ":C{application.Context.Context}";
+constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "C{std.core.String}lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char* STRING_VOID = "C{std.core.String}:";
 constexpr const char* MONITOR_ASYNCCALLBACK_VOID =
-    "Lapplication/AbilityMonitor/AbilityMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* WANT_ASYNCCALLBACK = "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{application.AbilityMonitor.AbilityMonitor}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char* WANT_ASYNCCALLBACK = "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
-    "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
-constexpr const char* SIGNATURE_MONITOR_VOID = "Lapplication/AbilityMonitor/AbilityMonitor;:V";
+    "application.abilityDelegatorArgs.AbilityDelegatorArgsInner";
+constexpr const char* SIGNATURE_MONITOR_VOID = "C{application.AbilityMonitor.AbilityMonitor}:";
 constexpr const char* SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityMonitor/AbilityMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{application.AbilityMonitor.AbilityMonitor}lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STAGEMONITOR_ASYNCCALLBACK_VOID =
-    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{application.AbilityStageMonitor.AbilityStageMonitor}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STAGEMONITOR_VOID =
-    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;:V";
+    "C{application.AbilityStageMonitor.AbilityStageMonitor}:";
 constexpr const char* SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{application.AbilityStageMonitor.AbilityStageMonitor}lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STAGEMONITOR_UIABILITY_ASYNCCALLBACK =
-    "L@ohos/app/ability/UIAbility/UIAbility;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.UIAbility.UIAbility}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STAGEMONITOR_UIABILITY_CHECK =
-    "L@ohos/app/ability/UIAbility/UIAbility;:V";
-constexpr const char* STRING_ASYNCCALLBACK_VOID = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:I";
+    "C{@ohos.app.ability.UIAbility.UIAbility}:";
+constexpr const char* STRING_ASYNCCALLBACK_VOID = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char* STRING_UIABILITY_NUMBER = "C{@ohos.app.ability.UIAbility.UIAbility}:i";
 constexpr const char* STRING_CALLBACK_UIABILITY =
-    "Lutils/AbilityUtils/AsyncCallbackWrapper;:L@ohos/app/ability/UIAbility/UIAbility;";
+    "C{utils.AbilityUtils.AsyncCallbackWrapper}:C{@ohos.app.ability.UIAbility.UIAbility}";
 constexpr const char* RECORD_GET_NAME =
     "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
 constexpr const char* RECORD_SET_NAME =
@@ -141,7 +141,7 @@ ani_object CreateEtsAbilityDelegator(ani_env *aniEnv)
     }
 
     ani_method method = nullptr;
-    status = aniEnv->Class_FindMethod(abilityDelegator, "<ctor>", ":V", &method);
+    status = aniEnv->Class_FindMethod(abilityDelegator, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
         return nullptr;
@@ -176,7 +176,7 @@ void SetBundleName(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>bundleName", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, "%%set-bundleName", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -220,7 +220,7 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_ref parameterRef = nullptr;
-    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lescompat/Record;",
+    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "%%get-parameters", ":C{std.core.Record}",
         &parameterRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethodByName_Ref failed status: %{public}d", status);
@@ -268,7 +268,7 @@ void SetTestCaseNames(ani_env *aniEnv, ani_class arguments, ani_object argumentO
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>testCaseNames", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, "%%set-testCaseNames", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -302,7 +302,7 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>testRunnerClassName", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, "%%set-testRunnerClassName", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -336,7 +336,7 @@ ani_object CreateEtsAbilityDelegatorArguments(
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegatorArgs success");
 
     ani_method method = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<ctor>", ":V", &method);
+    status = aniEnv->Class_FindMethod(arguments, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
         return nullptr;

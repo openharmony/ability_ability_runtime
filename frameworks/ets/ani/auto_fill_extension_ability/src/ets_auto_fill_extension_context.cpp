@@ -27,8 +27,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* AUTO_FILL_EXTENSION_CONTEXT_CLASS_NAME =
-    "Lapplication/AutoFillExtensionContext/AutoFillExtensionContext;";
-constexpr const char* CLEANER_CLASS = "Lapplication/AutoFillExtensionContext/Cleaner;";
+    "application.AutoFillExtensionContext.AutoFillExtensionContext";
+constexpr const char* CLEANER_CLASS = "application.AutoFillExtensionContext.Cleaner";
 }
 
 ani_object EtsAutoFillExtensionContext::SetEtsAutoFillExtensionContext(ani_env *env,
@@ -45,7 +45,7 @@ ani_object EtsAutoFillExtensionContext::SetEtsAutoFillExtensionContext(ani_env *
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "find method status: %{public}d", status);
         return nullptr;
     }
@@ -179,7 +179,7 @@ ani_object EtsAutoFillExtensionContext::CreateEtsAutoFillExtensionContext(ani_en
     }
     std::array functions = {
         ani_native_function { "nativeReloadInModal",
-            "Lapplication/CustomData/CustomData;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.CustomData.CustomData}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsAutoFillExtensionContext::ReloadInModal) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK

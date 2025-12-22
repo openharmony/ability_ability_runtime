@@ -38,33 +38,33 @@ namespace {
 static std::mutex g_connectsMutex;
 int32_t g_serialNumber = 0;
 static std::map<EtsUIExtensionConnectionKey, sptr<EtsUIExtensionConnection>, Etskey_compare> g_connects;
-const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
-const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "Lapplication/UIExtensionContext/Cleaner;";
+const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "application.UIExtensionContext.UIExtensionContext";
+const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "application.UIExtensionContext.Cleaner";
 constexpr const char* UISERVICEHOSTPROXY_KEY = "ohos.ability.params.UIServiceHostProxy";
 constexpr const int FAILED_CODE = -1;
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SIGNATURE_CONNECT_UI_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lapplication/UIServiceExtensionConnectCallback/UIServiceExtensionConnectCallback;"
-    "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{application.UIServiceExtensionConnectCallback.UIServiceExtensionConnectCallback}"
+    "C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SIGNATURE_START_UI_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION =
-    "Lapplication/UIServiceProxy/UIServiceProxy;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_WANT_CHK = "L@ohos/app/ability/Want/Want;:V";
-constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK = "Lapplication/UIServiceProxy/UIServiceProxy;:V";
+    "C{application.UIServiceProxy.UIServiceProxy}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *SIGNATURE_WANT_CHK = "C{@ohos.app.ability.Want.Want}:";
+constexpr const char *SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK = "C{application.UIServiceProxy.UIServiceProxy}:";
 constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE_CHECK =
-    "IL@ohos/app/ability/Want/Want;:V";
+    "iC{@ohos.app.ability.Want.Want}:";
 constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE =
-    "IL@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "iC{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 constexpr int32_t ARGC_FOUR = 4;
-constexpr const char *SIGNATURE_OPEN_ATOMIC_SERVICE = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
-    "L@ohos/app/ability/AtomicServiceOptions/AtomicServiceOptions;:V";
-constexpr const char *SIGNATURE_OPEN_LINK = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
-    "L@ohos/app/ability/OpenLinkOptions/OpenLinkOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
+    "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
+constexpr const char *SIGNATURE_OPEN_LINK = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
+    "C{@ohos.app.ability.OpenLinkOptions.OpenLinkOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 
@@ -1514,7 +1514,7 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
@@ -1530,39 +1530,39 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         ani_native_function { "terminateSelfWithResultSync", nullptr,
             reinterpret_cast<ani_int*>(EtsUIExtensionContext::TerminateSelfWithResultSync) },
         ani_native_function { "nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartAbility) },
-        ani_native_function { "nativeStartAbility", "L@ohos/app/ability/Want/Want;L@ohos/app/ability/"
-            "StartOptions/StartOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+        ani_native_function { "nativeStartAbility", "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability."
+            "StartOptions.StartOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartAbilityWithOption) },
         ani_native_function { "nativeConnectServiceExtensionAbility", SIGNATURE_CONNECT_SERVICE_EXTENSION,
             reinterpret_cast<void *>(EtsUIExtensionContext::ConnectServiceExtensionAbility) },
         ani_native_function { "nativeDisconnectServiceExtensionAbilitySync", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,
             reinterpret_cast<void *>(EtsUIExtensionContext::DisconnectServiceExtensionAbility) },
         ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResult) },
         ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
-            "AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils."
+            "AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultWithOptions) },
         ani_native_function { "nativeStartServiceExtensionAbilityWithAccount",
-            "L@ohos/app/ability/Want/Want;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartServiceExtensionAbilityWithAccount) },
         ani_native_function { "nativeStartAbilityForResultAsCaller",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/"
-            "ability/StartOptions/StartOptions;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}C{@ohos.app."
+            "ability.StartOptions.StartOptions}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultAsCaller) },
         ani_native_function { "nativeStartServiceExtensionAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartServiceExtensionAbility) },
-        ani_native_function { "nativeSetHostPageOverlayForbidden", "Z:V",
+        ani_native_function { "nativeSetHostPageOverlayForbidden", "z:",
             reinterpret_cast<void*>(EtsUIExtensionContext::SetHostPageOverlayForbidden) },
         ani_native_function{"setColorMode",
-            "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
+            "C{@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::SetColorMode)},
         ani_native_function{"nativeReportDrawnCompleted",
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContext::ReportDrawnCompleted)},
         ani_native_function{"nativeConnectUIServiceExtensionAbility", SIGNATURE_CONNECT_UI_SERVICE_EXTENSION,
             reinterpret_cast<void*>(EtsUIExtensionContext::ConnectUIServiceExtension)},
@@ -1575,7 +1575,7 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         ani_native_function{"nativeDisconnectUIServiceExtensionCheck", SIGNATURE_DISCONNECT_UI_SERVICE_EXTENSION_CHK,
             reinterpret_cast<void*>(EtsUIExtensionContext::DisconnectUIServiceExtensionCheck)},
         ani_native_function {"nativeStartUIAbilities",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.Array}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartUIAbilities)},
         ani_native_function{"nativeStartUIAbilitiesInSplitWindowModeCheck",
             SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE_CHECK,
@@ -1585,11 +1585,11 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             reinterpret_cast<void*>(EtsUIExtensionContext::StartUIAbilitiesInSplitWindowMode)},
         ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenAtomicService) },
-        ani_native_function { "nativeOpenAtomicServiceCheck", ":V",
+        ani_native_function { "nativeOpenAtomicServiceCheck", ":",
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenAtomicServiceCheck) },
         ani_native_function { "nativeOpenLinkSync", SIGNATURE_OPEN_LINK,
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenLink) },
-        ani_native_function { "nativeOpenLinkCheck", "Lstd/core/String;:V",
+        ani_native_function { "nativeOpenLinkCheck", "C{std.core.String}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenLinkCheck) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
@@ -1660,7 +1660,7 @@ bool EtsUIExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
         return false;
     }
 
-    ani_array_ref wantListArray = reinterpret_cast<ani_array_ref>(wantListObj);
+    ani_array wantListArray = reinterpret_cast<ani_array>(wantListObj);
     ani_size arrayLength = 0;
     if (env->Array_GetLength(wantListArray, &arrayLength) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get array length.");
@@ -1672,7 +1672,7 @@ bool EtsUIExtensionContext::UnwrapWantList(ani_env *env, ani_object wantListObj,
     }
     for (ani_size i = 0; i < arrayLength; i++) {
         ani_ref wantRef  = nullptr;
-        if (env->Array_Get_Ref(wantListArray, i, &wantRef) != ANI_OK || wantRef == nullptr) {
+        if (env->Array_Get(wantListArray, i, &wantRef) != ANI_OK || wantRef == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get want object");
             return false;
         }

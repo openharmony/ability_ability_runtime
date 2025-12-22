@@ -141,18 +141,18 @@ void EtsDialogRequestInit(ani_env *env)
     }
     
     ani_namespace ns;
-    status = env->FindNamespace("L@ohos/app/ability/dialogRequest/dialogRequest;", &ns);
+    status = env->FindNamespace("@ohos.app.ability.dialogRequest.dialogRequest", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "FindNamespace dialogRequest failed status : %{public}d", status);
         return;
     }
     std::array method = {
         ani_native_function {"getRequestInfo",
-            "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/dialogRequest/dialogRequest/RequestInfo;",
+            "C{@ohos.app.ability.Want.Want}:C{@ohos.app.ability.dialogRequest.dialogRequest.RequestInfo}",
             reinterpret_cast<void *>(EtsDialogRequest::GetRequestInfo)
         },
         ani_native_function {"getRequestCallback",
-            "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/dialogRequest/dialogRequest/RequestCallback;",
+            "C{@ohos.app.ability.Want.Want}:C{@ohos.app.ability.dialogRequest.dialogRequest.RequestCallback}",
             reinterpret_cast<void *>(EtsDialogRequest::GetRequestCallback)
         },
     };
@@ -164,7 +164,7 @@ void EtsDialogRequestInit(ani_env *env)
 
     ani_class cleanerCls = nullptr;
     if ((status = env->FindClass(
-        "L@ohos/app/ability/dialogRequest/dialogRequest/Cleaner;", &cleanerCls)) != ANI_OK || cleanerCls == nullptr) {
+        "@ohos.app.ability.dialogRequest.dialogRequest.Cleaner", &cleanerCls)) != ANI_OK || cleanerCls == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Cleaner FindClass failed status: %{public}d, or null cleanerCls", status);
         return;
     }

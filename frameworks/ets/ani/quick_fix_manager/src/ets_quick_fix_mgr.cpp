@@ -27,11 +27,11 @@ namespace quickFixManager {
 namespace {
 
 constexpr const int32_t ERR_OK = 0;
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char *CLASSNAME_ARRAY = "std.core.Array";
 constexpr const char *QUICK_FIX_INFO_CLASS_NAME =
-    "L@ohos/app/ability/quickFixManager/quickFixManager/ApplicationQuickFixInfoImpl;";
+    "@ohos.app.ability.quickFixManager.quickFixManager.ApplicationQuickFixInfoImpl";
 constexpr const char *HAP_MODULE_QUICK_FIX_INFO_IMPL_CLASS_NAME =
-    "L@ohos/app/ability/quickFixManager/quickFixManager/HapModuleQuickFixInfoImpl;";
+    "@ohos.app.ability.quickFixManager.quickFixManager.HapModuleQuickFixInfoImpl";
 
 ani_object WrapHapModuleQuickFixInfo(ani_env *env, const AppExecFwk::HqfInfo &hqfInfo)
 {
@@ -52,7 +52,7 @@ ani_object WrapHapModuleQuickFixInfo(ani_env *env, const AppExecFwk::HqfInfo &hq
         return nullptr;
     }
 
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "status : %{public}d", status);
         return nullptr;
@@ -106,7 +106,7 @@ ani_object WrapHapModuleQuickFixInfoArray(ani_env *env, const std::vector<AppExe
         return nullptr;
     }
     
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "status : %{public}d", status);
         return nullptr;
@@ -125,7 +125,7 @@ ani_object WrapHapModuleQuickFixInfoArray(ani_env *env, const std::vector<AppExe
             TAG_LOGE(AAFwkTag::QUICKFIX, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "status : %{public}d", status);
             break;
@@ -199,7 +199,7 @@ ani_object WrapEtsApplicationQuickFixInfo(ani_env *env, const AAFwk::Application
         return nullptr;
     }
     
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "status : %{public}d", status);
         return nullptr;
@@ -351,7 +351,7 @@ void EtsQuickFixManagerInit(ani_env *env)
         return;
     }
     ani_namespace ns;
-    const char* targetNamespace = "L@ohos/app/ability/quickFixManager/quickFixManager;";
+    const char* targetNamespace = "@ohos.app.ability.quickFixManager.quickFixManager";
     if (env->FindNamespace(targetNamespace, &ns) != ANI_OK) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "FindNamespace failed");
     }
@@ -362,17 +362,17 @@ void EtsQuickFixManagerInit(ani_env *env)
     std::array functions = {
         ani_native_function {
             "applyQuickFixSync",
-            "Lescompat/Array;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.Array}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(applyQuickFixSync)
         },
         ani_native_function {
             "revokeQuickFixSync",
-            "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(revokeQuickFixSync)
         },
         ani_native_function {
             "getApplicationQuickFixInfoSync",
-            "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(getApplicationQuickFixInfoSync)
         },
     };
