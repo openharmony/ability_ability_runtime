@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *MEMORY_LEVEL_ENUM_NAME = "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
+constexpr const char *MEMORY_LEVEL_ENUM_NAME = "@ohos.app.ability.AbilityConstant.AbilityConstant.MemoryLevel";
 } // namespace
 
 using namespace OHOS::AppExecFwk;

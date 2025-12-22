@@ -42,7 +42,7 @@ export default namespace verticalPanelManager {
       let p1 = taskpool.execute((): BusinessError => {
         return nativeStartVerticalPanelSync(context, wantParam, panelConfig, panelStartCallback);
       });
-      p1.then((e: NullishType) => {
+      p1.then((e: Any) => {
         let retError = e as BusinessError;
         if (retError.code === 0) {
           resolve(undefined);

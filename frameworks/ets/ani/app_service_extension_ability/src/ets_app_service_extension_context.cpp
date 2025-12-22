@@ -37,15 +37,15 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CONTEXT_CLASS_NAME = "Lapplication/AppServiceExtensionContext/AppServiceExtensionContext;";
+constexpr const char *CONTEXT_CLASS_NAME = "application.AppServiceExtensionContext.AppServiceExtensionContext";
 constexpr const char *APP_SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
-"Lapplication/AppServiceExtensionContext/AppServiceExtensionContext;";
+"application.AppServiceExtensionContext.AppServiceExtensionContext";
 static std::mutex g_connectsMutex;
 static std::recursive_mutex g_connectsLock;
 static std::map<EtsConnectionKey, sptr<ETSAppServiceExtensionConnection>, EtsKeyCompare> g_connects;
 static int64_t g_serialNumber = 0;
 constexpr const int FAILED_CODE = -1;
-constexpr const char *CLEANER_CLASS_NAME = "Lapplication/AppServiceExtensionContext/Cleaner;";
+constexpr const char *CLEANER_CLASS_NAME = "application.AppServiceExtensionContext.Cleaner";
 constexpr const int ANI_ALREADY_BINDED = 8;
 }
 
@@ -53,20 +53,20 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = ANI_ERROR;
     std::array functions = {
-        ani_native_function { "nativeTerminateSelf", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+        ani_native_function { "nativeTerminateSelf", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::TerminateSelf) },
         ani_native_function { "nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::StartAbility) },
         ani_native_function { "nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::StartAbilityWithOption) },
         ani_native_function { "nativeConnectServiceExtensionAbility",
-            "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J",
+            "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::ConnectServiceExtensionAbility) },
         ani_native_function { "nativeDisconnectServiceExtensionAbility",
-            "JLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "lC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAppServiceExtensionContext::DisconnectServiceExtensionAbility) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
@@ -272,7 +272,7 @@ ani_object CreateEtsAppServiceExtensionContext(ani_env *env, std::shared_ptr<App
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "Failed to BindNativeMethods");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "Failed to find constructor, status : %{public}d", status);
         return nullptr;
     }

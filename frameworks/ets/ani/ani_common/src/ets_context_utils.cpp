@@ -35,10 +35,10 @@ namespace AbilityRuntime {
 namespace ContextUtil {
 namespace {
 static std::once_flag g_bindNativeMethodsFlag;
-constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
-constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
-constexpr const char* CLEANER_CLASS = "Lapplication/Context/Cleaner;";
-constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication.EventHub.EventHub;";
+constexpr const char* CONTEXT_CLASS_NAME = "application.Context.Context";
+constexpr const char* AREA_MODE_ENUM_NAME = "@ohos.app.ability.contextConstant.contextConstant.AreaMode";
+constexpr const char* CLEANER_CLASS = "application.Context.Cleaner";
+constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "application.EventHub.EventHub";
 
 
 void BindContextDirInner(ani_env *aniEnv, ani_object contextObj, std::shared_ptr<Context> context)
@@ -173,7 +173,7 @@ bool SetNativeContextLong(ani_env *env, ani_object aniObj, ani_long nativeContex
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(contextCls, "<ctor>", ":V", &method)) != ANI_OK ||
+    if ((status = env->Class_FindMethod(contextCls, "<ctor>", ":", &method)) != ANI_OK ||
         method == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ctor FindMethod status: %{public}d, or null method", status);
         return false;
@@ -183,7 +183,7 @@ bool SetNativeContextLong(ani_env *env, ani_object aniObj, ani_long nativeContex
         TAG_LOGE(AAFwkTag::APPKIT, "Object_New status: %{public}d, or null contextObj", status);
         return false;
     }
-    if ((status = env->Class_FindMethod(contextCls, "setEtsContextPtr", "J:V", &method)) != ANI_OK ||
+    if ((status = env->Class_FindMethod(contextCls, "setEtsContextPtr", "l:", &method)) != ANI_OK ||
         method == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "setEtsContextPtr FindMethod status: %{public}d, or null method", status);
         return false;
@@ -274,7 +274,7 @@ void BindNativeFunction(ani_env *aniEnv)
     ani_status status = ANI_ERROR;
     std::call_once(g_bindNativeMethodsFlag, [&status, aniEnv, contextCls]() {
         std::array contextFunctions = {
-            ani_native_function {"getApplicationContextSync", ":Lapplication/ApplicationContext/ApplicationContext;",
+            ani_native_function {"getApplicationContextSync", ":C{application.ApplicationContext.ApplicationContext}",
                 reinterpret_cast<void *>(ContextUtil::GetApplicationContextSync)},
             ani_native_function {"switchArea", nullptr,
                 reinterpret_cast<void *>(ContextUtil::SwitchArea)},
@@ -282,18 +282,18 @@ void BindNativeFunction(ani_env *aniEnv)
                 reinterpret_cast<void *>(ContextUtil::GetArea)},
             ani_native_function {"getLogFileDir", nullptr,
                 reinterpret_cast<void *>(ContextUtil::GetLogFileDir)},
-            ani_native_function {"createModuleResourceManagerSync", "Lstd/core/String;Lstd/core/String;"
-                ":L@ohos/resourceManager/resourceManager/ResourceManager;",
+            ani_native_function {"createModuleResourceManagerSync", "C{std.core.String}C{std.core.String}"
+                ":C{@ohos.resourceManager.resourceManager.ResourceManager}",
                 reinterpret_cast<void *>(ContextUtil::CreateModuleResourceManagerSync)},
             ani_native_function {"nativeGetGroupDir", nullptr,
                 reinterpret_cast<void *>(ContextUtil::NativeGetGroupDir)},
-            ani_native_function {"nativeCreateDisplayContext", "J:Lapplication/Context/Context;",
+            ani_native_function {"nativeCreateDisplayContext", "l:C{application.Context.Context}",
                 reinterpret_cast<void *>(ContextUtil::NativeCreateDisplayContext)},
             ani_native_function {"nativeCreateAreaModeContext",
-                "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;:Lapplication/Context/Context;",
+                "C{@ohos.app.ability.contextConstant.contextConstant.AreaMode}:C{application.Context.Context}",
                 reinterpret_cast<void *>(ContextUtil::NativeCreateAreaModeContext)},
-            ani_native_function {"nativeCreateSystemHspModuleResourceManager", "Lstd/core/String;Lstd/core/String;"
-                ":L@ohos/resourceManager/resourceManager/ResourceManager;",
+            ani_native_function {"nativeCreateSystemHspModuleResourceManager", "C{std.core.String}C{std.core.String}"
+                ":C{@ohos.resourceManager.resourceManager.ResourceManager}",
                 reinterpret_cast<void *>(ContextUtil::NativeCreateSystemHspModuleResourceManager)},
         };
         status = aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
@@ -627,7 +627,7 @@ ani_object CreateContextObject(ani_env* env, ani_class contextClass, std::shared
     ani_object contextObj = nullptr;
     ani_method ctorMethod = nullptr;
     ani_status status = ANI_ERROR;
-    if ((status = env->Class_FindMethod(contextClass, "<ctor>", "J:V", &ctorMethod)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(contextClass, "<ctor>", "l:", &ctorMethod)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Find ctor method failed, status: %{public}d", status);
         return nullptr;
     }

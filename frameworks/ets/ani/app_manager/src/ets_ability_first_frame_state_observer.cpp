@@ -24,7 +24,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* ABILITY_FIRST_FRAME_STATE_OBSERVER_CLASS_NAME =
-    "Lapplication/AbilityFirstFrameStateObserver/AbilityFirstFrameStateObserver;";
+    "application.AbilityFirstFrameStateObserver.AbilityFirstFrameStateObserver";
 }
 ETSAbilityFirstFrameStateObserver::ETSAbilityFirstFrameStateObserver(ani_vm *vm) : etsVm_(vm) {}
 

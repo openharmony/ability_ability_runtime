@@ -24,42 +24,37 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
+constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_BUNDLEMANAGER_MULTIAPPMODE_TYPE =
-    "L@ohos/bundle/bundleManager/bundleManager/MultiAppModeType;";
+    "@ohos.bundle.bundleManager.bundleManager.MultiAppModeType";
 constexpr const char* CLASSNAME_DIALOG_ABILITY_INFO =
-    "L@ohos/app/ability/dialogSession/dialogSession/DialogAbilityInfoInner;";
+    "@ohos.app.ability.dialogSession.dialogSession.DialogAbilityInfoInner";
 constexpr const char* CLASSNAME_DIALOG_SESSION_INFO =
-    "L@ohos/app/ability/dialogSession/dialogSession/DialogSessionInfoInner;";
-constexpr const char* CLASSNAME_MULTIAPPMODE = "LbundleManager/ApplicationInfoInner/MultiAppModeInner;";
+    "@ohos.app.ability.dialogSession.dialogSession.DialogSessionInfoInner";
+constexpr const char* CLASSNAME_MULTIAPPMODE = "bundleManager.ApplicationInfoInner.MultiAppModeInner";
 ani_object WrapArrayDialogAbilityInfoToEts(ani_env *env, const std::vector<DialogAbilityInfo> &value)
 {
     ani_object etsValue = nullptr;
     ani_status status = ANI_ERROR;
-    ani_class intCls = nullptr;
     ani_ref undefinedRef = nullptr;
-    ani_array_ref refArray = nullptr;
+    ani_array refArray = nullptr;
 
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "null env");
-        return nullptr;
-    }
-    if ((status = env->FindClass(CLASSNAME_INT, &intCls)) != ANI_OK || intCls == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "FindClass failed, status: %{public}d or null intCls", status);
         return nullptr;
     }
     if ((status = env->GetUndefined(&undefinedRef)) != ANI_OK || undefinedRef == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "GetUndefined failed, status: %{public}d or null undefinedRef", status);
         return nullptr;
     }
-    if ((status = env->Array_New_Ref(intCls, value.size(), undefinedRef, &refArray)) != ANI_OK
+    if ((status = env->Array_New(value.size(), undefinedRef, &refArray)) != ANI_OK
         || refArray == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Array_New_Ref failed, status: %{public}d or null refArray", status);
         return nullptr;
     }
     for (uint32_t i = 0; i < value.size(); i++) {
         etsValue = WrapDialogAbilityInfo(env, value[i]);
-        if ((status = env->Array_Set_Ref(refArray, i, etsValue)) != ANI_OK) {
+        if ((status = env->Array_Set(refArray, i, etsValue)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::DIALOG, "Array_Set_Ref failed, status: %{public}d", status);
             return nullptr;
         }
@@ -170,7 +165,7 @@ ani_object WrapDialogAbilityInfo(ani_env *env, const AAFwk::DialogAbilityInfo &d
         TAG_LOGE(AAFwkTag::DIALOG, "null cls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "status : %{public}d", status);
         return nullptr;
     }
@@ -205,7 +200,7 @@ ani_object WrapDialogSessionInfo(ani_env *env, const AAFwk::DialogSessionInfo &d
         TAG_LOGE(AAFwkTag::DIALOG, "FindClass status : %{public}d or null cls", status);
         return AppExecFwk::CreateEtsNull(env);
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Class_FindMethod status : %{public}d or null method", status);
         return AppExecFwk::CreateEtsNull(env);
     }
@@ -249,7 +244,7 @@ ani_object WrapMultiAppModeData(ani_env *env, const AppExecFwk::MultiAppModeData
         TAG_LOGE(AAFwkTag::DIALOG, "FindClass status : %{public}d or null cls", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Class_FindMethod status : %{public}d or null method", status);
         return nullptr;
     }

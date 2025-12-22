@@ -28,7 +28,7 @@ namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
 constexpr const char *INSIGHT_INTENT_PROVIDER_CLASS_NAME =
-    "L@ohos/app/ability/insightIntentProvider/insightIntentProvider;";
+    "@ohos.app.ability.insightIntentProvider.insightIntentProvider";
 }
 
 class EtsInsightIntentProvider {
