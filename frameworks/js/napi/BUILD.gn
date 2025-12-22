@@ -65,6 +65,7 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/embeddable_ui_ability:embeddableuiability_napi",
     "${ability_runtime_napi_path}/embeddable_ui_ability_context:embeddableuiabilitycontext_napi",
     "${ability_runtime_napi_path}/embedded_ui_extension_ability:embeddeduiextensionability_napi",
+    "${ability_runtime_napi_path}/errorcode:errorcode_napi",
     "${ability_runtime_napi_path}/extension_ability:extensionability_napi",
     "${ability_runtime_napi_path}/extensioncontext:extensioncontext_napi",
     "${ability_runtime_napi_path}/featureAbility:featureability",
