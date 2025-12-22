@@ -17,6 +17,7 @@
 #define OHOS_AAFWK_FILE_PERMISSION_MANAGER
 
 #include <deque>
+#include <mutex>
 #include <string>
 #include <vector>
 #include "uri.h"
@@ -33,10 +34,23 @@ namespace AAFwk {
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
 #endif
+using CheckUriFunc = int32_t (*)(const std::string&, uint32_t);
 typedef enum OperationMode {
     READ_MODE = 1 << 0,
     WRITE_MODE = 1 << 1,
 } OperationMode;
+
+class DllWrapper {
+public:
+    DllWrapper() = default;
+    ~DllWrapper();
+    bool InitDlSymbol(const char* name, const char* funcName);
+    CheckUriFunc GetFunc();
+private:
+    void* handle_ = nullptr;
+    CheckUriFunc func_ = nullptr;
+    std::mutex funcLock_;
+};
 
 class FilePermissionManager {
 public:
@@ -48,6 +62,8 @@ public:
 private:
     static bool CheckDocsUriPermission(uint32_t callerTokenId, bool hasFileManagerPerm, bool hasSandboxManagerPerm,
         const std::string &path);
+
+    static DllWrapper& GetDllWrapper();
 };
 }  // namespace AAFwk
 }  // namespace OHOS
