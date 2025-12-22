@@ -8059,14 +8059,14 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
-    auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(appInfo->uid),
-        bundleInfo.name, appInfo->appIndex);
-    appInfo->accessTokenIdEx = accessTokenIdEx.tokenIDEx;
-    appInfo->accessTokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, 0)) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
         return ERR_INVALID_OPERATION;
     }
+    auto accessTokenIdEx = AccessToken::AccessTokenKit::GetHapTokenIDEx(GetUserIdByUid(appInfo->uid),
+        bundleInfo.name, appInfo->appIndex);
+    appInfo->accessTokenIdEx = accessTokenIdEx.tokenIDEx;
+    appInfo->accessTokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
 
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
