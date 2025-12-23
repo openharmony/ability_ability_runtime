@@ -343,6 +343,35 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartUIAbility_1200
+ * @tc.desc: StartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1200, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    sessionInfo->reuseDelegatorWindow = true;
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->isPreloadStart = false;
+    sessionInfo->processOptions->callingPid = 2000;
+    sessionInfo->processOptions->loadAbilityCallbackId = 123456;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetPid(1000);
+    mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    abilityRequest.appInfo.uid = 3000;
+    bool isColdStart = false;
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_FALSE(isColdStart);
+    EXPECT_NE(abilityRequest.processOptions, nullptr);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_0100
  * @tc.desc: CreateSessionInfo
  * @tc.type: FUNC
