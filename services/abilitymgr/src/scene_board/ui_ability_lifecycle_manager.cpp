@@ -214,6 +214,11 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     abilityRequest.sessionInfo = sessionInfo;
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
+    if (!isColdStart && shouldReturnPid && uiAbilityRecord->GetPid() > 0) {
+        DelayedSingleton<AppScheduler>::GetInstance()->NotifyLoadAbilityFinished(
+            abilityRequest.processOptions->callingPid, uiAbilityRecord->GetPid(),
+            abilityRequest.processOptions->loadAbilityCallbackId);
+    }
     SetLastExitReasonAsync(uiAbilityRecord);
     MarkStartingFlag(abilityRequest);
     if (sessionInfo->reuseDelegatorWindow) {
