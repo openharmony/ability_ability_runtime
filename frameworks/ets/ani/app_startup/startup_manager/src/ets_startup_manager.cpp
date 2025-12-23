@@ -40,7 +40,7 @@ constexpr const char *SIGNATURE_STARTUP_MANAGER_RUN_ASYNCCALLBACK =
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_ALL_STARTUP_TASK_RESULTS =
     ":";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_GET_STARTUP_TASK_RESULTS =
-    "C{std.core.String}:C{std.core.Object}";
+    "C{std.core.String}:Y";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_IS_STARTUP_TASK_INITIALIZED =
     "C{std.core.String}:z";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_STARTUP_TASK_RESULT =
