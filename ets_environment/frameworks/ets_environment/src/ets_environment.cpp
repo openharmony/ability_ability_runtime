@@ -499,7 +499,7 @@ bool ETSEnvironment::AddAbcFiles(ani_env *env, const std::string &modulePath)
         return false;
     }
     if ((status = env->Object_CallMethodByName_Void(static_cast<ani_object>(vmEntry_.abcLinkerRef_),
-        "addAbcFiles", "[Lstd/core/String;:V", refArray)) != ANI_OK) {
+        "addAbcFiles", "C{std.core.Array}:", refArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         return false;
     }
@@ -929,7 +929,7 @@ bool ETSEnvironment::SetHspAbcFiles(ani_env *env, ani_object abcObj)
     }
 
     if ((status = env->Object_CallMethodByName_Void(abcObj,
-        "addAbcFiles", "[Lstd/core/String;:V", strRefArray)) != ANI_OK) {
+        "addAbcFiles", "C{std.core.Array}:", strRefArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         return false;
     }
