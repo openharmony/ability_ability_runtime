@@ -321,6 +321,43 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_010, TestSize.Level2)
 }
 
 /**
+ * @tc.name: AppspawnSetExtMsgSec_001
+ * @tc.desc: AppspawnSetExtMsgSec, Test when appSignType is not empty then function returns 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgSec_001, TestSize.Level2)
+{
+    auto asc = std::make_shared<AppSpawnClient>(true);
+    AppSpawnStartMsg startMsg;
+    startMsg.appSignType = "test";
+    startMsg.code = MSG_APP_SPAWN;
+    startMsg.procName = "testProcName";
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    int ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->AppspawnSetExtMsgSec(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: AppspawnSetExtMsgSec_002
+ * @tc.desc: AppspawnSetExtMsgSec, Test when appSignType is empty then function returns 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgSec_002, TestSize.Level2)
+{
+    auto asc = std::make_shared<AppSpawnClient>(true);
+    AppSpawnStartMsg startMsg;
+    startMsg.code = MSG_APP_SPAWN;
+    startMsg.procName = "testProcName";
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    int ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->AppspawnSetExtMsgSec(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: AppspawnSetExtMsg_001
  * @tc.desc: AppspawnSetExtMsg.
  * @tc.type: FUNC
