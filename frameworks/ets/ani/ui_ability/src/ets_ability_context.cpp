@@ -2819,8 +2819,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void*>(EtsAbilityContext::SetMissionWindowIcon) },
         };
-        if ((status = env->Class_BindStaticNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindStaticNativeMethods failed status: %{public}d", status);
+        if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
             return;
         }
 
@@ -2832,14 +2832,14 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         std::array cleanerMethods = {
             ani_native_function {"clean", nullptr, reinterpret_cast<void *>(EtsAbilityContext::Clean) },
         };
-        if ((status = env->Class_BindStaticNativeMethods(cleanerCls, cleanerMethods.data(), cleanerMethods.size())) !=
+        if ((status = env->Class_BindNativeMethods(cleanerCls, cleanerMethods.data(), cleanerMethods.size())) !=
             ANI_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "cleanerCls Class_BindStaticNativeMethods failed status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "cleanerCls Class_BindNativeMethods failed status: %{public}d", status);
             return;
         }
     });
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindStaticNativeMethods status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods status: %{public}d", status);
         return false;
     }
     return true;
