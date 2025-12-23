@@ -44,10 +44,9 @@ ohos_fuzztest("MultiUserConfigMgrFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
-    "i18n:intl_util",
+    "i18n:i18n_sa_client",
     "os_account:libaccountkits",
     "os_account:os_account_innerkits",
-    "preferences:native_preferences",
   ]
 }
 
