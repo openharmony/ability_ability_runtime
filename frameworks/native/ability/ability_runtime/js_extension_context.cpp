@@ -56,6 +56,7 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return nullptr;
     }
+    HandleEscape handleScope(env);
     napi_value object = CreateJsBaseContext(env, context);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
@@ -84,7 +85,7 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
     std::string type = "ExtensionContext";
     napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
 
-    return object;
+    return handleScope.Escape(object);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

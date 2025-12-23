@@ -84,7 +84,9 @@ void ThrowErrorByNativeErr(napi_env env, int32_t err)
 
 napi_value CreateJsError(napi_env env, const AbilityErrorCode& err)
 {
-    return CreateJsError(env, static_cast<int32_t>(err), GetErrorMsg(err));
+    HandleEscape handleEscape(env);
+    return handleEscape.Escape(
+        CreateJsError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
 }
 
 napi_value CreateInvalidParamJsError(napi_env env, const std::string &message)
