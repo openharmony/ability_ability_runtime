@@ -100,7 +100,7 @@ private:
     std::shared_ptr<PendingWantKey> key_;
 };
 
-class MockIWantSender : public IWantSender {
+class MockIWantSender : public PendingWantRecord {
 public:
     virtual ~MockIWantSender() {};
 
@@ -552,7 +552,7 @@ HWTEST_F(AbilityManagerServiceElevenTest, CancelWantSender_0004, TestSize.Level1
         new (std::nothrow) MockPendingWantRecord(nullptr, 0, 0, nullptr, pendingKey);
     sender->SetIRemoteObjectFlags(recordWithKey);
     abilityMs->CancelWantSender(sender);
-    asObjectfunctionFrequency = 5;
+    asObjectfunctionFrequency = 6;
     EXPECT_EQ(sender->GetasObjectfunctionFrequency(), asObjectfunctionFrequency);
 
     GTEST_LOG_(INFO) << "CancelWantSender_0004 end";
