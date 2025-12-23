@@ -288,7 +288,7 @@ private:
             TAG_LOGE(AAFwkTag::DEFAULT, "null handler");
             return;
         }
-
+        HandleScope handle(releaseCallBackEngine_);
         auto task = [notify = this, &str] () {
             if (!FindJsCallerComplex(notify)) {
                 TAG_LOGE(AAFwkTag::DEFAULT, "address error");
