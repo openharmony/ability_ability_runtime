@@ -647,6 +647,7 @@ bool AppRunningManager::ProcessExitByBundleNameAndAppIndex(const std::string &bu
             if (clearPageStack) {
                 appRecord->ScheduleClearPageStack();
             }
+            appRecord->SetKilling();
             appRecord->ScheduleProcessSecurityExit();
         }
     }
