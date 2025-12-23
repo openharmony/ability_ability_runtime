@@ -34,6 +34,7 @@ napi_value CreateJsExtensionRunningInfo(napi_env env, const AAFwk::ExtensionRunn
 napi_value AbilityStateInit(napi_env env);
 napi_value UserStatusInit(napi_env env);
 napi_value CreateJsElementName(napi_env env, const AppExecFwk::ElementName &elementName);
+int32_t ConvertAbilityState(int32_t abilityState);
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData);
 napi_value CreateJsAbilityStateDataArray(
     napi_env env, const std::vector<AppExecFwk::AbilityStateData> &abilityStateDatas);
