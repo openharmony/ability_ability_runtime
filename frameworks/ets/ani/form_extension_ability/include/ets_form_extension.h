@@ -61,6 +61,8 @@ public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
     FormState OnAcquireFormState(const Want &want) override;
+
+    void OnSizeChanged(int64_t formId, int32_t newDimension, const Rect &newRect) override;
 private:
     void BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, std::shared_ptr<AAFwk::Want> want,
         const std::string &moduleName, const std::string &srcPath);
@@ -79,6 +81,11 @@ private:
         std::vector<FormDataProxy> &formDataProxies);
 
     bool ConvertFromDataProxies(ani_env *env, ani_object arrayValue, std::vector<FormDataProxy> &formDataProxies);
+
+    ani_object WrapFormRect(ani_env *env, const Rect &newRect);
+    
+    bool CreateObject(ani_env *env, ani_object &object, const std::string &className);
+
     std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str);
     ani_status ANIUtils_FormIdToAniString(ani_env *env, int64_t formId, ani_string &formIdStr);
     std::unique_ptr<NativeReference> etsObj_;
