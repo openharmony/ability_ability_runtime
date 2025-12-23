@@ -113,7 +113,7 @@ ani_object EtsStartupTaskResult::JsToEtsResult(ani_env *aniEnv, std::shared_ptr<
         return nullptr;
     }
     ani_ref unwrapResult = nullptr;
-    ani_status status = aniEnv->Object_CallMethodByName_Ref(result, "unwrap", ":C{std.core.Object}", &unwrapResult);
+    ani_status status = aniEnv->Object_CallMethodByName_Ref(result, "unwrap", ":Y", &unwrapResult);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName_Ref failed: %{public}d", status);
         hybridgref_delete_from_napi(napiEnv, ref);

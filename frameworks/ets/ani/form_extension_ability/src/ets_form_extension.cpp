@@ -601,7 +601,9 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", "C{std.core.Object}C{std.core.Object}:", &recordSetMethod);
+    status = env->Class_FindMethod(recordCls, "$_set",
+        "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}Y:",
+        &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
@@ -649,7 +651,7 @@ void ETSFormExtension::OnStop()
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return;
     }
-    
+
     ani_ref result;
     status = env->FunctionalObject_Call(static_cast<ani_fn_object>(nameRef), 0, nullptr, &result);
     if (status != ANI_OK) {
@@ -740,7 +742,7 @@ void ETSFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t
     ani_enum_item formLocationStateItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
         env, FORM_LOCATION_STATE_ENUM_NAME, formLocation, formLocationStateItem);
-    
+
     ani_method function;
     ani_status status = ANI_ERROR;
     if ((status = env->Class_FindMethod(
