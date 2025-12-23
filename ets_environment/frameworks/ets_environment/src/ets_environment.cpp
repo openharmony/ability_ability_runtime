@@ -71,6 +71,8 @@ const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
 
 constexpr const char* CLASSNAME_LINKER = "std.core.AbcRuntimeLinker";
+constexpr const int32_t ARG_ZERO = 0;
+constexpr const int32_t ARG_ONE = 1;
 } // namespace
 
 static void PostTaskWrapper(void(*task)(void *), void *data, const char *taskName, int64_t delayMs);
@@ -83,6 +85,15 @@ std::unique_ptr<ETSEnvironment> &ETSEnvironment::GetInstance()
         instance_ = std::make_unique<ETSEnvironment>();
     }
     return instance_;
+}
+
+ETSEnvironment::~ETSEnvironment()
+{
+    auto env = GetAniEnv();
+    if (env != nullptr && vmEntry_.abcLinkerRef_ != nullptr) {
+        env->GlobalReference_Delete(vmEntry_.abcLinkerRef_);
+        vmEntry_.abcLinkerRef_ = nullptr;
+    }
 }
 
 bool ETSEnvironment::LoadBootPathFile(std::string &bootfiles)
@@ -269,6 +280,11 @@ bool ETSEnvironment::Initialize(const std::shared_ptr<AppExecFwk::EventRunner> e
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetEnv failed %{public}d", status);
         return false;
     }
+
+    if (!InitAbcLinker(vmEntry_.aniEnv_)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "InitAbcLinker failed");
+        return false;
+    }
     return true;
 }
 
@@ -413,12 +429,54 @@ bool ETSEnvironment::PreloadModule(const std::string &modulePath)
     return true;
 }
 
-bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, ani_class &abcCls, ani_object &abcObj)
+bool ETSEnvironment::InitAbcLinker(ani_env *env)
 {
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "InitAbcLinker begin");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
         return false;
     }
+
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_LINKER, &vmEntry_.abcLinkerClass_)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
+        return false;
+    }
+
+    ani_ref undefinedRef = nullptr;
+    if ((status = env->GetUndefined(&undefinedRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+
+    ani_array refArray = nullptr;
+    if ((status = env->Array_New(ARG_ZERO, undefinedRef, &refArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref failed, status: %{public}d", status);
+        return false;
+    }
+
+    ani_object abcObj = CreateRuntimeLinker(env, vmEntry_.abcLinkerClass_, undefinedRef, refArray);
+    if (abcObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "CreateRuntimeLinker failed");
+        return false;
+    }
+
+    if ((status = env->GlobalReference_Create(abcObj, &vmEntry_.abcLinkerRef_)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GlobalReference_Create failed, status: %{public}d", status);
+        return false;
+    }
+
+    return true;
+}
+
+bool ETSEnvironment::AddAbcFiles(ani_env *env, const std::string &modulePath)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "AddAbcFiles begin");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
+
     ani_status status = ANI_ERROR;
 
     ani_string modulePathAni = nullptr;
@@ -432,34 +490,64 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         return false;
     }
     ani_array refArray = nullptr;
-    if ((status = env->Array_New(1, undefinedRef, &refArray)) != ANI_OK) {
+    if ((status = env->Array_New(ARG_ONE, undefinedRef, &refArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->Array_Set(refArray, 0, modulePathAni)) != ANI_OK) {
+    if ((status = env->Array_Set(refArray, ARG_ZERO, modulePathAni)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->FindClass(CLASSNAME_LINKER, &abcCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
+    if ((status = env->Object_CallMethodByName_Void(static_cast<ani_object>(vmEntry_.abcLinkerRef_),
+        "addAbcFiles", "[Lstd/core/String;:V", refArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         return false;
     }
 
-    abcObj = CreateRuntimeLinker(env, abcCls, undefinedRef, refArray);
-    if (abcObj == nullptr) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "CreateRuntimeLinker failed");
+    return true;
+}
+
+bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, ani_class &abcCls, ani_object &abcObj)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "LoadAbcLinker begin");
+    if (env == nullptr || vmEntry_.abcLinkerClass_ == nullptr || vmEntry_.abcLinkerRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "env or linker is null");
         return false;
     }
 
-    ani_class contextCls{};
-    if ((status = env->FindClass("std.interop.InteropContext", &contextCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "InteropContext failed, status: %{public}d", status);
+    ani_status status = ANI_ERROR;
+    if (!SetHspAbcFiles(env, static_cast<ani_object>(vmEntry_.abcLinkerRef_))) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "SetHspAbcFiles failed");
         return false;
     }
-    if ((status = env->Class_CallStaticMethodByName_Void(
-        contextCls, "setDefaultInteropLinker", "C{std.core.RuntimeLinker}:", abcObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "setDefaultInteropLinker failed, status: %{public}d", status);
-        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(vmEntry_.abcCacheMutex_);
+        auto iterator = vmEntry_.abcCacheMap_.find(modulePath);
+        if (iterator == vmEntry_.abcCacheMap_.end()) {
+            if (!AddAbcFiles(env, modulePath)) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "AddAbcFiles failed");
+                return false;
+            }
+            vmEntry_.abcCacheMap_.emplace(modulePath, true);
+        }
+    }
+
+    abcObj = static_cast<ani_object>(vmEntry_.abcLinkerRef_);
+    abcCls = vmEntry_.abcLinkerClass_;
+
+    if (!vmEntry_.isSetDefaultInteropLinker_) {
+        ani_class contextCls = nullptr;
+        if ((status = env->FindClass("std.interop.InteropContext", &contextCls)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "InteropContext failed, status: %{public}d", status);
+            return false;
+        }
+        if ((status = env->Class_CallStaticMethodByName_Void(
+            contextCls, "setDefaultInteropLinker", "C{std.core.RuntimeLinker}:", abcObj)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "setDefaultInteropLinker failed, status: %{public}d", status);
+            return false;
+        }
+        vmEntry_.isSetDefaultInteropLinker_ = true;
     }
 
     return true;
@@ -809,89 +897,68 @@ std::vector<std::string> ETSEnvironment::GetHspPathList()
     return hspPathList;
 }
 
-bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array &refHspLinkerArray, ani_class cls)
+bool ETSEnvironment::SetHspAbcFiles(ani_env *env, ani_object abcObj)
 {
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "SetHspAbcFiles begin");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
     const auto &hspPathList = GetHspPathList();
     if (hspPathList.empty()) {
         return true;
     }
-    ani_env *aniEnv = GetAniEnv();
-    if (aniEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
-        return false;
+    std::vector<std::string> hspPathListAdd;
+    {
+        std::lock_guard<std::mutex> lock(vmEntry_.abcCacheMutex_);
+        for (const auto &hspPath : hspPathList) {
+            if (vmEntry_.abcCacheMap_.find(hspPath) == vmEntry_.abcCacheMap_.end()) {
+                hspPathListAdd.emplace_back(hspPath);
+            }
+        }
     }
+    if (hspPathListAdd.empty()) {
+        return true;
+    }
+
     ani_status status = ANI_ERROR;
-    ani_method method = nullptr;
-    if ((status = aniEnv->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:",
-        &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
-        return false;
-    }
-
-    ani_ref undefined_ref;
-    if ((status = aniEnv->GetUndefined(&undefined_ref)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetUndefined failed, status: %{public}d", status);
-        return false;
-    }
-
-    ani_array str_refArray;
-    if (ConvertHspPathToAniArray(aniEnv, hspPathList, str_refArray) == false) {
+    ani_array strRefArray = nullptr;
+    if (ConvertHspPathToAniArray(env, hspPathListAdd, strRefArray) == false) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "ConvertHspPathToAniArray failed");
         return false;
     }
 
-    ani_object object = nullptr;
-    if ((status = aniEnv->Object_New(cls, method, &object, undefined_ref, str_refArray)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New AbcRuntimeLinker failed, status: %{public}d", status);
+    if ((status = env->Object_CallMethodByName_Void(abcObj,
+        "addAbcFiles", "[Lstd/core/String;:V", strRefArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         return false;
     }
 
-    if ((status = aniEnv->Array_New(1, undefined_ref, &refHspLinkerArray)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref Failed, status: %{public}d", status);
-        return false;
-    }
-    if ((status = aniEnv->Array_Set(refHspLinkerArray, 0, object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref Failed, status: %{public}d", status);
-        return false;
+    {
+        std::lock_guard<std::mutex> lock(vmEntry_.abcCacheMutex_);
+        for (auto &hspPath : hspPathListAdd) {
+            vmEntry_.abcCacheMap_.emplace(hspPath, true);
+        }
     }
     return true;
 }
 
 ani_object ETSEnvironment::CreateRuntimeLinker(
-    ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array& refArray)
+    ani_env *aniEnv, ani_class cls, ani_ref undefinedRef, ani_array &refArray)
 {
-    ani_object object = nullptr;
-    ani_array refHspLinkerArray = nullptr;
-    GetHspAbcRuntimeLinker(refHspLinkerArray, cls);
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "CreateRuntimeLinker begin");
     ani_status status = ANI_ERROR;
-
-    if (refHspLinkerArray == nullptr) {
-        ani_method runtimeLinkerCtorMethod = nullptr;
-        if ((status = aniEnv->Class_FindMethod(
-            cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:", &runtimeLinkerCtorMethod)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
-            return nullptr;
-        }
-        if ((status = aniEnv->Object_New(cls, runtimeLinkerCtorMethod, &object, undefined_ref, refArray)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New runtimeLinkerCtorMethod failed, status: %{public}d", status);
-            HandleUncaughtError();
-            return nullptr;
-        }
-    } else {
-        ani_method runtimeLinkerCtorMethodEx = nullptr;
-        if ((status = aniEnv->Class_FindMethod(cls,
-            "<ctor>",
-            "C{std.core.RuntimeLinker}C{std.core.Array}C{std.core.RuntimeLinker}:",
-            &runtimeLinkerCtorMethodEx)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
-            return nullptr;
-        }
-        if ((status = aniEnv->Object_New(cls, runtimeLinkerCtorMethodEx, &object, undefined_ref, refArray,
-            refHspLinkerArray)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New runtimeLinkerCtorMethodEx failed, status: %{public}d", status);
-            HandleUncaughtError();
-            return nullptr;
-        }
+    ani_object object = nullptr;
+    ani_method runtimeLinkerCtorMethod = nullptr;
+    if ((status = aniEnv->Class_FindMethod(
+        cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:", &runtimeLinkerCtorMethod)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = aniEnv->Object_New(cls, runtimeLinkerCtorMethod, &object, undefinedRef, refArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New runtimeLinkerCtorMethod failed, status: %{public}d", status);
+        HandleUncaughtError();
+        return nullptr;
     }
 
     return object;
