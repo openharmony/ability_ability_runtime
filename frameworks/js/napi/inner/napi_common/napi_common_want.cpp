@@ -67,6 +67,7 @@ void InnerInitWantOptionsData(std::map<std::string, unsigned int> &flagMap)
 
 napi_value WrapElementName(napi_env env, const ElementName &elementName)
 {
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
 
@@ -86,7 +87,7 @@ napi_value WrapElementName(napi_env env, const ElementName &elementName)
     NAPI_CALL(env, napi_create_string_utf8(env, elementName.GetModuleName().c_str(), NAPI_AUTO_LENGTH, &jsValue));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "moduleName", jsValue));
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 bool UnwrapElementName(napi_env env, napi_value param, ElementName &elementName)
@@ -1073,6 +1074,7 @@ bool InnerUnwrapWantOptions(napi_env env, napi_value param, const char *property
 
 napi_value WrapWant(napi_env env, const Want &want)
 {
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
 
@@ -1127,7 +1129,7 @@ napi_value WrapWant(napi_env env, const Want &want)
     jsValue = WrapArrayStringToJS(env, want.GetEntities());
     SetPropertyValueByPropertyName(env, jsObject, "entities", jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value WrapWantParamsFD(napi_env env, const AAFwk::WantParams &wantParams)
@@ -1239,6 +1241,7 @@ bool UnwrapWant(napi_env env, napi_value param, Want &want, const std::string &p
 
 napi_value WrapAbilityResult(napi_env env, const int &resultCode, const AAFwk::Want &want)
 {
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
 
@@ -1251,7 +1254,7 @@ napi_value WrapAbilityResult(napi_env env, const int &resultCode, const AAFwk::W
     jsValue = WrapWant(env, want);
     SetPropertyValueByPropertyName(env, jsObject, "want", jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 bool UnWrapAbilityResult(napi_env env, napi_value param, int &resultCode, AAFwk::Want &want)

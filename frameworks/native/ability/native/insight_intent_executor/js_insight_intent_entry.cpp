@@ -342,6 +342,7 @@ bool JsInsightIntentEntry::PrepareParametersUIAbilityForeground(napi_env env,
     }
 
     // assign ability pageloader
+    HandleScope handleScope(env);
     auto executorNapiVal = jsObj_->GetNapiValue();
     auto pageLoaderNapiVal = pageLoader->GetNapiValue();
     if (!CheckTypeForNapiValue(env, executorNapiVal, napi_object) ||

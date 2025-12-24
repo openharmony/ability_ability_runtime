@@ -428,6 +428,7 @@ std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want,
 bool JsAbilityStage::CallAcceptOrRequestSync(napi_env env, const AAFwk::Want &want, std::string &methodName,
     AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo) const
 {
+    HandleScope handleScope(env);
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
@@ -463,6 +464,7 @@ bool JsAbilityStage::CallAcceptOrRequestAsync(napi_env env, const AAFwk::Want &w
         TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
         return false;
     }
+    HandleScope handleScope(env);
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     bool hasCaughtException = false;
     napi_value result = CallObjectMethod(methodName.c_str(), hasCaughtException, &napiWant, ARGC_ONE);
