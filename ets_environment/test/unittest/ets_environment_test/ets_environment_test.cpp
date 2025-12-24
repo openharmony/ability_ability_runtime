@@ -319,7 +319,7 @@ HWTEST_F(EtsEnvironmentTest, FinishPreload_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    auto result = etsEnv->FinishPreload();
+    auto result = etsEnv->FinishPreload(nullptr);
     EXPECT_FALSE(result);
 }
 
