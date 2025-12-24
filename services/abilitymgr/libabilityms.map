@@ -45,6 +45,7 @@
       *CallerInfo*;
       *CallerRecord*;
       *CallRecord*;
+      *CommonExtensionManager*;
       *ConnectionObserverController*;
       *ConnectionRecord*;
       *ConnectionStateItem*;
@@ -97,6 +98,7 @@
       *UriUtils*;
       *UserController*;
       *UnlockScreenManager*;
+      *UIExtensionAbilityManager*;
       *WantSenderInfo*;
       *SenderInfo*;
       *ExtensionRunningInfo*;

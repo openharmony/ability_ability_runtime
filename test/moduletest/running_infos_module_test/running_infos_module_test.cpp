@@ -123,7 +123,6 @@ void RunningInfosModuleTest::OnStartAms()
 
         abilityMgrServ_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
         abilityMgrServ_->subManagersHelper_->InitSubManagers(userId, true);
-        abilityMgrServ_->subManagersHelper_->currentConnectManager_->SetTaskHandler(abilityMgrServ_->taskHandler_);
         auto topAbility = reinterpret_cast<MissionListManager*>(abilityMgrServ_->
             GetMissionListManagerByUserId(userId).get())->GetCurrentTopAbilityLocked();
         if (topAbility) {

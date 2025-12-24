@@ -18,6 +18,8 @@
 #define protected public
 #include "ability_manager_service.h"
 #include "ability_connect_manager.h"
+#include "ui_extension_ability_manager.h"
+#include "common_extension_manager.h"
 #include "ability_event_handler.h"
 #include "ams_configuration_parameter.h"
 #include "mission_list_manager.h"
@@ -778,7 +780,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
     auto result = abilityMs_->ConnectAbility(want, callback, nullptr, USER_ID_U100);
     WaitUntilTaskFinished();
     EXPECT_EQ(result, ERR_OK);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(USER_ID_U100)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(USER_ID_U100)->GetServiceMap();
     auto service = serviceMap.at(element.GetURI());
     service->SetAbilityState(AAFwk::AbilityState::ACTIVE);
 
@@ -859,7 +861,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
     auto result = abilityMs_->ConnectAbility(want, callback, nullptr, newUserId);
     WaitUntilTaskFinished();
     EXPECT_EQ(result, ERR_OK);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(newUserId)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(newUserId)->GetServiceMap();
     auto service = serviceMap.at(element.GetURI());
     service->SetAbilityState(AAFwk::AbilityState::ACTIVE);
 
@@ -942,7 +944,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleDisconnectAbilityDone
     auto result = abilityMs_->ConnectAbility(want, callback, nullptr, USER_ID_U100);
     WaitUntilTaskFinished();
     EXPECT_EQ(result, ERR_OK);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(USER_ID_U100)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(USER_ID_U100)->GetServiceMap();
     auto service = serviceMap.at(element.GetURI());
     service->SetAbilityState(AAFwk::AbilityState::ACTIVE);
 
@@ -1061,7 +1063,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
     auto result = abilityMs_->ConnectAbility(want, callback, nullptr, USER_ID_U100);
     WaitUntilTaskFinished();
     EXPECT_EQ(result, ERR_OK);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(USER_ID_U100)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(USER_ID_U100)->GetServiceMap();
     auto service = serviceMap.at(element.GetURI());
     service->SetAbilityState(AAFwk::AbilityState::ACTIVE);
 
@@ -1142,7 +1144,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
     auto result = abilityMs_->ConnectAbility(want, callback, nullptr, newUserId);
     WaitUntilTaskFinished();
     EXPECT_EQ(result, ERR_OK);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(newUserId)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(newUserId)->GetServiceMap();
     auto service = serviceMap.at(element.GetURI());
     service->SetAbilityState(AAFwk::AbilityState::ACTIVE);
 
@@ -1221,7 +1223,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StopServiceAbility_001, TestS
     auto result = abilityMs_->StartAbility(want, USER_ID_U100, -1);
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(USER_ID_U100)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(USER_ID_U100)->GetServiceMap();
     EXPECT_EQ(1, static_cast<int>(serviceMap.size()));
     for (auto& it : serviceMap) {
         EXPECT_EQ(it.first, element.GetURI());
@@ -1261,7 +1263,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StopServiceAbility_002, TestS
     auto result = abilityMs_->StartAbility(want, newUserId, -1);
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
-    auto serviceMap = abilityMs_->GetConnectManagerByUserId(newUserId)->GetServiceMap();
+    auto serviceMap = abilityMs_->GetCommonExtensionManagerByUserId(newUserId)->GetServiceMap();
     EXPECT_EQ(1, static_cast<int>(serviceMap.size()));
     for (auto& it : serviceMap) {
         EXPECT_EQ(it.first, element.GetURI());
