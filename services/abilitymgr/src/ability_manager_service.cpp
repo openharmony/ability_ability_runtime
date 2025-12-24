@@ -5509,7 +5509,7 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     return err;
 }
 
-static bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnWhiteList)
+bool AbilityManagerService::CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnWhiteList)
 {
     auto apiVersion = abilityInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD;
     auto bundleName = abilityInfo.applicationInfo.bundleName;
@@ -5522,7 +5522,7 @@ static bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::
     if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
         TAG_LOGW(AAFwkTag::SERVICE_EXT, "CheckSupportVpn bundleName: %{public}s, apiVersion: %{public}d, isVpnWhiteList: %{public}d",
             bundleName.c_str(), apiVersion, isVpnWhiteBundleName);
-        return apiVersion <= API20 && isVpnWhiteBundleName;
+        return isVpnWhiteBundleName;
     }
     return false;
 }
