@@ -44,9 +44,12 @@ export interface Callee {
 export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
   private prepareToTerminateCallbackPointer: long;
+  private continueCallbackPoint: long;
 
   private native nativeOnDestroyCallback(): void;
   private native nativeOnPrepareToTerminateCallback(prepareTermination: boolean): void;
+
+  private native nativeOnContinueCallback(result: AbilityConstant.OnContinueResult): void;
 
   private callOnDestroy(): boolean {
     let p = this.onDestroy();
@@ -74,6 +77,16 @@ export default class UIAbility extends Ability {
     return false;
   }
 
+  private callOnContinue(wantParams: Record<string, Object>): AbilityConstant.OnContinueResult | undefined {
+    let p = this.onContinue(wantParams);
+    if (p instanceof Promise) {
+      let promiseResult = p as Promise<AbilityConstant.OnContinueResult>;
+      promiseResult.then((result: AbilityConstant.OnContinueResult) => this.nativeOnContinueCallback(result));
+      return undefined;
+    }
+    return p as AbilityConstant.OnContinueResult;
+  }
+
   context: UIAbilityContext = new UIAbilityContext();
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
@@ -93,6 +106,10 @@ export default class UIAbility extends Ability {
   }
 
   onWindowStageRestore(windowStage: window.WindowStage): void {
+  }
+
+  onContinue(wantParams: Record<string, Object>): AbilityConstant.OnContinueResult | Promise<AbilityConstant.OnContinueResult> {
+    return AbilityConstant.OnContinueResult.REJECT;
   }
 
   onDestroy(): Promise<void> | undefined {
