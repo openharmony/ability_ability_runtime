@@ -460,6 +460,7 @@ bool AbilityManagerService::Init()
         AppUtils::GetInstance().GetLimitMaximumExtensionsPerProc());
 
     SubscribeScreenUnlockedEvent();
+    SubscribeUserUnlockedEvent();
     AddWatchParameters();
     appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(subManagersHelper_);
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
@@ -8647,7 +8648,7 @@ void AbilityManagerService::StartKeepAliveApps(int32_t userId)
     KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfos, userId);
 }
 
-void AbilityManagerService::StartAutoStartupApps(int32_t userId)
+void AbilityManagerService::StartAutoStartupApps(int32_t userId, bool isManualStart)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "StartAutoStartupApps called");
     bool isAutoStartupReady = system::GetBoolParameter(AUTO_STARTUP_READY, true);
@@ -8682,6 +8683,9 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAutoStartupApps userId:%{public}d", userId);
     StartAutoStartupApps(infoQueue, userId);
+    if (!isManualStart) {
+        abilityAutoStartupService_->AddHandledAutoStartupUsers(userId);
+    }
     auto removeParameterWatcherTask = []() {
         int32_t ret = RemoveParameterWatcher(
             AUTO_STARTUP_READY, AbilityManagerService::HandleAutoStartupReadyCallback, nullptr);
@@ -8734,9 +8738,26 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
     taskHandler_->SubmitTask(nextStartAutoStartupAppsTask, "StartAutoStartupApps", START_AUTO_START_APP_DELAY_TIME);
 }
 
+void AbilityManagerService::SubscribeUserUnlockedEvent()
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SubscribeUserUnlockedEvent called");
+    std::lock_guard<std::mutex> lock(subscribedMutex_);
+    // add listen screen unlocked.
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    userUnlockSubscriber_ = std::make_shared<AbilityRuntime::AbilityUserUnlockEventSubscriber>(subscribeInfo,
+        GetScreenUnlockCallback(), GetUserScreenUnlockCallback());
+    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(userUnlockSubscriber_);
+    if (!subResult) {
+        RetrySubscribeUnlockedEvent(RETRY_COUNT, userUnlockSubscriber_);
+    }
+}
+
 void AbilityManagerService::SubscribeScreenUnlockedEvent()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SubscribeScreenUnlockedEvent called");
     std::lock_guard<std::mutex> lock(subscribedMutex_);
     if (isSubscribed_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Screen unlocked event subscriber already exists");
@@ -8745,14 +8766,14 @@ void AbilityManagerService::SubscribeScreenUnlockedEvent()
     // add listen screen unlocked.
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-    screenSubscriber_ = std::make_shared<AbilityRuntime::AbilityManagerEventSubscriber>(subscribeInfo,
-        GetScreenUnlockCallback(), GetUserScreenUnlockCallback());
+    screenSubscriber_ = std::make_shared<AbilityRuntime::AbilityScreenUnlockEventSubscriber>(subscribeInfo,
+        GetScreenUnlockCallback());
     bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(screenSubscriber_);
     if (!subResult) {
-        RetrySubscribeScreenUnlockedEvent(RETRY_COUNT);
+        RetrySubscribeUnlockedEvent(RETRY_COUNT, screenSubscriber_);
+        return;
     }
     isSubscribed_ = true;
 }
@@ -8812,7 +8833,7 @@ std::function<void()> AbilityManagerService::GetUserScreenUnlockCallback()
 
 void AbilityManagerService::UnSubscribeScreenUnlockedEvent()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "UnSubscribeScreenUnlockedEvent called");
     std::lock_guard<std::mutex> lock(subscribedMutex_);
     bool subResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(screenSubscriber_);
     if (subResult) {
@@ -8821,24 +8842,31 @@ void AbilityManagerService::UnSubscribeScreenUnlockedEvent()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Screen unlocked event subscriber unsubscribe result is %{public}d.", subResult);
 }
 
-void AbilityManagerService::RetrySubscribeScreenUnlockedEvent(int32_t retryCount)
+void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "RetryCount: %{public}d.", retryCount);
-    auto retrySubscribeScreenUnlockedEventTask = [aams = weak_from_this(), screenSubscriber = screenSubscriber_,
+    CHECK_POINTER_LOG(subscriber, "subscriber nullptr");
+    auto retrySubscribeScreenUnlockedEventTask = [aams = weak_from_this(), unlockedEventSubscriber = subscriber,
                                                      retryCount]() {
-        bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(screenSubscriber);
+        CHECK_POINTER_LOG(unlockedEventSubscriber, "unlockedEventSubscriber nullptr");
+        bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(unlockedEventSubscriber);
         auto obj = aams.lock();
         if (obj == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "retry subscribe screen unlocked event, obj null");
             return;
         }
-        if (!subResult && retryCount > 0) {
-            obj->RetrySubscribeScreenUnlockedEvent(retryCount - 1);
+        if (subResult) {
+            obj->isSubscribed_ = true;
+            return;
+        }
+        if (retryCount > 0) {
+            obj->RetrySubscribeUnlockedEvent(retryCount - 1, unlockedEventSubscriber);
         }
     };
     constexpr int32_t delaytime = 200 * 1000; // us
     ffrt::submit(std::move(retrySubscribeScreenUnlockedEventTask),
-        ffrt::task_attr().delay(delaytime).name("RetrySubscribeScreenUnlockedEvent")
+        ffrt::task_attr().delay(delaytime).name("RetrySubscribeUnlockedEvent")
         .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
@@ -9309,10 +9337,8 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "startUser in service:%{public}d, displayId:%{public}" PRIu64"", userId, displayId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "startUser callback is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
+
+    CHECK_POINTER_AND_RETURN_LOG(callback, INVALID_PARAMETERS_ERR, "startUser callback is nullptr");
     auto checkRet = AbilityRuntime::UserController::GetInstance().CheckUserParam(userId);
     if (checkRet != ERR_OK) {
         callback->OnStartUserDone(userId, checkRet);
@@ -9334,6 +9360,12 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
         TAG_LOGI(AAFwkTag::ABILITYMGR, "low-mem mode, disallow");
         callback->OnStartUserDone(userId, ERR_ALL_APP_START_BLOCKED);
         return ERR_ALL_APP_START_BLOCKED;
+    }
+    // Lister screen unlock for auto startup apps.
+    if (system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false) && abilityAutoStartupService_ &&
+        !abilityAutoStartupService_->FindHandledAutoStartupUsers(userId)) {
+        InitInterceptorForScreenUnlock();
+        SubscribeScreenUnlockedEvent();
     }
 
     DelayedSingleton<AppScheduler>::GetInstance()->SetEnableStartProcessFlagByUserId(userId, true);
@@ -9368,6 +9400,12 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
         TAG_LOGE(AAFwkTag::ABILITYMGR, "stopUser callback is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
+    // clear userInfo for autoStartup
+    if (system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false) && abilityAutoStartupService_) {
+        abilityAutoStartupService_->RemoveHandledAutoStartupUsers(userId);
+    }
+    AbilityRuntime::AbilityEventMapManager::GetInstance().RemoveUser(userId);
+
     auto checkRet = AbilityRuntime::UserController::GetInstance().CheckStopUserParam(userId);
     if (checkRet != ERR_OK) {
         callback->OnStopUserDone(userId, checkRet);
@@ -9432,12 +9470,12 @@ int AbilityManagerService::LogoutUser(int32_t userId, sptr<IUserCallback> callba
         callback->OnLogoutUserDone(userId, checkRet);
         return checkRet;
     }
-
-    // Lister screen unlock for auto startup apps.
-    if (system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+    // clear userInfo for autoStartup
+    if (system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false) && abilityAutoStartupService_) {
         InitInterceptorForScreenUnlock();
-        SubscribeScreenUnlockedEvent();
+        abilityAutoStartupService_->RemoveHandledAutoStartupUsers(userId);
     }
+    AbilityRuntime::AbilityEventMapManager::GetInstance().RemoveUser(userId);
 
     RemoveLauncherDeathRecipient(userId);
     ClearUserData(userId);
@@ -12734,7 +12772,7 @@ int32_t AbilityManagerService::ManualStartAutoStartupApps(int32_t userId)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "verify PERMISSION_MANAGE_APP_BOOT_INTERNAL fail");
         return CHECK_PERMISSION_FAILED;
     }
-    StartAutoStartupApps(userId);
+    StartAutoStartupApps(userId, true);
     return ERR_OK;
 }
 

@@ -122,6 +122,10 @@ public:
      */
     int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
 
+    void AddHandledAutoStartupUsers(int32_t userId);
+    void RemoveHandledAutoStartupUsers(int32_t userId);
+    bool FindHandledAutoStartupUsers(int32_t userId);
+
     /**
      * @class ClientDeathRecipient
      * notices IRemoteBroker died.
@@ -170,6 +174,7 @@ private:
 
     mutable std::mutex autoStartUpMutex_;
     mutable std::mutex deathRecipientsMutex_;
+    std::vector<int32_t> handledAutoStartupUsers_;
     std::vector<sptr<IRemoteObject>> callbackVector_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> deathRecipients_;
     std::shared_ptr<AppExecFwk::BundleMgrClient> bundleMgrClient_;
