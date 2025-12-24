@@ -805,7 +805,7 @@ int32_t UIExtensionAbilityManager::GetOrCreateExtensionRecord(const AbilityReque
     return ERR_INVALID_VALUE;
 }
 
-int32_t UIExtensionAbilityManager::GetOrCreateTargetServiceRecord(
+int32_t UIExtensionAbilityManager::GetOrCreateExtensionRecord(
     const AbilityRequest &abilityRequest, const sptr<UIExtensionAbilityConnectInfo> &connectInfo,
     std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
 {
@@ -1020,7 +1020,7 @@ int UIExtensionAbilityManager::ConnectUIExtensionAbilityLocked(const AbilityRequ
     auto getRecordFunc = [this, connectInfo](const AbilityRequest &abilityRequest,
                                             std::shared_ptr<BaseExtensionRecord> &targetService,
                                             bool &isLoadedAbility) -> int {
-        return GetOrCreateTargetServiceRecord(abilityRequest, connectInfo, targetService, isLoadedAbility);
+        return GetOrCreateExtensionRecord(abilityRequest, connectInfo, targetService, isLoadedAbility);
     };
     
     auto updateCallback = [this](const std::shared_ptr<BaseExtensionRecord>& targetService) {
