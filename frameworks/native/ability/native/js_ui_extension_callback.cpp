@@ -165,6 +165,7 @@ void JsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want
 void JsUIExtensionCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &want)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
+    HandleScope handleScope(env_);
     if (env_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env_");
         return;

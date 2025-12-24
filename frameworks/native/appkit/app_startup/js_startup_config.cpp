@@ -187,6 +187,7 @@ void JsStartupConfig::InitListener(napi_env env, napi_value config)
 
 void JsStartupConfig::InitCustomization(napi_env env, napi_value configEntry, std::shared_ptr<AAFwk::Want> want)
 {
+    HandleScope handleScope(env);
     TAG_LOGD(AAFwkTag::STARTUP, "InitCustomization");
     if (!want) {
         TAG_LOGD(AAFwkTag::STARTUP, "want is null");
