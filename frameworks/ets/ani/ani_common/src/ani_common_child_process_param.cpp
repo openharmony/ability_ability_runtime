@@ -219,29 +219,27 @@ bool UnwrapChildProcessOptions(ani_env* env, ani_object object, ChildProcessOpti
         TAG_LOGE(AAFwkTag::PROCESSMGR, "env null");
         return false;
     }
-    ani_ref propRef = nullptr;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "isolationMode", &propRef);
-    if (status != ANI_OK || propRef == nullptr) {
-        options.isolationMode = false;
-        return true;
-    }
-    ani_boolean isUndefined = false;
-    status = env->Reference_IsUndefined(propRef, &isUndefined);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed to check undefined for 'isolationMode', status: %{public}d", status);
+    ani_status status = ANI_ERROR;
+    ani_ref isolationModeRef = nullptr;
+    ani_boolean isolationModeValue = ANI_FALSE;
+    if (GetRefProperty(env, object, "isolationMode", isolationModeRef) &&
+        (status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(isolationModeRef),
+        "valueOf", ":z", &isolationModeValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
+        errorMsg = "Parameter error. The type of options.isolationMode must be boolean.";
         return false;
     }
-    if (isUndefined) {
-        options.isolationMode = false;
-        return true;
-    }
-    ani_boolean flag = false;
-    status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(propRef), "valueOf", ":z", &flag);
-    if (status != ANI_OK) {
-        errorMsg = "Failed to get boolean value for isolationMode.";
+    options.isolationMode = static_cast<bool>(isolationModeValue);
+    ani_ref isolationUidRef = nullptr;
+    ani_boolean isolationUidValue = ANI_FALSE;
+    if (GetRefProperty(env, object, "isolationUid", isolationUidRef) &&
+        (status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(isolationUidRef),
+        "valueOf", ":z", &isolationUidValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
+        errorMsg = "Parameter error. The type of options.isolationUid must be boolean.";
         return false;
     }
-    options.isolationMode = flag;
+    options.isolationUid = static_cast<bool>(isolationUidValue);
     return true;
 }
 } // namespace AppExecFwk
