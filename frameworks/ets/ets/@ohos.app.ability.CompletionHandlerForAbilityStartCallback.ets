@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import { AbilityResult } from 'ability.abilityResult';
-import { CompletionHandlerForAbilityStartCallback } from '@ohos.app.ability.CompletionHandlerForAbilityStartCallback';
+export type OnRequestSuccessFn = (name: string) => void;
+export type OnRequestFailureFn = (name: string, failureCode: AbilityStartFailureCode, failureMessage: string) => void;
 
-type OnResultFn = (parameter: AbilityResult) => void;
+export class CompletionHandlerForAbilityStartCallback {
+    onRequestSuccess?: OnRequestSuccessFn;
+    onRequestFailure?: OnRequestFailureFn;
+}
 
-export default interface AbilityStartCallback {
-  onError(code: int, name: string, message: string): void;
-
-  onResult?: OnResultFn;
-
-  completionHandler?: CompletionHandlerForAbilityStartCallback;
+export enum AbilityStartFailureCode {
+    FAILURE_CODE_SYSTEM_MALFUNCTION = 0,
+    FAILURE_CODE_USER_CANCEL = 1
 }

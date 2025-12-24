@@ -892,6 +892,12 @@ ani_object EtsUIExtensionContentSession::StartAbilityByTypeSync(
     }
     std::shared_ptr<EtsUIExtensionCallback> uiExtensionCallback = std::make_shared<EtsUIExtensionCallback>(vm);
     uiExtensionCallback->SetEtsCallbackObject(startCallback);
+    ani_ref completionHandler;
+    ani_boolean isUndefined = false;
+    AppExecFwk::GetPropertyRef(env, startCallback, "completionHandler", completionHandler, isUndefined);
+    if (!isUndefined && completionHandler != nullptr) {
+        uiExtensionCallback->SetCompletionHandler(env, static_cast<ani_object>(completionHandler));
+    }
     if (uiWindow_ == nullptr || uiWindow_->GetUIContent() == nullptr) {
         return aniObject;
     }

@@ -29,6 +29,9 @@ public:
     void OnError(int32_t number) override;
     void OnResult(int32_t resultCode, const AAFwk::Want &want) override;
     void SetEtsCallbackObject(ani_object aniObject);
+    void SetCompletionHandler(ani_env *env, ani_object completionHandler);
+    void OnRequestSuccess(const std::string& name) override;
+    void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage) override;
 
 private:
     ani_env *GetAniEnv();
@@ -36,6 +39,7 @@ private:
 
     ani_vm *vm_ = nullptr;
     ani_ref callback_ = nullptr;
+    ani_ref completionHandler_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
