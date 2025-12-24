@@ -3272,17 +3272,59 @@ HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_
     EXPECT_NE(result, ERR_OK);
 }
 
-/*
- * Feature: AbilityManagerService
- * Function: ParseVpnWhiteListJson
- * FunctionPoints: ParseVpnWhiteListJson
+/**
+ * @tc.name: ParseVpnWhiteListJson_001
+ * @tc.desc: Test ParseVpnWhiteListJson if vpn_startability_whitelist.json is empty
+ * @tc.type: FUNC
  */
 HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnWhiteListJson_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
+    bool result = abilityMs_->ParseVpnWhiteListJson("/system/etc/vpn_startability_whitelist.json", "bundleNames");
+    EXPECT_NE(result, true);
+}
 
-    abilityMs_->ParseVpnWhiteListJson("/system/etc/vpn_startability_whitelist.json", "bundleNames");
+/**
+ * @tc.name: ParseVpnWhiteListJson_002
+ * @tc.desc: Test ParseVpnWhiteListJson if vpn_startability_whitelist.json is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnWhiteListJson_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    bool result = abilityMs_->ParseVpnWhiteListJson("/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: CheckSupportVpn_001
+ * @tc.desc: Test CheckSupportVpn when bundleName in whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
+{
+    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    auto abilityInfo = callerRequest.abilityInfo;
+    std::liststd::string vpnWhiteList = {"com.example.vpn"};
+    auto abilityMs_ = std::make_shared();
+    bool result = abilityMs_->CheckSupportVpn(abilityInfo, vpnWhiteList);
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: CheckSupportVpn_002
+ * @tc.desc: Test CheckSupportVpn when extensionAbilityType is VPN
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_002, TestSize.Level1)
+{
+    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::VPN;
+    auto abilityInfo = callerRequest.abilityInfo;
+    std::liststd::string vpnWhiteList = {"com.example.vpn"};
+    auto abilityMs_ = std::make_shared();
+    bool result = abilityMs_->CheckSupportVpn(abilityInfo, vpnWhiteList);
+    EXPECT_NE(result, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
