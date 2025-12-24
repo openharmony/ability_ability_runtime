@@ -47,18 +47,12 @@ HWTEST_F(AbilityManagerEventSubscriberTest, OnReceiveEvent_0001, TestSize.Level1
 {
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> userScreenUnlockCallback = []() {};
     EXPECT_NE(callback, nullptr);
-    EXPECT_NE(userScreenUnlockCallback, nullptr);
-    auto subscriber = std::make_shared<AbilityManagerEventSubscriber>(
-        subscribeInfo, callback, userScreenUnlockCallback);
+    auto subscriber = std::make_shared<AbilityScreenUnlockEventSubscriber>(subscribeInfo, callback);
     EventFwk::CommonEventData data;
     data.want_.operation_.action_ = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED;
     subscriber->OnReceiveEvent(data);
     EXPECT_NE(subscriber->screenUnlockCallback_, nullptr);
-    data.want_.operation_.action_ = EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED;
-    subscriber->OnReceiveEvent(data);
-    EXPECT_NE(subscriber->userScreenUnlockCallback_, nullptr);
 }
 } // namespace AAFwk
 } // namespace OHOS

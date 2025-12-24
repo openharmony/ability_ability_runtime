@@ -501,7 +501,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetUserScreenUnlockCallback_001, Test
     abilityMs_->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     abilityMs_->RemoveScreenUnlockInterceptor();
     int32_t retryCount = 1;
-    abilityMs_->RetrySubscribeScreenUnlockedEvent(retryCount);
+    abilityMs_->RetrySubscribeUnlockedEvent(retryCount, abilityMs_->screenSubscriber_);
     Want want;
     AbilityRequest abilityRequest;
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
