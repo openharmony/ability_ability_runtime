@@ -196,9 +196,9 @@ private:
     int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, bool isCreatedByConnect,
         const std::string &hostBundleName, std::shared_ptr<BaseExtensionRecord> &extensionRecord, bool &isLoaded);
 
-    int32_t GetOrCreateTargetServiceRecord(
+    int32_t GetOrCreateExtensionRecord(
         const AbilityRequest &abilityRequest, const sptr<UIExtensionAbilityConnectInfo> &connectInfo,
-        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility) override;
+        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility);
 
     void UpdateUIExtensionInfo(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);

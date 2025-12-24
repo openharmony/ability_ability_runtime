@@ -509,21 +509,6 @@ protected:
     */
     virtual int TerminateAbilityInner(const sptr<IRemoteObject> &token);
 
-    /**
-    * Get or create target service record.
-    *
-    * @param abilityRequest The ability request.
-    * @param connectInfo The UI Extension ability connection info.
-    * @param targetService The target service record.
-    * @param isLoadedAbility Whether ability is loaded.
-    * @return Returns error code.
-    */
-    virtual int32_t GetOrCreateTargetServiceRecord(
-        const AbilityRequest &abilityRequest, const sptr<UIExtensionAbilityConnectInfo> &connectInfo,
-        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
-    {
-        return 0;
-    }
 protected:
     /**
     * Handle successful preload of UI Extension.
@@ -789,7 +774,6 @@ private:
      * @param abilityRecord, died ability.
      */
     void HandleAbilityDiedTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
-
 
     void RestartAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int32_t currentUserId);
 
