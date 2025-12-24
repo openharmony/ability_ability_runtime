@@ -66,7 +66,8 @@ int32_t ExtensionRecordFactory::PreCheck(const AAFwk::AbilityRequest &abilityReq
     if (preCheckFlag == 0) {
         return ERR_OK;
     }
-    if (preCheckFlag & PRE_CHECK_FLAG_CALLED_WITHIN_THE_BUNDLE) {
+    if ((preCheckFlag & PRE_CHECK_FLAG_CALLED_WITHIN_THE_BUNDLE) &&
+        hostBundleName != AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
         if (hostBundleName != abilityRequest.abilityInfo.applicationName) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "not called");
             return ERR_INVALID_VALUE;
