@@ -290,6 +290,9 @@ public:
     virtual int32_t OnContinueAsyncCB(napi_ref jsWantParams, int32_t status,
         const AppExecFwk::AbilityInfo &abilityInfo);
 
+    virtual int32_t OnContinueAsyncCB(ani_ref aniWantParamsRef, int32_t status,
+        const AppExecFwk::AbilityInfo &abilityInfo);
+
     /**
      * @brief Prepare user data of local Ability.
      * @param wantParams Indicates the user data to be saved.

@@ -776,6 +776,17 @@ void EtsAbilityContext::SetMissionIconCheck(
         return;
     }
 }
+
+void EtsAbilityContext::SetMissionContinueState(ani_env *env, ani_object aniObj, ani_object stateObj,
+    ani_object callbackObj)
+{
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnSetMissionContinueState(env, aniObj, stateObj, callbackObj);
+}
 #endif
 
 void EtsAbilityContext::RestoreWindowStage(
@@ -2500,6 +2511,35 @@ void EtsAbilityContext::OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_ob
     AppExecFwk::AsyncCallback(env, callbackObj,
         EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(innerErrCode)), nullptr);
 }
+
+void EtsAbilityContext::OnSetMissionContinueState(ani_env *env, ani_object aniObj, ani_object stateObj,
+    ani_object callbackObj)
+{
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "context is nullptr");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    int state = 0;
+    bool result = AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, stateObj, state);
+    if (result == false) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Unwrap state failed");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
+        return;
+    }
+    AAFwk::ContinueState fwkState = AAFwk::ContinueState::CONTINUESTATE_UNKNOWN;
+    if (state == AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        fwkState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    } else {
+        fwkState = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    }
+    auto innerErrCode = context->SetMissionContinueState(fwkState);
+    AppExecFwk::AsyncCallback(env, callbackObj,
+        EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(innerErrCode)), nullptr);
+}
 #endif
 
 void EtsAbilityContext::OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
@@ -2818,6 +2858,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeSetMissionWindowIcon",
                 "C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void*>(EtsAbilityContext::SetMissionWindowIcon) },
+            ani_native_function { "nativeSetMissionContinueState",
+                "C{@ohos.app.ability.AbilityConstant.AbilityConstant.ContinueState}"
+                "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
+                reinterpret_cast<void*>(EtsAbilityContext::SetMissionContinueState) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);

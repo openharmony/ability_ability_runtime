@@ -24,6 +24,7 @@
 #include "ability_recovery.h"
 #include "ability_start_setting.h"
 #include "app_recovery.h"
+#include "bool_wrapper.h"
 #include "connection_manager.h"
 #include "context/application_context.h"
 #include "context/context.h"
@@ -72,6 +73,9 @@ constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const int32_t PROMISE_CALLBACK_PARAM_NUM = 2;
 constexpr const int32_t CALL_BACK_ERROR = -1;
+#ifdef SUPPORT_GRAPHICS
+const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
+#endif
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -1668,7 +1672,20 @@ int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityContinue(ability);
     }
-
+#ifdef SUPPORT_GRAPHICS
+    auto value = wantParams.GetParam(SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME);
+    AAFwk::IBoolean *ao = AAFwk::IBoolean::Query(value);
+    if (ao == nullptr || AAFwk::Boolean::Unbox(ao)) {
+        std::string pageStack = GetContentInfo();
+        if (pageStack.empty()) {
+            TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
+            status = CONTINUE_GET_CONTENT_FAILED;
+        } else {
+            TAG_LOGI(AAFwkTag::CONTINUATION, "pageStack: %{public}s", pageStack.c_str());
+            wantParams.SetParam(PAGE_STACK_PROPERTY_NAME, AAFwk::String::Box(pageStack));
+        }
+    }
+#endif
     Want want;
     want.SetParams(wantParams);
     want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
