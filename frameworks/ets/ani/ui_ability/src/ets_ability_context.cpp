@@ -1233,7 +1233,7 @@ void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string a
         TAG_LOGD(AAFwkTag::CONTEXT, "OpenLink Have Callback");
         CreateOpenLinkTask(env, callbackobj, context, want, requestCode);
     }
-    ret = context->OpenLink(want, requestCode);
+    ret = context->OpenLink(want, requestCode, openLinkOptions.GetHideFailureTipDialog());
     if (ret == 0) {
         TAG_LOGI(AAFwkTag::CONTEXT, "openLink succeeded");
         return;

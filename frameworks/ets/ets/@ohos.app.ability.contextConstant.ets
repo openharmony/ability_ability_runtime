@@ -32,6 +32,12 @@ namespace contextConstant {
     STARTUP_HIDE = 0,
     STARTUP_SHOW = 1
   }
+  
+  export enum Scenarios {
+    SCENARIO_MOVE_MISSION_TO_FRONT = 0x00000001,
+    SCENARIO_SHOW_ABILITY = 0x00000002,
+    SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT = 0x00000004
+  }
 }
 
 export default contextConstant;
