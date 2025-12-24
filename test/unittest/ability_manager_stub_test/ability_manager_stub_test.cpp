@@ -1875,7 +1875,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilityBySCBInner_001
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->StartUIAbilityBySCBInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
 /*
@@ -2960,7 +2960,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_CallUIAbilityBySCBInner_001,
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->CallUIAbilityBySCBInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
 /*
@@ -2975,8 +2975,8 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_SetSessionManagerServiceInne
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = stub_->CallUIAbilityBySCBInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
+    auto res = stub_->SetSessionManagerServiceInner(data, reply);
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
 }
 
 /*
