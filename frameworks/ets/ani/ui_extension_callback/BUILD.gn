@@ -25,6 +25,7 @@ ohos_shared_library("ani_ui_extension_callback") {
 
   include_dirs = [
     "./include",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_path}/services/common/include",
   ]
 
