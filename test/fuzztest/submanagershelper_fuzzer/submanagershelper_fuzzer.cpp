@@ -52,15 +52,12 @@ void SubManagersHelperFuzztest(bool switchUser, int64_t abilityRecordId,
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
 
     helper->InitSubManagers(USER0_ID, switchUser);
-    helper->InitConnectManager(USER0_ID, switchUser);
     helper->InitPendWantManager(USER0_ID, switchUser);
     helper->InitUIAbilityManager(USER0_ID, switchUser);
     helper->ClearSubManagers(USER0_ID);
     helper->GetDataAbilityManager(scheduler);
     helper->GetDataAbilityManagerByUserId(USER0_ID);
     helper->GetDataAbilityManagerByToken(token);
-    helper->GetConnectManagerByToken(token);
-    helper->GetConnectManagerByAbilityRecordId(abilityRecordId);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

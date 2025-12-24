@@ -24,6 +24,8 @@
 #include "utils/modal_system_dialog_util.h"
 #include "remote_on_listener_stub_mock.h"
 #include "ability_connect_manager.h"
+#include "ui_extension_ability_manager.h"
+#include "common_extension_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "ability_bundle_event_callback.h"
 #include "session/host/include/session.h"
@@ -175,9 +177,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIExtensionAbilityBySCB_001, Tes
 
         abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
         IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-        std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-        connectManager->sceneBoardTokenId_ = ONE;
-        abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+        std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(ONE);
+        abilityMs_->subManagersHelper_->uiExtensionAbilityManagers_.insert(std::make_pair(ONE, connectManager));
         IPCSkeleton::SetCallingTokenID(ONE);
         EXPECT_EQ(abilityMs_->CloseUIExtensionAbilityBySCB(callerToken), ERR_INVALID_VALUE);
 
@@ -216,9 +217,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIExtensionAbilityBySCB_002, Tes
             .WillRepeatedly(Return(true));
         abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
         IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-        std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-        connectManager->sceneBoardTokenId_ = ONE;
-        abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+        std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(ONE);
+        abilityMs_->subManagersHelper_->uiExtensionAbilityManagers_.insert(std::make_pair(ONE, connectManager));
         IPCSkeleton::SetCallingTokenID(ONE);
 
         AbilityRequest abilityRequest{};
@@ -273,9 +273,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIAbilityBySCB_001, TestSize.Lev
 
         abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
         IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-        std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
+        std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(ONE);
         connectManager->sceneBoardTokenId_ = ONE;
-        abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+        abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(ONE, connectManager));
         IPCSkeleton::SetCallingTokenID(ONE);
         auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
         abilityMs_->subManagersHelper_->uiAbilityManagers_.emplace(ONE, uiAbilityLifecycleManager);
@@ -300,98 +300,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, CloseUIAbilityBySCB_001, TestSize.Lev
     }
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CloseUIAbilityBySCB_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: MinimizeUIExtensionAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService MinimizeUIExtensionAbility
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    sptr<SessionInfo> extensionSessionInfo = nullptr;
-    bool fromUser = false;
-
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
-
-    extensionSessionInfo = new SessionInfo();
-    Rosen::SessionInfo info;
-    extensionSessionInfo->sessionToken = new Rosen::Session(info);
-    extensionSessionInfo->callerToken = MockToken(AbilityType::PAGE);
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
-
-    AbilityRequest abilityRequest{};
-    std::string deviceName = "device";
-    std::string abilityName = "ServiceAbility";
-    std::string appName = "hiservcie";
-    std::string bundleName = "com.ix.hiservcie";
-    std::string moduleName = "entry";
-    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    AppExecFwk::ApplicationInfo appInfo;
-    appInfo.accessTokenId = ONE;
-    abilityRequest.appInfo = appInfo;
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
-        abilityRequest);
-    extensionSessionInfo->callerToken = abilityRecord->GetToken();
-    IPCSkeleton::SetCallingTokenID(ONE);
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-    connectManager->sceneBoardTokenId_ = ONE;
-    connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
-        std::make_pair(abilityRecord, extensionSessionInfo);
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: MinimizeUIExtensionAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService MinimizeUIExtensionAbility
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_002 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    sptr<SessionInfo> extensionSessionInfo = nullptr;
-    bool fromUser = false;
-    extensionSessionInfo = new SessionInfo();
-    Rosen::SessionInfo info;
-    extensionSessionInfo->sessionToken = new Rosen::Session(info);
-    extensionSessionInfo->callerToken = MockToken(AbilityType::PAGE);
-
-    AbilityRequest abilityRequest{};
-    std::string deviceName = "device";
-    std::string abilityName = "ServiceAbility";
-    std::string appName = "hiservcie";
-    std::string bundleName = "com.ix.hiservcie";
-    std::string moduleName = "entry";
-    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
-    AppExecFwk::ApplicationInfo appInfo;
-    appInfo.accessTokenId = ONE;
-    abilityRequest.appInfo = appInfo;
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
-        abilityRequest);
-    extensionSessionInfo->callerToken = abilityRecord->GetToken();
-    IPCSkeleton::SetCallingTokenID(ONE);
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-    connectManager->sceneBoardTokenId_ = ONE;
-    connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
-        std::make_pair(abilityRecord, extensionSessionInfo);
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
-
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_002 end");
 }
 
 /*
@@ -430,14 +338,15 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, DisconnectLocalAbility_001, TestSize.
 
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-    connectManager->sceneBoardTokenId_ = ONE;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = connectManager;
-    IPCSkeleton::SetCallingTokenID(ONE);
     connect = new AbilityConnectCallback();
-    std::shared_ptr<AbilityConnectManager> connectManager2 = std::make_shared<AbilityConnectManager>(TWO);
+    std::shared_ptr<CommonExtensionManager> commonManager = std::make_shared<CommonExtensionManager>(0);
+    std::shared_ptr<UIExtensionAbilityManager> uiExtManager = std::make_shared<UIExtensionAbilityManager>(0);
+    commonManager->sceneBoardTokenId_ = TWO;
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(0, commonManager));
+    abilityMs_->subManagersHelper_->uiExtensionAbilityManagers_.insert(std::make_pair(0, uiExtManager));
+    std::shared_ptr<CommonExtensionManager> connectManager2 = std::make_shared<CommonExtensionManager>(TWO);
     connectManager2->sceneBoardTokenId_ = TWO;
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(0, connectManager2));
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(0, connectManager2));
     EXPECT_EQ(abilityMs_->DisconnectLocalAbility(connect), CONNECT_MAMAGER_NOT_FIND_BY_USERID);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest DisconnectLocalAbility_001 end");
@@ -592,45 +501,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartAbilityByCallWithErrMsg_001, Tes
     retCode = abilityMs_->StartAbilityByCallWithErrMsg(want, connect, nullptr, accountId, errMsg);
     EXPECT_EQ(retCode, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartAbilityByCallWithErrMsg_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: TerminateUIExtensionAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService TerminateUIExtensionAbility
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    sptr<SessionInfo> extensionSessionInfo = new SessionInfo();
-    Rosen::SessionInfo info;
-    extensionSessionInfo->sessionToken = new Rosen::Session(info);
-    extensionSessionInfo->persistentId = TWO;
-    AbilityRequest abilityRequest{};
-    std::string deviceName = "device";
-    std::string abilityName = "ServiceAbility";
-    std::string appName = "hiservcie";
-    std::string bundleName = "com.ix.hiservcie";
-    std::string moduleName = "entry";
-    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
-    AppExecFwk::ApplicationInfo appInfo;
-    appInfo.accessTokenId = ONE;
-    abilityRequest.appInfo = appInfo;
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
-        abilityRequest);
-    extensionSessionInfo->callerToken = abilityRecord->GetToken();
-    IPCSkeleton::SetCallingTokenID(ONE);
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
-    connectManager->sceneBoardTokenId_ = ONE;
-    connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
-        std::make_pair(abilityRecord, extensionSessionInfo);
-    abilityRecord->SetSessionInfo(extensionSessionInfo);
-    connectManager->serviceMap_.insert(std::make_pair("test", abilityRecord));
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
-    EXPECT_EQ(abilityMs_->TerminateUIExtensionAbility(extensionSessionInfo), ERR_INVALID_VALUE);
 }
 
 /*

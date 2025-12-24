@@ -351,9 +351,9 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(ONE);
     connectManager->sceneBoardTokenId_ = TEST_VALUE_ONE;
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(ONE, connectManager));
     IPCSkeleton::SetCallingTokenID(ONE);
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, false);
     EXPECT_NE(ret, ERR_OK);
@@ -403,9 +403,9 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001_002, TestSize.
     sessionInfo->sessionToken = new Rosen::Session(info);
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(ONE);
     connectManager->sceneBoardTokenId_ = TEST_VALUE_ONE;
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(ONE, connectManager));
     IPCSkeleton::SetCallingTokenID(TEST_VALUE_ONE);
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     FreeInstallInfo freeInstallInfo;
@@ -460,7 +460,12 @@ HWTEST_F(AbilityManagerServiceEighthTest, SignRestartProcess_001, TestSize.Level
     auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
-    abilityMs->subManagersHelper_->connectManagers_.emplace(uid, std::make_shared<AbilityConnectManager>(uid));
+    abilityMs->subManagersHelper_->commonExtensionManagers_.emplace(uid, std::make_shared<CommonExtensionManager>(uid));
+    ret = abilityMs->SignRestartProcess(uid, uid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    abilityMs->subManagersHelper_->uiExtensionAbilityManagers_.emplace(
+        uid, std::make_shared<UIExtensionAbilityManager>(uid));
     ret = abilityMs->SignRestartProcess(uid, uid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
@@ -541,7 +546,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, OnAppStateChanged_001, TestSize.Level1
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
     EXPECT_TRUE(abilityMs_->subManagersHelper_ != nullptr);
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
-    abilityMs_->subManagersHelper_->currentConnectManager_ = std::make_shared<AbilityConnectManager>(ONE);
+    abilityMs_->subManagersHelper_->currentCommonExtensionManager_ = std::make_shared<CommonExtensionManager>(ONE);
     abilityMs_->subManagersHelper_->currentDataAbilityManager_ = std::make_shared<DataAbilityManager>();
     AppInfo info;
     abilityMs_->OnAppStateChanged(info);
@@ -579,10 +584,10 @@ HWTEST_F(AbilityManagerServiceEighthTest, TerminateUIServiceExtensionAbility_001
     abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
     auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     token = abilityRecord->GetToken();
-    auto connectManager = std::make_shared<AbilityConnectManager>(1);
+    auto connectManager = std::make_shared<CommonExtensionManager>(1);
     connectManager->sceneBoardTokenId_ = 1;
     connectManager->serviceMap_.emplace(bundleName, abilityRecord);
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(1, connectManager));
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(1, connectManager));
     IPCSkeleton::SetCallingTokenID(0);
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
         .WillRepeatedly(Return(true));
@@ -621,9 +626,9 @@ HWTEST_F(AbilityManagerServiceEighthTest, TerminateUIServiceExtensionAbility_002
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     token = abilityRecord->GetToken();
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(1);
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(1);
     connectManager->sceneBoardTokenId_ = 1;
-    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(1, connectManager));
+    abilityMs_->subManagersHelper_->commonExtensionManagers_.insert(std::make_pair(1, connectManager));
     int32_t result = abilityMs_->TerminateUIServiceExtensionAbility(token);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 
