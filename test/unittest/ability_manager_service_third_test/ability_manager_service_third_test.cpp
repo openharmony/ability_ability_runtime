@@ -3304,7 +3304,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnWhiteListJson_002, TestSize.Lev
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
 {
-    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
     auto abilityInfo = callerRequest.abilityInfo;
     std::list<std::string> vpnWhiteList = {"com.example.vpn"};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
@@ -3319,7 +3320,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_002, TestSize.Level1)
 {
-    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
     callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::VPN;
     auto abilityInfo = callerRequest.abilityInfo;
     std::list<std::string> vpnWhiteList = {"com.example.vpn"};
