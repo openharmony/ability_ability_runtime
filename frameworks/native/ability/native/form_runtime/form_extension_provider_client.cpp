@@ -43,7 +43,7 @@ namespace {
         Constants::PARAM_LAYOUT_WIDTH_KEY,
         Constants::PARAM_LAYOUT_HEIGHT_KEY,
         Constants::PARAM_FORM_VIEW_SCALE,
-        Constants::IS_ADD_FORM_BY_HOST,
+        Constants::IS_ADD_FORM_BY_HOST
     };
 }
 
