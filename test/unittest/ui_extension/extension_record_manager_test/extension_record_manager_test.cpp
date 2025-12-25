@@ -1352,5 +1352,51 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0800, TestSize.Level1)
     result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
     EXPECT_NE(result, ERR_OK);
 }
+
+/**
+ * @tc.name: UpdateProcessName_0900
+ * @tc.desc: UpdateProcessName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0900, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "com.ohos.sceneboard";
+    abilityRequest.abilityInfo.name = "test";
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(2);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName2"));
+    int result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(2);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:2"));
+    abilityRecord->SetProcessName("newProcessName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(2);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:2"));
+    abilityRecord->SetProcessName("newProcessName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    abilityRecord->SetAppIndex(1);
+    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName123:2"));
+    abilityRecord->SetProcessName("processName");
+    extRecordMgr->AddExtensionRecord(1, extRecord);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_NE(result, ERR_OK);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
