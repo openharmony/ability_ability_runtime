@@ -343,7 +343,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
 }
 
 void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, std::string &hostBundleName)
+    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, const std::string &hostBundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_LOG(abilityInfo, "abilityInfo is invalid.");
