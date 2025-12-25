@@ -26,6 +26,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr int32_t ABILITY_STATE_FOREGROUND = 2;
+constexpr int32_t ABILITY_STATE_NATIVE_FOREGROUND = 9;
+}
 napi_value CreateJSToken(napi_env env, const sptr<IRemoteObject> target)
 {
     napi_value tokenClass = nullptr;
@@ -153,6 +157,20 @@ napi_value UserStatusInit(napi_env env)
     return objValue;
 }
 
+int32_t ConvertAbilityState(int32_t abilityState)
+{
+    int32_t state = 0;
+    switch (abilityState) {
+        case ABILITY_STATE_NATIVE_FOREGROUND:
+            state = ABILITY_STATE_FOREGROUND;
+            break;
+        default:
+            state = abilityState;
+            break;
+    }
+    return state;
+}
+
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -167,7 +185,8 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "abilityName", CreateJsValue(env, abilityStateData.abilityName));
     napi_set_named_property(env, object, "pid", CreateJsValue(env, abilityStateData.pid));
     napi_set_named_property(env, object, "uid", CreateJsValue(env, abilityStateData.uid));
-    napi_set_named_property(env, object, "state", CreateJsValue(env, abilityStateData.abilityState));
+    napi_set_named_property(env, object, "state",
+        CreateJsValue(env, ConvertAbilityState(abilityStateData.abilityState)));
     napi_set_named_property(env, object, "abilityType", CreateJsValue(env, abilityStateData.abilityType));
     napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
     if (abilityStateData.appCloneIndex != -1) {
