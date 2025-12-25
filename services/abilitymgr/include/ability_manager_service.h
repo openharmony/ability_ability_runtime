@@ -3015,9 +3015,9 @@ private:
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 
-    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnWhiteList);
+    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnAllowList);
 
-    bool ParseVpnWhiteListJson(const std::string &relativePath, const std::string &jsonItemStr);
+    bool ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
