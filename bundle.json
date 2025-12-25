@@ -741,6 +741,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/page_config_manager/include",
+              "header_files": [
+                "page_config_manager.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/page_config_manager:page_config_manager"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/app_manager",
               "header_files": []
             },

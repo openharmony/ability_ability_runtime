@@ -64,6 +64,7 @@ ohos_shared_library("ability_runtime") {
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_innerkits_path}/page_config_manager:page_config_manager",
   ]
 
   external_deps = [
