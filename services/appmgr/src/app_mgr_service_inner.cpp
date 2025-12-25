@@ -995,25 +995,60 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     std::shared_ptr<AppRunningRecord> appRecord;
     if (want && (want->GetBoolParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false))) {
         TAG_LOGI(AAFwkTag::APPMGR, "load plugin ability");
-        appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
-        while (appRecord && appRecord->GetProcessType() != ProcessType::NORMAL) {
-            auto callerPid = appRecord->GetCallerPid();
-            TAG_LOGI(AAFwkTag::APPMGR, "pre host: %{public}d", callerPid);
-            appRecord = GetAppRunningRecordByPid(callerPid);
+        if (abilityInfo->extensionAbilityType != ExtensionAbilityType::EMBEDDED_UI) {
+            appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
+            while (appRecord && appRecord->GetProcessType() != ProcessType::NORMAL) {
+                auto callerPid = appRecord->GetCallerPid();
+                TAG_LOGI(AAFwkTag::APPMGR, "pre host: %{public}d", callerPid);
+                appRecord = GetAppRunningRecordByPid(callerPid);
+            }
+            if (!appRecord) {
+                TAG_LOGE(AAFwkTag::APPMGR, "plugin appRecord null");
+                return;
+            }
+            auto element = want->GetElement();
+            auto pluginRet = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginHapModuleInfo(
+                appRecord->GetBundleName(), element.GetBundleName(), element.GetModuleName(),
+                appRecord->GetUserId(), hapModuleInfo);
+            if (pluginRet != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "GetPluginHapModuleInfo failed: %{public}d", pluginRet);
+                return;
+            }
+            isProcCache = DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
+        } else {
+            MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag,
+                processName, loadParam->isCallerSetProcess);
+            auto element = want->GetElement();
+            auto hostBundleName = want->GetStringParam(UIEXTENSION_HOST_BUNDLENAME);
+            auto userId = want->GetIntParam(UIEXTENSION_HOST_UID, -1) / BASE_USER_RANGE;
+            appInfo->bundleName = hostBundleName;
+            if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
+            }
+            appInfo = std::make_shared<ApplicationInfo>(bundleInfo.applicationInfo);
+            auto pluginRet = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginHapModuleInfo(
+                hostBundleName, element.GetBundleName(), element.GetModuleName(),
+                userId, hapModuleInfo);
+            if (pluginRet != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "GetPluginHapModuleInfo failed: %{public}d", pluginRet);
+            }
+            AAFwk::Want pwant;
+            AAExecFwk::ElementName pElement("", abilityInfo->bundleName, abilityInfo->name, abilityInfo->moduleName);
+            pwant.SetElement(pElement);
+            auto pluginExtensionInfo = std::make_shared<AppExecFwk::ExtensionAbilityInfo>();
+            if (DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginExtensionInfo(hostBundleName,
+                pwant, userId, *pluginExtensionInfo) != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "GetPluginExtensionInfo failed");
+            } else if (pluginExtensionInfo) {
+                hapModuleInfo.extensionInfos.push_back(*pluginExtensionInfo);
+                bundleInfo.extensionInfos.push_back(*pluginExtensionInfo);
+            }
+
+            isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+            appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
+                processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey,
+                customProcessFlag);
         }
-        if (!appRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "plugin appRecord null");
-            return;
-        }
-        auto element = want->GetElement();
-        auto pluginRet = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginHapModuleInfo(
-            appRecord->GetBundleName(), element.GetBundleName(), element.GetModuleName(),
-            appRecord->GetUserId(), hapModuleInfo);
-        if (pluginRet != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "GetPluginHapModuleInfo failed: %{public}d", pluginRet);
-            return;
-        }
-        isProcCache = DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
     } else {
         if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
@@ -4569,11 +4604,14 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_INVALID_VALUE;
     }
-    auto ret = PreCheckStartProcess(bundleName, uid, bundleIndex);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
-        appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
-        return ret;
+    ErrCode ret = ERR_OK;
+    if (extensionAbilityType != ExtensionAbilityType::EMBEDDED_UI) {
+        ret = PreCheckStartProcess(bundleName, uid, bundleIndex);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
+            appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
+            return ret;
+        }
     }
     bool isCJApp = IsCjApplication(bundleInfo);
     if (!remoteClientManager_ || !remoteClientManager_->GetSpawnClient()) {

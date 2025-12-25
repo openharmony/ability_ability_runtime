@@ -295,7 +295,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
 }
 
 std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(const Want &want, int32_t userId,
-    int32_t appIndex)
+    int32_t appIndex, const std::string &hostBundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bms = AbilityUtil::GetBundleManagerHelper();
@@ -310,7 +310,13 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
 
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     if (appIndex == 0) {
-        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryExtensionAbilityInfos(want, abilityInfoFlag, userId, extensionInfos));
+        if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+            AppExecFwk::ExtensionAbilityInfo pluginExtensionInfo;
+            IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, userId, pluginExtensionInfo));
+            extensionInfos.push_back(pluginExtensionInfo);
+        } else {
+            IN_PROCESS_CALL_WITHOUT_RET(bms->QueryExtensionAbilityInfos(want, abilityInfoFlag, userId, extensionInfos));
+        }
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxExtAbilityInfos(want, appIndex,
             abilityInfoFlag, userId, extensionInfos));
@@ -337,15 +343,19 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
 }
 
 void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo)
+    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, std::string &hostBundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_LOG(abilityInfo, "abilityInfo is invalid.");
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_LOG(bms, "bms is invalid.");
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
-        flags, appIndex, extensionInfo, userId));
+    if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+        IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, userId, extensionInfo));
+    } else {
+        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
+            flags, appIndex, extensionInfo, userId));
+    }
     if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
         abilityInfo->status = RESOLVE_ABILITY_ERR;

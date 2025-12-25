@@ -68,17 +68,24 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
     }
 
     auto hapModuleInfo = context->GetHapModuleInfo();
+    context->InitPluginExtensionInfo(abilityInfo, context->GetBundleName());
+    auto pluginExtensionInfo = context->GetPluginExtensionInfo();
     if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter = std::find_if(
-            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
+        if (pluginExtensionInfo && pluginExtensionInfo->bundleName == abilityInfo->bundleName
+            && pluginExtensionInfo->name == abilityInfo->name) {
+            napi_set_named_property(env, object, "pluginExtensionInfo", CreateJsExtensionAbilityInfo(env, *pluginExtensionInfo));
         } else {
-            napi_set_named_property(env, object, "extensionAbilityInfo", CreateJsExtensionAbilityInfo(env, *infoIter));
+            auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
+                TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
+                return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
+            };
+            auto infoIter = std::find_if(
+                hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
+            if (infoIter == hapModuleInfo->extensionInfos.end()) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
+            } else {
+                napi_set_named_property(env, object, "extensionAbilityInfo", CreateJsExtensionAbilityInfo(env, *infoIter));
+            }
         }
     }
 

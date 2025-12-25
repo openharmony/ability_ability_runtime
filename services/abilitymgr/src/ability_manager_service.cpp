@@ -3683,7 +3683,7 @@ int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::stri
         TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
             PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
         return ERR_PERMISSION_DENIED;
-    }
+    } 
     return PreloadUIExtensionAbilityInner(want, bundleName, userId, hostPid, requestCode);
 }
 
@@ -3707,6 +3707,7 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
             AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, callerAppIndex, extensionInfo, validUserId));
         if (extensionInfo.type == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+            IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, validUserId, extensionInfo));
             if (hostBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
                 (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
             } else {
@@ -4306,6 +4307,9 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     abilityRequest.Voluation(extensionSessionInfo->want, DEFAULT_INVAL_VALUE, callerToken);
     abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
     abilityRequest.sessionInfo = extensionSessionInfo;
+    if (AbilityRuntime::StartupUtil::IsStartPlugin(extensionSessionInfo->want)) {
+        abilityRequest.istartPlugin = true;
+    }
     result = GenerateEmbeddableUIAbilityRequest(extensionSessionInfo->want, abilityRequest, callerToken, validUserId);
     CHECK_POINTER_AND_RETURN(abilityRequest.sessionInfo, ERR_INVALID_VALUE);
     abilityRequest.sessionInfo->uiExtensionComponentId = (
@@ -7969,7 +7973,13 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
             return ERR_APP_CLONE_INDEX_INVALID;
         }
-        abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex);
+        auto caller = Token::GetAbilityRecordByToken(callerToken);
+        if (caller == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "callser is nullptr");
+            return ERR_INVALID_CALLER;
+        }
+        std::string hostBundleName = caller->GetAbilityInfo().bundleName;
+        abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
     if (abilityInfo->status != ERR_OK) {

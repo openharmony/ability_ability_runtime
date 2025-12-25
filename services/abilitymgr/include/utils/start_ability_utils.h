@@ -33,10 +33,10 @@ struct StartAbilityInfo {
     static std::shared_ptr<StartAbilityInfo> CreateCallerAbilityInfo(const sptr<IRemoteObject> &callerToken);
 
     static std::shared_ptr<StartAbilityInfo> CreateStartExtensionInfo(const Want &want, int32_t userId,
-        int32_t appIndex);
+        int32_t appIndex, const std::string &hostBundleName="");
 
     static void FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo);
+        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, std::string &hostBundleName="");
 
     std::string GetAppBundleName() const
     {

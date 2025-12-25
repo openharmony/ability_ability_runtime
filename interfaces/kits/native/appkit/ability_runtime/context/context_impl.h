@@ -332,6 +332,11 @@ public:
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfoWithContext(
         std::shared_ptr<Context> inputContext = nullptr) const;
 
+    void InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+        const std::string &hostBundleName);
+
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> ContextImpl::GetPluginExtensionInfo();
+
     /**
      * @brief Set HapModuleInfo
      *
@@ -579,6 +584,7 @@ private:
     std::shared_ptr<Context> parentContext_ = nullptr;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo_ = nullptr;
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> pluginExtensionInfo_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
     std::string currArea_ = "el2";
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos_;
