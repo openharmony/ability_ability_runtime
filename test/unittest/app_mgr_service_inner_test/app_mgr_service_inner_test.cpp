@@ -4270,6 +4270,25 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: BuildStartFlags_004
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_004, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_004 start");
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    abilityInfo.applicationInfo.cloudFileSyncEnabled = true;
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << APP_FLAGS_CLOUD_FILE_SYNC_ENABLED);
+    EXPECT_EQ(result, flag);
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_004 end");
+}
+
+/**
  * @tc.name: RegisterFocusListener_001
  * @tc.desc: register focus listener.
  * @tc.type: FUNC
