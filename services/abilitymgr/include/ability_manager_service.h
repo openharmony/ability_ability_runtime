@@ -2998,7 +2998,7 @@ private:
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
-    std::list<std::string> vpnWhiteList_;
+    std::list<std::string> vpnAllowList_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
