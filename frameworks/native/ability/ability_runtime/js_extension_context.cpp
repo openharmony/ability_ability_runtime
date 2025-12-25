@@ -73,7 +73,8 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
     if (abilityInfo && hapModuleInfo) {
         if (pluginExtensionInfo && pluginExtensionInfo->bundleName == abilityInfo->bundleName
             && pluginExtensionInfo->name == abilityInfo->name) {
-            napi_set_named_property(env, object, "pluginExtensionInfo", CreateJsExtensionAbilityInfo(env, *pluginExtensionInfo));
+            napi_set_named_property(env, object, "pluginExtensionInfo",
+                CreateJsExtensionAbilityInfo(env, *pluginExtensionInfo));
         } else {
             auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
                 TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
@@ -84,7 +85,8 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
             if (infoIter == hapModuleInfo->extensionInfos.end()) {
                 TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
             } else {
-                napi_set_named_property(env, object, "extensionAbilityInfo", CreateJsExtensionAbilityInfo(env, *infoIter));
+                napi_set_named_property(env, object, "extensionAbilityInfo",
+                    CreateJsExtensionAbilityInfo(env, *infoIter));
             }
         }
     }
