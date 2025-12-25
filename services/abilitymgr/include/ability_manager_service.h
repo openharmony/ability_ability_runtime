@@ -112,6 +112,7 @@ class AbilityManagerService : public SystemAbility,
 public:
     friend class PreloadManagerService;
     friend class StartOptionsUtils;
+    friend class UIAbilityLifecycleManager;
     static std::shared_ptr<AbilityManagerService> GetPubInstance();
 
     void OnStart() override;

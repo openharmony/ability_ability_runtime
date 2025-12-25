@@ -35,6 +35,7 @@
       *AbilityStartWithWaitObserverManager*;
       *AmsConfigurationParameter*;
       *AppExitReasonDataManager*;
+      *AppExitReasonHelper*;
       *ApplicationAnrListener*;
       *AppMgrUtil*;
       *AppScheduler*;
@@ -56,6 +57,7 @@
       *DisposedRuleInterceptor*;
       *DumpUtils*;
       *EcologicalRuleInterceptor*;
+      *ExitInfoDataManager*;
       *ExtensionPermissionsUtil*;
       *DataAbilityManager*;
       *BaseExtensionRecord*;
