@@ -123,6 +123,7 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "i18n:i18n_sa_client",
     "image_framework:image_native",
     "init:libbeget_proxy",
     "init:libbegetutil",
@@ -147,7 +148,6 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     defines += [ "SUPPORT_GRAPHICS" ]
     external_deps += [
       "i18n:intl_util",
-      "preferences:native_preferences",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
