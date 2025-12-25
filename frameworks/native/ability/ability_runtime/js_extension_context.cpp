@@ -68,7 +68,9 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
     }
 
     auto hapModuleInfo = context->GetHapModuleInfo();
-    context->InitPluginExtensionInfo(abilityInfo, context->GetBundleName());
+    if (abilityInfo->applicationInfo.bundleType == AppExecFwk::BundleType::APP_PLUGIN) {
+        context->InitPluginExtensionInfo(abilityInfo, context->GetBundleName());
+    }
     auto pluginExtensionInfo = context->GetPluginExtensionInfo();
     if (abilityInfo && hapModuleInfo) {
         if (pluginExtensionInfo && pluginExtensionInfo->bundleName == abilityInfo->bundleName

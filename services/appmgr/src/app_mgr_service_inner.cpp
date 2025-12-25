@@ -1022,24 +1022,24 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             auto hostBundleName = want->GetStringParam(UIEXTENSION_HOST_BUNDLENAME);
             auto userId = want->GetIntParam(UIEXTENSION_HOST_UID, -1) / BASE_USER_RANGE;
             appInfo->bundleName = hostBundleName;
-            if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
-            }
+            GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex);
             appInfo = std::make_shared<ApplicationInfo>(bundleInfo.applicationInfo);
             auto pluginRet = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginHapModuleInfo(
                 hostBundleName, element.GetBundleName(), element.GetModuleName(),
                 userId, hapModuleInfo);
             if (pluginRet != ERR_OK) {
-                TAG_LOGE(AAFwkTag::APPMGR, "GetPluginHapModuleInfo failed: %{public}d", pluginRet);
+                TAG_LOGW(AAFwkTag::APPMGR, "GetPluginHapModuleInfo failed: %{public}d", pluginRet);
             }
             AAFwk::Want pwant;
-            AAExecFwk::ElementName pElement("", abilityInfo->bundleName, abilityInfo->name, abilityInfo->moduleName);
+            AppExecFwk::ElementName pElement("", abilityInfo->bundleName, abilityInfo->name, abilityInfo->moduleName);
             pwant.SetElement(pElement);
             auto pluginExtensionInfo = std::make_shared<AppExecFwk::ExtensionAbilityInfo>();
             if (DelayedSingleton<BundleMgrHelper>::GetInstance()->GetPluginExtensionInfo(hostBundleName,
                 pwant, userId, *pluginExtensionInfo) != ERR_OK) {
                 TAG_LOGE(AAFwkTag::APPMGR, "GetPluginExtensionInfo failed");
-            } else if (pluginExtensionInfo) {
+                return;
+            }
+            if (pluginExtensionInfo) {
                 hapModuleInfo.extensionInfos.push_back(*pluginExtensionInfo);
                 bundleInfo.extensionInfos.push_back(*pluginExtensionInfo);
             }
