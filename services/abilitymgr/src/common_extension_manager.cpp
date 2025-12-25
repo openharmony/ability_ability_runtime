@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "multi_instance_utils.h"
 #include "ui_extension_utils.h"
+#include "appfreeze_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -103,6 +104,43 @@ void CommonExtensionManager::SetServiceAfterNewCreate(const AbilityRequest &abil
         TAG_LOGI(AAFwkTag::EXT, "create sceneboard");
         sceneBoardTokenId_ = abilityRequest.appInfo.accessTokenId;
     }
+}
+
+int CommonExtensionManager::AttachAbilityThreadInner(const sptr<IAbilityScheduler> &scheduler,
+    const sptr<IRemoteObject> &token)
+{
+    auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
+    if (abilityRecord == nullptr) {
+        auto terminatingRecord = GetExtensionByTokenFromTerminatingMap(token);
+        if (terminatingRecord != nullptr) {
+            TAG_LOGW(AAFwkTag::EXT, "Ability:%{public}s/%{public}s, user:%{public}d",
+                terminatingRecord->GetElementName().GetBundleName().c_str(),
+                terminatingRecord->GetElementName().GetAbilityName().c_str(), userId_);
+        }
+        auto tmpRecord = Token::GetAbilityRecordByToken(token);
+        if (tmpRecord && tmpRecord != terminatingRecord) {
+            TAG_LOGW(AAFwkTag::EXT, "Token:%{public}s/%{public}s, user:%{public}d",
+                tmpRecord->GetElementName().GetBundleName().c_str(),
+                tmpRecord->GetElementName().GetAbilityName().c_str(), userId_);
+        }
+    }
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    std::string element = abilityRecord->GetURI();
+    TAG_LOGD(AAFwkTag::EXT, "ability:%{public}s", element.c_str());
+    abilityRecord->RemoveLoadTimeoutTask();
+    AbilityRuntime::FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
+    abilityRecord->SetScheduler(scheduler);
+    TAG_LOGD(AAFwkTag::EXT, "Inactivate");
+    abilityRecord->Inactivate();
+    return ERR_OK;
+}
+
+int CommonExtensionManager::GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest,
+    std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
+{
+    GetOrCreateServiceRecord(abilityRequest, true, targetService, isLoadedAbility);
+    CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

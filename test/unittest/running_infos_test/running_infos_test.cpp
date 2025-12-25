@@ -282,6 +282,68 @@ HWTEST_F(RunningInfosTest, GetAbilityRunningInfos_007, TestSize.Level1)
     }
 }
 
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetExtensionRunningInfos
+ * SubFunction: NA
+ * FunctionPoints:query extension running infos
+ * EnvConditions: NA
+ * CaseDescription: start service ability, call query function.
+ */
+HWTEST_F(RunningInfosTest, GetExtensionRunningInfos_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    ElementName element("device", "com.ix.hiExtension", "hiExtension");
+    want.SetElement(element);
+    auto result = abilityMs_->StartAbility(want);
+
+    if (result == OHOS::ERR_OK) {
+        std::vector<ExtensionRunningInfo> infos;
+        size_t infoCount{ 1 };
+        int upperLimit = 10;
+        abilityMs_->GetExtensionRunningInfos(upperLimit, infos);
+        EXPECT_TRUE(infos.size() == infoCount);
+        if (infos.size() == infoCount) {
+            EXPECT_TRUE(infos[0].extension.GetAbilityName() == element.GetAbilityName());
+        }
+    }
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetExtensionRunningInfos
+ * SubFunction: NA
+ * FunctionPoints:query extension running infos
+ * EnvConditions: NA
+ * CaseDescription: start two service abilities, call query function.
+ */
+HWTEST_F(RunningInfosTest, GetExtensionRunningInfos_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    ElementName element("device", "com.ix.hiExtension", "hiExtension");
+    want.SetElement(element);
+    abilityMs_->StartAbility(want);
+
+    ElementName element2("device", "com.ix.hiExtension", "hiExtensionOther");
+    want.SetElement(element2);
+    auto result2 = abilityMs_->StartAbility(want);
+
+    if (result2 == OHOS::ERR_OK) {
+        std::vector<ExtensionRunningInfo> infos;
+        int upperLimit = 10;
+        abilityMs_->GetExtensionRunningInfos(upperLimit, infos);
+        size_t infoCount{ 2 };
+        EXPECT_TRUE(infos.size() == infoCount);
+        if (infos.size() == infoCount) {
+            EXPECT_TRUE(infos[0].extension.GetAbilityName() == element.GetAbilityName());
+            EXPECT_TRUE(infos[1].extension.GetAbilityName() == element2.GetAbilityName());
+        }
+    }
+}
+
 /*
  * @tc.name: GetAbilityRunningInfos_006
  * @tc.desc: GetAbilityRunningInfos Test
@@ -509,67 +571,6 @@ HWTEST_F(RunningInfosTest, DataGetAbilityRunningInfos_003, TestSize.Level1)
         EXPECT_TRUE(infos[0].abilityState == static_cast<int>(AbilityState::INITIAL));
         EXPECT_TRUE(infos[1].ability.GetAbilityName() == element2.GetAbilityName());
         EXPECT_TRUE(infos[1].abilityState == static_cast<int>(AbilityState::INITIAL));
-    }
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: GetExtensionRunningInfos
- * SubFunction: NA
- * FunctionPoints:query extension running infos
- * EnvConditions: NA
- * CaseDescription: start service ability, call query function.
- */
-HWTEST_F(RunningInfosTest, GetExtensionRunningInfos_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    ElementName element("device", "com.ix.hiExtension", "hiExtension");
-    want.SetElement(element);
-    auto result = abilityMs_->StartAbility(want);
-
-    if (result == OHOS::ERR_OK) {
-        std::vector<ExtensionRunningInfo> infos;
-        size_t infoCount{ 1 };
-        int upperLimit = 10;
-        abilityMs_->GetExtensionRunningInfos(upperLimit, infos);
-        EXPECT_TRUE(infos.size() == infoCount);
-        if (infos.size() == infoCount) {
-            EXPECT_TRUE(infos[0].extension.GetAbilityName() == element.GetAbilityName());
-        }
-    }
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: GetExtensionRunningInfos
- * SubFunction: NA
- * FunctionPoints:query extension running infos
- * EnvConditions: NA
- * CaseDescription: start two service abilities, call query function.
- */
-HWTEST_F(RunningInfosTest, GetExtensionRunningInfos_002, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    ElementName element("device", "com.ix.hiExtension", "hiExtension");
-    want.SetElement(element);
-    abilityMs_->StartAbility(want);
-
-    ElementName element2("device", "com.ix.hiExtension", "hiExtensionOther");
-    want.SetElement(element2);
-    auto result2 = abilityMs_->StartAbility(want);
-
-    if (result2 == OHOS::ERR_OK) {
-        std::vector<ExtensionRunningInfo> infos;
-        int upperLimit = 10;
-        abilityMs_->GetExtensionRunningInfos(upperLimit, infos);
-        size_t infoCount{ 2 };
-        EXPECT_TRUE(infos.size() == infoCount);
-        if (infos.size() == infoCount) {
-            EXPECT_TRUE(infos[0].extension.GetAbilityName() == element.GetAbilityName());
-            EXPECT_TRUE(infos[1].extension.GetAbilityName() == element2.GetAbilityName());
-        }
     }
 }
 }  // namespace AAFwk

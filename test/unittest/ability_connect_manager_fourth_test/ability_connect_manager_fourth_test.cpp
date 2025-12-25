@@ -224,7 +224,7 @@ HWTEST_F(AbilityConnectManagerFourthTest, DispatchForeground_001, TestSize.Level
     EXPECT_NE(abilityRecord, nullptr);
     taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("AbilityConnectManagerFourthTest");
     connectManager->taskHandler_ = taskHandler_;
-    int result = connectManager->DispatchForeground(abilityRecord);
+    int result = connectManager->DispatchForeground(abilityRecord, abilityRecord->GetToken());
 
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "DispatchForeground_001 end");
@@ -359,7 +359,7 @@ HWTEST_F(AbilityConnectManagerFourthTest, DispatchInactive_001, TestSize.Level1)
     EXPECT_NE(eventHandler1_, nullptr);
     connectManager->eventHandler_ = eventHandler1_;
 
-    connectManager->DispatchInactive(abilityRecord, 0);
+    connectManager->DispatchInactive(abilityRecord, 0, abilityRecord->GetToken());
     EXPECT_EQ(abilityRecord->GetAbilityState(), AbilityState::INACTIVE);
     TAG_LOGI(AAFwkTag::TEST, "DispatchInactive_001 end");
 }
@@ -388,7 +388,7 @@ HWTEST_F(AbilityConnectManagerFourthTest, DispatchInactive_002, TestSize.Level1)
     want.SetParam("ability.want.params.is_preload_uiextension_ability", false);
     abilityRecord->SetWant(want);
 
-    int result = connectManager->DispatchInactive(abilityRecord, AbilityState::INACTIVATING);
+    int result = connectManager->DispatchInactive(abilityRecord, AbilityState::INACTIVATING, abilityRecord->GetToken());
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "DispatchInactive_002 end");
 }
@@ -418,7 +418,7 @@ HWTEST_F(AbilityConnectManagerFourthTest, DispatchInactive_003, TestSize.Level1)
     want.SetParam("ability.want.params.is_preload_uiextension_ability", false);
     abilityRecord->SetWant(want);
 
-    int result = connectManager->DispatchInactive(abilityRecord, AbilityState::INACTIVATING);
+    int result = connectManager->DispatchInactive(abilityRecord, AbilityState::INACTIVATING, abilityRecord->GetToken());
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "DispatchInactive_003 end");
 }
@@ -449,7 +449,7 @@ HWTEST_F(AbilityConnectManagerFourthTest, DispatchInactive_004, TestSize.Level1)
     want.SetParam("ability.want.params.is_preload_uiextension_ability", true);
     abilityRecord->SetWant(want);
 
-    int result = connectManager->DispatchInactive(abilityRecord, 0);
+    int result = connectManager->DispatchInactive(abilityRecord, 0, abilityRecord->GetToken());
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "DispatchInactive_004 end");
 }
