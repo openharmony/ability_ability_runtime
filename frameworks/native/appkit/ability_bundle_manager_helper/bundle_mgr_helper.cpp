@@ -1157,6 +1157,7 @@ ErrCode BundleMgrHelper::GetPluginExtensionInfo(const std::string &hostBundleNam
     }
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetPluginExtensionInfo(hostBundleName, newWant, userId, pluginExtensionInfo);
 }
 }  // namespace AppExecFwk
