@@ -60,21 +60,7 @@ public:
      */
     int PreloadUIExtensionAbilityInner(const AbilityRequest &abilityRequest, std::string &hostBundleName,
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
-    
-    /**
-     * ConnectAbilityLocked, connect session with uiExtension ability.
-     *
-     * @param abilityRequest, Special want for service type's ability.
-     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param callerToken, caller ability token.
-     * @param sessionInfo the extension session info of the ability to connect.
-     * @param connectInfo the connect info.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t ConnectUIExtensionAbilityLocked(const AbilityRequest &abilityRequest,
-        const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
-        sptr<SessionInfo> sessionInfo = nullptr, sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
-    
+ 
     /**
      * Query preload uiextension record.
      *
@@ -104,8 +90,7 @@ public:
      */
     void ClearPreloadUIExtensionRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    int AttachAbilityThreadInner(const sptr<IAbilityScheduler> &scheduler,
-        const sptr<IRemoteObject> &token, const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+    int AttachAbilityThreadInner(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token) override;
 
     void OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state) override;
 
@@ -154,16 +139,12 @@ public:
 
 protected:
     int32_t StartAbilityLocked(const AbilityRequest &abilityRequest) override;
-    void HandlePreloadUIExtensionSuccess(int32_t extensionRecordId, bool isPreloadedSuccess) override;
-    void LoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
-    void ForegroundTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
-    void BackgroundTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
-    void TerminateTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
-    void HandleUIExtensionAbilityRecordTermination(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
     void HandleLoadAbilityOrStartSpecifiedProcess(
         const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
     int RemoveUIExtensionBySessionInfoToken(sptr<IRemoteObject> token) override;
 private:
+
+    int TerminateAbilityLocked(const sptr<IRemoteObject> &token) override;
 
     void SetLastExitReason(const AbilityRequest &abilityRequest, std::shared_ptr<BaseExtensionRecord> &targetService);
 
@@ -196,9 +177,8 @@ private:
     int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, bool isCreatedByConnect,
         const std::string &hostBundleName, std::shared_ptr<BaseExtensionRecord> &extensionRecord, bool &isLoaded);
 
-    int32_t GetOrCreateExtensionRecord(
-        const AbilityRequest &abilityRequest, const sptr<UIExtensionAbilityConnectInfo> &connectInfo,
-        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility);
+    int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest,
+        std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility) override;
 
     void UpdateUIExtensionInfo(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
@@ -209,7 +189,75 @@ private:
     int32_t AddPreloadUIExtensionRecord(const std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord) override;
 
     int TerminateAbilityInner(const sptr<IRemoteObject> &token) override;
+
+    void HandleStartTimeoutTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    void LoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+
+    void HandleForegroundTimeoutTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    /**
+    * Handle ability foreground timeout.
+    *
+    * @param abilityRecord The ability record that timed out.
+    */
+    void ForegroundTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+
+    void HandleStopTimeoutTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    /**
+    * Handle ability termination timeout.
+    *
+    * @param abilityRecord The ability record that timed out.
+    */
+    void TerminateTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+
+    void CleanActivatingTimeoutAbilityInner(std::shared_ptr<BaseExtensionRecord> abilityRecord) override;
+
+    void TerminateDone(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    bool HandleExtensionAbilityRemove(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    void HandleAbilityDiedTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    void HandlePostLoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int64_t recordId) override;
+
+    int DispatchForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
+        const sptr<IRemoteObject> &token) override;
+    int DispatchBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
+        const sptr<IRemoteObject> &token) override;
+    int DispatchInactive(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int state,
+        const sptr<IRemoteObject> &token) override;
+
+    int CheckAbilityStateForDisconnect(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+    int CleanupConnectionAndTerminateIfNeeded(std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    /**
+     * @brief schedule to background
+     *
+     * @param abilityRecord the ability to move
+     */
+    void MoveToBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     
+    void BackgroundTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+
+    /**
+    * Handle successful preload of UI Extension.
+    *
+    * @param extensionRecordId The ID of the extension record.
+    * @param isPreloadedSuccess Whether preloading was successful.
+    */
+    void HandlePreloadUIExtensionSuccess(int32_t extensionRecordId, bool isPreloadedSuccess);
+
+    void CompleteForegroundInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    int32_t ConnectAbilityLockedInner(bool isLoadedAbility,
+        std::shared_ptr<BaseExtensionRecord>& targetService, const AbilityRequest& abilityRequest,
+        std::shared_ptr<ConnectionRecord>& connectRecord) override;
+
+    void TerminateOrCacheAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord) override;
+    void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo) override;
+
     class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
@@ -226,7 +274,6 @@ private:
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
     std::mutex uiExtRecipientMapMutex_;
     std::mutex uiExtensionMapMutex_;
-    std::mutex loadAbilityQueueLock_;
     std::mutex preloadUIExtRecipientMapMutex_;
     std::map<int32_t, sptr<IRemoteObject::DeathRecipient>> preloadUIExtensionHostClientDeathRecipients_;
 
