@@ -3707,7 +3707,9 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
             AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, callerAppIndex, extensionInfo, validUserId));
         if (extensionInfo.type == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
-            IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, validUserId, extensionInfo));
+            if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+                IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, validUserId, extensionInfo));
+            }
             if (hostBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
                 (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
             } else {
@@ -7979,6 +7981,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
             return ERR_INVALID_CALLER;
         }
         std::string hostBundleName = caller->GetAbilityInfo().bundleName;
+        request.hostBundleName = hostBundleName;
         abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);

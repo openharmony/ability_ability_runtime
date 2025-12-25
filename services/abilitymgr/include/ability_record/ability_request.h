@@ -91,6 +91,7 @@ struct AbilityRequest {
     std::string reservedBundleName;
     std::string appId;
     std::string startTime;
+    std::string hostBundleName;
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo appInfo;

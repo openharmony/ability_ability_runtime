@@ -69,8 +69,11 @@ int32_t ExtensionRecordFactory::PreCheck(const AAFwk::AbilityRequest &abilityReq
     }
     if ((preCheckFlag & PRE_CHECK_FLAG_CALLED_WITHIN_THE_BUNDLE) &&
         hostBundleName != AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
-        if (hostBundleName != abilityRequest.abilityInfo.applicationName && (!abilityRequest.isTargetPlugin
-            || !(abilityRequest.abilityInfo.extensionAbilityType == ExtensionAbilityType::EMBEDDED_UI))) {
+        if (hostBundleName != abilityRequest.abilityInfo.applicationName) {
+            if (abilityRequest.isTargetPlugin && abilityRequest.hostBundleName == hostBundleName &&
+                abilityRequest.abilityInfo.extensionAbilityType == ExtensionAbilityType::EMBEDDED_UI) {
+                return ERR_OK;
+            }
             TAG_LOGW(AAFwkTag::ABILITYMGR, "not called");
             return ERR_INVALID_VALUE;
         }
