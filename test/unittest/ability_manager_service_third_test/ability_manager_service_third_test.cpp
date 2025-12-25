@@ -3292,21 +3292,23 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_001, TestSize.Lev
 HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    bool result = abilityMs_->ParseVpnAllowListJson("/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
+    bool result = abilityMs_->ParseVpnWhiteListJson(
+        "/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
     EXPECT_NE(result, false);
 }
 
 /**
  * @tc.name: CheckSupportVpn_001
- * @tc.desc: Test CheckSupportVpn when bundleName in whitelist
+ * @tc.desc: Test CheckSupportVpn when bundleName in allowlist
  * @tc.type: FUNC
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
 {
-    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
     auto abilityInfo = callerRequest.abilityInfo;
-    std::liststd::string vpnAllowList = {"com.example.vpn"};
-    auto abilityMs_ = std::make_shared();
+    std::list<std::string> vpnAllowList = {"com.example.vpn"};
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
     bool result = abilityMs_->CheckSupportVpn(abilityInfo, vpnAllowList);
     EXPECT_NE(result, false);
 }
@@ -3318,11 +3320,12 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_002, TestSize.Level1)
 {
-    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
     callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::VPN;
     auto abilityInfo = callerRequest.abilityInfo;
-    std::liststd::string vpnAllowList = {"com.example.vpn"};
-    auto abilityMs_ = std::make_shared();
+    std::list<std::string> vpnAllowList = {"com.example.vpn"};
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
     bool result = abilityMs_->CheckSupportVpn(abilityInfo, vpnAllowList);
     EXPECT_NE(result, false);
 }
