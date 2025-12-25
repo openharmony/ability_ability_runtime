@@ -3697,13 +3697,19 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(
     CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerAppIndex = 0;
+    int32_t appIndex = 0;
+    if (want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        appIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    }
+
     if (IN_PROCESS_CALL(bms->GetNameAndIndexForUid(callerUid, hostBundleName, callerAppIndex)) == ERR_OK) {
-        if (!want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY) || want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0)
-            != callerAppIndex) {
-            AppExecFwk::ExtensionAbilityInfo extensionInfo;
-            IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
-                AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, callerAppIndex, extensionInfo, validUserId));
-            if (extensionInfo.type == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+        AppExecFwk::ExtensionAbilityInfo extensionInfo;
+        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
+            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, callerAppIndex, extensionInfo, validUserId));
+        if (extensionInfo.type == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+            if (hostBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
+                (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+            } else {
                 (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, callerAppIndex);
             }
         }
@@ -7934,9 +7940,18 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     if (abilityRecord != nullptr) {
         request.callerTokenRecordId = abilityRecord->GetRecordId();
         std::string extensionTypeStr = want.GetStringParam(UIEXTENSION_TYPE_KEY);
+        int32_t appIndex = 0;
+        if (want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY)) {
+            appIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+        }
+
         if (AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr) ==
             AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
-            (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityRecord->GetAppIndex());
+            if (abilityRecord->GetApplicationInfo().bundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
+                (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+            } else {
+                (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityRecord->GetAppIndex());
+            }
         }
     }
     if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
