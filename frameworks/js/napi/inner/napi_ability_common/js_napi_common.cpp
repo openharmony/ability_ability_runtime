@@ -1249,6 +1249,7 @@ bool UnwrapParamForWant(napi_env env, napi_value args, AbilityType, CallAbilityP
         TAG_LOGE(AAFwkTag::JSNAPI, "wrong argument type");
         return false;
     }
+    AbilityRuntime::HandleScope handleScope(env);
 
     napi_value jsWant = GetPropertyValueByPropertyName(env, args, "want", napi_object);
     if (jsWant == nullptr) {

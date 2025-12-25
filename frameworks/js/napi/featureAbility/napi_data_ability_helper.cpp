@@ -1591,6 +1591,7 @@ bool UnwrapArrayOperationFromJS(
     }
     TAG_LOGI(AAFwkTag::FA, "param size:%{public}d", arraySize);
     result.clear();
+    AbilityRuntime::HandleScope handleScope(env);
     for (uint32_t i = 0; i < arraySize; i++) {
         jsValue = nullptr;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {

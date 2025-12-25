@@ -515,6 +515,7 @@ OnRequestResult JsAbilityContext::UnwrapCompletionHandlerOnRequestResult(napi_en
     }
     return [env, ref, funcName](const AppExecFwk::ElementName &element, const std::string &message) {
         napi_value completionHandler = ref->GetNapiValue();
+        AbilityRuntime::HandleScope handleScope(env);
         napi_value onRequestResultObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
             funcName, napi_function);
         size_t argc = ARGC_TWO;
@@ -529,6 +530,7 @@ OnRequestResult JsAbilityContext::UnwrapCompletionHandlerOnRequestResult(napi_en
 void JsAbilityContext::UnwrapCompletionHandlerInStartOptions(napi_env env, napi_value param,
     AAFwk::StartOptions &options)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(env, param,
         "completionHandler", napi_object);
     if (completionHandler == nullptr) {
