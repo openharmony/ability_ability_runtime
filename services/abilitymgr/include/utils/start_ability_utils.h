@@ -36,7 +36,7 @@ struct StartAbilityInfo {
         int32_t appIndex, const std::string &hostBundleName = "");
 
     static void FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, std::string &hostBundleName = "");
+        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, const std::string &hostBundleName = "");
 
     std::string GetAppBundleName() const
     {
