@@ -129,7 +129,7 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
         }
     }
     if (uncaughtTask_) {
-        uncaughtTask_(summary, errorObj);
+        uncaughtTask_(summary, errorObj, env_, obj);
     }
 }
 

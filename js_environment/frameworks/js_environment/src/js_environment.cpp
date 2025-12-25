@@ -177,8 +177,9 @@ void JsEnvironment::RegisterUncatchableExceptionHandler(const JsEnv::Uncatchable
         [weakThis, uncatchableTask] (auto& trycatch) {
             auto sharedThis = weakThis.lock();
             if (sharedThis) {
+                void* env = trycatch.GetEnv();
                 NapiUncaughtExceptionCallback napiUncaughtExceptionCallback(uncatchableTask,
-                    sharedThis->sourceMapOperator_, reinterpret_cast<napi_env>(sharedThis->engine_));
+                    sharedThis->sourceMapOperator_, reinterpret_cast<napi_env>(env));
                 napiUncaughtExceptionCallback(trycatch);
             } else {
                 TAG_LOGE(AAFwkTag::JSENV, "JsEnvironment has been destructed.");

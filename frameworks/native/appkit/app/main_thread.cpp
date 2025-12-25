@@ -172,7 +172,7 @@ constexpr char EVENT_KEY_CANGJIE[] = "CANGJIE";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_THREAD_NAME[] = "THREAD_NAME";
-constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
+constexpr char EVENT_KEY_APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char EVENT_KEY_PROCESS_LIFETIME[] = "PROCESS_LIFETIME";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
@@ -1470,7 +1470,7 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName,
             EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
             EVENT_KEY_REASON, errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
-            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
+            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId,
             EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
             EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
         ErrorObject appExecErrorObj = { .name = errorObj.name, .message = errorObj.message, .stack = errorObj.stack };
@@ -1491,7 +1491,7 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         }
         int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
             HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", KILL_REASON,
-            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
+            EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
             "FOREGROUND", foreground);
         TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event "
             "[FRAMEWORK,PROCESS_KILL],"
@@ -2052,57 +2052,75 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
     uncatchableTask = [weak, bundleName = uncatchableTaskInfo.bundleName,
         versionCode = uncatchableTaskInfo.versionCode, appRunningId = uncatchableTaskInfo.appRunningId,
         pid = uncatchableTaskInfo.pid, processName = uncatchableTaskInfo.processName, isUncatchable]
-        (std::string summary, const JsEnv::ErrorObject errorObject) {
+        (std::string summary, const JsEnv::ErrorObject errorObject, napi_env env, napi_value exception) {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
+
         time_t timet;
         time(&timet);
         std::string lifeTime = GetProcessLifeCycleByPid(pid);
-        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName,
-            EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
-            EVENT_KEY_REASON, errorObject.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
-            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
-            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
-            EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName(), EVENT_KEY_PROCESS_LIFETIME, lifeTime);
+        if (!ApplicationDataManager::jsErrorHasReport_.exchange(true)) {
+            int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
+                OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION,
+                std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
+                EVENT_KEY_REASON, errorObject.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
+                EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId,
+                EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
+                EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName(), EVENT_KEY_PROCESS_LIFETIME, lifeTime);
+            TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,JS_ERROR],"
+                " packageName=%{public}s, pid=%{public}d, appRunningId=%{public}s, threadName=%{public}s,"
+                " isUncatchable=%{public}d", result, bundleName.c_str(), pid, appRunningId.c_str(),
+                DumpProcessHelper::GetThreadName().c_str(), isUncatchable);
+        }
+
+        ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
 
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
-        auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
-        AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObject.name };
-        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-        AppExecFwk::ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
-        if (NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, summary,
-            appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
-            TAG_LOGI(AAFwkTag::APPKIT, "Complete all callbacks");
-            if (!isUncatchable) {
-                return;
-            }
+        auto mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
+        ApplicationDataManager::ExceptionParams params = {env, mainEnv, exception, summary, isUncatchable};
+        if (ApplicationDataManager::NotifyUncaughtException(params, appExecErrorObj)) {
+            return;
         }
+
         if (!isUncatchable && ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
             ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
             return;
         }
 
-        // if app's callback has been registered, let app decide whether exit or not.
-        TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n"
-            "%{public}s", bundleName.c_str(), errorObject.name.c_str(), summary.c_str());
-        bool foreground = false;
-        if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
-            ApplicationImpl::APP_STATE_FOREGROUND) {
-            foreground = true;
-        }
-        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
-            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
-            "MSG", KILL_REASON, "FOREGROUND", foreground, "IS_UNCATCHABLE", isUncatchable);
-        TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
-            " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
-            result, pid, processName.c_str(), KILL_REASON, foreground, isUncatchable);
-        _exit(JS_ERROR_EXIT);
+        bool foreground = (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
+            ApplicationImpl::APP_STATE_FOREGROUND) ? true : false;
+        ProcessExitInfo info = {bundleName, errorObject.name, summary, appRunningId, processName, pid, foreground,
+            isUncatchable};
+        ProcessExit(info);
     };
+}
+
+/**
+ *
+ * @brief Handle process exit.
+ *
+ * @param processExitInfo The info of the process exit info.
+ *
+ */
+void MainThread::ProcessExit(const ProcessExitInfo& info)
+{
+    AAFwk::ExitReason exitReason = { REASON_JS_ERROR, info.errorObjectName };
+    AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+
+    // if app's callback has been registered, let app decide whether exit or not.
+    TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n"
+        "%{public}s", info.bundleName.c_str(), info.errorObjectName.c_str(), info.summary.c_str());
+    int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+        HiviewDFX::HiSysEvent::EventType::FAULT, "PID", info.pid, "PROCESS_NAME", info.processName,
+        EVENT_KEY_APP_RUNNING_UNIQUE_ID, info.appRunningId, EVENT_KEY_REASON, "JsError",
+        "MSG", KILL_REASON, "FOREGROUND", info.foreground, "IS_UNCATCHABLE", info.isUncatchable);
+    TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
+        " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
+        result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
+    _exit(JS_ERROR_EXIT);
 }
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
