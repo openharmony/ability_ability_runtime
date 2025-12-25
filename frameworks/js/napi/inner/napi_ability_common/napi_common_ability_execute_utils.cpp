@@ -271,6 +271,7 @@ void GetAbilityInfoExecuteCB(napi_env, void *data)
 void GetAbilityInfoAsyncCompleteCB(napi_env env, napi_status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AbilityInfoCB *abilityInfoCB = static_cast<AbilityInfoCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -304,6 +305,7 @@ void GetAbilityInfoAsyncCompleteCB(napi_env env, napi_status, void *data)
 void GetAbilityInfoPromiseCompleteCB(napi_env env, napi_status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AbilityInfoCB *abilityInfoCB = static_cast<AbilityInfoCB *>(data);
     napi_value result = nullptr;
     if (abilityInfoCB->cbBase.errCode == NAPI_ERR_NO_ERROR) {
@@ -466,6 +468,7 @@ void GetHapModuleInfoExecuteCB(napi_env, void *data)
 void GetHapModuleInfoAsyncCompleteCB(napi_env env, napi_status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     HapModuleInfoCB *hapModuleInfoCB = static_cast<HapModuleInfoCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -493,6 +496,7 @@ void GetHapModuleInfoAsyncCompleteCB(napi_env env, napi_status, void *data)
 void GetHapModuleInfoPromiseCompleteCB(napi_env env, napi_status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     HapModuleInfoCB *hapModuleInfoCB = static_cast<HapModuleInfoCB *>(data);
     napi_value result = nullptr;
     if (hapModuleInfoCB->cbBase.errCode == NAPI_ERR_NO_ERROR) {

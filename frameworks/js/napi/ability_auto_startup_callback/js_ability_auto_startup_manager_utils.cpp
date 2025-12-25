@@ -94,6 +94,7 @@ napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStar
 
 bool AddBasicProperties(napi_env env, napi_value object, const AutoStartupInfo &info)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value bundleName = AppExecFwk::WrapStringToJS(env, info.bundleName);
     if (bundleName == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null bundleName");
@@ -141,6 +142,7 @@ bool AddBasicProperties(napi_env env, napi_value object, const AutoStartupInfo &
 
 bool AddReadOnlyProperties(napi_env env, napi_value object, const AutoStartupInfo &info)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value userId = AppExecFwk::WrapInt32ToJS(env, info.userId);
     if (userId == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null userId");
