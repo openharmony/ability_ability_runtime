@@ -33,6 +33,7 @@ void JsEnvironmentCallback::CallConfigurationUpdatedInner(const std::string &met
     const AppExecFwk::Configuration &config, const std::map<int32_t, std::shared_ptr<NativeReference>> &callbacks)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
+    HandleScope scope(env_);
     for (auto &callback : callbacks) {
         if (!callback.second) {
             TAG_LOGE(AAFwkTag::APPKIT, "invalid jsCallback");

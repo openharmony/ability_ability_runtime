@@ -45,9 +45,10 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTaskWithLastParam(napi_env env, napi_v
 // Help Functions
 napi_value CreateJsError(napi_env env, int32_t errCode, const std::string& message)
 {
+    HandleEscape handleEscape(env);
     napi_value result = nullptr;
     napi_create_error(env, CreateJsValue(env, errCode), CreateJsValue(env, message), &result);
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void BindNativeFunction(napi_env env, napi_value object, const char* name,
@@ -289,6 +290,7 @@ void NapiAsyncTask::ResolveWithNoError(napi_env env, napi_value value)
 
 void NapiAsyncTask::Reject(napi_env env, napi_value error)
 {
+    HandleScope handleScope(env);
     if (deferred_) {
         napi_reject_deferred(env, deferred_, error);
         deferred_ = nullptr;
