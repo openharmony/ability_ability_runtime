@@ -68,7 +68,7 @@ int32_t ExtensionRecordFactory::PreCheck(const AAFwk::AbilityRequest &abilityReq
         return ERR_OK;
     }
     if ((preCheckFlag & PRE_CHECK_FLAG_CALLED_WITHIN_THE_BUNDLE) &&
-        hostBundleName != AbilityConfig::SCENEBOARD_BUNDLE_NAME ) {
+        hostBundleName != AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
         if (hostBundleName != abilityRequest.abilityInfo.applicationName && (!abilityRequest.isTargetPlugin
             || !(abilityRequest.abilityInfo.extensionAbilityType == ExtensionAbilityType::EMBEDDED_UI))) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "not called");

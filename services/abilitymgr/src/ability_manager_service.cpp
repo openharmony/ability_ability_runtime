@@ -7989,8 +7989,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer mode");
         return ERR_NOT_DEVELOPER_MODE;
     }
-    auto result = InitialAbilityRequest(request, *abilityInfo);
-    return result;
+    return InitialAbilityRequest(request, *abilityInfo);
 }
 
 int32_t AbilityManagerService::InitialAbilityRequest(AbilityRequest &request,
