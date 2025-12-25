@@ -53,7 +53,10 @@ template("ets_environment_test_template") {
 }
 
 ets_environment_test_template("ets_environment_basic_test") {
-  sources = [ "ets_environment_test.cpp" ]
+  sources = [
+    "ets_environment_test.cpp",
+    "mock_ani_env.cpp"
+  ]
 }
 
 group("unittest") {
