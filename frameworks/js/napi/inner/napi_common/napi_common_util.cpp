@@ -715,6 +715,7 @@ std::shared_ptr<NativeReference> CreateNativeRef(
         TAG_LOGE(AAFwkTag::JSNAPI, "jsObject is nullptr");
         return nullptr;
     }
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value func = GetPropertyValueByPropertyName(env, jsObject, propertyName, type);
     if (func == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null %{public}s", propertyName);
@@ -740,6 +741,7 @@ std::shared_ptr<NativeReference> CreateNativeRef(
  */
 bool UnwrapInt32ByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, int32_t &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_number);
     if (jsValue != nullptr) {
         return UnwrapInt32FromJS2(env, jsValue, value);
@@ -761,6 +763,7 @@ bool UnwrapInt32ByPropertyName(napi_env env, napi_value jsObject, const char *pr
 bool UnwrapInt32ArrayByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::vector<int32_t> &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsArray = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsArray == nullptr) {
         return false;
@@ -781,6 +784,7 @@ bool UnwrapInt32ArrayByPropertyName(
  */
 bool UnwrapDoubleByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, double &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_number);
     if (jsValue != nullptr) {
         return UnwrapDoubleFromJS2(env, jsValue, value);
@@ -801,6 +805,7 @@ bool UnwrapDoubleByPropertyName(napi_env env, napi_value jsObject, const char *p
  */
 bool UnwrapBooleanByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, bool &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_boolean);
     if (jsValue != nullptr) {
         return UnwrapBoolFromJS2(env, jsValue, value);
@@ -812,6 +817,7 @@ bool UnwrapBooleanByPropertyName(napi_env env, napi_value jsObject, const char *
 bool UnwrapBooleanArrayByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::vector<bool> &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsArray = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsArray == nullptr) {
         return false;
@@ -832,6 +838,7 @@ bool UnwrapBooleanArrayByPropertyName(
  */
 bool UnwrapStringByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, std::string &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_string);
     if (jsValue != nullptr) {
         return UnwrapStringFromJS2(env, jsValue, value);
@@ -843,6 +850,7 @@ bool UnwrapStringByPropertyName(napi_env env, napi_value jsObject, const char *p
 bool UnwrapStringArrayByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::vector<std::string> &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsArray = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsArray == nullptr) {
         return false;
@@ -854,6 +862,7 @@ bool UnwrapStringArrayByPropertyName(
 bool UnwrapComplexArrayByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, ComplexArrayData &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsArray = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsArray == nullptr) {
         return false;
@@ -1315,6 +1324,7 @@ napi_value WrapLocaleToJS(napi_env env, const std::string &locale)
 
 bool UnwrapLocaleByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, std::string &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsValue == nullptr) {
         return false;
@@ -1353,6 +1363,7 @@ bool UnwrapLocaleFromJS(napi_env env, napi_value jsValue, std::string &value)
  */
 bool UnwrapUint32ByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, uint32_t &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_number);
     if (jsValue != nullptr) {
         return napi_get_value_uint32(env, jsValue, &value) == napi_ok;

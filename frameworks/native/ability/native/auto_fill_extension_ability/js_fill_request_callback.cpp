@@ -181,6 +181,7 @@ napi_value JsFillRequestCallback::OnFillRequestAutoFillPopupConfig(napi_env env,
 bool JsFillRequestCallback::SetPopupConfigToWantParams(
     napi_env env, NapiCallbackInfo& info, AAFwk::WantParams& wantParams)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = nullptr;
     bool isValueChanged = false;
     jsValue = GetPropertyValueByPropertyName(env, info.argv[INDEX_ZERO], CONFIG_POPUP_SIZE, napi_object);

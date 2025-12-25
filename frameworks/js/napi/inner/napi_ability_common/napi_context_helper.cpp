@@ -709,6 +709,7 @@ void GetAppInfoExecuteCB(napi_env env, void *data)
 void GetAppInfoAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AppInfoCB *appInfoCB = static_cast<AppInfoCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -766,6 +767,7 @@ napi_value GetApplicationInfoAsync(napi_env env, napi_value *args, const size_t 
 void GetAppInfoPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AppInfoCB *appInfoCB = static_cast<AppInfoCB *>(data);
     if (appInfoCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null appInfoCB");
