@@ -25,7 +25,7 @@ const char *OH_ABILITY_RUNTIME_ON_NATIVE_EXTENSION_CREATE = "OH_AbilityRuntime_O
 using CreateFuncType = void(*)(AbilityRuntime_ExtensionInstanceHandle, const char*);
 
 bool NativeRuntime::LoadModule(const std::string& bundleModuleName, const std::string& fileName,
-    const std::string& abilityName, AbilityRuntime_ExtensionInstance &instance)
+    const std::string& abilityName, AbilityRuntime_ExtensionInstance& instance)
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     if (moduleManager == nullptr) {

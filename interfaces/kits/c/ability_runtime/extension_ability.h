@@ -20,7 +20,7 @@
  * @brief Provide the definition of the C interface for the extension ability AbilityRuntime
  *
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
- * @since 23
+ * @since 24
  */
 
 /**
@@ -31,7 +31,7 @@
  * @library libability_runtime.so
  * @kit AbilityKit
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
- * @since 23
+ * @since 24
  */
 
 #ifndef ABILITY_RUNTIME_EXTENSION_ABILITY_H
@@ -46,21 +46,21 @@ extern "C" {
 /**
  * @brief Define the AbilityRuntime_ExtensionInstance structure type.
  *
- * @since 23
+ * @since 24
  */
 struct AbilityRuntime_ExtensionInstance;
 
 /**
  * @brief Defines the pointer to AbilityRuntime_ExtensionInstance.
  *
- * @since 23
+ * @since 24
  */
 typedef struct AbilityRuntime_ExtensionInstance* AbilityRuntime_ExtensionInstanceHandle;
 
 /**
  * @brief Define the function that must be in the native code to instantiate the native extension ability.
  *
- * @since 23
+ * @since 24
  */
 typedef void AbilityRuntime_Extension_CreateFunc(
     AbilityRuntime_ExtensionInstanceHandle handle, const char *abilityName);
@@ -68,7 +68,7 @@ typedef void AbilityRuntime_Extension_CreateFunc(
 /**
  * @brief The name of the function that native extension ability instance looks for when launching its native code.
  *
- * @since 23
+ * @since 24
  */
 AbilityRuntime_Extension_CreateFunc OH_AbilityRuntime_OnNativeExtensionCreate;
 
