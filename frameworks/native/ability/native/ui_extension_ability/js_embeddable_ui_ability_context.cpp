@@ -663,6 +663,7 @@ void JsEmbeddableUIAbilityContext::WrapJsUIAbilityContext(napi_env env,
         TAG_LOGE(AAFwkTag::UI_EXT, "null uiAbiContext");
         return;
     }
+    HandleScope handleScope(env);
     objValue = CreateJsBaseContext(env, uiAbiContext);
     std::unique_ptr<JsEmbeddableUIAbilityContext> jsContext = std::make_unique<JsEmbeddableUIAbilityContext>(
         uiAbiContext, nullptr, screenMode);
@@ -686,6 +687,7 @@ void JsEmbeddableUIAbilityContext::WrapJsUIExtensionContext(napi_env env,
         TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtContext");
         return;
     }
+    HandleScope handleScope(env);
     objValue = CreateJsBaseContext(env, uiExtContext);
     std::unique_ptr<JsEmbeddableUIAbilityContext> jsContext = std::make_unique<JsEmbeddableUIAbilityContext>(
         nullptr, uiExtContext, screenMode);

@@ -53,7 +53,7 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
         TAG_LOGD(AAFwkTag::APPKIT, "null jsContext or config");
         return;
     }
-
+    HandleScope handleScope(env);
     napi_value object = jsContext->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
         TAG_LOGE(AAFwkTag::APPKIT, "null object");
@@ -75,9 +75,10 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<AbilityRuntime::Context> context)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    HandleEscape handle(env);
     napi_value objValue = CreateJsBaseContext(env, context);
     if (context == nullptr) {
-        return objValue;
+        return handle.Escape(objValue);
     }
 
     auto configuration = context->GetConfiguration();
@@ -88,7 +89,7 @@ napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<AbilityRunt
     std::string type = "AbilityStageContext";
     napi_set_named_property(env, objValue, "contextType", CreateJsValue(env, type));
 
-    return objValue;
+    return handle.Escape(objValue);
 }
 
 napi_value AttachAbilityStageContext(napi_env env, void *value, void *hint)

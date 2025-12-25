@@ -1553,6 +1553,7 @@ void JsUIAbility::OnAbilityRequestFailure(const std::string &requestId, const Ap
     const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestFailure called");
+    HandleScope handle(jsRuntime_);
     UIAbility::OnAbilityRequestFailure(requestId, element, message, resultCode);
     auto abilityContext = GetAbilityContext();
     if (abilityContext == nullptr) {
@@ -1566,6 +1567,7 @@ void JsUIAbility::OnAbilityRequestSuccess(const std::string &requestId, const Ap
     const std::string &message)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestSuccess called");
+    HandleScope handle(jsRuntime_);
     UIAbility::OnAbilityRequestSuccess(requestId, element, message);
     auto abilityContext = GetAbilityContext();
     if (abilityContext == nullptr) {
