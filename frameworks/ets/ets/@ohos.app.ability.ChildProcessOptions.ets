@@ -15,8 +15,10 @@
 
 export interface ChildProcessOptions {
   isolationMode?: boolean;
+  isolationUid?: boolean;
 }
 
 class ChildProcessOptionsImpl implements ChildProcessOptions {
   public isolationMode?: boolean;
+  public isolationUid?: boolean;
 }
