@@ -335,7 +335,7 @@ public:
     void InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
         const std::string &hostBundleName);
 
-    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> ContextImpl::GetPluginExtensionInfo();
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> GetPluginExtensionInfo();
 
     /**
      * @brief Set HapModuleInfo
