@@ -370,6 +370,7 @@ bool JsInsightIntentEntry::PrepareParametersUIAbilityBackground(napi_env env)
         TAG_LOGE(AAFwkTag::INTENT, "js object null");
         return false;
     }
+    AbilityRuntime::HandleScope handleScope(env);
 
     auto executorNapiVal = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, executorNapiVal, napi_object)) {
@@ -396,6 +397,7 @@ bool JsInsightIntentEntry::PrepareParametersUIExtension(napi_env env,
         TAG_LOGE(AAFwkTag::INTENT, "page loader or object invalid");
         return false;
     }
+    AbilityRuntime::HandleScope handleScope(env);
 
     // assign ability pageloader
     auto executorNapiVal = jsObj_->GetNapiValue();
@@ -425,6 +427,7 @@ bool JsInsightIntentEntry::PrepareParametersServiceExtension(napi_env env)
         TAG_LOGE(AAFwkTag::INTENT, "js object null");
         return false;
     }
+    AbilityRuntime::HandleScope handleScope(env);
 
     auto executorNapiVal = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, executorNapiVal, napi_object)) {

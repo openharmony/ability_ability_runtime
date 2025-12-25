@@ -170,7 +170,6 @@ void JsUIExtensionCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &
         TAG_LOGE(AAFwkTag::UI_EXT, "null env_");
         return;
     }
-
     napi_value abilityResult = OHOS::AppExecFwk::WrapAbilityResult(env_, resultCode, want);
     if (abilityResult == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null abilityResult");
@@ -243,6 +242,7 @@ void JsUIExtensionCallback::CallJsError(int32_t number)
 
 void JsUIExtensionCallback::SetCompletionHandler(napi_env env, napi_value completionHandler)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
     if (env == nullptr || completionHandler == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameters");

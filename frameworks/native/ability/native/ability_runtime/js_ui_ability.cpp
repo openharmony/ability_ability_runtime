@@ -204,6 +204,7 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     const std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext)
 {
     CHECK_POINTER(contextRef);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value contextObj = contextRef->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get ability native object failed");
@@ -468,6 +469,7 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
 
 void JsUIAbility::CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
         contextObj = CreateJsAbilityContext(env, abilityContext_);
         CHECK_POINTER(contextObj);

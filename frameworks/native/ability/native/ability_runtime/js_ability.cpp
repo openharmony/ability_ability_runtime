@@ -208,6 +208,7 @@ std::string JsAbility::GenerateSrcPath(std::shared_ptr<AbilityInfo> abilityInfo)
 void JsAbility::BindContext()
 {
     auto env = jsRuntime_.GetNapiEnv();
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::ABILITY, "check type failed");
