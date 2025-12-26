@@ -56,28 +56,29 @@ HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_IsHiddenStart_001, TestSize.Leve
     MyFlag::retVerifyStartUIAbilityToHiddenPermission = false;
     MyFlag::retVerifyPreloadApplicationPermission = false;
     bool result = utils->IsHiddenStart(options);
-    EXPECT_EQ(result, false);
-
-    MyFlag::retVerifyStartUIAbilityToHiddenPermission = true;
-    MyFlag::retVerifyPreloadApplicationPermission = false;
-    options.processOptions = nullptr;
-    result = utils->IsHiddenStart(options);
-    EXPECT_EQ(result, false);
-
-    MyFlag::retVerifyStartUIAbilityToHiddenPermission = true;
-    MyFlag::retVerifyPreloadApplicationPermission = true;
-    options.processOptions = nullptr;
-    result = utils->IsHiddenStart(options);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 
     options.processOptions = std::make_shared<ProcessOptions>();
+    result = utils->IsHiddenStart(options);
+    EXPECT_FALSE(result);
+
     options.processOptions->startupVisibility = OHOS::AAFwk::StartupVisibility::STARTUP_SHOW;
     result = utils->IsHiddenStart(options);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 
     options.processOptions->startupVisibility = OHOS::AAFwk::StartupVisibility::STARTUP_HIDE;
+    MyFlag::retVerifyStartUIAbilityToHiddenPermission = true;
     result = utils->IsHiddenStart(options);
-    EXPECT_EQ(result, true);
+    EXPECT_TRUE(result);
+
+    MyFlag::retVerifyStartUIAbilityToHiddenPermission = false;
+    MyFlag::retVerifyPreloadApplicationPermission = true;
+    result = utils->IsHiddenStart(options);
+    EXPECT_FALSE(result);
+
+    options.processOptions->isPreloadStart = true;
+    result = utils->IsHiddenStart(options);
+    EXPECT_TRUE(result);
 }
 
 /* *
