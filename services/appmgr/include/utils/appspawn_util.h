@@ -84,6 +84,9 @@ static uint64_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     if (applicationInfo.ubsanEnabled) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::UBSANENABLED);
     }
+    if (applicationInfo.cloudFileSyncEnabled) {
+        startFlags = startFlags | (START_FLAG_BASE << APP_FLAGS_CLOUD_FILE_SYNC_ENABLED);
+    }
 
     return startFlags;
 }
