@@ -1379,11 +1379,12 @@ AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(sptr<IRemote
     return abms->GetElementNameByToken(token, isNeedLocalDeviceId);
 }
 
-ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(
+    uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->CheckUIExtensionIsFocused(uiExtensionTokenId, isFocused);
+    return abms->CheckUIExtensionIsFocused(uiExtensionTokenId, isFocused, displayId);
 }
 
 ErrCode AbilityManagerClient::DelegatorDoAbilityForeground(sptr<IRemoteObject> token)

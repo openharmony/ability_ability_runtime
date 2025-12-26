@@ -4210,7 +4210,7 @@ int AbilityManagerProxy::GetTopAbility(sptr<IRemoteObject> &token)
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4222,6 +4222,11 @@ int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, 
 
     if (!data.WriteUint32(uiExtensionTokenId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uiExtensionTokenId write fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "displayId write fail");
         return ERR_INVALID_VALUE;
     }
 
