@@ -17,13 +17,16 @@
 #include <gtest/gtest.h>
 
 #include "ability_event_handler.h"
+#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "app_exit_reason_helper.h"
 #include "bundle_mgr_helper.h"
 #include "exit_info_data_manager.h"
+#include "hilog_tag_wrapper.h"
 #include "mock_mission_list_manager_interface.h"
-#include "mock_os_account_manager_wrapper.h"
+#include "mock_my_status.h"
 #include "mock_scene_board_judgement.h"
+#include "os_account_manager_wrapper.h"
 
 #include "utils/ability_util.h"
 
@@ -202,6 +205,137 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0400, TestSize.Level1)
     EXPECT_NE(result, 0);
 
     GTEST_LOG_(INFO) << "RecordProcessExitReason_0400 end";
+}
+
+/**
+ * @tc.name: RecordProcessExitReasonForTimeout_0100
+ * @tc.desc: RecordProcessExitReasonForTimeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReasonForTimeout_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0100 start");
+
+    auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
+    EXPECT_NE(appExitReasonHelper, nullptr);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    ExitReason exitReason;
+    AppExecFwk::RunningProcessInfo processInfo;
+    std::vector<std::string> abilityList;
+    int32_t result = appExitReasonHelper->RecordProcessExitReasonForTimeout(
+        abilityInfo, exitReason, abilityList, processInfo);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0100 end");
+}
+
+/**
+ * @tc.name: RecordProcessExitReasonForTimeout_0200
+ * @tc.desc: RecordProcessExitReasonForTimeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReasonForTimeout_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0200 start");
+
+    auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
+    EXPECT_NE(appExitReasonHelper, nullptr);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    ExitReason exitReason;
+    exitReason.reason = AAFwk::Reason::REASON_APP_FREEZE;
+    AppExecFwk::RunningProcessInfo processInfo;
+    processInfo.pid_ = 0;
+    std::vector<std::string> abilityList;
+    int32_t result = appExitReasonHelper->RecordProcessExitReasonForTimeout(
+        abilityInfo, exitReason, abilityList, processInfo);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0200 end");
+}
+
+/**
+ * @tc.name: RecordProcessExitReasonForTimeout_0300
+ * @tc.desc: RecordProcessExitReasonForTimeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReasonForTimeout_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0300 start");
+
+    auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
+    EXPECT_NE(appExitReasonHelper, nullptr);
+
+    AAFwk::MyStatus::GetInstance().getOsAccountRet_ = -1;
+    AppExecFwk::AbilityInfo abilityInfo;
+    ExitReason exitReason;
+    exitReason.reason = AAFwk::Reason::REASON_APP_FREEZE;
+    AppExecFwk::RunningProcessInfo processInfo;
+    processInfo.pid_ = 1000;
+    std::vector<std::string> abilityList;
+    int32_t result = appExitReasonHelper->RecordProcessExitReasonForTimeout(
+        abilityInfo, exitReason, abilityList, processInfo);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0300 end");
+}
+
+/**
+ * @tc.name: RecordProcessExitReasonForTimeout_0400
+ * @tc.desc: RecordProcessExitReasonForTimeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReasonForTimeout_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0400 start");
+
+    auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
+    EXPECT_NE(appExitReasonHelper, nullptr);
+
+    AAFwk::MyStatus::GetInstance().getOsAccountRet_ = 0;
+    AppExecFwk::AbilityInfo abilityInfo;
+    ExitReason exitReason;
+    exitReason.reason = AAFwk::Reason::REASON_APP_FREEZE;
+    AppExecFwk::RunningProcessInfo processInfo;
+    processInfo.pid_ = 1000;
+    std::vector<std::string> abilityList;
+    int32_t result = appExitReasonHelper->RecordProcessExitReasonForTimeout(
+        abilityInfo, exitReason, abilityList, processInfo);
+    EXPECT_EQ(result, ERR_GET_ACTIVE_ABILITY_LIST_EMPTY);
+
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0400 end");
+}
+
+/**
+ * @tc.name: RecordProcessExitReasonForTimeout_0500
+ * @tc.desc: RecordProcessExitReasonForTimeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReasonForTimeout_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0500 start");
+
+    auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
+    EXPECT_NE(appExitReasonHelper, nullptr);
+
+    AAFwk::MyStatus::GetInstance().getOsAccountRet_ = 0;
+    AppExecFwk::AbilityInfo abilityInfo;
+    ExitReason exitReason;
+    exitReason.reason = AAFwk::Reason::REASON_APP_FREEZE;
+    AppExecFwk::RunningProcessInfo processInfo;
+    processInfo.pid_ = 1000;
+    std::vector<std::string> abilityList = { "EntryAbility" };
+    int32_t result = appExitReasonHelper->RecordProcessExitReasonForTimeout(
+        abilityInfo, exitReason, abilityList, processInfo);
+    EXPECT_NE(result, ERR_GET_ACTIVE_ABILITY_LIST_EMPTY);
+
+    TAG_LOGI(AAFwkTag::TEST, "RecordProcessExitReasonForTimeout_0500 end");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

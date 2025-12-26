@@ -7354,5 +7354,54 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0003, TestSize.L
     ret = mgr->IsUIAbilityAlreadyExist(want, "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0001
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0002
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->recordId_ = 100;
+    mgr->sessionAbilityMap_.emplace(1, record);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0003
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->recordId_ = 100;
+    mgr->terminateAbilityList_.push_back(record);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_NE(ret, nullptr);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
