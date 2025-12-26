@@ -1054,7 +1054,7 @@ bool AppRunningRecord::AbilityUnfocused(const std::shared_ptr<AbilityRunningReco
 
 void AppRunningRecord::PopForegroundingAbilityTokens()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "ability size: %{public}d",
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "ability size: %{public}d",
         static_cast<int32_t>(foregroundingAbilityTokens_.size()));
     for (auto iter = foregroundingAbilityTokens_.begin(); iter != foregroundingAbilityTokens_.end();) {
         auto ability = GetAbilityRunningRecordByToken(*iter);
@@ -1083,7 +1083,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     if (abilityRecord) {
-        TAG_LOGI(AAFwkTag::APPMGR, "terminate %{public}s", abilityRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::PROCESSMGR, "terminate %{public}s", abilityRecord->GetName().c_str());
     }
     if (!isTimeout) {
         StateChangedNotifyObserver(
