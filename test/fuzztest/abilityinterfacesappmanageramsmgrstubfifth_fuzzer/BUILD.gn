@@ -48,10 +48,12 @@ ohos_fuzztest("AbilityInterfacesAppManagerAmsMgrStubFifthFuzzTest") {
 
   external_deps = [
     "appspawn:appspawn_client",
+    "c_utils:utils",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "hilog:libhilog",
-    "safwk:system_ability_fwk",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
