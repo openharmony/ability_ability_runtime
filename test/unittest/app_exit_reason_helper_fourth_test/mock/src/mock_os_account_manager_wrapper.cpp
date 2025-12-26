@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "mock_os_account_manager_wrapper.h"
+#include "os_account_manager_wrapper.h"
+
+#include "mock_my_status.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -25,7 +27,7 @@ ErrCode OsAccountManagerWrapper::QueryActiveOsAccountIds(std::vector<int32_t>& i
 ErrCode OsAccountManagerWrapper::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t& id)
 {
     id = 0;
-    return 0;
+    return AAFwk::MyStatus::GetInstance().getOsAccountRet_;
 }
 
 ErrCode OsAccountManagerWrapper::GetOsAccountLocalIdFromProcess(int& id)
