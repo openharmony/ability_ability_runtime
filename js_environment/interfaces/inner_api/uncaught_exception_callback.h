@@ -71,6 +71,10 @@ private:
         napi_value exception)> uncaughtTask_;
     std::shared_ptr<SourceMapOperator> sourceMapOperator_ = nullptr;
     napi_env env_ = nullptr;
+
+    void AppendStackTrace(const std::string& errorStack, std::string& summary);
+
+    void AppendAsyncStack(const napi_value& obj, std::string& summary);
 };
 } // namespace JsEnv
 } // namespace OHOS
