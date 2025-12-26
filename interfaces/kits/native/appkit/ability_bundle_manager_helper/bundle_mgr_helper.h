@@ -130,6 +130,8 @@ public:
         int32_t userId, PluginBundleInfo &pluginBundleInfo);
     ErrCode GetTestRunnerTypeAndPath(const std::string &bundleName, const std::string &moduleName,
         ModuleTestRunner &testRunner);
+    ErrCode GetPluginExtensionInfo(const std::string &hostBundleName, const Want &want,
+        int32_t userId, ExtensionAbilityInfo &pluginExtensionInfo);
 
 private:
     sptr<IBundleMgr> Connect();
