@@ -1407,7 +1407,7 @@ public:
      */
     virtual int GetTopAbility(sptr<IRemoteObject> &token) = 0;
 
-    virtual int CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+    virtual int CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId = 0)
     {
         return 0;
     }
