@@ -4310,7 +4310,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
     abilityRequest.sessionInfo = extensionSessionInfo;
     if (AbilityRuntime::StartupUtil::IsStartPlugin(extensionSessionInfo->want)) {
-        abilityRequest.istartPlugin = true;
+        abilityRequest.isTargetPlugin = true;
     }
     result = GenerateEmbeddableUIAbilityRequest(extensionSessionInfo->want, abilityRequest, callerToken, validUserId);
     CHECK_POINTER_AND_RETURN(abilityRequest.sessionInfo, ERR_INVALID_VALUE);
@@ -7977,7 +7977,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         }
         auto caller = Token::GetAbilityRecordByToken(callerToken);
         if (caller == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callser is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is nullptr");
             return ERR_INVALID_CALLER;
         }
         std::string hostBundleName = caller->GetAbilityInfo().bundleName;
@@ -11617,7 +11617,7 @@ int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abil
     if (abilityRequest.want.HasParameter(AAFwk::SCREEN_MODE_KEY)) {
         // If started by embedded atomic service, allow it.
         return ERR_OK;
-    }
+    } 
 
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     if (AAFwk::UIExtensionUtils::IsSystemUIExtension(extensionType)) {
