@@ -232,6 +232,31 @@ HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0002, TestSize.L
 }
 
 /**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0003
+ * @tc.desc: Test UpdateAsCallerInfoFromDialog with BROKER_UID
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0003, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, 5557);
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(callerInfo, nullptr);
+
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromToken_0001
  * @tc.desc: Test the state of UpdateAsCallerInfoFromToken
  * @tc.type: FUNC
