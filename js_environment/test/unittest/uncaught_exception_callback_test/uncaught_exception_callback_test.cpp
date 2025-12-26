@@ -248,6 +248,50 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_04
     NapiUncaughtExceptionCallback callback(task, nullptr, env);
     callback(object);
 }
+
+/**
+ * @tc.name: NapiUncaughtExceptionCallbackTest_0500
+ * @tc.desc: Test NapiUncaughtExceptionCallback operator().
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_0500, TestSize.Level1)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+    auto env = jsRuntime->GetNapiEnv();
+    EXPECT_NE(env, nullptr);
+
+    // enable runtime async stack
+    EcmaVM *vm = const_cast<EcmaVM *>(reinterpret_cast<NativeEngine *>(env)->GetEcmaVm());
+    panda::DFXJSNApi::SetEnableRuntimeAsyncStack(vm, true);
+
+    // Test with valid code, and errorStack is not empty
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+
+    std::string errorCode = "This is an error code.";
+    std::string errorStack = "TypeError: This is a stack trace.";
+    std::string asyncStack = "TypeError: This is a async stack.\n";
+    napi_value nativeErrorCode = nullptr;
+    napi_value nativeErrorStack = nullptr;
+    napi_value nativeAsyncStack = nullptr;
+    napi_create_string_utf8(env, errorCode.c_str(), errorCode.length(), &nativeErrorCode);
+    napi_create_string_utf8(env, errorStack.c_str(), errorStack.length(), &nativeErrorStack);
+    napi_create_string_utf8(env, asyncStack.c_str(), asyncStack.length(), &nativeAsyncStack);
+    napi_set_named_property(env, object, "code", nativeErrorCode);
+    napi_set_named_property(env, object, "stack", nativeErrorStack);
+    napi_set_named_property(env, object, "asyncStack", nativeAsyncStack);
+    auto task = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env, napi_value exception) {
+        summary += "test";
+    };
+    NapiUncaughtExceptionCallback callback(task, nullptr, env);
+    callback(object);
+
+    // disable runtime async stack
+    panda::DFXJSNApi::SetEnableRuntimeAsyncStack(vm, false);
+}
  
 #if defined(__aarch64__)
 static inline ARK_INLINE void GetPcFpRegs([[maybe_unused]] void *regs)
