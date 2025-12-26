@@ -1681,106 +1681,6 @@ void EtsServiceExtensionContext::OnStartServiceExtensionAbilityWithAccount(ani_e
     AppExecFwk::AsyncCallback(env, callbackobj, aniObject, nullptr);
 }
 
-void EtsServiceExtensionContext::UnwrapCompletionHandlerForOpenLink(ani_env *env, ani_object param,
-    AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want& want)
-{
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UnwrapCompletionHandlerForOpenLink called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
-        return;
-    }
-    auto context = context_.lock();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
-        return;
-    }
-    ani_ref completionHandler;
-    if (!AppExecFwk::GetFieldRefByName(env, param, "completionHandler", completionHandler) ||
-        !completionHandler) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null completionHandler");
-        return;
-    }
-    ani_ref refCompletionHandler = nullptr;
-    if (env->GlobalReference_Create(completionHandler, &refCompletionHandler) != ANI_OK ||
-        !refCompletionHandler) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to create global ref for completionHandler.");
-        return;
-    }
-
-    OnRequestResult onRequestSucc;
-    OnRequestResult onRequestFail;
-    CreateOnRequestResultCallback(env, refCompletionHandler, onRequestSucc, "onRequestSuccess");
-    CreateOnRequestResultCallback(env, refCompletionHandler, onRequestFail, "onRequestFailure");
-    std::string requestId =
-        std::to_string(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()).count()));
-    if (context->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "add completionHandler failed");
-        return;
-    }
-    want.RemoveParam(KEY_REQUEST_ID);
-    want.SetParam(KEY_REQUEST_ID, requestId);
-}
-
-void EtsServiceExtensionContext::CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
-    OnRequestResult &onRequestCallback, const char *callbackName)
-{
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "CreateOnRequestResultCallback called");
-    ani_vm *etsVm = nullptr;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
-        return;
-    }
-    if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetVM failed, status: %{public}d", status);
-        env->GlobalReference_Delete(refCompletionHandler);
-        return;
-    }
-    onRequestCallback = [etsVm, refCompletionHandler, callbackName](const AppExecFwk::ElementName &element,
-        const std::string &message) {
-        ani_status status = ANI_ERROR;
-        ani_env *env = nullptr;
-        if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetEnv failed, status: %{public}d", status);
-            return;
-        }
-        ani_object elementObj = AppExecFwk::WrapElementName(env, element);
-        if (!elementObj) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "WrapElementName failed");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
-        ani_string messageStr = nullptr;
-        if (env->String_NewUTF8(message.c_str(), message.size(), &messageStr) != ANI_OK || !messageStr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "String_NewUTF8 for message failed");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
-        ani_ref funcRef;
-        if ((status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(refCompletionHandler),
-            callbackName, &funcRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Object_GetFieldByName_Ref failed");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
-        if (!AppExecFwk::IsValidProperty(env, funcRef)) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "IsValidProperty failed");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
-        ani_ref result = nullptr;
-        std::vector<ani_ref> argv = { elementObj, messageStr };
-        if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funcRef), ARGC_TWO, argv.data(),
-            &result)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "FunctionalObject_Call failed");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
-        env->GlobalReference_Delete(refCompletionHandler);
-    };
-}
-
 void EtsServiceExtensionContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string aniLink,
     ani_object callbackobj, ani_object openLinkOptionsObj)
 {
@@ -1808,7 +1708,13 @@ void EtsServiceExtensionContext::OnOpenLink(ani_env *env, ani_object aniObj, ani
     if (!isOptionsUndefined) {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "openlink have option");
         AppExecFwk::UnWrapOpenLinkOptions(env, openLinkOptionsObj, openLinkOptions, want);
-        UnwrapCompletionHandlerForOpenLink(env, openLinkOptionsObj, openLinkOptions, want);
+        OnRequestResult onRequestSucc;
+        OnRequestResult onRequestFail;
+        ani_ref refCompletionHandler = nullptr;
+        if (AppExecFwk::UnwrapOpenLinkCompletionHandler(env, openLinkOptionsObj, refCompletionHandler,
+            onRequestSucc, onRequestFail)) {
+            AddCompletionHandlerForOpenLink(env, refCompletionHandler, want, onRequestSucc, onRequestFail);
+        }
     }
 
     want.SetUri(link);
@@ -1839,6 +1745,27 @@ void EtsServiceExtensionContext::OnOpenLink(ani_env *env, ani_object aniObj, ani
             context->OnOpenLinkRequestFailure(requestId, want.GetElement(), jsonObject.dump());
         }
     }
+}
+
+void EtsServiceExtensionContext::AddCompletionHandlerForOpenLink(ani_env *env, ani_ref refCompletionHandler,
+    AAFwk::Want &want, OnRequestResult &onRequestSucc, OnRequestResult &onRequestFail)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "AddCompletionHandlerForOpenLink called");
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    uint64_t time = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    std::string requestId = std::to_string(time);
+    if (context->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "add completionHandler failed");
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    want.SetParam(KEY_REQUEST_ID, requestId);
 }
 
 ani_object EtsServiceExtensionContext::OnStartAbilityByCallWithAccount(ani_env *env, ani_object aniObj,
