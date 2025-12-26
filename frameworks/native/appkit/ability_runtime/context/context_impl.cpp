@@ -1355,6 +1355,7 @@ void ContextImpl::InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::Abil
     want.SetElement(element);
     pluginExtensionInfo_ = std::make_shared<AppExecFwk::ExtensionAbilityInfo>();
     if (bundleMgr_->GetPluginExtensionInfo(hostBundleName, want, accountId, *pluginExtensionInfo_) != ERR_OK) {
+        pluginExtensionInfo_ = nullptr;
         TAG_LOGE(AAFwkTag::APPKIT, "GetPluginExtensionInfo false");
     }
 }

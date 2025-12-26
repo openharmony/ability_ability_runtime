@@ -322,11 +322,9 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             break;
         }
         case PROCESS_MODE_RUN_WITH_MAIN_PROCESS: {
-            std::string process = "";
+            std::string process = abilityRequest.abilityInfo.bundleName;
             if (!abilityRequest.appInfo.process.empty()) {
                 process = abilityRequest.appInfo.process;
-            } else {
-                process = abilityRequest.abilityInfo.bundleName;
             }
             if (abilityRecord->GetAppIndex() > 0) {
                 process += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
