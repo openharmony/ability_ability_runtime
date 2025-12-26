@@ -316,7 +316,7 @@ static inline bool CheckUrl(const std::string &urlValue)
         return false;
     }
     Uri uri = Uri(urlValue);
-    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
+    if (uri.GetScheme().empty()) {
         return false;
     }
 
