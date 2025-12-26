@@ -990,7 +990,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 #endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     auto isKeepAliveApp = appRecord->IsKeepAliveApp();
-    TAG_LOGI(AAFwkTag::APPMGR, "terminate isLast:%{public}d,keepAlive:%{public}d", isLastAbility, isKeepAliveApp);
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "terminate isLast:%{public}d,keepAlive:%{public}d", isLastAbility, isKeepAliveApp);
     if (isLastAbility && !isKeepAliveApp && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr) {
@@ -1005,7 +1005,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             }
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "Terminate last:%{public}s.", appRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::PROCESSMGR, "Terminate last:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
