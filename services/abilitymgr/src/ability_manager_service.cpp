@@ -7953,10 +7953,9 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
 
         if (AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr) ==
             AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+            (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityRecord->GetAppIndex());
             if (abilityRecord->GetApplicationInfo().bundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
                 (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
-            } else {
-                (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityRecord->GetAppIndex());
             }
         }
     }
