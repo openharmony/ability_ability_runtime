@@ -13162,6 +13162,11 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
         return CHECK_PERMISSION_FAILED;
     }
 
+    Want want = abilityRecord->GetWant();
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
+        InsightIntentExecuteParam::RemoveInsightIntent(want);
+        abilityRecord->SetWant(want);
+    }
     // check send by same bundleName.
     std::string bundleNameStored = "";
     auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetBundleName(intentId, bundleNameStored);
