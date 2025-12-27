@@ -232,6 +232,16 @@ int32_t AppMgrService::PreloadApplication(const std::string &bundleName, int32_t
     return appMgrServiceInner_->PreloadApplication(bundleName, userId, preloadMode, appIndex);
 }
 
+int32_t AppMgrService::PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadExtension called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadExtension failed, appMgr not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->PreloadExtension(want, appIndex, userId);
+}
+
 void AppMgrService::PreloadModuleFinished(const int32_t recordId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadModuleFinished called");

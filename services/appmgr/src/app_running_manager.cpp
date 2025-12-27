@@ -114,7 +114,8 @@ bool AppRunningManager::CheckAppProcessNameIsSame(const std::shared_ptr<AppRunni
     if (appRecord == nullptr) {
         return false;
     }
-    return (appRecord->GetProcessName() == processName) && !(appRecord->GetExtensionSandBoxFlag());
+    return (appRecord->GetProcessName() == processName) &&
+        (appRecord->GetPreloadMode() == PreloadMode::PRELOAD_MODULE || !(appRecord->GetExtensionSandBoxFlag()));
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
