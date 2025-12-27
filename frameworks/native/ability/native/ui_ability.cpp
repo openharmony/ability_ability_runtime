@@ -938,6 +938,9 @@ void UIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bo
 const sptr<Rosen::Window> UIAbility::GetWindow()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (scene_ != nullptr) {
+        return scene_->GetMainWindow();
+    }
     return nullptr;
 }
 

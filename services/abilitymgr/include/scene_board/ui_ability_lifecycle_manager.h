@@ -53,6 +53,7 @@ struct SpecifiedRequest {
     uint32_t sceneFlag = 0;
     uint32_t callingTokenId = 0;
     AbilityRequest abilityRequest;
+    std::string pageConfig = "";
 
     SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
 };
@@ -79,11 +80,12 @@ public:
      *
      * @param abilityRequest the request of the service ability to start.
      * @param sessionInfo the info of scene session
+     * @param params start parameters.
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
-        bool isRestart, bool &isColdStart);
+    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        AbilityRuntime::StartParamsBySCB &params, bool &isColdStart);
 
     /**
      * @brief execute after the ability schedule the lifecycle
@@ -211,9 +213,11 @@ public:
      * Call UIAbility by SCB.
      *
      * @param sessionInfo the session info of the ability to be called.
+     * @param params start parameters.
      * @param isColdStart the session of the ability is or not cold start.
      */
-    void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart);
+    void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, AbilityRuntime::StartParamsBySCB &params,
+        bool &isColdStart);
 
     /**
      * OnAcceptWantResponse.
@@ -1110,11 +1114,11 @@ private:
      * @brief Handle cold start for specified ability
      * @param abilityRequest The ability request
      * @param sessionInfo The session info
-     * @param sceneFlag The scene flag
+     * @param params start parameters.
      * @return true if handled, false otherwise
      */
     bool HandleStartSpecifiedCold(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        uint32_t sceneFlag, bool isRestart);
+        AbilityRuntime::StartParamsBySCB &params);
 
     /**
      * @brief Handle cold accept want completion

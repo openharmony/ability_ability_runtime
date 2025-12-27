@@ -36,6 +36,7 @@
 #include "mock_sa_call.h"
 #include "session/host/include/session.h"
 #include "scene_board_judgement.h"
+#include "start_params_by_SCB.h"
 #include "system_ability_definition.h"
 #include "uri.h"
 #include "mock_ability_connect_callback.h"
@@ -1823,7 +1824,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityBySCB_001, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     sptr<SessionInfo> sessionInfo = nullptr;
     bool isColdStart = true;
-    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart, 0, false);
+    AbilityRuntime::StartParamsBySCB params;
+    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
@@ -1837,7 +1839,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityBySCB_002, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     bool isColdStart = true;
-    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart, 0, false);
+    AbilityRuntime::StartParamsBySCB params;
+    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 

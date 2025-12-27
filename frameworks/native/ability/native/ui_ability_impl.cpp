@@ -23,6 +23,7 @@
 #include "hitrace_meter.h"
 #include "json_utils.h"
 #include "ohos_application.h"
+#include "page_config_manager.h"
 #include "process_options.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
@@ -642,6 +643,9 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
                 HandleForegroundNewState(want, ret);
             } else {
                 HandleExecuteInsightIntentForeground(want, ret);
+            }
+            if (ability_ != nullptr) {
+                PageConfigManager::GetInstance().Initialize(targetState.pageConfig, ability_->GetWindow());
             }
 #endif
             break;
