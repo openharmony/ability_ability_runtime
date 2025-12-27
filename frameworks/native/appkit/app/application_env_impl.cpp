@@ -22,6 +22,7 @@ namespace  {
     constexpr int32_t UNSPECIFIED = 0;
     constexpr int32_t TYPE_CREATE_PROCESS = 1;
     constexpr int32_t TYPE_CREATE_ABILITY_STAGE = 2;
+    constexpr int32_t TYPE_CREATE_BACKGROUND_ABILITY = 4;
 }
 /**
  * @brief Sets L1 information about the runtime environment of the application to which the
@@ -57,6 +58,9 @@ void ApplicationEnvImpl::SetAppInfo(const ApplicationInfo &appInfo, PreloadMode 
             break;
         case PreloadMode::PRELOAD_BY_PHASE:
             appPreloadType_ = static_cast<int32_t>(appInfo.appPreloadPhase);
+            break;
+        case PreloadMode::PRE_LAUNCH:
+            appPreloadType_ = TYPE_CREATE_BACKGROUND_ABILITY;
             break;
         default:
             appPreloadType_ = UNSPECIFIED;

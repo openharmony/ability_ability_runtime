@@ -45,6 +45,8 @@ napi_value AppPreloadTypeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(AppPreloadType::TYPE_CREATE_ABILITY_STAGE)));
     napi_set_named_property(env, object, "TYPE_CREATE_WINDOW_STAGE",
         CreateJsValue(env, static_cast<int32_t>(AppPreloadType::TYPE_CREATE_WINDOW_STAGE)));
+    napi_set_named_property(env, object, "TYPE_CREATE_BACKGROUND_ABILITY",
+        CreateJsValue(env, static_cast<int32_t>(AppPreloadType::TYPE_CREATE_BACKGROUND_ABILITY)));
 
     return object;
 }
