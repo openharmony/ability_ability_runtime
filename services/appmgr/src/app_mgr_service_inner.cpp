@@ -281,6 +281,7 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
+constexpr const char* PRELOAD_EXTENSION_TASK = "PreloadExtensionTask";
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 constexpr const char* KILL_SUB_PROCESS_REASON_PREFIX = "Kill SubProcess Reason:";
@@ -654,6 +655,64 @@ void AppMgrServiceInner::PreloadModuleFinished(const int32_t pid)
     if (rssTaskHandler_) {
         rssTaskHandler_->SubmitTask(reportLoadTask, "reportPreloadTask");
     }
+}
+
+int32_t AppMgrServiceInner::PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
+        return ERR_PERMISSION_DENIED;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::string bundleName = want.GetElement().GetBundleName();
+    std::string abilityName = want.GetElement().GetAbilityName();
+
+    TAG_LOGI(AAFwkTag::APPMGR, "PreloadExtension %{public}s#%{public}s#%{public}d userId:%{public}d",
+        bundleName.c_str(), abilityName.c_str(), appIndex, userId);
+
+    if (userId == DEFAULT_INVAL_VALUE) {
+        userId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
+        if (userId == U0_USER_ID || userId == U1_USER_ID) {
+            userId = UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID);
+        }
+    }
+    if (UserRecordManager::GetInstance().IsLogoutUser(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!appPreloader_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appPreloader");
+        return ERR_INVALID_VALUE;
+    }
+    AbilityInfo abilityInfo;
+    if (!CreateAbilityInfo(want, abilityInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "createAbilityInfo fail");
+        return ERR_INVALID_OPERATION;
+    }
+    PreloadRequest request;
+    request.preloadMode = PreloadMode::PRELOAD_MODULE;
+    auto ret = appPreloader_->GeneratePreloadExtensionRequest(want, abilityInfo, userId, appIndex, request);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "generatePreloadRequest fail, ret:%{public}d", ret);
+        return ret;
+    }
+    auto task = [innerServiceWeak = weak_from_this(), request] () {
+        auto innerService = innerServiceWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
+        innerService->HandlePreloadApplication(request);
+    };
+    if (!taskHandler_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler_");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "submit task, bundleName:%{public}s, userId:%{public}d",
+        bundleName.c_str(), userId);
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = PRELOAD_EXTENSION_TASK,
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
+    return ERR_OK;
 }
 
 void AppMgrServiceInner::SetPreloadDebugApp(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ApplicationInfo> appInfo)
