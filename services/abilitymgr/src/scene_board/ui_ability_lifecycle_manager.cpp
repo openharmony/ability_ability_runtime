@@ -542,7 +542,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    SyncLoadAbilityTask(abilityRecord->GetRecordId());
+    SyncLoadExitReasonTask(abilityRecord->GetRecordId());
 
     auto callerRecord = abilityRecord->GetCallerRecord(); // this is a pointer
     if (abilityRecord->GetRequestCode() != DEFAULT_REQUEST_CODE &&
@@ -3067,14 +3067,15 @@ void UIAbilityLifecycleManager::SetLastExitReasonAsync(UIAbilityRecordPtr abilit
         }));
 }
 
-void UIAbilityLifecycleManager::SyncLoadAbilityTask(int32_t abilityRecordId)
+void UIAbilityLifecycleManager::SyncLoadExitReasonTask(int32_t abilityRecordId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::optional<ffrt::task_handle> taskHandle;
     {
         std::lock_guard lock(exitReasonTaskMutex_);
         auto it = exitReasonTasks_.find(abilityRecordId);
         if (it != exitReasonTasks_.end()) {
-            auto taskHandle = it->second;
+            taskHandle = it->second;
             exitReasonTasks_.erase(it);
         }
     }
@@ -4200,6 +4201,7 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
         auto &list = specifiedRequestList_[accessTokenIdStr + instanceKey];
         sessionInfo->requestId = request->requestId;
         request->persistentId = sessionInfo->persistentId;
+        request->sceneFlag = sceneFlag;
         list.push_back(request);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "restart StartSpecified: %{public}d, persitentId: %{public}d, "
             "list size: %{public}zu", request->requestId, sessionInfo->persistentId, list.size());

@@ -711,6 +711,8 @@ void UIAbilityImpl::HandleForegroundNewState(const AAFwk::Want &want, bool &bfla
 
 void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want, bool &bflag)
 {
+    std::string entry = "UIAbilityImpl::HandleExecuteInsightIntentForeground";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     TAG_LOGI(AAFwkTag::UIABILITY, "handle execute insight intent foreground");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);

@@ -1334,6 +1334,8 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
+        std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
+            FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat");
         ability->RequestFocus(want);
     };
     callback->Push(asyncCallback);
@@ -1346,7 +1348,7 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
@@ -1379,6 +1381,8 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
+        std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
+            FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground");
         ability->CallOnForegroundFunc(want);
     };
     callback->Push(asyncCallback);
@@ -1392,6 +1396,7 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
         return;
     }
     RegisterDelayResultCallback(executeParam);
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
