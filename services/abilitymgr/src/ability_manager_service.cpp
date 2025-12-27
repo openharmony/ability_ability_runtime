@@ -523,10 +523,6 @@ void AbilityManagerService::InitPushTask()
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     taskHandler_->SubmitTask(initStartupFlagTask, "InitStartupFlag");
 
-    auto initExtensionConfigTask = []() {
-        DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
-    };
-
     auto initExtensionConfigTask = [aams = shared_from_this()]() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
         if (!aams->ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES)) {
