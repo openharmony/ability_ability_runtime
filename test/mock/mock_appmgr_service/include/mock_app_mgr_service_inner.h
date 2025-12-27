@@ -51,6 +51,7 @@ public:
     MOCK_METHOD3(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
+    MOCK_METHOD3(PreloadExtension, int32_t(const AAFwk::Want&, int32_t, int32_t));
 #ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
 #endif // SUPPORT_CHILD_PROCESS

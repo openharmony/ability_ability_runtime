@@ -1292,5 +1292,33 @@ HWTEST_F(AppMgrProxyTest, KillProcessByPidForExit_001, TestSize.Level2)
     int32_t result = appMgrProxy_->KillProcessByPidForExit(pid, reason);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: PreloadExtension_0100
+ * @tc.desc: Preload application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrProxyTest, PreloadExtension_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    auto ret = appMgrProxy_->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, NO_ERROR);
+    EXPECT_EQ(mockAppMgrService_->code_,
+        static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION));
+}
 } // namespace AppExecFwk
 } // namespace OHOS

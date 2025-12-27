@@ -2705,5 +2705,25 @@ int32_t AppMgrProxy::KillChildProcessByPid(int32_t pid)
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID, data, reply, option);
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadExtension called.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadExtension Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, appIndex);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PRELOAD_EXTENSION, data, reply, option);
+    
+    return reply.ReadInt32();
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
