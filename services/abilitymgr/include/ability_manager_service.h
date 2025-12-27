@@ -3015,7 +3015,7 @@ private:
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 
-    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnAllowList);
+    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo);
 
     bool ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr);
 
