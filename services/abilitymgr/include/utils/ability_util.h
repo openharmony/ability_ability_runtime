@@ -169,6 +169,15 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return (int64_t)(t.tv_sec);
 }
 
+[[maybe_unused]] static int64_t UTCTimeMillis()
+{
+    struct timespec t;
+    t.tv_sec = 0;
+    t.tv_nsec = 0;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return static_cast<int64_t>(t.tv_sec * 1000LL + t.tv_nsec / 1000000LL);
+}
+
 [[maybe_unused]] static bool IsStartFreeInstall(const Want &want)
 {
     auto flags = want.GetFlags();

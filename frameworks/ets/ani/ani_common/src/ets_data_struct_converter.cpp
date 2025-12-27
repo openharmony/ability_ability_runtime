@@ -15,6 +15,7 @@
 
 #include "ets_data_struct_converter.h"
 
+#include "ani_common_util.h"
 #include "ani_enum_convert.h"
 #include "hilog_tag_wrapper.h"
 #include "running_process_info.h"
@@ -140,6 +141,16 @@ bool WrapLaunchParamInner(ani_env *env, const AAFwk::LaunchParam &launchParam, a
     if ((status = env->Object_SetPropertyByName_Ref(object, "lastExitDetailInfo",
         CreateEtsLastExitDetailInfo(env, launchParam.lastExitDetailInfo))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitDetailInfo");
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(object, "launchUptime",
+        AppExecFwk::CreateLong(env, launchParam.launchUptime))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set launchUptime");
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(object, "launchUTCTime",
+        AppExecFwk::CreateLong(env, launchParam.launchUTCTime))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set launchUTCTime");
         return false;
     }
     return true;
