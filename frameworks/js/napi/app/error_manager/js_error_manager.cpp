@@ -376,9 +376,8 @@ static bool NapiDoFunctionCallBack(WorkItem *newItem)
     return true;
 }
 
-static void DoFunctionCallback(uv_work_t *reqwork, int status)
+static void DoFunctionCallback(WorkItem *newItem)
 {
-    WorkItem *newItem = static_cast<WorkItem *>(reqwork->data);
     if (newItem == nullptr) {
         TAG_LOGI(AAFwkTag::JSNAPI, "Get WorkItem Failed");
         return;
@@ -451,9 +450,8 @@ static void DoCallbackInRegesterThread(napi_env env, WorkItem &info)
                 TAG_LOGI(AAFwkTag::JSNAPI, "Get Loop Failed");
                 continue;
             }
-
-            int ret = uv_queue_work(loop, &item->work, [](uv_work_t *reqwork) {}, DoFunctionCallback);
-            if (ret != 0 && item != nullptr) {
+            auto res = napi_send_event(env, [&]() {DoFunctionCallback(item);}, napi_eprio_immediate);
+            if (res != napi_status::napi_ok && item != nullptr) {
                 delete item;
                 item = nullptr;
             }
@@ -730,13 +728,10 @@ static bool GlobalPromiseManagerCallback(
         item->name = name;
         item->stack = stack;
         item->message = message;
-        int ret = uv_queue_work(
-            loop, &item->work, [](uv_work_t *reqwork) {}, DoFunctionCallback);
-        if (ret != 0) {
-            if (item != nullptr) {
-                delete item;
-                item = nullptr;
-            }
+        auto res = napi_send_event(env, [&]() {DoFunctionCallback(item);}, napi_eprio_immediate);
+        if (res != napi_status::napi_ok && item != nullptr) {
+            delete item;
+            item = nullptr;
         }
     }
     return true;
