@@ -3292,7 +3292,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_001, TestSize.Lev
 HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    bool result = abilityMs_->ParseVpnWhiteListJson(
+    bool result = abilityMs_->ParseVpnAllowListJson(
         "/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
     EXPECT_NE(result, false);
 }
