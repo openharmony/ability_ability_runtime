@@ -290,7 +290,7 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             std::string processName = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
             int32_t processAppIndex = 0;
             
-            if (abilityRequest.abilityInfo.bundleName == AAFwk::AbilityConfig::SCENEBOARD_ABILITY_NAME) {
+            if (abilityRequest.abilityInfo.bundleName == AAFwk::AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
                 processAppIndex = abilityRecord->GetWant().GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
             } else {
                 processAppIndex = abilityRecord->GetAppIndex();
