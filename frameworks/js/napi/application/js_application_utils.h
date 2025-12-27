@@ -25,6 +25,7 @@ enum class AppPreloadType {
     TYPE_CREATE_PROCESS = 1,
     TYPE_CREATE_ABILITY_STAGE = 2,
     TYPE_CREATE_WINDOW_STAGE = 3,
+    TYPE_CREATE_BACKGROUND_ABILITY = 4,
 };
 
 napi_value AppPreloadTypeInit(napi_env env);

@@ -219,5 +219,24 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0600, 
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 3);
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0600 end";
 }
+
+/**
+ * @tc.number: AppExecFwk_ApplicationEnvTest_SetAppInfo_0700
+ * @tc.name: ApplicationEnv SetAppInfo
+ * @tc.desc: Test ApplicationEnv get applicationInfo.
+ */
+HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0700, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0700 start";
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "bundleName";
+    applicationInfo.dataDir = "/dataDir";
+    applicationInfo.codePath = "/codePath";
+    PreloadMode preloadMode = PreloadMode::PRE_LAUNCH;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 4);
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvTest_SetAppInfo_0300 end";
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
