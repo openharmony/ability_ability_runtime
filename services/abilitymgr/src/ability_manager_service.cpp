@@ -2930,12 +2930,13 @@ int AbilityManagerService::SetWantForSessionInfo(sptr<SessionInfo> sessionInfo)
     return ERR_OK;
 }
 
-int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag,
-    bool isRestart)
+int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, AbilityRuntime::StartParamsBySCB &params,
+    bool &isColdStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, sceneFlag:%{public}u, restart: %{public}d", sceneFlag, isRestart);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, sceneFlag:%{public}u, restart: %{public}d",
+        params.sceneFlag, params.isRestart);
     if (sessionInfo == nullptr || sessionInfo->sessionToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
         return ERR_INVALID_VALUE;
@@ -2966,18 +2967,18 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
         return ERR_WRONG_INTERFACE_CALL;
     }
 
-    if (isRestart && !AppUtils::GetInstance().IsSupportRestartAppWithWindow()) {
+    if (params.isRestart && !AppUtils::GetInstance().IsSupportRestartAppWithWindow()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported");
         return ERR_CAPABILITY_NOT_SUPPORT;
     }
 
     if (!(sessionInfo->want).HasParameter(KEY_SESSION_ID)) {
-        return StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isRestart, isColdStart);
+        return StartUIAbilityBySCBDefault(sessionInfo, params, isColdStart);
     }
 
     std::string sessionId = (sessionInfo->want).GetStringParam(KEY_SESSION_ID);
     if (sessionId.empty()) {
-        return StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isRestart, isColdStart);
+        return StartUIAbilityBySCBDefault(sessionInfo, params, isColdStart);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "sessionId=%{public}s", sessionId.c_str());
@@ -2998,9 +2999,9 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         if (uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo) == nullptr) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "first time open");
-            return StartUIAbilityByPreInstallInner(sessionInfo, 0, sceneFlag, isRestart, isColdStart);
+            return StartUIAbilityByPreInstallInner(sessionInfo, 0, params, isColdStart);
         }
-        return StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isRestart, isColdStart);
+        return StartUIAbilityBySCBDefault(sessionInfo, params, isColdStart);
     }
 
     if (taskInfo.isFreeInstallFinished) {
@@ -3011,8 +3012,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
             return taskInfo.resultCode;
         }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "free install succeeds");
-        return StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, sceneFlag, isRestart,
-            isColdStart);
+        return StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, params, isColdStart);
     }
 
     {
@@ -3027,8 +3027,8 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
     return ERR_OK;
 }
 
-int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
-    bool isRestart, bool &isColdStart)
+int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionInfo,
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
@@ -3131,11 +3131,11 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         }
     }
 
-    return StartUIAbilityBySCBDefaultCommon(abilityRequest, sessionInfo, sceneFlag, isRestart, isColdStart);
+    return StartUIAbilityBySCBDefaultCommon(abilityRequest, sessionInfo, params, isColdStart);
 }
 
 int32_t AbilityManagerService::StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest,
-    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart, bool &isColdStart)
+    sptr<SessionInfo> sessionInfo, AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     auto abilityInfo = abilityRequest.abilityInfo;
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
@@ -3152,7 +3152,7 @@ int32_t AbilityManagerService::StartUIAbilityBySCBDefaultCommon(AbilityRequest &
     ReportAbilityAssociatedStartInfoToRSS(abilityInfo, RES_TYPE_SCB_START_ABILITY, sessionInfo->callerToken);
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-    return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, isRestart, isColdStart);
+    return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart);
 }
 
 int32_t AbilityManagerService::NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest)
@@ -12424,7 +12424,8 @@ void AbilityManagerService::SetRootSceneSession(const sptr<IRemoteObject> &rootS
     uiAbilityManager->SetRootSceneSession(rootSceneSession);
 }
 
-void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
+void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo,
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!IsCallerSceneBoard()) {
@@ -12433,7 +12434,7 @@ void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     }
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER(uiAbilityManager);
-    uiAbilityManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    uiAbilityManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
 }
 
 int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
@@ -14644,7 +14645,8 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
     }
 
     bool isColdStart = true;
-    int errCode = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, 0, false, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    int errCode = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, params, isColdStart);
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilityByPreInstallInner failed,errCode=%{public}d", errCode);
         return errCode;
@@ -14655,7 +14657,7 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
 
 // StartUIAbilityByPreInstallInner is called when free install task is already finished
 int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> sessionInfo, uint32_t specifyTokenId,
-    uint32_t sceneFlag, bool isRestart, bool &isColdStart)
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartUIAbilityByPreInstallInner");
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
@@ -14786,7 +14788,7 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     auto uiAbilityManager = GetUIAbilityManagerByUserId(validUserId);
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
 
-    return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, isRestart, isColdStart);
+    return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart);
 }
 
 void AbilityManagerService::NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int32_t errCode,

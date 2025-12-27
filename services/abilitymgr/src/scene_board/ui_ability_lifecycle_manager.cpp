@@ -178,10 +178,10 @@ void UIAbilityLifecycleManager::MarkStartingFlag(const AbilityRequest &abilityRe
 }
 
 int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-    uint32_t sceneFlag, bool isRestart, bool &isColdStart)
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (isRestart && !HandleRestartUIAbility(sessionInfo)) {
+    if (params.isRestart && !HandleRestartUIAbility(sessionInfo)) {
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
@@ -222,7 +222,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     SetLastExitReasonAsync(uiAbilityRecord);
     MarkStartingFlag(abilityRequest);
     if (sessionInfo->reuseDelegatorWindow) {
-        uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
+        uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = params.sceneFlag;
+        uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
         return ERR_OK;
     }
     auto want = uiAbilityRecord->GetWant();
@@ -234,7 +235,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
-    if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, isRestart) &&
+    if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, params) &&
         ProcessColdStartBranch(abilityRequest, sessionInfo, uiAbilityRecord, isColdStart)) {
         return ERR_OK;
     }
@@ -247,6 +248,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         if (scenarios == 0 && sessionInfo->isNewWant) {
             uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
         }
+        uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
         return ERR_OK;
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
@@ -272,11 +274,12 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (abilityRequest.processOptions) {
         isStartupHide = abilityRequest.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE;
     }
-    ForegroundOptions options = { sceneFlag, isShellCall, isStartupHide, sessionInfo->targetGrantBundleName };
+    ForegroundOptions options = { params.sceneFlag, isShellCall, isStartupHide, sessionInfo->targetGrantBundleName };
     if (shouldReturnPid) {
         options.callingPid = abilityRequest.processOptions->callingPid;
         options.loadAbilityCallbackId = abilityRequest.processOptions->loadAbilityCallbackId;
     }
+    options.pageConfig = params.pageConfig;
     if (sessionInfo->processOptions != nullptr) {
         options.selfPid = sessionInfo->processOptions->selfPid;
     }
@@ -1617,7 +1620,8 @@ void UIAbilityLifecycleManager::PostCallTimeoutTask(int32_t requestId)
         .timeout(GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
-void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
+void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo,
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
@@ -1666,6 +1670,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
     } else {
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
+    uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
     uiAbilityRecord->LoadAbility();
 }
 
@@ -4183,7 +4188,7 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
 }
 
 bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &abilityRequest,
-    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart)
+    sptr<SessionInfo> sessionInfo, AbilityRuntime::StartParamsBySCB &params)
 {
     if (!sessionInfo) {
         return false;
@@ -4193,7 +4198,7 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
         return false;
     }
 
-    if (isRestart) {
+    if (params.isRestart) {
         auto request = std::make_shared<SpecifiedRequest>(RequestIdUtil::GetRequestId(), abilityRequest);
         request->isCold = true;
         auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
@@ -4201,7 +4206,8 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
         auto &list = specifiedRequestList_[accessTokenIdStr + instanceKey];
         sessionInfo->requestId = request->requestId;
         request->persistentId = sessionInfo->persistentId;
-        request->sceneFlag = sceneFlag;
+        request->sceneFlag = params.sceneFlag;
+        request->pageConfig = params.pageConfig;
         list.push_back(request);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "restart StartSpecified: %{public}d, persitentId: %{public}d, "
             "list size: %{public}zu", request->requestId, sessionInfo->persistentId, list.size());
@@ -4216,7 +4222,8 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleStartSpecifiedCold: %{public}d, persitentId: %{public}d",
         request->requestId, sessionInfo->persistentId);
     request->persistentId = sessionInfo->persistentId;
-    request->sceneFlag = sceneFlag;
+    request->sceneFlag = params.sceneFlag;
+    request->pageConfig = params.pageConfig;
     request->callingTokenId = sessionInfo->callingTokenId;
     return true;
 }
@@ -4239,6 +4246,7 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
     ForegroundOptions options = { specifiedRequest.sceneFlag, isShellCall };
+    options.pageConfig = specifiedRequest.pageConfig;
     uiAbilityRecord->ProcessForegroundAbility(specifiedRequest.callingTokenId, options);
     SendKeyEvent(specifiedRequest.abilityRequest);
     return true;

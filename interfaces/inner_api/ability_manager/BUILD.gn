@@ -94,6 +94,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/start_params_by_SCB.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/open_link/open_link_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/prepare_terminate_callback_proxy.cpp",

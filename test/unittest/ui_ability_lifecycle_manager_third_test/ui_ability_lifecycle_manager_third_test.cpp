@@ -36,6 +36,7 @@
 #include "session_info.h"
 #include "session_manager_lite.h"
 #include "startup_util.h"
+#include "start_params_by_SCB.h"
 #include "status_bar_delegate_interface.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "server_constant.h"
@@ -1509,8 +1510,10 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartUIAbility_1200, TestSize.Level
 {
     auto mgr = std::make_unique<UIAbilityLifecycleManager>();
     AbilityRequest abilityRequest;
+    AbilityRuntime::StartParamsBySCB params;
+    params.isRestart = true;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, nullptr, 0, true, isColdStart), ERR_INVALID_VALUE);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, nullptr, params, isColdStart), ERR_INVALID_VALUE);
 }
 
 /**

@@ -35,6 +35,7 @@
 #include "ability_manager_service.h"
 #include "ability_scheduler_mock.h"
 #include "ipc_skeleton.h"
+#include "start_params_by_SCB.h"
 #include "status_bar_delegate_interface.h"
 #include "user_controller/user_controller.h"
 
@@ -130,8 +131,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_001, TestSize.Level1)
 {
     auto mgr = std::make_unique<UIAbilityLifecycleManager>();
     AbilityRequest abilityRequest;
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, nullptr, 0, false, isColdStart), ERR_INVALID_VALUE);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, nullptr, params, isColdStart), ERR_INVALID_VALUE);
 }
 
 /**
@@ -146,8 +148,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_002, TestSize.Level1)
     Rosen::SessionInfo info;
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = new Rosen::Session(info);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -168,8 +171,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_003, TestSize.Level1)
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -188,8 +192,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_004, TestSize.Level1)
     sessionInfo->persistentId = 1;
     sessionInfo->specifiedFlag = "0";
     abilityRequest.sessionInfo = sessionInfo;
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -207,8 +212,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_005, TestSize.Level1)
     sessionInfo->persistentId = 1;
     sessionInfo->reuseDelegatorWindow = true;
     abilityRequest.sessionInfo = sessionInfo;
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -229,8 +235,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_006, TestSize.Level1)
     abilityRequest.sessionInfo = sessionInfo;
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -252,8 +259,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_007, TestSize.Level1)
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->isReady_ = true;
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -270,8 +278,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_008, TestSize.Level1)
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = new Rosen::Session(info);
     sessionInfo->isNewWant = false;
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -291,8 +300,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_009, TestSize.Level1)
     abilityRequest.sessionInfo = sessionInfo;
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -312,8 +322,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1000, TestSize.Level1)
     sessionInfo->processOptions->isPreloadStart = true;
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
 }
 
 /**
@@ -336,8 +347,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1100, TestSize.Level1)
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetPreloaded();
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
     EXPECT_NE(abilityRequest.processOptions, nullptr);
     EXPECT_TRUE(abilityRequest.processOptions->isPreloadStart);
 }
@@ -2228,7 +2240,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_001, TestSize.Level1)
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     sptr<SessionInfo> sessionInfo;
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2244,7 +2257,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_002, TestSize.Level1)
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = nullptr;
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2265,7 +2279,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_003, TestSize.Level1)
     EXPECT_NE(token, nullptr);
     sessionInfo->sessionToken = token->AsObject();
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2282,7 +2297,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_004, TestSize.Level1)
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = new Rosen::Session(info);
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2302,7 +2318,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_005, TestSize.Level1)
 
     uiAbilityLifecycleManager->tmpAbilityMap_.emplace(1, nullptr);
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2325,7 +2342,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_006, TestSize.Level1)
     auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->tmpAbilityMap_.emplace(1, abilityRecord);
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -2352,7 +2370,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallUIAbilityBySCB_007, TestSize.Level1)
     uiAbilityLifecycleManager->tmpAbilityMap_.emplace(1, abilityRecord);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
     bool isColdStart = false;
-    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    AbilityRuntime::StartParamsBySCB params;
+    uiAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -5337,13 +5356,13 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     AbilityRequest abilityRequest;
-    uint32_t sceneFlag = 1;
-    auto result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, nullptr, sceneFlag, false);
+    AbilityRuntime::StartParamsBySCB params;
+    auto result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, nullptr, params);
     EXPECT_EQ(result, false);
 
     sptr<SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
-    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, false);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, params);
     EXPECT_EQ(result, false);
 
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
@@ -5354,7 +5373,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.
     std::list<std::shared_ptr<SpecifiedRequest>> Lists;
     Lists.push_back(specifiedRequest);
     uiAbilityLifecycleManager->specifiedRequestList_.emplace("key1", Lists);
-    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, false);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, params);
     EXPECT_EQ(result, true);
 
     Lists.clear();
@@ -5363,7 +5382,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.
     specifiedRequest->requestId = sessionInfo->requestId;
     Lists.push_back(specifiedRequest);
     uiAbilityLifecycleManager->specifiedRequestList_.emplace("key2", Lists);
-    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, false);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, params);
     EXPECT_EQ(result, false);
 
     Lists.clear();
@@ -5372,10 +5391,11 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.
     specifiedRequest->requestId = 2;
     Lists.push_back(specifiedRequest);
     uiAbilityLifecycleManager->specifiedRequestList_.emplace("key3", Lists);
-    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, false);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, params);
     EXPECT_EQ(result, false);
 
-    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag, true);
+    params.isRestart = true;
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, params);
     EXPECT_EQ(result, true);
 }
 

@@ -280,7 +280,8 @@
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
               "header_files": [
                 "ability_manager_client.h",
-                "launch_param.h"
+                "launch_param.h",
+                "start_params_by_SCB.h"
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager"
