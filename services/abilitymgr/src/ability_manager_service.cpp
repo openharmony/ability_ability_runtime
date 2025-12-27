@@ -468,11 +468,6 @@ bool AbilityManagerService::Init()
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
     
-    if (!ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES)) 
-    {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse vpn allow list json fail");
-    }
-
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResourceSchedule::ResSchedClient::GetInstance().InitKillReasonListener();
 #endif
@@ -531,6 +526,14 @@ void AbilityManagerService::InitPushTask()
     auto initExtensionConfigTask = []() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
     };
+
+    auto initExtensionConfigTask = [aams = shared_from_this()]() {
+        DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
+        if (!aams->ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "parse vpn allow list failed");
+        }
+    };
+
     taskHandler_->SubmitTask(initExtensionConfigTask, "InitExtensionConfigTask");
 
     auto bootCompletedTask = [handler = taskHandler_]() {
@@ -5508,12 +5511,12 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     return err;
 }
 
-bool AbilityManagerService::CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo, std::list<std::string> vpnAllowList)
+bool AbilityManagerService::CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo)
 {
     auto bundleName = abilityInfo.applicationInfo.bundleName;
     bool isVpnAllowBundleName = false;
-    std::list<std::string>::iterator it = std::find(vpnAllowList.begin(), vpnAllowList.end(), bundleName);
-    if (it != vpnAllowList.end()) {
+    std::list<std::string>::iterator it = std::find(vpnAllowList_.begin(), vpnAllowList_.end(), bundleName);
+    if (it != vpnAllowList_.end()) {
         isVpnAllowBundleName = true;
     }
 
@@ -5601,7 +5604,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
             return ERR_WRONG_INTERFACE_CALL;
         }
         // not allow app to connect other extension by using connectServiceExtensionAbility
-        bool isVpn = CheckSupportVpn(abilityInfo, vpnAllowList_);
+        bool isVpn = CheckSupportVpn(abilityInfo);
         if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService && !isVpn) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "ability, type not service");
             return TARGET_ABILITY_NOT_SERVICE;
