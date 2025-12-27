@@ -178,23 +178,25 @@ bool ApplicationDataManager::NotifyUncaughtException(const ExceptionParams &para
     }
     g_hasNotified = params.isUncatchable;
 
-    bool isMainEnv = (params.env == params.mainEnv);
     auto napiEnv = params.env ? params.env : params.mainEnv;
-    if (isMainEnv) {
+    if (params.env == params.mainEnv) {
         TAG_LOGI(AAFwkTag::APPKIT, "main thread");
         if (NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, params.summary,
             errorObj.name, errorObj.message, errorObj.stack)) {
             TAG_LOGI(AAFwkTag::APPKIT, "Complete all callbacks");
+            if (!params.isUncatchable) {
+                return true;
+            }
         }
     } else if (params.isUncatchable) {
         NativeEngine* engine = reinterpret_cast<NativeEngine*>(napiEnv);
         if (engine == nullptr) {
             return false;
         }
-        std::string instanceName;
-        InstanceType instanceType = InstanceType::DEFAULT_TYPE;
+        std::string name;
+        InstanceType type = InstanceType::DEFAULT_TYPE;
         if (engine->IsWorkerThread()) {
-            instanceType = InstanceType::WORKER_THREAD_TYPE;
+            type = InstanceType::WORKER_THREAD_TYPE;
             napi_value workerGlobalObject = nullptr;
             napi_get_global(napiEnv, &workerGlobalObject);
             napi_value valueStr = nullptr;
@@ -205,24 +207,22 @@ bool ApplicationDataManager::NotifyUncaughtException(const ExceptionParams &para
             napi_typeof(napiEnv, valueStr, &valueType);
  
             if (valueType == napi_string) {
-                size_t instanceNameSize = 0;
-                napi_get_value_string_utf8(napiEnv, valueStr, nullptr, 0, &instanceNameSize);
-                instanceName.reserve(instanceNameSize + 1);
-                instanceName.resize(instanceNameSize);
-                napi_get_value_string_utf8(napiEnv, valueStr, instanceName.data(), instanceName.size() + 1,
-                    &instanceNameSize);
+                size_t nameSize = 0;
+                napi_get_value_string_utf8(napiEnv, valueStr, nullptr, 0, &nameSize);
+                name.reserve(nameSize + 1);
+                name.resize(nameSize);
+                napi_get_value_string_utf8(napiEnv, valueStr, name.data(), name.size() + 1, &nameSize);
             }
-            TAG_LOGE(AAFwkTag::APPKIT, "worker thread, instanceType=1, instanceName=%{public}s", instanceName.c_str());
+            TAG_LOGE(AAFwkTag::APPKIT, "worker thread, instanceType=1, instanceName=%{public}s", name.c_str());
         } else if (engine->IsTaskPoolThread()) {
-            instanceType = InstanceType::TASK_POOL_THREAD_TYPE;
-            instanceName = GetFuncNameFromError(napiEnv, params.exception);
-            TAG_LOGE(AAFwkTag::APPKIT, "task pool thread, instanceType=2, instanceName=%{public}s",
-                instanceName.c_str());
+            type = InstanceType::TASK_POOL_THREAD_TYPE;
+            name = GetFuncNameFromError(napiEnv, params.exception);
+            TAG_LOGE(AAFwkTag::APPKIT, "task pool thread, instanceType=2, instanceName=%{public}s", name.c_str());
         }
-        NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, params.exception, instanceName,
-            static_cast<uint32_t>(instanceType));
+        NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, params.exception, name,
+            static_cast<uint32_t>(type));
     }
-    return (isMainEnv && !g_hasNotified);
+    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
