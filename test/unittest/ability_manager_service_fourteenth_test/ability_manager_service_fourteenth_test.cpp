@@ -355,11 +355,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, IsCallerSceneBoard_002, TestSize.L
     EXPECT_NE(abilityMs_, nullptr);
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<CommonExtensionManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
     mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentCommonExtensionManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->IsCallerSceneBoard();
     EXPECT_FALSE(retCode);
@@ -383,11 +383,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, IsCallerSceneBoard_003, TestSize.L
     EXPECT_NE(abilityMs_, nullptr);
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<CommonExtensionManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
     mockCurrentConnectManager->sceneBoardTokenId_ = 1;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentCommonExtensionManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->IsCallerSceneBoard();
     EXPECT_FALSE(retCode);
@@ -411,11 +411,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, IsCallerSceneBoard_004, TestSize.L
     EXPECT_NE(abilityMs_, nullptr);
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<CommonExtensionManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
     mockCurrentConnectManager->sceneBoardTokenId_ = 1;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentCommonExtensionManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->IsCallerSceneBoard();
     EXPECT_TRUE(retCode);
@@ -781,11 +781,10 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateAbilityWithFlag_005, Test
 
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<CommonExtensionManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentCommonExtensionManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->TerminateAbilityWithFlag(nullptr, 0, nullptr, true);
     EXPECT_EQ(retCode, ERR_OK);
@@ -832,7 +831,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     MyStatus::GetInstance().smhGetConnectManagerByToken_ = false;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_EQ(connectManager, nullptr);
@@ -860,13 +859,12 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
 
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
 
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_NE(connectManager, nullptr);
@@ -894,13 +892,12 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
 
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
 
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(
         MockSessionInfo(0), connectManager, targetAbility, false);
@@ -930,13 +927,12 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
 
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
 
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, true);
     EXPECT_NE(connectManager, nullptr);
@@ -964,13 +960,12 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
 
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
 
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, false);
     EXPECT_NE(connectManager, nullptr);
@@ -995,7 +990,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerAndUIExtensionByS
     MyStatus::GetInstance().ipcGetCallingUid_ = -1;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    std::shared_ptr<AbilityConnectManager> connectManager = nullptr;
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = nullptr;
     std::shared_ptr<BaseExtensionRecord> targetAbility = nullptr;
     abilityMs_->GetConnectManagerAndUIExtensionBySessionInfo(MockSessionInfo(0), connectManager, targetAbility, false);
     EXPECT_EQ(connectManager, nullptr);
@@ -1043,11 +1038,10 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_002, T
     EXPECT_NE(abilityMs_, nullptr);
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_    = mockCurrentConnectManager;
 
     int retCode = abilityMs_->TerminateUIExtensionAbility(MockSessionInfo(0), 0, nullptr);
     EXPECT_EQ(retCode, ABILITY_VISIBLE_FALSE_DENY_REQUEST);
@@ -1073,11 +1067,10 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_003, T
     EXPECT_NE(abilityMs_, nullptr);
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 0;
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->TerminateUIExtensionAbility(MockSessionInfo(0), 0, nullptr);
     EXPECT_EQ(retCode, ERR_WRONG_INTERFACE_CALL);
@@ -1438,11 +1431,11 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, NotifyStartupExceptionBySCB_002, T
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    auto mockCurrentConnectManager = std::make_shared<CommonExtensionManager>(0);
     EXPECT_NE(mockCurrentConnectManager, nullptr);
-    mockCurrentConnectManager->sceneBoardTokenId_ = 1;
     abilityMs->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    mockCurrentConnectManager->sceneBoardTokenId_ = 1;
+    abilityMs->subManagersHelper_->currentCommonExtensionManager_ = mockCurrentConnectManager;
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     abilityMs->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
     int32_t requestId = 0;

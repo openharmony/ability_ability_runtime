@@ -35,6 +35,7 @@ abilityms_files = [
   "src/assert_fault_callback_death_mgr.cpp",
   "src/assert_fault_proxy.cpp",
   "src/connection_record.cpp",
+  "src/common_extension_manager.cpp",
   "src/data_ability/data_ability_caller_recipient.cpp",
   "src/data_ability/data_ability_manager.cpp",
   "src/data_ability/data_ability_record.cpp",
@@ -80,6 +81,7 @@ abilityms_files = [
   "src/start_ability_handler/start_ability_sandbox_savefile.cpp",
 
   # new ability manager service here
+  "src/ui_extension/ui_extension_ability_manager.cpp",
   "src/ui_extension/preload_uiext_state_observer.cpp",
   "src/ui_extension_record/ui_extension_record.cpp",
   "src/ui_extension_record/ui_extension_record_factory.cpp",

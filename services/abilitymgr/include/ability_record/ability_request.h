@@ -28,9 +28,11 @@
 #include "start_options.h"
 #include "start_specified_ability_params.h"
 #include "want.h"
+#include "ui_extension/ui_extension_ability_connect_info.h"
 
 namespace OHOS {
 namespace AAFwk {
+using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 /**
  * @class AbilityRequest
  * Wrap parameters of starting ability.
@@ -101,6 +103,7 @@ struct AbilityRequest {
     uint64_t specifiedFullTokenId = 0;
     std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
     bool isFromOpenLink = false;
+    sptr<UIExtensionAbilityConnectInfo> uiExtensionAbilityConnectInfo = nullptr;
     std::pair<bool, LaunchReason> IsContinuation() const;
 
     bool IsAcquireShareData() const
