@@ -377,8 +377,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1200, TestSize.Level1)
     abilityRecord->SetPid(1000);
     mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
     abilityRequest.appInfo.uid = 3000;
+    AbilityRuntime::StartParamsBySCB params;
     bool isColdStart = false;
-    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, params, isColdStart), ERR_OK);
     EXPECT_FALSE(isColdStart);
     EXPECT_NE(abilityRequest.processOptions, nullptr);
 }
