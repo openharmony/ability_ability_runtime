@@ -67,7 +67,7 @@ HWTEST_F(AppExitReasonHelperThirdTest, RecordProcessExtensionExitReason_0100, Te
     std::shared_ptr<AAFwk::SubManagersHelper> subManagersHelper_;
     subManagersHelper_ = std::make_shared<AAFwk::SubManagersHelper>(taskHandler_, eventHandler_);
     int userId = 1;
-    subManagersHelper_->currentConnectManager_ = std::make_shared<AAFwk::AbilityConnectManager>(0);
+    subManagersHelper_->currentUIExtensionAbilityManager_ = std::make_shared<AAFwk::UIExtensionAbilityManager>(0);
     std::shared_ptr<AAFwk::AppExitReasonHelper> appExitReasonHelper_;
     appExitReasonHelper_ = std::make_shared<AAFwk::AppExitReasonHelper>(subManagersHelper_);
     std::string bundleName = "com.test.demo";
@@ -75,7 +75,7 @@ HWTEST_F(AppExitReasonHelperThirdTest, RecordProcessExtensionExitReason_0100, Te
     bool withKillMsg = false;
     OHOS::AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
     int32_t pid = -2;
-    appExitReasonHelper_->subManagersHelper_->currentConnectManager_ -> uiExtensionAbilityRecordMgr_ = nullptr;
+    appExitReasonHelper_->subManagersHelper_->currentUIExtensionAbilityManager_->uiExtensionAbilityRecordMgr_ = nullptr;
     int32_t result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason,
         processInfo, withKillMsg);
     EXPECT_EQ(result, AAFwk::ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY);
@@ -87,15 +87,15 @@ HWTEST_F(AppExitReasonHelperThirdTest, RecordProcessExtensionExitReason_0100, Te
     auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     ASSERT_NE(abilityRecord, nullptr);
     auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
-    appExitReasonHelper_->subManagersHelper_->currentConnectManager_
-        = std::make_shared<AAFwk::AbilityConnectManager>(0);
-    appExitReasonHelper_->subManagersHelper_->currentConnectManager_
+    appExitReasonHelper_->subManagersHelper_->currentUIExtensionAbilityManager_
+        = std::make_shared<AAFwk::UIExtensionAbilityManager>(0);
+    appExitReasonHelper_->subManagersHelper_->currentUIExtensionAbilityManager_
         ->uiExtensionAbilityRecordMgr_->extensionRecords_.clear();
     pid = 1;
     result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason,
         processInfo, withKillMsg);
     EXPECT_EQ(result, AAFwk::ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY);
-    appExitReasonHelper_->subManagersHelper_->currentConnectManager_
+    appExitReasonHelper_->subManagersHelper_->currentUIExtensionAbilityManager_
         ->uiExtensionAbilityRecordMgr_->extensionRecords_.emplace(userId, extRecord);
     result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason,
         processInfo, withKillMsg);

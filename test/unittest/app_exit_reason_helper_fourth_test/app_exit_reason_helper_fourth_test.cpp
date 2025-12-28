@@ -77,7 +77,7 @@ HWTEST_F(AppExitReasonHelperTest, RecordAppExitReason_0100, TestSize.Level1)
     exitReason.reason = Reason::REASON_CPP_CRASH;
     std::shared_ptr<SubManagersHelper> subManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(subManagersHelper, nullptr);
-    subManagersHelper->currentConnectManager_ = nullptr;
+    subManagersHelper->currentUIExtensionAbilityManager_ = nullptr;
     subManagersHelper->currentUIAbilityManager_ = nullptr;
     appExitReasonHelper->subManagersHelper_ = subManagersHelper;
     result = appExitReasonHelper->RecordAppExitReason(exitReason);

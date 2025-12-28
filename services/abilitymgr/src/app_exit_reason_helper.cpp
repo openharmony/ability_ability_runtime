@@ -228,7 +228,7 @@ int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
-    auto connectManager = subManagersHelper_->GetCurrentConnectManager();
+    auto connectManager = subManagersHelper_->GetCurrentUIExtensionAbilityManager();
     CHECK_POINTER_AND_RETURN(connectManager, ERR_NULL_OBJECT);
     std::vector<std::string> extensionList;
     int32_t resultCode = ERR_OK;

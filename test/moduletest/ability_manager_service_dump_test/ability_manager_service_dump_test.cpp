@@ -202,8 +202,6 @@ HWTEST_F(AbilityManagerServiceDumpTest, AbilityManagerService_OnAppStateChanged_
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs_->subManagersHelper_->currentConnectManager_ = std::make_shared<AbilityConnectManager>(0);
-    EXPECT_NE(abilityMs_->subManagersHelper_->currentConnectManager_, nullptr);
 
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
