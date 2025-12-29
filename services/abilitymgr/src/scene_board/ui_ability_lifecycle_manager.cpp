@@ -245,6 +245,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped START: %{public}d",
             static_cast<int32_t>(uiAbilityRecord->GetPendingState()));
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+        uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = params.sceneFlag;
         if (scenarios == 0 && sessionInfo->isNewWant) {
             uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
         }
@@ -567,12 +568,12 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     }
     if (abilityRecord->IsStartedByCall()) {
         (void)abilityRecord->PromotePriority();
-        if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
+        if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
             abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
-        } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+        } else {
             abilityRecord->SetStartToBackground(true);
             MoveToBackground(abilityRecord);
         }
