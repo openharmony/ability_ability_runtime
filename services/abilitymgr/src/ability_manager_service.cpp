@@ -467,7 +467,6 @@ bool AbilityManagerService::Init()
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
-    
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResourceSchedule::ResSchedClient::GetInstance().InitKillReasonListener();
 #endif
@@ -525,8 +524,8 @@ void AbilityManagerService::InitPushTask()
 
     auto initExtensionConfigTask = [aams = shared_from_this()]() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
-        if (!aams->ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "parse vpn allow list failed");
+        if (aams) {
+            aams->ParseVpnAllowListJson();
         }
     };
 
@@ -5510,18 +5509,11 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
 bool AbilityManagerService::CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo)
 {
     auto bundleName = abilityInfo.applicationInfo.bundleName;
-    bool isVpnAllowBundleName = false;
-    std::list<std::string>::iterator it = std::find(vpnAllowList_.begin(), vpnAllowList_.end(), bundleName);
-    if (it != vpnAllowList_.end()) {
-        isVpnAllowBundleName = true;
+    if (std::find(vpnAllowList_.begin(), vpnAllowList_.end(), bundleName) == vpnAllowList_.end()) {
+        return false;
     }
-
-    if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT, "CheckSupportVpn bundleName: %{public}s, isVpnAllowList: %{public}d",
-            bundleName.c_str(), isVpnAllowBundleName);
-        return isVpnAllowBundleName;
-    }
-    return false;
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "allow bundleName: %{public}s",  bundleName.c_str());
+    return true;
 }
 
 bool AbilityManagerService::ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr)
@@ -5536,12 +5528,18 @@ bool AbilityManagerService::ParseVpnAllowListJson(const std::string &relativePat
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson parse file err");
         return false;
     }
-    std::lock_guard<std::mutex> locker(whiteListMutex_);
+    std::lock_guard<std::mutex> locker(allowListMutex_);
     if (!jsonObj.contains(jsonItemStr)) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson not contains item");
         return false;
     }
+
     nlohmann::json vpnAllowJsonList = jsonObj[jsonItemStr.c_str()];
+    if (!vpnAllowJsonList.is_array()) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson: jsonItem is not array");
+        return false;
+    }
+
     for (const auto& it : vpnAllowJsonList) {
         if (it.is_string()) {
             TAG_LOGI(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson: bundleName: %{public}s", 
