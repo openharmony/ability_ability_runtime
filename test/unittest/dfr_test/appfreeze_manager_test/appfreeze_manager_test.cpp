@@ -480,7 +480,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetCatcherStack_Test001, Tes
     AppfreezeManager::AppInfo appInfo;
     int ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
     EXPECT_EQ(ret, 0);
-    std::string fileName = "/data/log/freeze/freeze.txt";
+    std::string fileName = "/data/log/faultlog/freeze/freeze.txt";
     std::string catcherStack = "AppfreezeManagerTest_GetCatcherStack_Test001";
     std::string result = appfreezeManager->GetCatcherStack(fileName, catcherStack);
     EXPECT_EQ(result, catcherStack);
