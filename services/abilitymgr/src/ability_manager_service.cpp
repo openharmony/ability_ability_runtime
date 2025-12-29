@@ -525,7 +525,7 @@ void AbilityManagerService::InitPushTask()
     auto initExtensionConfigTask = [aams = shared_from_this()]() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
         if (aams) {
-            aams->ParseVpnAllowListJson();
+            aams->ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES);
         }
     };
 
