@@ -1656,6 +1656,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
         return;
     }
     isColdStart = true;
+    uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = params.sceneFlag;
     uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
 
     MoreAbilityNumbersSendEventInfo(sessionInfo->userId, sessionInfo->want.GetElement().GetBundleName(),
