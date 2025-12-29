@@ -146,6 +146,7 @@ enum class AppMgrInterfaceCode {
     KILL_CHILD_PROCESS_BY_PID = 121,
     PRELOAD_EXTENSION = 122,
     LOCK_PROCESS_CACHE = 123,
+    SET_PROCESS_PREPARE_EXIT = 124,
 };
 } // AppExecFwk
 } // OHOS

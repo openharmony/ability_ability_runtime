@@ -2743,5 +2743,20 @@ int32_t AppMgrProxy::PreloadExtension(const AAFwk::Want &want, int32_t appIndex,
     return reply.ReadInt32();
 }
 
+
+void AppMgrProxy::SetProcessPrepareExit(int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+
+    PARCEL_UTIL_WRITE_NORET(data, Int32, pid);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT, data, reply, option);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

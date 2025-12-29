@@ -545,6 +545,7 @@ public:
     void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler);
     void SetEventHandler(const std::shared_ptr<AMSEventHandler> &handler);
 
+    bool IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clearMissionFlag);
     /**
      * When the one process has no ability, it will go dying.
      */
@@ -1139,6 +1140,11 @@ public:
         return isMasterProcess_;
     }
 
+    inline void SetPrepareExit()
+    {
+        isPrepareExit_ = true;
+    }
+
     inline void SetTimeStamp(int64_t timeStamp)
     {
         timeStamp_ = timeStamp;
@@ -1277,6 +1283,7 @@ private:
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
     bool isExtensionSandBox_ = false;
+    bool isPrepareExit_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
     std::atomic<bool> isPreForeground_ = false;

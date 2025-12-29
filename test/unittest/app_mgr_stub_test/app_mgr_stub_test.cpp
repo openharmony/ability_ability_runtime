@@ -1119,5 +1119,27 @@ HWTEST_F(AppMgrStubTest, HandlePreloadExtension_0200, TestSize.Level1)
     mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION), data, reply, option);
 }
+
+/**
+ * @tc.name: SetProcessPrepareExit_0100
+ * @tc.desc: Test SetProcessPrepareExit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, SetProcessPrepareExit_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1;
+    data.WriteInt32(pid);
+
+    EXPECT_CALL(*mockAppMgrService_, SetProcessPrepareExit(_)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

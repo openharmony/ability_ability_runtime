@@ -388,6 +388,30 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsSupportMultiProcessDeviceFeatu
 }
 
 /**
+ * @tc.name: AppRunningRecord_IsLastAbilityByFlag_0100
+ * @tc.desc: Test IsLastAbilityByFlag works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAbilityByFlag_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityByFlag_0100 start.");
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    appRecord->isPrepareExit_ = false;
+    bool ret = appRecord->IsLastAbilityByFlag(nullptr, true);
+    EXPECT_FALSE(ret);
+    ret = appRecord->IsLastAbilityByFlag(nullptr, false);
+    EXPECT_FALSE(ret);
+
+    appRecord->isPrepareExit_ = true;
+    ret = appRecord->IsLastAbilityByFlag(nullptr, true);
+    EXPECT_FALSE(ret);
+    ret = appRecord->IsLastAbilityByFlag(nullptr, false);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityByFlag_0100 end.");
+}
+
+/**
  * @tc.name: AppRunningRecord_SetStartupTaskData_0100
  * @tc.desc: Test SetStartupTaskData works.
  * @tc.type: FUNC
