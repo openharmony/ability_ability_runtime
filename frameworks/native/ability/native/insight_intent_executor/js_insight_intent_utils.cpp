@@ -32,7 +32,6 @@ bool JsInsightIntentUtils::CallJsFunctionWithResult(
     napi_value& result)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call js function");
-    AbilityRuntime::HandleScope handleScope(env);
     napi_value method = AppExecFwk::GetPropertyValueByPropertyName(env, obj, funcName, napi_valuetype::napi_function);
     if (method == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null method");
