@@ -20,7 +20,7 @@
 #include <vector>
 #include "uri.h"
 
-#include "media_library_extend_manager.h"
+#include "media_permission_helper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -37,7 +37,7 @@ public:
 
 private:
     MediaPermissionManager();
-    Media::MediaLibraryExtendManager *GetMediaLibraryManager();
+    Media::MediaPermissionHelper *GetMediaPermissionHelper();
     Media::PhotoPermissionType FlagToFileOpenMode(uint32_t flag);
     Media::HideSensitiveType ConvertHideSensitiveType(int32_t hideSensitiveType);
 };
