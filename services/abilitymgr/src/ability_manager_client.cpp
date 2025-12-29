@@ -1790,9 +1790,11 @@ void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, Abi
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     if (sessionInfo) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "CallUIAbilityBySCB t:%{public}s/%{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call,CallUIAbilityBySCB:%{public}s/%{public}s/%{public}d,flag:%{public}u",
             sessionInfo->want.GetElement().GetBundleName().c_str(),
-            sessionInfo->want.GetElement().GetAbilityName().c_str());
+            sessionInfo->want.GetElement().GetAbilityName().c_str(),
+            sessionInfo->want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1),
+            params.sceneFlag);
     }
 
     abms->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
