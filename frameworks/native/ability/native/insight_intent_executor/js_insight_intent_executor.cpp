@@ -206,7 +206,6 @@ bool JsInsightIntentExecutor::CallJsFunctionWithResult(
     napi_value& result)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
-    AbilityRuntime::HandleScope handleScope(env);
     napi_value method = AppExecFwk::GetPropertyValueByPropertyName(
         env,
         obj,
