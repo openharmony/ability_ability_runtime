@@ -291,6 +291,45 @@ void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
     }
 }
 
+void AppStateCallbackProxy::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal,
+    std::string &bundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
+        return;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write uid failed.");
+        return;
+    }
+
+    if (!data.WriteInt32(signal)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write signal failed.");
+        return;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write bundleName failed");
+        return;
+    }
+
+    auto ret = SendTransactCmd(
+        static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_RECORD_APP_EXIT_SIGNAL_REASON),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
 int32_t AppStateCallbackProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
