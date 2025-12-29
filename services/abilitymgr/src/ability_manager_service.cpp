@@ -8014,13 +8014,12 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
             return ERR_APP_CLONE_INDEX_INVALID;
         }
+        std::string hostBundleName = "";
         auto caller = Token::GetAbilityRecordByToken(callerToken);
-        if (caller == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is nullptr");
-            return ERR_INVALID_CALLER;
+        if (caller) {
+            hostBundleName = caller->GetAbilityInfo().bundleName;
+            request.hostBundleName = hostBundleName;
         }
-        std::string hostBundleName = caller->GetAbilityInfo().bundleName;
-        request.hostBundleName = hostBundleName;
         abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
