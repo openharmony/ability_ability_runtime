@@ -53,7 +53,7 @@ ohos_fuzztest("AbilityInterfacesAppManagerAmsMgrStubSevenththFuzzTest") {
     "hisysevent:libhisysevent",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "samgr:samgr_proxy",
+    "safwk:system_ability_fwk",
   ]
 
   if (ability_runtime_graphics) {
