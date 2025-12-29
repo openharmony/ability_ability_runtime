@@ -999,6 +999,8 @@ public:
 
     void SetProcessCaching(bool isCaching);
     bool IsCaching();
+    void SetProcessCacheLocked(bool isLock);
+    bool GetProcessCacheLocked();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
     bool GetNeedPreloadModule();
     void SetNeedLimitPrio(bool isNeedLimitPrio);
@@ -1259,6 +1261,7 @@ private:
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
     bool enableProcessCache_ = true;
+    std::atomic<bool> processCacheLocked_ = false;
     bool processCacheBlocked = false; // temporarily block process cache feature
     bool hasGPU_ = false;
     bool isStrictMode_ = false;

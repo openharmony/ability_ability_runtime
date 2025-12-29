@@ -809,6 +809,8 @@ public:
 
     int32_t SetProcessCacheEnable(int32_t pid, bool enable) override;
 
+    int32_t LockProcessCache(int32_t pid, bool isLock) override;
+
     /**
      * Elevate the current process to be a candidate master process.
      *

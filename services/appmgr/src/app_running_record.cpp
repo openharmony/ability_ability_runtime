@@ -2598,6 +2598,16 @@ bool AppRunningRecord::GetProcessCacheBlocked()
     return processCacheBlocked;
 }
 
+void AppRunningRecord::SetProcessCacheLocked(bool isLock)
+{
+    processCacheLocked_.store(isLock);
+}
+
+bool AppRunningRecord::GetProcessCacheLocked()
+{
+    return processCacheLocked_.load();
+}
+
 bool AppRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
 {
     std::lock_guard<ffrt::mutex> lock(hapModulesLock_);
