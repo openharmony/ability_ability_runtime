@@ -1000,8 +1000,8 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag,
-    bool isRestart)
+int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, AbilityRuntime::StartParamsBySCB &params,
+    bool &isColdStart)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start by scb");
@@ -1025,8 +1025,8 @@ int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool
             return INNER_ERR;
         }
     }
-    if (!data.WriteUint32(sceneFlag) || !data.WriteBool(isRestart)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag or isRestart write fail");
+    if (!data.WriteParcelable(&params)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::START_UI_ABILITY_BY_SCB, data, reply, option);
@@ -4825,7 +4825,8 @@ void AbilityManagerProxy::SetRootSceneSession(const sptr<IRemoteObject> &rootSce
     }
 }
 
-void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
+void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo,
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -4843,6 +4844,10 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
             return;
         }
+    }
+    if (!data.WriteParcelable(&params)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params write fail");
+        return;
     }
 
     MessageParcel reply;
