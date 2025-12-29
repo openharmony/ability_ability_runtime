@@ -398,8 +398,10 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
     }
     lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
     SetIsNewWant(false);
-    lifeCycleStateInfo_.sceneFlag = 0;
-    lifeCycleStateInfo_.sceneFlagBak = 0;
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        lifeCycleStateInfo_.sceneFlag = 0;
+        lifeCycleStateInfo_.sceneFlagBak = 0;
+    }
     lifeCycleStateInfo_.pageConfig = "";
     {
         std::lock_guard guard(wantLock_);
