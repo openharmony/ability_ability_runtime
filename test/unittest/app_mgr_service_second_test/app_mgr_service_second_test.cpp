@@ -513,5 +513,45 @@ HWTEST_F(AppMgrServiceSecondTest, SetProcessCacheEnable_0200, TestSize.Level1)
     auto ret = appMgrService->SetProcessCacheEnable(pid, enable);
     EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
 }
+
+/**
+ * @tc.name: LockProcessCache_001
+ * @tc.desc: LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceSecondTest, LockProcessCache_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->appMgrServiceInner_ = nullptr;
+    int32_t pid = 1;
+    bool isLock = false;
+    auto ret = appMgrService->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER);
+}
+
+/**
+ * @tc.name: LockProcessCache_002
+ * @tc.desc: LockProcessCache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceSecondTest, LockProcessCache_002, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appMgrService->appMgrServiceInner_ = std::make_shared<AppMgrServiceInner>();
+    appMgrService->eventHandler_ =
+        std::make_shared<AMSEventHandler>(appMgrService->taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t pid = 1;
+    bool isLock = false;
+    AAFwk::MyFlag::flag_ = 0;
+    auto ret = appMgrService->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+
+    AAFwk::MyFlag::flag_ = 1;
+    ret = appMgrService->LockProcessCache(pid, isLock);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

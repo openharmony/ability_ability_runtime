@@ -2204,6 +2204,24 @@ int32_t AppMgrProxy::SetProcessCacheEnable(int32_t pid, bool enable)
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::LockProcessCache(int32_t pid, bool isLock)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "LockProcessCache called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isLock);
+
+    MessageParcel reply;
+    MessageOption option;
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::LOCK_PROCESS_CACHE, data, reply, option);
+    return reply.ReadInt32();
+}
+
 void AppMgrProxy::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
