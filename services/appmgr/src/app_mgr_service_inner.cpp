@@ -31,6 +31,7 @@
 #include "ability_window_configuration.h"
 #include "accesstoken_kit.h"
 #include "app_config_data_manager.h"
+#include "app_hybrid_spawn_manager.h"
 #include "app_mem_info.h"
 #include "app_mgr_service.h"
 #include "app_mgr_event.h"
@@ -459,6 +460,7 @@ void AppMgrServiceInner::Init()
         }, ffrt::task_attr().delay(NWEB_PRELOAD_DELAY)
         .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
     AppNativeSpawnManager::GetInstance().InitNativeSpawnMsgPipe(appRunningManager_);
+    AppHybridSpawnManager::GetInstance().InitHybridSpawnMsgPipe(weak_from_this());
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -11179,6 +11181,16 @@ int32_t AppMgrServiceInner::KillChildProcessByPid(int32_t pid)
     appRecord->RemoveChildProcessRecord(childRecord);
     OnChildProcessDied(childRecord);
     return ERR_OK;
+}
+
+void AppMgrServiceInner::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
+{
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+        }
+    }
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
