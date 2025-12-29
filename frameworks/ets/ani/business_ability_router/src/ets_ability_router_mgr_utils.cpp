@@ -24,12 +24,12 @@ namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
 constexpr const char* BUSINESS_AIBILITY_INFO_INNER_CLASS_NAME =
-    "Lapplication/BusinessAbilityInfo/BusinessAbilityInfoInner;";
+    "application.BusinessAbilityInfo.BusinessAbilityInfoInner";
 constexpr const char* BUSINESS_TYPE_ENUM_NAME =
-    "L@ohos/app/businessAbilityRouter/businessAbilityRouter/BusinessType;";
+    "@ohos.app.businessAbilityRouter.businessAbilityRouter.BusinessType";
 constexpr const char* CLASSNAME_APPLICATIONINFO =
-    "LbundleManager/ApplicationInfoInner/ApplicationInfoInner;";
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
+    "bundleManager.ApplicationInfoInner.ApplicationInfoInner";
+constexpr const char *CLASSNAME_ARRAY = "std.core.Array";
 }
 
 bool UnwrapBusinessAbilityFilter(ani_env *env, ani_object param, BusinessAbilityFilter &filter)
@@ -99,7 +99,7 @@ ani_object ConvertBusinessAbilityInfos(ani_env *env, const std::vector<BusinessA
     }
 
     ani_method arrayCtor;
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "find ctor failed status : %{public}d", status);
         return nullptr;
@@ -118,7 +118,7 @@ ani_object ConvertBusinessAbilityInfos(ani_env *env, const std::vector<BusinessA
             TAG_LOGW(AAFwkTag::SER_ROUTER, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGW(AAFwkTag::SER_ROUTER, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
@@ -146,7 +146,7 @@ ani_object ConvertBusinessAbilityInfo(ani_env *env, const BusinessAbilityInfo &i
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null cls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
@@ -240,7 +240,7 @@ ani_object ConvertAppInfo(ani_env *env, const AppInfo &appInfo)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null cls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "find ctor failed status : %{public}d", status);
         return nullptr;
     }

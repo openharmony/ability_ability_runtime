@@ -1063,5 +1063,61 @@ HWTEST_F(AppMgrStubTest, HandleUpdateConfigurationMultiUser_0100, TestSize.Level
     EXPECT_EQ(replyResult, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "HandleUpdateConfigurationMultiUser_0100 end.");
 }
+
+/**
+ * @tc.name: HandlePreloadExtension_0100
+ * @tc.desc: Test HandlePreloadExtension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandlePreloadExtension_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+    data.WriteParcelable(&want);
+    data.WriteInt32(appIndex);
+    data.WriteInt32(userId);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandlePreloadExtension_0200
+ * @tc.desc: Test HandlePreloadExtension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandlePreloadExtension_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+    data.WriteInt32(appIndex);
+    data.WriteInt32(userId);
+
+    mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION), data, reply, option);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

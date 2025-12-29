@@ -562,6 +562,7 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
 napi_value BuildJsAbilityInfoNamedPropertyFirst(napi_env env, const AbilityInfo &abilityInfo, napi_value &result,
     napi_value &proValue)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     NAPI_CALL(env, napi_create_string_utf8(env, abilityInfo.bundleName.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "bundleName", proValue));
 

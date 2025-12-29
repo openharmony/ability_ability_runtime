@@ -1689,5 +1689,47 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleAbilityRecordReused_005, Test
 
     AppMgrUtil::appMgr_ = originAppMgr;
 }
+
+/**
+ * @tc.name: SetLastExitReasonAsync_001
+ * @tc.desc: SetLastExitReasonAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SetLastExitReasonAsync_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->SetLastExitReasonAsync(nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->exitReasonLoaded_ = false;
+    mgr->SetLastExitReasonAsync(abilityRecord);
+    EXPECT_TRUE(abilityRecord->exitReasonLoaded_);
+
+    abilityRecord->exitReasonLoaded_ = true;
+    mgr->SetLastExitReasonAsync(abilityRecord);
+    EXPECT_TRUE(abilityRecord->exitReasonLoaded_);
+}
+
+/**
+ * @tc.name: SyncLoadExitReasonTask_001
+ * @tc.desc: SyncLoadExitReasonTask
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, SyncLoadExitReasonTask_001, TestSize.Level2)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->exitReasonTasks_.clear();
+    mgr->SyncLoadExitReasonTask(0);
+
+    mgr->exitReasonTasks_.emplace(0, ffrt::task_handle());
+    mgr->SyncLoadExitReasonTask(0);
+
+    EXPECT_TRUE(mgr->exitReasonTasks_.empty());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

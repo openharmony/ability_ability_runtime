@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ public:
         const std::shared_ptr<AAFwk::Want>&, int32_t));
     MOCK_METHOD2(ScheduleCleanAbility, void(const sptr<IRemoteObject>&, bool));
     MOCK_METHOD1(ScheduleProfileChanged, void(const Profile&));
-    MOCK_METHOD1(ScheduleConfigurationUpdated, void(const Configuration&));
+    MOCK_METHOD2(ScheduleConfigurationUpdated, void(const Configuration&, ConfigUpdateReason));
     MOCK_METHOD0(ScheduleProcessSecurityExit, void());
     MOCK_METHOD1(ScheduleAbilityStage, void(const HapModuleInfo&));
     MOCK_METHOD2(ScheduleUpdateApplicationInfoInstalled, void(const ApplicationInfo&, const std::string&));

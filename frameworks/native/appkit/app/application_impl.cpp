@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,12 +164,12 @@ void ApplicationImpl::PerformMemoryLevel(int level)
  * @param config Indicates the updated configuration information.
  *
  */
-void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
+void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config, ConfigUpdateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ != nullptr) {
-        application_->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::System);
+        application_->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::System, reason);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,8 @@ bool DialogSessionInfo::ReadFromParcel(Parcel &parcel)
         TAG_LOGE(AAFwkTag::DIALOG, "parse callerAbilityInfo failed");
         return false;
     }
+    callerAbilityInfo.codePath = Str16ToStr8(parcel.ReadString16());
+    callerAbilityInfo.installSource = Str16ToStr8(parcel.ReadString16());
     int32_t targetAbilityInfoSize = 0;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, targetAbilityInfoSize);
     CONTAINER_SECURITY_VERIFY(parcel, targetAbilityInfoSize, &targetAbilityInfos);
@@ -99,6 +101,8 @@ bool DialogSessionInfo::ReadFromParcel(Parcel &parcel)
             TAG_LOGE(AAFwkTag::DIALOG, "parse targetAbilityInfo failed");
             return false;
         }
+        targetAbilityInfo.codePath = Str16ToStr8(parcel.ReadString16());
+        targetAbilityInfo.installSource = Str16ToStr8(parcel.ReadString16());
         targetAbilityInfos.emplace_back(targetAbilityInfo);
     }
     std::unique_ptr<AAFwk::WantParams> params(parcel.ReadParcelable<AAFwk::WantParams>());
@@ -114,11 +118,15 @@ bool DialogSessionInfo::Marshalling(Parcel &parcel) const
 {
     std::string callerAbilityInfoUri = callerAbilityInfo.GetURI();
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(callerAbilityInfoUri));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(callerAbilityInfo.codePath));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(callerAbilityInfo.installSource));
 
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, targetAbilityInfos.size());
     for (const auto &targetAbilityInfo : targetAbilityInfos) {
         std::string targetAbilityInfoUri = targetAbilityInfo.GetURI();
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(targetAbilityInfoUri));
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(targetAbilityInfo.codePath));
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(targetAbilityInfo.installSource));
     }
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &parameters);
     return true;

@@ -21,6 +21,7 @@
 
 #include "ability_info.h"
 #include "extension_ability_info.h"
+#include "start_specified_ability_params.h"
 #include "want.h"
 
 namespace OHOS {
@@ -32,10 +33,10 @@ struct StartAbilityInfo {
     static std::shared_ptr<StartAbilityInfo> CreateCallerAbilityInfo(const sptr<IRemoteObject> &callerToken);
 
     static std::shared_ptr<StartAbilityInfo> CreateStartExtensionInfo(const Want &want, int32_t userId,
-        int32_t appIndex);
+        int32_t appIndex, const std::string &hostBundleName = "");
 
     static void FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo);
+        int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, const std::string &hostBundleName = "");
 
     std::string GetAppBundleName() const
     {
@@ -62,6 +63,8 @@ struct StartAbilityUtils {
     static void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
     static int32_t StartUIAbilitiesProcessAppIndex(Want &want,
         sptr<IRemoteObject> callerToken, int32_t &appIndex);
+    static int32_t HandleSelfRedirection(bool isFromOpenLink,
+        const std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
 
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;
@@ -99,6 +102,9 @@ struct StartAbilityWrapParam {
     bool isFreeInstallFromService = false;
     uint64_t specifiedFullTokenId = 0;
     bool removeInsightIntentFlag = false;
+    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
+    bool isFromOpenLink = false;
+    bool isServiceMatch = false;
 };
 }
 }

@@ -383,5 +383,11 @@ ErrCode BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleNam
 {
     return ERR_OK;
 }
+
+ErrCode BundleMgrHelper::GetPluginExtensionInfo(const std::string &hostBundleName, const Want &want,
+    int32_t userId, ExtensionAbilityInfo &pluginExtensionInfo)
+{
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

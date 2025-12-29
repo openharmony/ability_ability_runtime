@@ -19,6 +19,8 @@
 #define protected public
 #include "ability_manager_service.h"
 #include "ability_connect_manager.h"
+#include "ui_extension_ability_manager.h"
+#include "common_extension_manager.h"
 #include "ability_connection.h"
 #include "ability_start_setting.h"
 #include "recovery_param.h"
@@ -248,19 +250,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetDataAbilityManagerByUserId_001, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetDataAbilityManagerByUserId_001 end");
 }
 
-/*
- * Feature: AbilityManagerService
- * Function: GetConnectManagerByToken
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GetConnectManagerByToken
- */
-HWTEST_F(AbilityManagerServiceThirdTest, GetConnectManagerByToken_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetConnectManagerByToken_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->GetConnectManagerByToken(nullptr), nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetConnectManagerByToken_001 end");
-}
 
 /*
  * Feature: AbilityManagerService
@@ -507,11 +496,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetAbilityRunningInfos_001, TestSize.Le
         EXPECT_EQ(abilityMs_->GetAbilityRunningInfos(info), ERR_INVALID_VALUE);
         abilityMs_->subManagersHelper_->currentMissionListManager_ = temp1;
 
-        auto temp2 = abilityMs_->subManagersHelper_->currentConnectManager_;
-        abilityMs_->subManagersHelper_->currentConnectManager_.reset();
-        EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
-        abilityMs_->subManagersHelper_->currentConnectManager_ = temp2;
-
         auto temp3 = abilityMs_->subManagersHelper_->currentDataAbilityManager_;
         abilityMs_->subManagersHelper_->currentDataAbilityManager_.reset();
         EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
@@ -592,7 +576,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, DisconnectBeforeCleanupByUserId_001, Te
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest DisconnectBeforeCleanupByUserId_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs_->subManagersHelper_->InitConnectManager(100, false);
+    abilityMs_->subManagersHelper_->InitCommonExtensionManager(100, false);
 
     auto abilityRecord = MockExtensionRecordBase(AbilityType::SERVICE);
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
@@ -601,14 +585,15 @@ HWTEST_F(AbilityManagerServiceThirdTest, DisconnectBeforeCleanupByUserId_001, Te
         std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
     abilityRecord->currentState_ = AbilityState::ACTIVE;
     abilityRecord->AddConnectRecordToList(connection1);
-    abilityMs_->GetConnectManagerByUserId(100)->AddConnectObjectToMap(callback1->AsObject(),
+    abilityMs_->GetCommonExtensionManagerByUserId(100)->AddConnectObjectToMap(callback1->AsObject(),
         abilityRecord->GetConnectRecordList(), false);
-    abilityMs_->GetConnectManagerByUserId(100)->serviceMap_.emplace(abilityRecord->GetElementName().GetURI(),
+    abilityMs_->GetCommonExtensionManagerByUserId(100)->serviceMap_.emplace(abilityRecord->GetElementName().GetURI(),
         abilityRecord);
 
     abilityMs_->DisconnectBeforeCleanupByUserId(100);
     ASSERT_EQ(abilityRecord->GetConnectRecordList().empty(), true);
-    ASSERT_EQ(abilityMs_->GetConnectManagerByUserId(100)->GetConnectRecordListByCallback(callback1).empty(), true);
+    ASSERT_EQ(
+        abilityMs_->GetCommonExtensionManagerByUserId(100)->GetConnectRecordListByCallback(callback1).empty(), true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest DisconnectBeforeCleanupByUserId_001 end");
 }
 
@@ -1270,8 +1255,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_001, TestSize
     StartAbilityWrapParam param = {
         .want = want,
         .callerToken = callerToken,
-        .userId = userId,
         .requestCode = requestCode,
+        .userId = userId,
     };
     auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
@@ -1293,8 +1278,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_002, TestSize
     StartAbilityWrapParam param = {
         .want = want,
         .callerToken = callerToken,
-        .userId = userId,
         .requestCode = requestCode,
+        .userId = userId,
     };
     auto result = abilityMs->StartAbilityByFreeInstall(param);
     EXPECT_EQ(result, ERR_INVALID_CONTINUATION_FLAG);
@@ -1644,8 +1629,16 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWrap_001, TestSize.Level1)
     uint32_t specifyToken = 0;
     bool isForegroundToRestartApp = true;
     bool isImplicit = true;
-    StartAbilityWrapParam startAbilityWrapParam = { want, callerToken, requestCode, false, userId, isStartAsCaller,
-        specifyToken, isForegroundToRestartApp, isImplicit };
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = want,
+        .callerToken = callerToken,
+        .requestCode = requestCode,
+        .userId = userId,
+        .isStartAsCaller = isStartAsCaller,
+        .specifyTokenId = specifyToken,
+        .isForegroundToRestartApp = isForegroundToRestartApp,
+        .isImplicit = isImplicit,
+    };
     auto result = abilityMs->StartAbilityWrap(startAbilityWrapParam);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
@@ -2444,8 +2437,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_001, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_FAIL);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 end");
 }
@@ -2466,8 +2465,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_002, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_FAIL);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 end");
 }
@@ -2488,8 +2493,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_003, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_NOT_TOP_ABILITY);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 end");
 }
@@ -2510,8 +2521,14 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_004, T
     AAFwk::Want convertedWant;
     Uri uri(FREE_INSTALL_ERR_OK);
     convertedWant.SetUri(uri);
-    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
-        token, USER_ID_U100, REQUESTCODE, true);
+    StartAbilityWrapParam param = {
+        .want = convertedWant,
+        .callerToken = token,
+        .requestCode = REQUESTCODE,
+        .userId = USER_ID_U100,
+        .removeInsightIntentFlag = true,
+    };
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(param, want);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 call result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 end");
 }

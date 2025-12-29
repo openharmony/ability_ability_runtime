@@ -514,5 +514,126 @@ HWTEST_F(StartAbilityUtilsTest, StartUIAbilitiesProcessAppIndex_003, TestSize.Le
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_003 end");
 }
+
+/**
+ * @tc.name: HandleSelfRedirection_001
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_001 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo };
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(false, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_001 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_002
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_002 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<AppExecFwk::AbilityInfo> infos;
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_002 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_003
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_003 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo, abilityInfo };
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_003 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_004
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_004 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo };
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_004 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_005
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_005 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.allowSelfRedirect = false;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo };
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_005 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_006
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_006 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.allowSelfRedirect = false;
+    abilityInfo.applicationInfo.uid = 100;
+    abilityInfo.linkType = AppExecFwk::LinkType::APP_LINK;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo };
+    MyStatus::GetInstance().processInfo_.uid_ = 200;
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_006 end");
+}
+
+/**
+ * @tc.name: HandleSelfRedirection_007
+ * @tc.desc: HandleSelfRedirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_007 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.allowSelfRedirect = false;
+    abilityInfo.applicationInfo.uid = 100;
+    abilityInfo.linkType = AppExecFwk::LinkType::APP_LINK;
+    std::vector<AppExecFwk::AbilityInfo> infos = { abilityInfo };
+    MyStatus::GetInstance().processInfo_.uid_ = 100;
+    int32_t ret = StartAbilityUtils::HandleSelfRedirection(true, infos);
+    EXPECT_EQ(ret, ERR_SELF_REDIRECTION_DISALLOWED);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest HandleSelfRedirection_007 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

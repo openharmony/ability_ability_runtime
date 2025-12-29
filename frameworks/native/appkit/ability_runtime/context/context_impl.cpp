@@ -1335,6 +1335,39 @@ void ContextImpl::InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::Abil
     }
 }
 
+void ContextImpl::InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+    const std::string &hostBundleName)
+{
+    if (pluginExtensionInfo_ == nullptr || abilityInfo == nullptr || hostBundleName.empty()) {
+        return;
+    }
+    int errCode = GetBundleManager();
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
+        return;
+    }
+    int accountId = GetCurrentAccountId();
+    if (accountId == 0) {
+        accountId = GetCurrentActiveAccountId();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", abilityInfo->bundleName, abilityInfo->name, abilityInfo->moduleName);
+    want.SetElement(element);
+    pluginExtensionInfo_ = std::make_shared<AppExecFwk::ExtensionAbilityInfo>();
+    if (bundleMgr_->GetPluginExtensionInfo(hostBundleName, want, accountId, *pluginExtensionInfo_) != ERR_OK) {
+        pluginExtensionInfo_ = nullptr;
+        TAG_LOGE(AAFwkTag::APPKIT, "GetPluginExtensionInfo false");
+    }
+}
+
+std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> ContextImpl::GetPluginExtensionInfo()
+{
+    if (pluginExtensionInfo_ == nullptr) {
+        TAG_LOGD(AAFwkTag::APPKIT, "pluginExtensionInfo_ is nullptr");
+    }
+    return pluginExtensionInfo_;
+}
+
 void ContextImpl::InitHapModuleInfo(const AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>(hapModuleInfo);
@@ -1693,6 +1726,7 @@ void ContextImpl::ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl)
     contextImpl->config_ = config_;
     contextImpl->currArea_ = currArea_;
     contextImpl->overlayModuleInfos_ = overlayModuleInfos_;
+    contextImpl->pluginExtensionInfo_ = pluginExtensionInfo_;
     {
         std::lock_guard<std::mutex> lock(checkedDirSetLock_);
         contextImpl->checkedDirSet_ = checkedDirSet_;
@@ -1846,6 +1880,18 @@ std::string ContextImpl::GetLatestParameter()
     }
     TAG_LOGW(AAFwkTag::APPKIT, "latestParameter_ is null");
     return "";
+}
+
+void ContextImpl::SetConfigUpdateReason(ConfigUpdateReason reason)
+{
+    std::lock_guard<std::mutex> lock(configUpdateReasonLock_);
+    configUpdateReason_ = reason;
+}
+
+ConfigUpdateReason ContextImpl::GetConfigUpdateReason()
+{
+    std::lock_guard<std::mutex> lock(configUpdateReasonLock_);
+    return configUpdateReason_;
 }
 
 #ifdef SUPPORT_GRAPHICS

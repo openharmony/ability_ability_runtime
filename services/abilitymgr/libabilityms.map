@@ -35,6 +35,7 @@
       *AbilityStartWithWaitObserverManager*;
       *AmsConfigurationParameter*;
       *AppExitReasonDataManager*;
+      *AppExitReasonHelper*;
       *ApplicationAnrListener*;
       *AppMgrUtil*;
       *AppScheduler*;
@@ -45,6 +46,7 @@
       *CallerInfo*;
       *CallerRecord*;
       *CallRecord*;
+      *CommonExtensionManager*;
       *ConnectionObserverController*;
       *ConnectionRecord*;
       *ConnectionStateItem*;
@@ -56,6 +58,7 @@
       *DisposedRuleInterceptor*;
       *DumpUtils*;
       *EcologicalRuleInterceptor*;
+      *ExitInfoDataManager*;
       *ExtensionPermissionsUtil*;
       *DataAbilityManager*;
       *BaseExtensionRecord*;
@@ -97,6 +100,7 @@
       *UriUtils*;
       *UserController*;
       *UnlockScreenManager*;
+      *UIExtensionAbilityManager*;
       *WantSenderInfo*;
       *SenderInfo*;
       *ExtensionRunningInfo*;

@@ -17,6 +17,7 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "app_utils.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -294,7 +295,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
 }
 
 std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(const Want &want, int32_t userId,
-    int32_t appIndex)
+    int32_t appIndex, const std::string &hostBundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bms = AbilityUtil::GetBundleManagerHelper();
@@ -309,7 +310,13 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
 
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     if (appIndex == 0) {
-        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryExtensionAbilityInfos(want, abilityInfoFlag, userId, extensionInfos));
+        if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+            AppExecFwk::ExtensionAbilityInfo pluginExtensionInfo;
+            IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, userId, pluginExtensionInfo));
+            extensionInfos.push_back(pluginExtensionInfo);
+        } else {
+            IN_PROCESS_CALL_WITHOUT_RET(bms->QueryExtensionAbilityInfos(want, abilityInfoFlag, userId, extensionInfos));
+        }
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxExtAbilityInfos(want, appIndex,
             abilityInfoFlag, userId, extensionInfos));
@@ -336,15 +343,19 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
 }
 
 void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_t userId,
-    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo)
+    int32_t appIndex, std::shared_ptr<StartAbilityInfo> abilityInfo, const std::string &hostBundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_LOG(abilityInfo, "abilityInfo is invalid.");
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_LOG(bms, "bms is invalid.");
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
-        flags, appIndex, extensionInfo, userId));
+    if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+        IN_PROCESS_CALL_WITHOUT_RET(bms->GetPluginExtensionInfo(hostBundleName, want, userId, extensionInfo));
+    } else {
+        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
+            flags, appIndex, extensionInfo, userId));
+    }
     if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
         abilityInfo->status = RESOLVE_ABILITY_ERR;
@@ -421,6 +432,25 @@ int32_t StartAbilityUtils::StartUIAbilitiesProcessAppIndex(Want &want,
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     return ERR_OK;
+}
+
+int32_t StartAbilityUtils::HandleSelfRedirection(bool isFromOpenLink,
+    const std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (!isFromOpenLink || abilityInfos.empty() || abilityInfos.size() > 1) {
+        return ERR_OK;
+    }
+    const AppExecFwk::AbilityInfo &abilityInfo = abilityInfos[0];
+    if (abilityInfo.allowSelfRedirect || abilityInfo.linkType != AppExecFwk::LinkType::APP_LINK) {
+        return ERR_OK;
+    }
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(
+        IPCSkeleton::GetCallingPid(), processInfo);
+    if (processInfo.uid_ != abilityInfo.applicationInfo.uid) {
+        return ERR_OK;
+    }
+    return ERR_SELF_REDIRECTION_DISALLOWED;
 }
 }
 }

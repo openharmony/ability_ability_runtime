@@ -389,5 +389,217 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_001, TestSize.Le
     std::string ret = "AppfreezeInner_ChangeFaultDateInfo_001AppfreezeInner_ChangeFaultDateInfo_001";
     EXPECT_EQ(faultData.errorObject.message, ret);
 }
+
+/**
+ * @tc.number: AppfreezeInner_ChangeFaultDateInfo_002
+ * @tc.name: ChangeFaultDateInfo
+ * @tc.desc: Verify that function ChangeFaultDateInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_002, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string testValue = "AppfreezeInner_ChangeFaultDateInfo_002";
+    std::string msgContent = testValue;
+    EXPECT_EQ(faultData.errorObject.message, "");
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    std::string ret = "AppfreezeInner_ChangeFaultDateInfo_002";
+    EXPECT_EQ(faultData.errorObject.message, ret);
+    EXPECT_EQ(faultData.forceExit, false);
+}
+
+/**
+ * @tc.number: AppfreezeInner_ChangeFaultDateInfo_003
+ * @tc.name: ChangeFaultDateInfo
+ * @tc.desc: Verify that function ChangeFaultDateInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_003, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string testValue = "AppfreezeInner_ChangeFaultDateInfo_003";
+    std::string msgContent = testValue;
+    faultData.errorObject.name = testValue;
+    faultData.timeoutMarkers = testValue;
+    faultData.eventId = 123;
+    faultData.needKillProcess = false;
+    faultData.appfreezeInfo = testValue;
+    faultData.appRunningUniqueId = testValue;
+    faultData.procStatm = testValue;
+    faultData.isEnableMainThreadSample = false;
+    uint64_t testTime = 12345;
+    faultData.schedTime = testTime;
+    faultData.detectTime = testTime;
+    int32_t count = 123;
+    faultData.appStatus = count;
+    faultData.samplerStartTime = testTime;
+    faultData.samplerFinishTime = testTime;
+    faultData.samplerCount = count;
+    faultData.pid = getpid();
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    EXPECT_EQ(faultData.errorObject.message, msgContent);
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    faultData.needKillProcess = true;
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    std::string ret = "AppfreezeInner_ChangeFaultDateInfo_003AppfreezeInner_ChangeFaultDateInfo_003";
+    EXPECT_EQ(faultData.errorObject.message, ret);
+    EXPECT_EQ(faultData.forceExit, true);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function SetMainHandler.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_SetMainHandler_001, TestSize.Level1)
+{
+    std::shared_ptr<EventHandler> eventHandler;
+    AppfreezeInner::SetMainHandler(eventHandler);
+    AppfreezeInner::SetMainHandler(nullptr);
+    std::shared_ptr<EventHandler> eventHandler1 = std::make_shared<EventHandler>();
+    EXPECT_TRUE(eventHandler1 != nullptr);
+    AppfreezeInner::SetMainHandler(eventHandler1);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function SetApplicationInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_SetApplicationInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> applicationInfo1;
+    appfreezeInner->SetApplicationInfo(applicationInfo1);
+    appfreezeInner->SetApplicationInfo(nullptr);
+    std::shared_ptr<ApplicationInfo> applicationInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_TRUE(applicationInfo != nullptr);
+    appfreezeInner->SetApplicationInfo(applicationInfo);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function IsHandleAppfreeze.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_IsHandleAppfreeze_001, TestSize.Level1)
+{
+    appfreezeInner->isAppDebug_ = true;
+    bool ret = appfreezeInner->IsHandleAppfreeze();
+    EXPECT_TRUE(!ret);
+    appfreezeInner->isAppDebug_ = false;
+    ret = appfreezeInner->IsHandleAppfreeze();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function GetMainHandlerDump.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetMainHandlerDump_001, TestSize.Level1)
+{
+    std::string testValue = "appfreeze";
+    std::string msgContent = testValue;
+    appfreezeInner->GetMainHandlerDump(msgContent);
+    bool ret = msgContent.find(testValue) != std::string::npos;
+    EXPECT_TRUE(!ret);
+    msgContent = "";
+    appfreezeInner->GetMainHandlerDump(msgContent);
+    ret = !msgContent.empty();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function GetProcessStartTime.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetProcessStartTime_001, TestSize.Level1)
+{
+    pid_t tid = 0;
+    unsigned long long startTime = 0;
+    bool ret = appfreezeInner->GetProcessStartTime(tid, startTime);
+    EXPECT_TRUE(!ret);
+    tid = gettid();
+    startTime = 0;
+    ret = appfreezeInner->GetProcessStartTime(tid, startTime);
+    EXPECT_TRUE(ret);
+    tid = gettid();
+    startTime = 1234;
+    ret = appfreezeInner->GetProcessStartTime(tid, startTime);
+    EXPECT_TRUE(ret);
+    tid = -1234;
+    startTime = 0;
+    ret = appfreezeInner->GetProcessStartTime(tid, startTime);
+    EXPECT_TRUE(!ret);
+    tid = -1234;
+    startTime = 1234;
+    ret = appfreezeInner->GetProcessStartTime(tid, startTime);
+    EXPECT_TRUE(!ret);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function LogFormat.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_LogFormat_001, TestSize.Level1)
+{
+    size_t totalSize = 0;
+    size_t objectSize = 0;
+    std::string ret = appfreezeInner->LogFormat(totalSize, objectSize);
+    std::string testValue = "HEAP_TOTAL_SIZE:0,HEAP_OBJECT_SIZE:0";
+    EXPECT_EQ(ret, testValue);
+    ret = appfreezeInner->LogFormat(totalSize, objectSize);
+    totalSize = 1234;
+    objectSize = 1234;
+    ret = appfreezeInner->LogFormat(totalSize, objectSize);
+    testValue = "HEAP_TOTAL_SIZE:1234,HEAP_OBJECT_SIZE:1234";
+    EXPECT_EQ(ret, testValue);
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function GetApplicationInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetApplicationInfo_001, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string testValue = "";
+    faultData.errorObject.name = testValue;
+    faultData.timeoutMarkers = testValue;
+    appfreezeInner->GetApplicationInfo(faultData);
+    EXPECT_TRUE(faultData.timeoutMarkers.empty());
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: Verify that function GetApplicationInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetApplicationInfo_002, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string testValue = "AppfreezeInnerTest_GetApplicationInfo_002";
+    faultData.errorObject.name = testValue;
+    faultData.timeoutMarkers = testValue;
+    faultData.eventId = 123;
+    faultData.needKillProcess = false;
+    faultData.appfreezeInfo = testValue;
+    faultData.appRunningUniqueId = testValue;
+    faultData.procStatm = testValue;
+    faultData.isEnableMainThreadSample = false;
+    uint64_t testTime = 12345;
+    faultData.schedTime = testTime;
+    faultData.detectTime = testTime;
+    int32_t count = 123;
+    faultData.appStatus = count;
+    faultData.samplerStartTime = testTime;
+    faultData.samplerFinishTime = testTime;
+    faultData.samplerCount = count;
+    faultData.pid = getpid();
+    appfreezeInner->GetApplicationInfo(faultData);
+    EXPECT_TRUE(!faultData.timeoutMarkers.empty());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

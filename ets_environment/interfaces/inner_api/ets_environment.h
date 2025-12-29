@@ -46,6 +46,7 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 class ETSEnvironment final : public std::enable_shared_from_this<ETSEnvironment> {
 public:
     ETSEnvironment() {};
+    ~ETSEnvironment();
 
     static std::unique_ptr<ETSEnvironment> &GetInstance();
     static void InitETSSDKNS(const std::string &path);
@@ -59,7 +60,7 @@ public:
     bool PreloadModule(const std::string &modulePath);
     bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
         void *&obj, void *&ref);
-    bool FinishPreload();
+    bool FinishPreload(napi_env jsEnv);
     bool PostFork(void *napiEnv, const std::string &aotPath, const std::vector<std::string>& appInnerHspPathList,
         const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
         const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner);
@@ -77,19 +78,29 @@ public:
     struct VMEntry {
         ani_vm *aniVm_;
         ani_env *aniEnv_;
+        ani_class abcLinkerClass_;
+        ani_ref abcLinkerRef_;
+        std::map<std::string, bool> abcCacheMap_;
+        std::mutex abcCacheMutex_;
+        bool isSetDefaultInteropLinker_;
         VMEntry()
         {
             aniVm_ = nullptr;
             aniEnv_ = nullptr;
+            abcLinkerClass_ = nullptr;
+            abcLinkerRef_ = nullptr;
+            isSetDefaultInteropLinker_ = false;
         }
     };
 
 private:
     bool ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector<std::string> &hapPathInfos,
-        ani_array_ref &refArray);
+        ani_array &refArray);
     std::vector<std::string> GetHspPathList();
-    bool GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, ani_class cls);
-    ani_object CreateRuntimeLinker(ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array_ref &refArray);
+    bool SetHspAbcFiles(ani_env *env, ani_object abcObj);
+    bool InitAbcLinker(ani_env *env);
+    bool AddAbcFiles(ani_env *env, const std::string &modulePath);
+    ani_object CreateRuntimeLinker(ani_env *aniEnv, ani_class cls, ani_ref undefinedRef, ani_array &refArray);
     bool LoadRuntimeApis();
     bool LoadSymbolCreateVM(void *handle, ETSRuntimeAPI &apis);
     bool LoadSymbolANIGetCreatedVMs(void *handle, ETSRuntimeAPI &apis);

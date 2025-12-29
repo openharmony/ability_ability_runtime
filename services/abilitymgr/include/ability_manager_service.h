@@ -29,6 +29,8 @@
 #include "ability_bundle_event_callback.h"
 #include "ability_config.h"
 #include "ability_connect_manager.h"
+#include "ui_extension_ability_manager.h"
+#include "common_extension_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_event_handler.h"
 #include "ability_info.h"
@@ -112,6 +114,7 @@ class AbilityManagerService : public SystemAbility,
 public:
     friend class PreloadManagerService;
     friend class StartOptionsUtils;
+    friend class UIAbilityLifecycleManager;
     static std::shared_ptr<AbilityManagerService> GetPubInstance();
 
     void OnStart() override;
@@ -122,6 +125,17 @@ public:
     virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 
     ServiceRunningState QueryServiceState() const;
+
+    /**
+     * StartAbilityWithServiceMatch with param, send param to ability manager service.
+     *
+     * @param param, the param of the ability to start.
+     * @param requestCode, Ability request code.
+     * @param userId, Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartAbilityWithServiceMatch(const InsightIntentExecuteParam &param,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE);
 
     /**
      * StartSelfUIAbility with want, start self uiability only on 2-in-1 devices.
@@ -1413,7 +1427,8 @@ public:
      */
     virtual int GetTopAbility(sptr<IRemoteObject> &token) override;
 
-    virtual int CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused) override;
+    virtual int CheckUIExtensionIsFocused(
+        uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId = 0) override;
 
     /**
      * The delegator calls this interface to move the ability to the foreground.
@@ -1637,9 +1652,10 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @param params The parameters to start specified ability.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want) override;
+    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params) override;
 
     /**
      * Notify sandbox app the result of saving file.
@@ -2402,6 +2418,7 @@ protected:
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
 
 private:
+    int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
     /**
@@ -2458,6 +2475,8 @@ private:
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
         uint64_t specifiedFullTokenId = 0);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
+    int32_t HandleExtensionConnectionByUserId(sptr<IAbilityConnection> connect, int32_t userId,
+        std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)> func);
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
@@ -2549,11 +2568,27 @@ private:
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
     int32_t HandleExtensionAbility(sptr<IAbilityConnection> connect,
         std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)>);
-    std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> GetConnectManagers();
-    std::shared_ptr<AbilityConnectManager> GetCurrentConnectManager();
-    std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(int32_t userId);
-    std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityConnectManager> GetConnectManagerByAbilityRecordId(const int64_t &abilityRecordId);
+    std::vector<std::shared_ptr<AbilityConnectManager>> GetConnectManagers();
+
+    int32_t GetServiceMapByUserId(AbilityConnectManager::ServiceMapType &serviceMap, int32_t userId);
+    std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(
+        int32_t userId, const AppExecFwk::ExtensionAbilityType type);
+    std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(
+        const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionAbilityType type);
+
+    std::unordered_map<int, std::shared_ptr<UIExtensionAbilityManager>> GetUIExtensionAbilityManagers();
+    std::shared_ptr<UIExtensionAbilityManager> GetCurrentUIExtensionAbilityManager();
+    std::shared_ptr<UIExtensionAbilityManager> GetUIExtensionAbilityManagerByUserId(int32_t userId);
+    std::shared_ptr<UIExtensionAbilityManager> GetUIExtensionAbilityManagerByToken(const sptr<IRemoteObject> &token);
+    std::shared_ptr<UIExtensionAbilityManager> GetUIExtensionAbilityManagerByAbilityRecordId(
+        const int64_t &abilityRecordId);
+
+    std::unordered_map<int, std::shared_ptr<CommonExtensionManager>> GetCommonExtensionManagers();
+    std::shared_ptr<CommonExtensionManager> GetCurrentCommonExtensionManager();
+    std::shared_ptr<CommonExtensionManager> GetCommonExtensionManagerByUserId(int32_t userId);
+    std::shared_ptr<CommonExtensionManager> GetCommonExtensionManagerByToken(const sptr<IRemoteObject> &token);
+    std::shared_ptr<CommonExtensionManager> GetCommonExtensionManagerByAbilityRecordId(const int64_t &abilityRecordId);
+
     std::shared_ptr<PendingWantManager> GetCurrentPendingWantManager();
     std::shared_ptr<PendingWantManager> GetPendingWantManagerByUserId(int32_t userId);
     std::unordered_map<int, std::shared_ptr<MissionListManagerInterface>> GetMissionListManagers();
@@ -2776,7 +2811,7 @@ private:
     bool CheckUserIdActive(int32_t userId);
 
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
-        std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<BaseExtensionRecord> &targetAbility,
+        std::shared_ptr<UIExtensionAbilityManager> &connectManager, std::shared_ptr<BaseExtensionRecord> &targetAbility,
         bool needCheck = false);
 
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
@@ -3016,9 +3051,7 @@ private:
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
 
-    int32_t OpenLinkFreeInstallAtomicService(Want &convertedWant, const Want &originalWant,
-        sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag,
-        bool hideFailureTipDialog = false);
+    int32_t OpenLinkFreeInstallAtomicService(StartAbilityWrapParam &param, const Want &originalWant);
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);

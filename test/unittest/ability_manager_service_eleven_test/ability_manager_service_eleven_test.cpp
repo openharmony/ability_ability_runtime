@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 
 #include "ability_connect_manager.h"
+#include "ui_extension_ability_manager.h"
+#include "common_extension_manager.h"
 #include "ability_connection.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
@@ -100,7 +102,7 @@ private:
     std::shared_ptr<PendingWantKey> key_;
 };
 
-class MockIWantSender : public IWantSender {
+class MockIWantSender : public PendingWantRecord {
 public:
     virtual ~MockIWantSender() {};
 
@@ -552,7 +554,7 @@ HWTEST_F(AbilityManagerServiceElevenTest, CancelWantSender_0004, TestSize.Level1
         new (std::nothrow) MockPendingWantRecord(nullptr, 0, 0, nullptr, pendingKey);
     sender->SetIRemoteObjectFlags(recordWithKey);
     abilityMs->CancelWantSender(sender);
-    asObjectfunctionFrequency = 5;
+    asObjectfunctionFrequency = 6;
     EXPECT_EQ(sender->GetasObjectfunctionFrequency(), asObjectfunctionFrequency);
 
     GTEST_LOG_(INFO) << "CancelWantSender_0004 end";
@@ -1054,9 +1056,9 @@ HWTEST_F(AbilityManagerServiceElevenTest, AttachAbilityThread_0010, TestSize.Lev
         abilityRecordTest->abilityInfo_.type = AppExecFwk::AbilityType::EXTENSION;
         abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
         EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
-        std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+        std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(0);
         EXPECT_NE(connectManager, nullptr);
-        abilityMs->subManagersHelper_->connectManagers_.emplace(0, connectManager);
+        abilityMs->subManagersHelper_->commonExtensionManagers_.emplace(0, connectManager);
         auto result = abilityMs->AttachAbilityThread(scheduler, token);
         EXPECT_NE(result, 0);
 

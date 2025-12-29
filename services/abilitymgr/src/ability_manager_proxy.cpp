@@ -3712,6 +3712,10 @@ int AbilityManagerProxy::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> 
 
 int AbilityManagerProxy::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start GetExtensionRunningInfos");
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -4206,7 +4210,7 @@ int AbilityManagerProxy::GetTopAbility(sptr<IRemoteObject> &token)
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4218,6 +4222,11 @@ int AbilityManagerProxy::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, 
 
     if (!data.WriteUint32(uiExtensionTokenId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uiExtensionTokenId write fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "displayId write fail");
         return ERR_INVALID_VALUE;
     }
 
@@ -4846,7 +4855,7 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     isColdStart = reply.ReadBool();
 }
 
-int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -4860,6 +4869,11 @@ int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
 
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+
+    if (!data.WriteParcelable(&params)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params write fail");
         return ERR_NATIVE_IPC_PARCEL_FAILED;
     }
 
@@ -6013,6 +6027,10 @@ int32_t AbilityManagerProxy::TransferAbilityResultForExtension(const sptr<IRemot
 
 void AbilityManagerProxy::NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start NotifyFrozenProcessByRSS");
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

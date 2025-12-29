@@ -26,12 +26,12 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *SIGNATURE_NAMESPACE_INTEROP_ABILITY_LIFECYCLE =
-    "L@ohos/app/ability/InteropAbilityLifecycleCallback/InteropAbilityLifecycle;";
+    "@ohos.app.ability.InteropAbilityLifecycleCallback.InteropAbilityLifecycle";
 constexpr const char *SIGNATURE_UIABILITY =
-    "Lstd/interop/ESValue;L@ohos/app/ability/InteropAbilityLifecycleCallback/InteropAbilityLifecycleCallback;:V";
+    "C{std.interop.ESValue}C{@ohos.app.ability.InteropAbilityLifecycleCallback.InteropAbilityLifecycleCallback}:";
 constexpr const char *SIGNATURE_UIABILITY_WINDOW_STAGE =
-    "Lstd/interop/ESValue;Lstd/interop/ESValue;"
-    "L@ohos/app/ability/InteropAbilityLifecycleCallback/InteropAbilityLifecycleCallback;:V";
+    "C{std.interop.ESValue}C{std.interop.ESValue}"
+    "C{@ohos.app.ability.InteropAbilityLifecycleCallback.InteropAbilityLifecycleCallback}:";
 constexpr const int32_t ERROR_CODE_NULL_ENV = -1;
 constexpr const int32_t ERROR_CODE_NULL_CALLBACK = -2;
 constexpr const int32_t ERROR_CODE_NULL_REF = -3;

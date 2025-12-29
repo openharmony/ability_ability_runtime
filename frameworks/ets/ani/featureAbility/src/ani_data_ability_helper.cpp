@@ -19,11 +19,11 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
-constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
-constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
-constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
-constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
+constexpr const char* CLASSNAME_INT = "std.core.Int";
+constexpr const char* CLASSNAME_BOOL = "std.core.Boolean";
+constexpr const char* CLASSNAME_STRING = "std.core.String";
+constexpr const char* CLASSNAME_ARRAY = "std.core.Array";
 void PutDouble(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani_object aniValue)
 {
     ani_double value = 0;
@@ -38,7 +38,7 @@ void PutDouble(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani
 void PutInt(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani_object aniValue)
 {
     ani_int value = 0;
-    ani_status status = env->Object_CallMethodByName_Int(aniValue, "unboxed", nullptr, &value);
+    ani_status status = env->Object_CallMethodByName_Int(aniValue, "toInt", nullptr, &value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FA, "Object_CallMethodByName_Int status: %{public}d", status);
         return;

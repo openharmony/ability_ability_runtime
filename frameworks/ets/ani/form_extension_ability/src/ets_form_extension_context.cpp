@@ -31,15 +31,15 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr ani_long ERROR_LONG_VALUE = -1;
-constexpr const char *FORM_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/FormExtensionContext/FormExtensionContext;";
-constexpr const char *CLEANER_CLASS_NAME = "Lapplication/FormExtensionContext/Cleaner;";
+constexpr const char *FORM_EXTENSION_CONTEXT_CLASS_NAME = "application.FormExtensionContext.FormExtensionContext";
+constexpr const char *CLEANER_CLASS_NAME = "application.FormExtensionContext.Cleaner";
 constexpr const char *SIGNATURE_START_ABILITY_FORM_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SIGNATURE_CONNECT_FORM_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
-constexpr const char *SIGNATURE_DISCONNECT_FORM_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_CHECK_WANT = "L@ohos/app/ability/Want/Want;:V";
-constexpr const char *SIGNATURE_CHECK_CONNECTION = ":V";
+    "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l";
+constexpr const char *SIGNATURE_DISCONNECT_FORM_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *SIGNATURE_CHECK_WANT = "C{@ohos.app.ability.Want.Want}:";
+constexpr const char *SIGNATURE_CHECK_CONNECTION = ":";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 
@@ -391,7 +391,7 @@ ani_object CreateEtsFormExtensionContext(ani_env *env, std::shared_ptr<FormExten
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Failed to find constructor, status : %{public}d", status);
         return nullptr;
     }

@@ -27,6 +27,7 @@ const std::string HIDE_FAILURE_TIP_DIALOG = "hideFailureTipDialog";
 bool UnwrapOpenLinkOptions(napi_env env, napi_value param, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         TAG_LOGE(AAFwkTag::JSNAPI, "invalid params");

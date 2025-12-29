@@ -60,5 +60,6 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/vertical_panel_manager:vertical_panel_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/want:want_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/wantagent:aniwantagent",
+    "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager:distributedmissionmanager_ani_pack",
   ]
 }

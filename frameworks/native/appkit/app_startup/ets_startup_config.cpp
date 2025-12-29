@@ -29,11 +29,11 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *STARTUP_CONFIG_CLASS_NAME = "L@ohos/app/appstartup/StartupConfig/StartupConfigImpl;";
-constexpr const char *STARTUP_CONFIG_ENTRY_CLASS_NAME = "L@ohos/app/appstartup/StartupConfigEntry/StartupConfigEntry;";
+constexpr const char *STARTUP_CONFIG_CLASS_NAME = "@ohos.app.appstartup.StartupConfig.StartupConfigImpl";
+constexpr const char *STARTUP_CONFIG_ENTRY_CLASS_NAME = "@ohos.app.appstartup.StartupConfigEntry.StartupConfigEntry";
 constexpr const char *STARTUP_CONFIG_ENTRY_SIGNATURE_ON_REQUEST_CUSTOM_MATCH_RULE =
-    "L@ohos/app/ability/Want/Want;:Lstd/core/String;";
-constexpr const char *STARTUP_LISTEN_SIGNATURE_ON_COMPLETED = "L@ohos/base/BusinessError;:V";
+    "C{@ohos.app.ability.Want.Want}:C{std.core.String}";
+constexpr const char *STARTUP_LISTEN_SIGNATURE_ON_COMPLETED = "C{@ohos.base.BusinessError}:";
 constexpr int32_t DEFAULT_AWAIT_TIMEOUT_MS = 10000;
 constexpr int32_t ARGC_ONE = 1;
 }
@@ -65,7 +65,7 @@ int32_t ETSStartupConfig::Init(Runtime &runtime, std::shared_ptr<Context> contex
     ani_status status = ANI_ERROR;
     ani_ref config = nullptr;
     if ((status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(configEntry), "onConfig",
-        ":L@ohos/app/appstartup/StartupConfig/StartupConfig;", &config)) != ANI_OK) {
+        ":C{@ohos.app.appstartup.StartupConfig.StartupConfig}", &config)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName_Ref onConfig failed");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -141,7 +141,7 @@ bool ETSStartupConfig::GetTimeoutMs(ani_env *env, ani_object config, int32_t &ti
         TAG_LOGE(AAFwkTag::STARTUP, "null env");
         return false;
     }
-    ani_status status = env->FindClass("L@ohos/app/appstartup/StartupConfig/StartupConfig;", &cls);
+    ani_status status = env->FindClass("@ohos.app.appstartup.StartupConfig.StartupConfig", &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "Findclass failed, status: %{public}d", status);
         return false;

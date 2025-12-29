@@ -31,7 +31,11 @@ void SubManagersHelper::InitSubManagers(int userId, bool switchUser)
 {
 }
 
-void SubManagersHelper::InitConnectManager(int32_t userId, bool switchUser)
+void SubManagersHelper::InitUIExtensionAbilityManager(int32_t userId, bool switchUser)
+{
+}
+
+void SubManagersHelper::InitCommonExtensionManager(int32_t userId, bool switchUser)
 {
 }
 
@@ -83,30 +87,66 @@ std::shared_ptr<DataAbilityManager> SubManagersHelper::GetDataAbilityManagerByTo
     return nullptr;
 }
 
-std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> SubManagersHelper::GetConnectManagers()
+std::vector<std::shared_ptr<AbilityConnectManager>> SubManagersHelper::GetConnectManagers()
 {
-    return connectManagers_;
+    return std::vector<std::shared_ptr<AbilityConnectManager>>{};
 }
 
-std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetCurrentConnectManager()
+std::unordered_map<int, std::shared_ptr<UIExtensionAbilityManager>> SubManagersHelper::GetUIExtensionAbilityManagers()
 {
-    return currentConnectManager_;
+    return uiExtensionAbilityManagers_;
 }
 
-std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByUserId(int32_t userId)
+std::shared_ptr<UIExtensionAbilityManager> SubManagersHelper::GetCurrentUIExtensionAbilityManager()
+{
+    return currentUIExtensionAbilityManager_;
+}
+
+std::shared_ptr<UIExtensionAbilityManager> SubManagersHelper::GetUIExtensionAbilityManagerByUserId(int32_t userId)
 {
     if (MyStatus::GetInstance().smhGetConnectManagerByToken_) {
-        return currentConnectManager_;
+        return currentUIExtensionAbilityManager_;
     }
     return nullptr;
 }
 
-std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByToken(const sptr<IRemoteObject> &token)
+std::shared_ptr<UIExtensionAbilityManager> SubManagersHelper::GetUIExtensionAbilityManagerByToken(
+    const sptr<IRemoteObject> &token)
 {
     return nullptr;
 }
 
-std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByAbilityRecordId(
+std::shared_ptr<UIExtensionAbilityManager> SubManagersHelper::GetUIExtensionAbilityManagerByAbilityRecordId(
+    const int64_t &abilityRecordId)
+{
+    return nullptr;
+}
+
+std::unordered_map<int, std::shared_ptr<CommonExtensionManager>> SubManagersHelper::GetCommonExtensionManagers()
+{
+    return commonExtensionManagers_;
+}
+
+std::shared_ptr<CommonExtensionManager> SubManagersHelper::GetCurrentCommonExtensionManager()
+{
+    return currentCommonExtensionManager_;
+}
+
+std::shared_ptr<CommonExtensionManager> SubManagersHelper::GetCommonExtensionManagerByUserId(int32_t userId)
+{
+    if (MyStatus::GetInstance().smhGetConnectManagerByToken_) {
+        return currentCommonExtensionManager_;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<CommonExtensionManager> SubManagersHelper::GetCommonExtensionManagerByToken(
+    const sptr<IRemoteObject> &token)
+{
+    return nullptr;
+}
+
+std::shared_ptr<CommonExtensionManager> SubManagersHelper::GetCommonExtensionManagerByAbilityRecordId(
     const int64_t &abilityRecordId)
 {
     return nullptr;

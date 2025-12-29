@@ -30,8 +30,8 @@ public:
     DISALLOW_COPY_AND_MOVE(ResSchedUtilBase);
 
     virtual void ReportUIExtensionProcColdStartToRss(
-        int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
-        const std::string& bundleName, const std::string& abilityName, const std::string& moduleName) = 0;
+        int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName, bool isPreloadUIExtension) = 0;
 };
 
 class ResSchedUtil : public ResSchedUtilBase {
@@ -43,8 +43,8 @@ public:
     static ResSchedUtil &GetInstance();
 
     MOCK_METHOD(void, ReportUIExtensionProcColdStartToRss,
-        (int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName,
-        const std::string& bundleName, const std::string& abilityName, const std::string& moduleName), ());
+        (int32_t extensionAbilityType, int hostPid, const std::string& hostBundleName, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName, bool isPreloadUIExtension), ());
 };
 
 } // namespace AAFwk

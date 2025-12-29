@@ -39,9 +39,6 @@
 #endif
 
 namespace OHOS {
-namespace AppExecFwk {
-class Configuration;
-}
 namespace Ace {
 class UIContent;
 }

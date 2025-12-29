@@ -593,8 +593,8 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityWithRemoveIntentFlag_003, 
     StartAbilityWrapParam param = {
         .want = want,
         .callerToken = callerToken,
-        .userId = userId,
         .requestCode = requestCode,
+        .userId = userId,
         .removeInsightIntentFlag = true,
     };
     auto ret = abilityMs_->StartAbilityWithRemoveIntentFlag(param);
@@ -620,8 +620,8 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByFreeInstall_001, TestSiz
     StartAbilityWrapParam param = {
         .want = want,
         .callerToken = callerToken,
-        .userId = userId,
         .requestCode = requestCode,
+        .userId = userId,
     };
     auto ret = abilityMs_->StartAbilityByFreeInstall(param);
     EXPECT_EQ(ret, ERR_INVALID_CALLER);

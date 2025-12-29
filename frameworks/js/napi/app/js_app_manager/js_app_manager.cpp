@@ -63,7 +63,6 @@ constexpr const char* ON_OFF_TYPE = "applicationState";
 constexpr const char* ON_OFF_TYPE_SYNC = "applicationStateEvent";
 constexpr const char* ON_OFF_TYPE_APP_FOREGROUND_STATE = "appForegroundState";
 constexpr const char* ON_OFF_TYPE_ABILITY_FIRST_FRAME_STATE = "abilityFirstFrameState";
-static std::mutex observerLock_;
 
 class JsAppManager final {
 public:
@@ -336,7 +335,6 @@ private:
                 isUsingFilter = true;
             }
         }
-        std::lock_guard<std::mutex> lock(observerLock_);
         if (observer_->GetJsObserverMapSize() == 0) {
             int32_t ret = appManager_->RegisterApplicationStateObserverWithFilter(observer_,
                 bundleNameList, appStateFilter, isUsingFilter);
@@ -383,7 +381,6 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-        std::lock_guard<std::mutex> lock(observerLock_);
         if (observerSync_->GetJsObserverMapSize() == 0) {
             int32_t ret = appManager_->RegisterApplicationStateObserver(observerSync_, bundleNameList);
             if (ret == 0) {
@@ -553,7 +550,6 @@ private:
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
         }
-        std::lock_guard<std::mutex> lock(observerLock_);
         observer->RemoveJsObserverObject(observerId);
         if (observer->GetJsObserverMapSize() == 0) {
             int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
@@ -631,7 +627,6 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-        std::lock_guard<std::mutex> lock(observerLock_);
         if (!observerSync_->FindObserverByObserverId(observerId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
             ThrowInvalidParamError(env, "not find observerId.");

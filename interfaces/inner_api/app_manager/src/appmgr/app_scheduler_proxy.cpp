@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,7 +408,7 @@ void AppSchedulerProxy::ScheduleProfileChanged(const Profile &profile)
     }
 }
 
-void AppSchedulerProxy::ScheduleConfigurationUpdated(const Configuration &config)
+void AppSchedulerProxy::ScheduleConfigurationUpdated(const Configuration &config, ConfigUpdateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     MessageParcel data;
@@ -419,6 +419,10 @@ void AppSchedulerProxy::ScheduleConfigurationUpdated(const Configuration &config
     }
     if (!data.WriteParcelable(&config)) {
         TAG_LOGD(AAFwkTag::APPMGR, "write profile failed");
+        return;
+    }
+    if (!data.WriteUint8(static_cast<uint8_t>(reason))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write flag failed.");
         return;
     }
     int32_t ret = SendTransactCmd(

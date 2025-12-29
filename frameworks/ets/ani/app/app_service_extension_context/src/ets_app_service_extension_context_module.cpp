@@ -38,7 +38,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *ETS_APP_SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
-    "Lapplication/AppServiceExtensionContext/AppServiceExtensionContext;";
+    "application.AppServiceExtensionContext.AppServiceExtensionContext";
 } // namespace
 
 ani_object EtsAppServiceExtensionContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, ani_object input,
@@ -436,9 +436,9 @@ void EtsAppServiceExtensionContextModuleInit(ani_env *aniEnv)
     }
 
     std::array nativeFuncs = {
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;Lstd/core/String;:Lstd/core/Object;",
+        ani_native_function { "nativeTransferStatic", "C{std.interop.ESValue}C{std.core.String}:C{std.core.Object}",
             reinterpret_cast<void*>(EtsAppServiceExtensionContextModule::NativeTransferStatic) },
-        ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+        ani_native_function { "nativeTransferDynamic", "C{std.core.Object}:C{std.interop.ESValue}",
             reinterpret_cast<void*>(EtsAppServiceExtensionContextModule::NativeTransferDynamic) },
     };
     status = aniEnv->Class_BindStaticNativeMethods(appServiceExtensionContextCls, nativeFuncs.data(),

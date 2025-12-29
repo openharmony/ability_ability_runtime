@@ -26,16 +26,17 @@ namespace OHOS {
 namespace AAFwk {
 bool HiddenStartUtils::IsHiddenStart(const StartOptions &options)
 {
-    if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission() &&
-        !PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
-        return false;
-    }
-
     if (options.processOptions == nullptr) {
         return false;
     }
 
     if (options.processOptions->startupVisibility != OHOS::AAFwk::StartupVisibility::STARTUP_HIDE) {
+        return false;
+    }
+
+    if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission() &&
+        (!options.processOptions->isPreloadStart ||
+        !PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission())) {
         return false;
     }
 

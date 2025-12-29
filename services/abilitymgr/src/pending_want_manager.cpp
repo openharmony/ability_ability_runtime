@@ -317,7 +317,7 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target,  SenderInfo
         TAG_LOGE(AAFwkTag::WANTAGENT, "target object null or a proxy");
         return ERR_INVALID_VALUE;
     }
-    sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> record = static_cast<PendingWantRecord*>(target.GetRefPtr());
     if (!CheckPermission(record)) {
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
@@ -376,7 +376,7 @@ void PendingWantManager::CancelWantSender(const bool isSystemAppCall, const sptr
         TAG_LOGE(AAFwkTag::WANTAGENT, "target object null or a proxy");
         return;
     }
-    sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> record = static_cast<PendingWantRecord*>(sender.GetRefPtr());
     CancelWantSenderLocked(*record, true);
 }
 
@@ -532,7 +532,7 @@ int32_t PendingWantManager::GetPendingWantUid(const sptr<IWantSender> &target)
         return -1;
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     return ((record != nullptr) ? (record->GetUid()) : (-1));
 }
@@ -550,7 +550,7 @@ int32_t PendingWantManager::GetPendingWantUserId(const sptr<IWantSender> &target
         TAG_LOGE(AAFwkTag::WANTAGENT, "target obj null or a proxy object");
         return -1;
     }
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     return ((record != nullptr) ? (record->GetKey()->GetUserId()) : (-1));
 }
@@ -569,7 +569,7 @@ std::string PendingWantManager::GetPendingWantBundleName(const sptr<IWantSender>
         return "";
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     if (record != nullptr) {
         return record->GetKey()->GetBundleName();
@@ -591,7 +591,7 @@ int32_t PendingWantManager::GetPendingWantCode(const sptr<IWantSender> &target)
         return -1;
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     return ((record != nullptr) ? (record->GetKey()->GetCode()) : (-1));
 }
@@ -610,7 +610,7 @@ int32_t PendingWantManager::GetPendingWantType(const sptr<IWantSender> &target)
         return -1;
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     return ((record != nullptr) ? (record->GetKey()->GetType()) : (-1));
 }
@@ -630,7 +630,7 @@ void PendingWantManager::RegisterCancelListener(const sptr<IWantSender> &sender,
         return;
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(sender.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     if (record == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null record. code = %{public}d",
@@ -657,7 +657,7 @@ void PendingWantManager::UnregisterCancelListener(const sptr<IWantSender> &sende
         return;
     }
 
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(sender.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     if (record == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null record");
@@ -685,7 +685,7 @@ int32_t PendingWantManager::GetPendingRequestWant(const sptr<IWantSender> &targe
         TAG_LOGE(AAFwkTag::WANTAGENT, "null want");
         return ERR_INVALID_VALUE;
     }
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
 
     if (targetRecord == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null targetRecord");
@@ -717,7 +717,7 @@ int32_t PendingWantManager::GetWantSenderInfo(const sptr<IWantSender> &target, s
         TAG_LOGE(AAFwkTag::WANTAGENT, "null info");
         return ERR_INVALID_VALUE;
     }
-    sptr<PendingWantRecord> targetRecord = iface_cast<PendingWantRecord>(obj);
+    sptr<PendingWantRecord> targetRecord = static_cast<PendingWantRecord*>(target.GetRefPtr());
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     if (record == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null record");

@@ -87,6 +87,7 @@ bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media:
 bool UnwrapPixelMapByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::shared_ptr<Media::PixelMap> &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsValue == nullptr) {
         return false;
@@ -254,6 +255,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 
 bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptions &startOptions, AAFwk::Want &want)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
@@ -276,6 +278,7 @@ EXTERN_C_END
 bool UnwrapCommonCompletionHandler(napi_env env, napi_value param,
     AbilityRuntime::OnRequestResult &onRequestSucc, AbilityRuntime::OnRequestResult &onRequestFail)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(env, param,
         COMPLETION_HANDLER, napi_object);
     if (completionHandler == nullptr) {
@@ -303,6 +306,7 @@ AbilityRuntime::OnRequestResult UnwrapCompletionHandlerOnRequestResult(napi_env 
         return nullptr;
     }
     return [env, ref, funcName](const AppExecFwk::ElementName &element, const std::string &message) {
+        AbilityRuntime::HandleScope handleScope(env);
         napi_value completionHandler = ref->GetNapiValue();
         napi_value onRequestResultObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
             funcName, napi_function);

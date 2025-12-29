@@ -45,7 +45,8 @@ public:
     void InitSyscapModule() override;
 
 private:
-    static void PostTaskToHandler(const char* taskName, uv_io_cb func, void* work, int status, int priority);
+    static void PostTaskToHandler(const uv_task_info_t* taskInfo);
+    static int CheckPendingHigherEvent(int priority);
 
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };

@@ -621,7 +621,8 @@ AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(sptr<IRemote
     return {};
 }
 
-ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused,
+    uint64_t displayId)
 {
     return ERR_OK;
 }
@@ -801,7 +802,7 @@ void AbilityManagerClient::SetRootSceneSession(sptr<IRemoteObject> rootSceneSess
 void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
 {}
 
-int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params)
 {
     return 0;
 }

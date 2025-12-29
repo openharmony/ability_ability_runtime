@@ -951,6 +951,22 @@ void ApplicationContext::SetLatestParameter(const AAFwk::Want &want)
     contextImpl_->SetLatestParameter(want);
 }
 
+ConfigUpdateReason ApplicationContext::GetConfigUpdateReason()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetConfigUpdateReason() :
+        ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
+}
+
+void ApplicationContext::SetConfigUpdateReason(ConfigUpdateReason reason)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "config update scene:%{public}u", static_cast<uint8_t>(reason));
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
+        return;
+    }
+    contextImpl_->SetConfigUpdateReason(reason);
+}
+
 sptr<IRemoteObject> ApplicationContext::GetToken()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetToken() : nullptr;

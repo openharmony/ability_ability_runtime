@@ -34,9 +34,9 @@ namespace {
 constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
 constexpr int32_t PARAMETER_ERROR = -1;
-constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
-constexpr const char* WANT_AGENT_NAMESPACE = "L@ohos/app/ability/wantAgent/wantAgent;";
-constexpr const char* CLEANER_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/Cleaner;";
+constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "@ohos.app.ability.wantAgent.wantAgent.CompleteDataImpl";
+constexpr const char* WANT_AGENT_NAMESPACE = "@ohos.app.ability.wantAgent.wantAgent";
+constexpr const char* CLEANER_CLASS = "@ohos.app.ability.wantAgent.wantAgent.Cleaner";
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -141,7 +141,7 @@ bool OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
         return false;
     }
@@ -511,22 +511,15 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         params.wants.emplace_back(want);
     }
 
-    ani_boolean isActionTypeUndefined = true;
+    ani_boolean isUndefined = true;
     ani_ref actionTypeRef = nullptr;
-    GetPropertyRef(env, info, "actionType", actionTypeRef, isActionTypeUndefined);
-    if (!isActionTypeUndefined) {
-        if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
-            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType)) {
-                return PARAMETER_ERROR;
-        }
+    if (!GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionType GetPropertyRef failed");
+        return PARAMETER_ERROR;
     }
-    ani_boolean isOperationTypeUndefined = true;
-    GetPropertyRef(env, info, "operationType", actionTypeRef, isOperationTypeUndefined);
-    if (isActionTypeUndefined && !isOperationTypeUndefined) {
-        if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
-            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType)) {
-                return PARAMETER_ERROR;
-        }
+    if (!isUndefined) {
+        AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(
+            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType);
     }
 
     ani_int requestCode = 0;
@@ -536,11 +529,13 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
     }
     params.requestCode = requestCode;
 
-    ani_boolean isActionFlagsRefUndefined = true;
     ani_ref actionFlagsRef = nullptr;
-    GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isActionFlagsRefUndefined);
-    if (!isActionFlagsRefUndefined) {
-        ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
+    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionFlags GetPropertyRef failed");
+        return PARAMETER_ERROR;
+    }
+    if (!isUndefined) {
+        ani_array actionFlagsArr = reinterpret_cast<ani_array>(actionFlagsRef);
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Array_GetLength failed status: %{public}d", status);
@@ -560,14 +555,18 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         }
     }
 
-    ani_boolean isExtraInfosUndefined = true;
-    ani_boolean isExtraInfoUndefined = true;
     ani_ref extraInfoRef = nullptr;
-    GetPropertyRef(env, info, "extraInfos", extraInfoRef, isExtraInfosUndefined);
-    if (isExtraInfosUndefined) {
-        GetPropertyRef(env, info, "extraInfo", extraInfoRef, isExtraInfoUndefined);
+    if (!GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfos GetPropertyRef failed");
+        return PARAMETER_ERROR;
     }
-    if (!isExtraInfosUndefined || !isExtraInfoUndefined) {
+    if (isUndefined) {
+        if (!GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfo GetPropertyRef failed");
+            return PARAMETER_ERROR;
+        }
+    }
+    if (!isUndefined) {
         if (!UnwrapWantParams(env, extraInfoRef, params.extraInfo)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
             return PARAMETER_ERROR;
@@ -799,7 +798,7 @@ ani_object EtsWantAgent::CreateEtsCompletedData(ani_env *env, const CompletedDis
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
         return nullptr;
     }
@@ -973,7 +972,7 @@ ani_status BindNativeFunctions(ani_env *env)
             reinterpret_cast<void *>(EtsWantAgent::CreateLocalWantAgent) },
         ani_native_function { "nativeIsLocalWantAgent", nullptr,
             reinterpret_cast<void *>(EtsWantAgent::IsLocalWantAgent) },
-        ani_native_function { "nativeTriggerCheck", "Lstd/core/Object;LwantAgent/triggerInfo/TriggerInfo;:V",
+        ani_native_function { "nativeTriggerCheck", "C{std.core.Object}C{wantAgent.triggerInfo.TriggerInfo}:",
             reinterpret_cast<void *>(EtsWantAgent::TriggerCheck) },
         ani_native_function { "nativeTriggerAsync", nullptr, reinterpret_cast<void *>(EtsWantAgent::TriggerAsync) },
     };

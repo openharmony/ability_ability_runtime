@@ -33,13 +33,15 @@ struct ErrorObject {
 
 struct UncaughtExceptionInfo {
     std::string hapPath;
-    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask;
+    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj, napi_env env,
+        napi_value exception)> uncaughtTask;
 };
 
 class NapiUncaughtExceptionCallback final {
 public:
     NapiUncaughtExceptionCallback(
-        std::function<void(const std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
+        std::function<void(const std::string summary, const JsEnv::ErrorObject errorObj, napi_env env,
+            napi_value exception)> uncaughtTask,
         std::shared_ptr<SourceMapOperator> sourceMapOperator, napi_env env)
         : uncaughtTask_(uncaughtTask), sourceMapOperator_(sourceMapOperator), env_(env)
     {}
@@ -65,9 +67,14 @@ public:
 #endif // SUPPORT_GRAPHICS
 
 private:
-    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask_;
+    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj, napi_env napi,
+        napi_value exception)> uncaughtTask_;
     std::shared_ptr<SourceMapOperator> sourceMapOperator_ = nullptr;
     napi_env env_ = nullptr;
+
+    void AppendStackTrace(const std::string& errorStack, std::string& summary);
+
+    void AppendAsyncStack(const napi_value& obj, std::string& summary);
 };
 } // namespace JsEnv
 } // namespace OHOS
