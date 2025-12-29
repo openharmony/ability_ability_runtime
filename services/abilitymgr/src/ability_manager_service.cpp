@@ -13611,6 +13611,15 @@ void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AppExe
         .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
+void AbilityManagerService::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal,
+    std::string &bundleName)
+{
+    if(DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->RecordSignalReason(
+        pid, uid, signal, bundleName) != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordSignalReason failed");
+    }
+}
+
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
