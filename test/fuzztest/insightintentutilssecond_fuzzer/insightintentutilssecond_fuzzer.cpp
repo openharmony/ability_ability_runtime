@@ -35,6 +35,16 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityFuzzUtil::GetRandomExtractInsightIntentGenericInfo(fdp, genericInfo);
     AbilityFuzzUtil::GetRandomInsightIntentInfoForQuery(fdp, queryInfo);
     utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
+    genericInfo.decoratorType = INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
+    utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
+    genericInfo.decoratorType = INSIGHT_INTENTS_DECORATOR_TYPE_PAGE;
+    utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
+    genericInfo.decoratorType = INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY;
+    utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
+    genericInfo.decoratorType = INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION;
+    utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
+    genericInfo.decoratorType = INSIGHT_INTENTS_DECORATOR_TYPE_FORM;
+    utils.ConvertExtractInsightIntentGenericInfo(genericInfo, queryInfo);
 
     return true;
 }

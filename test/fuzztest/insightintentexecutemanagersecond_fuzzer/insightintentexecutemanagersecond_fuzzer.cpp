@@ -45,6 +45,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckIntentIsExemption(uid);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetAllIntentExemptionInfo();
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->OnInsightAppDied(callerBundleName);
 
     return true;
 }
