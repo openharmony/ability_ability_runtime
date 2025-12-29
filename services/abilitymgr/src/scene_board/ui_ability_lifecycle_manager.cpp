@@ -3662,7 +3662,8 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
         std::vector<sptr<IRemoteObject>> tokens;
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(pid, tokens));
-        for (const auto &token : PrepareTerminateAppAndGetRemaining(pid, tokens)) {
+        auto remainingTokens = PrepareTerminateAppAndGetRemaining(pid, tokens);
+        for (const auto &token : remainingTokens) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
             if (PrepareTerminateAbility(abilityRecord, true)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate blocked");
@@ -3670,12 +3671,28 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
             }
             abilitysToTerminate.emplace(abilityRecord);
         }
+        SetProcessPrepareExit(pid, remainingTokens.size(), abilitysToTerminate.size());
         for (const auto &abilityRecord : abilitysToTerminate) {
             TerminateSession(abilityRecord);
         }
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "end.");
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::SetProcessPrepareExit(int32_t pid, size_t remainingTokensSize,
+    size_t abilitysToTerminateSize) const
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "remianningTokens %{public}zu, abilitysToTerminate %{public}zu",
+        remainingTokensSize, abilitysToTerminateSize);
+    if (remainingTokensSize == abilitysToTerminateSize) {
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        if (appMgr == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
+        } else {
+            IN_PROCESS_CALL_WITHOUT_RET(appMgr->SetProcessPrepareExit(pid));
+        }
+    }
 }
 
 void UIAbilityLifecycleManager::TryPrepareTerminateByPidsDone(const std::string &moduleName,

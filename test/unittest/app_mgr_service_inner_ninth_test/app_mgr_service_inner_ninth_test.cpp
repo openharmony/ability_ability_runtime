@@ -2285,6 +2285,27 @@ HWTEST_F(AppMgrServiceInnerNinthTest, SignRestartProcess_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetProcessPrepareExit_0100
+ * @tc.desc: Test SetProcessPrepareExit
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, SetProcessPrepareExit_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetProcessPrepareExit_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    appMgrServiceInner->SetProcessPrepareExit(0);
+
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = appRecord;
+    appMgrServiceInner->SetProcessPrepareExit(0);
+    EXPECT_TRUE(appRecord->isTerminating);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "SetProcessPrepareExit_0100 end");
+}
+
+/**
  * @tc.name: KillChildProcessByPid_0100
  * @tc.desc: Test KillChildProcessByPid
  * @tc.type: FUNC

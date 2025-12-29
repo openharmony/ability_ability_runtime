@@ -531,5 +531,31 @@ HWTEST_F(AppMgrServiceThirdTest, KillProcessByPidForExit_001, TestSize.Level1)
     res = appMgrService->KillProcessByPidForExit(0, "");
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: SetProcessPrepareExit
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService SetProcessPrepareExit
+ * EnvConditions: NA
+ * CaseDescription: Verify SetProcessPrepareExit
+ */
+HWTEST_F(AppMgrServiceThirdTest, SetProcessPrepareExit_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->SetProcessPrepareExit(0);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    EXPECT_TRUE(appMgrService->IsReady());
+
+    AAFwk::MyFlag::flag_ = 0;
+    appMgrService->SetProcessPrepareExit(0);
+
+    AAFwk::MyFlag::flag_ = 1;
+    appMgrService->SetProcessPrepareExit(0);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
