@@ -862,7 +862,6 @@ bool UnwrapStringArrayByPropertyName(
 bool UnwrapComplexArrayByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, ComplexArrayData &value)
 {
-    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsArray = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
     if (jsArray == nullptr) {
         return false;
