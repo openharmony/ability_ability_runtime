@@ -113,36 +113,6 @@ void AbilityConnectManagerSecondTest::TearDown(void)
 
 /*
  * Feature: AbilityConnectManager
- * Function: PreloadUIExtensionAbilityInner
- */
-HWTEST_F(AbilityConnectManagerSecondTest, PreloadUIExtensionAbilityInner_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "PreloadUIExtensionAbilityInner_001 start");
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
-    EXPECT_NE(connectManager, nullptr);
-    std::string hostBundleName = "hostBundleName";
-    int32_t hostPid = 1;
-
-    auto res = connectManager->PreloadUIExtensionAbilityInner(abilityRequest_, hostBundleName, hostPid);
-    EXPECT_EQ(res, ERR_WRONG_INTERFACE_CALL);
-
-    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
-    res = connectManager->PreloadUIExtensionAbilityInner(abilityRequest_, hostBundleName, hostPid);
-    EXPECT_EQ(res, ERR_OK);
-
-    abilityRequest_.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
-    res = connectManager->PreloadUIExtensionAbilityInner(abilityRequest_, hostBundleName, hostPid);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-
-    abilityRequest_.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, false);
-    abilityRequest_.extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
-    res = connectManager->PreloadUIExtensionAbilityInner(abilityRequest_, hostBundleName, hostPid);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "PreloadUIExtensionAbilityInner_001 end");
-}
-
-/*
- * Feature: AbilityConnectManager
  * Function: GetExtensionByIdFromTerminatingMap
  */
 HWTEST_F(AbilityConnectManagerSecondTest, GetExtensionByIdFromTerminatingMap_001, TestSize.Level1)
@@ -150,7 +120,7 @@ HWTEST_F(AbilityConnectManagerSecondTest, GetExtensionByIdFromTerminatingMap_001
     TAG_LOGI(AAFwkTag::TEST, "GetExtensionByIdFromTerminatingMap_001 start");
     std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
     EXPECT_NE(connectManager, nullptr);
-    int64_t abilityRecordId = 1;
+    int64_t abilityRecordId = -1;
 
     std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
         abilityRequest_);

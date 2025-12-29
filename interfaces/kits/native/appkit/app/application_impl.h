@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include "application_info.h"
+#include "configuration.h"
 #include "profile.h"
 #include "iremote_object.h"
 #include "ability_local_record.h"
@@ -127,9 +128,10 @@ public:
      * @brief System determines to send the new config to application.
      *
      * @param config Indicates the updated configuration information.
-     *
+     * @param reason Indicates the updated configuration scene flag.
      */
-    void PerformConfigurationUpdated(const Configuration &config);
+    void PerformConfigurationUpdated(const Configuration &config,
+        ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
 
     enum {
         APP_STATE_CREATE = 0,

@@ -455,8 +455,10 @@ private:
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
-    void ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId);
-    bool UpdateConfiguration(std::shared_ptr<AppRunningRecord> &appRecord, Rosen::ConfigMode configMode);
+    void ExecuteConfigurationTask(const BackgroundAppInfo& info,
+        const int32_t userId, ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
+    bool UpdateConfiguration(std::shared_ptr<AppRunningRecord> &appRecord,
+        Rosen::ConfigMode configMode, ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
     bool IsSameAbilityType(
         const std::shared_ptr<AppRunningRecord> &appRecord, const AppExecFwk::AbilityInfo &abilityInfo);
 private:

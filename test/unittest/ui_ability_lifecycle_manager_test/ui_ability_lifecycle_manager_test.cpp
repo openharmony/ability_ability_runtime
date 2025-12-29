@@ -343,6 +343,35 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartUIAbility_1200
+ * @tc.desc: StartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1200, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    sessionInfo->reuseDelegatorWindow = true;
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->isPreloadStart = false;
+    sessionInfo->processOptions->callingPid = 2000;
+    sessionInfo->processOptions->loadAbilityCallbackId = 123456;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetPid(1000);
+    mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    abilityRequest.appInfo.uid = 3000;
+    bool isColdStart = false;
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, false, isColdStart), ERR_OK);
+    EXPECT_FALSE(isColdStart);
+    EXPECT_NE(abilityRequest.processOptions, nullptr);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_0100
  * @tc.desc: CreateSessionInfo
  * @tc.type: FUNC
@@ -4774,6 +4803,114 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_005, TestSize.Level1
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_0600
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_0600, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId = AbilityManagerService::LOAD_TIMEOUT_MSG;
+    std::string msgContent;
+    std::string ret = "load timeout.";
+    int typeId;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), true);
+    EXPECT_EQ(msgContent, ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_0700
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_0700, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId = AbilityManagerService::FOREGROUND_TIMEOUT_MSG;
+    std::string msgContent;
+    std::string ret = "foreground timeout.";
+    int typeId;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), true);
+    EXPECT_EQ(msgContent, ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_0800
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_0800, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId = AbilityManagerService::BACKGROUND_TIMEOUT_MSG;
+    std::string msgContent;
+    std::string ret = "background timeout.";
+    int typeId;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), true);
+    EXPECT_EQ(msgContent, ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_0900
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_0900, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId = AbilityManagerService::TERMINATE_TIMEOUT_MSG;
+    std::string msgContent;
+    std::string ret = "terminate timeout.";
+    int typeId;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), true);
+    EXPECT_EQ(msgContent, ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_1000
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_1000, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId = AbilityManagerService::ACTIVE_TIMEOUT_MSG;
+    std::string msgContent;
+    std::string ret = "active timeout.";
+    int typeId;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), false);
+    EXPECT_NE(msgContent, ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetContentAndTypeId_1100
+ * @tc.desc: GetContentAndTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_1100, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    uint32_t msgId1 = AbilityManagerService::LOAD_TIMEOUT_MSG;
+    std::string msgContent1;
+    int typeId1 = -1;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId1, msgContent1, typeId1), true);
+    
+    uint32_t msgId2 = AbilityManagerService::FOREGROUND_TIMEOUT_MSG;
+    std::string msgContent2;
+    int typeId2 = -1;
+    EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId2, msgContent2, typeId2), true);
+    
+    EXPECT_NE(msgContent1, msgContent2);
+    EXPECT_EQ(typeId1, typeId2);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_CheckCallerFromBackground_0100
  * @tc.desc: CheckCallerFromBackground
  * @tc.type: FUNC
@@ -7216,6 +7353,55 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsUIAbilityAlreadyExist_0003, TestSize.L
     mgr->sessionAbilityMap_[5] = record;
     ret = mgr->IsUIAbilityAlreadyExist(want, "flag", 0, "key", AppExecFwk::LaunchMode::STANDARD);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0001
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0002
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->recordId_ = 100;
+    mgr->sessionAbilityMap_.emplace(1, record);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: FindUIAbilityRecordByIdLocked_0003
+ * @tc.desc: FindUIAbilityRecordByIdLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->recordId_ = 100;
+    mgr->terminateAbilityList_.push_back(record);
+    auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
+    EXPECT_NE(ret, nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

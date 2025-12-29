@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* WANT_AGENT_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/WantAgentCls;";
+constexpr const char* WANT_AGENT_CLASS = "@ohos.app.ability.wantAgent.wantAgent.WantAgentCls";
 
 ani_object CreateWantAgent(ani_env *env, ani_long ptr)
 {
@@ -31,7 +31,7 @@ ani_object CreateWantAgent(ani_env *env, ani_long ptr)
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod status: %{public}d, or null method", status);
         return nullptr;
     }

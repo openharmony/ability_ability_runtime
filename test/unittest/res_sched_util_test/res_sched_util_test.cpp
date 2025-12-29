@@ -110,8 +110,9 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0400, TestSize.Level2)
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
     std::string moduleName = "moduleName";
+    bool isPreloadUIExtension = false;
     AAFwk::ResSchedUtil::GetInstance().ReportUIExtensionProcColdStartToRss(pickerType,
-        hostPid, hostBundleName, bundleName, abilityName, moduleName);
+        hostPid, hostBundleName, bundleName, abilityName, moduleName, isPreloadUIExtension);
     SUCCEED();
     int64_t resSchedType = AAFwk::RES_TYPE_SCB_START_ABILITY;
     int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);

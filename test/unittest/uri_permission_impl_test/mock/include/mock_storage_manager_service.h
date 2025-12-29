@@ -72,6 +72,11 @@ public:
         return E_OK;
     }
 
+    virtual int32_t IsUsbFuseByType(const std::string &fsType, bool &enabled) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t GetFreeSizeOfVolume(const std::string &volumeUuid, int64_t &freeSize) override
     {
         return E_OK;

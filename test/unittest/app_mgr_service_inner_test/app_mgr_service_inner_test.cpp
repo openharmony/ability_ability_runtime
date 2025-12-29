@@ -548,7 +548,7 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     // do test1
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, nullptr, false);
 
     int32_t hostPid = 102;
     // fill want
@@ -558,9 +558,9 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
     want->SetModuleName("moduleName");
 
     // do test2
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(nullptr, want, false);
     // do test3
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, nullptr, false);
 
     // fill extensionAbilityType
     abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR; // 504
@@ -571,10 +571,11 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
         StrEq(""),
         StrEq("bundleName"),
         StrEq("abilityName"),
-        StrEq("moduleName")
+        StrEq("moduleName"),
+        Eq(false)
     )).Times(1);
     // do test4
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 
     // fill appRunningManager_
     std::string hostBundleName = "wantHostBundleName";
@@ -597,15 +598,16 @@ HWTEST_F(AppMgrServiceInnerTest, ReportUIExtensionProcColdStartToRss_001, TestSi
         StrEq(hostBundleName),
         StrEq("bundleName"),
         StrEq("abilityName"),
-        StrEq("moduleName")
+        StrEq("moduleName"),
+        Eq(false)
     )).Times(1);
     // do test5
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 
     // fill abilityInfo_ with not UIExtension
     abilityInfo_->extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     // do test6
-    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want);
+    appMgrServiceInner->ReportUIExtensionProcColdStartToRss(abilityInfo_, want, false);
 }
 
 /**
@@ -4268,6 +4270,25 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: BuildStartFlags_004
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_004, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_004 start");
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    abilityInfo.applicationInfo.cloudFileSyncEnabled = true;
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << APP_FLAGS_CLOUD_FILE_SYNC_ENABLED);
+    EXPECT_EQ(result, flag);
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_004 end");
+}
+
+/**
  * @tc.name: RegisterFocusListener_001
  * @tc.desc: register focus listener.
  * @tc.type: FUNC
@@ -5428,6 +5449,7 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
+    EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
     appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
 }
 
@@ -5705,6 +5727,93 @@ HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_1200, TestSize.Level1)
     int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
     TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1200 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0100
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadExtension_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0100 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0200
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadExtension_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = -1;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    MyFlag::flag_ = 1; // pass VerifyPreloadApplicationPermission
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0200 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0300
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadExtension_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    MyFlag::flag_ = 1;
+
+    appMgrServiceInner->appPreloader_ = nullptr;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0300 end");
 }
 
 /**

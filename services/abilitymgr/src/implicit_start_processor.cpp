@@ -16,6 +16,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "app_utils.h"
 #include "dialog_session_manager.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
@@ -525,6 +526,11 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         ProcessLinkType(abilityInfos);
     }
 
+    if (auto ret = StartAbilityUtils::HandleSelfRedirection(request.isFromOpenLink, abilityInfos); ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "disallow self redirection");
+        return ret;
+    }
+
 #ifdef WITH_DLP
     if (request.want.GetBoolParam(AbilityUtil::DLP_PARAMS_SANDBOX, false)) {
         Security::DlpPermission::DlpFileKits::ConvertAbilityInfoWithSupportDlp(request.want, abilityInfos);
@@ -610,6 +616,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         dialogAppInfo.visible = info.visible;
         dialogAppInfo.appIndex = info.applicationInfo.appIndex;
         dialogAppInfo.multiAppMode = info.applicationInfo.multiAppMode;
+        dialogAppInfo.codePath = info.applicationInfo.codePath;
+        dialogAppInfo.installSource = info.applicationInfo.installSource;
         dialogAppInfos.emplace_back(dialogAppInfo);
     }
     KioskManager::GetInstance().FilterDialogAppInfos(dialogAppInfos);
@@ -659,6 +667,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAppIndexes(int32_t userId, A
         dialogAppInfo.visible = info.visible;
         dialogAppInfo.appIndex = info.applicationInfo.appIndex;
         dialogAppInfo.multiAppMode = info.applicationInfo.multiAppMode;
+        dialogAppInfo.codePath = info.applicationInfo.codePath;
+        dialogAppInfo.installSource = info.applicationInfo.installSource;
         dialogAppInfos.emplace_back(dialogAppInfo);
     }
     return ERR_OK;
@@ -729,6 +739,8 @@ int ImplicitStartProcessor::QueryBmsAppInfos(AbilityRequest &request, int32_t us
             dialogAppInfo.visible = abilityInfo.visible;
             dialogAppInfo.appIndex = abilityInfo.applicationInfo.appIndex;
             dialogAppInfo.multiAppMode = abilityInfo.applicationInfo.multiAppMode;
+            dialogAppInfo.codePath = abilityInfo.applicationInfo.codePath;
+            dialogAppInfo.installSource = abilityInfo.applicationInfo.installSource;
             dialogAppInfos.emplace_back(dialogAppInfo);
         }
     }
@@ -981,6 +993,8 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
     dialogAppInfo.appIndex = param.info.appIndex;
     dialogAppInfo.multiAppMode = param.info.applicationInfo.multiAppMode;
     dialogAppInfo.isAppLink = (param.info.linkType == AppExecFwk::LinkType::APP_LINK);
+    dialogAppInfo.codePath = param.info.applicationInfo.codePath;
+    dialogAppInfo.installSource = param.info.applicationInfo.installSource;
     dialogAppInfos.emplace_back(dialogAppInfo);
 }
 

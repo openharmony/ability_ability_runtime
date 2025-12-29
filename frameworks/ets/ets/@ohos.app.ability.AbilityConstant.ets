@@ -25,6 +25,8 @@ namespace AbilityConstant {
     lastExitReason: LastExitReason;
     lastExitMessage: string;
     lastExitDetailInfo?: LastExitDetailInfo;
+    launchUptime?: long;
+    launchUTCTime?: long;
   }
 
   export interface LastExitDetailInfo {
@@ -126,6 +128,8 @@ class LaunchParamImpl implements AbilityConstant.LaunchParam {
   lastExitReason: AbilityConstant.LastExitReason = AbilityConstant.LastExitReason.UNKNOWN;
   lastExitMessage: string = '';
   lastExitDetailInfo?: AbilityConstant.LastExitDetailInfo = undefined;
+  launchUptime?: long = 0;
+  launchUTCTime?: long = 0;
 }
 
 class LastExitDetailInfoImpl implements AbilityConstant.LastExitDetailInfo {

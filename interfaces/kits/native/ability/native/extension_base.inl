@@ -110,9 +110,11 @@ void ExtensionBase<C>::OnMemoryLevel(int level)
     Extension::OnMemoryLevel(level);
     TAG_LOGD(AAFwkTag::EXT, "called");
 
-    if (extensionCommon_) {
-        extensionCommon_->OnMemoryLevel(level);
+    if (!extensionCommon_) {
+        TAG_LOGE(AAFwkTag::EXT, "extensionCommon_ nullptr");
+        return;
     }
+    extensionCommon_->OnMemoryLevel(level);
 }
 
 template<class C>

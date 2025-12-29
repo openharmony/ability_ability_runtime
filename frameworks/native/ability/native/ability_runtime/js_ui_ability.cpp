@@ -24,6 +24,7 @@
 #include "ability_recovery.h"
 #include "ability_start_setting.h"
 #include "app_recovery.h"
+#include "bool_wrapper.h"
 #include "connection_manager.h"
 #include "context/application_context.h"
 #include "context/context.h"
@@ -72,6 +73,9 @@ constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const int32_t PROMISE_CALLBACK_PARAM_NUM = 2;
 constexpr const int32_t CALL_BACK_ERROR = -1;
+#ifdef SUPPORT_GRAPHICS
+const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
+#endif
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -200,6 +204,7 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     const std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext)
 {
     CHECK_POINTER(contextRef);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value contextObj = contextRef->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get ability native object failed");
@@ -464,6 +469,7 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
 
 void JsUIAbility::CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
         contextObj = CreateJsAbilityContext(env, abilityContext_);
         CHECK_POINTER(contextObj);
@@ -1328,6 +1334,8 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
+        std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
+            FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat");
         ability->RequestFocus(want);
     };
     callback->Push(asyncCallback);
@@ -1340,7 +1348,7 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
@@ -1373,6 +1381,8 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
+        std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
+            FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground");
         ability->CallOnForegroundFunc(want);
     };
     callback->Push(asyncCallback);
@@ -1386,6 +1396,7 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
         return;
     }
     RegisterDelayResultCallback(executeParam);
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
     if (!ret) {
@@ -1549,6 +1560,7 @@ void JsUIAbility::OnAbilityRequestFailure(const std::string &requestId, const Ap
     const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestFailure called");
+    HandleScope handle(jsRuntime_);
     UIAbility::OnAbilityRequestFailure(requestId, element, message, resultCode);
     auto abilityContext = GetAbilityContext();
     if (abilityContext == nullptr) {
@@ -1562,6 +1574,7 @@ void JsUIAbility::OnAbilityRequestSuccess(const std::string &requestId, const Ap
     const std::string &message)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestSuccess called");
+    HandleScope handle(jsRuntime_);
     UIAbility::OnAbilityRequestSuccess(requestId, element, message);
     auto abilityContext = GetAbilityContext();
     if (abilityContext == nullptr) {
@@ -1668,7 +1681,20 @@ int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
         JsAbilityLifecycleCallbackArgs ability(jsAbilityObj_);
         applicationContext->DispatchOnAbilityContinue(ability);
     }
-
+#ifdef SUPPORT_GRAPHICS
+    auto value = wantParams.GetParam(SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME);
+    AAFwk::IBoolean *ao = AAFwk::IBoolean::Query(value);
+    if (ao == nullptr || AAFwk::Boolean::Unbox(ao)) {
+        std::string pageStack = GetContentInfo();
+        if (pageStack.empty()) {
+            TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
+            status = CONTINUE_GET_CONTENT_FAILED;
+        } else {
+            TAG_LOGI(AAFwkTag::CONTINUATION, "pageStack: %{public}s", pageStack.c_str());
+            wantParams.SetParam(PAGE_STACK_PROPERTY_NAME, AAFwk::String::Box(pageStack));
+        }
+    }
+#endif
     Want want;
     want.SetParams(wantParams);
     want.AddFlags(want.FLAG_ABILITY_CONTINUATION);

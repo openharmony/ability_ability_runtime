@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.distributedMissionManager", "distributedMissionManager")
+@!sts_export_default
+
+@!sts_inject_into_module("""
+import { AsyncCallback, Callback, BusinessError } from '@ohos.base';
+""")
+
+use ContinuableInfo as appContinuableInfo;
+use MissionParameter as appMissionParameter;
+use MissionDeviceInfo as appMissionDeviceInfo;
+use MissionCallbacks as appMissionCallback;
+use ContinueMissionInfo as appContinueMissionInfo;
+use ContinueCallback as appContinueCallback;
+use ContinueDeviceInfo as appContinueDeviceInfo;
+
+enum ContinueState : i32 {
+  ACTIVE = 0,
+  INACTIVE = 1,
+}
+
+struct ContinueCallbackInfo {
+  state: ContinueState;
+  info: appContinuableInfo.ContinuableInfo;
+}
+
+@!sts_inject("""
+  static { loadLibrary("distributedmissionmanager_ani.z"); }
+
+    function on(event: string, cb: (arg0 : Object) => void) : void {
+      switch (event) {
+            case "continueStateChange": {
+              onContinueStateChange(cb as (info: ContinueCallbackInfo) => void);
+              return;
+            }
+            default: throw new Error(`Unknown event: ${event}`);
+        }
+    }
+    function off(event: string, cb?: (arg0 : Object) => void) : void {
+        switch (event) {
+            case "continueStateChange": {
+              offContinueStateChange(cb);
+              return;
+            }
+            default: throw new Error(`Unknown type: ${event}`);
+        }
+    }
+""")
+
+function OnContinueStateChange(f: (info: ContinueCallbackInfo) => void) : void;
+function OffContinueStateChange(callbackOpt: Optional<(info: ContinueCallbackInfo) => void>) : void;
+
+@gen_async("startSyncRemoteMissions")
+@gen_promise("startSyncRemoteMissions")
+function StartSyncRemoteMissionsSync(parameter: appMissionParameter.MissionParameter): void;
+
+@gen_async("stopSyncRemoteMissions")
+@gen_promise("stopSyncRemoteMissions")
+function StopSyncRemoteMissionsSync(parameter: appMissionDeviceInfo.MissionDeviceInfo): void;
+
+@gen_async("registerMissionListener")
+@gen_promise("registerMissionListener")
+function RegisterMissionListenerSync(parameter: appMissionDeviceInfo.MissionDeviceInfo, options: appMissionCallback.MissionCallback): void;
+
+@gen_async("unRegisterMissionListener")
+@gen_promise("unRegisterMissionListener")
+function UnRegisterMissionListenerSync(parameter: appMissionDeviceInfo.MissionDeviceInfo): void;
+
+@rename("continueMission")
+function ContinueMissionWithMissionInfoCallback(parameter: appContinueMissionInfo.ContinueMissionInfo, callback: (err: @sts_type("BusinessError<void>") Opaque, data: Opaque) => void): void;
+
+@rename("continueMission")
+function ContinueMissionWithMissionInfoPromise(parameter: appContinueMissionInfo.ContinueMissionInfo): @sts_type("Promise<void>") Opaque;
+
+@gen_async("continueMission")
+@gen_promise("continueMission")
+function ContinueMissionWithDeviceInfoSync(parameter: appContinueDeviceInfo.ContinueDeviceInfo, options: appContinueCallback.ContinueCallback) : void;

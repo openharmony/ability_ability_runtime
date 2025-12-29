@@ -17,7 +17,7 @@ import hilog from '@ohos.hilog'
 import rpc from '@ohos.rpc';
 import { RecordData } from '@ohos.base';
 
-type valueType = NullishType;
+type valueType = Any;
 const DOMAIN_ID = 0xD001300;
 const TAG = 'RecordSerializeTool';
 const int32Max: number = Math.pow(2, 31) - 1;
@@ -62,7 +62,7 @@ class RecordWriter {
     }
   }
 
-  private writeObject(obj: NullishType): void {
+  private writeObject(obj: Any): void {
     if (obj === null) {
       this.buffer.append('null');
     } else if (obj === undefined) {
@@ -91,8 +91,8 @@ class RecordWriter {
     const objType = Type.of(tuple as Object) as ClassType;
     const writableFields = this.getWritableFields(objType, reflect.Value.of(tuple as Object) as ClassValue);
     for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
-        const fieldValue = writableFields[fieldIdx][1].getData();
-        arr.push(fieldValue);
+      const fieldValue = writableFields[fieldIdx][1].getData();
+      arr.push(fieldValue);
     }
     return arr;
   }
@@ -186,28 +186,28 @@ class RecordWriter {
 
   private writeValueType(obj: Object): boolean {
     if (obj instanceof Boolean) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Byte) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Char) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Short) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Int) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Long) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Float) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof Double) {
-      this.buffer.append(JSON.stringify(obj.unboxed()));
+      this.buffer.append(JSON.stringify(obj));
       return true;
     } else if (obj instanceof BigInt) {
       this.buffer.append(JSON.stringify(obj));
@@ -219,37 +219,37 @@ class RecordWriter {
 
   private writeValueTypeToNative(wantParams: NativeWantParams | null, key: string, obj: Object): boolean {
     if (obj instanceof Boolean) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Byte) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Char) {
-      wantParams?.setParam(key, Char.toByte(obj).unboxed());
+      wantParams?.setParam(key, Char.toByte(obj));
       return true;
     } else if (obj instanceof Short) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Int) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Long) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Float) {
-      wantParams?.setParam(key, obj.unboxed());
+      wantParams?.setParam(key, obj);
       return true;
     } else if (obj instanceof Double) {
       // consistent with napi behavior
       if (key === VALUE_PROPERTY) {
-        let value: double = obj.unboxed();
+        let value: double = obj;
         if (Number.isInteger(value) && value >= int32Min && value <= int32Max) {
           wantParams?.setParam(key, value as int);
         } else {
           wantParams?.setParam(key, value as double);
         }
       } else {
-        wantParams?.setParam(key, obj.unboxed());
+        wantParams?.setParam(key, obj);
       }
       return true;
     } else if (obj instanceof BigInt) {
@@ -287,14 +287,14 @@ class RecordWriter {
           complexArray.doubleList.push(Number(num));
         });
         complexArray.intList = [];
-        complexArray.doubleList.push((element as number).unboxed());
+        complexArray.doubleList.push((element as number));
       } else {
-        complexArray.intList.push((element as int).unboxed());
+        complexArray.intList.push((element as int));
       }
     } else if (element instanceof Long) {
       hilog.debug(DOMAIN_ID, TAG, `array value type Long`);
       // consistent with napi behavior
-      const doubleValue = Number(element.unboxed());
+      const doubleValue = Number(element);
       if (complexArray.intList.length > 0) {
         complexArray.intList.forEach(num => {
           complexArray.doubleList.push(Number(num));
@@ -310,7 +310,7 @@ class RecordWriter {
         });
         complexArray.intList = [];
       }
-      complexArray.doubleList.push((element as number).unboxed());
+      complexArray.doubleList.push((element as number));
     } else {
       const objType = Type.of(element);
       // enum value are number
@@ -366,7 +366,7 @@ class RecordWriter {
           }
           break;
         case 'boolean':
-          complexArray.boolList.push((element as Boolean).unboxed());
+          complexArray.boolList.push((element as Boolean));
           break;
         case 'number':
           try {
@@ -432,7 +432,7 @@ class RecordWriter {
       let newWantParams: NativeWantParams;
       for (let i = 0; i < complexArray.objectList.length; i++) {
         newWantParams = new NativeWantParams();
-        if (this.handleArrayObject(complexArray.objectList[i] as object, newWantParams)!= true) {
+        if (this.handleArrayObject(complexArray.objectList[i] as object, newWantParams) != true) {
           hilog.error(DOMAIN_ID, TAG, `parse array member failed, index: %{public}d`, i);
         }
         wantParamsArray.push(newWantParams);
@@ -607,7 +607,7 @@ class RecordWriter {
       const objFieldValue = fieldTypeValuePair[1] as reflect.Value;
 
       if (this.writeField(objField.getName(), objFieldValue.getData(), wantParams) == true) {
-        isSuccess= true;
+        isSuccess = true;
       }
     }
 
@@ -615,12 +615,12 @@ class RecordWriter {
   }
 
   private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
-    return fields.findIndex((value, index, array) => {return value[0].getName() == field.getName()});
+    return fields.findIndex((value, index, array) => { return value[0].getName() == field.getName() });
   }
 
   private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
     const writableFields = new Array<[Field, reflect.Value]>();
-    let fieldRename : string | undefined = undefined;
+    let fieldRename: string | undefined = undefined;
 
     const fieldsCount = classValue.getFieldsNum();
     for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
@@ -682,7 +682,7 @@ export class RecordSerializeTool {
   }
 
   private static jsonValue2Object(value: JSONValue): string | number | boolean | null |
-  Array<valueType> | Record<string, valueType> {
+    Array<valueType> | Record<string, valueType> {
     if (value instanceof JSONString) {
       return value.value;
     } else if (value instanceof JSONNumber) {

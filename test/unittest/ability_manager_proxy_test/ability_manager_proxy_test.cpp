@@ -1841,6 +1841,25 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetExtensionRunningInfos_0
 
 /*
  * Feature: AbilityManagerService
+ * Function: NotifyFrozenProcessByRSS
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifyFrozenProcessByRSS
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of NotifyFrozenProcessByRSS
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_NotifyFrozenProcessByRSS_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::vector<int32_t> pidList;
+    int32_t uid = 1;
+    proxy_->NotifyFrozenProcessByRSS(pidList, uid);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_FROZEN_PROCESS_BY_RSS), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: GetProcessRunningInfos
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetProcessRunningInfos
@@ -2581,7 +2600,8 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB
 {
     proxy_ = std::make_shared<AbilityManagerProxy>(nullptr);
     Want want;
-    proxy_->StartSpecifiedAbilityBySCB(want);
+    StartSpecifiedAbilityParams params;
+    proxy_->StartSpecifiedAbilityBySCB(want, params);
     EXPECT_TRUE(proxy_ != nullptr);
 }
 
@@ -2599,7 +2619,8 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB
     EXPECT_TRUE(proxy_ != nullptr);
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).Times(1).WillOnce(Return(NO_ERROR));
     Want want;
-    proxy_->StartSpecifiedAbilityBySCB(want);
+    StartSpecifiedAbilityParams params;
+    proxy_->StartSpecifiedAbilityBySCB(want, params);
 }
 
 /*

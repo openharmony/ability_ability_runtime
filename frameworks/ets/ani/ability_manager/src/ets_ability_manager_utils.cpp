@@ -21,13 +21,13 @@
 
 namespace OHOS {
 namespace AbilityManagerEts {
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
-constexpr const char *SET_OBJECT_VOID_SIGNATURE = "ILstd/core/Object;:V";
-constexpr const char *CLASSNAME_ABILITY_RRUNNINGINFO = "Lapplication/AbilityRunningInfo/AbilityRunningInfoImpl;";
-constexpr const char *ABILITY_STATE_ENUM_NAME = "L@ohos/app/ability/abilityManager/abilityManager/AbilityState;";
-constexpr const char *CLASSNAME_EXTENSION_RUNNINGINFO = "Lapplication/ExtensionRunningInfo/ExtensionRunningInfoInner;";
+constexpr const char *CLASSNAME_ARRAY = "std.core.Array";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
+constexpr const char *CLASSNAME_ABILITY_RRUNNINGINFO = "application.AbilityRunningInfo.AbilityRunningInfoImpl";
+constexpr const char *ABILITY_STATE_ENUM_NAME = "@ohos.app.ability.abilityManager.abilityManager.AbilityState";
+constexpr const char *CLASSNAME_EXTENSION_RUNNINGINFO = "application.ExtensionRunningInfo.ExtensionRunningInfoInner";
 constexpr const char *EXTENSION_ABILITY_TYPE_ENUM_NAME
-    = "L@ohos/bundle/bundleManager/bundleManager/ExtensionAbilityType;";
+    = "@ohos.bundle.bundleManager.bundleManager.ExtensionAbilityType";
 constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 
 bool WrapAbilityRunningInfoArray(
@@ -49,7 +49,7 @@ bool WrapAbilityRunningInfoArray(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null arrayCls");
         return false;
     }
-    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "status : %{public}d", status);
         return false;
     }
@@ -103,7 +103,7 @@ bool WrapAbilityRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::Abil
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "findMethod failed, status: %{public}d", status);
         return false;
     }
@@ -175,7 +175,7 @@ bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null arrayCls");
         return false;
     }
-    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "findMethod failed, status : %{public}d", status);
         return false;
     }
@@ -197,7 +197,7 @@ bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::
             TAG_LOGE(AAFwkTag::ABILITYMGR, "String_NewUTF8 failed, status : %{public}d", status);
             return false;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", i, aniStr);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, aniStr);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed, status : %{public}d", status);
             return false;
@@ -221,7 +221,7 @@ bool WrapExtensionRunningInfoArray(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass failed, status : %{public}d", status);
         return false;
     }
-    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) != ANI_OK || arrayCtor == nullptr) {
+    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor)) != ANI_OK || arrayCtor == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod failed, status : %{public}d", status);
         return false;
     }
@@ -267,7 +267,7 @@ bool WrapExtensionRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::Ex
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "findMethod failed, status: %{public}d", status);
         return false;
     }
@@ -394,7 +394,7 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &abilitySta
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("Lapplication/AbilityStateData/AbilityStateData;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("application.AbilityStateData.AbilityStateData", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "find class failed status : %{public}d", status);
         return nullptr;
     }
@@ -402,7 +402,7 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &abilitySta
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null cls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
@@ -436,7 +436,7 @@ ani_object WrapAbilityElementName(ani_env *env, const AppExecFwk::ElementName &e
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status: %{public}d or null elementNameObj", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod status: %{public}d or null method", status);
         return nullptr;
     }

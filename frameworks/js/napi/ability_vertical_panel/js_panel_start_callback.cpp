@@ -129,6 +129,7 @@ void JsPanelStartCallback::OnResult(int32_t resultCode, const AAFwk::Want &want)
 void JsPanelStartCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::VERTICAL_PANEL, "CallJsResult call");
+    HandleScope handleScope(env_);
     if (env_ == nullptr) {
         TAG_LOGE(AAFwkTag::VERTICAL_PANEL, "null env_");
         return;

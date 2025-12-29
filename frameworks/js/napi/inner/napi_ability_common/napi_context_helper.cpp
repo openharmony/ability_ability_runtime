@@ -26,6 +26,7 @@
 #include "file_ex.h"
 #include "hilog_tag_wrapper.h"
 #include "js_napi_common_ability.h"
+#include "js_runtime_utils.h"
 #include "permission_list_state.h"
 #include "securec.h"
 
@@ -708,6 +709,7 @@ void GetAppInfoExecuteCB(napi_env env, void *data)
 void GetAppInfoAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AppInfoCB *appInfoCB = static_cast<AppInfoCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -765,6 +767,7 @@ napi_value GetApplicationInfoAsync(napi_env env, napi_value *args, const size_t 
 void GetAppInfoPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     AppInfoCB *appInfoCB = static_cast<AppInfoCB *>(data);
     if (appInfoCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null appInfoCB");
@@ -1399,6 +1402,7 @@ ElementNameCB *CreateElementNameCBInfo(napi_env env)
 napi_value WrapElementName(napi_env env, const ElementNameCB *elementNameCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    HandleEscape handleEscape(env);
     if (elementNameCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null elementNameCB");
         return nullptr;
@@ -1421,7 +1425,7 @@ napi_value WrapElementName(napi_env env, const ElementNameCB *elementNameCB)
     NAPI_CALL(env, napi_create_string_utf8(env, elementNameCB->uri.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "uri", proValue));
     TAG_LOGI(AAFwkTag::JSNAPI, "end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void GetElementNameExecuteCB(napi_env env, void *data)
@@ -1460,6 +1464,7 @@ void GetElementNameExecuteCB(napi_env env, void *data)
 void GetElementNameAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "complete");
+    HandleScope handleScope(env);
     ElementNameCB *elementNameCB = static_cast<ElementNameCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1487,6 +1492,7 @@ void GetElementNameAsyncCompleteCB(napi_env env, napi_status status, void *data)
 void GetElementNamePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "complete");
+    HandleScope handleScope(env);
     ElementNameCB *elementNameCB = static_cast<ElementNameCB *>(data);
     napi_value result = nullptr;
     if (elementNameCB->cbBase.errCode == NAPI_ERR_NO_ERROR) {

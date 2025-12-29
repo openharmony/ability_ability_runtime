@@ -16,6 +16,8 @@
 #ifndef MOCK_MY_STATUS_H
 #define MOCK_MY_STATUS_H
 
+#include "running_process_info.h"
+
 namespace OHOS {
 namespace AAFwk {
 class MyStatus {
@@ -23,6 +25,7 @@ public:
     static MyStatus& GetInstance();
     ~MyStatus() = default;
     bool retValue_ = false;
+    OHOS::AppExecFwk::RunningProcessInfo processInfo_;
 private:
     MyStatus() = default;
 };

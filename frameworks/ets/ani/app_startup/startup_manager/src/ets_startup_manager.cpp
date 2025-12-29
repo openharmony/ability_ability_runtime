@@ -31,20 +31,20 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 namespace {
-constexpr const char *ETS_STARTUP_MANAGER_CLASS_NAME = "L@ohos/app/appstartup/startupManager/startupManager;";
+constexpr const char *ETS_STARTUP_MANAGER_CLASS_NAME = "@ohos.app.appstartup.startupManager.startupManager";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_CREATE_STARTUP_TASK_MANAGER =
-    "Lescompat/Array;ZL@ohos/app/appstartup/StartupConfig/StartupConfig;"
-    "Lapplication/AbilityStageContext/AbilityStageContext;:I";
+    "C{std.core.Array}zC{@ohos.app.appstartup.StartupConfig.StartupConfig}"
+    "C{application.AbilityStageContext.AbilityStageContext}:i";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_RUN_ASYNCCALLBACK =
-    "ILutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_ALL_STARTUP_TASK_RESULTS =
-    ":V";
+    ":";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_GET_STARTUP_TASK_RESULTS =
-    "Lstd/core/String;:Lstd/core/Object;";
+    "C{std.core.String}:C{std.core.Object}";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_IS_STARTUP_TASK_INITIALIZED =
-    "Lstd/core/String;:Z";
+    "C{std.core.String}:z";
 constexpr const char *SIGNATURE_STARTUP_MANAGER_REMOVE_STARTUP_TASK_RESULT =
-    "Lstd/core/String;:V";
+    "C{std.core.String}:";
 constexpr int32_t ERR_FAILURE = -1;
 }
 

@@ -296,6 +296,33 @@ HWTEST_F(AbilityManagerServiceMockTest, PreloadUIExtensionAbilityInner_0100, Tes
 }
 
 /**
+ * @tc.name: PreloadUIExtensionAbilityInner_0200
+ * @tc.desc: Test PreloadUIExtensionAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, PreloadUIExtensionAbilityInner_0200, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    std::string bundleName = "com.ohos.sceneboard";
+    std::string abilityName_ = "MainAbility";
+    Want want;
+    want.SetElementName(bundleName, abilityName_);
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    applicationInfo.name = "test";
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
+    StartAbilityUtils::startAbilityInfo->status = ERR_OK;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.visible = true;
+    abilityMs->subManagersHelper_ = nullptr;
+    int32_t preloadId = 1;
+    int32_t userId = 1;
+    auto ret = abilityMs->PreloadUIExtensionAbilityInner(want, bundleName, preloadId, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: StartUIExtensionAbility_0100
  * @tc.desc: Test  getabilityInfos error
  * @tc.type: FUNC

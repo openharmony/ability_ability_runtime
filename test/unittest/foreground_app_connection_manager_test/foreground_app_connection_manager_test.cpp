@@ -519,6 +519,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_002, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_002 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -541,6 +542,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_003, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_003 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -563,6 +565,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_004, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_004 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -585,6 +588,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_005, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_005 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -607,6 +611,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_006, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_006 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -630,6 +635,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_007, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_007 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -653,6 +659,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_008, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_008 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -676,6 +683,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_009, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_009 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -699,6 +707,7 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_010, Test
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_010 Start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = true;
     abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
     AbilityRequest callerAbilityRequest;
     callerAbilityRequest.appInfo.bundleName = "com.test.demo";
@@ -710,6 +719,30 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_010, Test
     bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
     EXPECT_EQ(result, true);
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_010 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection_011
+ * FunctionPoints: target not systemApp
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_011, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_011 Start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.isSystemApp = false;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::BACKUP;
+    AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.test.demo";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    callerAbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_011 End");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

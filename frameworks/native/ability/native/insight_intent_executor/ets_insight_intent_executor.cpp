@@ -35,7 +35,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using State = EtsInsightIntentExecutor::State;
 namespace {
-constexpr const char *EXECUTOR_CLASS_NAME = "L@ohos/app/ability/InsightIntentExecutor/InsightIntentExecutor;";
+constexpr const char *EXECUTOR_CLASS_NAME = "@ohos.app.ability.InsightIntentExecutor.InsightIntentExecutor";
 }
 InsightIntentExecutor *EtsInsightIntentExecutor::Create(Runtime &runtime)
 {

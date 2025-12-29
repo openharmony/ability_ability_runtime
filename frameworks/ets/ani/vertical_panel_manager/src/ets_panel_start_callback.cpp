@@ -32,7 +32,7 @@ constexpr const char *ERROR_MSG_INNER = "Inner error.";
 
 namespace {
 constexpr const char *ABILITY_START_CLASS_NAME =
-    "L@ohos/app/ability/verticalPanelManager/verticalPanelManager/PanelStartCallback;";
+    "@ohos.app.ability.verticalPanelManager.verticalPanelManager.PanelStartCallback";
 }
 
 EtsPanelStartCallback::~EtsPanelStartCallback()

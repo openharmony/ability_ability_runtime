@@ -17,10 +17,12 @@ import { RecordData } from '@ohos.base';
 
 export default interface OpenLinkOptions {
     appLinkingOnly?: boolean;
+    hideFailureTipDialog?: boolean;
     parameters?: Record<string, RecordData>;
 }
 
 class OpenLinkOptionsImpl implements OpenLinkOptions {
     appLinkingOnly?: boolean|undefined;
+    hideFailureTipDialog?: boolean|undefined;
     parameters?: Record<string, RecordData>|undefined;
 }

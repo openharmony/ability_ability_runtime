@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,8 @@ class Runtime;
 namespace OHOS {
 namespace JsEnv {
 struct ErrorObject;
-using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject)>;
+using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject, napi_env env,
+    napi_value exception)>;
 }  // namespace JsEnv
 namespace EtsEnv {
 struct ETSUncaughtExceptionInfo;
@@ -79,6 +80,16 @@ struct RuntimeUpdateParam {
     AbilityRuntime::Runtime::Options option;
     UncatchableTaskInfo uncatchableTaskInfo;
     std::string hapPath;
+};
+struct ProcessExitInfo {
+    std::string bundleName;
+    std::string errorObjectName;
+    std::string summary;
+    std::string appRunningId;
+    std::string processName;
+    int32_t pid;
+    bool foreground;
+    bool isUncatchable;
 };
 class ContextDeal;
 struct ModuleTestRunner;
@@ -279,7 +290,8 @@ public:
      * @param config The updated config.
      *
      */
-    void ScheduleConfigurationUpdated(const Configuration &config) override;
+    void ScheduleConfigurationUpdated(const Configuration &config,
+        ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT) override;
 
     /**
      *
@@ -460,6 +472,15 @@ private:
         bool isUncatchable = false);
 
     /**
+    *
+    * @brief Handle process exit.
+    *
+    * @param processExitInfo The info of the process exit info.
+    *
+    */
+    static void ProcessExit(const ProcessExitInfo& info);
+
+    /**
      *
      * @brief update the application info after new module installed.
      *
@@ -539,9 +560,11 @@ private:
      * @brief send the new config to the application.
      *
      * @param config The updated config.
+     * @param reason The updated configuration scene flag.
      *
      */
-    void HandleConfigurationUpdated(const Configuration &config);
+    void HandleConfigurationUpdated(const Configuration &config,
+        ConfigUpdateReason reason = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
 
     /**
      *

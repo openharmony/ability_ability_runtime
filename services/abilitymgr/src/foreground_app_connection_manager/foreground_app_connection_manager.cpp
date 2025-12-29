@@ -35,9 +35,10 @@ bool ForegroundAppConnectionManager::IsForegroundAppConnection(
         TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityRecord is null");
         return false;
     }
-    if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE &&
-        !(UIExtensionUtils::IsUIExtension(targetAbilityInfo.extensionAbilityType))) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "target not UIAbility or UIExtension");
+    bool targetUIAbilityQualified = targetAbilityInfo.type == AppExecFwk::AbilityType::PAGE &&
+        targetAbilityInfo.applicationInfo.isSystemApp;
+    if (!targetUIAbilityQualified && !(UIExtensionUtils::IsUIExtension(targetAbilityInfo.extensionAbilityType))) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "target not systemApp_UIAbility or UIExtension");
         return false;
     }
     if (callerAbilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE &&

@@ -16,6 +16,7 @@
 #include "app_mgr_proxy.h"
 
 #include "ability_manager_errors.h"
+#include "app_utils.h"
 #include "appexecfwk_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_chain_utils.h"
@@ -197,6 +198,10 @@ int32_t AppMgrProxy::ClearUpApplicationDataBySelf(int32_t userId)
 
 int32_t AppMgrProxy::GetAllRunningProcesses(std::vector<RunningProcessInfo> &info)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: GetAllRunningProcesses");
+        return AAFwk::INNER_ERR;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     MessageParcel data;
     MessageParcel reply;
@@ -446,6 +451,10 @@ int32_t AppMgrProxy::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &p
 
 int32_t AppMgrProxy::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: DumpHeapMemory");
+        return AAFwk::INNER_ERR;
+    }
     TAG_LOGD(AAFwkTag::APPMGR, "AppMgrProxy::DumpHeapMemory.");
     MessageParcel data;
     MessageParcel reply;
@@ -615,6 +624,10 @@ int AppMgrProxy::RegisterApplicationStateObserver(
 int AppMgrProxy::UnregisterApplicationStateObserver(
     const sptr<IApplicationStateObserver> &observer)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: UnregisterApplicationStateObserver");
+        return AAFwk::INNER_ERR;
+    }
     if (!observer) {
         TAG_LOGE(AAFwkTag::APPMGR, "observer null");
         return ERR_INVALID_VALUE;
@@ -1590,6 +1603,10 @@ int32_t AppMgrProxy::GetRunningProcessInformation(
 
 int32_t AppMgrProxy::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: ChangeAppGcState");
+        return AAFwk::INNER_ERR;
+    }
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     MessageParcel reply;
@@ -2486,6 +2503,10 @@ int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const Abil
 
 int32_t AppMgrProxy::UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: UpdateProcessMemoryState");
+        return AAFwk::INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
 
@@ -2702,5 +2723,25 @@ int32_t AppMgrProxy::KillChildProcessByPid(int32_t pid)
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_CHILD_PROCESS_BY_PID, data, reply, option);
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadExtension called.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadExtension Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, appIndex);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PRELOAD_EXTENSION, data, reply, option);
+    
+    return reply.ReadInt32();
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

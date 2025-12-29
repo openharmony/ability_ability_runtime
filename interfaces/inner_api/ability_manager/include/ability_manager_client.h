@@ -1286,7 +1286,7 @@ public:
      */
     ErrCode GetTopAbility(sptr<IRemoteObject> &token);
 
-    ErrCode CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused);
+    ErrCode CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused, uint64_t displayId = 0);
 
     /**
      * DelegatorDoAbilityForeground, the delegator calls this interface to move the ability to the foreground.
@@ -1489,9 +1489,10 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @param params The parameters to start specified ability.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t StartSpecifiedAbilityBySCB(const Want &want);
+    int32_t StartSpecifiedAbilityBySCB(const Want &want, const StartSpecifiedAbilityParams &params);
 
     /**
      * Notify sandbox app the result of saving file.

@@ -50,7 +50,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char* UIEXTENSION_CLASS_NAME = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
+constexpr const char* UIEXTENSION_CLASS_NAME = "@ohos.app.ability.UIExtensionAbility.UIExtensionAbility";
 constexpr const char *UIEXT_ONCREATE_SIGNATURE = "C{@ohos.app.ability.AbilityConstant.AbilityConstant.LaunchParam}:";
 constexpr const char *UIEXT_ONSESSIONDESTROY_SIGNATURE =
     "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}:";
@@ -225,7 +225,7 @@ bool EtsUIExtensionBase::BindNativeMethods()
         return false;
     }
     std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
+        ani_native_function { "nativeOnDestroyCallback", ":", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
     };
     ani_class cls {};
     ani_status status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls);
@@ -366,7 +366,7 @@ void EtsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *ca
         destroyCallbackPoint)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
-    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":z");
     if (!isAsyncCallback) {
         TAG_LOGE(AAFwkTag::UI_EXT, "call promise failed");
         OnStopCallBack();

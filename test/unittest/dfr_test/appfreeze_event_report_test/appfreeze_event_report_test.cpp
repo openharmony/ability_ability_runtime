@@ -48,6 +48,18 @@ void AppfreezeEventReportTest::SetUp(void)
 void AppfreezeEventReportTest::TearDown(void)
 {}
 
+AppfreezeEventInfo GetEventInfo()
+{
+    int tid = static_cast<int>(gettid());
+    int pid = static_cast<int>(getpid());
+    int uid = static_cast<int>(getuid());
+    AppfreezeEventInfo eventInfo;
+    eventInfo.tid = tid;
+    eventInfo.pid = pid;
+    eventInfo.uid = uid;
+    return eventInfo;
+}
+
 /**
  * @tc.number: SendAppfreezeEvent_Test_001
  * @tc.desc: add testcase
@@ -385,6 +397,112 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_010, TestSize.Level1)
     eventInfo.freezeInfoFile = "SendAppfreezeEvent_Test_010: freezeInfoFile";
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
+    int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.number: SendAppfreezeEvent_Test_011
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_011, TestSize.Level1)
+{
+    std::string eventName = "THREAD_BLOCK_3S";
+    std::string testName = "SendAppfreezeEvent_Test_011";
+    auto eventInfo = GetEventInfo();
+    int testValue = 21; // test value
+    eventInfo.eventId = testValue;
+    eventInfo.bundleName = testName;
+    eventInfo.processName = testName;
+    eventInfo.binderInfo = "PeerBinderCatcher -- pid==1234\nBinderCatcher --"
+        "1234:0 to 901:4079 code 16 wait:0.25653125 s frz_state:3, "
+        "ns:-1:-1 to -1:-1, debug:1234:0 to 901:4079, active_code:0, active_thread=0, pending_async_proc=0\n"
+        "3712:0 to 13967:0 code d2 wait:0.703385417 s frz_state:1234,  "
+        "ns:-1:-1 to -1:-1, debug:3712:0 to 13967:0, active_code:0, active_thread=0, pending_async_proc=0\n"
+        "1733:2285 to 3712:0 code b wait:1.365925521 s frz_state:3,  "
+        "ns:-1:-1 to -1:-1, debug:1733:2285 to 3712:0, active_code:0, active_thread=0, pending_async_proc=0\n";
+    eventInfo.freezeMemory = "freeze memory ";
+    eventInfo.errorStack = "#00 pc 00000000000015b8 [shmm](__kernel_gettimeofday+72)\\n"
+        "#01 pc 00000000001d7e44 /system/lib64/ld-musl-aarck64.so.1(clock_gettime+48)"
+        "(f8a0616c89b184992d0e8883cc78f638)\\n"
+        "#03 pc 00000000000a0500 /system/lib64/platformsdk/libruntime.z.so"
+        "(c2f75213ee12fdf08da323fe546923ff)\\n"
+        "......\\n";
+    eventInfo.errorName = "THREAD_BLOCK_3S";
+    eventInfo.errorMessage = "MSG ="
+        "Fault time:2025/06/28-14:08:34"
+        "App main thread is not response!"
+        "Main handler dump start time: 2025-06-28 14:08:34.067"
+        "mainHandler dump is:"
+        "EventHandler dump begin curTime: 2025-06-28 14:08:34.067";
+    eventInfo.freezeMemory = "Get freeze memory start time: 2025-06-28 14:08:37.112\\n"
+        "some avg10=56.81 avg60=56.81 avg300=56.81 total=56";
+    eventInfo.freezeInfoFile = "/data/log/testFile/stackFile.txt,/data/log/testFile/cpuFile.txt";
+    eventInfo.hitraceInfo = "HitraceIdInfo: hitrace_id: a92ab27238f409a, span_id: "
+        "1cd61c9, parent_span_id: 3072e, trace_flag: 0";
+    int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.number: SendAppfreezeEvent_Test_012
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_012, TestSize.Level1)
+{
+    std::string eventName = "THREAD_BLOCK_6S";
+    std::string testName = "SendAppfreezeEvent_Test_012";
+    auto eventInfo = GetEventInfo();
+    int testValue = 12; // test value
+    eventInfo.eventId = testValue;
+    eventInfo.bundleName = testName;
+    eventInfo.processName = testName;
+    eventInfo.binderInfo = "testValue";
+    eventInfo.freezeMemory = "freeze memory ";
+    eventInfo.errorStack = "errorStack";
+    eventInfo.errorName = eventName;
+    eventInfo.errorMessage = "MSG =";
+    eventInfo.freezeInfoFile = "testFile";
+    eventInfo.hitraceInfo = testName;
+    eventInfo.foregroundState = true;
+    eventInfo.processLifeTime = 16;
+    int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.number: SendAppfreezeEvent_Test_013
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_013, TestSize.Level1)
+{
+    std::string eventName = "APP_INPUT_BLOCK";
+    std::string testName = "SendAppfreezeEvent_Test_013";
+    auto eventInfo = GetEventInfo();
+    int testValue = 13; // test value
+    eventInfo.eventId = testValue;
+    eventInfo.bundleName = testName;
+    eventInfo.processName = testName;
+    eventInfo.binderInfo = testName;
+    eventInfo.freezeMemory = testName;
+    eventInfo.appRunningUniqueId = testName;
+    eventInfo.errorStack = testName;
+    eventInfo.errorName = testName;
+    eventInfo.errorMessage = testName;
+    eventInfo.freezeInfoFile = testName;
+    eventInfo.hitraceInfo = testName;
+    eventInfo.foregroundState = true;
+    eventInfo.applicationHeapInfo = testName;
+    eventInfo.processLifeTime = testName;
+    eventInfo.dispatchedEventId = 23;
+    eventInfo.processedId = 24;
+    eventInfo.markedId = 25;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);

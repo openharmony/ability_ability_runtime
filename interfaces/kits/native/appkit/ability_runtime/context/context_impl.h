@@ -25,7 +25,6 @@ namespace AppExecFwk {
 struct RunningProcessInfo;
 class BundleMgrHelper;
 class OverlayEventSubscriber;
-class Configuration;
 }
 namespace AAFwk {
 class Want;
@@ -333,6 +332,11 @@ public:
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfoWithContext(
         std::shared_ptr<Context> inputContext = nullptr) const;
 
+    void InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+        const std::string &hostBundleName);
+
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> GetPluginExtensionInfo();
+
     /**
      * @brief Set HapModuleInfo
      *
@@ -441,6 +445,10 @@ public:
     void SetLatestParameter(const AAFwk::Want& want);
 
     std::string GetLatestParameter();
+
+    ConfigUpdateReason GetConfigUpdateReason() override;
+
+    void SetConfigUpdateReason(ConfigUpdateReason reason);
 
 #ifdef SUPPORT_SCREEN
     /**
@@ -576,6 +584,7 @@ private:
     std::shared_ptr<Context> parentContext_ = nullptr;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo_ = nullptr;
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> pluginExtensionInfo_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
     std::string currArea_ = "el2";
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos_;
@@ -598,6 +607,8 @@ private:
     std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
     std::mutex latestParameterMutex_;
     std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
+    std::mutex configUpdateReasonLock_;
+    ConfigUpdateReason configUpdateReason_ = ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
 
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;

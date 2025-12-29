@@ -37,7 +37,7 @@ public:
         const std::shared_ptr<AAFwk::Want>&, int32_t));
     MOCK_METHOD2(ScheduleCleanAbility, void(const sptr<IRemoteObject>&, bool));
     MOCK_METHOD1(ScheduleProfileChanged, void(const Profile&));
-    MOCK_METHOD1(ScheduleConfigurationUpdated, void(const Configuration& config));
+    MOCK_METHOD2(ScheduleConfigurationUpdated, void(const Configuration& config, ConfigUpdateReason));
     MOCK_METHOD1(ScheduleShrinkMemory, void(const int));
     MOCK_METHOD0(ScheduleLowMemory, void());
     MOCK_METHOD0(ScheduleProcessSecurityExit, void());

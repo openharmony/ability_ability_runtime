@@ -77,10 +77,10 @@ void DialogSessionManager::SetStartupSessionInfo(const std::string &dialogSessio
 }
 
 void DialogSessionManager::SetDialogSessionInfo(const std::string &dialogSessionId,
-    sptr<DialogSessionInfo> &dilogSessionInfo, std::shared_ptr<DialogCallerInfo> &dialogCallerInfo)
+    sptr<DialogSessionInfo> &dialogSessionInfo, std::shared_ptr<DialogCallerInfo> &dialogCallerInfo)
 {
     std::lock_guard<ffrt::mutex> guard(dialogSessionRecordLock_);
-    dialogSessionInfoMap_[dialogSessionId] = dilogSessionInfo;
+    dialogSessionInfoMap_[dialogSessionId] = dialogSessionInfo;
     dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
 }
 
@@ -186,6 +186,8 @@ void DialogSessionManager::GenerateCallerAbilityInfo(AbilityRequest &abilityRequ
         callerAbilityInfo.visible = callerRecord->GetAbilityInfo().visible;
         callerAbilityInfo.appIndex = callerRecord->GetApplicationInfo().appIndex;
         callerAbilityInfo.multiAppMode = callerRecord->GetApplicationInfo().multiAppMode;
+        callerAbilityInfo.codePath = callerRecord->GetApplicationInfo().codePath;
+        callerAbilityInfo.installSource = callerRecord->GetApplicationInfo().installSource;
     }
 }
 
@@ -204,6 +206,8 @@ void DialogSessionManager::GenerateSelectorTargetAbilityInfos(std::vector<Dialog
         targetDialogAbilityInfo.visible = dialogAppInfo.visible;
         targetDialogAbilityInfo.appIndex = dialogAppInfo.appIndex;
         targetDialogAbilityInfo.multiAppMode = dialogAppInfo.multiAppMode;
+        targetDialogAbilityInfo.codePath = dialogAppInfo.codePath;
+        targetDialogAbilityInfo.installSource = dialogAppInfo.installSource;
         targetAbilityInfos.emplace_back(targetDialogAbilityInfo);
     }
 }
@@ -222,6 +226,8 @@ void DialogSessionManager::GenerateJumpTargetAbilityInfos(AbilityRequest &abilit
     targetDialogAbilityInfo.visible = abilityRequest.abilityInfo.visible;
     targetDialogAbilityInfo.appIndex = abilityRequest.abilityInfo.applicationInfo.appIndex;
     targetDialogAbilityInfo.multiAppMode = abilityRequest.abilityInfo.applicationInfo.multiAppMode;
+    targetDialogAbilityInfo.codePath = abilityRequest.abilityInfo.applicationInfo.codePath;
+    targetDialogAbilityInfo.installSource = abilityRequest.abilityInfo.applicationInfo.installSource;
     targetAbilityInfos.emplace_back(targetDialogAbilityInfo);
 }
 

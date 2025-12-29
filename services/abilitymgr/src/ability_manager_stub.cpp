@@ -2927,8 +2927,9 @@ int AbilityManagerStub::GetTopAbilityTokenInner(MessageParcel &data, MessageParc
 int AbilityManagerStub::CheckUIExtensionIsFocusedInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uiExtensionTokenId = data.ReadUint32();
+    uint64_t displayId = data.ReadUint64();
     bool isFocused = false;
-    auto result = CheckUIExtensionIsFocused(uiExtensionTokenId, isFocused);
+    auto result = CheckUIExtensionIsFocused(uiExtensionTokenId, isFocused, displayId);
     if (result == ERR_OK) {
         if (!reply.WriteBool(isFocused)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
@@ -3678,7 +3679,12 @@ int32_t AbilityManagerStub::StartSpecifiedAbilityBySCBInner(MessageParcel &data,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
         return ERR_INVALID_VALUE;
     }
-    auto resultCode = StartSpecifiedAbilityBySCB(*want);
+    std::unique_ptr<StartSpecifiedAbilityParams> params(data.ReadParcelable<StartSpecifiedAbilityParams>());
+    if (params == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "params null");
+        return ERR_INVALID_VALUE;
+    }
+    auto resultCode = StartSpecifiedAbilityBySCB(*want, *params);
     reply.WriteInt32(resultCode);
     return NO_ERROR;
 }

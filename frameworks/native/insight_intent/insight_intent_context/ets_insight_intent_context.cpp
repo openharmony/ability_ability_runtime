@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CONTEXT_CLASS_NAME = "L@ohos/app/ability/InsightIntentContext/InsightIntentContext;";
+constexpr const char *CONTEXT_CLASS_NAME = "@ohos.app.ability.InsightIntentContext.InsightIntentContext";
 }
 void EtsInsightIntentContext::Finalizer(ani_env *env, void *data, void *hint)
 {
@@ -226,7 +226,7 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> CreateEtsInsightIntentContext(an
             return std::unique_ptr<AppExecFwk::ETSNativeReference>();
         }
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
         return std::unique_ptr<AppExecFwk::ETSNativeReference>();
     }
