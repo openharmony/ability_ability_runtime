@@ -87,19 +87,19 @@ bool SetWindowRect(ani_env *env,
     }
 
     ani_status status = ANI_OK;
-    if ((status = env->Object_SetPropertyByName_Double(object, "left", left)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "left", left)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(object, "top", top)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "top", top)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(object, "width", width)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "width", width)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(object, "height", left)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "height", left)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }
