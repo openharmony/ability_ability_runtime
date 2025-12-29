@@ -45,6 +45,7 @@ constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestC
 constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 constexpr const char* SPECIFIED_ABILITY_FLAG = "ohos.ability.params.specifiedAbilityFlag";
+constexpr int32_t BROKER_UID = 5557;
 }
 
 UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
@@ -123,7 +124,7 @@ void UpdateCallerInfoUtil::UpdateSignatureInfo(std::string bundleName, Want& wan
 void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken,
     sptr<IRemoteObject> callerToken)
 {
-    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+    if (callerToken != nullptr && !StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
         want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
         want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
@@ -199,7 +200,14 @@ bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
 {
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
     auto dialogCallerInfo = DialogSessionManager::GetInstance().GetDialogCallerInfo(dialogSessionId);
+    auto removeParamsForNotBroker = [&want](int32_t uid) {
+        if (uid != BROKER_UID) {
+            want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+            want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+        }
+    };
     if (dialogCallerInfo == nullptr) {
+        removeParamsForNotBroker(IPCSkeleton::GetCallingUid());
         TAG_LOGW(AAFwkTag::ABILITYMGR, "failed get dialog caller info");
         return false;
     }
@@ -216,6 +224,8 @@ bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
     want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, callerAppCloneIndex);
+
+    removeParamsForNotBroker(uid);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
             dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
