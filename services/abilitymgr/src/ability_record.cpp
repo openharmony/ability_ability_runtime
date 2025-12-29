@@ -400,6 +400,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
     SetIsNewWant(false);
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
+    lifeCycleStateInfo_.pageConfig = "";
     {
         std::lock_guard guard(wantLock_);
         InsightIntentExecuteParam::RemoveInsightIntent(want_);
@@ -452,6 +453,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = options.sceneFlag;
+        lifeCycleStateInfo_.pageConfig = options.pageConfig;
         LoadAbility(options.isShellCall, options.isStartupHide, options.callingPid,
             options.loadAbilityCallbackId, options.selfPid);
         return;

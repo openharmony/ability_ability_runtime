@@ -23,6 +23,7 @@
 #undef private
 
 #include "ability_record.h"
+#include "start_params_by_SCB.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -110,7 +111,8 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     sptr<SessionInfo> sessionInfo;
     uint32_t sceneFlag = GetU32Data(data);
     bool boolParam = *data % ENABLE;
-    uIAbilityLifecycleManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, boolParam, boolParam);
+    AbilityRuntime::StartParamsBySCB params;
+    uIAbilityLifecycleManager->StartUIAbility(abilityRequest, sessionInfo, params, boolParam);
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     int intParam = static_cast<int>(GetU32Data(data));
     AppExecFwk::PacMap saveData;
@@ -142,7 +144,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     std::string errMsg;
     uIAbilityLifecycleManager->ResolveLocked(abilityRequest3, errMsg);
     sptr<SessionInfo> sessionInfo3;
-    uIAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo3, boolParam);
+    uIAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo3, params, boolParam);
     DoSomethingInterestingWithMyAPI1(data, size);
 
     return true;

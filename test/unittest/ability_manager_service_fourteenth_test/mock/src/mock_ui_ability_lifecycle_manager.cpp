@@ -50,7 +50,7 @@ void UIAbilityLifecycleManager::MarkStartingFlag(const AbilityRequest &abilityRe
 }
 
 int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-    uint32_t sceneFlag, bool isRestart, bool &isColdStart)
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
     return ERR_OK;
 }
@@ -247,7 +247,8 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     return 0;
 }
 
-void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
+void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo,
+    AbilityRuntime::StartParamsBySCB &params, bool &isColdStart)
 {
 }
 
@@ -713,7 +714,7 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
 }
 
 bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &abilityRequest,
-    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isRestart)
+    sptr<SessionInfo> sessionInfo, AbilityRuntime::StartParamsBySCB &params)
 {
     return true;
 }
