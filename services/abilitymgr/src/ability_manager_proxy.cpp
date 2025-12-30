@@ -5058,7 +5058,7 @@ int32_t AbilityManagerProxy::RegisterStatusBarDelegate(sptr<AbilityRuntime::ISta
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
+int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -5078,7 +5078,10 @@ int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<i
             return ERR_NATIVE_IPC_PARCEL_FAILED;
         }
     }
-
+    if (!data.WriteBool(clear)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write clear fail");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
     auto ret = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);

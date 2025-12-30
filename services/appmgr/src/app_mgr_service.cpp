@@ -2106,5 +2106,19 @@ int32_t AppMgrService::KillChildProcessByPid(int32_t pid)
     }
     return appMgrServiceInner_->KillChildProcessByPid(pid);
 }
+
+void AppMgrService::SetProcessPrepareExit(int32_t pid)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return;
+    }
+    if (!appMgrServiceInner_->IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return;
+    }
+    appMgrServiceInner_->SetProcessPrepareExit(pid);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

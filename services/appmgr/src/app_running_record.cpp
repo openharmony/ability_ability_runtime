@@ -1285,6 +1285,14 @@ void AppRunningRecord::SetEventHandler(const std::shared_ptr<AMSEventHandler> &h
     eventHandler_ = handler;
 }
 
+bool AppRunningRecord::IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clearMissionFlag)
+{
+    if (clearMissionFlag || isPrepareExit_) {
+        return IsLastPageAbilityRecord(token);
+    }
+    return IsLastAbilityRecord(token);
+}
+
 bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
     auto moduleRecord = GetModuleRunningRecordByToken(token);

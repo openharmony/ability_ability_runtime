@@ -1334,5 +1334,19 @@ HWTEST_F(AppMgrProxyTest, PreloadExtension_0100, TestSize.Level1)
     EXPECT_EQ(mockAppMgrService_->code_,
         static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION));
 }
+
+/**
+ * @tc.name: SetProcessPrepareExit_001
+ * @tc.desc: SetProcessPrepareExit.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, SetProcessPrepareExit_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetProcessPrepareExit_001 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
+    auto pid = 100;
+    appMgrProxy_->SetProcessPrepareExit(pid);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -824,9 +824,9 @@ HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_KillProcessWithPrepa
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_KillProcessWithPrepareTerminate_0100 start");
     std::vector<int32_t> pids;
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
-    EXPECT_EQ(proxy_->KillProcessWithPrepareTerminate(pids), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(proxy_->KillProcessWithPrepareTerminate(pids, false), INVALID_PARAMETERS_ERR);
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
-    EXPECT_EQ(proxy_->KillProcessWithPrepareTerminate(pids), NO_ERROR);
+    EXPECT_EQ(proxy_->KillProcessWithPrepareTerminate(pids, false), NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_KillProcessWithPrepareTerminate_0100 end");
 }
 } // namespace AAFwk

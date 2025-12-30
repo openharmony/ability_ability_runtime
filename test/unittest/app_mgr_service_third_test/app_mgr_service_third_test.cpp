@@ -531,5 +531,34 @@ HWTEST_F(AppMgrServiceThirdTest, KillProcessByPidForExit_001, TestSize.Level1)
     res = appMgrService->KillProcessByPidForExit(0, "");
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: SetProcessPrepareExit
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService SetProcessPrepareExit
+ * EnvConditions: NA
+ * CaseDescription: Verify SetProcessPrepareExit
+ */
+HWTEST_F(AppMgrServiceThirdTest, SetProcessPrepareExit_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->SetProcessPrepareExit(0);
+
+    auto mockAppMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    appMgrService->SetInnerService(mockAppMgrServiceInner);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, mockAppMgrServiceInner);
+    EXPECT_TRUE(appMgrService->IsReady());
+
+    EXPECT_CALL(*mockAppMgrServiceInner, IsFoundationCall).Times(1)
+        .WillOnce(Return(false));
+    appMgrService->SetProcessPrepareExit(0);
+
+    EXPECT_CALL(*mockAppMgrServiceInner, IsFoundationCall).Times(1)
+        .WillOnce(Return(true));
+    appMgrService->SetProcessPrepareExit(0);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

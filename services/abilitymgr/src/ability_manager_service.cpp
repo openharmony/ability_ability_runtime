@@ -12762,7 +12762,7 @@ int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IS
     return uiAbilityManager->RegisterStatusBarDelegate(delegate);
 }
 
-int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
+int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
 {
     if (!IsCallerSceneBoard() && !PermissionVerification::GetInstance()->VerifyCallingPermission(
         PermissionConstants::PERMISSION_KILL_APP_PROCESSES)) {
@@ -12771,7 +12771,7 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
     }
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-    return uiAbilityManager->TryPrepareTerminateByPids(pids);
+    return uiAbilityManager->TryPrepareTerminateByPids(pids, clear);
 }
 
 bool AbilityManagerService::ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart)

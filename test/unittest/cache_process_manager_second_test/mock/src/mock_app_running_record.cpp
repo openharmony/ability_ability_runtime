@@ -1215,6 +1215,11 @@ bool AppRunningRecord::IsUserRequestCleaning() const
     return isUserRequestCleaning_;
 }
 
+bool AppRunningRecord::IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clearMissionFlag)
+{
+    return false;
+}
+
 bool AppRunningRecord::IsProcessAttached() const
 {
     return false;
