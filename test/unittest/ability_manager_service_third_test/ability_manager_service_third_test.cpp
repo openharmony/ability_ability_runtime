@@ -3280,7 +3280,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_
 HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    bool result = abilityMs_->ParseVpnAllowListJson("/etc/ability_runtime/vpn_startability_allowlist.json", "bundleNames");
+    bool result = abilityMs_->ParseVpnAllowListJson(
+        "/etc/ability_runtime/vpn_startability_allowlist.json", "bundleNames");
     EXPECT_NE(result, true);
 }
 
