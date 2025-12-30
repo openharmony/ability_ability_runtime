@@ -62,6 +62,8 @@ int AppStateCallbackHost::OnRemoteRequest(
             return HandleOnStartProcessFailed(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_CACHE_EXIT_INFO):
             return HandleOnCacheExitInfo(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_RECORD_APP_EXIT_SIGNAL_REASON):
+            return HandleRecordAppExitSignalReason(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -110,6 +112,11 @@ void AppStateCallbackHost::OnStartProcessFailed(const std::vector<sptr<IRemoteOb
 void AppStateCallbackHost::OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
+
+void AppStateCallbackHost::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -262,6 +269,28 @@ int32_t AppStateCallbackHost::HandleOnCacheExitInfo(MessageParcel &data, Message
     data.ReadStringVector(&uiExtensionNames);
     OnCacheExitInfo(accessTokenId, *exitInfo, bundleName, abilityNames, uiExtensionNames);
 
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleRecordAppExitSignalReason(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    if (pid <= 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pid is illegal");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t uid = data.ReadInt32();
+    if (uid < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "uid is illegal");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t signal = data.ReadInt32();
+    if (signal < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "signal is illegal");
+        return ERR_INVALID_VALUE;
+    }
+    std::string bundleName = data.ReadString();
+    RecordAppExitSignalReason(pid, uid, signal, bundleName);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk
