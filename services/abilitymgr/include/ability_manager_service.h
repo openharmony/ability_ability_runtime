@@ -713,7 +713,8 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
-        uint64_t specifiedFullTokenId = 0) override;
+        uint64_t specifiedFullTokenId = 0,
+        int32_t loadTimeout = 0) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -2476,7 +2477,9 @@ private:
         const sptr<SessionInfo> &sessionInfo = nullptr,
         bool isQueryExtensionOnly = false,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
-        uint64_t specifiedFullTokenId = 0);
+        uint64_t specifiedFullTokenId = 0,
+        int32_t loadTimeout = 0);
+
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int32_t HandleExtensionConnectionByUserId(sptr<IAbilityConnection> connect, int32_t userId,
         std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)> func);

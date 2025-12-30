@@ -1908,6 +1908,8 @@ private:
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
+    static int32_t GetLoadTimeout(int32_t loadTimeout);
+
     void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
 
     void HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,

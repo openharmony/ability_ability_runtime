@@ -705,5 +705,53 @@ HWTEST_F(AbilityConnectManagerTest, ResumeExtensionAbilityLocked_001, TestSize.L
     EXPECT_EQ(result, OHOS::ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "ResumeExtensionAbilityLocked end");
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetLoadTimeout
+ */
+HWTEST_F(AbilityConnectManagerTest, GetLoadTimeout_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_001 start");
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    auto timeout = connectManager->GetLoadTimeout(0);
+    EXPECT_NE(timeout, 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetLoadTimeout
+ */
+HWTEST_F(AbilityConnectManagerTest, GetLoadTimeout_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_002 start");
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    auto timeout = connectManager->GetLoadTimeout(-1);
+    EXPECT_NE(timeout, -1);
+
+    timeout = connectManager->GetLoadTimeout(100);
+    EXPECT_NE(timeout, 100);
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_002 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetLoadTimeout
+ */
+HWTEST_F(AbilityConnectManagerTest, GetLoadTimeout_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_003 start");
+    std::shared_ptr<CommonExtensionManager> connectManager = std::make_shared<CommonExtensionManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    auto timeout = connectManager->GetLoadTimeout(10);
+    EXPECT_EQ(timeout, 10);
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_003 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

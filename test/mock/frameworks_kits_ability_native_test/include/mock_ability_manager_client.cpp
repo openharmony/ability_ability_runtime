@@ -98,6 +98,12 @@ ErrCode AbilityManagerClient::ConnectAbility(const Want &want, sptr<IAbilityConn
     return -1;
 }
 
+ErrCode AbilityManagerClient::ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId,
+    int32_t loadTimeout)
+{
+    return -1;
+}
+
 ErrCode AbilityManagerClient::ConnectAbility(const Want& want, sptr<IAbilityConnection> connect,
     sptr<IRemoteObject> callerToken, int32_t userId, uint64_t specifiedFullTokenId)
 {
