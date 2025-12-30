@@ -459,6 +459,11 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t NotifyCreateBundleDataDirWithEl(uint32_t userId, uint8_t elx) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
