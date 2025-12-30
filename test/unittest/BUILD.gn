@@ -437,6 +437,7 @@ group("unittest") {
       "native_runtime_test:unittest",
       "os_account_manager_wrapper_test:unittest",
       "page_state_data_test:unittest",
+      "page_config_manager_test:unittest",
       "pending_want_common_event_test:unittest",
       "pending_want_key_test:unittest",
       "pending_want_manager_dump_test:unittest",

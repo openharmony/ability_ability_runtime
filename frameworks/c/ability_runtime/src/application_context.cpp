@@ -561,7 +561,10 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextNotifyPageChanged(
         TAG_LOGE(AAFwkTag::APPKIT, "targetPageName null");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
-
+    if (targetPageNameLength <= 0 || static_cast<size_t>(targetPageNameLength) != strlen(targetPageName)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "targetPageNameLength invalid");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
     auto err = PageConfigManager::GetInstance().NotifyPageChanged(targetPageName, targetPageNameLength, windowId);
     if (err == ERR_NO_INIT) {
         TAG_LOGE(AAFwkTag::APPKIT, "windowId invalid");
