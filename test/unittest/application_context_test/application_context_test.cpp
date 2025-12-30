@@ -2041,7 +2041,6 @@ HWTEST_F(ApplicationContextTest, GetInteropCallbacks_0200, TestSize.Level1)
     GTEST_LOG_(INFO) << "GetInteropCallbacks_0200 end";
 }
 
-
 /**
  * @tc.number: GetConfigUpdateReason_0100
  * @tc.name: GetConfigUpdateReason
@@ -2064,7 +2063,7 @@ HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0100, TestSize.Level1)
 /**
  * @tc.number: GetConfigUpdateReason_0200
  * @tc.name: GetConfigUpdateReason
- * @tc.desc: Create GetConfigUpdateReason default
+ * @tc.desc: Create GetConfigUpdateReason in WHITE_LIST
  */
 HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0200, TestSize.Level1)
 {
