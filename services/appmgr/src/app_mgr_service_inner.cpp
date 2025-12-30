@@ -1242,17 +1242,18 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
 
-    auto reportLoadTask = [appRecord, abilityRecordId = loadParam->abilityRecordId]() {
+    auto reportLoadTask = [appRecord, abilityRecordId = loadParam->abilityRecordId,
+        loadTimeout = loadParam->loadTimeout]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
-            auto timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
-                AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+            auto timeOut = AppMgrServiceInner::GetLoadTimeout(loadTimeout);
             if (appRecord->GetExtensionType() == ExtensionAbilityType::SERVICE) {
                 timeOut = AbilityRuntime::GlobalConstant::GetLoadAndInactiveTimeout() *
                     AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             }
             auto stage = appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH ?
                 AAFwk::LoadingStage::PRE_LAUNCH_BEGIN : AAFwk::LoadingStage::LOAD_BEGIN;
+            TAG_LOGD(AAFwkTag::APPMGR, "report load,timeout:%{public}d", timeOut);
             AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(stage,
                 priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
         }
@@ -1265,6 +1266,15 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
         UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     }
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
+}
+
+int32_t AppMgrServiceInner::GetLoadTimeout(int32_t loadTimeout)
+{
+    if (loadTimeout > 0) {
+        return loadTimeout;
+    }
+    return AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
+        AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
 }
 
 void AppMgrServiceInner::HandleExistingAppRecordAfterFound(std::shared_ptr<AppRunningRecord> appRecord,

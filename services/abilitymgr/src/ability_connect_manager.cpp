@@ -70,6 +70,7 @@ const int COMMAND_TIMEOUT_MULTIPLE = 5;
 const int COMMAND_TIMEOUT_MULTIPLE_NEW = 21;
 const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 5;
 #endif
+constexpr const int32_t LOAD_TIMEOUT_MAX = 30;
 const int32_t AUTO_DISCONNECT_INFINITY = -1;
 constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
@@ -402,7 +403,7 @@ int AbilityConnectManager::ConnectAbilityLockedInner(bool isLoadedAbility,
 {
     if (!isLoadedAbility) {
         TAG_LOGI(AAFwkTag::EXT, "load");
-        LoadAbility(targetService);
+        LoadAbility(targetService, nullptr, false, abilityRequest.loadExtensionTimeout);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE)) {
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);
@@ -1198,7 +1199,8 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityConnectManager::GetConnectRe
 }
 
 void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
-    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback, bool isPreloadUIExtension)
+    std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback, bool isPreloadUIExtension,
+    int32_t loadTimeout)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
@@ -1209,9 +1211,11 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecor
         RemoveServiceAbility(abilityRecord);
         return;
     }
+    int32_t loadTimeoutFinal =
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * GetLoadTimeout(loadTimeout);
     if (!abilityRecord->IsDebugApp()) {
         TAG_LOGD(AAFwkTag::EXT, "IsDebug is false, here is not debug app");
-        PostTimeOutTask(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
+        PostLoadTimeoutTask(abilityRecord, loadTimeoutFinal);
     }
     sptr<Token> token = abilityRecord->GetToken();
     sptr<Token> perToken = nullptr;
@@ -1241,6 +1245,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecor
     loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
     loadParam.extensionProcessMode = abilityRecord->GetExtensionProcessMode();
     loadParam.isPreloadUIExtension = isPreloadUIExtension;
+    loadParam.loadTimeout = loadTimeoutFinal;
     SetExtensionLoadParam(loadParam, abilityRecord);
     AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam.token, "AbilityConnectManager::LoadAbility");
     HandleLoadAbilityOrStartSpecifiedProcess(loadParam, abilityRecord);
@@ -1430,11 +1435,10 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<BaseExtensionR
 
     std::string taskName;
     auto recordId = abilityRecord->GetAbilityRecordId();
-    TAG_LOGD(AAFwkTag::EXT, "task: %{public}s, %{public}d, %{public}" PRId64,
-        abilityRecord->GetURI().c_str(), connectRecordId, recordId);
-    if (messageId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
-        HandlePostLoadTimeout(abilityRecord, recordId);
-    } else if (messageId == AbilityManagerService::CONNECT_TIMEOUT_MSG) {
+    TAG_LOGD(AAFwkTag::EXT, "task: %{public}s/%{public}s, %{public}d, %{public}" PRId64,
+        abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str(),
+        connectRecordId, recordId);
+    if (messageId == AbilityManagerService::CONNECT_TIMEOUT_MSG) {
         HandlePostConnectTimeout(abilityRecord, connectRecordId, recordId);
     } else {
         TAG_LOGE(AAFwkTag::EXT, "messageId error");
@@ -1442,13 +1446,16 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<BaseExtensionR
     }
 }
 
-void AbilityConnectManager::HandlePostLoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
-    int64_t recordId)
+void AbilityConnectManager::PostLoadTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
+    int32_t loadTimeout)
 {
-    int32_t delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    abilityRecord->SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, delayTime / HALF_TIMEOUT,
+    CHECK_POINTER(abilityRecord);
+    auto recordId = abilityRecord->GetAbilityRecordId();
+    TAG_LOGD(AAFwkTag::EXT, "task: %{public}s/%{public}s, %{public}" PRId64,
+        abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str(), recordId);
+    abilityRecord->SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT,
         recordId, true);
-    abilityRecord->SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime, recordId, true);
+    abilityRecord->SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout, recordId, true);
 }
 
 void AbilityConnectManager::HandlePostConnectTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
@@ -1463,6 +1470,27 @@ void AbilityConnectManager::HandlePostConnectTimeout(const std::shared_ptr<BaseE
     
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
         abilityRecord->GetUid(), delayTime, recordId);
+}
+
+int32_t AbilityConnectManager::GetLoadTimeout(int32_t loadTimeout)
+{
+#ifdef SUPPORT_ASAN
+    return LOAD_TIMEOUT_MULTIPLE;
+#else
+    if (loadTimeout == 0) {
+        TAG_LOGD(AAFwkTag::EXT, "loadTimeout 0, reset to default");
+        return LOAD_TIMEOUT_MULTIPLE;
+    }
+    if (loadTimeout < 0 || loadTimeout > LOAD_TIMEOUT_MAX) {
+        TAG_LOGW(AAFwkTag::EXT, "loadTimeout %{public}d invalid, reset to default", loadTimeout);
+        return LOAD_TIMEOUT_MULTIPLE;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGW(AAFwkTag::EXT, "not sa call");
+        return LOAD_TIMEOUT_MULTIPLE;
+    }
+    return loadTimeout;
+#endif
 }
 
 void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord)

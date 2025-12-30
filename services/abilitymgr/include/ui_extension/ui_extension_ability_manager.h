@@ -220,7 +220,7 @@ private:
 
     void HandleAbilityDiedTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
-    void HandlePostLoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int64_t recordId) override;
+    void PostLoadTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int32_t loadTimeout) override;
 
     int DispatchForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<IRemoteObject> &token) override;

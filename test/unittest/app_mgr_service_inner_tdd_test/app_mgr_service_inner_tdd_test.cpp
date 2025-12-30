@@ -22,11 +22,13 @@
 #include "remote_client_manager.h"
 #undef private
 #include "app_scheduler.h"
+#include "app_utils.h"
 #include "app_mgr_event.h"
 #include "app_spawn_client.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
+#include "global_constant.h"
 #include "mock_ability_token.h"
 #include "mock_app_scheduler.h"
 #include "mock_bundle_manager.h"
@@ -1480,6 +1482,40 @@ HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_005, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_005 end");
+}
+
+/**
+ * @tc.name: GetLoadTimeout
+ * @tc.desc: Get load timeout
+ * @tc.type: FUNC
+ * @tc.Function: GetLoadTimeout
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetLoadTimeout_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_001 start");
+    auto timeout = AppMgrServiceInner::GetLoadTimeout(12);
+    EXPECT_EQ(timeout, 12);
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_001 end");
+}
+
+/**
+ * @tc.name: GetLoadTimeout
+ * @tc.desc: Get load timeout
+ * @tc.type: FUNC
+ * @tc.Function: GetLoadTimeout
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetLoadTimeout_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_002 start");
+    auto timeout = AppMgrServiceInner::GetLoadTimeout(0);
+    auto timeoutDefault = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
+        AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+    EXPECT_EQ(timeout, timeoutDefault);
+    TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_002 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

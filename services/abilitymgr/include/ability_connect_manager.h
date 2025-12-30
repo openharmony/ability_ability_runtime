@@ -389,10 +389,11 @@ protected:
     * @param abilityRecord The ability record to load.
     * @param updateRecordCallback Callback to update record after loading.
     * @param isPreloadUIExtension Whether loading for UI Extension preload.
+    * @param timeout, timeout multiply for ability loading stage, not work on asan
     */
     void LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         std::function<void(const std::shared_ptr<BaseExtensionRecord> &)> updateRecordCallback = nullptr,
-        bool isPreloadUIExtension = false);
+        bool isPreloadUIExtension = false, int32_t loadTimeout = 0);
 
     /**
      * RemoveServiceAbility.
@@ -526,7 +527,7 @@ protected:
 
     virtual bool HandleExtensionAbilityRemove(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
-    virtual void HandlePostLoadTimeout(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int64_t recordId);
+    virtual void PostLoadTimeoutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int32_t loadTimeout);
 
     virtual int DispatchForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
         const sptr<IRemoteObject> &token);
@@ -770,6 +771,7 @@ private:
     void PostTimeOutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, uint32_t messageId);
     void PostTimeOutTask(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int connectRecordId,
         uint32_t messageId);
+    int32_t GetLoadTimeout(int32_t loadTimeout);
 
     void CompleteForeground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
