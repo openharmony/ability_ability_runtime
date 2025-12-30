@@ -122,6 +122,7 @@
       },
       "build": {
         "sub_component": [
+          "//foundation/ability/ability_runtime/agent_runtime_framework/interfaces/inner_api:agent_fwk",
           "//foundation/ability/ability_runtime/services:ams_target",
           "//foundation/ability/ability_runtime/services/sa_profile:ams_sa_profile",
           "//foundation/ability/ability_runtime/services/quickfixmgr:quick_fix.cfg",
