@@ -12762,7 +12762,7 @@ int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IS
     return uiAbilityManager->RegisterStatusBarDelegate(delegate);
 }
 
-int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids, bool clear)
+int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
 {
     if (!IsCallerSceneBoard() && !PermissionVerification::GetInstance()->VerifyCallingPermission(
         PermissionConstants::PERMISSION_KILL_APP_PROCESSES)) {

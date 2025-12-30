@@ -1124,7 +1124,7 @@ public:
 
     ErrCode RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
 
-    ErrCode KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids, bool clear = false);
+    ErrCode KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear = false);
 
     /**
      * kill the process with reason

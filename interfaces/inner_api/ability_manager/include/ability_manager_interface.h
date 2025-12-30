@@ -1709,7 +1709,7 @@ public:
         return 0;
     }
 
-    virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids, bool clear)
+    virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
     {
         return 0;
     }

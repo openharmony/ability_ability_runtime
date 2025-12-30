@@ -1144,6 +1144,10 @@ public:
     {
         isPrepareExit_ = true;
     }
+    inline bool IsPrepareExit() const
+    {
+        return isPrepareExit_;
+    }
 
     inline void SetTimeStamp(int64_t timeStamp)
     {

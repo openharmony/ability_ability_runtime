@@ -5058,7 +5058,7 @@ int32_t AbilityManagerProxy::RegisterStatusBarDelegate(sptr<AbilityRuntime::ISta
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids, bool clear)
+int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
 {
     MessageParcel data;
     MessageParcel reply;
