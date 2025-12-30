@@ -35,7 +35,6 @@ bool LifeCycleStateInfo::ReadFromParcel(Parcel &parcel)
     }
     launchParam = *launchInfo;
     sceneFlag = parcel.ReadUint32();
-    pageConfig = parcel.ReadString();
     return true;
 }
 
@@ -80,9 +79,6 @@ bool LifeCycleStateInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteUint32(sceneFlag)) {
-        return false;
-    }
-    if (!parcel.WriteString(pageConfig)) {
         return false;
     }
     return true;

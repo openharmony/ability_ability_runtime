@@ -2941,6 +2941,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, Ab
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
         return ERR_INVALID_VALUE;
     }
+    sessionInfo->want.SetParam(AbilityRuntime::GlobalConstant::PAGE_CONFIG, params.pageConfig);
     EventInfo eventInfo = BuildEventInfo(sessionInfo->want, -1);
 #ifdef MEMMGR_OVERRIDE_ENABLE
     WantParams wantParams = (sessionInfo->want).GetParams();

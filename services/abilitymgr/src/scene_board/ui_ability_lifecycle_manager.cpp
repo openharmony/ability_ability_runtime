@@ -223,7 +223,6 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     MarkStartingFlag(abilityRequest);
     if (sessionInfo->reuseDelegatorWindow) {
         uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = params.sceneFlag;
-        uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
         return ERR_OK;
     }
     auto want = uiAbilityRecord->GetWant();
@@ -249,7 +248,6 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         if (scenarios == 0 && sessionInfo->isNewWant) {
             uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
         }
-        uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
         return ERR_OK;
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
@@ -280,7 +278,6 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         options.callingPid = abilityRequest.processOptions->callingPid;
         options.loadAbilityCallbackId = abilityRequest.processOptions->loadAbilityCallbackId;
     }
-    options.pageConfig = params.pageConfig;
     if (sessionInfo->processOptions != nullptr) {
         options.selfPid = sessionInfo->processOptions->selfPid;
     }
@@ -1638,6 +1635,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB abilityId:%{public}" PRIu64 ".",
         sessionInfo->uiAbilityId);
+    sessionInfo->want.SetParam(AbilityRuntime::GlobalConstant::PAGE_CONFIG, params.pageConfig);
     auto search = tmpAbilityMap_.find(sessionInfo->requestId);
     if (search == tmpAbilityMap_.end()) {
         if (sessionInfo->uiAbilityId == 0 && tmpAbilityMap_.size() == 1) {
@@ -1672,7 +1670,6 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
     } else {
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
-    uiAbilityRecord->lifeCycleStateInfo_.pageConfig = params.pageConfig;
     uiAbilityRecord->LoadAbility();
 }
 
@@ -4210,7 +4207,6 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
         sessionInfo->requestId = request->requestId;
         request->persistentId = sessionInfo->persistentId;
         request->sceneFlag = params.sceneFlag;
-        request->pageConfig = params.pageConfig;
         list.push_back(request);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "restart StartSpecified: %{public}d, persitentId: %{public}d, "
             "list size: %{public}zu", request->requestId, sessionInfo->persistentId, list.size());
@@ -4226,7 +4222,6 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(const AbilityRequest &a
         request->requestId, sessionInfo->persistentId);
     request->persistentId = sessionInfo->persistentId;
     request->sceneFlag = params.sceneFlag;
-    request->pageConfig = params.pageConfig;
     request->callingTokenId = sessionInfo->callingTokenId;
     return true;
 }
@@ -4249,7 +4244,6 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
     ForegroundOptions options = { specifiedRequest.sceneFlag, isShellCall };
-    options.pageConfig = specifiedRequest.pageConfig;
     uiAbilityRecord->ProcessForegroundAbility(specifiedRequest.callingTokenId, options);
     SendKeyEvent(specifiedRequest.abilityRequest);
     return true;

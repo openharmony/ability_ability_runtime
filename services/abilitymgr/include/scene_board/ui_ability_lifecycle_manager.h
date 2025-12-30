@@ -53,7 +53,6 @@ struct SpecifiedRequest {
     uint32_t sceneFlag = 0;
     uint32_t callingTokenId = 0;
     AbilityRequest abilityRequest;
-    std::string pageConfig = "";
 
     SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
 };
