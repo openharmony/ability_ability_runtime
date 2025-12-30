@@ -2040,5 +2040,45 @@ HWTEST_F(ApplicationContextTest, GetInteropCallbacks_0200, TestSize.Level1)
     EXPECT_FALSE(context_->GetInteropCallbacks().empty());
     GTEST_LOG_(INFO) << "GetInteropCallbacks_0200 end";
 }
+
+/**
+ * @tc.number: GetConfigUpdateReason_0100
+ * @tc.name: GetConfigUpdateReason
+ * @tc.desc: Create GetConfigUpdateReason default
+ */
+HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0100 start";
+    std::shared_ptr<ContextImpl> contextImpl = nullptr;
+    context_->AttachContextImpl(contextImpl);
+    auto ret = context_->GetConfigUpdateReason();
+    EXPECT_EQ(ret, ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
+    // not set config reason expect default.
+    context_->AttachContextImpl(mock_);
+    ret = context_->GetConfigUpdateReason();
+    EXPECT_EQ(ret, ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0100 end";
+}
+
+/**
+ * @tc.number: GetConfigUpdateReason_0200
+ * @tc.name: GetConfigUpdateReason
+ * @tc.desc: Create GetConfigUpdateReason in WHITE_LIST
+ */
+HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0200 start";
+    std::shared_ptr<ContextImpl> contextImpl = nullptr;
+    context_->AttachContextImpl(contextImpl);
+    context_->SetConfigUpdateReason(ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
+    auto ret = context_->GetConfigUpdateReason();
+    EXPECT_EQ(ret, ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT);
+
+    context_->AttachContextImpl(mock_);
+    context_->SetConfigUpdateReason(ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
+    ret = context_->GetConfigUpdateReason();
+    EXPECT_EQ(ret, ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0200 end";
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
