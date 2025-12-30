@@ -428,6 +428,43 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAbilityRecord_0100, TestSi
 }
 
 /**
+ * @tc.name: AppRunningRecord_IsLastAbilityRecord_0200
+ * @tc.desc: Test IsLastAbilityRecord works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAbilityRecord_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityRecord_0200 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    appRecord->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    bool ret = appRecord->IsLastAbilityRecord(token);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityRecord_0200 end.");
+}
+
+
+/**
+ * @tc.name: AppRunningRecord_IsLastAbilityRecord_0300
+ * @tc.desc: Test IsLastAbilityRecord works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAbilityRecord_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityRecord_0300 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    appRecord->specifiedAbilityRequest_ = nullptr;
+    bool ret = appRecord->IsLastAbilityRecord(token);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastAbilityRecord_0300 end.");
+}
+
+/**
  * @tc.name: AppRunningRecord_ExtensionAbilityRecordExists_0100
  * @tc.desc: Test ExtensionAbilityRecordExists works.
  * @tc.type: FUNC
@@ -495,6 +532,42 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastPageAbilityRecord_0100, Te
     bool ret = appRecord->IsLastPageAbilityRecord(token);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastPageAbilityRecord_0100 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsLastPageAbilityRecord_0200
+ * @tc.desc: Test IsLastPageAbilityRecord works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastPageAbilityRecord_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastPageAbilityRecord_0200 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    appRecord->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    bool ret = appRecord->IsLastPageAbilityRecord(token);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastPageAbilityRecord_0200 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsLastPageAbilityRecord_0300
+ * @tc.desc: Test IsLastPageAbilityRecord works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastPageAbilityRecord_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastPageAbilityRecord_0300 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    appRecord->specifiedAbilityRequest_ = nullptr;
+    bool ret = appRecord->IsLastPageAbilityRecord(token);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsLastPageAbilityRecord_0300 end.");
 }
 
 /**
