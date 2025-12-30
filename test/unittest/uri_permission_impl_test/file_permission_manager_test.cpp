@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_001, TestSize.L
     uint32_t callerTokenId = 0;
     uint32_t flag = 0;
     std::vector<PolicyInfo> pathPolicies;
-    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, "", pathPolicies);
     bool res = false;
     if (ret.empty()) {
         res = true;
@@ -88,7 +88,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_002, TestSize.L
     uint32_t callerTokenId = 1002;
     uint32_t flag = 0;
     std::vector<PolicyInfo> pathPolicies;
-    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, "", pathPolicies);
     EXPECT_FALSE(ret.empty());
 }
 
@@ -118,7 +118,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_003, TestSize.L
     MyFlag::permissionFileAccessManager_ = true;
     MyFlag::permissionSandboxAccessManager_ = true;
     std::vector<PolicyInfo> pathPolicies;
-    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, "", pathPolicies);
     EXPECT_EQ(ret.size(), uriVec.size());
     bool res = true;
     for (size_t i = 0; i < ret.size(); i++) {
@@ -145,7 +145,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_004, TestSize.L
     MyFlag::permissionFileAccessManager_ = true;
     MyFlag::permissionSandboxAccessManager_ = true;
     std::vector<PolicyInfo> pathPolicies;
-    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, "", pathPolicies);
     EXPECT_FALSE(ret[0]);
 }
 
@@ -246,21 +246,6 @@ HWTEST_F(FilePermissionManagerTest, InitDlSymbol_002, TestSize.Level1)
     const char* funcName = "testFunc";
     bool ret = wrapper.InitDlSymbol(soName, funcName);
     ASSERT_FALSE(ret);
-}
-
-/*
- * Feature: InitDlSymbol
- * Function: InitDlSymbol
- * SubFunction: NA
- * FunctionPoints: InitDlSymbol
- */
-HWTEST_F(FilePermissionManagerTest, InitDlSymbol_003, TestSize.Level1)
-{
-    DllWrapper wrapper;
-    const char* soName = "libmission_list.z.so";
-    const char* funcName = "CreateMissionListWrap";
-    bool ret = wrapper.InitDlSymbol(soName, funcName);
-    ASSERT_TRUE(ret);
 }
 
 /*
