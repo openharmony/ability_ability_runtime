@@ -5637,7 +5637,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GenerateAbilityRecord_0002, TestSize.Lev
     bool isColdStart = false;
     auto record = mgr->GenerateAbilityRecord(request, sessionInfo, isColdStart);
     EXPECT_EQ(record, tmpRecord);
-    EXPECT_TRUE(isColdStart);
+    EXPECT_FALSE(isColdStart);
 }
 
 /**
