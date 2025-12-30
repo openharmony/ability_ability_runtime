@@ -1862,7 +1862,7 @@ ErrCode AbilityManagerClient::RegisterStatusBarDelegate(sptr<AbilityRuntime::ISt
     return abms->RegisterStatusBarDelegate(delegate);
 }
 
-ErrCode AbilityManagerClient::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids, bool clear)
+ErrCode AbilityManagerClient::KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, KillProcessWithPrepareTerminate");
     auto abms = GetAbilityManager();

@@ -546,15 +546,18 @@ HWTEST_F(AppMgrServiceThirdTest, SetProcessPrepareExit_001, TestSize.Level1)
     appMgrService->SetInnerService(nullptr);
     appMgrService->SetProcessPrepareExit(0);
 
-    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    auto mockAppMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    appMgrService->SetInnerService(mockAppMgrServiceInner);
     appMgrService->taskHandler_ = taskHandler_;
-    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, mockAppMgrServiceInner);
     EXPECT_TRUE(appMgrService->IsReady());
 
-    AAFwk::MyFlag::flag_ = 0;
+    EXPECT_CALL(*mockAppMgrServiceInner, IsFoundationCall).Times(1)
+        .WillOnce(Return(false));
     appMgrService->SetProcessPrepareExit(0);
 
-    AAFwk::MyFlag::flag_ = 1;
+    EXPECT_CALL(*mockAppMgrServiceInner, IsFoundationCall).Times(1)
+        .WillOnce(Return(true));
     appMgrService->SetProcessPrepareExit(0);
 }
 } // namespace AppExecFwk

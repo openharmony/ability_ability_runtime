@@ -2114,10 +2114,8 @@ void AppMgrService::SetProcessPrepareExit(int32_t pid)
         TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
         return;
     }
-    bool isCallingPermission =
-        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
+    if (!appMgrServiceInner_->IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return;
     }
     appMgrServiceInner_->SetProcessPrepareExit(pid);
