@@ -2068,7 +2068,7 @@ HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0100, TestSize.Level1)
  */
 HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0200, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0100 start";
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0200 start";
     std::shared_ptr<ContextImpl> contextImpl = nullptr;
     context_->AttachContextImpl(contextImpl);
     context_->SetConfigUpdateReason(ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
@@ -2079,7 +2079,7 @@ HWTEST_F(ApplicationContextTest, GetConfigUpdateReason_0200, TestSize.Level1)
     context_->SetConfigUpdateReason(ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
     ret = context_->GetConfigUpdateReason();
     EXPECT_EQ(ret, ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST);
-    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0100 end";
+    GTEST_LOG_(INFO) << "GetConfigUpdateReason_0200 end";
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
