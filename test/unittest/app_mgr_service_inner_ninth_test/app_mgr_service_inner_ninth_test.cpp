@@ -2300,7 +2300,7 @@ HWTEST_F(AppMgrServiceInnerNinthTest, SetProcessPrepareExit_0100, TestSize.Level
     auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = appRecord;
     appMgrServiceInner->SetProcessPrepareExit(0);
-    EXPECT_TRUE(appRecord->isTerminating);
+    EXPECT_TRUE(appRecord->isPrepareExit_);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "SetProcessPrepareExit_0100 end");
 }

@@ -2542,7 +2542,7 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_KillProcessWithPre
 {
     GTEST_LOG_(INFO) << "AbilityManagerClient_KillProcessWithPrepareTerminate_0100 start";
     std::vector<int32_t> pids;
-    client_->KillProcessWithPrepareTerminate(pids);
+    client_->KillProcessWithPrepareTerminate(pids, false);
     EXPECT_NE(client_, nullptr);
     GTEST_LOG_(INFO) << "AbilityManagerClient_KillProcessWithPrepareTerminate_0100 end";
 }
