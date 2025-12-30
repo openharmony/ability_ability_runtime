@@ -3430,7 +3430,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, TryPrepareTerminateByPids_001, TestSize.
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::vector<int32_t> pids;
-    EXPECT_EQ(uiAbilityLifecycleManager->TryPrepareTerminateByPids(pids), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->TryPrepareTerminateByPids(pids, false), ERR_OK);
 }
 
 /**

@@ -3799,7 +3799,7 @@ int32_t AbilityManagerStub::KillProcessWithPrepareTerminateInner(MessageParcel &
     for (uint32_t i = 0; i < size; i++) {
         pids.emplace_back(data.ReadInt32());
     }
-    int32_t result = KillProcessWithPrepareTerminate(pids);
+    int32_t result = KillProcessWithPrepareTerminate(pids, data.ReadBool());
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "kill process fail");
     }
