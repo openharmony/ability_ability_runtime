@@ -1317,7 +1317,7 @@ public:
      */
     virtual sptr<IAbilityManagerCollaborator> GetAbilityManagerCollaborator() override;
 
-    virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids) override;
+    virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t> &pids, bool clear) override;
 
     /**
      * @brief  the process with reason

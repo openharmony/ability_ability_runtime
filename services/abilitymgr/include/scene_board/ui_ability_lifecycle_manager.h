@@ -415,7 +415,7 @@ public:
      * @param pids List of process IDs to terminate
      * @return ERR_OK if successful, error code otherwise
      */
-    int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
+    int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids, bool clear);
 
     /**
      * @brief Change ability visibility
@@ -1188,6 +1188,8 @@ private:
      * @return true if updated, false otherwise
      */
     bool UpdateSpecifiedFlag(UIAbilityRecordPtr abilityRequest, const std::string &flag);
+    void SetProcessPrepareExit(int32_t pid, size_t remainingTokensSize, size_t abilityToTerminateSize,
+        bool clear) const;
 
     /**
      * @brief Process cold start branch

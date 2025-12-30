@@ -11220,5 +11220,19 @@ void AppMgrServiceInner::RecordAppExitSignalReason(int32_t pid, int32_t uid, int
         }
     }
 }
+
+void AppMgrServiceInner::SetProcessPrepareExit(int32_t pid)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "SetProcessPrepareExit %{public}d", pid);
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SetProcessPrepareExit appRecord null: %{public}d", pid);
+        return;
+    }
+    appRecord->SetProcessCacheBlocked(true);
+    appRecord->SetTerminating();
+    appRecord->SetPrepareExit();
+}
+
 } // namespace AppExecFwk
 }  // namespace OHOS

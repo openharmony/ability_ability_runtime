@@ -3653,17 +3653,18 @@ std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppA
     return remainingTokens;
 }
 
-int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<int32_t>& pids)
+int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<int32_t>& pids, bool clear)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "prepare terminate app");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "prepareTerminateApp: %{public}zu, clear: %{public}d", pids.size(), clear);
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->BlockProcessCacheByPids(pids));
     for (const auto &pid : pids) {
         std::unordered_set<std::shared_ptr<AbilityRecord>> abilitysToTerminate;
         std::vector<sptr<IRemoteObject>> tokens;
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(pid, tokens));
-        for (const auto &token : PrepareTerminateAppAndGetRemaining(pid, tokens)) {
+        auto remainingTokens = PrepareTerminateAppAndGetRemaining(pid, tokens);
+        for (const auto &token : remainingTokens) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
             if (PrepareTerminateAbility(abilityRecord, true)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate blocked");
@@ -3671,12 +3672,25 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
             }
             abilitysToTerminate.emplace(abilityRecord);
         }
+        SetProcessPrepareExit(pid, remainingTokens.size(), abilitysToTerminate.size(), clear);
         for (const auto &abilityRecord : abilitysToTerminate) {
             TerminateSession(abilityRecord);
         }
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "end.");
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::SetProcessPrepareExit(int32_t pid, size_t remainingTokensSize,
+    size_t abilitysToTerminateSize, bool clear) const
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "remianningTokens %{public}zu, abilitysToTerminate %{public}zu",
+        remainingTokensSize, abilitysToTerminateSize);
+    if (remainingTokensSize == abilitysToTerminateSize && clear) {
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        CHECK_POINTER(appMgr);
+        IN_PROCESS_CALL_WITHOUT_RET(appMgr->SetProcessPrepareExit(pid));
+    }
 }
 
 void UIAbilityLifecycleManager::TryPrepareTerminateByPidsDone(const std::string &moduleName,
