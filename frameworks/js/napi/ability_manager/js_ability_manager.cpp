@@ -368,6 +368,7 @@ private:
         TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
         NapiAsyncTask::CompleteCallback complete =
             [](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 std::vector<AAFwk::AbilityRunningInfo> infos;
                 auto errcode = AbilityManagerClient::GetInstance()->GetAbilityRunningInfos(infos);
                 if (errcode == 0) {
@@ -410,6 +411,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete =
             [upperLimit](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 std::vector<AAFwk::ExtensionRunningInfo> infos;
                 auto errcode = AbilityManagerClient::GetInstance()->GetExtensionRunningInfos(upperLimit, infos);
                 if (errcode == 0) {
@@ -500,6 +502,7 @@ private:
 #endif
         NapiAsyncTask::CompleteCallback complete =
             [](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 AppExecFwk::ElementName elementName = AbilityManagerClient::GetInstance()->GetTopAbility();
 #ifdef ENABLE_ERRCOE
                 task.ResolveWithNoError(env, CreateJsElementName(env, elementName));
