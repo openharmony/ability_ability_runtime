@@ -27,10 +27,13 @@ ohos_unittest("agent_card_test") {
 
   sources = [
     "agent_card_test.cpp",
+    "mock/src/parcel_mock.cpp",
+    "${agent_runtime_framework_path}/interfaces/inner_api/src/agent_card.cpp",
   ]
 
   include_dirs = [
     "mock/include",
+    "${ability_runtime_services_path}/common/include",
     "${agent_runtime_framework_path}/interfaces/inner_api/include",
   ]
 
