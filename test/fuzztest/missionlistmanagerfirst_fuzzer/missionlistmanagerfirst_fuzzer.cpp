@@ -66,24 +66,20 @@ uint32_t GetU32Data(const char* ptr)
         ptr[INPUT_THREE];
 }
 
-std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
+MissionAbilityRecordPtr GetFuzzAbilityRecord()
 {
     sptr<Token> token = nullptr;
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    if (!abilityRecord) {
-        return nullptr;
-    }
-    return abilityRecord;
+    return MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 }
 
 sptr<Token> GetFuzzAbilityToken()
 {
     sptr<Token> token = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    auto abilityRecord = GetFuzzAbilityRecord();
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
@@ -119,7 +115,7 @@ void DoSomethingTestWithMyAPI0(std::shared_ptr<MissionListManager> missionListMg
     missionListMgr->EnqueueWaitingAbilityToFront(abilityRequest);
     missionListMgr->StartWaitingAbility();
     missionListMgr->UnRegisterMissionListener(nullptr);
-    std::shared_ptr<AbilityRecord> targetAbilityRecord = GetFuzzAbilityRecord();
+    auto targetAbilityRecord = GetFuzzAbilityRecord();
     missionListMgr->AddRecord(abilityRequest, targetAbilityRecord);
     std::shared_ptr<Mission> targetMission = std::make_shared<Mission>(int32Param, targetAbilityRecord);
     missionListMgr->GetTargetMission(abilityRequest, targetMission, targetAbilityRecord);
@@ -146,7 +142,7 @@ void DoSomethingTestWithMyAPI0(std::shared_ptr<MissionListManager> missionListMg
     targetAbilityRecord->currentState_ = static_cast<AAFwk::AbilityState>(uint32Param % ABILITY_STATE_MOD);
     missionListMgr->DispatchState(targetAbilityRecord, uint32Param % ABILITY_STATE_MOD);
     missionListMgr->CompleteForegroundSuccess(targetAbilityRecord);
-    std::shared_ptr<AbilityRecord> prevAbilityRecord = GetFuzzAbilityRecord();
+    auto prevAbilityRecord = GetFuzzAbilityRecord();
     prevAbilityRecord->isTerminating_ = boolParam;
     prevAbilityRecord->currentState_ = static_cast<AAFwk::AbilityState>(uint32Param % ABILITY_STATE_MOD);
     targetAbilityRecord->SetPreAbilityRecord(prevAbilityRecord);
@@ -163,7 +159,7 @@ void DoSomethingTestWithMyAPI1(std::shared_ptr<MissionListManager> missionListMg
     missionListMgr->GetMissionInfo(int32Param, missionInfo);
     std::shared_ptr<StartOptions> startOptions = nullptr;
     missionListMgr->MoveMissionToFront(int32Param, startOptions);
-    std::shared_ptr<AbilityRecord> callerAbility = GetFuzzAbilityRecord();
+    auto callerAbility = GetFuzzAbilityRecord();
     auto abilityRecord = GetFuzzAbilityRecord();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(int32Param, abilityRecord);
     missionListMgr->defaultStandardList_->AddMissionToTop(mission);

@@ -102,7 +102,7 @@ HWTEST_F(AbilityTimeoutTest, OnAbilityDied_001, TestSize.Level1)
         abilityRequest.abilityInfo.name = "com.test.DiedAbility001";
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.name = "com.test";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID, abilityRecord, abilityRequest.abilityInfo.bundleName);
         abilityRecord->SetMissionId(mission->GetMissionId());
@@ -142,7 +142,7 @@ HWTEST_F(AbilityTimeoutTest, OnAbilityDied_002, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID, abilityRecord, abilityRequest.abilityInfo.bundleName);
         abilityRecord->SetMissionId(mission->GetMissionId());
@@ -183,7 +183,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_001, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID, abilityRecord, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(mission != nullptr);
@@ -224,7 +224,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_002, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(launcher != nullptr);
@@ -237,7 +237,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_002, TestSize.Level1)
         // common ability load timeout
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.Timeout002";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, abilityRecord, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(mission != nullptr);
@@ -280,7 +280,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_003, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
         launcher->SetMissionId(missionLauncher->GetMissionId());
@@ -290,7 +290,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_003, TestSize.Level1)
         // common ability by caller
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto callerMission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, caller, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(caller != nullptr);
@@ -302,7 +302,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_003, TestSize.Level1)
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(caller->GetToken()) != nullptr);
         // common ability load timeout
         abilityRequest.abilityInfo.name = "com.test.Timeout003";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 2, abilityRecord, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(abilityRecord != nullptr);
@@ -343,7 +343,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_004, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -357,13 +357,13 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_004, TestSize.Level1)
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.caller";
         abilityRequest.abilityInfo.type = AbilityType::SERVICE;
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability load timeout
         abilityRequest.abilityInfo.type = AbilityType::PAGE;
         abilityRequest.abilityInfo.name = "com.test.Timeout004";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, abilityRecord, abilityRequest.abilityInfo.bundleName);
@@ -407,7 +407,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_005, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -421,13 +421,13 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_005, TestSize.Level1)
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability load timeout
         abilityRequest.abilityInfo.type = AbilityType::PAGE;
         abilityRequest.abilityInfo.name = "com.test.Timeout005";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, abilityRecord, abilityRequest.abilityInfo.bundleName);
@@ -471,7 +471,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_006, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -482,14 +482,14 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_006, TestSize.Level1)
         EXPECT_TRUE(curListManager->launcherList_->GetAbilityRecordByToken(launcher->GetToken()) != nullptr);
 
         // common ability by caller as launcher type
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability load timeout
         abilityRequest.abilityInfo.type = AbilityType::PAGE;
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.appInfo.name = "com.test.Timeout006";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, abilityRecord, abilityRequest.abilityInfo.bundleName);
@@ -533,7 +533,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_007, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -546,14 +546,14 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_007, TestSize.Level1)
         // common ability by caller
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common launcher ability load timeout
         abilityRequest.abilityInfo.type = AbilityType::PAGE;
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.abilityInfo.name = "com.test.Timeout007";
-        auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto mission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, abilityRecord, abilityRequest.abilityInfo.bundleName);
@@ -597,7 +597,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_002, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -609,7 +609,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_002, TestSize.Level1)
 
         // common launcher ability timeout
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground002";
-        auto commonLauncher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonLauncher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonLauncher != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, commonLauncher, abilityRequest.abilityInfo.bundleName);
@@ -651,7 +651,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_003, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -663,7 +663,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_003, TestSize.Level1)
         // common ability by caller
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         auto callerMission =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, caller, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(caller != nullptr);
@@ -674,7 +674,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_003, TestSize.Level1)
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(caller->GetToken()) != nullptr);
         // common ability timeout
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground003";
-        auto commonLauncher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonLauncher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonLauncher != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID + 2, commonLauncher, abilityRequest.abilityInfo.bundleName);
@@ -716,7 +716,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_004, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -729,13 +729,13 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_004, TestSize.Level1)
         // common ability by caller (launcher type)
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability timeout
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground004";
-        auto commonLauncher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonLauncher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonLauncher != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, commonLauncher, abilityRequest.abilityInfo.bundleName);
@@ -779,7 +779,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_005, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -793,13 +793,13 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_005, TestSize.Level1)
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.type = AbilityType::SERVICE;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability timeout
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground005";
-        auto commonLauncher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonLauncher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonLauncher != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, commonLauncher, abilityRequest.abilityInfo.bundleName);
@@ -843,7 +843,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_006, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -857,13 +857,13 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_006, TestSize.Level1)
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
         abilityRequest.abilityInfo.name = "com.test.caller";
-        auto caller = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto caller = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(caller != nullptr);
 
         // common ability timeout
         abilityRequest.appInfo.isLauncherApp = false;
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground006";
-        auto commonAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonAbility = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonAbility != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, commonAbility, abilityRequest.abilityInfo.bundleName);
@@ -907,7 +907,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_007, TestSize.Level1)
         abilityRequest.abilityInfo.bundleName = "com.test";
         abilityRequest.appInfo.isLauncherApp = true;
         abilityRequest.appInfo.name = "com.test";
-        auto launcher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto launcher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(launcher != nullptr);
         auto missionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID, launcher, abilityRequest.abilityInfo.bundleName);
@@ -919,7 +919,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_007, TestSize.Level1)
 
         // common ability timeout without caller
         abilityRequest.abilityInfo.name = "com.test.TimeoutForeground007";
-        auto commonLauncher = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        auto commonLauncher = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
         EXPECT_TRUE(commonLauncher != nullptr);
         auto commonMissionLauncher =
             std::make_shared<Mission>(MOCK_MISSION_ID + 1, commonLauncher, abilityRequest.abilityInfo.bundleName);

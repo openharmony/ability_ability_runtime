@@ -15,10 +15,12 @@
 
 #include <gtest/gtest.h>
 
+#define protected public
 #define private public
 #include "ability_debug_deal.h"
 #include "ability_record.h"
 #undef private
+#undef protected
 #include "want.h"
 
 namespace OHOS {

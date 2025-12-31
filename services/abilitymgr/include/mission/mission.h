@@ -18,8 +18,8 @@
 
 #include <memory>
 
-#include "ability_record.h"
 #include "inner_mission_info.h"
+#include "mission_ability_record.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -31,7 +31,7 @@ class MissionList;
  */
 class Mission : public std::enable_shared_from_this<Mission> {
 public:
-    Mission(int32_t id, const std::shared_ptr<AbilityRecord> abilityRecord, const std::string &missionName = "",
+    Mission(int32_t id, MissionAbilityRecordPtr abilityRecord, const std::string &missionName = "",
         int32_t startMethod = 0);
     explicit Mission(const std::shared_ptr<Mission> &mission);
     virtual ~Mission();
@@ -81,9 +81,9 @@ public:
     /**
      * @brief Get the Ability Record object
      *
-     * @return std::shared_ptr<AbilityRecord>
+     * @return MissionAbilityRecordPtr
      */
-    std::shared_ptr<AbilityRecord> GetAbilityRecord() const;
+    MissionAbilityRecordPtr GetAbilityRecord() const;
 
     /**
      * @brief Get the mission id
@@ -227,7 +227,7 @@ private:
     int32_t missionId_;
     int32_t startMethod_;
     std::weak_ptr<MissionList> ownerMissionList_;
-    std::shared_ptr<AbilityRecord> abilityRecord_;
+    MissionAbilityRecordPtr abilityRecord_;
     std::string missionName_;
     std::string specifiedFlag_;
     std::string missionTime_ = "0";

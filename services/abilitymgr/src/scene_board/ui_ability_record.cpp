@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "scene_board/ui_ability_record.h"
+#include "ui_ability_record.h"
+
+#include "ability_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -32,6 +34,13 @@ std::shared_ptr<UIAbilityRecord> UIAbilityRecord::CreateAbilityRecord(const Abil
 AbilityRecordType UIAbilityRecord::GetAbilityRecordType()
 {
     return AbilityRecordType::UI_ABILITY;
+}
+
+void UIAbilityRecord::ScheduleCollaborate(const Want &want)
+{
+    std::lock_guard guard(collaborateWantLock_);
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->ScheduleCollaborate(want);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

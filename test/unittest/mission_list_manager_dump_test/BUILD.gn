@@ -44,6 +44,11 @@ ohos_unittest("mission_list_manager_dump_test") {
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
   }
+
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
 }
 
 group("unittest") {

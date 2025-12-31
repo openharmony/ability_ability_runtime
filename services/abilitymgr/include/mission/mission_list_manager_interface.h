@@ -129,9 +129,6 @@ public:
     virtual void InitMissionInfoMgr(int32_t userId) = 0;
     virtual void SetMissionAbilityState(int32_t missionId, AbilityState state) = 0;
     virtual int32_t GetInnerMissionInfoById(int32_t missionId, InnerMissionInfo &innerMissionInfo) = 0;
-#ifdef SUPPORT_SCREEN
-    virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t missionId) = 0;
-#endif
 };
 }  // namespace AAFwk
 }  // namespace OHOS

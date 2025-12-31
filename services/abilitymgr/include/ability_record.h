@@ -175,8 +175,6 @@ public:
 
     bool GetAbilityForegroundingFlag() const;
 
-    void SetAbilityForegroundingFlag();
-
     /**
      * get ability's state.
      *
@@ -220,34 +218,6 @@ public:
     sptr<Token> GetToken() const;
 
     /**
-     * set ability's previous ability record.
-     *
-     * @param abilityRecord , previous ability record
-     */
-    void SetPreAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
-    /**
-     * get ability's previous ability record.
-     *
-     * @return previous ability record
-     */
-    std::shared_ptr<AbilityRecord> GetPreAbilityRecord() const;
-
-    /**
-     * set ability's next ability record.
-     *
-     * @param abilityRecord , next ability record
-     */
-    void SetNextAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
-    /**
-     * get ability's previous ability record.
-     *
-     * @return previous ability record
-     */
-    std::shared_ptr<AbilityRecord> GetNextAbilityRecord() const;
-
-    /**
      * check whether the ability is ready.
      *
      * @return true : ready ,false: not ready
@@ -259,13 +229,6 @@ public:
     bool GetRecoveryInfo();
 
 #ifdef SUPPORT_SCREEN
-    /**
-     * check whether the ability 's window is attached.
-     *
-     * @return true : attached ,false: not attached
-     */
-    bool IsWindowAttached() const;
-
     inline bool IsStartingWindow() const
     {
         return isStartingWindow_;
@@ -286,38 +249,11 @@ public:
         return killReason_;
     }
 
-    inline void SetIsKillPrecedeStart(bool isKillPrecedeStart)
-    {
-        isKillPrecedeStart_.store(isKillPrecedeStart);
-    }
-
-    inline bool IsKillPrecedeStart()
-    {
-        return isKillPrecedeStart_.load();
-    }
-
-    void PostCancelStartingWindowHotTask();
-
-    /**
-     * process request of foregrounding the ability.
-     *
-     */
-    void ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
-        std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
-        uint32_t sceneFlag = 0);
-
-    void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit = true,
-        uint32_t sceneFlag = 0);
-    void NotifyAnimationFromTerminatingAbility() const;
-    void NotifyAnimationFromMinimizeAbility(bool& animaEnabled);
-
     bool ReportAtomicServiceDrawnCompleteEvent();
     void SetCompleteFirstFrameDrawing(const bool flag);
     bool IsCompleteFirstFrameDrawing() const;
     bool GetColdStartFlag();
     void SetColdStartFlag(bool isColdStart);
-    bool GetPrelaunchFlag();
-    void SetPrelaunchFlag(bool isPrelaunch);
 #endif
 
     /**
@@ -537,7 +473,7 @@ public:
      * dump ability info.
      *
      */
-    void Dump(std::vector<std::string> &info);
+    virtual void Dump(std::vector<std::string> &info);
 
     void DumpClientInfo(std::vector<std::string> &info, const std::vector<std::string> &params,
         bool isClient = false, bool dumpConfig = true) const;
@@ -659,7 +595,6 @@ public:
 
     bool CanRestartResident();
 
-    std::string GetLabel();
     inline int64_t GetAbilityRecordId() const
     {
         return recordId_;
@@ -668,8 +603,6 @@ public:
     void SetPendingState(AbilityState state);
     AbilityState GetPendingState() const;
 
-    bool IsNeedBackToOtherMissionStack();
-    void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void RemoveAbilityDeathRecipient() const;
@@ -783,28 +716,6 @@ public:
     void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
     void NotifyAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode);
 
-    void ScheduleCollaborate(const Want &want);
-
-    bool IsHook () const
-    {
-        return isHook_;
-    }
-
-    inline void SetIsHook(bool isHook)
-    {
-        isHook_ = isHook;
-    }
-
-    bool GetHookOff () const
-    {
-        return hookOff_;
-    }
-
-    inline void SetHookOff(bool hookOff)
-    {
-        hookOff_ = hookOff;
-    }
-
     inline void SetLaunchWant(std::shared_ptr<Want> launchWant)
     {
         launchWant_ = launchWant;
@@ -828,11 +739,6 @@ public:
     inline void SetBackgroundDrivenFlag(bool isLastWantBackgroundDriven)
     {
         isLastWantBackgroundDriven_.store(isLastWantBackgroundDriven);
-    }
-
-    inline bool IsLastWantBackgroundDriven() const
-    {
-        return isLastWantBackgroundDriven_.load();
     }
 
     inline void SetOnNewWantSkipScenarios(int32_t scenarios)
@@ -915,7 +821,6 @@ protected:
     AbilityState currentState_ = AbilityState::INITIAL;    // current life state
     Want want_ = {};                                       // want to start this ability
 
-private:
     /**
      * get the type of ability.
      *
@@ -975,31 +880,6 @@ private:
     sptr<AbilityTransitionInfo> CreateAbilityTransitionInfo(const AbilityRequest &abilityRequest) const;
     sptr<AbilityTransitionInfo> CreateAbilityTransitionInfo(const std::shared_ptr<StartOptions> &startOptions,
         const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest);
-    std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager() const;
-    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t windowIconId,
-        std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const;
-
-    void AnimationTask(bool isRecent, const AbilityRequest &abilityRequest,
-        const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility);
-    void NotifyAnimationFromStartingAbility(const std::shared_ptr<AbilityRecord> &callerAbility,
-        const AbilityRequest &abilityRequest) const;
-    void NotifyAnimationFromRecentTask(const std::shared_ptr<StartOptions> &startOptions,
-        const std::shared_ptr<Want> &want) const;
-    void NotifyAnimationFromTerminatingAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit,
-        bool flag);
-
-    void StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
-        std::shared_ptr<StartOptions> &startOptions);
-    void StartingWindowColdTask(bool isRecent, const AbilityRequest &abilityRequest,
-        std::shared_ptr<StartOptions> &startOptions);
-    void PostCancelStartingWindowColdTask();
-    void StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
-        const AbilityRequest &abilityRequest);
-    void StartingWindowHot();
-    void StartingWindowCold(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
-        const AbilityRequest &abilityRequest);
-    void InitColdStartingWindowResource(const std::shared_ptr<Global::Resource::ResourceManager> &resourceMgr);
-    void GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor);
     void SetAbilityStateInner(AbilityState state);
 #endif
     void PostStartAbilityByCallTimeoutTask(bool isHalf);
@@ -1031,7 +911,6 @@ private:
     bool minimizeReason_ = false;           // new version
     bool clearMissionFlag_ = false;
     bool keepAliveBundle_ = false;
-    bool isNeedBackToOtherMissionStack_ = false;
     bool lockedState_ = false;
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;
@@ -1039,9 +918,9 @@ private:
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
-    bool isHook_ = false;
-    bool hookOff_ = false;
     bool isPluginAbility_ = false;
+    bool isPrelaunch_ = false;
+    bool isHook_ = false;
     std::atomic_bool isCallerSetProcess_ = false;       // new version
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 
@@ -1063,8 +942,6 @@ private:
     int startId_ = 0;  // service(ability) start id
 
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
-    std::weak_ptr<AbilityRecord> preAbilityRecord_ = {};   // who starts this ability record
-    std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
     sptr<IAbilityScheduler> scheduler_ = {};       // kit scheduler
@@ -1109,13 +986,7 @@ private:
     bool isStartingWindow_ = false;
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
-    bool isPrelaunch_ = false;
-    uint32_t bgColor_ = 0;
-    std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 #endif
-
-    std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
-
     std::shared_ptr<Want> connectWant_ = nullptr;
     std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
     LaunchDebugInfo launchDebugInfo_;
@@ -1136,7 +1007,6 @@ private:
     bool isPrepareTerminate_ = false;
 
     std::string killReason_ = "";
-    std::atomic_bool isKillPrecedeStart_ = false;
     std::shared_ptr<Want> launchWant_ = nullptr;
     std::shared_ptr<Want> lastWant_ = nullptr;
     std::atomic_bool isLastWantBackgroundDriven_ = false;

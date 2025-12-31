@@ -79,9 +79,7 @@ const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 #endif // WITH_DLP
 const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 const std::string KEY_MISSION_ID = "ohos.anco.param.missionId";
-const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
 const std::string PARAMS_FILE_SAVING_URL_KEY = "pick_path_return";
-const uint32_t RELEASE_STARTING_BG_TIMEOUT = 15000; // release starting window resource timeout.
 const std::string SHELL_ASSISTANT_DIEREASON = "crash_die";
 const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
@@ -528,120 +526,7 @@ void AbilityRecord::RemoveLoadTimeoutTask()
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
 }
 
-std::string AbilityRecord::GetLabel()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    std::string strLabel = abilityInfo_.applicationInfo.label;
-
-    if (abilityInfo_.resourcePath.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "resource path empty");
-        return strLabel;
-    }
-
 #ifdef SUPPORT_SCREEN
-    auto resourceMgr = CreateResourceManager();
-    if (!resourceMgr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "CreateResourceManager empty");
-        return strLabel;
-    }
-
-    auto result = resourceMgr->GetStringById(abilityInfo_.applicationInfo.labelId, strLabel);
-    if (result != OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, fail", __func__);
-    }
-
-    InitColdStartingWindowResource(resourceMgr);
-#endif
-
-    return strLabel;
-}
-
-#ifdef SUPPORT_SCREEN
-void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit,
-    uint32_t sceneFlag)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "SUPPORT_GRAPHICS: ability record: %{public}s/%{public}s",
-        GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-
-    StartingWindowHot();
-    auto flag = !IsForeground();
-    NotifyAnimationFromTerminatingAbility(callerAbility, needExit, flag);
-    PostCancelStartingWindowHotTask();
-
-    PostForegroundTimeoutTask();
-    if (IsAbilityState(AbilityState::FOREGROUND)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s/%{public}s",
-            GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-        ForegroundAbility(sceneFlag);
-    } else {
-        // background to active state
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s/%{public}s",
-            GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-        lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-    }
-}
-
-void AbilityRecord::NotifyAnimationFromTerminatingAbility(const std::shared_ptr<AbilityRecord>& callerAbility,
-    bool needExit, bool flag)
-{
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get WMS failed");
-        return;
-    }
-
-    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    if (callerAbility) {
-        auto callerAbilityInfo = callerAbility->GetAbilityInfo();
-        SetAbilityTransitionInfo(callerAbilityInfo, fromInfo);
-        fromInfo->abilityToken_ = callerAbility->GetToken();
-    }
-
-    if (flag && needExit) {
-        fromInfo->reason_ = TransitionReason::BACK_TRANSITION;
-    } else if (flag && !needExit) {
-        fromInfo->reason_ = TransitionReason::BACKGROUND_TRANSITION;
-    } else {
-        fromInfo->reason_ = TransitionReason::CLOSE;
-    }
-
-    auto toInfo = CreateAbilityTransitionInfo();
-    SetAbilityTransitionInfo(abilityInfo_, toInfo);
-    bool animaEnabled = false;
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
-}
-
-void AbilityRecord::NotifyAnimationFromTerminatingAbility() const
-{
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get WMS failed");
-        return;
-    }
-
-    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    SetAbilityTransitionInfo(fromInfo);
-    fromInfo->reason_ = TransitionReason::CLOSE;
-    bool animaEnabled = false;
-    windowHandler->NotifyWindowTransition(fromInfo, nullptr, animaEnabled);
-}
-
-void AbilityRecord::NotifyAnimationFromMinimizeAbility(bool& animaEnabled)
-{
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get WMS failed");
-        return;
-    }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Notify Animation From MinimizeAbility");
-    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    SetAbilityTransitionInfo(fromInfo);
-    fromInfo->reason_ = TransitionReason::MINIMIZE;
-    windowHandler->NotifyWindowTransition(fromInfo, nullptr, animaEnabled);
-}
-
 void AbilityRecord::SetAbilityTransitionInfo(sptr<AbilityTransitionInfo>& info) const
 {
     info->abilityToken_ = token_;
@@ -667,87 +552,6 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo()
     return info;
 }
 
-void AbilityRecord::StartingWindowHot()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get WMS failed");
-        return;
-    }
-
-    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
-    if (missionListWrap == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "null missionListWrap");
-        return;
-    }
-
-    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
-    if (!pixelMap) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get snapshot failed");
-    }
-
-    auto info = CreateAbilityTransitionInfo();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "notify wms to start StartingWindow");
-    windowHandler->StartingWindow(info, pixelMap);
-}
-
-void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
-    std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
-    uint32_t sceneFlag)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "SUPPORT_GRAPHICS: ability record: %{public}s/%{public}s",
-        GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-#ifdef SUPPORT_UPMS
-    {
-        std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0, false);
-    }
-#endif // SUPPORT_UPMS
-
-    if (isReady_ && !GetRestartAppFlag()) {
-        auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-        if (!handler) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail get AbilityEventHandler");
-            return;
-        }
-        auto taskName = std::to_string(missionId_) + "_hot";
-        handler->CancelTask(taskName);
-
-        StartingWindowTask(isRecent, !isWindowStarted_, abilityRequest, startOptions);
-        AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
-        if (isWindowStarted_) {
-            PostCancelStartingWindowHotTask();
-        } else {
-            PostCancelStartingWindowColdTask();
-        }
-        PostForegroundTimeoutTask();
-        if (IsAbilityState(AbilityState::FOREGROUND)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s/%{public}s",
-                GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-            ForegroundAbility(sceneFlag);
-        } else {
-            // background to active state
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s/%{public}s",
-                GetElementName().GetBundleName().c_str(), GetElementName().GetAbilityName().c_str());
-            lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        }
-    } else {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "SUPPORT_GRAPHICS: to load ability.");
-        lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-        auto needStartingWindow = abilityRequest.want.GetBoolParam(NEED_STARTINGWINDOW, true);
-        if (!isSaCall || needStartingWindow) {
-            StartingWindowTask(isRecent, true, abilityRequest, startOptions);
-            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
-            PostCancelStartingWindowColdTask();
-        }
-        LoadAbility();
-    }
-}
-
 std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
 {
     auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
@@ -765,20 +569,6 @@ std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
     }
 
     return std::make_shared<Want>(innerMissionInfo.missionInfo.want);
-}
-
-void AbilityRecord::AnimationTask(bool isRecent, const AbilityRequest &abilityRequest,
-    const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (isRecent) {
-        auto want = GetWantFromMission();
-        NotifyAnimationFromRecentTask(startOptions, want);
-    } else {
-        if (!IsForeground()) {
-            NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
-        }
-    }
 }
 
 void AbilityRecord::SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo,
@@ -801,130 +591,6 @@ void AbilityRecord::SetAbilityTransitionInfo(const AppExecFwk::AbilityInfo &abil
     info->orientation_ = abilityInfo.orientation;
     info->apiCompatibleVersion_ = abilityInfo.applicationInfo.apiCompatibleVersion;
     SetShowWhenLocked(abilityInfo, info);
-}
-
-void AbilityRecord::NotifyAnimationFromRecentTask(const std::shared_ptr<StartOptions> &startOptions,
-    const std::shared_ptr<Want> &want) const
-{
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, failed", __func__);
-        return;
-    }
-
-    auto toInfo = CreateAbilityTransitionInfo(startOptions, want);
-    toInfo->abilityToken_ = token_;
-    toInfo->missionId_ = missionId_;
-    SetAbilityTransitionInfo(abilityInfo_, toInfo);
-    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    fromInfo->isRecent_ = true;
-    bool animaEnabled = false;
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
-}
-
-void AbilityRecord::NotifyAnimationFromStartingAbility(const std::shared_ptr<AbilityRecord> &callerAbility,
-    const AbilityRequest &abilityRequest) const
-{
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, failed", __func__);
-        return;
-    }
-
-    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    if (callerAbility) {
-        auto callerAbilityInfo = callerAbility->GetAbilityInfo();
-        SetAbilityTransitionInfo(callerAbilityInfo, fromInfo);
-        fromInfo->abilityToken_ = callerAbility->GetToken();
-    } else {
-        fromInfo->abilityToken_ = abilityRequest.callerToken;
-    }
-
-    auto toInfo = CreateAbilityTransitionInfo(abilityRequest);
-    toInfo->abilityToken_ = token_;
-    toInfo->missionId_ = missionId_;
-    SetAbilityTransitionInfo(abilityInfo_, toInfo);
-    bool animaEnabled = false;
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
-}
-
-void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
-    std::shared_ptr<StartOptions> &startOptions)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (isRecent) {
-        auto want = GetWantFromMission();
-        if (isCold) {
-            StartingWindowCold(startOptions, want, abilityRequest);
-        } else {
-            StartingWindowHot(startOptions, want, abilityRequest);
-        }
-    } else {
-        std::shared_ptr<Want> want = nullptr;
-        if (isCold) {
-            StartingWindowCold(startOptions, want, abilityRequest);
-        } else {
-            StartingWindowHot(startOptions, want, abilityRequest);
-        }
-    }
-}
-
-void AbilityRecord::PostCancelStartingWindowHotTask()
-{
-    if (IsDebug()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "debug mode, just return");
-        return;
-    }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    CHECK_POINTER_LOG(handler, "Fail to get TaskHandler.");
-
-    auto windowHandler = GetWMSHandler();
-    CHECK_POINTER_LOG(windowHandler, "PostCancelStartingWindowColdTask, Get WMS handler failed.");
-
-    auto abilityRecord(shared_from_this());
-    auto delayTask = [windowHandler, abilityRecord] {
-        if (windowHandler && abilityRecord && abilityRecord->IsStartingWindow() &&
-            abilityRecord->GetAbilityState() != AbilityState::FOREGROUNDING) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "PostCancelStartingWindowHotTask, call windowHandler CancelStartingWindow.");
-            windowHandler->CancelStartingWindow(abilityRecord->GetToken());
-            abilityRecord->SetStartingWindow(false);
-        }
-    };
-    auto taskName = std::to_string(missionId_) + "_hot";
-    int foregroundTimeout =
-        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
-    handler->SubmitTask(delayTask, taskName, foregroundTimeout);
-}
-
-void AbilityRecord::PostCancelStartingWindowColdTask()
-{
-    if (IsDebug()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "debug mode, just return");
-        return;
-    }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    CHECK_POINTER_LOG(handler, "Fail to get TaskHandler.");
-
-    auto windowHandler = GetWMSHandler();
-    CHECK_POINTER_LOG(windowHandler, "PostCancelStartingWindowColdTask, Get WMS handler failed.");
-
-    auto abilityRecord(shared_from_this());
-    auto delayTask = [windowHandler, abilityRecord] {
-        if (windowHandler && abilityRecord && abilityRecord->IsStartingWindow() &&
-            (abilityRecord->GetScheduler() == nullptr ||
-            abilityRecord->GetAbilityState() != AbilityState::FOREGROUNDING)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR,
-                "PostCancelStartingWindowColdTask, call windowHandler CancelStartingWindow.");
-            windowHandler->CancelStartingWindow(abilityRecord->GetToken());
-            abilityRecord->SetStartingWindow(false);
-        }
-    };
-    auto taskName = std::to_string(missionId_) + "_cold";
-    int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    handler->SubmitTask(delayTask, taskName, loadTimeout);
 }
 
 sptr<IWindowManagerServiceHandler> AbilityRecord::GetWMSHandler() const
@@ -989,87 +655,6 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     return info;
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager() const
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetEffectiveLanguage(), status);
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    resConfig->SetLocaleInfo(locale);
-    AppExecFwk::Configuration cfg;
-    if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetConfiguration(cfg) == 0) {
-        std::string colormode = cfg.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "getcolormode is %{public}s.", colormode.c_str());
-        resConfig->SetColorMode(AppExecFwk::ConvertColorMode(colormode));
-    } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getcolormode failed");
-    }
-
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(false));
-    resourceMgr->UpdateResConfig(*resConfig);
-
-    std::string loadPath;
-    if (!abilityInfo_.hapPath.empty()) {
-        loadPath = abilityInfo_.hapPath;
-    } else {
-        loadPath = abilityInfo_.resourcePath;
-    }
-
-    if (loadPath.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid app resource");
-        return nullptr;
-    }
-
-    if (!resourceMgr->AddResource(loadPath.c_str())) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, failed", __func__);
-        return nullptr;
-    }
-    return resourceMgr;
-}
-
-std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (resourceMgr == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, null resourceMgr", __func__);
-        return nullptr;
-    }
-
-    Media::SourceOptions opts;
-    uint32_t errorCode = 0;
-    std::unique_ptr<Media::ImageSource> imageSource;
-    if (!abilityInfo_.hapPath.empty()) { // hap is not unzip
-        std::unique_ptr<uint8_t[]> iconOut;
-        size_t len;
-        if (resourceMgr->GetMediaDataById(windowIconId, len, iconOut) != Global::Resource::RState::SUCCESS) {
-            return nullptr;
-        }
-        imageSource = Media::ImageSource::CreateImageSource(iconOut.get(), len, opts, errorCode);
-    } else { // already unzip hap
-        std::string iconPath;
-        if (resourceMgr->GetMediaById(windowIconId, iconPath) != Global::Resource::RState::SUCCESS) {
-            return nullptr;
-        }
-        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
-    }
-
-    if (errorCode != 0 || imageSource == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, id %{private}d err %{public}d", windowIconId, errorCode);
-        return nullptr;
-    }
-
-    Media::DecodeOptions decodeOpts;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    if (errorCode != 0) {
-        TAG_LOGE(
-            AAFwkTag::ABILITYMGR, "failed, id %{private}d err %{public}d", windowIconId, errorCode);
-        return nullptr;
-    }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "OUT.");
-    return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
-}
-
 sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(
     const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
     const AbilityRequest &abilityRequest)
@@ -1084,108 +669,6 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(
     SetAbilityTransitionInfo(info);
     SetStartingWindow(true);
     return info;
-}
-
-void AbilityRecord::StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions,
-    const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get WMS failed");
-        return;
-    }
-
-    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
-    if (missionListWrap == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "null missionListWrap");
-        return;
-    }
-
-    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
-    if (!pixelMap) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, failed", __func__);
-    }
-
-    auto info = CreateAbilityTransitionInfo(startOptions, want, abilityRequest);
-    windowHandler->StartingWindow(info, pixelMap);
-}
-
-void AbilityRecord::StartingWindowCold(const std::shared_ptr<StartOptions> &startOptions,
-    const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    auto windowHandler = GetWMSHandler();
-    if (!windowHandler) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, get WMS failed", __func__);
-        return;
-    }
-
-    // get bg pixelmap and color.
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    uint32_t bgColor = 0;
-    GetColdStartingWindowResource(pixelMap, bgColor);
-
-    // start window
-    auto info = CreateAbilityTransitionInfo(startOptions, want, abilityRequest);
-    windowHandler->StartingWindow(info, pixelMap, bgColor);
-    startingWindowBg_.reset();
-}
-
-void AbilityRecord::GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor)
-{
-    bg = startingWindowBg_;
-    bgColor = bgColor_;
-    if (bg) {
-        return;
-    }
-    auto resourceMgr = CreateResourceManager();
-    if (!resourceMgr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "get resourceMgr failed");
-        return;
-    }
-
-    auto windowIconId = static_cast<uint32_t>(abilityInfo_.startWindowIconId);
-    bg = GetPixelMap(windowIconId, resourceMgr);
-
-    auto colorId = static_cast<uint32_t>(abilityInfo_.startWindowBackgroundId);
-    auto colorErrval = resourceMgr->GetColorById(colorId, bgColor);
-    if (colorErrval != OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "failed to GetColorById");
-        bgColor = 0xdfffffff;
-    }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "colorId is %{public}u, bgColor is %{public}u.", colorId, bgColor);
-}
-
-void AbilityRecord::InitColdStartingWindowResource(
-    const std::shared_ptr<Global::Resource::ResourceManager> &resourceMgr)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!resourceMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid resourceManager");
-        return;
-    }
-
-    startingWindowBg_ = GetPixelMap(static_cast<uint32_t>(abilityInfo_.startWindowIconId), resourceMgr);
-    if (resourceMgr->GetColorById(static_cast<uint32_t>(abilityInfo_.startWindowBackgroundId), bgColor_) !=
-        OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getColorById failed");
-        bgColor_ = 0xdfffffff;
-    }
-
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (startingWindowBg_ && handler) {
-        auto delayTask = [me = weak_from_this()] {
-            auto self = me.lock();
-            if (!self || !self->startingWindowBg_) {
-                return;
-            }
-            self->startingWindowBg_.reset();
-        };
-        handler->SubmitTask(delayTask, "release_bg", RELEASE_STARTING_BG_TIMEOUT);
-    }
 }
 
 bool AbilityRecord::ReportAtomicServiceDrawnCompleteEvent()
@@ -1221,16 +704,6 @@ bool AbilityRecord::GetColdStartFlag()
 void AbilityRecord::SetColdStartFlag(bool isColdStart)
 {
     coldStart_ = isColdStart;
-}
-
-bool AbilityRecord::GetPrelaunchFlag()
-{
-    return isPrelaunch_;
-}
-
-void AbilityRecord::SetPrelaunchFlag(bool isPrelaunch)
-{
-    isPrelaunch_ = isPrelaunch;
 }
 #endif
 
@@ -1518,11 +991,6 @@ bool AbilityRecord::GetAbilityForegroundingFlag() const
     return isAbilityForegrounding_;
 }
 
-void AbilityRecord::SetAbilityForegroundingFlag()
-{
-    isAbilityForegrounding_ = true;
-    DelayedSingleton<AppScheduler>::GetInstance()->SetAbilityForegroundingFlagToAppRecord(pid_);
-}
 #ifdef SUPPORT_SCREEN
 void AbilityRecord::SetAbilityState(AbilityState state)
 {
@@ -1606,37 +1074,10 @@ sptr<Token> AbilityRecord::GetToken() const
     return token_;
 }
 
-void AbilityRecord::SetPreAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    preAbilityRecord_ = abilityRecord;
-}
-
-std::shared_ptr<AbilityRecord> AbilityRecord::GetPreAbilityRecord() const
-{
-    return preAbilityRecord_.lock();
-}
-
-void AbilityRecord::SetNextAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    nextAbilityRecord_ = abilityRecord;
-}
-
-std::shared_ptr<AbilityRecord> AbilityRecord::GetNextAbilityRecord() const
-{
-    return nextAbilityRecord_.lock();
-}
-
 bool AbilityRecord::IsReady() const
 {
     return isReady_;
 }
-
-#ifdef SUPPORT_SCREEN
-bool AbilityRecord::IsWindowAttached() const
-{
-    return isWindowAttached_;
-}
-#endif
 
 bool AbilityRecord::IsLauncherAbility() const
 {
@@ -2285,29 +1726,15 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     GetAbilityTypeString(typeStr);
     dumpInfo = "        ability type [" + typeStr + "]";
     info.push_back(dumpInfo);
-    std::shared_ptr<AbilityRecord> preAbility = GetPreAbilityRecord();
-    if (preAbility == nullptr) {
-        dumpInfo = "        previous ability app name [NULL]";
-        dumpInfo.append("\n");
-        dumpInfo += "        previous ability file name [NULL]";
-    } else {
-        dumpInfo =
-            "        previous ability app name [" + preAbility->GetAbilityInfo().applicationName + "]";
-        dumpInfo.append("\n");
-        dumpInfo += "        previous ability file name [" + preAbility->GetAbilityInfo().name + "]";
-    }
+
+    dumpInfo = "        previous ability app name [NULL]";
+    dumpInfo.append("\n");
+    dumpInfo += "        previous ability file name [NULL]";
     info.push_back(dumpInfo);
-    std::shared_ptr<AbilityRecord> nextAbility = GetNextAbilityRecord();
-    if (nextAbility == nullptr) {
-        dumpInfo = "        next ability app name [NULL]";
-        dumpInfo.append("\n");
-        dumpInfo += "        next ability file name [NULL]";
-    } else {
-        dumpInfo =
-            "        next ability app name [" + nextAbility->GetAbilityInfo().applicationName + "]";
-        dumpInfo.append("\n");
-        dumpInfo += "        next ability main name [" + nextAbility->GetAbilityInfo().name + "]";
-    }
+
+    dumpInfo = "        next ability app name [NULL]";
+    dumpInfo.append("\n");
+    dumpInfo += "        next ability file name [NULL]";
     info.push_back(dumpInfo);
     dumpInfo = "        state #" + AbilityRecord::ConvertAbilityState(GetAbilityState()) + "  start time [" +
                std::to_string(startTime_) + "]";
@@ -3354,26 +2781,6 @@ AbilityState AbilityRecord::GetPendingState() const
     return pendingState_.load();
 }
 
-bool AbilityRecord::IsNeedBackToOtherMissionStack()
-{
-    return isNeedBackToOtherMissionStack_;
-}
-
-void AbilityRecord::SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack)
-{
-    isNeedBackToOtherMissionStack_ = isNeedBackToOtherMissionStack;
-}
-
-std::shared_ptr<AbilityRecord> AbilityRecord::GetOtherMissionStackAbilityRecord() const
-{
-    return otherMissionStackAbilityRecord_.lock();
-}
-
-void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    otherMissionStackAbilityRecord_ = abilityRecord;
-}
-
 int32_t AbilityRecord::GetCollaboratorType() const
 {
     return collaboratorType_;
@@ -3655,13 +3062,6 @@ void AbilityRecord::SetDebugUIExtension()
     want_.SetParam(AbilityConfig::DEBUG_APP, true);
     launchDebugInfo_.isDebugAppSet = true;
     launchDebugInfo_.debugApp = true;
-}
-
-void AbilityRecord::ScheduleCollaborate(const Want &want)
-{
-    std::lock_guard guard(collaborateWantLock_);
-    CHECK_POINTER(lifecycleDeal_);
-    lifecycleDeal_->ScheduleCollaborate(want);
 }
 
 void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
