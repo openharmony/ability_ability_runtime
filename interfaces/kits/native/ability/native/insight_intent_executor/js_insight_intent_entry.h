@@ -70,11 +70,10 @@ private:
         const InsightIntentExecutorInfo& insightIntentInfo,
         JsRuntime& runtime);
 
-    bool CallJsFunctionWithResultInner(
+    napi_value CallJsFunctionWithResultInner(
         const char* funcName,
         size_t argc,
-        const napi_value* argv,
-        napi_value& result
+        const napi_value* argv
     );
 
     void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
