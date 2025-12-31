@@ -572,7 +572,7 @@ private:
      * @param abilityRequest The request that specifies the ability to be added.
      * @param targetAbilityRecord A reference to a shared pointer that will hold the new ability record.
      */
-    void AddRecord(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetAbilityRecord);
+    void AddRecord(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> targetAbilityRecord);
 
     /**
      * @brief Retrieves the target mission and ability record based on the ability request.
@@ -583,7 +583,7 @@ private:
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
     int GetTargetMission(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
-        std::shared_ptr<AbilityRecord> &targetAbilityRecord);
+        MissionAbilityRecordPtr &targetAbilityRecord);
 
     /**
      * @brief Starts an ability in a locked context, ensuring thread safety.
@@ -684,7 +684,7 @@ private:
      * @param isReachToLimit A reference to a boolean that will indicate whether the limit is reached.
      */
     void GetTargetMissionAndAbility(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
-        std::shared_ptr<AbilityRecord> &targetRecord, bool &isReachToLimit);
+        MissionAbilityRecordPtr &targetRecord, bool &isReachToLimit);
 
     /**
      * @brief Handles the reuse of a mission and ability based on the ability request.
@@ -695,7 +695,7 @@ private:
      * @return A boolean indicating whether the reuse was successful.
      */
     bool HandleReusedMissionAndAbility(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
-        std::shared_ptr<AbilityRecord> &targetRecord);
+        MissionAbilityRecordPtr &targetRecord);
 
     /**
      * @brief Retrieves the name of the mission based on the ability request.
@@ -755,7 +755,7 @@ private:
      * @param state The new state to which the ability record is transitioning.
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int DispatchState(const std::shared_ptr<AbilityRecord> &abilityRecord, int state);
+    int DispatchState(MissionAbilityRecordPtr abilityRecord, int state);
 
     /**
      * @brief Dispatches a foreground event for the specified ability record, indicating whether the operation was
@@ -766,7 +766,7 @@ private:
      * @param state The initial state of the ability (default is AbilityState::INITIAL).
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success,
+    int DispatchForeground(MissionAbilityRecordPtr abilityRecord, bool success,
         AbilityState state = AbilityState::INITIAL);
 
     /**
@@ -775,7 +775,7 @@ private:
      * @param abilityRecord The ability record for which the terminate event is being dispatched.
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int DispatchTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int DispatchTerminate(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Dispatches a background event for the specified ability record.
@@ -783,28 +783,28 @@ private:
      * @param abilityRecord The ability record for which the background event is being dispatched.
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int DispatchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int DispatchBackground(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Completes the foreground transition for the specified ability record, indicating success.
      *
      * @param abilityRecord The ability record for which the foreground transition is being completed.
      */
-    void CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void CompleteForegroundSuccess(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Completes the termination process for the specified ability record.
      *
      * @param abilityRecord The ability record for which the termination is being completed.
      */
-    void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void CompleteTerminate(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Delays the completion of the termination process for the specified ability record.
      *
      * @param abilityRecord The ability record for which the termination completion is being delayed.
      */
-    void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void DelayCompleteTerminate(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Completes the background transition for the specified ability record.
@@ -856,15 +856,15 @@ private:
      * @param specifiedNextRecord An optional ability record to set as the next record after the move.
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        const std::shared_ptr<AbilityRecord> &specifiedNextRecord = nullptr);
+    int MoveAbilityToBackgroundLocked(MissionAbilityRecordPtr abilityRecord,
+        MissionAbilityRecordPtr specifiedNextRecord = nullptr);
 
     /**
      * @brief Removes an ability record from the backgrounding process.
      *
      * @param abilityRecord The ability record to remove from the backgrounding process.
      */
-    void RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void RemoveBackgroundingAbility(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Terminates an ability record in a locked context, ensuring thread safety.
@@ -873,7 +873,7 @@ private:
      * @param flag A boolean flag that may influence the termination process.
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
-    int TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
+    int TerminateAbilityLocked(MissionAbilityRecordPtr abilityRecord, bool flag);
 
     /**
      * @brief remove the mission from the mission list
@@ -881,7 +881,7 @@ private:
      * @param abilityRecord the ability need to remove
      * @param flag mark is terminate or close
      */
-    void RemoveTerminatingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
+    void RemoveTerminatingAbility(MissionAbilityRecordPtr abilityRecord, bool flag);
 
     /**
      * @brief Retrieves an ability record by its unique identifier.
@@ -1074,7 +1074,7 @@ private:
      * @param abilityRecord The ability record for which the foreground transition is being completed.
      * @param state The new state to transition the ability record to upon failure.
      */
-    void CompleteForegroundFailed(const std::shared_ptr<AbilityRecord> &abilityRecord, AbilityState state);
+    void CompleteForegroundFailed(MissionAbilityRecordPtr abilityRecord, AbilityState state);
 
     /**
      * @brief Resolves an ability based on the provided target ability and ability request.
@@ -1154,7 +1154,7 @@ private:
      *
      * @param abilityRecord The ability record for which to terminate the previous ability.
      */
-    void TerminatePreviousAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void TerminatePreviousAbility(MissionAbilityRecordPtr abilityRecord);
 
     /**
      * @brief Notifies that a mission has been created for the specified ability record.
@@ -1212,7 +1212,7 @@ private:
      * @return A boolean indicating whether the update was successful.
      */
     bool UpdateAbilityRecordLaunchReason(
-        const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetAbilityRecord);
+        const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> targetAbilityRecord);
 
     /**
      * @brief Retrieves an alive ability record by its remote object token.
@@ -1271,7 +1271,7 @@ private:
      * @param token The remote object token of the ability record to retrieve.
      * @return A shared pointer to the ability record, or a null pointer if not found.
      */
-    std::shared_ptr<AbilityRecord> GetAbilityRecordByTokenInner(const sptr<IRemoteObject> &token) const;
+    MissionAbilityRecordPtr GetAbilityRecordByTokenInner(const sptr<IRemoteObject> &token) const;
 
     /**
      * @brief Terminates an ability record internally, with additional parameters for result code and want.
@@ -1299,7 +1299,7 @@ private:
      * @param token The remote object token of the ability record to retrieve.
      * @return A shared pointer to the ability record from the terminate list, or a null pointer if not found.
      */
-    std::shared_ptr<AbilityRecord> GetAbilityFromTerminateListInner(const sptr<IRemoteObject> &token);
+    MissionAbilityRecordPtr GetAbilityFromTerminateListInner(const sptr<IRemoteObject> &token);
 
     /**
      * @brief Sets the last exit reason for the specified ability record.

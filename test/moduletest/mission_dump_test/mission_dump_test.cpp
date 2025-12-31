@@ -80,7 +80,7 @@ HWTEST_F(MissionDumpTest, Dump_Mission_List_001, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
 
     int32_t id = 1;
@@ -138,7 +138,7 @@ HWTEST_F(MissionDumpTest, Dump_Mission_List_002, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
 
     int32_t id = 1;
@@ -194,7 +194,7 @@ HWTEST_F(MissionDumpTest, Dump_Mission_List_003, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
 
     int32_t id = 1;
@@ -250,7 +250,7 @@ HWTEST_F(MissionDumpTest, Dump_Mission_List_004, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
 
     int32_t id = 1;
@@ -306,7 +306,7 @@ HWTEST_F(MissionDumpTest, Dump_MissionList_ByRecordId_001, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
     abilityRecord->recordId_ = 101;
 
@@ -357,7 +357,7 @@ HWTEST_F(MissionDumpTest, Dump_MissionList_ByRecordId_002, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
     abilityRecord->recordId_ = 101;
 
@@ -408,7 +408,7 @@ HWTEST_F(MissionDumpTest, Dump_MissionList_ByRecordId_003, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo applicationInfo;
     int requestCode = -1;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
+    auto abilityRecord = std::make_shared<MissionAbilityRecord>(want, abilityInfo, applicationInfo, requestCode);
     EXPECT_TRUE(abilityRecord);
     abilityRecord->recordId_ = 101;
 

@@ -45,6 +45,7 @@ config("abilityms_config") {
     "include/rdb/",
     "include/resident_process/",
     "include/keep_alive/",
+    "include/scene_board",
     "include/screen_lock/",
     "include/ui_extension",
     "include/ui_extension_record",

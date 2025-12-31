@@ -59,12 +59,8 @@ void MissionListDumpTest::TearDown()
  */
 HWTEST_F(MissionListDumpTest, MissionListDump_DumpList_0100, TestSize.Level2)
 {
-    Want want;
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    EXPECT_NE(abilityRecord, nullptr);
-
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     auto mission = std::make_shared<Mission>(MISSION_ID, abilityRecord);
     EXPECT_NE(mission, nullptr);
 
@@ -92,11 +88,8 @@ HWTEST_F(MissionListDumpTest, MissionListDump_DumpList_0100, TestSize.Level2)
  */
 HWTEST_F(MissionListDumpTest, MissionListDump_DumpStateByRecordId_0100, TestSize.Level2)
 {
-    Want want;
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    EXPECT_NE(abilityRecord, nullptr);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->recordId_ = RECORD_ID;
 
     auto mission = std::make_shared<Mission>(MISSION_ID, abilityRecord);

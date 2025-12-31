@@ -36,7 +36,7 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<CallContainer> get() const;
-    std::shared_ptr<AbilityRecord> abilityRecord_{ nullptr };
+    MissionAbilityRecordPtr abilityRecord_{ nullptr };
 private:
     std::shared_ptr<CallContainer> callContainer_{ nullptr };
 
@@ -50,10 +50,8 @@ void CallContainerTest::TearDown() {}
 void CallContainerTest::SetUp()
 {
     callContainer_ = std::make_shared<CallContainer>();
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
-    Want want;
-    abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    AbilityRequest abilityRequest;
+    abilityRecord_ = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
 }
 
 std::shared_ptr<CallContainer> CallContainerTest::get() const
