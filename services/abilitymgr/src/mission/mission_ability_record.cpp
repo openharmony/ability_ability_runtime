@@ -340,10 +340,8 @@ void MissionAbilityRecord::AnimationTask(bool isRecent, const AbilityRequest &ab
     if (isRecent) {
         auto want = GetWantFromMission();
         NotifyAnimationFromRecentTask(startOptions, want);
-    } else {
-        if (!IsForeground()) {
-            NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
-        }
+    } else if (!IsForeground()) {
+        NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
     }
 }
 
