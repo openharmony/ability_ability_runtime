@@ -105,6 +105,7 @@ struct AbilityRequest {
     bool isFromOpenLink = false;
     sptr<UIExtensionAbilityConnectInfo> uiExtensionAbilityConnectInfo = nullptr;
     std::pair<bool, LaunchReason> IsContinuation() const;
+    int32_t loadExtensionTimeout = 0; // only for connectAbility
 
     bool IsAcquireShareData() const
     {
