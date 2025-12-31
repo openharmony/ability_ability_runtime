@@ -255,7 +255,7 @@ std::shared_ptr<BaseExtensionRecord> AbilityConnectManager::GetExtensionByTokenF
 
 void AbilityConnectManager::LoadAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord,
     std::function<void(const std::shared_ptr<BaseExtensionRecord>&)> updateRecordCallback,
-    bool isPreloadUIExtension)
+    bool isPreloadUIExtension, int32_t loadTimeout)
 {
 }
 
@@ -669,8 +669,8 @@ bool AbilityConnectManager::HandleExtensionAbilityRemove(const std::shared_ptr<B
     return false;
 }
 
-void AbilityConnectManager::HandlePostLoadTimeout(
-    const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int64_t recordId)
+void AbilityConnectManager::PostLoadTimeoutTask(
+    const std::shared_ptr<BaseExtensionRecord> &abilityRecord, int32_t loadTimeout)
 {
 }
 

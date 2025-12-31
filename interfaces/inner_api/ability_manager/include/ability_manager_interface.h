@@ -725,6 +725,7 @@ public:
      * @param extensionType, type of the extension.
      * @param userId, the service user ID.
      * @param specifiedFullTokenId, The specified full token ID.
+     * @param loadTimeout, timeout multiply for ability loading stage, range 1-30, not work on asan.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ConnectAbilityCommon(
@@ -734,7 +735,8 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
-        uint64_t specifiedFullTokenId = 0)
+        uint64_t specifiedFullTokenId = 0,
+        int32_t loadTimeout = 0)
     {
         return 0;
     }
