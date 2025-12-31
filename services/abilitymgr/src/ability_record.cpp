@@ -1731,7 +1731,7 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     dumpInfo.append("\n");
     dumpInfo += "        previous ability file name [NULL]";
     info.push_back(dumpInfo);
-    
+
     dumpInfo = "        next ability app name [NULL]";
     dumpInfo.append("\n");
     dumpInfo += "        next ability file name [NULL]";
