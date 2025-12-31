@@ -18,19 +18,15 @@
 
 #include <string>
 #include <vector>
-#include <gmock/gmock.h>
-
-#include "parcel.h"
 
 namespace OHOS {
-namespace AgentRuntime {
-class ParcelMock : public Parcel {
+class Parcel {
 public:
-    MOCK_METHOD(bool, WriteUint32, (uint32_t value));
-    MOCK_METHOD(bool, WriteString, (const std::string& value));
-    MOCK_METHOD(bool, WriteParcelable, (const Parcelable* parcelable));
-    MOCK_METHOD(uint32_t, ReadUint32, ());
-    MOCK_METHOD(std::string, ReadString, ());
+    bool WriteUint32(uint32_t value);
+    bool WriteString(const std::string& value);
+    bool WriteParcelable(const Parcelable* parcelable);
+    uint32_t ReadUint32();
+    const std::string ReadString();
 
     template <typename T>
     T* ReadParcelable() const
@@ -39,12 +35,11 @@ public:
     }
 
     // Additional methods needed for testing
-    MOCK_METHOD(bool, WriteBool, (bool value));
-    MOCK_METHOD(bool, WriteStringVector, (const std::vector<std::string>& value));
-    MOCK_METHOD(bool, ReadBool, ());
-    MOCK_METHOD(bool, ReadStringVector, (std::vector<std::string>* value));
+    bool WriteBool(bool value);
+    bool WriteStringVector(const std::vector<std::string>& value);
+    bool ReadBool();
+    bool ReadStringVector(std::vector<std::string>* value);
 };
-} // namespace AgentRuntime
 } // namespace OHOS
 
 #endif // OHOS_AGENT_RUNTIME_PARCEL_MOCK_H
