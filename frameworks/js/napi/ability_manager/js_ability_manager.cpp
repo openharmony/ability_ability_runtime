@@ -534,6 +534,7 @@ private:
         std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
 
         AAFwk::ShareRuntimeTask task = [env, asyncTask](int32_t resultCode, const AAFwk::WantParams &wantParam) {
+            HandleScope handleScope(env);
             if (resultCode != 0) {
                 asyncTask->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(resultCode)));
                 return;

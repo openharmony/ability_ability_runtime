@@ -89,20 +89,18 @@ private:
         const InsightIntentExecutorInfo& insightIntentInfo,
         JsRuntime& runtime);
 
-    static bool CallJsFunctionWithResult(
+    static napi_value CallJsFunctionWithResult(
         napi_env env,
         napi_value obj,
         const char* funcName,
         size_t argc,
-        const napi_value* argv,
-        napi_value& result
+        const napi_value* argv
     );
 
-    bool CallJsFunctionWithResultInner(
+    napi_value CallJsFunctionWithResultInner(
         const char* funcName,
         size_t argc,
-        const napi_value* argv,
-        napi_value& result
+        const napi_value* argv
     );
 
     static std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> GetResultFromJs(napi_env env,
