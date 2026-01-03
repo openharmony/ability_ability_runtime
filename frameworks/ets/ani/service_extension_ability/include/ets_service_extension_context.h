@@ -133,12 +133,8 @@ private:
         ani_int accountId, ani_object callbackobj);
     void OnStartAbilityWithAccount(ani_env *env, ani_object obj, ani_object wantObj, ani_int accountId,
         ani_object optionsObj, ani_object callbackobj);
-    void UnwrapCompletionHandlerForOpenLink(ani_env *env, ani_object param, AAFwk::OpenLinkOptions &openLinkOptions,
-        AAFwk::Want& want);
     void UnWrapCompletionHandlerForAtomicService(ani_env *env, ani_object param, AAFwk::StartOptions &options,
         const std::string &appId);
-    void CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
-        OnRequestResult &onRequestCallback, const char *callbackName);
     void CreateOnAtomicRequestFailureResultCallback(ani_env *env, ani_ref refCompletionHandler,
         OnAtomicRequestFailure &onRequestCallback, const char *callbackName);
     void CreateOnAtomicRequestSuccessResultCallback(ani_env *env, ani_ref refCompletionHandler,
@@ -147,6 +143,8 @@ private:
         ani_object optionsObj);
     void OnOpenLink(ani_env *env, ani_object obj, ani_string link, ani_object callbackobj,
         ani_object openlinkOptionsObj);
+    void AddCompletionHandlerForOpenLink(ani_env *env, ani_ref refCompletionHandler, AAFwk::Want &want,
+        OnRequestResult &onRequestSucc, OnRequestResult &onRequestFail);
     ani_object OnStartAbilityByCallWithAccount(ani_env *env, ani_object obj, ani_object want, ani_int accountId);
     std::weak_ptr<ServiceExtensionContext> context_;
     sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;
