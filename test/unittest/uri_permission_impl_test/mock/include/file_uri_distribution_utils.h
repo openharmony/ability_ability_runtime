@@ -49,6 +49,7 @@ public:
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
     static bool IsUdmfOrPasteboardCall();
     static bool IsDFSCall();
+    static bool IsSandboxApp(uint32_t tokenId);
 };
 } // OHOS
 } // AAFwk

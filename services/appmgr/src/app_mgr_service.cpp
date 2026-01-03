@@ -488,28 +488,6 @@ int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
     return ERR_INVALID_OPERATION;
 }
 
-int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
-{
-    if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
-        return ERR_INVALID_OPERATION;
-    }
-    bool isCallingPermission =
-        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
-        return ERR_PERMISSION_DENIED;
-    }
-    auto appRunningRecord = appMgrServiceInner_->GetAppRunningRecordByPid(pid);
-    if (appRunningRecord && appRunningRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
-        isSandbox = true;
-        TAG_LOGD(AAFwkTag::APPMGR, "current app is a sandbox.");
-        return ERR_OK;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "current app is not a sandbox.");
-    return ERR_OK;
-}
-
 int32_t AppMgrService::IsTerminatingByPid(pid_t pid, bool &isTerminating)
 {
     if (!IsReady()) {
