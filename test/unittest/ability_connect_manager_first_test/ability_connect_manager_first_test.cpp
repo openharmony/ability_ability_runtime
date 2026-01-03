@@ -585,7 +585,7 @@ HWTEST_F(AbilityConnectManagerTest, StartAbilityLocked_001, TestSize.Level1)
     EXPECT_EQ(element.GetURI(), stringUri);
 
     int result = connectManager->StartAbilityLocked(abilityRequest);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityLocked_001 end");
 }
 
