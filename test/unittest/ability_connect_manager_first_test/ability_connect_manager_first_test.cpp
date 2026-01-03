@@ -756,30 +756,26 @@ HWTEST_F(AbilityConnectManagerTest, GetLoadTimeout_003, TestSize.Level1)
 
 /*
 * Feature: AbilityConnectManager
-* Function: GetOrCreateExtensionRecord
+* Function: GetOrCreateServiceRecord
 */
-HWTEST_F(AbilityConnectManagerTest, GetOrCreateExtensionRecord_001, TestSize.Level1)
+HWTEST_F(AbilityConnectManagerTest, GetOrCreateServiceRecord_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateExtensionRecord_001 start");
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateServiceRecord_001 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
     EXPECT_NE(connectManager, nullptr);
 
-
     AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.type = AbilityType::PAGE;
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
-        abilityRequest);
-    std::string hostBundName = "bundleName";
-    bool isCreate = false;
-    bool isLoadedAbility = false;
-    connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    abilityRequest.abilityInfo.bundleName = "com.example.test";
+    abilityRequest.abilityInfo.name = "TestAbility";
 
-    int32_t result = connectManager->GetOrCreateExtensionRecord(
-        abilityRequest, isCreate, hostBundName, abilityRecord, isLoadedAbility);
-    EXPECT_EQ(result, ERR_NULL_OBJECT);
-    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateExtensionRecord_001 end");
+    std::shared_ptr<BaseExtensionRecord> serviceRecord = nullptr;
+    bool isLoadedAbility = false;
+    connectManager->GetOrCreateServiceRecord(abilityRequest, false, serviceRecord, isLoadedAbility);
+
+    ASSERT_NE(serviceRecord, nullptr);
+    EXPECT_EQ(serviceRecord->GetAbilityInfo().name, "TestAbility");
+    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateServiceRecord_001 end");
 }
 
 /*
