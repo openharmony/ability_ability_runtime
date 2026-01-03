@@ -2658,7 +2658,7 @@ private:
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
     int GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
-        const sptr<IRemoteObject> &callerToken, int32_t userId);
+        const sptr<IRemoteObject> &callerToken, int32_t userId, const std::string hostBundleName = "");
     int32_t InitialAbilityRequest(AbilityRequest &request, const StartAbilityInfo &abilityInfo) const;
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit = false,

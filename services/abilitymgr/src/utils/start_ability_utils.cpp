@@ -260,7 +260,12 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
     request->customProcess = request->abilityInfo.process;
     if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         if (request->abilityInfo.name.empty() || request->abilityInfo.bundleName.empty()) {
-            FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, request);
+            std::string hostBundleName = "";
+            auto caller = Token::GetAbilityRecordByToken(callerToken);
+            if (caller) {
+                hostBundleName = caller->GetAbilityInfo().bundleName;
+            }
+            FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, request, hostBundleName);
         }
         return request;
     }
@@ -304,7 +309,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
         static_cast<uint32_t>(AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL);
     auto abilityInfo = std::make_shared<StartAbilityInfo>();
     if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
-        FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, abilityInfo);
+        FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, abilityInfo, hostBundleName);
         return abilityInfo;
     }
 
