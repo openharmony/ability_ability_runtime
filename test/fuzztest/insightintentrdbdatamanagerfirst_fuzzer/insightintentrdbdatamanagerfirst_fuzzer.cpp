@@ -38,6 +38,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::string key = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string value = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->UpdateData(key, value);
+    int32_t errCode = 202;
+    DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->IsRetryErrCode(errCode);
     return true;
 }
 }

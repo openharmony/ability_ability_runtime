@@ -67,9 +67,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     stub->OnRemoteRequest(code, parcel, reply, option);
     code = static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_RUN_NATIVE_PROC);
     stub->OnRemoteRequest(code, parcel, reply, option);
+    code = static_cast<uint32_t>(IChildScheduler::Message::ON_LOAD_ABILITY_FINISHED);
+    stub->OnRemoteRequest(code, parcel, reply, option);
     stub->HandleScheduleLoadChild(parcel, reply);
     stub->HandleScheduleExitProcessSafely(parcel, reply);
     stub->HandleScheduleRunNativeProc(parcel, reply);
+    stub->HandleOnLoadAbilityFinished(parcel, reply);
     return true;
 }
 }

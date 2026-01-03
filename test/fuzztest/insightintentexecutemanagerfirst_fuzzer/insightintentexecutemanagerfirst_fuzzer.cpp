@@ -71,6 +71,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(want, executeMode, userId);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->AddWantUirsAndFlagsFromParam(param, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateFuncDecoratorParams(param, info, want);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdatePageDecoratorParams(param, info, want);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(param, info, want);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateDecoratorParams(param,
+        decoratorInfo, want);
+     
+    param->executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    param->abilityName_ = "EntryAbility";
+    param->bundleName_ = "com.example.fuzztest";
+    param->moduleName_ = "mainModule";
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GenerateWant(param, decoratorInfo, want);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateFuncDecoratorParams(param, info, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetMainElementName(param);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdatePageDecoratorParams(param, info, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(param, info, want);

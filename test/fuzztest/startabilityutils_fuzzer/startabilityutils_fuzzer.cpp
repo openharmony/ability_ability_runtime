@@ -25,6 +25,7 @@
 #undef private
 
 #include "ability_record.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -63,7 +64,7 @@ sptr<Token> GetFuzzAbilityToken()
     return token;
 }
 
-void StartAbilityUtilsFuzztest1(bool boolParam, std::string &stringParam, int32_t int32Param)
+void StartAbilityUtilsFuzztest1(bool boolParam, std::string &stringParam, int32_t int32Param, int32_t userId)
 {
     Want want;
     sptr<Token> callerToken = GetFuzzAbilityToken();
@@ -80,6 +81,7 @@ void StartAbilityUtilsFuzztest1(bool boolParam, std::string &stringParam, int32_
     StartAbilityInfo::CreateCallerAbilityInfo(nullptr);
     StartAbilityInfo::CreateCallerAbilityInfo(callerToken);
     StartAbilityUtils::GetCloneAppIndexes(stringParam, int32Param);
+    StartAbilityUtils::CheckAppProvisionMode(want, userId, callerToken);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
@@ -87,7 +89,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     bool boolParam = *data % ENABLE;
     std::string stringParam(data, size);
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
-    StartAbilityUtilsFuzztest1(boolParam, stringParam, int32Param);
+    int32_t userId = static_cast<int32_t>(GetU32Data(data));
+    StartAbilityUtilsFuzztest1(boolParam, stringParam, int32Param, userId);
     return true;
 }
 }
