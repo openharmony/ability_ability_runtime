@@ -407,6 +407,7 @@ group("fuzztest") {
     "insightintentrdbdatamanagerfirst_fuzzer:fuzztest",
     "insightintentrdbdatamanagersecond_fuzzer:fuzztest",
     "insightintentrdbdatamanagerthird_fuzzer:fuzztest",
+    "insightintentrdbstoragemgr_fuzzer:fuzztest",
     "isramconstraineddevice_fuzzer:fuzztest",
     "jsabilityautostartupmanager_fuzzer:fuzztest",
     "keepaliveprocessmanagereighteenth_fuzzer:fuzztest",
