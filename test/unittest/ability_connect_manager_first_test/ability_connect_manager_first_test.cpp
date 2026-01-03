@@ -753,5 +753,142 @@ HWTEST_F(AbilityConnectManagerTest, GetLoadTimeout_003, TestSize.Level1)
     EXPECT_EQ(timeout, 10);
     TAG_LOGI(AAFwkTag::TEST, "GetLoadTimeout_003 end");
 }
+
+/*
+* Feature: AbilityConnectManager
+* Function: GetOrCreateExtensionRecord
+*/
+HWTEST_F(AbilityConnectManagerTest, GetOrCreateExtensionRecord_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateExtensionRecord_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(
+        abilityRequest);
+    std::string hostBundName = "bundleName";
+    bool isCreate = false;
+    bool isLoadedAbility = false;
+    connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
+
+    int32_t result = connectManager->GetOrCreateExtensionRecord(
+        abilityRequest, isCreate, hostBundName, abilityRecord, isLoadedAbility);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    TAG_LOGI(AAFwkTag::TEST, "GetOrCreateExtensionRecord_001 end");
+}
+
+/*
+  * Feature: AbilityConnectManager
+  * Function: SetServiceAfterNewCreate
+  */
+ HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_001, TestSize.Level1)
+ {
+     TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_001 start");
+     auto connectManager = std::make_shared<AbilityConnectManager>(0);
+     std::string deviceName = "device";
+     std::string abilityName = AbilityConfig::LAUNCHER_ABILITY_NAME;
+     std::string appName = "hiservcie";
+     std::string bundleName = "com.ix.hiservcie";
+     std::string moduleName = "entry";
+     auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+     auto targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+
+
+     connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+     EXPECT_TRUE(targetService->IsLauncherRoot());
+ }
+
+
+/*
+* Feature: AbilityConnectManager
+* Function: SetServiceAfterNewCreate
+*/
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_002 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    auto targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    targetService->SetKeepAliveBundle(true);
+
+
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_FALSE(targetService->IsLauncherRoot());
+}
+
+
+/*
+* Feature: AbilityConnectManager
+* Function: SetServiceAfterNewCreate
+*/
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_003 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = AbilityConfig::SCENEBOARD_ABILITY_NAME;
+    std::string appName = "hiservcie";
+    std::string bundleName = AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    auto targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRequest.appInfo.accessTokenId = FAKE_TOKENID;
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
+}
+
+/*
+* Feature: AbilityConnectManager
+* Function: SetServiceAfterNewCreate
+*/
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_004 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = AbilityConfig::SCENEBOARD_ABILITY_NAME;
+    std::string appName = "hiservcie";
+    std::string bundleName = AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    abilityRequest.restart = true;
+    auto targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRequest.appInfo.accessTokenId = FAKE_TOKENID;
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_EQ(connectManager->sceneBoardTokenId_, FAKE_TOKENID);
+}
+
+/*
+* Feature: AbilityConnectManager
+* Function: SetServiceAfterNewCreate
+*/
+HWTEST_F(AbilityConnectManagerTest, SetServiceAfterNewCreate_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetServiceAfterNewCreate_005 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    auto abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    abilityRequest.restart = true;
+    auto targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    targetService->SetKeepAliveBundle(true);
+
+
+    connectManager->SetServiceAfterNewCreate(abilityRequest, *targetService);
+    EXPECT_FALSE(targetService->IsLauncherRoot());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

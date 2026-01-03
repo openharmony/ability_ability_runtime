@@ -286,7 +286,10 @@ public:
         const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     ServiceMapType GetServiceMap();
-
+    uint32_t GetSceneBoardTokenId() const
+    {
+        return sceneBoardTokenId_;
+    }
 protected:
 
     /**
@@ -476,17 +479,6 @@ protected:
     {
         return 0;
     }
-
-    /**
-    * Get or create service record for ability request.
-    *
-    * @param abilityRequest The ability request.
-    * @param isCreatedByConnect Whether created by connection.
-    * @param targetAbilityRecord The target ability record.
-    * @param isLoadedAbility Whether ability is loaded.
-    */
-    virtual void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
-        std::shared_ptr<BaseExtensionRecord> &targetAbilityRecord, bool &isLoadedAbility) {}
 
     virtual int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest,
         std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
@@ -712,6 +704,16 @@ private:
      */
     void RemoveConnectionRecordFromMap(std::shared_ptr<ConnectionRecord> connect);
 
+    /**
+    * GetOrCreateServiceRecord.
+    *
+    * @param abilityRequest, Special want for service type's ability.
+    * @param isCreatedByConnect, whether is created by connect ability mode.
+    * @param targetAbilityRecord, the target service ability record.
+    * @param isLoadedAbility, whether the target ability has been loaded.
+    */
+    void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
+        std::shared_ptr<BaseExtensionRecord> &targetAbilityRecord, bool &isLoadedAbility);
     void SetServiceAfterNewCreate(const AbilityRequest &abilityRequest, BaseExtensionRecord &targetService);
 
     /**
@@ -841,6 +843,7 @@ private:
     std::mutex callerPidConnectionCountMapMutex_;
     std::deque<std::map<int32_t, LoadAbilityContext>> loadAbilityQueue_;
     std::vector<int32_t> thresholds_ = {50, 100, 200, 500};
+    std::atomic_uint32_t sceneBoardTokenId_ = 0;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

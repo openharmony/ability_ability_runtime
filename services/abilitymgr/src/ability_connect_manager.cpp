@@ -21,6 +21,7 @@
 #include "ability_manager_constants.h"
 #include "ability_permission_util.h"
 #include "ability_resident_process_rdb.h"
+#include "ability_util.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
@@ -346,7 +347,14 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     }
     std::shared_ptr<BaseExtensionRecord> targetService;
     bool isLoadedAbility = false;
-    ret = GetOrCreateExtensionRecord(abilityRequest, targetService, isLoadedAbility);
+    if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType) &&
+        abilityRequest.uiExtensionAbilityConnectInfo != nullptr) {
+        ret = GetOrCreateExtensionRecord(abilityRequest, targetService, isLoadedAbility);
+    } else {
+        GetOrCreateServiceRecord(abilityRequest, true, targetService, isLoadedAbility);
+        CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
+        ret = ERR_OK;
+    }
     if (ret != ERR_OK) {
         return ret;
     }
@@ -3147,6 +3155,76 @@ bool AbilityConnectManager::IsSpecialAbility(const AppExecFwk::AbilityInfo &abil
         }
     }
     return false;
+}
+
+void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abilityRequest,
+    const bool isCreatedByConnect, std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    // lifecycle is not complete when window extension is reused
+    bool noReuse = UIExtensionUtils::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
+    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    std::string serviceKey = element.GetURI();
+    if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
+        serviceKey = element.GetURI() + std::to_string(abilityRequest.want.GetIntParam(FRS_APP_INDEX, 0));
+    }
+    {
+        std::lock_guard lock(serviceMapMutex_);
+        auto serviceMapIter = serviceMap_.find(serviceKey);
+        targetService = serviceMapIter == serviceMap_.end() ? nullptr : serviceMapIter->second;
+    }
+    if (targetService == nullptr &&
+        IsCacheExtensionAbilityByInfo(abilityRequest.abilityInfo)) {
+        targetService = AbilityCacheManager::GetInstance().Get(abilityRequest);
+        if (targetService != nullptr) {
+            AddToServiceMap(serviceKey, targetService);
+        }
+    }
+    if (noReuse && targetService) {
+        if (IsSpecialAbility(abilityRequest.abilityInfo)) {
+            TAG_LOGI(AAFwkTag::EXT, "removing ability: %{public}s/%{public}s",
+                element.GetBundleName().c_str(),
+                element.GetAbilityName().c_str());
+        }
+        RemoveServiceFromMapSafe(serviceKey);
+    }
+    isLoadedAbility = true;
+    if (noReuse || targetService == nullptr) {
+        targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+        CHECK_POINTER(targetService);
+        targetService->SetOwnerMissionUserId(userId_);
+        if (isCreatedByConnect) {
+            targetService->SetCreateByConnectMode();
+        }
+        SetServiceAfterNewCreate(abilityRequest, *targetService);
+        AddToServiceMap(serviceKey, targetService);
+        isLoadedAbility = false;
+    }
+    TAG_LOGD(AAFwkTag::EXT, "service map add, serviceKey: %{public}s", serviceKey.c_str());
+}
+
+void AbilityConnectManager::SetServiceAfterNewCreate(const AbilityRequest &abilityRequest,
+    BaseExtensionRecord &targetService)
+{
+    if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+        targetService.SetLauncherRoot();
+        if (abilityRequest.restart) {
+            targetService.SetRestartTime(abilityRequest.restartTime);
+            targetService.SetRestartCount(abilityRequest.restartCount);
+        }
+    } else if (IsAbilityNeedKeepAlive(BaseExtensionRecord::TransferToExtensionRecordBase(
+        targetService.shared_from_this())) && abilityRequest.restart) {
+        targetService.SetRestartTime(abilityRequest.restartTime);
+        targetService.SetRestartCount(abilityRequest.restartCount);
+    }
+    if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        targetService.SetInstanceKey(MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
+    }
+    if (targetService.IsSceneBoard()) {
+        TAG_LOGI(AAFwkTag::EXT, "create sceneboard");
+        sceneBoardTokenId_ = abilityRequest.appInfo.accessTokenId;
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

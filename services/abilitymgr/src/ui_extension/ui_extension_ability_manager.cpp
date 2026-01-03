@@ -1307,11 +1307,6 @@ void UIExtensionAbilityManager::CompleteForegroundInner(const std::shared_ptr<Ba
 int UIExtensionAbilityManager::GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest,
     std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
 {
-    if (!UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType) ||
-        abilityRequest.uiExtensionAbilityConnectInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not UI extension or connectInfo null");
-        return ERR_INVALID_VALUE;
-    }
     auto bundleName = abilityRequest.uiExtensionAbilityConnectInfo->hostBundleName;
     int32_t ret = GetOrCreateExtensionRecord(abilityRequest, true, bundleName, targetService, isLoadedAbility);
     if (ret != ERR_OK || targetService == nullptr) {
