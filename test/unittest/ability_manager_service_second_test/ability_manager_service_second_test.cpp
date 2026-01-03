@@ -1718,6 +1718,23 @@ HWTEST_F(AbilityManagerServiceSecondTest, GenerateExtensionAbilityRequest_001, T
 
 /*
  * Feature: AbilityManagerService
+ * Function: GenerateExtensionAbilityRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateExtensionAbilityRequest
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, GenerateExtensionAbilityRequest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateExtensionAbilityRequest_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("ohos.params.pluginAbility", true);
+    AbilityRequest request;
+    EXPECT_EQ(abilityMs_->GenerateExtensionAbilityRequest(want, request, nullptr, 100), RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateExtensionAbilityRequest_002 end");
+} 
+
+/*
+ * Feature: AbilityManagerService
  * Function: KillProcess
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService KillProcess
