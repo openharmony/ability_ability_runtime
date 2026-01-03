@@ -218,7 +218,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermission_003, TestSiz
     int32_t funcResult = 1;
     auto result = upmsi->GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, ERR_URI_LIST_OUT_OF_RANGE);
 }
 
 /*
@@ -501,7 +501,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RevokeAllMapUriPermissions_002,
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RevokeUriPermissionManually_001, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
-    MyFlag::isSAOrSystemAppCall_ = true;
+    MyFlag::isSystemAppCall_ = true;
     MyFlag::isUriTypeValid_ = true;
     MyFlag::getTokenIdByBundleNameStatus_ = -1;
     Uri uri("uri");

@@ -81,28 +81,22 @@ CheckUriFunc DllWrapper::GetFunc()
     return func_;
 }
 
-static bool CheckPermission(uint32_t tokenCaller, const std::string &permission)
-{
-    return PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenCaller, permission);
-}
-
 DllWrapper& FilePermissionManager::GetDllWrapper()
 {
     static DllWrapper dll;
     return dll;
 }
 
-bool FilePermissionManager::CheckDocsUriPermission(uint32_t callerTokenId, bool hasFileManagerPerm,
-    bool hasSandboxManagerPerm, const std::string &path)
+bool FilePermissionManager::CheckDocsUriPermission(TokenIdPermission &tokenPermission, const std::string &path)
 {
     if (path.find(APPDATA_URI) == 0) {
-        return hasSandboxManagerPerm;
+        return tokenPermission.VerifySandboxAccessPermission();
     }
 
     auto& dll = GetDllWrapper();
     CheckUriFunc func = dll.GetFunc();
     if (func != nullptr) {
-        int32_t ret = func(path, callerTokenId);
+        int32_t ret = func(path, tokenPermission.GetTokenId());
         if (ret == PERMISSION_GRANTED) {
             return true;
         }
@@ -112,12 +106,12 @@ bool FilePermissionManager::CheckDocsUriPermission(uint32_t callerTokenId, bool 
     }
 
     if (path.find(STORAGE_URI) == 0 && path.find(APPDATA_URI) != 0) {
-        return hasFileManagerPerm;
+        return tokenPermission.VerifyFileAccessManagerPermission();
     }
     return false;
 }
 
-static bool CheckFileManagerUriPermission(uint32_t providerTokenId,
+static bool CheckFileManagerUriPermission(TokenIdPermission &tokenPermission,
                                           const std::string &filePath,
                                           const std::string &bundleName)
 {
@@ -137,13 +131,13 @@ static bool CheckFileManagerUriPermission(uint32_t providerTokenId,
         if (dirname == bundleName) {
             return true;
         }
-        return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DOWNLOAD);
+        return tokenPermission.VerifyRWDownloadPermission();
     }
     if (path.find(DESKTOP_PATH) == 0) {
-        return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DESKTOP);
+        return tokenPermission.VerifyRWDeskTopPermission();
     }
     if (path.find(DOCUMENTS_PATH) == 0) {
-        return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DOCUMENTS);
+        return tokenPermission.VerifyRWDocumentsPermission();
     }
     return false;
 }
@@ -167,17 +161,15 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
     pathPolicies.clear();
     std::vector<int32_t> resultIndex;
     std::vector<PolicyInfo> persistPolicys;
-    bool hasFileManagerPerm = CheckPermission(callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
-    bool hasSandboxManagerPerm = CheckPermission(callerTokenId, PermissionConstants::PERMISSION_SANDBOX_ACCESS_MANAGER);
+    TokenIdPermission tokenPermission(callerTokenId);
     auto& dll = GetDllWrapper();
     (void)dll.InitDlSymbol(URI_CHECK_SO_NAME, URI_CHECK_FUNC_NAME);
     for (size_t i = 0; i < uriVec.size(); i++) {
         PolicyInfo policyInfo = GetPathPolicyInfoFromUri(uriVec[i], flag);
         pathPolicies.emplace_back(policyInfo);
         if ((uriVec[i].GetAuthority() == FILE_MANAGER_AUTHORITY) &&
-            (CheckFileManagerUriPermission(callerTokenId, policyInfo.path,
-                                           bundleName) ||
-            CheckDocsUriPermission(callerTokenId, hasFileManagerPerm, hasSandboxManagerPerm, policyInfo.path))) {
+            (CheckFileManagerUriPermission(tokenPermission, policyInfo.path, bundleName) ||
+            CheckDocsUriPermission(tokenPermission, policyInfo.path))) {
             resultCodes[i] = true;
             continue;
         }

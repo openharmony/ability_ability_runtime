@@ -24,6 +24,7 @@
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager_wrapper.h"
+#include "permission_constants.h"
 #include "permission_verification.h"
 #include "tokenid_kit.h"
 #include "fud_constants.h"
@@ -141,8 +142,13 @@ bool FUDUtils::IsSystemAppCall()
 
 bool FUDUtils::IsPrivilegedSACall()
 {
-    uint32_t uid = IPCSkeleton::GetCallingUid();
-    return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID || uid == COLLABORATION_FWK_UID;
+    uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
+    auto permissionName = PermissionConstants::PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED;
+    if (PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
+        return true;
+    }
+    uint32_t callerUId = IPCSkeleton::GetCallingUid();
+    return callerUId == COLLABORATION_FWK_UID;
 }
 
 bool FUDUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
@@ -307,6 +313,22 @@ bool FUDUtils::GenerateFUDAppInfo(FUDAppInfo &info)
     }
     return false;
 }
+
+bool FUDUtils::IsSandboxApp(uint32_t tokenId)
+{
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo hapInfo;
+        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo);
+        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
+            return false;
+        }
+        return hapInfo.instIndex > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX;
+    }
+    return false;
+}
+
 
 bool FUDUtils::CheckUriTypeIsValid(Uri &uri)
 {

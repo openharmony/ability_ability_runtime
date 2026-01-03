@@ -90,7 +90,7 @@ bool PermissionVerification::IsSACall() const
 }
 bool PermissionVerification::IsSystemAppCall() const
 {
-    return MyFlag::IsSystempAppCall_;
+    return MyFlag::IsSystemAppCall_;
 }
 bool PermissionVerification::IsShellCall() const
 {

@@ -345,21 +345,6 @@ int AppMgrProxy::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
     return result;
 }
 
-int32_t AppMgrProxy::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
-
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::JUDGE_SANDBOX_BY_PID, data, reply, option);
-    isSandbox = reply.ReadBool();
-    return reply.ReadInt32();
-}
-
 int32_t AppMgrProxy::IsTerminatingByPid(pid_t pid, bool &isTerminating)
 {
     MessageParcel data;

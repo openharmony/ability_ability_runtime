@@ -80,5 +80,45 @@ bool TokenIdPermission::VerifyWriteAudioPermission()
     }
     return haveWriteAudioPermission_;
 }
+
+bool TokenIdPermission::VerifyRWDownloadPermission()
+{
+    if (!initRWDownloadPermission_) {
+        initRWDownloadPermission_ = true;
+        haveRWDownloadPermission_ = PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
+            tokenId_, PermissionConstants::PERMISSION_READ_WRITE_DOWNLOAD);
+    }
+    return haveRWDownloadPermission_;
+}
+
+bool TokenIdPermission::VerifyRWDeskTopPermission()
+{
+    if (!initRWDeskTopPermission_) {
+        initRWDeskTopPermission_ = true;
+        haveRWDeskTopPermission_ = PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
+            tokenId_, PermissionConstants::PERMISSION_READ_WRITE_DESKTOP);
+    }
+    return haveRWDeskTopPermission_;
+}
+
+bool TokenIdPermission::VerifyRWDocumentsPermission()
+{
+    if (!initRWDocumentsPermission_) {
+        initRWDocumentsPermission_ = true;
+        haveRWDocumentsPermission_ = PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
+            tokenId_, PermissionConstants::PERMISSION_READ_WRITE_DOCUMENTS);
+    }
+    return haveRWDocumentsPermission_;
+}
+
+bool TokenIdPermission::VerifySandboxAccessPermission()
+{
+    if (!initSandboxAccessPermission_) {
+        initSandboxAccessPermission_ = true;
+        haveSandboxAccessPermission_ = PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
+            tokenId_, PermissionConstants::PERMISSION_SANDBOX_ACCESS_MANAGER);
+    }
+    return haveSandboxAccessPermission_;
+}
 }  // OHOS
 }  // AAFwk
