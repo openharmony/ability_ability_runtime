@@ -36,76 +36,6 @@ CommonExtensionManager::CommonExtensionManager(int userId) : AbilityConnectManag
 CommonExtensionManager::~CommonExtensionManager()
 {}
 
-void CommonExtensionManager::GetOrCreateServiceRecord(const AbilityRequest &abilityRequest,
-    const bool isCreatedByConnect, std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    // lifecycle is not complete when window extension is reused
-    bool noReuse = UIExtensionUtils::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
-    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
-        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
-    std::string serviceKey = element.GetURI();
-    if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
-        serviceKey = element.GetURI() + std::to_string(abilityRequest.want.GetIntParam(FRS_APP_INDEX, 0));
-    }
-    {
-        std::lock_guard lock(serviceMapMutex_);
-        auto serviceMapIter = serviceMap_.find(serviceKey);
-        targetService = serviceMapIter == serviceMap_.end() ? nullptr : serviceMapIter->second;
-    }
-    if (targetService == nullptr &&
-        IsCacheExtensionAbilityByInfo(abilityRequest.abilityInfo)) {
-        targetService = AbilityCacheManager::GetInstance().Get(abilityRequest);
-        if (targetService != nullptr) {
-            CallAddToServiceMap(serviceKey, targetService);
-        }
-    }
-    if (noReuse && targetService) {
-        if (IsSpecialAbility(abilityRequest.abilityInfo)) {
-            TAG_LOGI(AAFwkTag::EXT, "removing ability: %{public}s/%{public}s",
-                element.GetBundleName().c_str(),
-                element.GetAbilityName().c_str());
-        }
-        RemoveServiceFromMapSafe(serviceKey);
-    }
-    isLoadedAbility = true;
-    if (noReuse || targetService == nullptr) {
-        targetService = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
-        CHECK_POINTER(targetService);
-        targetService->SetOwnerMissionUserId(userId_);
-        if (isCreatedByConnect) {
-            targetService->SetCreateByConnectMode();
-        }
-        SetServiceAfterNewCreate(abilityRequest, *targetService);
-        CallAddToServiceMap(serviceKey, targetService);
-        isLoadedAbility = false;
-    }
-    TAG_LOGD(AAFwkTag::EXT, "service map add, serviceKey: %{public}s", serviceKey.c_str());
-}
-
-void CommonExtensionManager::SetServiceAfterNewCreate(const AbilityRequest &abilityRequest,
-    BaseExtensionRecord &targetService)
-{
-    if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
-        targetService.SetLauncherRoot();
-        if (abilityRequest.restart) {
-            targetService.SetRestartTime(abilityRequest.restartTime);
-            targetService.SetRestartCount(abilityRequest.restartCount);
-        }
-    } else if (IsAbilityNeedKeepAlive(BaseExtensionRecord::TransferToExtensionRecordBase(
-        targetService.shared_from_this())) && abilityRequest.restart) {
-        targetService.SetRestartTime(abilityRequest.restartTime);
-        targetService.SetRestartCount(abilityRequest.restartCount);
-    }
-    if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
-        targetService.SetInstanceKey(MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
-    }
-    if (targetService.IsSceneBoard()) {
-        TAG_LOGI(AAFwkTag::EXT, "create sceneboard");
-        sceneBoardTokenId_ = abilityRequest.appInfo.accessTokenId;
-    }
-}
-
 int CommonExtensionManager::AttachAbilityThreadInner(const sptr<IAbilityScheduler> &scheduler,
     const sptr<IRemoteObject> &token)
 {
@@ -132,14 +62,6 @@ int CommonExtensionManager::AttachAbilityThreadInner(const sptr<IAbilitySchedule
     abilityRecord->SetScheduler(scheduler);
     TAG_LOGD(AAFwkTag::EXT, "Inactivate");
     abilityRecord->Inactivate();
-    return ERR_OK;
-}
-
-int CommonExtensionManager::GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest,
-    std::shared_ptr<BaseExtensionRecord> &targetService, bool &isLoadedAbility)
-{
-    GetOrCreateServiceRecord(abilityRequest, true, targetService, isLoadedAbility);
-    CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
     return ERR_OK;
 }
 }  // namespace AAFwk
