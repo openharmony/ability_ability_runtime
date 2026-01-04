@@ -125,7 +125,8 @@ HWTEST_F(BundleMgrHelperSecondTest, BundleMgrHelperSecondTest_GetPluginExtension
     std::string pluginBundleName = "pluginBundleName";
     AppExecFwk::ExtensionAbilityInfo pluginExtensionInfo;
     int32_t userId = 100;
-    auto ret = bundleMgrHelper->GetPluginExtensionInfo(hostBundleName, nullptr, userId, pluginExtensionInfo);
+    Want want;
+    auto ret = bundleMgrHelper->GetPluginExtensionInfo(hostBundleName, want, userId, pluginExtensionInfo);
     EXPECT_NE(ret, ERR_OK);
 }
 }  // namespace AppExecFwk
