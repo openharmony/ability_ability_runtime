@@ -284,8 +284,8 @@ HWTEST_F(JsInsightIntentEntrySecondTest, JsInsightIntentEntryCallJsFunctionWithR
     MyFlag::isGetNapiEnvNullptr_ = true;
     napi_value argv;
     napi_value result;
-    auto ret = jsInsightIntentEntry->CallJsFunctionWithResultInner("test", 1, &argv, result);
-    EXPECT_FALSE(ret);
+    auto ret = jsInsightIntentEntry->CallJsFunctionWithResultInner("test", 1, &argv);
+    EXPECT_EQ(ret, nullptr);
 }
 
 /*

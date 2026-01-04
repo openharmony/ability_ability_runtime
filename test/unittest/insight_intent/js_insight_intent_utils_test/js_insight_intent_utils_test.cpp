@@ -77,8 +77,8 @@ HWTEST_F(JsInsightIntentUtilsTest, CallJsFunctionWithResult_0100, TestSize.Level
     EXPECT_EQ(status, napi_ok);
 
     napi_value result = nullptr;
-    auto ret = JsInsightIntentUtils::CallJsFunctionWithResult(env_, objValue, "test", 0, nullptr, result);
-    EXPECT_EQ(ret, true);
+    auto ret = JsInsightIntentUtils::CallJsFunctionWithResult(env_, objValue, "test", 0, nullptr);
+    EXPECT_NE(ret, nullptr);
     auto jsRet = JsInsightIntentUtils::GetResultFromJs(env_, result);
     EXPECT_EQ(jsRet, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "testcase end");
@@ -107,8 +107,8 @@ HWTEST_F(JsInsightIntentUtilsTest, CallJsFunctionWithResult_0200, TestSize.Level
     EXPECT_EQ(status, napi_ok);
 
     napi_value result = nullptr;
-    auto ret = JsInsightIntentUtils::CallJsFunctionWithResult(env_, objValue, "test", 0, nullptr, result);
-    EXPECT_EQ(ret, true);
+    auto ret = JsInsightIntentUtils::CallJsFunctionWithResult(env_, objValue, "test", 0, nullptr);
+    EXPECT_NE(ret, nullptr);
     auto jsRet = JsInsightIntentUtils::GetResultFromJs(env_, result);
     EXPECT_EQ(jsRet, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "testcase end");

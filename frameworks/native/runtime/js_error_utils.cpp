@@ -91,22 +91,26 @@ napi_value CreateJsError(napi_env env, const AbilityErrorCode& err)
 
 napi_value CreateInvalidParamJsError(napi_env env, const std::string &message)
 {
-    return CreateJsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), message);
+    HandleEscape handleEscape(env);
+    return handleEscape.Escape(
+        CreateJsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), message));
 }
 
 napi_value CreateNoPermissionError(napi_env env, const std::string& permission)
 {
-    return CreateJsError(env,
+    HandleEscape handleEscape(env);
+    return handleEscape.Escape(CreateJsError(env,
         static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED),
-        GetNoPermissionErrorMsg(permission));
+        GetNoPermissionErrorMsg(permission)));
 }
 
 napi_value CreateJsErrorByNativeErr(napi_env env, int32_t err, const std::string& permission)
 {
+    HandleEscape handleEscape(env);
     auto errCode = GetJsErrorCodeByNativeError(err);
     auto errMsg = (errCode == AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED && !permission.empty()) ?
         GetNoPermissionErrorMsg(permission) : GetErrorMsg(errCode);
-    return CreateJsError(env, static_cast<int32_t>(errCode), errMsg);
+    return handleEscape.Escape(CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
