@@ -3291,5 +3291,64 @@ HWTEST_F(AbilityManagerServiceThirdTest, UnRegisterPreloadUIExtensionHostClient_
     auto result = abilityMs_->UnRegisterPreloadUIExtensionHostClient(callerPid);
     EXPECT_NE(result, ERR_OK);
 }
+
+/**
+ * @tc.name: ParseVpnAllowListJson_001
+ * @tc.desc: Test ParseVpnAllowListJson if vpn_startability_allowlist.json is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    bool result = abilityMs_->ParseVpnAllowListJson(
+        "/etc/ability_runtime/vpn_startability_allowlist.json", "bundleNames");
+    EXPECT_NE(result, true);
+}
+
+/**
+ * @tc.name: ParseVpnAllowListJson_002
+ * @tc.desc: Test ParseVpnAllowListJson if vpn_startability_allowlist.json is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    bool result = abilityMs_->ParseVpnAllowListJson(
+        "/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: CheckSupportVpn_001
+ * @tc.desc: Test CheckSupportVpn when bundleName in allowlist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_001, TestSize.Level1)
+{
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    auto abilityInfo = callerRequest.abilityInfo;
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->vpnAllowList_ = {"com.example.vpn"};
+    bool result = abilityMs_->CheckSupportVpn(abilityInfo);
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: CheckSupportVpn_002
+ * @tc.desc: Test CheckSupportVpn when extensionAbilityType is VPN
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckSupportVpn_002, TestSize.Level1)
+{
+    AbilityRequest callerRequest = GenerateAbilityRequest(
+        "0", "abilityName", "appName", "com.example.vpn", "moduleName");
+    callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::VPN;
+    auto abilityInfo = callerRequest.abilityInfo;
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->vpnAllowList_ = {"com.example.vpn"};
+    bool result = abilityMs_->CheckSupportVpn(abilityInfo);
+    EXPECT_NE(result, false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
