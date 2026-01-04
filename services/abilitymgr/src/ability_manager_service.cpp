@@ -344,6 +344,9 @@ constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_REQUEST_CODE = -1;
 constexpr const char* PARAM_PREVENT_STARTABILITY = "persist.sys.abilityms.prevent_startability";
 constexpr const char* SUSPEND_SERVICE_CONFIG_FILE = "/etc/efficiency_manager/prevent_startability_whitelist.json";
+constexpr const char* VPN_ALLOWLIST_CONFIG_FILE = "/etc/ability_runtime/vpn_startability_allowlist.json";
+constexpr const char* DEFAULT_VPN_ALLOWLIST_CONFIG_FILE = "/system/etc/vpn_startability_allowlist.json";
+constexpr const char* VPN_ALLOW_BUNDLENAMES = "bundleNames";
 constexpr int32_t MAX_BUFFER = 2048;
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
@@ -520,9 +523,13 @@ void AbilityManagerService::InitPushTask()
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     taskHandler_->SubmitTask(initStartupFlagTask, "InitStartupFlag");
 
-    auto initExtensionConfigTask = []() {
+    auto initExtensionConfigTask = [aams = shared_from_this()]() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
+        if (aams) {
+            aams->ParseVpnAllowListJson(VPN_ALLOWLIST_CONFIG_FILE, VPN_ALLOW_BUNDLENAMES);
+        }
     };
+
     taskHandler_->SubmitTask(initExtensionConfigTask, "InitExtensionConfigTask");
 
     auto bootCompletedTask = [handler = taskHandler_]() {
@@ -5513,6 +5520,50 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     return err;
 }
 
+bool AbilityManagerService::CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo)
+{
+    auto bundleName = abilityInfo.applicationInfo.bundleName;
+    if (std::find(vpnAllowList_.begin(), vpnAllowList_.end(), bundleName) == vpnAllowList_.end()) {
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "allow bundleName: %{public}s",  bundleName.c_str());
+    return true;
+}
+
+bool AbilityManagerService::ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr)
+{
+    nlohmann::json jsonObj;
+    std::string absolutePath = GetConfigFileAbsolutePath(relativePath);
+    if (absolutePath.length() == 0) {
+        TAG_LOGW(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson absolutePath isEmpty");
+        absolutePath = DEFAULT_VPN_ALLOWLIST_CONFIG_FILE;
+    }
+    if (ParseJsonValueFromFile(jsonObj, absolutePath) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson parse file err");
+        return false;
+    }
+    std::lock_guard<std::mutex> locker(allowListMutex_);
+    if (!jsonObj.contains(jsonItemStr)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson not contains item");
+        return false;
+    }
+
+    nlohmann::json vpnAllowJsonList = jsonObj[jsonItemStr.c_str()];
+    if (!vpnAllowJsonList.is_array()) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson: jsonItem is not array");
+        return false;
+    }
+
+    for (const auto& it : vpnAllowJsonList) {
+        if (it.is_string()) {
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "ParseVpnAllowListJson: bundleName: %{public}s", 
+                it.get<std::string>().c_str());
+            vpnAllowList_.push_back(it.get<std::string>());
+        }
+    }
+    return true;
+}
+
 int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, const sptr<SessionInfo> &sessionInfo,
@@ -5563,7 +5614,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
             return ERR_WRONG_INTERFACE_CALL;
         }
         // not allow app to connect other extension by using connectServiceExtensionAbility
-        bool isVpn = abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN;
+        bool isVpn = CheckSupportVpn(abilityInfo);
         if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService && !isVpn) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "ability, type not service");
             return TARGET_ABILITY_NOT_SERVICE;
