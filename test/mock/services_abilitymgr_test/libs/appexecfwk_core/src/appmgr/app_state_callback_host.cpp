@@ -59,6 +59,11 @@ void AppStateCallbackHost::NotifyAppPreCache(int32_t pid, int32_t userId)
     TAG_LOGD(AAFwkTag::TEST, "NotifyAppPreCache called");
 }
 
+void AppStateCallbackHost::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RecordAppExitSignalReason called");
+}
+
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel& data, MessageParcel& reply)
 {
     return NO_ERROR;
@@ -80,6 +85,11 @@ int32_t AppStateCallbackHost::HandleNotifyStartKeepAliveProcess(MessageParcel &d
 }
 
 int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
+{
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleRecordAppExitSignalReason(MessageParcel &data, MessageParcel &reply)
 {
     return NO_ERROR;
 }

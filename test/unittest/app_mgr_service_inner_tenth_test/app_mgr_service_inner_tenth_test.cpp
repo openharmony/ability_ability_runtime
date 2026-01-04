@@ -119,6 +119,10 @@ public:
     {
         AAFwk::MyStatus::GetInstance().notifyStartKeepAliveProcessCalled_ = true;
     }
+    void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName) override
+    {
+        AAFwk::MyStatus::GetInstance().recordAppExitSignalReasonCall_ = true;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -980,6 +984,27 @@ HWTEST_F(AppMgrServiceInnerTenthTest, NotifyStartResidentProcess_002, TestSize.L
     appMgrServiceInner->NotifyStartResidentProcess(bundleInfos);
     EXPECT_FALSE(AAFwk::MyStatus::GetInstance().notifyStartResidentProcessCalled_);
     TAG_LOGI(AAFwkTag::TEST, "NotifyStartResidentProcess_002 end");
+}
+
+/**
+ * @tc.name: RecordAppExitSignalReason_001
+ * @tc.desc: Test RecordAppExitSignalReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, RecordAppExitSignalReason_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RecordAppExitSignalReason_001 start");
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto mockCallback = sptr<MockIAppStateCallback>::MakeSptr();
+    appMgrServiceInner->RegisterAppStateCallback(mockCallback);
+    int32_t pid = 12345;
+    int32_t uid = 1000;
+    int32_t signal = 9;
+    std::string bundleName = "com.example.test";
+    appMgrServiceInner->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().recordAppExitSignalReasonCall_);
+    TAG_LOGI(AAFwkTag::TEST, "RecordAppExitSignalReason_001 end");
 }
 
 /**
