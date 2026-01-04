@@ -223,6 +223,7 @@ public:
     bool notifyAppPreCacheCalled_ = false;
     bool notifyStartResidentProcessCalled_ = false;
     bool notifyStartKeepAliveProcessCalled_ = false;
+    bool recordAppExitSignalReasonCall_ = false;
     int getCallingUidCalledTimes_ = 0;
     int getAppRunningRecordMapCall_ = 0;
     bool setKeepAliveEnableStateCalled_ = false;
@@ -290,6 +291,7 @@ public:
         notifyAppPreCacheCalled_ = false;
         notifyStartResidentProcessCalled_ = false;
         notifyStartKeepAliveProcessCalled_ = false;
+        recordAppExitSignalReasonCall_ = false;
         getCallingUidCalledTimes_ = 0;
         getAppRunningRecordMapCall_ = 0;
         setKeepAliveEnableStateCalled_ = false;

@@ -597,6 +597,25 @@ HWTEST_F(AppSchedulerTest, AppScheduler_NotifyStartResidentProcess_001, TestSize
 
 /*
  * Feature: AppScheduler
+ * Function: RecordAppExitSignalReason
+ * SubFunction: NA
+ * FunctionPoints: AppScheduler RecordAppExitSignalReason
+ * EnvConditions: NA
+ * CaseDescription: Verify RecordAppExitSignalReason
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_RecordAppExitSignalReason_001, TestSize.Level1)
+{
+    ASSERT_NE(appStateMock_, nullptr);
+    DelayedSingleton<AppScheduler>::GetInstance()->callback_ = appStateMock_;
+    int32_t pid = 12345;
+    int32_t uid = 1000;
+    int32_t signal = 9;
+    std::string bundleName = "com.example.test";
+    DelayedSingleton<AppScheduler>::GetInstance()->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+}
+
+/*
+ * Feature: AppScheduler
  * Function: NotifyStartKeepAliveProcess
  * SubFunction: NA
  * FunctionPoints: AppScheduler NotifyStartKeepAliveProcess

@@ -122,6 +122,10 @@ public:
     {
         AAFwk::MyStatus::GetInstance().notifyStartKeepAliveProcessCalled_ = true;
     }
+    void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName) override
+    {
+        AAFwk::MyStatus::GetInstance().recordAppExitSignalReasonCall_ = true;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
