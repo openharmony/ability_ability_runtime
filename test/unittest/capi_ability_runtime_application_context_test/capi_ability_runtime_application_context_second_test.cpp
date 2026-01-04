@@ -308,7 +308,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, GetLogFileDirTest_004, 
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, TestSize.Level2)
 {
-    char* targetPage = "";
+    const char* targetPage = "";
     int32_t targetPageNameLength = 0;
     int32_t windowId = 0;
     AbilityRuntime_ErrorCode code =
@@ -333,7 +333,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, 
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_002, TestSize.Level2)
 {
-    char* targetPage = "";
+    const char* targetPage = "";
     int32_t targetPageNameLength = 0;
     int32_t windowId = 0;
     AbilityRuntime_ErrorCode code =
@@ -354,7 +354,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_002, 
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_003, TestSize.Level2)
 {
-    char* targetPage = "";
+    const char* targetPage = "";
     int32_t targetPageNameLength = 0;
     int32_t windowId = 0;
     AbilityRuntime_ErrorCode code =
