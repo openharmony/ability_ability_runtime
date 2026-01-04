@@ -17,15 +17,14 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-bool JsInsightIntentUtils::CallJsFunctionWithResult(
+napi_value JsInsightIntentUtils::CallJsFunctionWithResult(
     napi_env env,
     napi_value obj,
     const char* funcName,
     size_t argc,
-    const napi_value* argv,
-    napi_value& result)
+    const napi_value* argv)
 {
-    return false;
+    return nullptr;
 }
 
 std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> JsInsightIntentUtils::GetResultFromJs(

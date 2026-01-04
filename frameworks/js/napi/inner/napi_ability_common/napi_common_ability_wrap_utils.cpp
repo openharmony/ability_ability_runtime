@@ -160,6 +160,7 @@ napi_value GetContinueAbilityOptionsInfoCommon(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
 
     // reversible?: boolean
@@ -174,13 +175,14 @@ napi_value GetContinueAbilityOptionsInfoCommon(
 
     napi_get_null(env, &result);
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value GetContinueAbilityOptionsReversible(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
@@ -198,13 +200,14 @@ napi_value GetContinueAbilityOptionsReversible(
         info.reversible = reversible;
     }
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value GetContinueAbilityOptionsDeviceID(
     const napi_env &env, const napi_value &value, ContinueAbilityOptionsInfo &info)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
@@ -223,12 +226,13 @@ napi_value GetContinueAbilityOptionsDeviceID(
         info.deviceId = str;
     }
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapAppInfo(napi_env env, const ApplicationInfo &appInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -264,7 +268,7 @@ napi_value WrapAppInfo(napi_env env, const ApplicationInfo &appInfo)
     NAPI_CALL(env, napi_create_string_utf8(env, appInfo.entryDir.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "entryDir", proValue));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 int32_t GetStartAbilityErrorCode(ErrCode innerErrorCode)
@@ -562,7 +566,7 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
 napi_value BuildJsAbilityInfoNamedPropertyFirst(napi_env env, const AbilityInfo &abilityInfo, napi_value &result,
     napi_value &proValue)
 {
-    AbilityRuntime::HandleScope handleScope(env);
+    AbilityRuntime::HandleEscape handleEscape(env);
     NAPI_CALL(env, napi_create_string_utf8(env, abilityInfo.bundleName.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "bundleName", proValue));
 
@@ -632,12 +636,13 @@ napi_value BuildJsAbilityInfoNamedPropertyFirst(napi_env env, const AbilityInfo 
     NAPI_CALL(env, napi_create_int32(env, abilityInfo.backgroundModes, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "backgroundModes", proValue));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value BuildJsAbilityInfoNamedPropertySecond(napi_env env, const AbilityInfo &abilityInfo, napi_value &result,
     napi_value &proValue)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     NAPI_CALL(env, napi_create_int32(env, static_cast<int32_t>(abilityInfo.subType), &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "subType", proValue));
 
@@ -646,12 +651,13 @@ napi_value BuildJsAbilityInfoNamedPropertySecond(napi_env env, const AbilityInfo
 
     NAPI_CALL(env, napi_get_boolean(env, abilityInfo.formEnabled, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "formEnabled", proValue));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -665,12 +671,13 @@ napi_value WrapAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
     applicationInfo = WrapAppInfo(env, abilityInfo.applicationInfo);
     NAPI_CALL(env, napi_set_named_property(env, result, "applicationInfo", applicationInfo));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapProperties(napi_env env, const std::vector<std::string> properties, const std::string &proName,
     napi_value &result)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArrayProperties = nullptr;
     NAPI_CALL(env, napi_create_array(env, &jsArrayProperties));
     napi_value proValue = nullptr;
@@ -680,7 +687,7 @@ napi_value WrapProperties(napi_env env, const std::vector<std::string> propertie
         NAPI_CALL(env, napi_set_element(env, jsArrayProperties, i, proValue));
     }
     NAPI_CALL(env, napi_set_named_property(env, result, proName.c_str(), jsArrayProperties));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapModuleInfos(napi_env env, const ApplicationInfo &appInfo, napi_value &result)
@@ -746,6 +753,7 @@ HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
 napi_value BuildJsHapModuleInfoNamedProperty(napi_env env, const HapModuleInfoCB &cb, napi_value &result,
     napi_value &proValue)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     NAPI_CALL(env, napi_create_string_utf8(env, cb.hapModuleInfo.name.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "name", proValue));
 
@@ -781,11 +789,12 @@ napi_value BuildJsHapModuleInfoNamedProperty(napi_env env, const HapModuleInfoCB
 
     NAPI_CALL(env, napi_get_boolean(env, cb.hapModuleInfo.installationFree, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "installationFree", proValue));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapHapModuleInfo(napi_env env, const HapModuleInfoCB &cb)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     napi_value result = nullptr;
     napi_value proValue = nullptr;
@@ -824,7 +833,7 @@ napi_value WrapHapModuleInfo(napi_env env, const HapModuleInfoCB &cb)
     }
     NAPI_CALL(env, napi_set_named_property(env, result, "abilityInfo", abilityInfos));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 /**
@@ -871,6 +880,7 @@ void SaveAppVersionInfo(AppVersionInfo &appVersionInfo, const std::string appNam
 napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionInfoCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     napi_value proValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -885,7 +895,7 @@ napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionIn
     NAPI_CALL(env, napi_create_int32(env, appVersionInfoCB.appVersionInfo.versionCode, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "versionCode", proValue));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 /**
@@ -923,6 +933,7 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
 napi_value WrapAbilityName(napi_env env, const AbilityNameCB *abilityNameCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (abilityNameCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
         return nullptr;
@@ -930,7 +941,7 @@ napi_value WrapAbilityName(napi_env env, const AbilityNameCB *abilityNameCB)
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_string_utf8(env, abilityNameCB->name.c_str(), NAPI_AUTO_LENGTH, &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void UnwrapAbilityStartSettingForNumber(
@@ -1037,6 +1048,7 @@ bool UnwrapParamStopAbilityWrap(napi_env env, size_t argc, napi_value *argv, Asy
 
 napi_value UnwrapParamForWantAgent(napi_env &env, napi_value &args, AbilityRuntime::WantAgent::WantAgent *&wantAgent)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args, &valuetype));
     NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
@@ -1053,7 +1065,7 @@ napi_value UnwrapParamForWantAgent(napi_env &env, napi_value &args, AbilityRunti
     }
 
     napi_get_null(env, &result);
-    return result;
+    return handleEscape.Escape(result);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

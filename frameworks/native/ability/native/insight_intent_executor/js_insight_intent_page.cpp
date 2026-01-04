@@ -189,6 +189,7 @@ void JsInsightIntentPage::SetInsightIntentParam(JsRuntime& runtime, const std::s
         TAG_LOGE(AAFwkTag::INTENT, "env nullptr");
         return;
     }
+    HandleScope handleScope(env);
     napi_value paramNapiVal = AppExecFwk::WrapWantParams(env, newWant.GetParams());
     std::string paramStr = JsInsightIntentUtils::StringifyObject(env, paramNapiVal);
     TAG_LOGD(AAFwkTag::INTENT, "param string %{private}s", paramStr.c_str());

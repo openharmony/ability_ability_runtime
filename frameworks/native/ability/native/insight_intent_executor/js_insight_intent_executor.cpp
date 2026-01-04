@@ -197,15 +197,16 @@ std::unique_ptr<NativeReference> JsInsightIntentExecutor::LoadJsCode(
     return jsCode;
 }
 
-bool JsInsightIntentExecutor::CallJsFunctionWithResult(
+napi_value JsInsightIntentExecutor::CallJsFunctionWithResult(
     napi_env env,
     napi_value obj,
     const char* funcName,
     size_t argc,
-    const napi_value* argv,
-    napi_value& result)
+    const napi_value* argv)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
+    HandleEscape handleEscape(env);
+    napi_value result = nullptr;
     napi_value method = AppExecFwk::GetPropertyValueByPropertyName(
         env,
         obj,
@@ -213,7 +214,7 @@ bool JsInsightIntentExecutor::CallJsFunctionWithResult(
         napi_valuetype::napi_function);
     if (method == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null method");
-        return false;
+        return nullptr;
     }
     napi_call_function(
         env,
@@ -222,29 +223,27 @@ bool JsInsightIntentExecutor::CallJsFunctionWithResult(
         argc,
         argv,
         &result);
-    return true;
+    return handleEscape.Escape(result);
 }
 
-bool JsInsightIntentExecutor::CallJsFunctionWithResultInner(
+napi_value JsInsightIntentExecutor::CallJsFunctionWithResultInner(
     const char* funcName,
     size_t argc,
-    const napi_value* argv,
-    napi_value& result)
+    const napi_value* argv)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto* env = runtime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_valuetype::napi_object)) {
         TAG_LOGE(AAFwkTag::INTENT, "CallJsFunctionWithResultInner Type error");
-        return false;
+        return nullptr;
     }
     return JsInsightIntentExecutor::CallJsFunctionWithResult(
         env,
         obj,
         funcName,
         argc,
-        argv,
-        result);
+        argv);
 }
 
 std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> JsInsightIntentExecutor::GetResultFromJs(
@@ -465,8 +464,8 @@ bool JsInsightIntentExecutor::ExecuteInsightIntentUIAbilityForeground(
     napi_value paramJs = AppExecFwk::WrapWantParams(env, param);
     napi_value argv[argc] = { nameJs, paramJs, windowStageJs->GetNapiValue() };
     napi_value result = nullptr;
-
-    if (!CallJsFunctionWithResultInner(funcName, argc, argv, result)) {
+    result = CallJsFunctionWithResultInner(funcName, argc, argv);
+    if (result == nullptr) {
         ReplyFailedInner();
         return false;
     }
@@ -495,8 +494,8 @@ bool JsInsightIntentExecutor::ExecuteInsightIntentUIAbilityBackground(
     napi_value paramJs = AppExecFwk::WrapWantParams(env, param);
     napi_value argv[argc] = { nameJs, paramJs };
     napi_value result = nullptr;
-
-    if (!CallJsFunctionWithResultInner(funcName, argc, argv, result)) {
+    result = CallJsFunctionWithResultInner(funcName, argc, argv);
+    if (result == nullptr) {
         ReplyFailedInner();
         return false;
     }
@@ -527,8 +526,8 @@ bool JsInsightIntentExecutor::ExecuteInsightIntentUIExtension(
     napi_value paramJs = AppExecFwk::WrapWantParams(env, param);
     napi_value argv[argc] = { nameJs, paramJs, UIExtensionContentSession->GetNapiValue() };
     napi_value result = nullptr;
-
-    if (!CallJsFunctionWithResultInner(funcName, argc, argv, result)) {
+    result = CallJsFunctionWithResultInner(funcName, argc, argv);
+    if (result == nullptr) {
         ReplyFailedInner();
         return false;
     }
@@ -557,8 +556,8 @@ bool JsInsightIntentExecutor::ExecuteInsightIntentServiceExtension(
     napi_value paramJs = AppExecFwk::WrapWantParams(env, param);
     napi_value argv[argc] = { nameJs, paramJs };
     napi_value result = nullptr;
-
-    if (!CallJsFunctionWithResultInner(funcName, argc, argv, result)) {
+    result = CallJsFunctionWithResultInner(funcName, argc, argv);
+    if (result == nullptr) {
         ReplyFailedInner();
         return false;
     }
