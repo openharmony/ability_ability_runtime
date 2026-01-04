@@ -300,4 +300,71 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, GetLogFileDirTest_004, 
     ASSERT_EQ(writeLength, logFileDir.length());
     ASSERT_STREQ(buffer, logFileDir.c_str());
 }
+
+/**
+ * @tc.number: NotifyPageChanged_001
+ * @tc.desc: Function test with targetPageName is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, TestSize.Level2)
+{
+    char* targetPage = "";
+    int32_t targetPageNameLength = 0;
+    int32_t windowId = 0;
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextNotifyPageChanged("", targetPageNameLength, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(NULL, targetPageNameLength, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(nullptr, targetPageNameLength, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, -1, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+}
+
+/**
+ * @tc.number: NotifyPageChanged_002
+ * @tc.desc: Function test with targetPageNameLength is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_002, TestSize.Level2)
+{
+    char* targetPage = "";
+    int32_t targetPageNameLength = 0;
+    int32_t windowId = 0;
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, 0, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, -1, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.number: NotifyPageChanged_003
+ * @tc.desc: Function test with windowId is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_003, TestSize.Level2)
+{
+    char* targetPage = "";
+    int32_t targetPageNameLength = 0;
+    int32_t windowId = 0;
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, 0);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, -12);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, windowId);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+}
 }
