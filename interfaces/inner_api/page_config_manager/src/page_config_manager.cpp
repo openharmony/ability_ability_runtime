@@ -87,6 +87,11 @@ int32_t PageConfigManager::NotifyPageChanged(const char* targetPageName,
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     std::lock_guard lock(g_pageConfigMutex);
+    if (targetPageName == nullptr || targetPageNameLength <= 0 ||
+            static_cast<size_t>(targetPageNameLength) != strlen(targetPageName)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "targetPageName null or length invalid");
+        return ERR_NO_INIT;
+    }
     if (pageConfigSo_ == nullptr) {
         TAG_LOGD(AAFwkTag::ABILITY, "pageConfigSo_ not loaded");
         return ERR_OK;
