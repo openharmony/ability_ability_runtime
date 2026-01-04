@@ -93,9 +93,9 @@ public:
     std::string GetGroupDir(std::string groupId) override;
 
     void InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
-        const std::string &hostBundleName) override;
+        const std::string &hostBundleName);
     
-    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> GetPluginExtensionInfo() override;
+    std::shared_ptr<AppExecFwk::ExtensionAbilityInfo> GetPluginExtensionInfo();
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
