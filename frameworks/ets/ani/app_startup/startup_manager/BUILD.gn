@@ -24,8 +24,7 @@ ohos_shared_library("startup_manager_ani_kit") {
     debug = false
   }
 
-  include_dirs =
-      [ "${ability_runtime_path}/frameworks/ets/ani/app_startup/startup_manager/include" ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/app_startup/startup_manager/include" ]
   configs = []
 
   public_configs = []
@@ -40,20 +39,20 @@ ohos_shared_library("startup_manager_ani_kit") {
   deps = [
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_native_path}/appkit:ability_stage_ani",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "ability_base:configuration",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",

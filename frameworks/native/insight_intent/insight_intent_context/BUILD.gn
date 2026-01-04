@@ -30,6 +30,8 @@ ohos_shared_library("insightintentcontext") {
   defines = [ "AMS_LOG_TAG = \"InsigtIntent\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001308" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   public_configs = [ ":insight_intent_context_public_config" ]
 
   deps = [
@@ -72,6 +74,8 @@ ohos_shared_library("cj_insightintentcontext") {
 
   defines = [ "AMS_LOG_TAG = \"InsigtIntent\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001308" ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = [ ":insight_intent_context_public_config" ]
 

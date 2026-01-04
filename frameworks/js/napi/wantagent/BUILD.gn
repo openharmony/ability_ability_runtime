@@ -23,6 +23,8 @@ ohos_shared_library("wantagent") {
     "./",
   ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   sources = [
     "napi_want_agent.cpp",
     "native_module.cpp",

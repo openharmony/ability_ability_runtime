@@ -20,7 +20,10 @@ ohos_shared_library("uripermissionmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = []
 

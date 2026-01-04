@@ -16,12 +16,15 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("missionmanager_ani") {
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
   }
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   sources = [
     "./src/ets_mission_info_utils.cpp",

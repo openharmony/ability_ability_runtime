@@ -37,6 +37,27 @@ gen_js_obj("ability_context_abc") {
 ohos_shared_library("abilitycontext_napi") {
   sources = [ "ability_context_module.cpp" ]
 
+  cflags = [
+    "-flto=full",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-Os",
+  ]
+  cflags_cc = [
+    "-flto=full",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-Os",
+  ]
+  ldflags = [
+    "-flto=full",
+    "-Wl",
+  ]
+
   deps = [
     ":ability_context_abc",
     ":ability_context_js",

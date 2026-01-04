@@ -27,7 +27,10 @@ config("child_process_manager_config") {
 }
 
 ohos_shared_library("child_process_manager") {
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":child_process_manager_config" ]
 
   sources = []

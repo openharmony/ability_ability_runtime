@@ -17,6 +17,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("application_context_ani_kit") {
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -31,7 +32,7 @@ ohos_shared_library("application_context_ani_kit") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
   ]
 
-  configs = []
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = []
 
