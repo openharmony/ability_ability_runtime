@@ -25,6 +25,8 @@ ohos_shared_library("napi_ability_common") {
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits_public_config",
   ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   sources = [
     "js_napi_common.cpp",
     "napi_common_ability.cpp",

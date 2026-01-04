@@ -31,6 +31,8 @@ ohos_shared_library("featureability_ani") {
 
   include_dirs = [ "./include" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   public_configs = [ ":featureability_public_config" ]
 
   sources = [ "./src/ani_data_ability_helper.cpp" ]

@@ -30,6 +30,8 @@ ohos_shared_library("ani_wantagent_common") {
   }
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   public_configs = [ ":ani_wantagent_common_public_config" ]
 
   sources = [ "ani_common_want_agent.cpp" ]

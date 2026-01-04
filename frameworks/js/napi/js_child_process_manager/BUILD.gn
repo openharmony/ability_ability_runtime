@@ -17,7 +17,10 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 ohos_shared_library("childprocessmanager_napi") {
   sources = []
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = []
 

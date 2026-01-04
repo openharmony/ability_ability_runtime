@@ -39,7 +39,10 @@ ohos_shared_library("session_handler") {
     "src/session_handler_stub.cpp",
   ]
 
-  configs = [ ":session_handler_config" ]
+  configs = [
+    ":session_handler_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":session_handler_public_config" ]
 
   deps = []

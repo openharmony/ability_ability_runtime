@@ -27,7 +27,10 @@ ohos_shared_library("autostartupmanager") {
     "js_ability_auto_startup_manager.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
