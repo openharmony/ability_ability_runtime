@@ -113,5 +113,20 @@ HWTEST_F(BundleMgrHelperSecondTest, BundleMgrHelperSecondTest_GetPluginInfoForTa
     auto ret = bundleMgrHelper->GetPluginInfoForTarget(hostBundleName, pluginBundleName, 0, pluginBundleInfo);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: BundleMgrHelperSecondTest_GetPluginExtensionInfo_001
+ * @tc.desc: GetPluginExtensionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperSecondTest, BundleMgrHelperSecondTest_GetPluginExtensionInfo_001, TestSize.Level1)
+{
+    std::string hostBundleName = "hostBundleName";
+    std::string pluginBundleName = "pluginBundleName";
+    AppExecFwk::ExtensionAbilityInfo pluginExtensionInfo;
+    int32_t userId = 100;
+    auto ret = bundleMgrHelper->GetPluginExtensionInfo(hostBundleName, nullptr, userId, pluginExtensionInfo);
+    EXPECT_NE(ret, ERR_OK);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
