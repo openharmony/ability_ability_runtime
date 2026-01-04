@@ -31,9 +31,9 @@ class PageConfigManager final : public NoCopyable {
 public:
     static PageConfigManager &GetInstance();
 
-    int Initialize(std::string configJson, const wptr<Rosen::Window>& window);
+    int32_t Initialize(const std::string& configJson, const wptr<Rosen::Window>& window);
 
-    int NotifyPageChanged(const char* targetPageName, int32_t targetPageNameLength, int32_t windowId);
+    int32_t NotifyPageChanged(const char* targetPageName, int32_t targetPageNameLength, int32_t windowId);
 
 private:
     PageConfigManager() = default;

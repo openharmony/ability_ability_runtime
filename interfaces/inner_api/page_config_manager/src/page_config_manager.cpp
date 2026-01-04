@@ -25,9 +25,9 @@
 namespace OHOS::AbilityRuntime {
 namespace {
 constexpr const char *PAGE_CONFIG_LIBNAME = "libhmos_pageconfig.z.so";
-using InitializeFunc = int(*)(const std::string&, const wptr<Rosen::Window>&);
+using InitializeFunc = int32_t (*)(const std::string&, const wptr<Rosen::Window>&);
 InitializeFunc g_initializeFunc = nullptr;
-using NotifyPageChangedFunc = int(*)(const char*, int32_t, int32_t);
+using NotifyPageChangedFunc = int32_t (*)(const char*, int32_t, int32_t);
 NotifyPageChangedFunc g_notifyPageChangedFunc = nullptr;
 }
 
@@ -37,8 +37,9 @@ PageConfigManager &PageConfigManager::GetInstance()
     return instance;
 }
 
-int PageConfigManager::Initialize(std::string configJson, const wptr<Rosen::Window>& window)
+int32_t PageConfigManager::Initialize(const std::string& configJson, const wptr<Rosen::Window>& window)
 {
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     std::lock_guard guard(g_pageConfigMutex);
     if (isInitialized_) {
         TAG_LOGI(AAFwkTag::ABILITY, "has initialized");
@@ -70,6 +71,7 @@ int PageConfigManager::Initialize(std::string configJson, const wptr<Rosen::Wind
 
 void PageConfigManager::LoadPageConfigSo()
 {
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (pageConfigSo_ == nullptr) {
         pageConfigSo_ = dlopen(PAGE_CONFIG_LIBNAME, RTLD_LAZY);
         if (pageConfigSo_ == nullptr) {
@@ -80,11 +82,16 @@ void PageConfigManager::LoadPageConfigSo()
     }
 }
 
-int PageConfigManager::NotifyPageChanged(const char* targetPageName,
+int32_t PageConfigManager::NotifyPageChanged(const char* targetPageName,
     int32_t targetPageNameLength, int32_t windowId)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     std::lock_guard lock(g_pageConfigMutex);
+    if (targetPageName == nullptr || targetPageNameLength <= 0 ||
+            static_cast<size_t>(targetPageNameLength) != strlen(targetPageName)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "targetPageName null or length invalid");
+        return ERR_NO_INIT;
+    }
     if (pageConfigSo_ == nullptr) {
         TAG_LOGD(AAFwkTag::ABILITY, "pageConfigSo_ not loaded");
         return ERR_OK;
