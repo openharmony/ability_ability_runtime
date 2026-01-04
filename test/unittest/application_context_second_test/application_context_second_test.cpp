@@ -116,5 +116,32 @@ HWTEST_F(ApplicationContextSecondTest, ProcessSecurityExit_0100, TestSize.Level1
     GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 end";
 }
 
+/**
+ * @tc.number:GetPluginExtensionInfo_0100
+ * @tc.name: GetPluginExtensionInfo
+ * @tc.desc: GetPluginExtensionInfo
+ */
+HWTEST_F(ApplicationContextSecondTest, GetPluginExtensionInfo_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetPluginExtensionInfo_0100 start";
+    context_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto result = context_->contextImpl_->GetPluginExtensionInfo();
+    EXPECT_EQ(result, nullptr);
+    GTEST_LOG_(INFO) << "GetPluginExtensionInfo_0100 end";
+}
+
+/**
+ * @tc.number:InitPluginExtensionInfo_0100
+ * @tc.name: InitPluginExtensionInfo
+ * @tc.desc: InitPluginExtensionInfo
+ */
+HWTEST_F(ApplicationContextSecondTest, InitPluginExtensionInfo_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InitPluginExtensionInfo_0100 start";
+    context_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    context_->contextImpl_->InitPluginExtensionInfo(nullptr, "");
+    EXPECT_EQ(context_->contextImpl_->GetPluginExtensionInfo(), nullptr);
+    GTEST_LOG_(INFO) << "InitPluginExtensionInfo_0100 end";
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
