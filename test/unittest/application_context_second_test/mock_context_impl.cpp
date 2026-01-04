@@ -189,7 +189,7 @@ std::shared_ptr<AppExecFwk::Configuration> MockContextImpl::GetConfiguration() c
 }
 
 void MockContextImpl::InitPluginExtensionInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
-        const std::string &hostBundleName)
+    const std::string &hostBundleName)
 {
     return;
 }

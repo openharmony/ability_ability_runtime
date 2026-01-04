@@ -116,7 +116,7 @@ HWTEST_F(ExtensionRecordFactoryTest, PreCheck_0300, TestSize.Level1)
     abilityRequest.abilityInfo.name = "MainAbility";
     abilityRequest.isTargetPlugin = true;
     abilityRequest.hostBundleName = hostBundleName;
-    AbilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
     int32_t result = extensionRecordFactory->PreCheck(abilityRequest, hostBundleName);
     EXPECT_EQ(result, ERR_OK);
 }
