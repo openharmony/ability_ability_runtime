@@ -28,9 +28,15 @@ ohos_unittest("page_config_manager_test") {
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "faultloggerd:libdfx_dumpcatcher",
+    "faultloggerd:libfaultloggerd",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "window_manager:libwm",
+    "ipc:ipc_core",
   ]
 }
 
