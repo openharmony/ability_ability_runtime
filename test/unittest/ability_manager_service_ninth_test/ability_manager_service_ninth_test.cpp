@@ -415,7 +415,7 @@ HWTEST_F(AbilityManagerServiceNinthTest, NotifySaveAsResult_001, TestSize.Level1
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest NotifySaveAsResult_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     Want want;
     ElementName element("device", "com.ohos.dlpmanager", "ServiceAbility", "entry");
     want.SetElement(element);
@@ -435,7 +435,7 @@ HWTEST_F(AbilityManagerServiceNinthTest, StartAbilityWithServiceMatch_001, TestS
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     InsightIntentExecuteParam param;
     int32_t userId = 100;
     int32_t requestCode = 100;
@@ -455,7 +455,7 @@ HWTEST_F(AbilityManagerServiceNinthTest, StartAbilityWithServiceMatch_002, TestS
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     InsightIntentExecuteParam param;
     param.bundleName_ = "com.example.test";
     param.abilityName_ = "com.example.test.MainAbility";
@@ -479,7 +479,7 @@ HWTEST_F(AbilityManagerServiceNinthTest, ExecuteIntentWithServiceMatch_001, Test
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     InsightIntentExecuteParam param;
     auto result = abilityMs_->ExecuteIntent(0, nullptr, param);
     EXPECT_NE(result, ERR_OK);
@@ -497,7 +497,7 @@ HWTEST_F(AbilityManagerServiceNinthTest, ExecuteIntentWithServiceMatch_002, Test
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     InsightIntentExecuteParam param;
     param.bundleName_ = "com.example.test";
     param.abilityName_ = "com.example.test.MainAbility";
