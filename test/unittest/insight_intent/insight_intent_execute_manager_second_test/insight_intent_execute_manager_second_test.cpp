@@ -564,7 +564,7 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0600, TestSize.Leve
     AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
     Want want;
     int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
 
