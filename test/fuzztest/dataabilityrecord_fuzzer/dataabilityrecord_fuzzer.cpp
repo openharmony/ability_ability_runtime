@@ -73,6 +73,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     dataAbilityRecord->Dump();
     dataAbilityRecord->Dump(info);
     dataAbilityRecord->GetDiedCallerPid(callerRemote);
+    dataAbilityRecord->OnSchedulerDied(remote);
     return true;
 }
 }
