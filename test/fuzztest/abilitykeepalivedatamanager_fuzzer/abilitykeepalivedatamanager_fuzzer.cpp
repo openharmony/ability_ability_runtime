@@ -59,6 +59,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
     AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveDataWithSetterId(info);
     AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusToValue(info);
+    AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveDataToKey(info);
     DistributedKv::Value value;
     AbilityFuzzUtil::GetRandomKeepAliveStatus(fdp, aliveStatus);
     AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusFromValue(value, aliveStatus);
