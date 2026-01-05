@@ -183,11 +183,6 @@ public:
         return 0;
     }
 
-    virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox)
-    {
-        return 0;
-    }
-
     bool SetAppFreezeFilter(int32_t pid)
     {
         return false;

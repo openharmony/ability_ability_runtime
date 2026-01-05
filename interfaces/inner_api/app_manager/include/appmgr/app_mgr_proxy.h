@@ -193,16 +193,6 @@ public:
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override;
 
     /**
-     * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
-     * Obtains information about application processes that are running on the device.
-     *
-     * @param pid, the pid of current app running record.
-     * @param isSandbox, current app is or not a sandbox.
-     * @return ERR_OK ,return back success，others fail.
-     */
-    virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox) override;
-
-    /**
      * IsTerminatingByPid, call IsTerminatingByPid() through proxy project.
      * Obtains information about application processes that are running on the device.
      *

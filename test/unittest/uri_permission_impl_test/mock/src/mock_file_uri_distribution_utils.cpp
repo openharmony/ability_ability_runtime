@@ -55,7 +55,7 @@ bool FUDUtils::IsSystemAppCall()
 
 bool FUDUtils::IsPrivilegedSACall()
 {
-    return MyFlag::IsPrivilegedSACall_;
+    return MyFlag::isPrivilegedSACall_;
 }
 
 bool FUDUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
@@ -123,6 +123,11 @@ bool FUDUtils::IsUdmfOrPasteboardCall()
 bool FUDUtils::IsDFSCall()
 {
     return MyFlag::isDFSCallRet_;
+}
+
+bool FUDUtils::IsSandboxApp(uint32_t tokenId)
+{
+    return MyFlag::isSandboxAppRet_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

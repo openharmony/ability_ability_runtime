@@ -68,7 +68,7 @@ public:
         permissionReadWriteDownload_ = false;
         permissionReadWriteDesktop_ = false;
         permissionReadWriteDocuments_ = false;
-        IsSystempAppCall_ = false;
+        IsSystemAppCall_ = false;
         tokenInfos = {};
     }
 
@@ -85,7 +85,7 @@ public:
     static bool permissionReadWriteDownload_;
     static bool permissionReadWriteDesktop_;
     static bool permissionReadWriteDocuments_;
-    static bool IsSystempAppCall_;
+    static bool IsSystemAppCall_;
     static bool permissionFileAccessPersist_;
     static bool isSAOrSystemAppCall_;
     static bool isUriTypeValid_;

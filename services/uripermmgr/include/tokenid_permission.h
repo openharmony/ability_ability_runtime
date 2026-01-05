@@ -45,6 +45,14 @@ public:
 
     bool VerifyWriteAudioPermission();
 
+    bool VerifyRWDownloadPermission();
+
+    bool VerifyRWDeskTopPermission();
+
+    bool VerifyRWDocumentsPermission();
+
+    bool VerifySandboxAccessPermission();
+
 private:
     uint32_t tokenId_ = 0;
 
@@ -54,6 +62,10 @@ private:
     bool haveReadAudioPermission_ = false;
     bool haveWriteAudioPermission_ = false;
     bool haveProxyAuthorizationUriPermission_ = false;
+    bool haveRWDownloadPermission_ = false;
+    bool haveRWDeskTopPermission_ = false;
+    bool haveRWDocumentsPermission_ = false;
+    bool haveSandboxAccessPermission_ = false;
 
     bool initFileAccessManagerPermission_ = false;
     bool initReadImageVideoPermission_ = false;
@@ -61,6 +73,10 @@ private:
     bool initReadAudioPermission_ = false;
     bool initWriteAudioPermission_ = false;
     bool initProxyAuthorizationUriPermission_ = false;
+    bool initRWDownloadPermission_ = false;
+    bool initRWDeskTopPermission_ = false;
+    bool initRWDocumentsPermission_ = false;
+    bool initSandboxAccessPermission_ = false;
 };
 }  // OHOS
 }  // AAFwk
