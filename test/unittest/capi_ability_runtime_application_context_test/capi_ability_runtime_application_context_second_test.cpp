@@ -33,7 +33,7 @@ constexpr const char* BASE_LOG_FILE = "/log";
 constexpr const char* EL_LIST[] = { "el1", "el2", "el3", "el4", "el5" };
 constexpr int32_t BUFFER_SIZE = 1024;
 const std::string TEST_BUNDLE_NAME = "com.example.myapplication";
-constexpr const char* TEST_PAGE_NAME = "https://www.baidu.com";
+constexpr const char* TEST_PAGE_NAME = "https://xxx.test.com";
 }
 
 using namespace testing;
