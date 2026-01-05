@@ -43,7 +43,24 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     executeMode = static_cast<ExecuteMode>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_FOUR));
     srcEntry = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     utils.GetSrcEntry(elementName, intentName, executeMode, srcEntry);
-
+    AbilityRuntime::InsightIntentInfo info;
+    info.intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentDomain = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.srcEntry = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.arkTSMode = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.inputParams = AppExecFwk::AbilityFuzzUtil::GenerateStringArray(fdp);
+    info.outputParams = AppExecFwk::AbilityFuzzUtil::GenerateStringArray(fdp);
+    info.cfgEntities = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.keywords = AppExecFwk::AbilityFuzzUtil::GenerateStringArray(fdp);
+    AbilityRuntime::InsightIntentInfoForQuery queryInfo;
+    bool getEntity = fdp.ConsumeBool();
+    utils.ConvertConfigInsightIntentInfo(info, queryInfo, getEntity);
     return true;
 }
 }
