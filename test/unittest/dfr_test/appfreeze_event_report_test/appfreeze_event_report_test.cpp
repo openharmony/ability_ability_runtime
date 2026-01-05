@@ -507,5 +507,32 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_013, TestSize.Level1)
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.number: SendAppfreezeEvent_Test_011
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_014, TestSize.Level1)
+{
+    std::string eventName = "BUSINESS_INPUT_BLOCK";
+    std::string testName = "SendAppfreezeEvent_Test_014";
+    AppfreezeEventInfo eventInfo;
+    eventInfo.eventId = 14; // test value
+    eventInfo.bundleName = testName;
+    eventInfo.processName = testName;
+    eventInfo.binderInfo = testName;
+    eventInfo.freezeMemory = testName;
+    eventInfo.appRunningUniqueId = testName;
+    eventInfo.errorStack = testName;
+    eventInfo.errorName = testName;
+    eventInfo.errorMessage = testName;
+    eventInfo.freezeInfoFile = testName;
+    eventInfo.hitraceInfo = testName;
+    eventInfo.foregroundState = false;
+    int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+    EXPECT_EQ(ret, 0);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
