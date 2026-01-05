@@ -880,7 +880,7 @@ const AppExecFwk::ApplicationInfo &AbilityRecord::GetApplicationInfo() const
 
 AbilityState AbilityRecord::GetAbilityState() const
 {
-    return currentState_;
+    return currentState_.load();
 }
 
 WindowConfig AbilityRecord::GetAbilityWindowConfig() const
@@ -890,7 +890,8 @@ WindowConfig AbilityRecord::GetAbilityWindowConfig() const
 
 bool AbilityRecord::IsForeground() const
 {
-    return currentState_ == AbilityState::FOREGROUND || currentState_ == AbilityState::FOREGROUNDING;
+    auto state = currentState_.load();
+    return state == AbilityState::FOREGROUND || state == AbilityState::FOREGROUNDING;
 }
 
 AbilityVisibilityState AbilityRecord::GetAbilityVisibilityState() const
@@ -924,8 +925,8 @@ void AbilityRecord::UpdateAbilityVisibilityState()
 #ifdef SUPPORT_SCREEN
 void AbilityRecord::SetAbilityStateInner(AbilityState state)
 {
-    currentState_ = state;
-    if (currentState_ == AbilityState::BACKGROUND) {
+    currentState_.store(state);
+    if (state == AbilityState::BACKGROUND) {
         isAbilityForegrounding_ = false;
     }
 
@@ -982,7 +983,7 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
 
     auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
     if (missionListWrap != nullptr) {
-        missionListWrap->SetMissionAbilityState(missionId_, currentState_);
+        missionListWrap->SetMissionAbilityState(missionId_, state);
     }
 }
 #endif // SUPPORT_SCREEN
@@ -1974,7 +1975,7 @@ bool AbilityRecord::IsLauncherRoot() const
 
 bool AbilityRecord::IsAbilityState(const AbilityState &state) const
 {
-    return (currentState_ == state);
+    return (currentState_.load() == state);
 }
 
 bool AbilityRecord::IsActiveState() const
