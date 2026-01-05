@@ -89,11 +89,17 @@ public:
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
 private:
+    struct FocusedAppInfo {
+        int32_t left = 0;
+        int32_t top = 0;
+        uint32_t width = 0;
+        uint32_t height = 0;
+    };
     bool Init();
     void Dump(const std::vector<std::u16string>& args, std::string& result) const;
     void ShowHelp(std::string& result) const;
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
-    void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
+    FocusedAppInfo GetFocusedAppInfo() const;
     sptr<IRemoteObject> GetAbilityManagerService() const;
     static int32_t GetCallingUserId(uint32_t tokenId);
     static bool IsSystemApp(uint32_t tokenId, uint64_t fullTokenId);
