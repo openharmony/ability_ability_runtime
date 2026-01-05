@@ -1086,6 +1086,17 @@ bool AppfreezeManager::CheckAppfreezeHappend(const std::string& key, const std::
     return result;
 }
 
+bool AppfreezeManager::CheckNeedRecordAppRunningUnquieId(const std::string& eventName)
+{
+    if (eventName == AppFreezeType::THREAD_BLOCK_3S || eventName == AppFreezeType::THREAD_BLOCK_6S ||
+        eventName == AppFreezeType::BUSSINESS_THREAD_BLOCK_3S ||
+        eventName == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S ||
+        eventName == AppFreezeType::BUSINESS_INPUT_BLOCK) {
+        return true;
+    }
+    return false;
+}
+
 bool AppfreezeManager::IsBetaVersion()
 {
     return g_betaVersion;
