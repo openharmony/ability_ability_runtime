@@ -818,7 +818,7 @@ public:
 protected:
     sptr<Token> token_ = {};                               // used to interact with kit and wms
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
-    AbilityState currentState_ = AbilityState::INITIAL;    // current life state
+    std::atomic<AbilityState> currentState_ = AbilityState::INITIAL;    // current life state
     Want want_ = {};                                       // want to start this ability
 
     /**
