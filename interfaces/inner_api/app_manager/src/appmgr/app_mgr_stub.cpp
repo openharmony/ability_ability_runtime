@@ -234,8 +234,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
     #endif
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT_BY_SA):
             return HandleNotifyFaultBySA(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::JUDGE_SANDBOX_BY_PID):
-            return HandleJudgeSandboxByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APPFREEZE_FILTER):
             return HandleSetAppFreezeFilter(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_BUNDLE_NAME_BY_PID):
@@ -676,21 +674,6 @@ int32_t AppMgrStub::HandleGetAllChildrenProcesses(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 #endif // SUPPORT_CHILD_PROCESS
-
-int32_t AppMgrStub::HandleJudgeSandboxByPid(MessageParcel &data, MessageParcel &reply)
-{
-    HITRACE_METER(HITRACE_TAG_APP);
-    int32_t pid = data.ReadInt32();
-    bool isSandbox = false;
-    auto result = JudgeSandboxByPid(pid, isSandbox);
-    if (!reply.WriteBool(isSandbox)) {
-        return ERR_INVALID_VALUE;
-    }
-    if (!reply.WriteInt32(result)) {
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
 
 int32_t AppMgrStub::HandleIsTerminatingByPid(MessageParcel &data, MessageParcel &reply)
 {

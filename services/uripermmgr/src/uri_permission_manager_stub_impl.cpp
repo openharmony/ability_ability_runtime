@@ -73,7 +73,7 @@ ErrCode UriPermissionManagerStubImpl::VerifyUriPermission(const Uri& uri, uint32
     TAG_LOGI(AAFwkTag::URIPERMMGR, "uri:%{private}s, flag:%{public}u, tokenId:%{public}u",
         uri.ToString().c_str(), flag, tokenId);
     if (!FUDUtils::IsDFSCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "no permission call");
         funcResult = false;
         return ERR_OK;
     }
@@ -223,10 +223,11 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
         return WrapErrorCode(ret, funcResult);
     }
     uint32_t callerTokenId = initiatorTokenId;
-    if (!(FUDUtils::IsFoundationCall() || FUDUtils::IsPrivilegedSACall())) {
+    if (!FUDUtils::IsPrivilegedSACall()) {
         callerTokenId = IPCSkeleton::GetCallingTokenID();
     }
     funcResult = GrantUriPermissionInner(uriVec, flag, callerTokenId, targetTokenId, targetBundleName);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermission finished.");
     return ERR_OK;
 }
 
@@ -245,7 +246,6 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const UriPermissionRawD
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GrantUriPermission failed, errCode:%{public}d", errCode);
         return errCode;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermission finished.");
     return ERR_OK;
 }
 
@@ -861,8 +861,8 @@ ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<st
             MAX_URI_COUNT, uriStrVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
-    if (!FUDUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
+    if (!FUDUtils::IsPrivilegedSACall()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "no permission call");
         return ERR_OK;
     }
     if ((flag & FLAG_READ_WRITE_URI) == 0) {
@@ -1072,8 +1072,8 @@ ErrCode UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri& uri
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "uri:%{private}s, bundleName:%{public}s, appIndex:%{public}d",
         uri.ToString().c_str(), bundleName.c_str(), appIndex);
-    if (!FUDUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
+    if (!FUDUtils::IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SystemApp call");
         funcResult = CHECK_PERMISSION_FAILED;
         return ERR_OK;
     }
@@ -1225,18 +1225,8 @@ void UriPermissionManagerStubImpl::ProxyDeathRecipient::OnRemoteDied([[maybe_unu
 int32_t UriPermissionManagerStubImpl::CheckCalledBySandBox()
 {
     // reject sandbox to grant uri permission
-    ConnectManager(appMgr_, APP_MGR_SERVICE_ID);
-    if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "appMgr null");
-        return INNER_ERR;
-    }
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    bool isSandbox = false;
-    if (IN_PROCESS_CALL(appMgr_->JudgeSandboxByPid(callerPid, isSandbox)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "JudgeSandboxByPid failed");
-        return INNER_ERR;
-    }
-    if (isSandbox) {
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    if (FUDUtils::IsSandboxApp(callerTokenId)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "sandbox app not grant URI permission");
         return ERR_CODE_GRANT_URI_PERMISSION;
     }

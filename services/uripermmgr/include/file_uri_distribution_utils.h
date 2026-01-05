@@ -51,6 +51,7 @@ public:
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
     static bool IsUdmfOrPasteboardCall();
     static bool IsDFSCall();
+    static bool IsSandboxApp(uint32_t tokenId);
 
 private:
     static bool CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo);

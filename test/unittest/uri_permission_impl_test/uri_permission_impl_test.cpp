@@ -87,7 +87,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_001, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, ERR_CODE_INVALID_URI_FLAG);
 }
 
 /*
@@ -107,7 +107,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_002, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
 }
 
 /*
@@ -128,7 +128,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_003, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -151,7 +151,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_004, TestSize.Level1)
     StorageManager::StorageManagerServiceMock::isZero = false;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
     StorageManager::StorageManagerServiceMock::isZero = true;
 }
@@ -179,7 +179,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_005, TestSize.Level1)
     MockSystemAbilityManager::isNullptr = false;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, tmpFlag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -207,7 +207,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_006, TestSize.Level1)
     uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -235,7 +235,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -284,7 +284,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_009, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, ERR_CODE_INVALID_URI_FLAG);
 }
 
 /*
@@ -312,7 +312,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_010, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
 }
 
 /*
@@ -341,7 +341,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_011, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -372,7 +372,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_012, TestSize.Level1)
     StorageManager::StorageManagerServiceMock::isZero = false;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
     StorageManager::StorageManagerServiceMock::isZero = true;
 }
@@ -408,7 +408,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_013, TestSize.Level1)
     MockSystemAbilityManager::isNullptr = false;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, tmpFlag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -444,7 +444,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_014, TestSize.Level1)
     uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -480,7 +480,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_015, TestSize.Level1)
     uint32_t flag = 2;
     int32_t funcResult = -1;
     upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -577,7 +577,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_001, TestSize.L
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isSystemAppCall_ = true;
     MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
@@ -611,7 +611,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_002, TestSize.L
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isSystemAppCall_ = true;
     MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
@@ -641,7 +641,7 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_003, TestSize.L
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isSystemAppCall_ = true;
     MyFlag::isDFSCallRet_ = true;
     uint32_t flagRead = 1;
     uint32_t fromTokenId = 1001;
@@ -1412,7 +1412,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_001, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    MyFlag::isPrivilegedSACall_ = false;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -1444,7 +1444,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_002, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -1476,7 +1476,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_003, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "http://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -1508,7 +1508,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_004, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -1540,7 +1540,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_005, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -1575,7 +1575,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_006, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    MyFlag::isPrivilegedSACall_ = false;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     std::vector<bool> funcResult(1, false);
@@ -1597,7 +1597,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_007, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     std::vector<bool> funcResult(1, false);
@@ -1619,7 +1619,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_008, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "http://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     std::vector<bool> funcResult(1, false);
@@ -1641,7 +1641,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_009, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     std::vector<bool> funcResult(1, false);
@@ -1663,7 +1663,7 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_010, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isPrivilegedSACall_ = true;
     std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
     const std::vector<std::string> uris = { uri };
     std::vector<bool> funcResult(1, false);
@@ -1869,10 +1869,7 @@ HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_004, 
     ASSERT_NE(upms, nullptr);
     MyFlag::isSystemAppCall_ = true;
     MyFlag::permissionGrantUriPermissionAsCaller_ = true;
-    auto mockAppMgr = new AppExecFwk::MockAppMgrService();
-    mockAppMgr->judgeSandboxByPidRet_ = 0;
-    mockAppMgr->isSandbox_ = true;
-    upms->appMgr_ = mockAppMgr;
+    MyFlag::isSandboxAppRet_ = true;
     auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
     EXPECT_EQ(result, ERR_CODE_GRANT_URI_PERMISSION);
 }
@@ -1889,10 +1886,7 @@ HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_005, 
     ASSERT_NE(upms, nullptr);
     MyFlag::isSystemAppCall_ = true;
     MyFlag::permissionGrantUriPermissionAsCaller_ = true;
-    auto mockAppMgr = new AppExecFwk::MockAppMgrService();
-    mockAppMgr->judgeSandboxByPidRet_ = 0;
-    mockAppMgr->isSandbox_ = false;
-    upms->appMgr_ = mockAppMgr;
+    MyFlag::isSandboxAppRet_ = false;
     auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
     EXPECT_EQ(result, ERR_OK);
 }
@@ -2044,6 +2038,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_002, TestSize.Level1)
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::isSystemAppCall_ = true;
+    MyFlag::processUdmfKeyRet_ = INNER_ERR;
     std::string key = "testKey";
     uint32_t flag = 1;
     uint32_t targetTokenId = 100002;
@@ -2051,7 +2046,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_002, TestSize.Level1)
     auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
     MyFlag::isSystemAppCall_ = false;
     EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(funcResult, INNER_ERR);
+    EXPECT_EQ(funcResult, ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED);
 }
 
 /*
@@ -2065,11 +2060,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_003, TestSize.Level1)
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::isSystemAppCall_ = true;
-    sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
-    ASSERT_NE(mockAppMgr, nullptr);
-    mockAppMgr->judgeSandboxByPidRet_ = 0;
-    mockAppMgr->isSandbox_ = true;
-    upms->appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    MyFlag::isSandboxAppRet_ = true;
     std::string key = "testKey";
     uint32_t flag = 1;
     uint32_t targetTokenId = 100002;
@@ -2091,11 +2082,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_004, TestSize.Level1)
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     MyFlag::isSystemAppCall_ = true;
-    sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
-    ASSERT_NE(mockAppMgr, nullptr);
-    mockAppMgr->judgeSandboxByPidRet_ = 0;
-    mockAppMgr->isSandbox_ = false;
-    upms->appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    MyFlag::isSandboxAppRet_ = false;
     std::string key = "testKey";
     uint32_t flag = 1;
     uint32_t targetTokenId = 100002;

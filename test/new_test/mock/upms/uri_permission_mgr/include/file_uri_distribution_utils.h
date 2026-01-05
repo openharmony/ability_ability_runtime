@@ -115,6 +115,11 @@ public:
     {
         return false;
     }
+
+    bool IsSandboxApp(uint32_t tokenId)
+    {
+        return true;
+    }
 };
 } // OHOS
 } // AAFwk
