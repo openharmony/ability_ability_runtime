@@ -33,6 +33,7 @@ constexpr const char* BASE_LOG_FILE = "/log";
 constexpr const char* EL_LIST[] = { "el1", "el2", "el3", "el4", "el5" };
 constexpr int32_t BUFFER_SIZE = 1024;
 const std::string TEST_BUNDLE_NAME = "com.example.myapplication";
+constexpr const char* TEST_PAGE_NAME = "https://www.baidu.com";
 }
 
 using namespace testing;
@@ -310,7 +311,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, 
 {
     const char* targetPage = "";
     int32_t targetPageNameLength = 0;
-    int32_t windowId = 0;
+    int32_t windowId = 12;
     AbilityRuntime_ErrorCode code =
         OH_AbilityRuntime_ApplicationContextNotifyPageChanged("", targetPageNameLength, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
@@ -321,9 +322,8 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, 
     code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(nullptr, targetPageNameLength, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, -1, windowId);
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
 }
 
 /**
@@ -333,17 +333,16 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_001, 
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_002, TestSize.Level2)
 {
-    const char* targetPage = "";
     int32_t targetPageNameLength = 0;
-    int32_t windowId = 0;
+    int32_t windowId = 12;
     AbilityRuntime_ErrorCode code =
-        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, 0, windowId);
+        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, 0, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, -1, windowId);
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, -1, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, windowId);
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, targetPageNameLength, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -354,17 +353,16 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_002, 
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextSecondTest, NotifyPageChanged_003, TestSize.Level2)
 {
-    const char* targetPage = "";
     int32_t targetPageNameLength = 0;
     int32_t windowId = 0;
     AbilityRuntime_ErrorCode code =
-        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, 0);
+        OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, targetPageNameLength, 0);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, -12);
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, targetPageNameLength, -12);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(targetPage, targetPageNameLength, windowId);
+    code = OH_AbilityRuntime_ApplicationContextNotifyPageChanged(TEST_PAGE_NAME, targetPageNameLength, windowId);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 }
 }
