@@ -18,6 +18,7 @@
 #include "mock_permission_verification.h"
 
 #include "ability_manager_service.h"
+#include "ability_manager_interface.h"
 #include "ability_connect_manager.h"
 #include "ui_extension_ability_manager.h"
 #include "common_extension_manager.h"
@@ -414,13 +415,97 @@ HWTEST_F(AbilityManagerServiceNinthTest, NotifySaveAsResult_001, TestSize.Level1
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest NotifySaveAsResult_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);;
+    EXPECT_NE(abilityMs_, nullptr);
     Want want;
     ElementName element("device", "com.ohos.dlpmanager", "ServiceAbility", "entry");
     want.SetElement(element);
     auto result = abilityMs_->NotifySaveAsResult(want, 100, 100);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest NotifySaveAsResult_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAbilityWithServiceMatch_001
+ * Function: StartAbilityWithServiceMatch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityWithServiceMatch
+ */
+HWTEST_F(AbilityManagerServiceNinthTest, StartAbilityWithServiceMatch_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    InsightIntentExecuteParam param;
+    int32_t userId = 100;
+    int32_t requestCode = 100;
+    auto result = abilityMs_->StartAbilityWithServiceMatch(param, userId, requestCode);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAbilityWithServiceMatch_002
+ * Function: StartAbilityWithServiceMatch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityWithServiceMatch
+ */
+HWTEST_F(AbilityManagerServiceNinthTest, StartAbilityWithServiceMatch_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    InsightIntentExecuteParam param;
+    param.bundleName_ = "com.example.test";
+    param.abilityName_ = "com.example.test.MainAbility";
+    param.moduleName_ = "entry";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    int32_t userId = 100;
+    int32_t requestCode = 100;
+    auto result = abilityMs_->StartAbilityWithServiceMatch(param, userId, requestCode);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest StartAbilityWithServiceMatch_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: ExecuteIntentWithServiceMatch_001
+ * Function: ExecuteIntent
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ExecuteIntent
+ */
+HWTEST_F(AbilityManagerServiceNinthTest, ExecuteIntentWithServiceMatch_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    InsightIntentExecuteParam param;
+    auto result = abilityMs_->ExecuteIntent(0, nullptr, param);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: ExecuteIntentWithServiceMatch_002
+ * Function: ExecuteIntent
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ExecuteIntent
+ */
+HWTEST_F(AbilityManagerServiceNinthTest, ExecuteIntentWithServiceMatch_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    InsightIntentExecuteParam param;
+    param.bundleName_ = "com.example.test";
+    param.abilityName_ = "com.example.test.MainAbility";
+    param.moduleName_ = "entry";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    auto result = abilityMs_->ExecuteIntent(0, nullptr, param);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest ExecuteIntentWithServiceMatch_002 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
