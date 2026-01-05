@@ -567,7 +567,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextNotifyPageChanged(
     }
     auto err = PageConfigManager::GetInstance().NotifyPageChanged(targetPageName, targetPageNameLength, windowId);
     if (err == ERR_NO_INIT) {
-        TAG_LOGE(AAFwkTag::APPKIT, "windowId invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid windowId");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
     if (err != ERR_OK) {
