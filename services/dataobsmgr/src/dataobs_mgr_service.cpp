@@ -841,7 +841,7 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo, DataObsO
     return SUCCESS;
 }
 
-DataObsMgrService::FocusedAppInfo DataObsMgrService::GetFocusedAppInfo() const
+DataObsMgrService::FocusedAppInfo DataObsMgrService::GetFocusedWindowInfo() const
 {
     Rosen::FocusChangeInfo info;
     DataObsMgrService::FocusedAppInfo appInfo = { 0 };
@@ -900,7 +900,7 @@ Status DataObsMgrService::NotifyProcessObserver(const std::string &key, const sp
     }
     auto abilityManager = iface_cast<IAbilityManager>(remote);
 
-    FocusedAppInfo appInfo = GetFocusedAppInfo();
+    FocusedAppInfo appInfo = GetFocusedWindowInfo();
 
     Want want;
     want.SetElementName(DIALOG_APP, PROGRESS_ABILITY);

@@ -94,12 +94,13 @@ private:
         int32_t top = 0;
         uint32_t width = 0;
         uint32_t height = 0;
+        sptr<IRemoteObject> abilityToken = nullptr;
     };
     bool Init();
     void Dump(const std::vector<std::u16string>& args, std::string& result) const;
     void ShowHelp(std::string& result) const;
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
-    FocusedAppInfo GetFocusedAppInfo() const;
+    FocusedAppInfo GetFocusedWindowInfo() const;
     sptr<IRemoteObject> GetAbilityManagerService() const;
     static int32_t GetCallingUserId(uint32_t tokenId);
     static bool IsSystemApp(uint32_t tokenId, uint64_t fullTokenId);
