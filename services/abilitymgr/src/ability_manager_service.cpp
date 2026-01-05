@@ -3729,7 +3729,7 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(
     ErrCode result = ERR_OK;
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.lifeCycle = LIFE_CYCLE_PRELOAD;
-    result = GenerateExtensionAbilityRequest(want, abilityRequest, nullptr, validUserId);
+    result = GenerateExtensionAbilityRequest(want, abilityRequest, nullptr, validUserId, hostBundleName);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "generate abilityReq error");
         return result;
@@ -8032,8 +8032,8 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     return ERR_OK;
 }
 
-int AbilityManagerService::GenerateExtensionAbilityRequest(
-    const Want &want, AbilityRequest &request, const sptr<IRemoteObject> &callerToken, int32_t userId)
+int AbilityManagerService::GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
+    const sptr<IRemoteObject> &callerToken, int32_t userId, const std::string hostBundleName)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord != nullptr) {
@@ -8060,6 +8060,9 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     request.want = want;
     request.callerToken = callerToken;
     request.startSetting = nullptr;
+    if (AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+        request.isTargetPlugin = true;
+    }
 
     auto abilityInfo = StartAbilityUtils::startAbilityInfo;
     if (abilityInfo == nullptr || abilityInfo->GetAppBundleName() != want.GetElement().GetBundleName()) {
@@ -8067,13 +8070,9 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
             return ERR_APP_CLONE_INDEX_INVALID;
         }
-        std::string hostBundleName = "";
-        auto caller = Token::GetAbilityRecordByToken(callerToken);
-        if (caller) {
-            hostBundleName = caller->GetAbilityInfo().bundleName;
-            request.hostBundleName = hostBundleName;
-        }
-        abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
+        std::string nHostBundleName = GetHostBundleName(hostBundleName, callerToken);
+        request.hostBundleName = nHostBundleName;
+        abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, nHostBundleName);
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
     if (abilityInfo->status != ERR_OK) {
@@ -8084,6 +8083,18 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         return ERR_NOT_DEVELOPER_MODE;
     }
     return InitialAbilityRequest(request, *abilityInfo);
+}
+
+std::string AbilityManagerService::GetHostBundleName(const std::string hostBundleName,
+    const sptr<IRemoteObject> &callerToken)
+{
+    std::string result = hostBundleName;
+    auto caller = Token::GetAbilityRecordByToken(callerToken);
+    if (result.empty() && caller) {
+        result = caller->GetAbilityInfo().bundleName;
+    }
+
+    return result;
 }
 
 int32_t AbilityManagerService::InitialAbilityRequest(AbilityRequest &request,
@@ -12386,7 +12397,8 @@ bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord>
             tokenID = caller->GetApplicationInfo().accessTokenId;
         }
     }
-    if (callingTokenId != tokenID) {
+    if (callingTokenId != tokenID && !(abilityRecord->IsPluginAbility() &&
+        abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self, caller:%{public}u, tokenId:%{public}u", callingTokenId, tokenID);
         return false;
     }
