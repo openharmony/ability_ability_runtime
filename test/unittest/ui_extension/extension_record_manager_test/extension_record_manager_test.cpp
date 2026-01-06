@@ -486,10 +486,10 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0200, TestSize.Level1)
     std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
 
     extRecord->processMode_ = PROCESS_MODE_PLUGIN;
-    const char *EMBEDDEDUI = "embeddedUI";
+    const char *embeddedUI = "embeddedUI";
     std::string hostBundleName = "testHostBundleName";
-    std::string process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName 
-        + SEPARATOR + EMBEDDEDUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);
+    std::string process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName
+        + SEPARATOR + embeddedUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);
     int32_t result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
     EXPECT_EQ(abilityRecord->GetProcessName(), process);
     EXPECT_EQ(result, ERR_OK);
