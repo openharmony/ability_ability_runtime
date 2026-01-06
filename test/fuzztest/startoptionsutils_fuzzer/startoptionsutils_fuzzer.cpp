@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,9 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
 #include "ability_fuzz_util.h"
+#define private public
 #include "start_options_utils.h"
+#undef private
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -37,9 +39,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     StartOptions startOptions;
     AbilityFuzzUtil::GetRandomStartOptions(fdp, startOptions);
-    
+    sptr<IRemoteObject> callerToken = nullptr;
     int32_t userId = fdp.ConsumeIntegral<int32_t>();
-    StartOptionsUtils::CheckProcessOptions(want, startOptions, nullptr, userId);
+    StartOptionsUtils::CheckProcessOptions(want, startOptions, callerToken, userId);
+    StartOptionsUtils::CheckProcessOptionsInner(want, startOptions, callerToken, userId);
+    StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(want, startOptions);
     return true;
 }
 } // namespace OHOS

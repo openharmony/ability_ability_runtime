@@ -30,14 +30,35 @@ namespace {
 constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
+static void GenerateLoadParam(FuzzedDataProvider& fdp, AbilityRuntime::LoadParam& loadParam)
+{
+    loadParam.abilityRecordId = fdp.ConsumeIntegral<int32_t>();
+    loadParam.isShellCall = fdp.ConsumeBool();
+    loadParam.instanceKey = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    loadParam.isKeepAlive = fdp.ConsumeBool();
+    loadParam.isMainElementRunning = fdp.ConsumeBool();
+    loadParam.isKeepAliveAppService = fdp.ConsumeBool();
+    loadParam.isCallerSetProcess = fdp.ConsumeBool();
+    loadParam.customProcessFlag = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    loadParam.extensionProcessMode = fdp.ConsumeIntegral<uint32_t>();
+    loadParam.extensionLoadParam.networkEnableFlags = fdp.ConsumeBool();
+    loadParam.extensionLoadParam.saEnableFlags = fdp.ConsumeBool();
+    loadParam.extensionLoadParam.strictMode = fdp.ConsumeBool();
+    loadParam.isStartupHide = fdp.ConsumeBool();
+    loadParam.callingPid = fdp.ConsumeIntegral<pid_t>();
+    loadParam.loadAbilityCallbackId = fdp.ConsumeIntegral<uint64_t>();
+    loadParam.isPrelaunch = fdp.ConsumeBool();
+    loadParam.isPreloadStart = fdp.ConsumeBool();
+    loadParam.selfPid = fdp.ConsumeIntegral<pid_t>();
+    loadParam.isPreloadUIExtension = fdp.ConsumeBool();
+    loadParam.loadTimeout = fdp.ConsumeIntegral<int32_t>();
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider fdp(data, size);
     HapModuleInfo hapModuleInfo;
-    hapModuleInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    hapModuleInfo.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    hapModuleInfo.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    hapModuleInfo.process = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    AbilityFuzzUtil::GenerateHapModuleInfo(fdp, hapModuleInfo);
     BundleInfo bundleInfo;
     AbilityFuzzUtil::GetRandomBundleInfo(fdp, bundleInfo);
 
@@ -49,9 +70,15 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     bool isDataAbility = fdp.ConsumeBool();
     bool updateEnable = fdp.ConsumeBool();
     int32_t userId = fdp.ConsumeIntegral<int32_t>();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    bool isMainUIAbility = fdp.ConsumeBool();
+    AbilityRuntime::LoadParam loadParam;
+    GenerateLoadParam(fdp, loadParam);
 
     MainElementUtils::CheckMainElement(hapModuleInfo, processName, mainElement, isDataAbility, uriStr, userId);
     MainElementUtils::UpdateMainElement(bundleName, moduleName, mainElement, updateEnable, userId);
+    MainElementUtils::IsMainUIAbility(bundleName, abilityName, userId);
+    MainElementUtils::SetMainUIAbilityKeepAliveFlag(isMainUIAbility, bundleName, loadParam);
     MainElementUtils::CheckMainUIAbility(bundleInfo, mainElement);
     MainElementUtils::CheckStatusBarAbility(bundleInfo);
     MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElement);

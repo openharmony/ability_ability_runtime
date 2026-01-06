@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "ability_fuzz_util.h"
 #include "ability_record.h"
 #include "securec.h"
 
@@ -63,8 +64,9 @@ sptr<Token> GetFuzzAbilityToken()
     return token;
 }
 
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const char* data, size_t size, const uint8_t* rawData)
 {
+    FuzzedDataProvider fdp(rawData, size);
     std::shared_ptr<DisposedRuleInterceptor> executer = std::make_shared<DisposedRuleInterceptor>();
     Want want;
     AppExecFwk::DisposedRule disposedRule;
@@ -77,9 +79,12 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         shouldBlockFunc);
     const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;
     int32_t bundleType = static_cast<int32_t>(GetU32Data(data));
+    std::vector<AppExecFwk::DisposedRule> disposedRules = AbilityFuzzUtil::GetRandomDisposedRulesList(fdp);
 
     executer-> DoProcess(param);
     executer-> CheckControl(want, userId, disposedRule, 0);
+    executer-> FindBlockDisposedRule(want, disposedRules, disposedRule);
+    executer-> FindNonBlockDisposedRule(disposedRules, disposedRule);
     int32_t uid = static_cast<int32_t>(GetU32Data(data));
     executer-> StartNonBlockRule(want, disposedRule, uid);
     executer-> UnregisterObserver(uid);
@@ -118,7 +123,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
 #ifndef DISABLE_FUZZ
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+    OHOS::DoSomethingInterestingWithMyAPI(ch, size, data);
 #endif
     free(ch);
     ch = nullptr;
