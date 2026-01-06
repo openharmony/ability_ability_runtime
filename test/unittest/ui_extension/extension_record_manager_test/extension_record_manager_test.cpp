@@ -434,15 +434,6 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0100, TestSize.Level1)
     EXPECT_EQ(abilityRecord->GetProcessName(), process);
     EXPECT_EQ(result, ERR_OK);
 
-    extRecord->processMode_ = PROCESS_MODE_PLUGIN;
-    const char *EMBEDDEDUI = "embeddedUI";
-    std::string hostBundleName = "testHostBundleName";
-    process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName 
-        + SEPARATOR + EMBEDDEDUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);
-    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
-    EXPECT_EQ(abilityRecord->GetProcessName(), process);
-    EXPECT_EQ(result, ERR_OK);
-
     extRecord->processMode_ = PROCESS_MODE_TYPE;
     process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name;
     result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
@@ -475,6 +466,31 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0100, TestSize.Level1)
     abilityRequest.appInfo.process = "testProcess";
     process = abilityRequest.appInfo.process;
     result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateProcessName_0200
+ * @tc.desc: UpdateProcessName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0200, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "testBundleName";
+    abilityRequest.abilityInfo.name = "testInfoName";
+    auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    extRecord->processMode_ = PROCESS_MODE_PLUGIN;
+    const char *EMBEDDEDUI = "embeddedUI";
+    std::string hostBundleName = "testHostBundleName";
+    std::string process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName 
+        + SEPARATOR + EMBEDDEDUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);
+    int32_t result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
     EXPECT_EQ(abilityRecord->GetProcessName(), process);
     EXPECT_EQ(result, ERR_OK);
 }

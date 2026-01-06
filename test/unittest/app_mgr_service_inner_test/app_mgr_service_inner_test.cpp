@@ -534,23 +534,39 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner2, nullptr);
 
     appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
+    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
+}
 
-    auto appMgrServiceInner3 = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner3, nullptr);
+/**
+ * @tc.name: LoadAbility_002
+ * @tc.desc: load ability.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, LoadAbility_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 start");
+    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+
+    std::shared_ptr<AAFwk::want> want;
+    want->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
+
+    auto appMgrServiceInner2 = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner2, nullptr);
 
     std::shared_ptr<AAFwk::want> want1;
     want1->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
-    appMgrServiceInner3->LoadAbility(abilityInfo_, applicationInfo_, want1, loadParamPtr);
-
-    auto appMgrServiceInner4 = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner4, nullptr);
-
-    std::shared_ptr<AAFwk::want> want2;
-    want2->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     abilityInfo_->extensionAbilityType = ExtensionAbilityType::EMBEDDED_UI;
-    appMgrServiceInner4->LoadAbility(abilityInfo_, applicationInfo_, want2, loadParamPtr);
-
-    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
+    appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, want1, loadParamPtr);
+    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 end");
 }
 
 /**
