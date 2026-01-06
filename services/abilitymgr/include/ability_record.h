@@ -532,6 +532,10 @@ public:
     {
         return keepAliveBundle_;
     }
+    void SetIsKeepAliveDied(bool value)
+    {
+        isKeepAliveDied_ = value;
+    }
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -911,6 +915,7 @@ protected:
     bool minimizeReason_ = false;           // new version
     bool clearMissionFlag_ = false;
     bool keepAliveBundle_ = false;
+    bool isKeepAliveDied_ = false;
     bool lockedState_ = false;
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;

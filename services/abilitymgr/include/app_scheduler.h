@@ -113,7 +113,8 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
-    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid = AppExecFwk::INVALID_DIED_PID) {}
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -721,7 +722,8 @@ protected:
      * @brief Notify abilityms start keep-alive process.
      * @param bundleInfos resident process bundle infos.
      */
-    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid = AppExecFwk::INVALID_DIED_PID) override;
 
     /**
      * @brief Notify abilityms app process OnRemoteDied

@@ -44,6 +44,7 @@ constexpr int32_t QUICKFIX_UID = 5524;
 constexpr int32_t SHADER_CACHE_GROUPID = 3099;
 constexpr int32_t RESOURCE_MANAGER_UID = 1096;
 constexpr int32_t DEFAULT_USER_ID = 0;
+constexpr int32_t INVALID_DIED_PID = -1;
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -115,7 +116,8 @@ public:
     {
         AAFwk::MyStatus::GetInstance().notifyStartResidentProcessCalled_ = true;
     }
-    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid = INVALID_DIED_PID) override
     {
         AAFwk::MyStatus::GetInstance().notifyStartKeepAliveProcessCalled_ = true;
     }
