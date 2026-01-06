@@ -555,17 +555,17 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_002, TestSize.Level0)
     loadParam.token = token;
     auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
 
-    std::shared_ptr<AAFwk::want> want;
+    std::shared_ptr<AAFwk::Want> want;
     want->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
 
-    auto appMgrServiceInner2 = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner2, nullptr);
+    auto appMgrServiceInner1 = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner1, nullptr);
 
-    std::shared_ptr<AAFwk::want> want1;
+    std::shared_ptr<AAFwk::Want> want1;
     want1->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     abilityInfo_->extensionAbilityType = ExtensionAbilityType::EMBEDDED_UI;
-    appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, want1, loadParamPtr);
+    appMgrServiceInner1->LoadAbility(abilityInfo_, applicationInfo_, want1, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 end");
 }
 

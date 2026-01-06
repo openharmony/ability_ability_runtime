@@ -644,7 +644,6 @@ HWTEST_F(StartAbilityUtilsTest, HandleSelfRedirection_007, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest FindExtensionInfo_001 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
     int32_t abilityInfoFlag = 0;
@@ -664,7 +663,6 @@ HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_001, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest FindExtensionInfo_002 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t abilityInfoFlag = 0;
@@ -684,14 +682,13 @@ HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_002, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_001 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t userId = 100;
     int32_t appIndex = 0;
     std::string hostBundleName = "com.example.unittest";
     auto abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
-    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);  
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_001 end");
 }
 
@@ -703,14 +700,13 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_001, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_002 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
     int32_t userId = 100;
     int32_t appIndex = 0;
     std::string hostBundleName = "com.example.unittest";
     auto abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
-    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);  
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_002 end");
 }
 
@@ -722,14 +718,13 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_002, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_003, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_003 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t userId = 100;
     int32_t appIndex = 1;
     std::string hostBundleName = "com.example.unittest";
     auto abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
-    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);  
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_003 end");
 }
 
@@ -741,14 +736,13 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_003, TestSize.Level1)
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_004, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_004 start");
-
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
     int32_t userId = 100;
     int32_t appIndex = 1;
     std::string hostBundleName = "com.example.unittest";
     auto abilityInfo = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex, hostBundleName);
-    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);  
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_004 end");
 }
 }  // namespace AAFwk
