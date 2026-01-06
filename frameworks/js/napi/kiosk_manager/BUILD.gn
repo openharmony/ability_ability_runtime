@@ -23,25 +23,27 @@ template("kioskmanager") {
     }
     forward_variables_from(invoker, [ "relative_install_dir" ])
 
+    configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
     defines = []
     if (defined(invoker.defines)) {
       defines += invoker.defines
     }
 
     sources = [
-      "kiosk_manager_module.cpp",
       "js_kiosk_manager.cpp",
+      "kiosk_manager_module.cpp",
     ]
 
     include_dirs = [ "./" ]
 
     deps = [
       "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-      "${ability_runtime_native_path}/ability/native:ability_business_error",
       "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",
       "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_napi_path}/inner/napi_common:napi_common",
       "${ability_runtime_native_path}/ability:ability_context_native",
+      "${ability_runtime_native_path}/ability/native:ability_business_error",
     ]
 
     external_deps = [

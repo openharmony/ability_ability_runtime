@@ -59,6 +59,7 @@ ohos_shared_library("connect_server_manager") {
   configs = [
     ":connect_server_manager_config",
     "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
   ]
 
   public_configs = [ ":connect_server_manager_public_config" ]

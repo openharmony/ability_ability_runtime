@@ -22,7 +22,10 @@ ohos_shared_library("missionmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits" ]
 
@@ -73,7 +76,10 @@ ohos_shared_library("missionmanager_napi") {
 ohos_shared_library("distributedmissionmanager") {
   include_dirs = []
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   cflags = [
     "-fPIC",

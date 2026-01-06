@@ -18,6 +18,8 @@ template("abilitymanager") {
   ohos_shared_library(target_name) {
     forward_variables_from(invoker, [ "relative_install_dir" ])
 
+    configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
     defines = []
     if (defined(invoker.defines)) {
       defines += invoker.defines

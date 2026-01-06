@@ -18,12 +18,13 @@ config("foreground_app_obs_manager_public_config") {
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   visibility = [ ":*" ]
-  visibility +=
-      [ "${ability_runtime_test_path}/unittest/foreground_app_connection_test/*" ]
+  visibility += [
+    "${ability_runtime_test_path}/unittest/foreground_app_connection_test/*",
+  ]
   include_dirs = [
     "include",
     "${ability_runtime_services_path}/common/include",
-    "${ability_runtime_innerkits_path}/connectionobs_manager/include"
+    "${ability_runtime_innerkits_path}/connectionobs_manager/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -40,9 +41,9 @@ ohos_shared_library("foreground_app_obs_manager") {
   }
 
   sources = [
-    "src/foreground_app_connection_data.cpp",
     "src/foreground_app_connection_client.cpp",
     "src/foreground_app_connection_client_impl.cpp",
+    "src/foreground_app_connection_data.cpp",
     "src/foreground_app_connection_proxy.cpp",
     "src/foreground_app_connection_proxy_adapter.cpp",
     "src/foreground_app_connection_stub.cpp",
@@ -50,6 +51,8 @@ ohos_shared_library("foreground_app_obs_manager") {
   ]
 
   public_configs = [ ":foreground_app_obs_manager_public_config" ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   deps = []
 

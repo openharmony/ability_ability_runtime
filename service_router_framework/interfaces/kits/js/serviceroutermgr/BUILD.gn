@@ -31,7 +31,10 @@ ohos_shared_library("businessabilityrouter") {
     "service_router_mgr.cpp",
   ]
 
-  configs = [ "${srms_services_path}:srms_config" ]
+  configs = [
+    "${srms_services_path}:srms_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",

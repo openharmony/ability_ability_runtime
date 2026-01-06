@@ -37,7 +37,10 @@ ohos_shared_library("js_environment") {
     "src/uncaught_exception_callback.cpp",
   ]
 
-  configs = [ ":js_environment_config" ]
+  configs = [
+    ":js_environment_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   public_configs = [ ":public_js_environment_config" ]
 

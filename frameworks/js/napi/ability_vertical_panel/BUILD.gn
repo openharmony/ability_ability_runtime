@@ -37,7 +37,10 @@ ohos_shared_library("verticalpanelmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",

@@ -44,17 +44,20 @@ ohos_shared_library("ability_runtime") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":ability_runtime_ndk_config" ]
 
   sources = [
     "src/ability_business_error_utils.cpp",
     "src/application_context.cpp",
+    "src/context.cpp",
     "src/load_ability_callback_impl.cpp",
     "src/start_options.cpp",
     "src/start_options_impl.cpp",
     "src/want_utils.cpp",
-    "src/context.cpp",
   ]
 
   deps = [
@@ -63,8 +66,8 @@ ohos_shared_library("ability_runtime") {
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_innerkits_path}/page_config_manager:page_config_manager",
+    "${ability_runtime_native_path}/appkit:app_context",
   ]
 
   external_deps = [

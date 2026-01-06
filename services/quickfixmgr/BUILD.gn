@@ -45,7 +45,10 @@ ohos_shared_library("quickfixms") {
   branch_protector_ret = "pac_ret"
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper" ]
   shlib_type = "sa"
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":quickfixms_config" ]
 
   sources = quickfixms_sources

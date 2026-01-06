@@ -22,7 +22,10 @@ ohos_shared_library("missionmanager") {
     "native_module.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits" ]
 

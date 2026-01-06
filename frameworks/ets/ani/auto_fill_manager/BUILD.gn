@@ -16,6 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("ability_auto_fill_manager_ani_kit") {
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -25,7 +26,7 @@ ohos_shared_library("ability_auto_fill_manager_ani_kit") {
 
   include_dirs = [ "./include" ]
 
-  configs = []
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = []
 

@@ -29,7 +29,8 @@ gen_js_obj("sendable_context_manager_js") {
 }
 
 gen_js_obj("sendable_context_manager_abc") {
-  input = get_label_info(":gen_sendable_context_manager_abc", "target_out_dir") + "/sendable_context_manager.abc"
+  input = get_label_info(":gen_sendable_context_manager_abc",
+                         "target_out_dir") + "/sendable_context_manager.abc"
   output = target_out_dir + "/sendable_context_manager_abc.o"
   dep = ":gen_sendable_context_manager_abc"
 }
@@ -55,9 +56,14 @@ ohos_shared_library("sendablecontextmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  configs = [
+    "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   deps = [
+    ":sendable_context_manager_abc",
+    ":sendable_context_manager_js",
     "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
@@ -66,8 +72,6 @@ ohos_shared_library("sendablecontextmanager_napi") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    ":sendable_context_manager_abc",
-    ":sendable_context_manager_js",
   ]
 
   external_deps = [
