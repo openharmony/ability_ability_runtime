@@ -50,7 +50,10 @@ ohos_shared_library("mission_manager") {
     debug = false
   }
 
-  configs = [ ":mission_manager_config" ]
+  configs = [
+    ":mission_manager_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":mission_manager_public_config" ]
 
   deps = [

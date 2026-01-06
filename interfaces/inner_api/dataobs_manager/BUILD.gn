@@ -47,6 +47,8 @@ ohos_shared_library("dataobs_manager") {
     "${ability_runtime_services_path}/dataobsmgr:dataobsms_config",
   ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   deps = []
 
   external_deps = [

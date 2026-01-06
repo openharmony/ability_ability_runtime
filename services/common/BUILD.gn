@@ -51,19 +51,42 @@ config("common_config") {
   }
 }
 
+config("optimize_config") {
+  cflags = [
+    "-flto=full",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-Os",
+  ]
+  cflags_cc = [
+    "-flto=full",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-Os",
+  ]
+  ldflags = [
+    "-flto=full",
+    "-Wl",
+  ]
+}
+
 #build so
 ohos_shared_library("perm_verification") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [ "${ability_runtime_utils_path}/server/constant" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   public_configs = [ ":common_config" ]
 
   sources = [ "src/permission_verification.cpp" ]
 
-  deps = [
-    ":app_util",
-  ]
+  deps = [ ":app_util" ]
 
   external_deps = [
     "ability_base:want",
@@ -89,6 +112,7 @@ ohos_shared_library("perm_verification") {
 ohos_shared_library("task_handler_wrap") {
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   public_configs = [ ":common_config" ]
   include_dirs = [ "include" ]
 
@@ -111,6 +135,7 @@ ohos_shared_library("task_handler_wrap") {
 ohos_shared_library("app_util") {
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   public_configs = [ ":common_config" ]
   include_dirs = [ "include" ]
 
@@ -119,11 +144,11 @@ ohos_shared_library("app_util") {
     "src/ability_manager_xcollie.cpp",
     "src/app_utils.cpp",
     "src/event_report.cpp",
+    "src/hitrace_chain_utils.cpp",
     "src/json_utils.cpp",
+    "src/rate_limiter.cpp",
     "src/record_cost_time_util.cpp",
     "src/res_sched_util.cpp",
-    "src/rate_limiter.cpp",
-    "src/hitrace_chain_utils.cpp",
   ]
 
   external_deps = [
@@ -186,7 +211,8 @@ ohos_shared_library("user_controller") {
 
   sources = [ "src/user_controller/user_controller.cpp" ]
 
-  deps = [ "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper", ]
+  deps =
+      [ "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper" ]
 
   external_deps = [
     "c_utils:utils",

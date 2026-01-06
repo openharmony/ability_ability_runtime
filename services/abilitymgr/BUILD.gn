@@ -197,12 +197,12 @@ ohos_shared_library("abilityms") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "udmf:udmf_client",
     "window_manager:libmodal_system_ui_extension_client",
     "window_manager:libwsutils",
     "window_manager:scene_session",
     "window_manager:session_manager_lite",
     "window_manager:sms",
-    "udmf:udmf_client",
   ]
   public_external_deps = [ "background_task_mgr:bgtaskmgr_innerkits" ]
 
@@ -260,12 +260,8 @@ ohos_shared_library("abilityms") {
   }
 
   if (ability_runtime_graphics && ability_runtime_screenlock_enable) {
-    defines += [
-      "ABILITY_RUNTIME_SCREENLOCK_ENABLE"
-    ]
-    external_deps += [
-      "screenlock_mgr:screenlock_client",
-    ]
+    defines += [ "ABILITY_RUNTIME_SCREENLOCK_ENABLE" ]
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
   }
 
   if (ability_runtime_upms) {
@@ -315,6 +311,7 @@ ohos_shared_library("wantagent_manager") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -443,6 +440,8 @@ ohos_shared_library("mission_list") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   sources = [
     "src/mission/mission.cpp",

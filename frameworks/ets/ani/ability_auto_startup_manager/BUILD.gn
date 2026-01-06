@@ -16,6 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("auto_startup_manager") {
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -30,7 +31,7 @@ ohos_shared_library("auto_startup_manager") {
 
   sources = [ "./src/ets_ability_auto_startup_manager.cpp" ]
 
-  configs = []
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",

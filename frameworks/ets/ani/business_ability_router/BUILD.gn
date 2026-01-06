@@ -16,6 +16,7 @@ import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
 ohos_shared_library("businessabilityrouter_ani") {
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -36,7 +37,10 @@ ohos_shared_library("businessabilityrouter_ani") {
     "src/ets_ability_router_mgr_utils.cpp",
   ]
 
-  configs = [ "${srms_services_path}:srms_config" ]
+  configs = [
+    "${srms_services_path}:srms_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",

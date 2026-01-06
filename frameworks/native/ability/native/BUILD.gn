@@ -172,7 +172,10 @@ ohos_shared_library("abilitykit_utils") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
   ]
 
-  configs = [ ":abilitykit_utils_exceptions" ]
+  configs = [
+    ":abilitykit_utils_exceptions",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   public_configs = [ ":abilitykit_utils_public_config" ]
 
@@ -331,7 +334,10 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
-  configs = [ ":ability_config" ]
+  configs = [
+    ":ability_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [
     ":ability_public_config",
     "${ability_runtime_native_path}/ability:ability_context_public_config",
@@ -581,6 +587,7 @@ ohos_shared_library("extensionkit_native") {
   ]
 
   public_configs = [ ":extensionkit_public_config" ]
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   deps = [
     ":abilitykit_utils",
@@ -712,6 +719,8 @@ ohos_shared_library("insight_intent_executor") {
 
   public_configs = [ ":insight_intent_executor_public_config" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
@@ -762,6 +771,8 @@ ohos_shared_library("insight_intent_executor_ani") {
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor.cpp",
     "${ability_runtime_path}/frameworks/native/insight_intent/insight_intent_context/ets_insight_intent_context.cpp",
   ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = [ ":insight_intent_executor_public_config" ]
 
@@ -824,6 +835,8 @@ ohos_shared_library("cj_insight_intent_executor") {
   ]
 
   public_configs = [ ":insight_intent_executor_public_config" ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -914,6 +927,8 @@ ohos_shared_library("ui_ability_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/ui_ability/src/ets_ui_ability_servicehost_stub_impl.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/ui_ability/src/ets_uiservice_ability_connection.cpp",
   ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = [ ":uiability_config" ]
 
@@ -1032,6 +1047,8 @@ ohos_shared_library("uiabilitykit_native") {
 
   public_configs = [ ":uiability_config" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   deps = [
     ":abilitykit_native",
     ":abilitykit_utils",
@@ -1136,6 +1153,8 @@ ohos_shared_library("uiabilitykit_native") {
 }
 
 ohos_shared_library("ability_thread") {
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
@@ -1209,6 +1228,8 @@ ohos_shared_library("ets_form_extension") {
     cfi_vcall_icall_only = true
     debug = false
   }
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
@@ -1439,6 +1460,8 @@ ohos_shared_library("form_extension_module") {
 }
 
 ohos_shared_library("service_extension") {
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [
@@ -1526,6 +1549,8 @@ ohos_shared_library("app_service_extension_ani") {
     "${ability_runtime_path}/utils/global/freeze/include",
   ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   sources = [
     "${ability_runtime_path}/frameworks/ets/ani/app_service_extension_ability/src/ets_app_service_extension.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/app_service_extension_ability/src/ets_app_service_extension_context.cpp",
@@ -1595,6 +1620,8 @@ ohos_shared_library("service_extension_ani") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${ability_runtime_path}/utils/global/freeze/include",
   ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   sources = [
     "${ability_runtime_path}/frameworks/ets/ani/service_extension_ability/src/ets_service_extension.cpp",
@@ -1667,6 +1694,7 @@ ohos_shared_library("ui_service_extension_connection") {
   }
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection" ]
@@ -1712,6 +1740,7 @@ ohos_shared_library("ui_service_extension_connection_ani") {
   }
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [
@@ -1768,6 +1797,7 @@ ohos_shared_library("ui_service_extension") {
   }
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [
@@ -1863,6 +1893,8 @@ ohos_shared_library("ui_service_extension_ani") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
@@ -2062,7 +2094,10 @@ ohos_shared_library("continuation_ipc") {
     "${ability_runtime_native_path}/ability/native/continuation/remote_register_service/remote_register_service_stub.cpp",
   ]
 
-  configs = [ ":ability_config" ]
+  configs = [
+    ":ability_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   public_configs = [ ":ability_public_config" ]
 
@@ -2109,7 +2144,10 @@ ohos_shared_library("data_ability_helper") {
     "${ability_runtime_native_path}/ability/native/data_ability_helper.cpp",
   ]
 
-  configs = [ ":ability_config" ]
+  configs = [
+    ":ability_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
   public_configs = [ ":ability_public_config" ]
 
   deps = [
@@ -2246,6 +2284,7 @@ ohos_shared_library("dialog_request_callback") {
   configs = [
     ":dialog_request_callback_config",
     "${ability_runtime_services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:optimize_config",
   ]
 
   public_configs = [ ":dialog_request_callback_public_config" ]
@@ -2337,6 +2376,8 @@ ohos_shared_library("ui_extension") {
 
   public_configs = [ ":ui_extension_public_config" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   deps = [
     ":abilitykit_native",
     ":abilitykit_utils",
@@ -2400,7 +2441,10 @@ ohos_shared_library("photo_editor_extension_ani") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  configs = [ ":photo_editor_extension_config" ]
+  configs = [
+    ":photo_editor_extension_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = [
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
@@ -2516,6 +2560,8 @@ ohos_shared_library("ui_extension_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/ets_uiservice_uiext_connection.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_base/src/ets_ui_extension_base.cpp",
   ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = [ ":ui_extension_ani_public_config" ]
 
@@ -2707,7 +2753,10 @@ config("share_extension_config") {
 }
 
 ohos_shared_library("share_extension") {
-  configs = [ ":share_extension_config" ]
+  configs = [
+    ":share_extension_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/share_extension_ability/include" ]
 
@@ -2815,7 +2864,10 @@ config("action_extension_config") {
 }
 
 ohos_shared_library("action_extension") {
-  configs = [ ":action_extension_config" ]
+  configs = [
+    ":action_extension_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/action_extension_ability/include" ]
 
@@ -3090,7 +3142,10 @@ ohos_shared_library("embedded_ui_extension") {
   }
   branch_protector_ret = "pac_ret"
 
-  configs = [ ":embedded_ui_extension_config" ]
+  configs = [
+    ":embedded_ui_extension_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/embedded_ui_extension_ability/embedded_ui_extension.cpp",
@@ -3251,6 +3306,8 @@ config("auto_fill_extension_config") {
 ohos_shared_library("auto_fill_extension") {
   public_configs = [ ":auto_fill_extension_config" ]
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   sources = []
 
   deps = [
@@ -3320,6 +3377,8 @@ ohos_shared_library("auto_fill_extension_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
   ]
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   public_configs = [ ":auto_fill_extension_config" ]
 
@@ -3637,6 +3696,8 @@ ohos_shared_library("app_service_extension") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
