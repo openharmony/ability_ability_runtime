@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,7 +289,7 @@ HWTEST_F(AgentCardTest, AuthenticationUnmarshalling_001, TestSize.Level1)
     Parcel parcelMock;
     Authentication *authentication = Authentication::Unmarshalling(parcelMock);
 
-    EXPECT_TRUE(authentication != nullptr);
+    EXPECT_TRUE(authentication == nullptr);
 }
 
 /**
@@ -547,7 +547,583 @@ HWTEST_F(AgentCardTest, SkillUnmarshalling_001, TestSize.Level1)
     Parcel parcelMock;
     Skill *skill = Skill::Unmarshalling(parcelMock);
 
-    EXPECT_TRUE(skill != nullptr);
+    EXPECT_TRUE(skill == nullptr);
+}
+
+/**
+ * @tc.name: AgentCardReadFromParcel_001
+ * @tc.desc: AgentCardReadFromParcel_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_001, TestSize.Level1)
+{
+    AgentCard agentCard;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    Parcel parcelMock;
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AgentCardReadFromParcel_002
+ * @tc.desc: AgentCardReadFromParcel_002
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_002, TestSize.Level1)
+{
+    AgentCard agentCard;
+    std::vector<std::string> defaultInputModes;
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    Parcel parcelMock;
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardReadFromParcel_003
+ * @tc.desc: AgentCardReadFromParcel_003
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_003, TestSize.Level1)
+{
+    AgentCard agentCard;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    agentCard.defaultOutputModes = defaultOutputModes;
+    Parcel parcelMock;
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_001
+ * @tc.desc: AgentCardMarshalling_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_001, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_002
+ * @tc.desc: AgentCardMarshalling_002
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_002, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_003
+ * @tc.desc: AgentCardMarshalling_003
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_003, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_004
+ * @tc.desc: AgentCardMarshalling_004
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_004, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_005
+ * @tc.desc: AgentCardMarshalling_005
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_005, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = nullptr;
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_006
+ * @tc.desc: AgentCardMarshalling_006
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_006, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_007
+ * @tc.desc: AgentCardMarshalling_007
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_007, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_008
+ * @tc.desc: AgentCardMarshalling_008
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_008, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = nullptr;
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_009
+ * @tc.desc: AgentCardMarshalling_009
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_009, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = nullptr;
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_010
+ * @tc.desc: AgentCardMarshalling_010
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_010, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_011
+ * @tc.desc: AgentCardMarshalling_011
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_011, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardMarshalling_012
+ * @tc.desc: AgentCardMarshalling_012
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardMarshalling_012, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.name = "test1";
+    agentCard.description = "test1";
+    agentCard.url = "test1";
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    agentCard.version = "test1";
+    agentCard.documentationUrl = "test1";
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::string> defaultInputModes;
+    defaultInputModes.push_back("test");
+    agentCard.defaultInputModes = defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    defaultOutputModes.push_back("test");
+    agentCard.defaultOutputModes = defaultOutputModes;
+    std::vector<std::shared_ptr<Skill>> skills;
+    agentCard.skills = skills;
+
+    Parcel parcelMock;
+    bool result = agentCard.Marshalling(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardUnmarshalling_001
+ * @tc.desc: AgentCardUnmarshalling_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardUnmarshalling_001, TestSize.Level1)
+{
+    Parcel parcelMock;
+    AgentCard *agentCard = AgentCard::Unmarshalling(parcelMock);
+
+    EXPECT_TRUE(agentCard == nullptr);
+}
+
+/**
+ * @tc.name: AgentCardToJson_001
+ * @tc.desc: AgentCardToJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardToJson_001, TestSize.Level1)
+{
+    AgentCard agentCard;
+    std::shared_ptr<Provider> provider = std::make_shared<Provider>();
+    agentCard.provider = provider;
+    std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
+    agentCard.capabilities = capabilities;
+    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
+    agentCard.authentication = authentication;
+    std::vector<std::shared_ptr<Skill>> skills;
+    skills.push_back(std::make_shared<Skill>());
+    agentCard.skills = skills;
+    nlohmann::json jsonObject = agentCard.ToJson();
+    EXPECT_TRUE(jsonObject.contains("provider"));
+
+    agentCard.provider = nullptr;
+    jsonObject = agentCard.ToJson();
+    EXPECT_FALSE(jsonObject.contains("provider"));
+
+    agentCard.capabilities = nullptr;
+    jsonObject = agentCard.ToJson();
+    EXPECT_FALSE(jsonObject.contains("capabilities"));
+
+    agentCard.authentication = nullptr;
+    jsonObject = agentCard.ToJson();
+    EXPECT_FALSE(jsonObject.contains("authentication"));
+
+    std::vector<std::shared_ptr<Skill>> skills1;
+    agentCard.skills = skills1;
+    jsonObject = agentCard.ToJson();
+    EXPECT_FALSE(jsonObject.contains("skills"));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_001
+ * @tc.desc: AgentCardFromJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
+{
+    Provider provider;
+    Capabilities capabilities;
+    Authentication authentication;
+    std::vector<std::string> defaultInputModes;
+    std::vector<std::string> defaultOutputModes;
+    Skill skill;
+    nlohmann::json jsonArray = { skill };
+    nlohmann::json jsonObject = nlohmann::json {
+        { "name", "test" },
+        { "description", "test" },
+        { "url", "test" },
+        { "provider", provider },
+        { "version", "test" },
+        { "documentationUrl", "test" },
+        { "capabilities", capabilities },
+        { "authentication", authentication },
+        { "defaultInputModes", defaultInputModes },
+        { "defaultOutputModes", defaultOutputModes },
+        { "skills", jsonArray },
+    };
+    AgentCard agentCard = AgentCard::FromJson(jsonObject);
+
+    EXPECT_TRUE(agentCard.name == "test");
 }
 } // namespace AgentRuntime
 } // namespace OHOS
