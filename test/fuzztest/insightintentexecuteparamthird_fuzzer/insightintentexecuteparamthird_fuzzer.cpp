@@ -27,6 +27,11 @@ using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
+namespace {
+constexpr size_t U32_AT_SIZE = 4;
+constexpr size_t STRING_MAX_LENGTH = 128;
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     InsightIntentExecuteParam executeParam;
@@ -34,6 +39,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     InsightIntentExecuteParam param;
     FuzzedDataProvider fdp(data, size);
     AbilityFuzzUtil::GetRandomInsightIntentExecuteParam(fdp, param);
+    executeParam.GenerateFromWant(want, param);
+    std::string executeParamName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME, executeParamName);
+    executeParam.GenerateFromWant(want, param);
+
+    int32_t intentId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_ID, std::to_string(intentId));
     executeParam.GenerateFromWant(want, param);
 
     return true;

@@ -75,6 +75,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
 {
     bool boolParam = *data % ENABLE;
     int intParam = static_cast<int>(GetU32Data(data));
+    int missionId = static_cast<int>(GetU32Data(data));
     Parcel wantParcel;
     Want *want = nullptr;
     if (wantParcel.WriteBuffer(data, size)) {
@@ -109,6 +110,17 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
     missionListManager->GetAbilityFromTerminateList(token);
     missionListManager->SetMissionLockedState(intParam, boolParam);
+
+    std::shared_ptr<Mission> mission = std::make_shared<Mission>(missionId, abilityRecord);
+    missionListManager->defaultStandardList_->AddMissionToTop(mission);
+    missionListManager->ClearMissionLocking(-1, nullptr);
+    missionListManager->ClearMissionLocking(missionId, nullptr);
+    missionListManager->ClearMissionLocking(missionId, mission);
+    missionListManager->ClearMission(-1);
+    missionListManager->ClearMission(missionId);
+    missionListManager->ClearAllMissions();
+    missionListManager->defaultStandardList_->AddMissionToTop(mission);
+    missionListManager->ClearAllMissions();
     if (want) {
         delete want;
         want = nullptr;

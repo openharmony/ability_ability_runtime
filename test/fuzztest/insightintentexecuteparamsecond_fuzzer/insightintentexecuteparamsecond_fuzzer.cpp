@@ -39,6 +39,24 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     executeParam.Unmarshalling(parcel);
     executeParam.IsInsightIntentExecute(want);
     executeParam.IsInsightIntentPage(want);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, std::to_string(fdp.ConsumeIntegral<uint64_t>()));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE, fdp.ConsumeIntegral<int32_t>());
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRY, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_URI, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_FLAGS, fdp.ConsumeIntegral<int32_t>());
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG, fdp.ConsumeIntegral<int32_t>());
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_DECORATOR_TYPE, fdp.ConsumeIntegral<int32_t>());
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRANCE, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_CLASSNAME, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_METHODNAME, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_PAGEPATH, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    want.SetParam(
+        AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME, fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
     executeParam.RemoveInsightIntent(want);
 
     return true;

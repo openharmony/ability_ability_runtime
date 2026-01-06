@@ -265,6 +265,10 @@ void DoSomethingTestWithMyAPI4(std::shared_ptr<MissionListManager> missionListMg
     missionListMgr->EnqueueWaitingAbility(abilityRequest); // add twice
     missionListMgr->OnStartSpecifiedAbilityTimeoutResponse();
     missionListMgr->GetMissionBySpecifiedFlag(want, stringParam);
+    abilityRequest.abilityInfo.launchMode = static_cast<LaunchMode>(uint32Param % 3);  // 3 means luanch mode max enum
+    abilityRequest.startRecent = boolParam;
+    missionListMgr->GetReusedMission(abilityRequest);
+    missionListMgr->StartAbility(abilityRequest);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

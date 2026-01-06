@@ -110,6 +110,14 @@ void GetRandomExtractInsightIntentInfo(FuzzedDataProvider& fdp, ExtractInsightIn
     info.result = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.example = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.keywords = GenerateStringArray(fdp);
+    InsightIntentEntityInfo entities;
+    entities.decoratorFile = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    entities.className = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    entities.decoratorType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    entities.entityCategory = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    entities.parameters = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    entities.parentClassName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.entities.push_back(entities);
 }
 
 void GetRandomInsightIntentExecuteParam(FuzzedDataProvider& fdp, InsightIntentExecuteParam& info)
