@@ -708,5 +708,42 @@ int32_t AbilityAutoStartupService::CheckPermissionForEDM()
     }
     return ERR_OK;
 }
+
+void AbilityAutoStartupService::AddHandledAutoStartupUsers(int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "AddhandledAutoStartupUsers userId:%{public}d", userId);
+    std::lock_guard<std::mutex> lock(autoStartUpMutex_);
+    for (int32_t user : handledAutoStartupUsers_) {
+        if (user == userId) {
+            TAG_LOGD(AAFwkTag::AUTO_STARTUP, "already has userId:%{public}d", userId);
+            return;
+        }
+    }
+    handledAutoStartupUsers_.emplace_back(userId);
+    return;
+}
+
+void AbilityAutoStartupService::RemoveHandledAutoStartupUsers(int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "RemoveHandledAutoStartupUsers userId:%{public}d", userId);
+    std::lock_guard<std::mutex> lock(autoStartUpMutex_);
+    handledAutoStartupUsers_.erase(
+        std::remove(handledAutoStartupUsers_.begin(), handledAutoStartupUsers_.end(), userId),
+        handledAutoStartupUsers_.end());
+    return;
+}
+
+bool AbilityAutoStartupService::FindHandledAutoStartupUsers(int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "FindHandledAutoStartupUsers userId:%{public}d", userId);
+    std::lock_guard<std::mutex> lock(autoStartUpMutex_);
+    for (int32_t user : handledAutoStartupUsers_) {
+        if (user == userId) {
+            TAG_LOGI(AAFwkTag::AUTO_STARTUP, "find userId:%{public}d", userId);
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

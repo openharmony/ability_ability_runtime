@@ -1159,5 +1159,71 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAutoStartupStatusForSelf_001, TestSiz
     }
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAutoStartupStatusForSelf_001 end";
 }
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: AddHandledAutoStartupUsers
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService AddHandledAutoStartupUsers
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, AddHandledAutoStartupUsers_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest AddHandledAutoStartupUsers_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 100;
+    abilityAutoStartupService->AddHandledAutoStartupUsers(userId);
+    bool isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_TRUE(isHandled);
+    abilityAutoStartupService->AddHandledAutoStartupUsers(userId);
+    isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_TRUE(isHandled);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest AddHandledAutoStartupUsers_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: RemoveHandledAutoStartupUsers
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService RemoveHandledAutoStartupUsers
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, RemoveHandledAutoStartupUsers_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest RemoveHandledAutoStartupUsers_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 101;
+    abilityAutoStartupService->AddHandledAutoStartupUsers(userId);
+    bool isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_TRUE(isHandled);
+    abilityAutoStartupService->RemoveHandledAutoStartupUsers(userId);
+    isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_FALSE(isHandled);
+    abilityAutoStartupService->RemoveHandledAutoStartupUsers(userId);
+    isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_FALSE(isHandled);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest RemoveHandledAutoStartupUsers_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: FindHandledAutoStartupUsers
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService FindHandledAutoStartupUsers
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, FindHandledAutoStartupUsers_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest FindHandledAutoStartupUsers_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 101;
+    abilityAutoStartupService->AddHandledAutoStartupUsers(userId);
+    bool isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_TRUE(isHandled);
+    abilityAutoStartupService->RemoveHandledAutoStartupUsers(userId);
+    isHandled = abilityAutoStartupService->FindHandledAutoStartupUsers(userId);
+    EXPECT_FALSE(isHandled);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest FindHandledAutoStartupUsers_001 end";
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -2626,13 +2626,14 @@ private:
 
     void StartKeepAliveApps(int32_t userId);
 
-    void StartAutoStartupApps(int32_t userId);
+    void StartAutoStartupApps(int32_t userId, bool isManualStart = false);
     void StartAutoStartupApps(std::queue<AutoStartupInfo> infoList, int32_t userId);
+    void SubscribeUserUnlockedEvent();
     void SubscribeScreenUnlockedEvent();
     std::function<void(int32_t)> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
-    void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
+    void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber);
     void RemoveScreenUnlockInterceptor();
     void AddWatchParameters();
 
@@ -3039,7 +3040,8 @@ private:
     sptr<WindowFocusChangedListener> focusListener_;
 #endif // SUPPORT_GRAPHICS
 
-    std::shared_ptr<AbilityRuntime::AbilityManagerEventSubscriber> screenSubscriber_;
+    std::shared_ptr<AbilityRuntime::AbilityUserUnlockEventSubscriber> userUnlockSubscriber_;
+    std::shared_ptr<AbilityRuntime::AbilityScreenUnlockEventSubscriber> screenSubscriber_;
     bool isSubscribed_ = false;
     std::mutex subscribedMutex_;
 
