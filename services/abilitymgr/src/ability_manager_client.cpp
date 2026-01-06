@@ -412,9 +412,10 @@ ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartUIAbilityBySCB target: %{public}s/%{public}s, "
-        "persistentId: %{public}d, appIndex: %{public}d", sessionInfo->want.GetElement().GetBundleName().c_str(),
+        "persistentId: %{public}d, appIndex: %{public}d, pageConfigSize:%{public}zu",
+        sessionInfo->want.GetElement().GetBundleName().c_str(),
         sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->persistentId,
-        sessionInfo->want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
+        sessionInfo->want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1), params.pageConfig.size());
     return abms->StartUIAbilityBySCB(sessionInfo, params, isColdStart);
 }
 
@@ -1798,11 +1799,12 @@ void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, Abi
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     if (sessionInfo) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call,CallUIAbilityBySCB:%{public}s/%{public}s/%{public}d,flag:%{public}u",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call,CallUIAbilityBySCB:%{public}s/%{public}s/%{public}d,flag:%{public}u, "
+            "pageConfigSize:%{public}zu",
             sessionInfo->want.GetElement().GetBundleName().c_str(),
             sessionInfo->want.GetElement().GetAbilityName().c_str(),
             sessionInfo->want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1),
-            params.sceneFlag);
+            params.sceneFlag, params.pageConfig.size());
     }
 
     abms->CallUIAbilityBySCB(sessionInfo, params, isColdStart);
