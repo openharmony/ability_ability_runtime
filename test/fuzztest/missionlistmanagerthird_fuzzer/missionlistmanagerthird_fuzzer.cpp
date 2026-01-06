@@ -32,6 +32,7 @@ namespace OHOS {
 namespace {
 constexpr size_t U32_AT_SIZE = 4;
 constexpr uint8_t ENABLE = 2;
+constexpr uint8_t ABILITY_STATE_MOD = 20;
 class MyAbilityConnection : public IAbilityConnection {
 public:
     MyAbilityConnection() = default;
@@ -109,6 +110,10 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     missionListManager->DispatchBackground(abilityRecord);
     missionListManager->CompleteBackground(abilityRecord);
     missionListManager->TerminateAbility(abilityRecord, intParam, want, boolParam);
+    missionListManager->DispatchState(abilityRecord, intParam % ABILITY_STATE_MOD);
+    missionListManager->DispatchForeground(abilityRecord, boolParam);
+    missionListManager->DispatchState(abilityRecord, intParam % ABILITY_STATE_MOD);
+    missionListManager->CompleteBackground(abilityRecord);
     if (want) {
         delete want;
         want = nullptr;
