@@ -761,5 +761,10 @@ ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const Want &want,
 {
     return ERR_OK;
 }
+
+void UIAbilityLifecycleManager::HandleUIAbilityDiedByPid(int32_t pid)
+{
+    return;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

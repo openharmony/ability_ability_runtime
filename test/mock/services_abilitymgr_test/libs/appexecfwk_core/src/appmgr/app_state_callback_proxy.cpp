@@ -41,7 +41,8 @@ void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 void AppStateCallbackProxy::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {}
 
-void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t diedPid)
 {}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -7424,5 +7424,51 @@ HWTEST_F(UIAbilityLifecycleManagerTest, FindUIAbilityRecordByIdLocked_0003, Test
     auto ret = mgr->FindUIAbilityRecordByIdLocked(100);
     EXPECT_NE(ret, nullptr);
 }
+
+/**
+ * @tc.name: HandleUIAbilityDiedByPid_0001
+ * @tc.desc: HandleUIAbilityDiedByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HandleUIAbilityDiedByPid_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleUIAbilityDiedByPid_0001 start");
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->pid_ = 1;
+    mgr->sessionAbilityMap_.emplace(111, record);
+    mgr->sessionAbilityMap_.emplace(112, nullptr);
+    int32_t pid = 1;
+    mgr->HandleUIAbilityDiedByPid(pid);
+    EXPECT_NE(mgr->sessionAbilityMap_[111], nullptr);
+    EXPECT_EQ(mgr->sessionAbilityMap_[112], nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleUIAbilityDiedByPid_0001 end");
+}
+
+/**
+ * @tc.name: HandleUIAbilityDiedByPid_0002
+ * @tc.desc: HandleUIAbilityDiedByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HandleUIAbilityDiedByPid_0002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleUIAbilityDiedByPid_0002 start");
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    auto record = UIAbilityRecord::CreateAbilityRecord(abilityRequest);
+    record->pid_ = 2;
+    mgr->sessionAbilityMap_.emplace(111, record);
+    mgr->sessionAbilityMap_.emplace(112, nullptr);
+    int32_t pid = 1;
+    mgr->HandleUIAbilityDiedByPid(pid);
+    EXPECT_NE(mgr->sessionAbilityMap_[111], nullptr);
+    EXPECT_EQ(mgr->sessionAbilityMap_[112], nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleUIAbilityDiedByPid_0002 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

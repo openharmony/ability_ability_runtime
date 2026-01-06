@@ -5533,7 +5533,7 @@ void AppMgrServiceInner::RestartKeepAliveProcess(std::shared_ptr<AppRunningRecor
     std::vector<BundleInfo> infos;
     infos.emplace_back(bundleInfo);
     TAG_LOGI(AAFwkTag::APPMGR, "keepAliveProcess %{public}s", appRecord->GetProcessName().c_str());
-    NotifyStartKeepAliveProcess(infos);
+    NotifyStartKeepAliveProcess(infos, appRecord->GetPid());
 }
 
 void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord)
@@ -9913,12 +9913,12 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
-void AppMgrServiceInner::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+void AppMgrServiceInner::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t diedPid)
 {
     std::lock_guard lock(appStateCallbacksLock_);
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
-            item.callback->NotifyStartKeepAliveProcess(bundleInfos);
+            item.callback->NotifyStartKeepAliveProcess(bundleInfos, diedPid);
         }
     }
 }
