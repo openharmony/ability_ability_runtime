@@ -1347,6 +1347,9 @@ HWTEST_F(AbilityManagerServiceFourthTest, OnRemoveSystemAbility_001, TestSize.Le
 
     systemAbilityId = WINDOW_MANAGER_SERVICE_ID;
     abilityMs_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+
+    systemAbilityId = RENDER_SERVICE;
+    abilityMs_->OnRemoveSystemAbility(systemAbilityId, deviceId);
     EXPECT_TRUE(abilityMs_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnRemoveSystemAbility_001 end");
 }
