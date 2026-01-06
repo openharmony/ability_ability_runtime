@@ -434,6 +434,18 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0100, TestSize.Level1)
     EXPECT_EQ(abilityRecord->GetProcessName(), process);
     EXPECT_EQ(result, ERR_OK);
 
+<<<<<<< HEAD
+=======
+    extRecord->processMode_ = PROCESS_MODE_PLUGIN;
+    const char *EMBEDDEDUI = "embeddedUI";
+    std::string hostBundleName = "testHostBundleName";
+    process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName 
+        + SEPARATOR + EMBEDDEDUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+>>>>>>> 5144dda8603f93af99bf9c55eab71dddd2ca9589
     extRecord->processMode_ = PROCESS_MODE_TYPE;
     process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name;
     result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
