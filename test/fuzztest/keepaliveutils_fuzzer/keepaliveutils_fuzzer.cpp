@@ -34,7 +34,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     KeepAliveUtils::NotifyDisableKeepAliveProcesses(bundleInfos, userId);
     BundleInfo bundleInfo;
     AbilityFuzzUtil::GenerateBundleInfo(fdp, bundleInfo);
-    KeepAliveType type;
+    KeepAliveType type =
+        static_cast<KeepAliveType>(fdp.ConsumeIntegralInRange<int32_t>(0, AbilityFuzzUtil::CODE_TWO) - 1);
     KeepAliveUtils::IsKeepAliveBundle(bundleInfo, userId, type);
     return true;
 }
