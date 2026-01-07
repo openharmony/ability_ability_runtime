@@ -31,7 +31,7 @@ namespace AbilityRuntime {
 namespace {
 
 std::recursive_mutex g_connectsLock;
-uint32_t g_serialNumber = 0;
+int64_t g_serialNumber = 0;
 static std::mutex g_connectsMutex;
 static std::map<EtsConnectionKey, sptr<ETSServiceExtensionConnection>, EtsKeyCompare> g_connects;
 const std::string APP_LINKING_ONLY = "appLinkingOnly";

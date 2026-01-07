@@ -176,6 +176,7 @@ bool UnwrapFilterCallbackFromEts(ani_env *env,
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
     }
+    uint32_t uintCallbacks = static_cast<uint32_t>(mid);
     uint32_t allCallbacks = static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED) |
         static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_ABILITY_STATE_CHANGED) |
         static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_PROCESS_CREATED) |
@@ -183,14 +184,14 @@ bool UnwrapFilterCallbackFromEts(ani_env *env,
         static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_PROCESS_STATE_CHANGED) |
         static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_APP_STARTED) |
         static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_APP_STOPPED);
-    if (static_cast<uint32_t>(mid) & (~allCallbacks)) {
+    if (uintCallbacks & (~allCallbacks)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Invalid allCallback value: %{public}u", mid);
         return false;
     }
-    if (mid & static_cast<uint32_t>(FilterCallback::ON_ABILITY_STATE_CHANGED)) {
-        mid |= static_cast<uint32_t>(FilterCallback::ON_EXTENSION_STATE_CHANGED);
+    if (uintCallbacks & static_cast<uint32_t>(FilterCallback::ON_ABILITY_STATE_CHANGED)) {
+        uintCallbacks |= static_cast<uint32_t>(FilterCallback::ON_EXTENSION_STATE_CHANGED);
     }
-    callback = static_cast<AppExecFwk::FilterCallback>(mid);
+    callback = static_cast<AppExecFwk::FilterCallback>(uintCallbacks);
     return true;
 }
 

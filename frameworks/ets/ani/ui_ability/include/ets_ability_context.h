@@ -256,7 +256,7 @@ private:
 
 struct EtsConnectionKey {
     AAFwk::Want want;
-    int32_t id = 0;
+    int64_t id = 0;
     int32_t accountId = 0;
 };
 
