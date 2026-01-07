@@ -312,6 +312,12 @@ void EtsUIServiceExtensionContext::OnStartAbilityByType(ani_env *env, ani_string
     }
     std::shared_ptr<EtsUIExtensionCallback> callback = std::make_shared<EtsUIExtensionCallback>(aniVM);
     callback->SetEtsCallbackObject(abilityStartCallback);
+    ani_ref completionHandler;
+    ani_boolean isUndefined = false;
+    AppExecFwk::GetPropertyRef(env, abilityStartCallback, "completionHandler", completionHandler, isUndefined);
+    if (!isUndefined && completionHandler != nullptr) {
+        callback->SetCompletionHandler(env, static_cast<ani_object>(completionHandler));
+    }
     int32_t innerErrCode = static_cast<int32_t>(ERR_OK);
     auto context = GetContext();
     if (context == nullptr) {
