@@ -486,6 +486,7 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0200, TestSize.Level1)
     std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
 
     extRecord->processMode_ = PROCESS_MODE_PLUGIN;
+    extRecord->hostBundleName_ = "testHostBundleName";
     const char *embeddedUI = "embeddedUI";
     std::string hostBundleName = "testHostBundleName";
     std::string process = hostBundleName + SEPARATOR + abilityRequest.abilityInfo.bundleName
