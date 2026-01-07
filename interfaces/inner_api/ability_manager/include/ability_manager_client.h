@@ -1023,9 +1023,10 @@ public:
      * Start Ability for prelaunch
      *
      * @param want, Special want for service type's ability.
+     * @param frameNum, Special frameNum for remove start window num.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartAbilityForPrelaunch(const Want &want);
+    ErrCode StartAbilityForPrelaunch(const Want &want, const int32_t frameNum);
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
