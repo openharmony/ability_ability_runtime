@@ -52,8 +52,8 @@ private:
     void ReleaseReference(ani_env *env, ani_ref etsObjRef);
     void CallObjectMethod(ani_env *env, const char *methodName, const char *signature, ...);
     sptr<EtsUIAbilityServiceHostStubImpl> serviceHostStub_;
-    ani_ref serviceProxyObject_;
-    ani_ref aniAsyncCallback_;
+    ani_ref serviceProxyObject_ = nullptr;
+    ani_ref aniAsyncCallback_ = nullptr;
     std::vector<ani_ref> duplicatedPendingCallbacks_;
 };
 }  // namespace AbilityRuntime
