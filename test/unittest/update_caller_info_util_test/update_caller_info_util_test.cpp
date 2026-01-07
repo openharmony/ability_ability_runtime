@@ -233,7 +233,7 @@ HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0002, TestSize.L
 
 /**
  * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0003
- * @tc.desc: Test UpdateAsCallerInfoFromDialog with BROKER_UID
+ * @tc.desc: Test UpdateAsCallerInfoFromDialog with BROKER_UID and SHELL_ASSISTANT
  * @tc.type: FUNC
  */
 HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0003, TestSize.Level1)
@@ -242,7 +242,92 @@ HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0003, TestSize.L
     DialogSessionManager dialogSessionManager;
     Want want;
     const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
-    want.SetParam(Want::PARAM_RESV_CALLER_UID, 5557);
+    std::string callerBundleName = "com.ohos.shell_assistant";
+    int32_t BROKER_UID = 5557;
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, BROKER_UID);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(callerInfo, nullptr);
+
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0004
+ * @tc.desc: Test UpdateAsCallerInfoFromDialog with not BROKER_UID and SHELL_ASSISTANT
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0004, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+    std::string callerBundleName = "com.ohos.shell_assistant";
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, 1314);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(callerInfo, nullptr);
+
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0005
+ * @tc.desc: Test UpdateAsCallerInfoFromDialog with BROKER_UID and not SHELL_ASSISTANT
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0005, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+    std::string callerBundleName = "com.ohos.test";
+    int32_t BROKER_UID = 5557;
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, BROKER_UID);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(callerInfo, nullptr);
+
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0006
+ * @tc.desc: Test UpdateAsCallerInfoFromDialog with not BROKER_UID and not SHELL_ASSISTANT
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0006, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+    std::string callerBundleName = "com.ohos.test";
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, 1314);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
     std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
     EXPECT_NE(dialogCallerInfo, nullptr);
