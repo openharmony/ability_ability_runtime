@@ -52,7 +52,7 @@ constexpr const char *ON_SESSION_DESTROY_METHOD_NAME =
     "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}:";
 constexpr const char *ON_SAVE_REQUEST_METHOD_NAME =
     "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}"
-    "C{application.AutoFillRequest.SaveRequest;Lapplication.AutoFillRequest.SaveRequestCallback}:";
+    "C{application.AutoFillRequest.SaveRequest}C{application.AutoFillRequest.SaveRequestCallback}:";
 constexpr const char *ON_FILL_REQUEST_METHOD_NAME =
     "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}"
     "C{application.AutoFillRequest.FillRequest}C{application.AutoFillRequest.FillRequestCallback}:";
