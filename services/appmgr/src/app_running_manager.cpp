@@ -1345,7 +1345,7 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
     return ERR_OK;
 }
 
-int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall)
+int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -1365,7 +1365,7 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
             TAG_LOGW(AAFwkTag::APPMGR, "pid%{public}d not found", pid);
         } else {
             TAG_LOGD(AAFwkTag::APPMGR, "pid%{public}d memory level = %{public}d", pid, it->second);
-            appRecord->ScheduleMemoryLevel(it->second, isShellCall);
+            appRecord->ScheduleMemoryLevel(it->second);
         }
     }
     return ERR_OK;

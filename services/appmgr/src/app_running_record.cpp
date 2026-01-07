@@ -620,10 +620,10 @@ void AppRunningRecord::ScheduleTrimMemory()
     }
 }
 
-void AppRunningRecord::ScheduleMemoryLevel(int32_t level, bool isShellCall)
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
 {
     if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleMemoryLevel(level, isShellCall);
+        appLifeCycleDeal_->ScheduleMemoryLevel(level);
     }
 }
 
