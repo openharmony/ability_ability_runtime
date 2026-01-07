@@ -79,15 +79,12 @@ protected:
     std::shared_ptr<BaseExtensionRecord> serviceRecord2_{ nullptr };
     std::shared_ptr<BaseExtensionRecord> uiExtensionAbilityRecord1_{ nullptr };
     OHOS::sptr<Token> serviceToken_{ nullptr };
-    OHOS::sptr<Token> serviceToken_{ nullptr };
     OHOS::sptr<Token> serviceToken1_{ nullptr };
     OHOS::sptr<Token> serviceToken2_{ nullptr };
     OHOS::sptr<IAbilityConnection> callbackA_{ nullptr };
     OHOS::sptr<IAbilityConnection> callbackB_{ nullptr };
     AbilityRequest uiExtensionAbilityRequest1_{};
-    std::shared_ptr<BaseExtensionRecord> uiExtensionAbilityRecord1_{ nullptr };
     OHOS::sptr<Token> uiExtensionAbilityToken1_{ nullptr };
-
 
 private:
     std::shared_ptr<UIExtensionAbilityManager> connectManager_;
@@ -1462,7 +1459,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, UpdateUIExtensionBindInfo_001, TestSize.
 HWTEST_F(UIExtensionAbilityManagerTest, UpdateUIExtensionBindInfo_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     abilityRecord->abilityInfo_.extensionAbilityType = ExtensionAbilityType::SERVICE;
     
     connectManager->UpdateUIExtensionBindInfo(abilityRecord, "testBundle", 1);
@@ -1720,7 +1718,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, IsCallerValid_001, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription: Verify IsCallerValid with null sessionInfo
  */
-HWTEST_F(UIExtensioAbilityManagerTest, IsCallerValid_002, TestSize.Level1)
+HWTEST_F(UIExtensionAbilityManagerTest, IsCallerValid_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
