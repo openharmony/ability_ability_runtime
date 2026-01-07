@@ -26,6 +26,7 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler.h"
 #include "ability_util.h"
+#include "extension_record.h"
 #include "bundlemgr/mock_bundle_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_ability_connect_callback.h"
@@ -900,7 +901,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, PreloadUIExtensionAbilityLocked_0100, Te
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     std::string hostBundleName = "com.ohos.uiextensionuser";
 
-    int32_t preloadId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;;
+    int32_t preloadId = INVALID_EXTENSION_RECORD_ID;
     int32_t hostPid = DEFAULT_INVAL_VALUE;
     auto ret = connectManager->PreloadUIExtensionAbilityLocked(
         abilityRequest, hostBundleName, ERR_PRELOAD_APP_DATA_ABILITIES_FAILED);
@@ -937,7 +938,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, UnPreloadUIExtensionAbilityLocked_0100, 
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     ASSERT_NE(connectManager, nullptr);
-    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
+    int32_t extensionAbilityId = INVALID_EXTENSION_RECORD_ID;
     auto ret = connectManager->UnPreloadUIExtensionAbilityLocked(extensionAbilityId);
     EXPECT_EQ(ret, ERR_CODE_INVALID_ID);
 }
