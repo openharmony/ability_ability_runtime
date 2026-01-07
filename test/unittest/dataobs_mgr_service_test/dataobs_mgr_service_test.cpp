@@ -909,5 +909,25 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_SharePreferencesUri_
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_SharePreferencesUri_0100 end";
 }
 
+/*
+ * Feature: DataObsMgrService with NotifyProcessObserver
+ * Function: GetFocusedWindowInfo
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService GetFocusedWindowInfo
+ * EnvConditions: NA
+ * CaseDescription: Check whether the default window information is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_GetFocusedWindowInfo_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_GetFocusedWindowInfo_0001 start";
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    DataObsMgrService::FocusedAppInfo appinfo = dataObsMgrServer->GetFocusedWindowInfo();
+    EXPECT_EQ(appinfo.top, 0);
+    EXPECT_EQ(appinfo.left, 0);
+    EXPECT_EQ(appinfo.height, 0);
+    EXPECT_EQ(appinfo.width, 0);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_GetFocusedWindowInfo_0001 end";
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
