@@ -258,7 +258,7 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_003, TestSize.Level1)
  */
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_004, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_004 start");
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t userId = 100;
@@ -723,7 +723,7 @@ HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_001, TestSize.Level1)
     int32_t appIndex = 1;
     std::shared_ptr<StartAbilityInfo> abilityInfo = std::make_shared<StartAbilityInfo>();
     StartAbilityInfo::FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, abilityInfo);
-    EXPECT_EQ(abilityInfo->status, ERR_APP_CLONE_INDEX_INVALID);
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest FindExtensionInfo_001 end");
 }
 
@@ -742,7 +742,7 @@ HWTEST_F(StartAbilityUtilsTest, FindExtensionInfo_002, TestSize.Level1)
     int32_t appIndex = 1;
     std::shared_ptr<StartAbilityInfo> abilityInfo = std::make_shared<StartAbilityInfo>();
     StartAbilityInfo::FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, abilityInfo);
-    EXPECT_EQ(abilityInfo->status, ERR_APP_CLONE_INDEX_INVALID);
+    EXPECT_EQ(abilityInfo->status, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest FindExtensionInfo_002 end");
 }
 }  // namespace AAFwk
