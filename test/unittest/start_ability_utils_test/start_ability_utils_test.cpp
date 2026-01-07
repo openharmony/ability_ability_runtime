@@ -258,7 +258,7 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_003, TestSize.Level1)
  */
 HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_004, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest CreateStartExtensionInfo_004 start");
     Want want;
     want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
     int32_t userId = 100;
