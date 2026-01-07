@@ -47,6 +47,7 @@ ohos_unittest("agent_card_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
   ]
 
   cflags_cc = []
