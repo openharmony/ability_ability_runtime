@@ -278,7 +278,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
       });
       taskpool.execute((): void => {
         this.nativeOpenAtomicService(appId, asyncCall, options);
-      }).catch((err: BusinessError): void => {
+      }).catch((err: Error): void => {
         reject(err as BusinessError);
       });
     });
@@ -295,7 +295,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         });
         taskpool.execute((): void => {
           this.nativePreStartMission(bundleName, moduleName, abilityName, startTime, myCall);
-        }).catch((err: BusinessError): void => {
+        }).catch((err: Error): void => {
           reject(err as BusinessError);
         });
       });
@@ -305,8 +305,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeRequestModalUIExtension(pickerWant, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -321,7 +321,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         });
         taskpool.execute((): void => {
           this.nativeRequestModalUIExtension(pickerWant, myCall);
-        }).catch((err: BusinessError): void => {
+        }).catch((err: Error): void => {
           reject(err as BusinessError);
         });
       });
@@ -338,7 +338,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         });
         taskpool.execute((): void => {
           this.nativeStartRecentAbility(want, myCall, options);
-        }).catch((err: BusinessError): void => {
+        }).catch((err: Error): void => {
           reject(err as BusinessError);
         });
       });
@@ -348,8 +348,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartRecentAbility(want, asyncCall, options);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -357,8 +357,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartRecentAbility(want, asyncCall, undefined);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -389,7 +389,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         });
         taskpool.execute((): void => {
           this.nativeStopServiceExtensionAbilityWithAccount(want, accountId, myCall);
-        }).catch((err: BusinessError): void => {
+        }).catch((err: Error): void => {
           reject(err as BusinessError);
         });
       });
@@ -399,8 +399,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStopServiceExtensionAbilityWithAccount(want, accountId, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -415,7 +415,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         });
         taskpool.execute((): void => {
           this.nativeStartServiceExtensionAbilityWithAccount(want, accountId, myCall);
-        }).catch((err: BusinessError): void => {
+        }).catch((err: Error): void => {
           reject(err as BusinessError);
         });
       });
@@ -425,8 +425,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartServiceExtensionAbilityWithAccount(want, accountId, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -455,8 +455,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityWithAccountSync(want, accountId, options, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -464,8 +464,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityWithAccountSync(want, accountId, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -490,8 +490,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCall, options);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -499,8 +499,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCall, undefined);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
