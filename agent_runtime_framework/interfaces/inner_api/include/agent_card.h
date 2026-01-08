@@ -83,6 +83,10 @@ struct Skill : public Parcelable {
 };
 
 struct AgentCard : public Parcelable {
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    int32_t appIndex;
     std::string name;
     std::string description;
     std::string url;
@@ -102,6 +106,19 @@ struct AgentCard : public Parcelable {
     nlohmann::json ToJson() const;
     static AgentCard FromJson(nlohmann::json jsonObject);
     static AgentCard *Unmarshalling(Parcel &parcel);
+};
+
+class AgentCardsRawData {
+public:
+    std::string ownedData;
+    uint32_t size = 0;
+    const void* data = nullptr;
+    bool isMalloc = false;
+
+    static void FromAgentCardVec(const std::vector<AgentCard> &cards, AgentCardsRawData &rawData);
+    static int32_t ToAgentCardVec(const AgentCardsRawData &rawData, std::vector<AgentCard> &cards);
+    int32_t RawDataCpy(const void *readdata);
+    ~AgentCardsRawData();
 };
 } // AgentRuntime
 } // OHOS
