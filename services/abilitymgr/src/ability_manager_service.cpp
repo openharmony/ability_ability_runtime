@@ -187,6 +187,8 @@ constexpr int32_t PENG_LAI_UID = 7655;
 constexpr int32_t RSS_UID = 1096;
 constexpr const char* IS_DELEGATOR_CALL = "isDelegatorCall";
 
+constexpr int32_t SHORT_REPOLL_TIME_MICRO_SECONDS = 200000;
+
 // Startup rule switch
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 constexpr const char* BACKGROUND_JUDGE_FLAG = "component.startup.backgroundJudge.flag";
@@ -7879,7 +7881,7 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, uint64_t 
             TAG_LOGE(AAFwkTag::ABILITYMGR, "query highest priority ability failed");
             return RESOLVE_ABILITY_ERR;
         }
-        usleep(REPOLL_TIME_MICRO_SECONDS);
+        usleep(SHORT_REPOLL_TIME_MICRO_SECONDS);
     }
     queryTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
 
