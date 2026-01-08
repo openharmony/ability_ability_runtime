@@ -1722,7 +1722,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, IsCallerValid_001, TestSize.Level1)
 HWTEST_F(UIExtensionAbilityManagerTest, IsCallerValid_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     abilityRecord->sessionInfo_ = nullptr;
     
     bool result = connectManager->IsCallerValid(abilityRecord);
