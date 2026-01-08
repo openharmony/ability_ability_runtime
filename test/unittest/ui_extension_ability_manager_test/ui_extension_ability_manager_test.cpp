@@ -1480,7 +1480,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, UpdateUIExtensionBindInfo_002, TestSize.
 HWTEST_F(UIExtensionAbilityManagerTest, UpdateUIExtensionBindInfo_003, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+    BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     abilityRecord->abilityInfo_.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
     
     connectManager->UpdateUIExtensionBindInfo(abilityRecord, AbilityConfig::SCENEBOARD_BUNDLE_NAME, 1);
@@ -1560,7 +1561,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionRootHostInfo_001, TestSize
 HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionRootHostInfo_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     sptr<IRemoteObject> token = abilityRecord->GetToken();
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
     
@@ -1595,7 +1597,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, AddPreloadUIExtensionRecord_001, TestSiz
 HWTEST_F(UIExtensionAbilityManagerTest, AddPreloadUIExtensionRecord_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
     
     int32_t result = connectManager->AddPreloadUIExtensionRecord(abilityRecord);
@@ -1630,7 +1633,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, RemoveUIExtensionBySessionInfoToken_001,
 HWTEST_F(UIExtensionAbilityManagerTest, RemoveUIExtensionBySessionInfoToken_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     sptr<IRemoteObject> token = abilityRecord->GetToken();
     
     connectManager->uiExtensionMap_[token] = {std::weak_ptr<BaseExtensionRecord>(), nullptr};
@@ -1668,7 +1672,8 @@ HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionCallerTokenList_001, TestS
 HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionCallerTokenList_002, TestSize.Level1)
 {
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
+    std::shared_ptr<BaseExtensionRecord> abilityRecord =
+        BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest_);
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
     
     std::list<sptr<IRemoteObject>> callerList;
