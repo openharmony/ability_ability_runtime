@@ -69,12 +69,15 @@ public:
      */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
+    virtual void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName) override;
+
 private:
     int32_t HandleOnAppStateChanged(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnAbilityRequestDone(MessageParcel& data, MessageParcel& reply);
     int32_t HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyStartKeepAliveProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRecordAppExitSignalReason(MessageParcel &data, MessageParcel &reply);
 
     using AppStateCallbackFunc = int32_t(AppStateCallbackHost::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, AppStateCallbackFunc> memberFuncMap_;

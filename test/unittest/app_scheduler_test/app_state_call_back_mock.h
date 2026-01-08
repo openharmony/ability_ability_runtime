@@ -35,6 +35,7 @@ public:
     MOCK_METHOD1(NotifyStartResidentProcess, void(std::vector<AppExecFwk::BundleInfo>&));
     MOCK_METHOD1(NotifyStartKeepAliveProcess, void(std::vector<AppExecFwk::BundleInfo>&));
     MOCK_METHOD2(NotifyAppPreCache, void(int32_t, int32_t));
+    MOCK_METHOD4(RecordAppExitSignalReason, void(int32_t, int32_t, int32_t, std::string&));
 };
 }  // namespace AAFwk
 }  // namespace OHOS
