@@ -2308,6 +2308,22 @@ HWTEST_F(AbilityManagerServiceFirstTest, NotifyStartResidentProcess_0100, TestSi
 }
 
 /**
+ * @tc.name: AbilityManagerServiceFirstTest_RecordAppExitSignalReason_0100
+ * @tc.desc: Test RecordAppExitSignalReason.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, RecordAppExitSignalReason_0100, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = 12345;
+    int32_t uid = 1000;
+    int32_t signal = 9;
+    std::string bundleName = "com.example.test";
+    abilityMs->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+}
+
+/**
  * @tc.name: AbilityManagerServiceFirstTest_NotifyStartKeepAliveProcess_0100
  * @tc.desc: Test NotifyStartKeepAliveProcess.
  * @tc.type: FUNC
