@@ -15,12 +15,15 @@
 
 #include "agent_manager_client.h"
 
+#include "ability_manager_errors.h"
 #include "agent_load_callback.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+
+using namespace OHOS::AAFwk;
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -33,6 +36,42 @@ AgentManagerClient &AgentManagerClient::GetInstance()
     TAG_LOGD(AAFwkTag::SER_ROUTER, "GetInstance called");
     static AgentManagerClient instance;
     return instance;
+}
+
+int32_t AgentManagerClient::GetAllAgentCards(std::vector<AgentCard> &cards)
+{
+    auto agentMgr = GetAgentMgrProxy();
+    if (agentMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
+        return ERR_NULL_AGENT_MGR_PROXY;
+    }
+    AgentCardsRawData rawData;
+    auto ret = agentMgr->GetAllAgentCards(rawData);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "get all failed: %{public}d", ret);
+        return ret;
+    }
+    return AgentCardsRawData::ToAgentCardVec(rawData, cards);
+}
+
+int32_t AgentManagerClient::GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards)
+{
+    auto agentMgr = GetAgentMgrProxy();
+    if (agentMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
+        return ERR_NULL_AGENT_MGR_PROXY;
+    }
+    return agentMgr->GetAgentCardsByBundleName(bundleName, cards);
+}
+
+int32_t AgentManagerClient::GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card)
+{
+    auto agentMgr = GetAgentMgrProxy();
+    if (agentMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
+        return ERR_NULL_AGENT_MGR_PROXY;
+    }
+    return agentMgr->GetAgentCardByUrl(bundleName, url, card);
 }
 
 sptr<IAgentManager> AgentManagerClient::GetAgentMgrProxy()

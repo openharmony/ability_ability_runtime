@@ -24,6 +24,7 @@ ohos_shared_library("agent_fwk") {
 
   include_dirs = [
     "include",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
   ]
   sources = [
@@ -78,6 +79,7 @@ ohos_shared_library("agent_manager") {
   }
 
   include_dirs = [
+    "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
   ]
   configs = []
@@ -91,6 +93,7 @@ ohos_shared_library("agent_manager") {
   sources += filter_include(output_values, [ "*.cpp" ])
   defines = [ "AMS_LOG_TAG = \"AgentManagerService\"" ]
   deps = [
+    ":agent_fwk",
     ":agent_manager_interface",
   ]
 
@@ -99,6 +102,7 @@ ohos_shared_library("agent_manager") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

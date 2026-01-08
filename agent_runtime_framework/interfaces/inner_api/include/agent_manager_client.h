@@ -34,9 +34,13 @@ public:
 
     void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
     void OnLoadSystemAbilityFail();
-    sptr<IAgentManager> GetAgentMgrProxy();
+
+    int32_t GetAllAgentCards(std::vector<AgentCard> &cards);
+    int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards);
+    int32_t GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card);
 
 private:
+    sptr<IAgentManager> GetAgentMgrProxy();
     void ClearProxy();
     bool LoadAgentMgrService();
     void SetAgentMgr(const sptr<IRemoteObject> &remoteObject);

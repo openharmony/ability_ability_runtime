@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-sequenceable AgentCard..OHOS.AgentRuntime.AgentCard;
-rawdata AgentCard..OHOS.AgentRuntime.AgentCardsRawData;
-interface OHOS.AgentRuntime.IAgentManager {
-    void GetAllAgentCards([out] AgentCardsRawData cards);
-    void GetAgentCardsByBundleName([in] String bundleName, [out] AgentCard[] cards);
-    void GetAgentCardByUrl([in] String bundleName, [in] String url, [out] AgentCard card);
+#include "native_engine/native_engine.h"
+#include "js_agent_manager.h"
+
+static napi_module _module = {
+    .nm_version = 0,
+    .nm_filename = "app/ability/agentmanager_napi.so/agent_manager.js",
+    .nm_register_func = OHOS::AgentRuntime::JsAgentManagerInit,
+    .nm_modname = "app.ability.agentManager",
+};
+
+extern "C" __attribute__((constructor)) void NAPI_app_ability_AgentManager_AutoRegister(void)
+{
+    napi_module_register(&_module);
 }

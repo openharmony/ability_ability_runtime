@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-sequenceable AgentCard..OHOS.AgentRuntime.AgentCard;
-rawdata AgentCard..OHOS.AgentRuntime.AgentCardsRawData;
-interface OHOS.AgentRuntime.IAgentManager {
-    void GetAllAgentCards([out] AgentCardsRawData cards);
-    void GetAgentCardsByBundleName([in] String bundleName, [out] AgentCard[] cards);
-    void GetAgentCardByUrl([in] String bundleName, [in] String url, [out] AgentCard card);
-}
+#ifndef OHOS_AGENT_RUNTIME_ETS_AGENT_MANAGER_H
+#define OHOS_AGENT_RUNTIME_ETS_AGENT_MANAGER_H
+
+#include "ets_runtime.h"
+
+namespace OHOS {
+namespace AgentManagerEts {
+void EtsAgentManagerRegistryInit(ani_env *env);
+} // namespace AgentManagerEts
+} // namespace OHOS
+#endif // OHOS_AGENT_RUNTIME_ETS_AGENT_MANAGER_H
