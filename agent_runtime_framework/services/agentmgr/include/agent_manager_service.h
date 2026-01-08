@@ -20,6 +20,7 @@
 #include <mutex>
 #include <string>
 
+#include "agent_bundle_event_callback.h"
 #include "agent_event_handler.h"
 #include "agent_manager_stub.h"
 #include "system_ability.h"
@@ -49,12 +50,14 @@ public:
 private:
     AgentManagerService();
     void Init();
+    void RegisterBundleEventCallback();
     DISALLOW_COPY_AND_MOVE(AgentManagerService);
 
 private:
     static sptr<AgentManagerService> instance_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AgentEventHandler> eventHandler_;
+    sptr<AgentBundleEventCallback> bundleEventCallback_;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
