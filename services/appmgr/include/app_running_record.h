@@ -429,7 +429,7 @@ public:
      *
      * @return
      */
-    void ScheduleMemoryLevel(int32_t level, bool isShellCall = false);
+    void ScheduleMemoryLevel(int32_t level);
 
     /**
      * ScheduleHeapMemory, Get the application's memory allocation info.
