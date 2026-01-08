@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string jsonStr(data, size);
     std::shared_ptr<IAbilityInterceptor> interceptor;
     executer->AddInterceptor(jsonStr, interceptor);
+    executer->HasInterceptor(jsonStr);
     executer->RemoveInterceptor(jsonStr);
     Want want;
     int requestCode = static_cast<int>(GetU32Data(data));
