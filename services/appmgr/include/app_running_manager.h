@@ -275,7 +275,7 @@ public:
      * @param  procLevelMap , <pid_t, MemoryLevel>.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall = false);
+    int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap);
 
     /*
     * Get the application's memory allocation info.

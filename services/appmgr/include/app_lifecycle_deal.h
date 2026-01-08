@@ -111,12 +111,11 @@ public:
      * ScheduleMemoryLevel, call ScheduleMemoryLevel() through proxy project,
      * Notifies the application of the current memory.
      *
-     * @param Level, The memory level.
-     * @param isShellCall, A flag indicating whether it is invoked via the aa command.
+     * @param The memory level.
      *
      * @return
      */
-    void ScheduleMemoryLevel(int32_t Level, bool isShellCall = false);
+    void ScheduleMemoryLevel(int32_t Level);
 
     /**
      * ScheduleHeapMemory, call ScheduleHeapMemory() through proxy project,

@@ -92,7 +92,7 @@ public:
     {
         scheduled_ |= LOW_MEMORY_SCHEDULED;
     }
-    void ScheduleMemoryLevel(const int, bool) override
+    void ScheduleMemoryLevel(const int) override
     {
         scheduled_ |= MEMORY_LEVEL_SCHEDULED;
     }
