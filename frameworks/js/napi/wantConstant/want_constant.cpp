@@ -95,6 +95,7 @@ napi_value WantConstantInit(napi_env env, napi_value exports)
 
     SetNamedProperty(env, showMode, 0, "WINDOW");
     SetNamedProperty(env, showMode, 1, "EMBEDDED_FULL");
+    SetNamedProperty(env, showMode, 2, "EMBEDDED_HALF");
 
 #ifdef ENABLE_ERRCODE
     napi_value params = nullptr;
