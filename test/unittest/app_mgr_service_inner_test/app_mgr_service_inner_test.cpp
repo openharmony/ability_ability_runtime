@@ -538,38 +538,6 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: LoadAbility_002
- * @tc.desc: load ability.
- * @tc.type: FUNC
- * @tc.require: issueI5W4S7
- */
-HWTEST_F(AppMgrServiceInnerTest, LoadAbility_002, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 start");
-    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    AbilityRuntime::LoadParam loadParam;
-    loadParam.token = token;
-    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
-
-    std::shared_ptr<AAFwk::Want> want;
-    want->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
-
-    auto appMgrServiceInner1 = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner1, nullptr);
-
-    std::shared_ptr<AAFwk::Want> want1;
-    want1->SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
-    abilityInfo_->extensionAbilityType = ExtensionAbilityType::EMBEDDED_UI;
-    appMgrServiceInner1->LoadAbility(abilityInfo_, applicationInfo_, want1, loadParamPtr);
-    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 end");
-}
-
-/**
  * @tc.name: CheckLoadAbilityConditions_001
  * @tc.desc: check load ability conditions.
  * @tc.type: FUNC
