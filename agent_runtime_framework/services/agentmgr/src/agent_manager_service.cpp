@@ -15,9 +15,12 @@
 
 #include "agent_manager_service.h"
 
+#include "agent_bundle_event_callback.h"
 #include "agent_config.h"
+#include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -61,6 +64,10 @@ void AgentManagerService::OnStart() noexcept
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Publish failed");
         return;
     }
+    bool addBundleMgr = AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!addBundleMgr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "addBundleMgr failed");
+    }
 }
 
 void AgentManagerService::OnStop() noexcept
@@ -71,11 +78,30 @@ void AgentManagerService::OnStop() noexcept
 void AgentManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) noexcept
 {
     TAG_LOGI(AAFwkTag::SER_ROUTER, "add sysAbilityId %{public}d", systemAbilityId);
+    if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        RegisterBundleEventCallback();
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
 }
 
 void AgentManagerService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) noexcept
 {
     TAG_LOGI(AAFwkTag::SER_ROUTER, "remove sysAbilityId %{public}d", systemAbilityId);
+}
+
+void AgentManagerService::RegisterBundleEventCallback()
+{
+    if (bundleEventCallback_ != nullptr) {
+        return;
+    }
+    bundleEventCallback_ = sptr<AgentBundleEventCallback>::MakeSptr();
+    bool ret = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->RegisterBundleEventCallback(
+        bundleEventCallback_);
+    if (!ret) {
+        bundleEventCallback_ = nullptr;
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "register bundle event error");
+    }
 }
 }  // namespace AgentRuntime
 }  // namespace OHOS
