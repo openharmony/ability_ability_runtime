@@ -228,6 +228,8 @@ public:
 
     std::string GetBundleNameWithContext(std::shared_ptr<Context> inputContext = nullptr) const;
 
+    std::shared_ptr<Context> CreateModuleOrPluginContext(const std::string &bundleName, const std::string &moduleName);
+
     /**
      * @brief Get file area
      *
