@@ -18,6 +18,8 @@
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
 #include "napi_common_util.h"
+#include <cstdlib>
+#include <cerrno>
 
 namespace OHOS {
 namespace AppExecFwk {
