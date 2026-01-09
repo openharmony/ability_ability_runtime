@@ -105,6 +105,7 @@ ContextImpl::ContextImpl()
 
 ContextImpl::~ContextImpl()
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "~ContextImpl");
     UnsubscribeToOverlayEvents();
 }
 
