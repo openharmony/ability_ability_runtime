@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,6 +244,12 @@ private:
     void OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
         ani_object callbackObj);
     void UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &options);
+    void CreateOnAtomicRequestFailureResultCallback(ani_env *env, ani_ref refCompletionHandler,
+        OnAtomicRequestFailure &onRequestCallback, const char *callbackName);
+    void CreateOnAtomicRequestSuccessResultCallback(ani_env *env, ani_ref refCompletionHandler,
+        OnAtomicRequestSuccess &onRequestCallback, const char *callbackName);
+    void UnWrapCompletionHandlerForAtomicService(ani_env *env, ani_object param, AAFwk::StartOptions &options,
+        const std::string &appId);
     void AddCompletionHandlerForOpenLink(ani_env *env, ani_ref refCompletionHandler, AAFwk::Want &want,
         OnRequestResult &onRequestSucc, OnRequestResult &onRequestFail);
 
