@@ -120,6 +120,11 @@ bool CheckConnectionParam(napi_env env, napi_value value, sptr<JSUIExtensionConn
     return true;
 }
 
+JsUIExtensionContext::~JsUIExtensionContext()
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "~JsUIExtensionContext");
+}
+
 void JsUIExtensionContext::Finalizer(napi_env env, void* data, void* hint)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");

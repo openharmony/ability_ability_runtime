@@ -364,9 +364,11 @@ void UIExtension::RegisterAbilityConfigUpdateCallback()
     }
     auto uiExtensionAbility = std::static_pointer_cast<UIExtension>(shared_from_this());
     std::weak_ptr<UIExtension> abilityWptr = uiExtensionAbility;
+    std::weak_ptr<UIExtensionContext> abilityContextWptr = context;
     context->RegisterAbilityConfigUpdateCallback(
-        [abilityWptr, abilityContext = context](AppExecFwk::Configuration &config) {
+        [abilityWptr, abilityContextWptr](AppExecFwk::Configuration &config) {
         std::shared_ptr<UIExtension> abilitySptr = abilityWptr.lock();
+        std::shared_ptr<UIExtensionContext> abilityContext = abilityContextWptr.lock();
         if (abilitySptr == nullptr || abilityContext == nullptr || abilityContext->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "null abilitySptr or abilityContext or GetAbilityInfo");
             return;
