@@ -31,7 +31,7 @@ class JSUIServiceUIExtConnection;
 class JsUIExtensionContext {
 public:
     explicit JsUIExtensionContext(const std::shared_ptr<UIExtensionContext>& context) : context_(context) {}
-    virtual ~JsUIExtensionContext() = default;
+    virtual ~JsUIExtensionContext();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value StartAbility(napi_env env, napi_callback_info info);
     static napi_value OpenLink(napi_env env, napi_callback_info info);
