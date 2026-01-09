@@ -129,6 +129,11 @@ void UISessionAbilityResultListener::SaveResultCallbacks(int requestCode, Runtim
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
 }
 
+JsUIExtensionContentSession::~JsUIExtensionContentSession()
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "~JsUIExtensionContentSession");
+}
+
 JsUIExtensionContentSession::JsUIExtensionContentSession(
     sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
     std::weak_ptr<AbilityRuntime::Context> &context,
