@@ -1421,7 +1421,7 @@ void UIAbilityLifecycleManager::MoveToBackground(const UIAbilityRecordPtr &abili
     abilityRecord->BackgroundAbility(task);
 }
 
-int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
+int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest, const int32_t frameNum)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "prelaunch ability: %{public}s %{public}s",
         abilityRequest.abilityInfo.bundleName.c_str(), abilityRequest.abilityInfo.name.c_str());
@@ -1467,6 +1467,7 @@ int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abil
     sessionInfo->state = CallToState::BACKGROUND;
     sessionInfo->needClearInNotShowRecent = true;
     sessionInfo->isPrelaunch = true;
+    sessionInfo->frameNum = frameNum;
     
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(sessionInfo->requestId, uiAbilityRecord);

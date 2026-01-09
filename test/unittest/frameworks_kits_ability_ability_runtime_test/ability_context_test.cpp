@@ -387,7 +387,7 @@ public:
     {
         return ERR_OK;
     }
-    virtual ErrCode StartAbilityForPrelaunch(const Want &want)
+    virtual ErrCode StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
     {
         return ERR_OK;
     }

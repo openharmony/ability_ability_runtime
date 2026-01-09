@@ -508,7 +508,7 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
     return ERR_OK;
 }
 
-ErrCode StartAbilityForPrelaunch(const Want &want)
+ErrCode StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
 {
     return ERR_OK;
 }
