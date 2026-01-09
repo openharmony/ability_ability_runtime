@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
+const std::string XIAOYI_BUNDLE_NAME = "com.hmos.vassistant";
 constexpr int BUNDLE_NAME_LIST_MAX_SIZE = 128;
 constexpr int OBSERVER_SINGLE_COUNT_LOG = 40;
 constexpr int OBSERVER_SINGLE_STEP_LOG = 10;

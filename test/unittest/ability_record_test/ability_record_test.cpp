@@ -61,7 +61,7 @@ const std::string DEBUG_APP = "debugApp";
 #ifdef WITH_DLP
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 #endif // WITH_DLP
-const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+const std::string SHELL_ASSISTANT_BUNDLENAME = "com.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
 constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_HIGH = "ohos.ability.params.uiExtensionLaunchTimestampHigh";
