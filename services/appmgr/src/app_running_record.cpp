@@ -1295,6 +1295,12 @@ bool AppRunningRecord::IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clear
 
 bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
+    {
+        std::lock_guard lock(specifiedMutex_);
+        if (!IsTerminating() && specifiedAbilityRequest_ != nullptr) {
+            return false;
+        }
+    }
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
@@ -1323,6 +1329,12 @@ bool AppRunningRecord::ExtensionAbilityRecordExists()
 
 bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
 {
+    {
+        std::lock_guard lock(specifiedMutex_);
+        if (!IsTerminating() && specifiedAbilityRequest_ != nullptr) {
+            return false;
+        }
+    }
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
