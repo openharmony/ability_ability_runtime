@@ -2778,7 +2778,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartSelfUIAbilityInCurrentProcess_0100
 HWTEST_F(AbilityManagerClientBranchTest, StartAbilityForPrelaunch_001, TestSize.Level1)
 {
     Want want;
-    EXPECT_EQ(client_->StartAbilityForPrelaunch(want), 0);
+    EXPECT_EQ(client_->StartAbilityForPrelaunch(want, 0), 0);
 }
 
 }  // namespace AAFwk

@@ -2565,7 +2565,8 @@ int AbilityManagerStub::StartAbilityForPrelaunchInner(MessageParcel &data, Messa
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = StartAbilityForPrelaunch(*want);
+    int32_t frameNum = data.ReadInt32();
+    int32_t result = StartAbilityForPrelaunch(*want, frameNum);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteInt32(result);

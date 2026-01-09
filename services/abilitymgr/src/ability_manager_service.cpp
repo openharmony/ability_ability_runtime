@@ -9432,7 +9432,7 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
     return missionListMgr->ResolveLocked(abilityRequest);
 }
 
-int AbilityManagerService::StartAbilityForPrelaunch(const Want &want)
+int AbilityManagerService::StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
@@ -9495,7 +9495,7 @@ int AbilityManagerService::StartAbilityForPrelaunch(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityManager null, userId is invalid:%{public}d", oriValidUserId);
         return ERR_INVALID_VALUE;
     }
-    return uiAbilityManager->PrelaunchAbilityLocked(abilityRequest);
+    return uiAbilityManager->PrelaunchAbilityLocked(abilityRequest, frameNum);
 }
 
 int AbilityManagerService::StartAbilityJust(AbilityRequest &abilityRequest, int32_t validUserId)

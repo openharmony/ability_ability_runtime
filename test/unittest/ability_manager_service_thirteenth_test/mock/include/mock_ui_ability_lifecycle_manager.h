@@ -202,7 +202,7 @@ public:
      * @param abilityRequest target ability request.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int PrelaunchAbilityLocked(const AbilityRequest &abilityRequest);
+    int PrelaunchAbilityLocked(const AbilityRequest &abilityRequest, const int32_t frameNum);
 
     /**
      * Call UIAbility by SCB.

@@ -289,7 +289,7 @@ public:
     {
         return 0;
     }
-    int StartAbilityForPrelaunch(const Want &want)  override
+    int StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)  override
     {
         return 0;
     }
