@@ -37,6 +37,7 @@ const std::string CODE_KEY_NAME = "code";
 
 napi_value GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value code = nullptr;
     napi_create_int32(env, errCode, &code);
     napi_value msg = nullptr;
@@ -44,7 +45,7 @@ napi_value GenerateBusinessError(const napi_env &env, int32_t errCode, const std
     napi_value businessError = nullptr;
     napi_create_error(env, nullptr, msg, &businessError);
     napi_set_named_property(env, businessError, CODE_KEY_NAME.c_str(), code);
-    return businessError;
+    return handleEscape.Escape(businessError);
 }
 
 static int32_t ErrorCodeReturn(int32_t code)
@@ -126,15 +127,17 @@ static std::string ErrorMessageReturn(int32_t code)
 
 napi_value GetUndefined(const napi_env &env)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value nullResult = nullptr;
     napi_get_undefined(env, &nullResult);
-    return nullResult;
+    return handleEscape.Escape(nullResult);
 }
 
 bool SetStartSyncMissionsContext(const napi_env &env, const napi_value &value,
     SyncRemoteMissionsContext* context, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "call");
+    AbilityRuntime::HandleScope handleScope(env);
     bool isFixConflict = false;
     napi_has_named_property(env, value, "fixConflict", &isFixConflict);
     if (!isFixConflict) {
@@ -186,6 +189,7 @@ bool SetSyncRemoteMissionsContext(const napi_env &env, const napi_value &value,
     bool isStart, SyncRemoteMissionsContext* context, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "call");
+    AbilityRuntime::HandleScope handleScope(env);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType != napi_object) {
@@ -238,6 +242,7 @@ bool ProcessSyncInput(napi_env &env, napi_callback_info info, bool isStart,
     SyncRemoteMissionsContext* syncContext, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -277,6 +282,7 @@ void StartSyncRemoteMissionsAsyncWork(napi_env &env, const napi_value resourceNa
                 syncContext->fixConflict, syncContext->tag);
         },
         [](napi_env env, napi_status status, void* data) {
+            AbilityRuntime::HandleScope handleScope(env);
             SyncRemoteMissionsContext* syncContext = (SyncRemoteMissionsContext*)data;
             // set result
             napi_value result[2] = { nullptr };
@@ -314,6 +320,7 @@ void StartSyncRemoteMissionsAsyncWork(napi_env &env, const napi_value resourceNa
 napi_value NAPI_StartSyncRemoteMissions(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     auto syncContext = new SyncRemoteMissionsContext();
     if (!ProcessSyncInput(env, info, true, syncContext, errInfo)) {
@@ -335,7 +342,7 @@ napi_value NAPI_StartSyncRemoteMissions(napi_env env, napi_callback_info info)
 
     StartSyncRemoteMissionsAsyncWork(env, resourceName, syncContext);
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void StopSyncRemoteMissionsAsyncWork(napi_env &env, napi_value resourceName,
@@ -349,6 +356,7 @@ void StopSyncRemoteMissionsAsyncWork(napi_env &env, napi_value resourceName,
                 StopSyncRemoteMissions(syncContext->deviceId);
         },
         [](napi_env env, napi_status status, void* data) {
+            AbilityRuntime::HandleScope handleScope(env);
             SyncRemoteMissionsContext* syncContext = (SyncRemoteMissionsContext*)data;
             // set result
             napi_value result[2] = { nullptr };
@@ -386,6 +394,7 @@ void StopSyncRemoteMissionsAsyncWork(napi_env &env, napi_value resourceName,
 napi_value NAPI_StopSyncRemoteMissions(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     auto syncContext = new SyncRemoteMissionsContext();
     if (!ProcessSyncInput(env, info, false, syncContext, errInfo)) {
@@ -407,7 +416,7 @@ napi_value NAPI_StopSyncRemoteMissions(napi_env env, napi_callback_info info)
 
     StopSyncRemoteMissionsAsyncWork(env, resourceName, syncContext);
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 RegisterMissionCB *CreateRegisterMissionCBCBInfo(napi_env &env)
@@ -487,6 +496,7 @@ void RegisterMissionExecuteCB(napi_env env, void *data)
 void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     auto registerMissionCB = static_cast<RegisterMissionCB *>(data);
     // set result
     napi_value result[2] = { nullptr };
@@ -506,6 +516,7 @@ void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *
 
 void ReturnValueToApplication(napi_env &env, napi_value *result, RegisterMissionCB *registerMissionCB)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     if (registerMissionCB->callbackRef == nullptr) { // promise
         if (registerMissionCB->result == 0) {
             napi_resolve_deferred(env, registerMissionCB->cbBase.deferred, result[1]);
@@ -525,6 +536,7 @@ void ReturnValueToApplication(napi_env &env, napi_value *result, RegisterMission
 napi_value RegisterMissionAsync(napi_env env, RegisterMissionCB *registerMissionCB)
 {
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback");
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (registerMissionCB == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "null registerMissionCB");
         napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, ErrorMessageReturn(SYSTEM_WORK_ABNORMALLY)));
@@ -548,7 +560,7 @@ napi_value RegisterMissionAsync(napi_env env, RegisterMissionCB *registerMission
         &registerMissionCB->cbBase.asyncWork);
     napi_queue_async_work(env, registerMissionCB->cbBase.asyncWork);
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool CheckMissionCallbackProperty(napi_env &env, const napi_value &value, std::string &errInfo)
@@ -573,6 +585,7 @@ bool SetCallbackReference(napi_env &env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     if (!CheckMissionCallbackProperty(env, value, errInfo)) {
         return false;
     }
@@ -664,6 +677,7 @@ bool CreateOnCallbackReference(napi_env &env, const napi_value &jsMethod,
 bool RegisterMissionWrapDeviceId(napi_env &env, napi_value &argc,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_valuetype valueType = napi_undefined;
     bool isDeviceId = false;
     napi_has_named_property(env, argc, "deviceId", &isDeviceId);
@@ -724,6 +738,7 @@ napi_value RegisterMissionWrap(napi_env &env, napi_callback_info info,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = 3;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr);
@@ -753,7 +768,7 @@ napi_value RegisterMissionWrap(napi_env &env, napi_callback_info info,
 
     napi_value ret = RegisterMissionAsync(env, registerMissionCB);
     TAG_LOGI(AAFwkTag::MISSION, "called end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 void OnExecuteCB(napi_env &env, OnCB *onCB)
@@ -804,6 +819,7 @@ napi_value OnWrap(napi_env &env, napi_callback_info info,
     OnCB *onCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = 2;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr);
@@ -831,7 +847,7 @@ napi_value OnWrap(napi_env &env, napi_callback_info info,
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     TAG_LOGI(AAFwkTag::MISSION, "called end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void OffExecuteCB(napi_env env, OnCB *onCB)
@@ -865,6 +881,7 @@ napi_value OffWrap(napi_env &env, napi_callback_info info,
     OnCB *onCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = 2;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr);
@@ -891,12 +908,13 @@ napi_value OffWrap(napi_env &env, napi_callback_info info,
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     TAG_LOGI(AAFwkTag::MISSION, "called end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value NAPI_RegisterMissionListener(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     RegisterMissionCB *registerMissionCB = CreateRegisterMissionCBCBInfo(env);
     if (registerMissionCB == nullptr) {
@@ -914,12 +932,13 @@ napi_value NAPI_RegisterMissionListener(napi_env env, napi_callback_info info)
         return GetUndefined(env);
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_NotifyToOn(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     OnCB *onCB = CreateOnCBCBInfo(env);
     if (onCB == nullptr) {
@@ -937,12 +956,13 @@ napi_value NAPI_NotifyToOn(napi_env env, napi_callback_info info)
         return GetUndefined(env);
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_NotifyToOff(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     OnCB *onCB = CreateOnCBCBInfo(env);
     if (onCB == nullptr) {
@@ -960,7 +980,7 @@ napi_value NAPI_NotifyToOff(napi_env env, napi_callback_info info)
         return GetUndefined(env);
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
@@ -1088,6 +1108,7 @@ void UvWorkOnCallback(uv_work_t *work, int status)
         delete work;
         return;
     }
+    AbilityRuntime::HandleScope handleScope(onCB->cbBase.cbInfo.env);
     napi_value result[3] = {nullptr};
     napi_create_int32(onCB->cbBase.cbInfo.env, onCB->continueState, &result[0]);
     napi_create_object(onCB->cbBase.cbInfo.env, &result[1]);
@@ -1241,6 +1262,7 @@ void UvWorkNotifySnapshot(uv_work_t *work, int status)
 
 void CallbackReturn(napi_value *result, RegisterMissionCB *registerMissionCB)
 {
+    AbilityRuntime::HandleScope handleScope(registerMissionCB->cbBase.cbInfo.env);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
     napi_get_undefined(registerMissionCB->cbBase.cbInfo.env, &undefined);
@@ -1391,6 +1413,7 @@ void UnRegisterMissionExecuteCB(napi_env env, void *data)
 void UnRegisterMissionPromiseCompletedCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     auto registerMissionCB = (RegisterMissionCB*)data;
     // set result
     napi_value result[2] = { nullptr };
@@ -1411,6 +1434,7 @@ void UnRegisterMissionPromiseCompletedCB(napi_env env, napi_status status, void 
 napi_value UnRegisterMissionPromise(napi_env env, RegisterMissionCB *registerMissionCB)
 {
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback");
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (registerMissionCB == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "null param");
         return nullptr;
@@ -1434,13 +1458,14 @@ napi_value UnRegisterMissionPromise(napi_env env, RegisterMissionCB *registerMis
         &registerMissionCB->cbBase.asyncWork);
     napi_queue_async_work(env, registerMissionCB->cbBase.asyncWork);
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback end");
-    return promise;
+    return handleEscape.Escape(promise);
 }
 
 bool GetUnRegisterMissionDeviceId(napi_env &env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value napiDeviceId = nullptr;
     napi_valuetype valueType = napi_undefined;
     bool isDeviceId = false;
@@ -1483,6 +1508,7 @@ napi_value UnRegisterMissionWrap(napi_env &env, napi_callback_info info,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argc = 2;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value ret = nullptr;
@@ -1512,12 +1538,13 @@ napi_value UnRegisterMissionWrap(napi_env &env, napi_callback_info info,
     }
     ret = UnRegisterMissionPromise(env, registerMissionCB);
     TAG_LOGI(AAFwkTag::MISSION, "called end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_UnRegisterMissionListener(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     RegisterMissionCB *registerMissionCB = CreateRegisterMissionCBCBInfo(env);
     if (registerMissionCB == nullptr) {
@@ -1535,25 +1562,27 @@ napi_value NAPI_UnRegisterMissionListener(napi_env env, napi_callback_info info)
         return GetUndefined(env);
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value WrapString(napi_env &env, const std::string &param, const std::string &paramName)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
 
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsValue = nullptr;
     TAG_LOGD(AAFwkTag::MISSION, "called. %{public}s = %{public}s",
         paramName.c_str(), param.c_str());
     napi_create_string_utf8(env, param.c_str(), NAPI_AUTO_LENGTH, &jsValue);
 
-    return jsValue;
+    return handleEscape.Escape(jsValue);
 }
 
 napi_value WrapInt32(napi_env &env, int32_t num, const std::string &paramName)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
 
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_create_object(env, &jsObject);
 
@@ -1562,17 +1591,18 @@ napi_value WrapInt32(napi_env &env, int32_t num, const std::string &paramName)
     napi_create_int32(env, num, &jsValue);
     napi_set_named_property(env, jsObject, paramName.c_str(), jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value CreateInt32(napi_env &env, int32_t num, const std::string &paramName)
 {
     TAG_LOGD(AAFwkTag::MISSION, "called. %{public}s = %{public}d", paramName.c_str(), num);
 
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsValue = nullptr;
     napi_create_int32(env, num, &jsValue);
 
-    return jsValue;
+    return handleEscape.Escape(jsValue);
 }
 
 ContinueAbilityCB *CreateContinueAbilityCBCBInfo(napi_env &env)
@@ -1638,6 +1668,7 @@ void ContinueAbilityExecuteCB(napi_env env, void *data)
 void ContinueAbilityCallbackCompletedCB(napi_env env, napi_status status, void *data)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     auto continueAbilityCB = static_cast<ContinueAbilityCB *>(data);
     // set result
     napi_value result[2] = { nullptr };
@@ -1682,6 +1713,7 @@ void ContinueAbilityCallbackCompletedCB(napi_env env, napi_status status, void *
 napi_value ContinueAbilityAsync(napi_env env, ContinueAbilityCB *continueAbilityCB)
 {
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback");
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (continueAbilityCB == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "null param");
         return nullptr;
@@ -1706,7 +1738,7 @@ napi_value ContinueAbilityAsync(napi_env env, ContinueAbilityCB *continueAbility
         &continueAbilityCB->cbBase.asyncWork);
     napi_queue_async_work_with_qos(env, continueAbilityCB->cbBase.asyncWork, napi_qos_user_initiated);
     TAG_LOGI(AAFwkTag::MISSION, "asyncCallback end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool CheckContinueDeviceInfoSrcDeviceId(napi_env &env, napi_value &napiSrcDeviceId,
@@ -1815,6 +1847,7 @@ bool CheckContinueFirstArgs(napi_env &env, const napi_value &value,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     if (!CheckContinueKeyExist(env, value)) {
         TAG_LOGE(AAFwkTag::MISSION, "Wrong argument key");
         errInfo = "Parameter error. The type of \"parameter\" must be ContinueMission";
@@ -1856,6 +1889,7 @@ bool CheckArgsWithBundleName(napi_env &env, const napi_value &value,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     if (!CheckBundleNameExist(env, value)) {
         TAG_LOGE(AAFwkTag::MISSION, "Args without bundleName");
         return false;
@@ -1895,6 +1929,7 @@ bool CheckContinueCallback(napi_env &env, const napi_value &value,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value jsMethod = nullptr;
     napi_valuetype valuetype = napi_undefined;
     napi_typeof(env, value, &valuetype);
@@ -1947,6 +1982,7 @@ napi_value ContinueAbilityWrap(napi_env &env, napi_callback_info info,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = 3;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value ret = nullptr;
@@ -1996,12 +2032,13 @@ napi_value ContinueAbilityWrap(napi_env &env, napi_callback_info info,
 
     ret = ContinueAbilityAsync(env, continueAbilityCB);
     TAG_LOGI(AAFwkTag::MISSION, "called end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_ContinueAbility(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::string errInfo = "Parameter error";
     ContinueAbilityCB *continueAbilityCB = CreateContinueAbilityCBCBInfo(env);
     if (continueAbilityCB == nullptr) {
@@ -2019,7 +2056,7 @@ napi_value NAPI_ContinueAbility(napi_env env, napi_callback_info info)
         return GetUndefined(env);
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 ContinueAbilityCB *CheckAndGetParameters(uv_work_t *work, napi_handle_scope *scope)

@@ -67,6 +67,7 @@ void JSAbilityForegroundStateObserver::OnAbilityStateChanged(const AbilityStateD
 void JSAbilityForegroundStateObserver::HandleOnAbilityStateChanged(const AbilityStateData &abilityStateData)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    HandleScope handleScope(env_);
     for (auto &item : jsObserverObjectSet_) {
         if (item == nullptr) {
             continue;
@@ -81,6 +82,7 @@ void JSAbilityForegroundStateObserver::CallJsFunction(
     const napi_value &value, const char *methodName, const napi_value *argv, const size_t argc)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    HandleScope handleScope(env_);
     if (value == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null value");
         return;
@@ -156,6 +158,7 @@ void JSAbilityForegroundStateObserver::RemoveAllJsObserverObject()
 
 std::shared_ptr<NativeReference> JSAbilityForegroundStateObserver::GetObserverObject(const napi_value &jsObserverObject)
 {
+    HandleScope handleScope(env_);
     if (jsObserverObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
         return nullptr;

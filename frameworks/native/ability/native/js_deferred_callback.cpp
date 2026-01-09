@@ -34,6 +34,7 @@ JsDeferredCallback::JsDeferredCallback(napi_env env): env_(env)
 
 void JsDeferredCallback::operator()(int32_t resultCode)
 {
+    HandleScope handleScope(env_);
     if (deferred_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "null deferred_");
         return;

@@ -77,6 +77,7 @@ void JsPreloadUIExtensionCallbackClient::ProcessOnDestroyDone(int32_t extensionA
 
 void JsPreloadUIExtensionCallbackClient::CallJsPreloadedUIExtensionAbility(int32_t preloadId)
 {
+    HandleScope handleScope(env_);
     if (callbackRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null callbackRef_");
         return;

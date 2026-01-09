@@ -51,6 +51,7 @@ private:
     napi_value OnSetRequestResult(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::DIALOG, "call");
+        HandleScope handleScope(env);
         if (info.argc < 1) {
             TAG_LOGE(AAFwkTag::DIALOG, "Params not match");
             ThrowTooFewParametersError(env);
@@ -99,6 +100,7 @@ private:
 napi_value CreateJsDialogRequestCallback(napi_env env, const sptr<IDialogRequestCallback> &remoteObj)
 {
     TAG_LOGI(AAFwkTag::DIALOG, "call");
+    HandleEscape handleEscape(env);
     if (!remoteObj) {
         TAG_LOGE(AAFwkTag::DIALOG, "remoteObj invalid");
         return CreateJsUndefined(env);
@@ -117,7 +119,7 @@ napi_value CreateJsDialogRequestCallback(napi_env env, const sptr<IDialogRequest
     BindNativeFunction(env, objValue, "setRequestResult", moduleName, JsDialogRequestCallback::SetRequestResult);
 
     TAG_LOGI(AAFwkTag::DIALOG, "end");
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 } // AbilityRuntime
 } // OHOS
