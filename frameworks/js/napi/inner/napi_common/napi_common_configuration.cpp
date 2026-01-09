@@ -44,7 +44,7 @@ bool IsValidValue(const char* end, const std::string& str)
 bool ConvertToDouble(const std::string& str, double& outValue)
 {
     if (str.empty()) {
-        LOGW(AAFwkTag::JSNAPI, "ConvertToDouble failed str is null");
+        TAG_LOGW(AAFwkTag::JSNAPI, "ConvertToDouble failed str is null");
         return false;
     }
     char* end = nullptr;
