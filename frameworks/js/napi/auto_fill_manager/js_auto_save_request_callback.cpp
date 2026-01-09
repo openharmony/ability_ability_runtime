@@ -84,6 +84,7 @@ void JsAutoSaveRequestCallback::JSCallFunction(const std::string &methodName)
 
 void JsAutoSaveRequestCallback::JSCallFunctionWorker(const std::string &methodName)
 {
+    HandleScope handleScope(env_);
     if (callback_ == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null callback_");
         return;

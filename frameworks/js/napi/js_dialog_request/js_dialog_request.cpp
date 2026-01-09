@@ -39,6 +39,7 @@ napi_value ResultCodeInit(napi_env env)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -49,7 +50,7 @@ napi_value ResultCodeInit(napi_env env)
     napi_set_named_property(env, objValue, "RESULT_OK", CreateJsValue(env, RESULT_OK));
     napi_set_named_property(env, objValue, "RESULT_CANCEL", CreateJsValue(env, RESULT_CANCEL));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 class JsDialogRequest {
@@ -77,6 +78,7 @@ private:
     napi_value OnGetRequestInfo(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::DIALOG, "call");
+        HandleEscape handleEscape(env);
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::DIALOG, "Params not match");
             ThrowTooFewParametersError(env);
@@ -109,7 +111,7 @@ private:
             return CreateJsUndefined(env);
         }
 
-        return jsRequestInfo;
+        return handleEscape.Escape(jsRequestInfo);
     }
 
     napi_value OnGetRequestCallback(napi_env env, NapiCallbackInfo& info)

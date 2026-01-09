@@ -229,6 +229,7 @@ napi_value JsParticleAbility::PATerminateAbility(napi_env env, napi_callback_inf
 
 Ability* JsParticleAbility::GetAbility(napi_env env)
 {
+    HandleScope handleScope(env);
     napi_status ret;
     napi_value global = nullptr;
     const napi_extended_error_info *errorInfo = nullptr;

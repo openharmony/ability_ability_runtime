@@ -119,6 +119,7 @@ void JsMissionListener::CallJsMethod(const std::string &methodName, int32_t miss
 void JsMissionListener::CallJsMethodInner(const std::string &methodName, int32_t missionId)
 {
     // jsListenerObjectMap_ may be changed in env_->CallFunction()
+    HandleScope handleScope(env_);
     auto tmpMap = jsListenerObjectMap_;
     for (auto &item : tmpMap) {
         napi_value obj = (item.second)->GetNapiValue();
@@ -137,6 +138,7 @@ void JsMissionListener::CallJsFunction(
     napi_value obj, const char* methodName, napi_value *argv, size_t argc)
 {
     TAG_LOGI(AAFwkTag::MISSION, "method:%{public}s", methodName);
+    HandleScope handleScope(env_);
     if (obj == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "get obj failed");
         return;
@@ -189,6 +191,7 @@ void JsMissionListener::CallJsMissionIconUpdated(int32_t missionId, const std::s
         return;
     }
 
+    HandleScope handleScope(env_);
     napi_value nativeMissionId = CreateJsValue(env_, missionId);
     auto nativeIcon = Media::PixelMapNapi::CreatePixelMap(env_, icon);
 
