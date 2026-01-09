@@ -21,6 +21,8 @@
 #include "js_app_process_state.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include <cstdlib>
+#include <cerrno>
 
 namespace OHOS {
 namespace AbilityRuntime {
