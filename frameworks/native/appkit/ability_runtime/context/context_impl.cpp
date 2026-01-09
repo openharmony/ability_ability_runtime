@@ -1994,9 +1994,10 @@ std::shared_ptr<Context> ContextImpl::CreateModuleOrPluginContext(const std::str
         return nullptr;
     }
 
-    auto appContext = CreateModuleContext(bundleName, moduleName, this);
+    std::shared_ptr<Context> currentContext = shared_from_this();
+    std::shared_ptr<Context> appContext = CreateModuleContext(bundleName, moduleName, currentContext);
     if (appContext == nullptr) {
-        appContext = CreatePluginContext(bundleName, moduleName, this);
+        appContext = CreatePluginContext(bundleName, moduleName, currentContext);
     }
 
     return appContext;
