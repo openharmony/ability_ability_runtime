@@ -83,7 +83,7 @@ ErrCode AppControlProxy::GetAppRunningControlRule(
         return ERR_OK;
     }
     Want want;
-    ElementName element("", "com.huawei.hmos.appgallery", "MainAbility");
+    ElementName element("", "com.hmos.appgallery", "MainAbility");
     want.SetElement(element);
     controlRuleResult.controlWant = std::make_shared<Want>(want);
     controlRuleResult.controlMessage = "the test app is not available";

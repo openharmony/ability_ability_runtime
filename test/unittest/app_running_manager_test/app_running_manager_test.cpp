@@ -267,7 +267,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_UpdateConfiguration_0100, Test
     appRunningManager->appRunningRecordMap_.emplace(++recordId, nullptr);
     appRunningRecord->SetState(ApplicationState::APP_STATE_READY);
     appRunningManager->appRunningRecordMap_.emplace(++recordId, appRunningRecord);
-    appInfo->name = "com.huawei.shell_assistant";
+    appInfo->name = "com.shell_assistant";
     appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     appRunningManager->appRunningRecordMap_.emplace(++recordId, appRunningRecord);
     EXPECT_EQ(appRunningManager->appRunningRecordMap_.size(), recordId);

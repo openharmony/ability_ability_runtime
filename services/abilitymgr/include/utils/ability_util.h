@@ -47,7 +47,7 @@ constexpr const char* DLP_PARAMS_BUNDLE_NAME = "ohos.dlp.params.bundleName";
 constexpr const char* DLP_PARAMS_MODULE_NAME = "ohos.dlp.params.moduleName";
 constexpr const char* DLP_PARAMS_ABILITY_NAME = "ohos.dlp.params.abilityName";
 #endif // WITH_DLP
-constexpr const char* MARKET_BUNDLE_NAME = "com.huawei.hmsapp.appgallery";
+constexpr const char* MARKET_BUNDLE_NAME = "com.hmsapp.appgallery";
 constexpr const char* MARKET_CROWD_TEST_BUNDLE_PARAM = "crowd_test_bundle_name";
 constexpr const char* BUNDLE_NAME_SELECTOR_DIALOG = "com.ohos.amsdialog";
 constexpr const char* JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPkg";
