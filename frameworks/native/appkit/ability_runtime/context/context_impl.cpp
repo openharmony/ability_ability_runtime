@@ -1986,5 +1986,20 @@ std::shared_ptr<Context> ContextImpl::CreateTargetPluginContext(const std::strin
 
     return WrapContext(pluginBundleName, moduleName, inputContext, pluginBundleInfo, hostBundName);
 }
+
+std::shared_ptr<Context> ContextImpl::CreateModuleOrPluginContext(const std::string &bundleName, const std::string &moduleName)
+{
+    if (bundleName .empty() || moduleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "input params is null");
+        return nullptr;
+    }
+
+    auto appContext = CreateModuleContext(bundleName, moduleName, this);
+    if (appContext == nullptr) {
+        appContext = CreatePluginContext(bundleName, moduleName, this);
+    }
+
+    return appContext;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
