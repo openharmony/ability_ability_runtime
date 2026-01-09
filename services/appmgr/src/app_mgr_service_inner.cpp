@@ -238,7 +238,6 @@ constexpr const char* RENDER_PROCESS_TYPE = "render";
 constexpr const char* GPU_PROCESS_NAME = ":gpu";
 constexpr const char* GPU_PROCESS_TYPE = "gpu";
 constexpr const char* KILL_REASON_USER_REQUEST = "User Request";
-constexpr const char* HYBRIDSPAWN_UNIFIED = "persist.appspawn.hybridspawn.unified";
 const std::string TOKEN_ID = "TOKEN_ID";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
@@ -4625,7 +4624,6 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     PerfProfile::GetInstance().SetAppForkStartTime(GetTickCount());
     pid_t pid = 0;
     ErrCode errCode = ERR_OK;
-    bool isHybridSpawnUnified = OHOS::system::GetBoolParameter(HYBRIDSPAWN_UNIFIED, false);
     if (isCJApp) {
         if (!remoteClientManager_->GetCJSpawnClient()) {
             TAG_LOGE(AAFwkTag::APPMGR, "appSpawnClient null");
@@ -4636,7 +4634,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
     } else if ((appInfo != nullptr &&
         (appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_1_2 || appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_HYBRID)) &&
-        !isHybridSpawnUnified) {
+        !AAFwk::AppUtils::GetInstance().IsHybridSpawnUnified()) {
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         startMsg.gids.push_back(SHADER_CACHE_GROUPID);
         errCode = remoteClientManager_->GetHybridSpawnClient()->StartProcess(startMsg, pid);
