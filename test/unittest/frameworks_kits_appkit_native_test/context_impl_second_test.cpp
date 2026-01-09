@@ -576,5 +576,81 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreatePluginContext_002, F
 
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_002 end";
 }
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateModuleOrPluginContext_001
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateModuleOrPluginContext_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_001 start";
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::string bundleName = "com.example.bundleName";
+    std::string moduleName = "moduleName";
+
+    auto context = contextImpl->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateModuleOrPluginContext_002
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateModuleOrPluginContext_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_002 start";
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::string bundleName = "";
+    std::string moduleName = "moduleName";
+
+    auto context = contextImpl->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_002 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateModuleOrPluginContext_003
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateModuleOrPluginContext_003, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_003 start";
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::string bundleName = "com.example.hostBundleName";
+    std::string moduleName = "";
+
+    auto context = contextImpl->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_003 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateModuleOrPluginContext_004
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateModuleOrPluginContext_004, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_004 start";
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    auto context = contextImpl->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateModuleOrPluginContext_004 end";
+}
 }  // namespace AppExecFwk
 }
