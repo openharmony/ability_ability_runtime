@@ -437,7 +437,7 @@ HWTEST_F(AbilityManagerServiceElevenTest, GetWantSenderByUserId_0003, TestSize.L
 }
 
 /*
- * Feature: GetWantSenderByUserId_0003
+ * Feature: GetWantSenderByUserId_0004
  * Function: GetWantSenderByUserId
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetWantSenderByUserId
