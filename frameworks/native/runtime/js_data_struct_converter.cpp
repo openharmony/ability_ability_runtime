@@ -24,6 +24,36 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace{
+bool IsValidValue(const char* end, const std::string& str)
+{
+    if (!end) {
+        return false;
+    }
+
+    if (end == str.c_str() || errno == ERANGE || *end != '\0') {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertToDouble(const std::string& str, double& outValue)
+{
+    if (str.empty()) {
+        LOGW(AAFwkTag::JSNAPI, "ConvertToDouble failed str is null");
+        return false;
+    }
+    char* end = nullptr;
+    errno = 0;
+    double value = std::strtod(str.c_str(), &end);
+    if (!IsValidValue(end, str)) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "ConvertToDouble failed for: %{public}s", str.c_str());
+        return false;
+    }
+    outValue = value;
+    return true;
+}
+}
 using namespace OHOS::AppExecFwk;
 napi_value CreateJsWantObject(napi_env env, const AAFwk::Want& want)
 {
@@ -142,15 +172,19 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
         CreateJsValue(env, hasPointerDevice == "true" ? true : false));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    double fontSizeScaleValue = 1.0;
+    ConvertToDouble(fontSizeScale, fontSizeScaleValue);
     napi_set_named_property(env, object, "fontSizeScale",
-        CreateJsValue(env, fontSizeScale == "" ? 1.0 : std::stod(fontSizeScale)));
+        CreateJsValue(env, fontSizeScaleValue));
 
     napi_set_named_property(env, object, "fontId", CreateJsValue(env,
         configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID)));
 
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    double fontWeightScaleValue = 1.0;
+    ConvertToDouble(fontWeightScale, fontWeightScaleValue);
     napi_set_named_property(env, object, "fontWeightScale",
-        CreateJsValue(env, fontWeightScale == "" ? 1.0 : std::stod(fontWeightScale)));
+        CreateJsValue(env, fontWeightScaleValue));
 
     napi_set_named_property(env, object, "mcc", CreateJsValue(env,
         configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC)));
