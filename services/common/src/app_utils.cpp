@@ -927,5 +927,6 @@ bool AppUtils::IsHybridSpawnUnified()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "IsHybridSpawnUnified: %{public}d", isHybridSpawnUnified_.value);
     return isHybridSpawnUnified_.value;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
