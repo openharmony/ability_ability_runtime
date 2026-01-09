@@ -20,12 +20,12 @@ namespace AbilityRuntime {
 InsightIntentDbCache::InsightIntentDbCache()
 {}
 
-void InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
+int32_t InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
 {
     std::lock_guard<std::mutex> lock(genericInfosMutex_);
     if (userId_ == userId) {
         TAG_LOGD(AAFwkTag::INTENT, "no need init, userId %{public}d.", userId_);
-        return;
+        return ERR_INVALID_VALUE;
     }
     std::vector<ExtractInsightIntentInfo> totalInfos;
     std::vector<InsightIntentInfo> configInfos;
@@ -35,7 +35,12 @@ void InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
     if (DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(
         userId, totalInfos, configInfos) != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Load All IntentData failed");
-        return;
+        return ERR_INVALID_VALUE;
+    }
+
+    if (totalInfos.size() == 0) {
+        TAG_LOGW(AAFwkTag::INTENT, "empty intent");
+        return ERR_NULL_INTENT;
     }
     for (size_t i = 0; i < totalInfos.size(); i++) {
         ExtractInsightIntentInfo info = totalInfos.at(i);
@@ -43,6 +48,7 @@ void InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
         intentGenericInfos_[bundleName].push_back(info.genericInfo);
     }
     userId_ = userId;
+    return ERR_OK;
 }
 
 InsightIntentDbCache::~InsightIntentDbCache()
@@ -252,6 +258,12 @@ void InsightIntentDbCache::GetConfigInsightIntentInfo(const std::string &bundleN
         TAG_LOGW(AAFwkTag::INTENT, "GetConfigInsightIntentInfo failed");
         return;
     }
+}
+
+void InsightIntentDbCache::BackupRdb()
+{
+    std::lock_guard<std::mutex> lock(genericInfosMutex_);
+    DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->BackupRdb();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
