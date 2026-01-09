@@ -69,12 +69,12 @@ public:
     void StateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
         bool isFromWindowFocusChanged, BundleType bundleType = BundleType::APP);
     void OnAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
-        bool needNotifyApp, bool isFromWindowFocusChanged);
+        bool needNotifyApp, bool isFromWindowFocusChanged, bool isByCall);
     void OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
-    void OnProcessStateChanged(
-        const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged = false);
+    void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
+        bool isFromWindowFocusChanged = false, bool isByCall = false);
     void OnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
                                          const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -100,7 +100,7 @@ private:
     void HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
-        bool needNotifyApp, bool isFromWindowFocusChanged);
+        bool needNotifyApp, bool isFromWindowFocusChanged, bool isByCall);
     void HandleOnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleStateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
@@ -134,8 +134,8 @@ private:
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
         const ApplicationState state, bool isFromWindowFocusChanged = false);
     void HandleOnProcessCreated(const ProcessData &data, BundleType bundleType = BundleType::APP);
-    void HandleOnProcessStateChanged(
-        const std::shared_ptr<AppRunningRecord> &appRecordm, bool isFromWindowFocusChanged = false);
+    void HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
+        bool isFromWindowFocusChanged = false, bool isByCall = false);
     void HandleOnProcessDied(const ProcessData &data, BundleType bundleType = BundleType::APP);
     void HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnPageShow(const PageStateData pageStateData);
@@ -148,6 +148,7 @@ private:
     void HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
     void HandleOnProcessTypeChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool PreventNotify(ApplicationState state, int32_t observerUid, bool isByCall);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
