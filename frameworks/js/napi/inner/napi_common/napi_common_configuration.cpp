@@ -117,7 +117,7 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
     SetPropertyValueByPropertyName(env, jsObject, "fontSizeScale", jsValue);
 
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-     double fontWeightScaleValue = 1.0;
+    double fontWeightScaleValue = 1.0;
     ConvertToDouble(fontWeightScale, fontWeightScaleValue);
     jsValue = WrapDoubleToJS(env, fontWeightScaleValue);
     SetPropertyValueByPropertyName(env, jsObject, "fontWeightScale", jsValue);

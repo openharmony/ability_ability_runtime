@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-namespace{
+namespace {
 bool IsValidValue(const char* end, const std::string& str)
 {
     if (!end) {
