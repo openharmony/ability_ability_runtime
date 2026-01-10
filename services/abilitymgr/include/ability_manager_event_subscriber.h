@@ -22,7 +22,6 @@
 #include "common_event_subscribe_info.h"
 #include "common_event_subscriber.h"
 #include "nocopyable.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

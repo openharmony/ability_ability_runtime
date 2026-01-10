@@ -8985,7 +8985,7 @@ void AbilityManagerService::SubscribeUserUnlockedEvent()
         GetScreenUnlockCallback(), GetUserScreenUnlockCallback());
     bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(userUnlockSubscriber_);
     if (!subResult) {
-        RetrySubscribeUnlockedEvent(RETRY_COUNT, userUnlockSubscriber_);
+        RetrySubscribeUnlockedEvent(RETRY_COUNT, userUnlockSubscriber_, true);
     }
 }
 
@@ -9077,12 +9077,12 @@ void AbilityManagerService::UnSubscribeScreenUnlockedEvent()
 }
 
 void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
-    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber)
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber, bool isUserUnlockSubscriber)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "RetryCount: %{public}d.", retryCount);
     CHECK_POINTER_LOG(subscriber, "subscriber nullptr");
     auto retrySubscribeScreenUnlockedEventTask = [aams = weak_from_this(), unlockedEventSubscriber = subscriber,
-                                                     retryCount]() {
+                                                     retryCount, isUserUnlock = isUserUnlockSubscriber]() {
         CHECK_POINTER_LOG(unlockedEventSubscriber, "unlockedEventSubscriber nullptr");
         bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(unlockedEventSubscriber);
         auto obj = aams.lock();
@@ -9091,11 +9091,13 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
             return;
         }
         if (subResult) {
-            obj->isSubscribed_ = true;
+            if (!isUserUnlock) {
+                obj->isSubscribed_ = true;
+            }
             return;
         }
         if (retryCount > 0) {
-            obj->RetrySubscribeUnlockedEvent(retryCount - 1, unlockedEventSubscriber);
+            obj->RetrySubscribeUnlockedEvent(retryCount - 1, unlockedEventSubscriber, isUserUnlock);
         }
     };
     constexpr int32_t delaytime = 200 * 1000; // us
