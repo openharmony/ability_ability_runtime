@@ -20,6 +20,7 @@
 
 #include "parcel.h"
 #include "pending_want.h"
+#include "local_pending_want.h"
 #include "want_agent.h"
 #include "want_agent_helper.h"
 
@@ -36,6 +37,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         std::shared_ptr<WantAgent> wantAgent1 = std::make_shared<WantAgent>(pendingWant);
         Parcel parcel;
         wantAgent1->Marshalling(parcel);
+
+        std::shared_ptr<LocalPendingWant> localPendingWAnt = nullptr;
+        std::shared_ptr<WantAgent> localWantAgent1 = std::make_shared<WantAgent>(pendingWant);
+        Parcel parcel2;
+        localPendingWAnt->Marshalling(parcel2);
+
         wantAgent = WantAgent::Unmarshalling(wantAgentParcel);
         if (wantAgent) {
             std::shared_ptr<PendingWant> pendingWant1 = wantAgent->GetPendingWant();

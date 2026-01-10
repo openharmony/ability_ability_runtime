@@ -34,6 +34,7 @@
 #include "extract_insight_intent_profile.h"
 #include "keep_alive_info.h"
 #include "keep_alive_process_manager.h"
+#include "insight_intent_profile.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -78,6 +79,40 @@ AppExecFwk::ElementName GenerateElementName(FuzzedDataProvider& fdp, AppExecFwk:
 
     return name;
 }
+
+ExecuteMode GetRandomExecuteMode(FuzzedDataProvider& fdp)
+{
+    return static_cast<ExecuteMode>(fdp.ConsumeIntegralInRange<int>(
+        static_cast<int>(ExecuteMode::UI_ABILITY_FOREGROUND),
+        static_cast<int>(ExecuteMode::SERVICE_EXTENSION_ABILITY)
+    ));
+}
+
+void GetRandomUIAbilityIntentInfo(FuzzedDataProvider& fdp, UIAbilityIntentInfo& info)
+{
+    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    size_t modeCount = fdp.ConsumeIntegralInRange<size_t>(0, 1);
+    for (size_t i = 0; i < modeCount; ++i) {
+        info.supportExecuteMode.push_back(GetRandomExecuteMode(fdp));
+    }
+}
+
+void GetRandomUIExtensionIntentInfo(FuzzedDataProvider& fdp, UIExtensionIntentInfo& info)
+{
+    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomServiceExtensionIntentInfo(FuzzedDataProvider& fdp, ServiceExtensionIntentInfo& info)
+{
+    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomFormIntentInfo(FuzzedDataProvider& fdp, FormIntentInfo& info)
+{
+    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.formName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
 
 void GetRandomExtractInsightIntentGenericInfo(FuzzedDataProvider& fdp, ExtractInsightIntentGenericInfo& info)
 {
@@ -148,6 +183,30 @@ void GetRandomInsightIntentExecuteParam(FuzzedDataProvider& fdp, InsightIntentEx
     info.pagePath_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navigationId_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navDestinationName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomInsightIntentInfo(FuzzedDataProvider& fdp, InsightIntentInfo& info)
+{
+    info.intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentDomain = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.srcEntry = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.arkTSMode = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.cfgEntities = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+
+    info.inputParams = GenerateStringArray(fdp);
+    info.outputParams = GenerateStringArray(fdp);
+    info.keywords = GenerateStringArray(fdp);
+
+    GetRandomUIAbilityIntentInfo(fdp, info.uiAbilityIntentInfo);
+    GetRandomUIExtensionIntentInfo(fdp, info.uiExtensionIntentInfo);
+    GetRandomServiceExtensionIntentInfo(fdp, info.serviceExtensionIntentInfo);
+    GetRandomFormIntentInfo(fdp, info.formIntentInfo);
 }
 
 void GetRandomExtractInsightIntentProfileInfo(FuzzedDataProvider& fdp, ExtractInsightIntentProfileInfo& info)
