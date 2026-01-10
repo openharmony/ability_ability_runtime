@@ -793,7 +793,7 @@ public:
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     void OnAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
-        bool needNotifyApp, bool isFromWindowFocusChanged);
+        bool needNotifyApp, bool isFromWindowFocusChanged, bool isByCall);
 
     void OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
 

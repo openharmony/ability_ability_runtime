@@ -916,7 +916,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
-            serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false);
+            serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false, false);
         }
         return;
     }
