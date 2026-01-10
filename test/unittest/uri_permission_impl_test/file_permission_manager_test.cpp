@@ -101,7 +101,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_002, TestSize.L
 HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_003, TestSize.Level1)
 {
     std::vector<Uri> uriVec;
-    Uri uri = Uri("file://docs/storage/Users/currentUser/appdata");
+    Uri uri = Uri("file://docs/storage/Users/currentUser/appdata/el2/base/");
     Uri uri1 = Uri("file://docs/storage/Users/currentUser/appdata/el2/base/demo");
     Uri uri2 = Uri("file://docs/storage/Users/currentUser/Download");
     Uri uri3 = Uri("file://docs/storage/Users/currentUser");
@@ -139,7 +139,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_004, TestSize.L
 {
     std::vector<Uri> uriVec;
     Uri uri4 = Uri("file://docs/data/storage/el2/base/haps/entry/files/test_A.txt");
-    uriVec.emplace_back(uri);
+    uriVec.emplace_back(uri4);
     uint32_t callerTokenId = 1002;
     uint32_t flag = 0;
     MyFlag::permissionFileAccessManager_ = true;
@@ -175,10 +175,10 @@ HWTEST_F(FilePermissionManagerTest, GetPathPolicyInfoFromUri_001, TestSize.Level
  */
 HWTEST_F(FilePermissionManagerTest, CheckDocsUriPermission_001, TestSize.Level1)
 {
+    std::string appDataPath = "/storage/Users/currentUser/appdata/test_A.txt";
     TokenIdPermission caller(0);
     MyFlag::permissionFileAccessManager_ = false;
     MyFlag::permissionSandboxAccessManager_ = false;
-    std::string appDataPath = "/storage/Users/currentUser/appdata/test_A.txt";
     bool ret = FilePermissionManager::CheckDocsUriPermission(caller, appDataPath);
     ASSERT_FALSE(ret);
 }
