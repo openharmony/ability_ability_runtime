@@ -4749,8 +4749,9 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         }
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
-    } else if (appInfo != nullptr &&
-        (appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_1_2 || appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_HYBRID)) {
+    } else if ((appInfo != nullptr &&
+        (appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_1_2 || appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_HYBRID)) &&
+        !AAFwk::AppUtils::GetInstance().IsHybridSpawnUnified()) {
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         startMsg.gids.push_back(SHADER_CACHE_GROUPID);
         errCode = remoteClientManager_->GetHybridSpawnClient()->StartProcess(startMsg, pid);

@@ -96,6 +96,7 @@ constexpr const char* RESIDENT_WHITE_LIST_PATH = "etc/ability_runtime/resident_p
 constexpr const char* NORMAL_RESIDENT_APPS = "normal_resident_apps";
 constexpr const char* ON_NEW_PROCESS_ENABLE_LIST_PATH = "etc/ability_runtime/on_new_process_enable_list.json";
 constexpr const char* ON_NEW_PROCESS_ENABLE_LIST = "onNewProcessEnableList";
+constexpr const char* HYBRIDSPAWN_UNIFIED = "persist.appspawn.hybridspawn.unified";
 }
 
 AppUtils::~AppUtils() {}
@@ -916,6 +917,16 @@ bool AppUtils::InAppTransferList(const std::string &bundleName)
         }
     }
     return false;
+}
+
+bool AppUtils::IsHybridSpawnUnified()
+{
+    if (!isHybridSpawnUnified_.isLoaded) {
+        isHybridSpawnUnified_.value = system::GetBoolParameter(HYBRIDSPAWN_UNIFIED, false);
+        isHybridSpawnUnified_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "IsHybridSpawnUnified: %{public}d", isHybridSpawnUnified_.value);
+    return isHybridSpawnUnified_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
