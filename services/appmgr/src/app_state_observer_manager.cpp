@@ -34,6 +34,7 @@ constexpr int OBSERVER_SINGLE_COUNT_LOG = 40;
 constexpr int OBSERVER_SINGLE_STEP_LOG = 10;
 constexpr int OBSERVER_UID_COUNT_LOG = 3;
 constexpr int OBSERVER_AMOUNT_COUNT_LOG = 70;
+constexpr int32_t RESOURCE_MANAGER_UID = 1096;
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 } // namespace
 AppStateObserverManager::AppStateObserverManager()
@@ -260,21 +261,21 @@ void AppStateObserverManager::OnAppStateChanged(
     const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state,
     bool needNotifyApp,
-    bool isFromWindowFocusChanged)
+    bool isFromWindowFocusChanged, bool isByCall)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord, state, needNotifyApp, isFromWindowFocusChanged]() {
+    auto task = [weak = weak_from_this(), appRecord, state, needNotifyApp, isFromWindowFocusChanged, isByCall]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStateChanged come.");
-        self->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged);
+        self->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged, isByCall);
     };
     AAFwk::TaskAttribute taskAttribute{ .taskName_ = "AppStateChanged", .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE };
     handler_->SubmitTask(task, taskAttribute);
@@ -340,21 +341,21 @@ void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRec
 #endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::OnProcessStateChanged(
-    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged, bool isByCall)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord, isFromWindowFocusChanged]() {
+    auto task = [weak = weak_from_this(), appRecord, isFromWindowFocusChanged, isByCall]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessStateChanged come.");
-        self->HandleOnProcessStateChanged(appRecord, isFromWindowFocusChanged);
+        self->HandleOnProcessStateChanged(appRecord, isFromWindowFocusChanged, isByCall);
     };
     handler_->SubmitTask(task);
 }
@@ -553,7 +554,7 @@ void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunnin
 }
 
 void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const ApplicationState state, bool needNotifyApp, bool isFromWindowFocusChanged)
+    const ApplicationState state, bool needNotifyApp, bool isFromWindowFocusChanged, bool isByCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
@@ -567,7 +568,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
             appRecord->GetSplitModeAndFloatingMode(data.isSplitScreenMode, data.isFloatingWindowMode);
             auto appForegroundStateObserverMap = GetAppForegroundStateObserverMapCopy();
             for (const auto &[observer, uid] : appForegroundStateObserverMap) {
-                if (observer != nullptr) {
+                if (observer != nullptr && !PreventNotify(state, uid, isByCall)) {
                     observer->OnAppStateChanged(data);
                 }
             }
@@ -582,6 +583,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 const auto &bundleNames = it->second.bundleNames;
                 auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
                 bool valid = (bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr;
+                valid = valid && !PreventNotify(state, it->second.uid, isByCall);
                 if (valid) {
                     AppStateFilter appStateFilter {FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED,
                         GetFilterTypeFromBundleType(bundleType),
@@ -798,7 +800,7 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data, Bu
 }
 
 void AppStateObserverManager::HandleOnProcessStateChanged(
-    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged, bool isByCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
@@ -825,7 +827,8 @@ void AppStateObserverManager::HandleOnProcessStateChanged(
             GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
             FilterAbilityStateType::NONE};
         if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
-            it->second.appStateFilter.Match(appStateFilter)) {
+            it->second.appStateFilter.Match(appStateFilter) &&
+            !PreventNotify(appRecord->GetState(), it->second.uid, isByCall)) {
             it->first->OnProcessStateChanged(data);
         }
     }
@@ -1177,6 +1180,11 @@ void AppStateObserverManager::DecreaseObserverCount(int32_t uid)
         observerCountMap_.erase(it);
     }
     observerAmount_--;
+}
+
+bool AppStateObserverManager::PreventNotify(ApplicationState state, int32_t observerUid, bool isByCall)
+{
+    return isByCall && state == ApplicationState::APP_STATE_BACKGROUND && observerUid == RESOURCE_MANAGER_UID;
 }
 
 AppStateObserverMap AppStateObserverManager::GetAppStateObserverMapCopy()
