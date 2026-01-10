@@ -45,6 +45,7 @@ constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestC
 constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 constexpr const char* SPECIFIED_ABILITY_FLAG = "ohos.ability.params.specifiedAbilityFlag";
+constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 constexpr int32_t BROKER_UID = 5557;
 }
 
@@ -262,7 +263,11 @@ void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRem
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
-    UpdateCallerAppCloneIndex(want, abilityRecord->GetAppIndex());
+    if (abilityRecord->GetApplicationInfo().bundleName != AbilityConfig::SCENEBOARD_BUNDLE_NAME ||
+        AppExecFwk::ConvertToExtensionAbilityType(want.GetStringParam(UIEXTENSION_TYPE_KEY)) !=
+        AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+        UpdateCallerAppCloneIndex(want, abilityRecord->GetAppIndex());
+    }
     UpdateSignatureInfo(callerBundleName, want);
 }
 

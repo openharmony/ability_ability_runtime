@@ -29,7 +29,23 @@ namespace {
 constexpr const char *SEPARATOR = ":";
 constexpr const char *EMBEDDEDUI = "embeddedUI";
 const std::string IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
+constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 constexpr size_t HOST_PID_INDEX = 3;
+int32_t GetAppIndexByRecord(std::shared_ptr<AAFwk::AbilityRecord> abilityRecord,
+    std::shared_ptr<AAFwk::AbilityRecord> callerRecord, const AAFwk::AbilityRequest &abilityRequest)
+{
+    int32_t processAppIndex = abilityRecord->GetAppIndex();
+    if (callerRecord != nullptr) {
+        std::string extensionType = abilityRequest.want.GetStringParam(UIEXTENSION_TYPE_KEY);
+        auto embeddedType = AppExecFwk::ConvertToExtensionAbilityType(extensionType);
+        std::string callerBundleName = callerRecord->GetApplicationInfo().bundleName;
+        if (callerBundleName == AAFwk::AbilityConfig::SCENEBOARD_BUNDLE_NAME &&
+            embeddedType == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI) {
+            processAppIndex = abilityRequest.want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, processAppIndex);
+        }
+    }
+    return processAppIndex;
+}
 }
 std::atomic_int32_t ExtensionRecordManager::extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
 
@@ -252,11 +268,15 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
 {
     CHECK_POINTER_AND_RETURN(record, ERR_INVALID_VALUE);
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = record->abilityRecord_;
+    std::shared_ptr<AAFwk::AbilityRecord> callerRecord = AAFwk::Token::
+        GetAbilityRecordByToken(abilityRequest.callerToken);
+
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
-    auto appendAppIndex = [&abilityRecord](std::string &processName) {
-        if (abilityRecord->GetAppIndex() > 0) {
-            processName += SEPARATOR + std::to_string(abilityRecord->GetAppIndex());
+    int32_t processAppIndex = GetAppIndexByRecord(abilityRecord, callerRecord, abilityRequest);
+    auto appendAppIndex = [processAppIndex](std::string &processName) {
+        if (processAppIndex > 0) {
+            processName += SEPARATOR + std::to_string(processAppIndex);
         }
     };
     switch (record->processMode_) {
@@ -288,13 +308,6 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
         }
         case PROCESS_MODE_HOST_SPECIFIED: {
             std::string processName = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
-            int32_t processAppIndex = 0;
-            
-            if (abilityRequest.abilityInfo.bundleName == AAFwk::AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
-                processAppIndex = abilityRecord->GetWant().GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
-            } else {
-                processAppIndex = abilityRecord->GetAppIndex();
-            }
 
             if (processAppIndex > 0) {
                 auto isStrEndWith = [](const std::string &targetStr, const std::string &suffix) {
