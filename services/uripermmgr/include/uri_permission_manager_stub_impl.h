@@ -93,16 +93,16 @@ public:
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    ErrCode GrantUriPermissionWithType(const std::vector<Uri> &uriVec, uint32_t flag,
-        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
-        const std::vector<int32_t> &permisionTypes, int32_t &funcResult) override;
+    ErrCode GrantUriPermissionPrivileged(const std::vector<std::string>& uriVec, uint32_t flag,
+        const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
+        int32_t& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    ErrCode GrantUriPermissionPrivileged(const std::vector<std::string>& uriVec, uint32_t flag,
-        const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
-        int32_t& funcResult) override;
+    ErrCode GrantUriPermissionWithType(const std::vector<Uri> &uriVec, uint32_t flag,
+        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
+        const std::vector<int32_t> &permissionTypes, int32_t &funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
@@ -120,14 +120,14 @@ public:
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    ErrCode CheckUriAuthorizationWithType(const std::vector<std::string>& uriVec, uint32_t flag, uint32_t tokenId,
-        std::vector<CheckResult>& funcResult) override;
+    ErrCode CheckUriAuthorization(const std::vector<std::string>& uriVec, uint32_t flag, uint32_t tokenId,
+        std::vector<bool>& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    ErrCode CheckUriAuthorization(const std::vector<std::string>& uriVec, uint32_t flag, uint32_t tokenId,
-        std::vector<bool>& funcResult) override;
+    ErrCode CheckUriAuthorizationWithType(const std::vector<std::string> &uriVec, uint32_t flag, uint32_t tokenId,
+        std::vector<CheckResult> &funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
@@ -146,20 +146,32 @@ private:
 
     bool VerifyUriPermissionInner(const Uri& uri, uint32_t flag, uint32_t tokenId);
 
+    std::vector<bool> VerifyUriPermissionByPolicy(std::vector<PolicyInfo> &policys, uint32_t flag, uint32_t tokenId);
+
     std::vector<bool> VerifyUriPermissionByMap(std::vector<Uri> &uriVec, uint32_t flag, uint32_t tokenId);
 
     bool VerifySingleUriPermissionByMap(const std::string &uri, uint32_t flag, uint32_t tokenId);
 
     int32_t AddTempUriPermission(const std::string &uri, uint32_t flag, TokenId fromTokenId, TokenId targetTokenId);
 
-    int32_t GrantUriPermissionInner(const std::vector<std::string> &uriVec, uint32_t flag,
-        uint32_t callerTokenId, uint32_t targetTokenId, const std::string &targetBundleName);
+    int32_t GrantUriPermissionInner(BatchUri &batchUri, const std::vector<std::string> &uriVec, uint32_t flag,
+        const FUDAppInfo &callerInfo, const FUDAppInfo &targetInfo);
 
-    int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag, uint32_t callerTokenId,
-       FUDAppInfo &targetAppInfo, int32_t hideSensitiveType);
-    
+    ErrCode CheckGrantUriPermission(const std::vector<std::string>& uriVec, uint32_t flag,
+        const std::string& targetBundleName, int32_t appIndex);
+
+    int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag,
+        const FUDAppInfo &callerInfo, const FUDAppInfo &targetAppInfo, int32_t hideSensitiveType,
+        const std::vector<int32_t> &permissionTypes);
+
+    int32_t GrantBatchMediaUriPermissionImpl(const std::vector<std::string> &mediaUris, uint32_t flag,
+        uint32_t callerTokenId, uint32_t targetTokenId, int32_t hideSensitiveType);
+
+    int32_t GrantBatchUriPermissionImplByPolicy(const std::vector<PolicyInfo> &policyInfoVec, uint32_t policyFlag,
+        const FUDAppInfo &callerInfo, const FUDAppInfo &targetInfo);
+
     int32_t GrantUriPermissionPrivilegedImpl(BatchStringUri &batchUris, uint32_t flag,
-        uint32_t callerTokenId, FUDAppInfo &targetAppInfo, int32_t hideSensitiveType);
+        const FUDAppInfo &callerInfo, const FUDAppInfo &targetAppInfo, int32_t hideSensitiveType);
 
     int32_t GrantBatchContentUriPermissionImpl(const std::vector<std::string> &contentUris,
         uint32_t flag, uint32_t targetTokenId, const std::string &targetBundleName);
@@ -172,27 +184,36 @@ private:
 
     void RemoveContentTokenIdRecord(uint32_t tokenId);
 
-    int32_t GrantBatchMediaUriPermissionImpl(const std::vector<std::string> &mediaUris, uint32_t flag,
-        uint32_t callerTokenId, uint32_t targetTokenId, int32_t hideSensitiveType);
+    void AddPolicyRecordCache(uint32_t callerTokenId, uint32_t targetTokenId, const std::string &path);
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    int32_t SandboxManagerSetPolicy(const std::vector<PolicyInfo> &policyInfoVec, uint32_t flag,
+        const FUDAppInfo &callerInfo, const FUDAppInfo &targetInfo, std::vector<uint32_t> &result);
+#endif
 
     int32_t GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec,
         uint32_t flag, TokenId callerTokenId, TokenId targetTokenId);
 
-    std::vector<bool> CheckUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<std::string> &uriVec,
-        uint32_t flag);
+    int32_t CheckUriPermission(BatchUri &batchUri, uint32_t flag, uint32_t callerTokenId,
+        const std::string &callerAlterableBundleName = "", uint32_t targetTokenId = 0);
 
-    void CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<std::string> &uriVec,
-        uint32_t flag, std::vector<bool> &result);
+    int32_t CheckProxyUriPermission(BatchUri &batchUri, uint32_t callerTokenId, uint32_t flag);
 
     void RevokeMapUriPermission(uint32_t tokenId);
 
+    void RevokePolicyUriPermission(uint32_t tokenId);
+
     int32_t RevokeAllMapUriPermissions(uint32_t tokenId);
+
+    int32_t RevokeAllPolicyUriPermissions(uint32_t tokenId);
 
     int32_t RevokeUriPermissionManuallyInner(Uri &uri, uint32_t targetTokenId);
 
     int32_t RevokeMapUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId, Uri &uri);
 
     int32_t DeleteShareFile(uint32_t targetTokenId, const std::vector<std::string> &uriVec);
+
+    int32_t RevokePolicyUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId, Uri &uri);
 
     int32_t RevokeMediaUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId, Uri &uri);
 
@@ -217,12 +238,15 @@ private:
     int32_t GrantUriPermissionByKeyInner(const std::string &key, uint32_t flag,
         uint32_t callerTokenId, uint32_t targetTokenId);
 
-    int32_t CheckGrantUriPermissionByKeyAsCaller();
-
     int32_t CheckGrantUriPermissionByKey();
+
+    int32_t CheckGrantUriPermissionByKeyAsCaller();
 
     int32_t CheckGrantUriPermissionByKeyParams(const std::string &key, uint32_t flag,
         FUDAppInfo &callerAppInfo, FUDAppInfo &targetAppInfo, std::vector<std::string> &uris);
+
+    int32_t GrantBatchUriPermissionImplByPolicyWithoutCache(const std::vector<PolicyInfo> &policyInfos,
+        uint32_t flag, const FUDAppInfo &callerInfo, const FUDAppInfo &targetInfo);
 #endif // ABILITY_RUNTIME_UDMF_ENABLE
 
     inline int32_t WrapErrorCode(int32_t errorCode, int32_t &funcRet);
@@ -230,7 +254,8 @@ private:
     void StringVecToRawData(const std::vector<std::string> &stringVec, StorageFileRawData &rawData);
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-    ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult) override;
+    ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult)
+        override;
     ErrCode RawDataToPolicyInfo(const UriPermissionRawData& policyRawData, std::vector<PolicyInfo>& policy);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
@@ -246,8 +271,10 @@ private:
 
 private:
     std::map<std::string, std::list<GrantInfo>> uriMap_;
+    std::map<std::string, std::list<GrantPolicyInfo>> policyMap_;
     std::mutex mutex_;
     std::mutex mgrMutex_;
+    std::mutex policyMapMutex_;
     sptr<AppExecFwk::IAppMgr> appMgr_ = nullptr;
     sptr<StorageManager::IStorageManager> storageManager_ = nullptr;
     std::set<uint32_t> permissionTokenMap_;

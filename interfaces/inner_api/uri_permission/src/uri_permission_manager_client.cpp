@@ -16,7 +16,6 @@
 #include "uri_permission_manager_client.h"
 
 #include "ability_manager_errors.h"
-#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -29,11 +28,13 @@ namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 const int MAX_URI_COUNT = 200000;
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
+constexpr int32_t BROKER_UID = 5557;
 
 bool CheckUseRawData()
 {
     // broker can't use raw data
-    return getuid() != AppUtils::GetInstance().GetCollaboratorBrokerUID();
+    auto selfUID = getuid();
+    return selfUID != BROKER_UID;
 }
 } // namespace
 

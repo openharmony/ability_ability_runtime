@@ -53,7 +53,7 @@ void FileUriDistributionUtilsTest::TearDown() {}
 HWTEST_F(FileUriDistributionUtilsTest, SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
 {
     std::vector<std::string> uriVec = { "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt" };
-    const std::vector<bool> resVec = { true };
+    const std::vector<CheckResult> resVec = { CheckResult(true, 0) };
     auto ret = FUDUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
     ASSERT_EQ(ret, false);
 }
