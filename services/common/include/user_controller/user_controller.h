@@ -37,6 +37,7 @@ public:
     void SetForegroundUserId(int32_t userId, uint64_t displayId);
 
     bool GetDisplayIdByForegroundUserId(int32_t userId, uint64_t &displayId);
+    bool IsExistDisplayId(uint64_t displayId);
 
     bool IsForegroundUser(int32_t userId);
     bool IsForegroundUser(int32_t userId, uint64_t displayId);
@@ -44,6 +45,7 @@ public:
     void GetAllForegroundUserId(std::vector<int32_t> &userIds);
 
     void ClearUserId(int32_t userId);
+    void ClearDisplayId(uint64_t displayId);
 
     int32_t GetCallerUserId();
 

@@ -9604,6 +9604,8 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
 
     DelayedSingleton<AppScheduler>::GetInstance()->SetEnableStartProcessFlagByUserId(userId, true);
     auto oldUserId = AbilityRuntime::UserController::GetInstance().GetForegroundUserId(displayId);
+    // True indicates that a user has been created on this displayId, false indicates that no user has been created
+    auto hasDisplayId = AbilityRuntime::UserController::GetInstance().IsExistDisplayId(displayId);
     if (oldUserId != U0_USER_ID && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         // start freezing screen
         AbilityRuntime::UserController::GetInstance().SetFreezingNewUserId(userId);
@@ -9622,7 +9624,16 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
     }
 
     AbilityRuntime::UserController::GetInstance().SetForegroundUserId(userId, displayId);
-    return SwitchToUser(oldUserId, userId, displayId, callback, isAppRecovery);
+    auto ret = SwitchToUser(oldUserId, userId, displayId, callback, isAppRecovery);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SwitchToUser filed，oldUserId:%{public}d, hasDisplayId:%{public}d", oldUserId, hasDisplayId);
+        if (hasDisplayId) {
+            AbilityRuntime::UserController::GetInstance().SetForegroundUserId(oldUserId, displayId);
+        } else {
+            AbilityRuntime::UserController::GetInstance().ClearDisplayId(displayId);
+        }
+    }
+    return ret;
 }
 
 int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callback)
@@ -10344,22 +10355,19 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, uint6
         "%{public}s, oldUserId:%{public}d, newUserId:%{public}d, isAppRecovery:%{public}d", __func__,
         oldUserId, userId, isAppRecovery);
     SwitchManagers(userId);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        PauseOldUser(oldUserId);
-        ConnectServices();
-        StartUserApps();
-    }
+    int32_t ret = ERR_OK;
 #ifndef DISABLE_LAUNCHER
-    bool isBoot = oldUserId == U0_USER_ID ? true : false;
-    auto ret = StartHighestPriorityAbility(userId, displayId, isBoot, isAppRecovery);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
+    if (!StartUserApps(oldUserId)) {
+        bool isBoot = oldUserId == U0_USER_ID ? true : false;
+        ret = StartHighestPriorityAbility(userId, displayId, isBoot, isAppRecovery);
     }
-#else
-    auto ret = ERR_OK;
 #endif
     if (callback) {
         callback->OnStartUserDone(userId, ret);
+    }
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
+        return ret;
     }
     if (taskHandler_) {
         taskHandler_->SubmitTask([abilityMs = shared_from_this(), userId]() {
@@ -10449,13 +10457,19 @@ void AbilityManagerService::PauseOldConnectManager(int32_t userId)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, PauseOldConnectManager:%{public}d-----end", __func__, userId);
 }
 
-void AbilityManagerService::StartUserApps()
+bool AbilityManagerService::StartUserApps(int32_t oldUserId)
 {
-    auto missionListManager = GetCurrentMissionListManager();
-    if (missionListManager && missionListManager->IsStarted()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "missionListManager ResumeManager");
-        missionListManager->ResumeManager();
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        PauseOldUser(oldUserId);
+        ConnectServices();
+        auto missionListManager = GetCurrentMissionListManager();
+        if (missionListManager && missionListManager->IsStarted()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "missionListManager ResumeManager");
+            missionListManager->ResumeManager();
+            return true;
+        }
     }
+    return false;
 }
 
 int32_t AbilityManagerService::GetValidUserId(int32_t userId)

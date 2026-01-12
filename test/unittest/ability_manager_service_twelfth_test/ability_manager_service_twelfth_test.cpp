@@ -22,6 +22,7 @@
 #include "ability_manager_service.h"
 #include "modal_system_dialog/modal_system_dialog_ui_extension.h"
 #include "utils/modal_system_dialog_util.h"
+#include "user_controller/user_controller.h"
 #include "remote_on_listener_stub_mock.h"
 #include "ability_connect_manager.h"
 #include "ui_extension_ability_manager.h"
@@ -479,6 +480,94 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_001, TestSize.Level1)
     retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
     EXPECT_EQ(retCode, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_001 end");
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: StartUser
+* SubFunction: NA
+* FunctionPoints: AbilityManagerService StartUser - U1_USER_ID special case
+*/
+HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = U1_USER_ID; // userId = 1
+    uint64_t displayId = 0;
+    sptr<IUserCallback> callback = new MockIUserCallback();
+    bool isAppRecovery = false;
+
+    IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
+    auto retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, INVALID_USERID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_002 end");
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: StartUser
+* SubFunction: NA
+* FunctionPoints: AbilityManagerService StartUser - Already foreground user
+*/
+HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = 100;
+    uint64_t displayId = 0;
+    sptr<IUserCallback> callback = new MockIUserCallback();
+    bool isAppRecovery = false;
+
+    IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+
+    AbilityRuntime::UserController::GetInstance().SetForegroundUserId(userId, displayId);
+
+    auto retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_003 end");
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: StartUser
+* SubFunction: NA
+* FunctionPoints: AbilityManagerService StartUser - Invalid userId negative value
+*/
+HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = -1; // invalid userId
+    uint64_t displayId = 0;
+    sptr<IUserCallback> callback = new MockIUserCallback();
+    bool isAppRecovery = false;
+
+    IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
+    auto retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, INVALID_USERID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_004 end");
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: StartUser
+* SubFunction: NA
+* FunctionPoints: AbilityManagerService StartUser - Without permission
+*/
+HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_005 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = 100;
+    uint64_t displayId = 0;
+    sptr<IUserCallback> callback = new MockIUserCallback();
+    bool isAppRecovery = false;
+
+    IPCSkeleton::SetCallingUid(1000);
+    auto retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_005 end");
 }
 
 /*
