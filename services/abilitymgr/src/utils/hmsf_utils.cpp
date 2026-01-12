@@ -34,6 +34,9 @@ void HmfsUtils::AddDeleteDfx(const std::string &path)
     }
     if (file == nullptr || fd < 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "open dfx path %{public}s failed", path.c_str());
+        if (file) {
+            fclose(file);
+        }
         return;
     }
     unsigned int flags = 0;
