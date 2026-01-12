@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "ability_record.h"
 #define private public
@@ -37,6 +38,7 @@ constexpr size_t OFFSET_ZERO = 24;
 constexpr size_t OFFSET_ONE = 16;
 constexpr size_t OFFSET_TWO = 8;
 constexpr uint8_t ENABLE = 2;
+constexpr size_t STRING_MAX_LENGTH = 128;
 } // namespace
 
 uint32_t GetU32Data(const char* ptr)
@@ -46,9 +48,9 @@ uint32_t GetU32Data(const char* ptr)
         ptr[INPUT_THREE];
 }
 
-bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const char *ch, size_t size, const uint8_t *data)
 {
-    std::string strParam(data, size);
+    std::string strParam(ch, size);
     auto extensionConfig = std::make_shared<ExtensionConfig>();
     extensionConfig->LoadExtensionConfiguration();
     extensionConfig->GetExtensionAutoDisconnectTime(strParam);
@@ -63,6 +65,13 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->IsExtensionStartDefaultEnable(strParam, strParam);
     nlohmann::json object;
     extensionConfig->LoadExtensionConfig(object);
+    FuzzedDataProvider fdp(data, size);
+    std::string extensionTypeName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    bool isSystemApp = fdp.ConsumeBool();
+    std::string bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    extensionConfig->IsScreenUnlockIntercept(extensionTypeName, isSystemApp, bundleName);
+    std::string abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    extensionConfig->IsScreenUnlockAllowAbility(extensionTypeName, bundleName, abilityName);
     extensionConfig->ReadFileInfoJson(strParam, object);
     extensionConfig->GetExtensionConfigPath();
     extensionConfig->LoadExtensionAutoDisconnectTime(object, strParam);
@@ -106,7 +115,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+    OHOS::DoSomethingInterestingWithMyAPI(ch, size, data);
     free(ch);
     ch = nullptr;
     return 0;
