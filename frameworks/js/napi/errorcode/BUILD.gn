@@ -27,6 +27,10 @@ ohos_shared_library("errorcode_napi") {
 
   sources = [ "ability_errorcode_module.cpp" ]
 
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
+
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",

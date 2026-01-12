@@ -93,6 +93,7 @@ void JsAbilityAutoStartupCallBack::JSCallFunction(const AutoStartupInfo &info, c
     wptr<JsAbilityAutoStartupCallBack> stub = static_cast<JsAbilityAutoStartupCallBack*>(AsObject().GetRefPtr());
     NapiAsyncTask::CompleteCallback complete = [stub, info, methodName](
                                                    napi_env env, NapiAsyncTask &task, int32_t status) {
+        AbilityRuntime::HandleScope handleScope(env);
         sptr<JsAbilityAutoStartupCallBack> obj = stub.promote();
         if (obj == nullptr) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null obj");
@@ -109,6 +110,7 @@ void JsAbilityAutoStartupCallBack::JSCallFunction(const AutoStartupInfo &info, c
 void JsAbilityAutoStartupCallBack::JSCallFunctionWorker(const AutoStartupInfo &info, const std::string &methodName)
 {
     std::lock_guard<std::mutex> lock(mutexlock_);
+    AbilityRuntime::HandleScope handleScope(env_);
     for (auto callback : callbacks_) {
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null callback");
