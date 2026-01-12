@@ -1515,6 +1515,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication begin");
+    // Set the thread priority to 5.
     ffrt::submit([]() {}, ffrt::task_attr().qos(5));
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
