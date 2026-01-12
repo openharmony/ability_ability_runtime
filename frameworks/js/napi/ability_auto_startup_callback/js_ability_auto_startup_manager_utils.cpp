@@ -70,6 +70,11 @@ bool IsNormalObject(napi_env env, napi_value value)
 
 napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null env");
+        return nullptr;
+    }
+    HandleEscape handleEscape(env);
     napi_value arrayObj = nullptr;
     napi_status createStatus = napi_create_array(env, &arrayObj);
     if (createStatus != napi_ok || arrayObj == nullptr) {
@@ -89,7 +94,7 @@ napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStar
         }
     }
 
-    return arrayObj;
+    return handleEscape.Escape(arrayObj);
 }
 
 bool AddBasicProperties(napi_env env, napi_value object, const AutoStartupInfo &info)
@@ -172,6 +177,11 @@ bool AddReadOnlyProperties(napi_env env, napi_value object, const AutoStartupInf
 
 napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null env");
+        return nullptr;
+    }
+    HandleEscape handleEscape(env);
     napi_value object = AppExecFwk::CreateJSObject(env);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null object");
@@ -187,7 +197,7 @@ napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info)
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to add readonly properties");
         return nullptr;
     }
-    return object;
+    return handleEscape.Escape(object);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
