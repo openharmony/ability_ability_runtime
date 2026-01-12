@@ -160,6 +160,13 @@ export default class ServiceExtensionContext extends ExtensionContext {
     });
   }
 
+  startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbility(want, options, myCall);
+    });
+  }
+
   startAbility(want: Want, options?: StartOptions): Promise<void> {
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
