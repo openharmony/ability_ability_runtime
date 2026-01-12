@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -26,8 +27,12 @@ namespace AbilityRuntime {
 #define HMF_IOCTL_HW_SET_FLAGS _IOR(0xf5, 71, unsigned int)
 void HmfsUtils::AddDeleteDfx(const std::string &path)
 {
-    int32_t fd = open(path.c_str(), O_RDONLY);
-    if (fd < 0) {
+    FILE *file = fopen(path.c_str(), "r");
+    int32_t fd = -1;
+    if (file) {
+        fd = fileno(file);
+    }
+    if (file == nullptr || fd < 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "open dfx path %{public}s failed", path.c_str());
         return;
     }
@@ -35,23 +40,23 @@ void HmfsUtils::AddDeleteDfx(const std::string &path)
     int32_t ret = ioctl(fd, HMF_IOCTL_HW_GET_FLAGS, &flags);
     if (ret < 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR,  "check dfx flag path %{public}s failed errno:%{public}d", path.c_str(), errno);
-        close(fd);
+        fclose(file);
         return;
     }
     if (flags & HMFS_MONITOR_FL) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Delete Control flag is already set");
-        close(fd);
+        fclose(file);
         return;
     }
     flags |= HMFS_MONITOR_FL;
     ret = ioctl(fd, HMF_IOCTL_HW_SET_FLAGS, &flags);
     if (ret < 0) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Add dfx flag failed errno:%{public}d path %{public}s", errno, path.c_str());
-        close(fd);
+        fclose(file);
         return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Delete Control flag of %{public}s is set succeed", path.c_str());
-    close(fd);
+    fclose(file);
     return;
 }
 
