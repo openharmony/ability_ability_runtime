@@ -37,6 +37,7 @@ int32_t InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
         TAG_LOGE(AAFwkTag::INTENT, "Load All IntentData failed");
         return ERR_INVALID_VALUE;
     }
+    userId_ = userId;
 
     if (totalInfos.size() == 0) {
         TAG_LOGW(AAFwkTag::INTENT, "empty intent");
@@ -47,7 +48,6 @@ int32_t InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
         std::string bundleName = info.genericInfo.bundleName;
         intentGenericInfos_[bundleName].push_back(info.genericInfo);
     }
-    userId_ = userId;
     return ERR_OK;
 }
 
