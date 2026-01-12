@@ -60,6 +60,7 @@ constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_LOW = "ohos.ability.params.ui
 napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    HandleEscape handleEscape(env);
     if (value == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null value");
         return nullptr;
@@ -109,7 +110,7 @@ napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
         return nullptr;
     }
 
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 JsUIExtensionBase::JsUIExtensionBase(const std::unique_ptr<Runtime> &runtime)

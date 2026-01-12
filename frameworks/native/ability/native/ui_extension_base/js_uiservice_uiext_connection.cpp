@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "js_error_utils.h"
 #include "js_ui_service_proxy.h"
+#include "js_runtime_utils.h"
 #include "napi_common_want.h"
 #include "ui_extension_servicehost_stub_impl.h"
 
@@ -117,6 +118,7 @@ JSUIServiceUIExtConnection::~JSUIServiceUIExtConnection()
 void JSUIServiceUIExtConnection::HandleOnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
+    HandleScope handleScope(env_);
     if (napiAsyncTask_ != nullptr) {
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "HandleOnAbilityConnectDone, CreateJsUIServiceProxy");
         sptr<UIExtensionServiceHostStubImpl> hostStub = GetServiceHostStub();
@@ -140,6 +142,7 @@ void JSUIServiceUIExtConnection::HandleOnAbilityDisconnectDone(const AppExecFwk:
     int resultCode)
 {
     if (napiAsyncTask_ != nullptr) {
+        HandleScope handleScope(env_);
         napi_value innerError = CreateJsError(env_, AbilityErrorCode::ERROR_CODE_INNER);
         napiAsyncTask_->Reject(env_, innerError);
         RejectDuplicatedPendingTask(env_, innerError);
@@ -226,6 +229,7 @@ int32_t JSUIServiceUIExtConnection::OnSendData(OHOS::AAFwk::WantParams &data)
 
 void JSUIServiceUIExtConnection::HandleOnSendData(const OHOS::AAFwk::WantParams &data)
 {
+    HandleScope handleScope(env_);
     napi_value argv[] = { AppExecFwk::CreateJsWantParams(env_, data) };
     CallObjectMethod("onData", argv, ARGC_ONE);
 }
