@@ -45,7 +45,7 @@ constexpr char EVENT_LAST_MARKED_EVENTID[] = "LAST_MARKED_EVENTID";
 constexpr char EVENT_LAST_PROCESS_EVENTID[] = "LAST_PROCESS_EVENTID";
 }
 
-int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSysEventType type,
+int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSysEventEventType type,
     const AppfreezeEventInfo &eventInfo)
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "SendAppfreezeEvent eventName:%{public}s", eventName.c_str());
@@ -62,110 +62,101 @@ int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSys
     return LogGeneralEvent(eventName, type, eventInfo);
 }
 
-int AppfreezeEventReport::LogAppInputBlockEvent(const std::string &name, HiSysEventType type,
+int AppfreezeEventReport::LogAppInputBlockEvent(const std::string &name, HiSysEventEventType type,
     const AppfreezeEventInfo &eventInfo)
 {
     int ret = -1;
-    ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_UID, eventInfo.uid,
-        EVENT_PID, eventInfo.pid,
-        EVENT_PACKAGE_NAME, eventInfo.bundleName,
-        EVENT_PROCESS_NAME, eventInfo.processName,
-        EVENT_MESSAGE, eventInfo.errorMessage,
-        EVENT_STACK, eventInfo.errorStack,
-        EVENT_BINDER_INFO, eventInfo.binderInfo,
-        EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId,
-        EVENT_INPUT_ID, eventInfo.eventId,
-        EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
-        EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
-        EVENT_FOREGROUND, eventInfo.foregroundState,
-        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
-        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
-        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime,
-        EVENT_LAST_DISPATCH_EVENTID, std::to_string(eventInfo.dispatchedEventId),
-        EVENT_LAST_PROCESS_EVENTID, std::to_string(eventInfo.processedId),
-        EVENT_LAST_MARKED_EVENTID, std::to_string(eventInfo.markedId));
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(20);
+    hisyseventReport->InsertParam(EVENT_UID, eventInfo.uid);
+    hisyseventReport->InsertParam(EVENT_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_PACKAGE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_MESSAGE, eventInfo.errorMessage);
+    hisyseventReport->InsertParam(EVENT_STACK, eventInfo.errorStack);
+    hisyseventReport->InsertParam(EVENT_BINDER_INFO, eventInfo.binderInfo);
+    hisyseventReport->InsertParam(EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId);
+    hisyseventReport->InsertParam(EVENT_INPUT_ID, eventInfo.eventId);
+    hisyseventReport->InsertParam(EVENT_FREEZE_MEMORY, eventInfo.freezeMemory);
+    hisyseventReport->InsertParam(EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze);
+    hisyseventReport->InsertParam(EVENT_FOREGROUND, eventInfo.foregroundState);
+    hisyseventReport->InsertParam(EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile);
+    hisyseventReport->InsertParam(EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo);
+    hisyseventReport->InsertParam(EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    hisyseventReport->InsertParam(EVENT_LAST_DISPATCH_EVENTID, std::to_string(eventInfo.dispatchedEventId));
+    hisyseventReport->InsertParam(EVENT_LAST_PROCESS_EVENTID, std::to_string(eventInfo.processedId));
+    hisyseventReport->InsertParam(EVENT_LAST_MARKED_EVENTID, std::to_string(eventInfo.markedId));
+    ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     return ret;
 }
 
-int AppfreezeEventReport::LogThreadBlockEvent(const std::string &name, HiSysEventType type,
+int AppfreezeEventReport::LogThreadBlockEvent(const std::string &name, HiSysEventEventType type,
     const AppfreezeEventInfo &eventInfo)
 {
     int ret = -1;
-    ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_UID, eventInfo.uid,
-        EVENT_PID, eventInfo.pid,
-        EVENT_TID, eventInfo.tid,
-        EVENT_PACKAGE_NAME, eventInfo.bundleName,
-        EVENT_PROCESS_NAME, eventInfo.processName,
-        EVENT_MESSAGE, eventInfo.errorMessage,
-        EVENT_STACK, eventInfo.errorStack,
-        EVENT_BINDER_INFO, eventInfo.binderInfo,
-        EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId,
-        EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
-        EVENT_MAIN_STACK, eventInfo.mainStack,
-        EVENT_TRACE_ID, eventInfo.hitraceInfo,
-        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
-        EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
-        EVENT_FOREGROUND, eventInfo.foregroundState,
-        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
-        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(20);
+    hisyseventReport->InsertParam(EVENT_UID, eventInfo.uid);
+    hisyseventReport->InsertParam(EVENT_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_TID, eventInfo.tid);
+    hisyseventReport->InsertParam(EVENT_PACKAGE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_MESSAGE, eventInfo.errorMessage);
+    hisyseventReport->InsertParam(EVENT_STACK, eventInfo.errorStack);
+    hisyseventReport->InsertParam(EVENT_BINDER_INFO, eventInfo.binderInfo);
+    hisyseventReport->InsertParam(EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId);
+    hisyseventReport->InsertParam(EVENT_FREEZE_MEMORY, eventInfo.freezeMemory);
+    hisyseventReport->InsertParam(EVENT_MAIN_STACK, eventInfo.mainStack);
+    hisyseventReport->InsertParam(EVENT_TRACE_ID, eventInfo.hitraceInfo);
+    hisyseventReport->InsertParam(EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile);
+    hisyseventReport->InsertParam(EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze);
+    hisyseventReport->InsertParam(EVENT_FOREGROUND, eventInfo.foregroundState);
+    hisyseventReport->InsertParam(EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo);
+    hisyseventReport->InsertParam(EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     return ret;
 }
 
-int AppfreezeEventReport::LogLifeCycleTimeoutEvent(const std::string &name, HiSysEventType type,
+int AppfreezeEventReport::LogLifeCycleTimeoutEvent(const std::string &name, HiSysEventEventType type,
     const AppfreezeEventInfo &eventInfo)
 {
     int ret = -1;
-    ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_UID, eventInfo.uid,
-        EVENT_PID, eventInfo.pid,
-        EVENT_TID, eventInfo.tid,
-        EVENT_PACKAGE_NAME, eventInfo.bundleName,
-        EVENT_PROCESS_NAME, eventInfo.processName,
-        EVENT_MESSAGE, eventInfo.errorMessage,
-        EVENT_STACK, eventInfo.errorStack,
-        EVENT_BINDER_INFO, eventInfo.binderInfo,
-        EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId,
-        EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
-        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
-        EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
-        EVENT_FOREGROUND, eventInfo.foregroundState,
-        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
-        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(20);
+    hisyseventReport->InsertParam(EVENT_UID, eventInfo.uid);
+    hisyseventReport->InsertParam(EVENT_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_TID, eventInfo.tid);
+    hisyseventReport->InsertParam(EVENT_PACKAGE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_MESSAGE, eventInfo.errorMessage);
+    hisyseventReport->InsertParam(EVENT_STACK, eventInfo.errorStack);
+    hisyseventReport->InsertParam(EVENT_BINDER_INFO, eventInfo.binderInfo);
+    hisyseventReport->InsertParam(EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId);
+    hisyseventReport->InsertParam(EVENT_FREEZE_MEMORY, eventInfo.freezeMemory);
+    hisyseventReport->InsertParam(EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile);
+    hisyseventReport->InsertParam(EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze);
+    hisyseventReport->InsertParam(EVENT_FOREGROUND, eventInfo.foregroundState);
+    hisyseventReport->InsertParam(EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo);
+    hisyseventReport->InsertParam(EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     return ret;
 }
 
-int AppfreezeEventReport::LogGeneralEvent(const std::string &name, HiSysEventType type,
+int AppfreezeEventReport::LogGeneralEvent(const std::string &name, HiSysEventEventType type,
     const AppfreezeEventInfo &eventInfo)
 {
     int ret = -1;
-    ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_UID, eventInfo.uid,
-        EVENT_PID, eventInfo.pid,
-        EVENT_TID, eventInfo.tid,
-        EVENT_PACKAGE_NAME, eventInfo.bundleName,
-        EVENT_PROCESS_NAME, eventInfo.processName,
-        EVENT_MESSAGE, eventInfo.errorMessage,
-        EVENT_STACK, eventInfo.errorStack,
-        EVENT_BINDER_INFO, eventInfo.binderInfo,
-        EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId,
-        EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
-        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
-        EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
-        EVENT_FOREGROUND, eventInfo.foregroundState);
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(20);
+    hisyseventReport->InsertParam(EVENT_UID, eventInfo.uid);
+    hisyseventReport->InsertParam(EVENT_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_TID, eventInfo.tid);
+    hisyseventReport->InsertParam(EVENT_PACKAGE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_MESSAGE, eventInfo.errorMessage);
+    hisyseventReport->InsertParam(EVENT_STACK, eventInfo.errorStack);
+    hisyseventReport->InsertParam(EVENT_BINDER_INFO, eventInfo.binderInfo);
+    hisyseventReport->InsertParam(EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId);
+    hisyseventReport->InsertParam(EVENT_FREEZE_MEMORY, eventInfo.freezeMemory);
+    hisyseventReport->InsertParam(EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile);
+    hisyseventReport->InsertParam(EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze);
+    ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     return ret;
 }
 }  // namespace AppExecFwk

@@ -16,11 +16,12 @@
 #include "ability_manager_radar.h"
 
 #include "ability_manager_errors.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AAFWK {
+using namespace OHOS::AAFwk;
 namespace {
 constexpr const char* ORG_PKG_NAME = "ohos.abilitymanagerservice";
 constexpr const char* APPLICATION_CONTINUE_BEHAVIOR = "APPLICATION_CONTINUE_BEHAVIOR";
@@ -43,15 +44,14 @@ ContinueRadar &ContinueRadar::GetInstance()
 
 bool ContinueRadar::ClickIconContinue(const std::string& func)
 {
-    int32_t res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
-        BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_CONTINUE),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(5);
+    hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+    hisyseventReport->InsertParam(FUNC, func);
+    hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON));
+    hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_CONTINUE));
+    hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    int res = hisyseventReport->Report(APP_CONTINUE_DOMAIN,
+        APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
         return false;
@@ -68,26 +68,22 @@ bool ContinueRadar::ClickIconStartAbility(const std::string& func, unsigned int 
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
     if (stageRes == StageRes::STAGE_SUCC) {
-        res = HiSysEventWrite(
-            APP_CONTINUE_DOMAIN,
-            APPLICATION_CONTINUE_BEHAVIOR,
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-            ORG_PKG, ORG_PKG_NAME,
-            FUNC, func,
-            BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
-            BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_STARTABILITY),
-            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+        auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(5);
+        hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+        hisyseventReport->InsertParam(FUNC, func);
+        hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON));
+        hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_STARTABILITY));
+        hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+        res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     } else {
-        res = HiSysEventWrite(
-            APP_CONTINUE_DOMAIN,
-            APPLICATION_CONTINUE_BEHAVIOR,
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-            ORG_PKG, ORG_PKG_NAME,
-            FUNC, func,
-            BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
-            BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_STARTABILITY),
-            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
-            ERROR_CODE, errCode);
+        auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(6);
+        hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+        hisyseventReport->InsertParam(FUNC, func);
+        hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON));
+        hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_STARTABILITY));
+        hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL));
+        hisyseventReport->InsertParam(ERROR_CODE, errCode);
+        res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     }
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
@@ -99,15 +95,13 @@ bool ContinueRadar::ClickIconStartAbility(const std::string& func, unsigned int 
 bool ContinueRadar::ClickIconRecvOver(const std::string& func)
 {
     int32_t res = ERR_OK;
-    res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
-        BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_RECV_OVER),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(5);
+    hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+    hisyseventReport->InsertParam(FUNC, func);
+    hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON));
+    hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(ClickIcon::CLICKICON_RECV_OVER));
+    hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
         return false;
@@ -117,15 +111,13 @@ bool ContinueRadar::ClickIconRecvOver(const std::string& func)
 
 bool ContinueRadar::SaveDataContinue(const std::string& func)
 {
-    int32_t res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA),
-        BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_CONTINUE),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(5);
+    hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+    hisyseventReport->InsertParam(FUNC, func);
+    hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA));
+    hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_CONTINUE));
+    hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    int32_t res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
         return false;
@@ -135,15 +127,13 @@ bool ContinueRadar::SaveDataContinue(const std::string& func)
 
 bool ContinueRadar::SaveDataRes(const std::string& func)
 {
-    int32_t res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA),
-        BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_RES),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(5);
+    hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+    hisyseventReport->InsertParam(FUNC, func);
+    hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA));
+    hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_RES));
+    hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    int32_t res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
         return false;
@@ -153,16 +143,14 @@ bool ContinueRadar::SaveDataRes(const std::string& func)
 
 bool ContinueRadar::SaveDataRemoteWant(const std::string& func)
 {
-    int32_t res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA),
-        BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_REMOTE_WANT),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
-        TO_CALL_PKG, DMS_PKG_NAME);
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(6);
+    hisyseventReport->InsertParam(ORG_PKG, ORG_PKG_NAME);
+    hisyseventReport->InsertParam(FUNC, func);
+    hisyseventReport->InsertParam(BIZ_SCENE, static_cast<int32_t>(BizScene::SAVE_DATA));
+    hisyseventReport->InsertParam(BIZ_STAGE, static_cast<int32_t>(SaveData::SAVEDATA_REMOTE_WANT));
+    hisyseventReport->InsertParam(STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+    hisyseventReport->InsertParam(TO_CALL_PKG, DMS_PKG_NAME);
+    int32_t res = hisyseventReport->Report(APP_CONTINUE_DOMAIN, APPLICATION_CONTINUE_BEHAVIOR, HISYSEVENT_BEHAVIOR);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "error, res:%{public}d", res);
         return false;

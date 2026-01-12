@@ -17,8 +17,9 @@
 #include <mutex>
 #include <algorithm>
 #include <string>
+#include <sstream>
  
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "lperf.h"
 #include "hilog_tag_wrapper.h"
  
@@ -78,9 +79,6 @@ int32_t AppCapturePerf::CapturePerf(const FaultData &faultData)
     int res = 0;
     auto &instance = Developtools::HiPerf::HiPerfLocal::Lperf::GetInstance();
     res = instance.StartProcessStackSampling(tids, FREQ, CAPTURE_DURATION, false);
-    if (res != 0) {
-        TAG_LOGE(AAFwkTag::APPDFR, "hiperf stack capture failed");
-    }
     std::vector<std::string> perf;
     for (uint32_t i = 0; i < tids.size(); i++) {
         std::string info;
@@ -92,9 +90,12 @@ int32_t AppCapturePerf::CapturePerf(const FaultData &faultData)
         perf.push_back(info);
     }
     instance.FinishProcessStackSampling();
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "CPU_LOAD_CAPTURE_STACK",
-        HiviewDFX::HiSysEvent::EventType::STATISTIC, "APP_NAME", faultData.errorObject.name,
-        "TIDS", tids, "PERF", perf, "PERFID", perfId);
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+    hisyseventReport->InsertParam("APP_NAME", faultData.errorObject.name);
+    hisyseventReport->InsertParam("TIDS", tids);
+    hisyseventReport->InsertParam("PERF", perf);
+    hisyseventReport->InsertParam("PERFID", perfId);
+    hisyseventReport->Report("AAFWK", "CPU_LOAD_CAPTURE_STACK", HISYSEVENT_STATISTIC);
     return NO_ERROR;
 }
 

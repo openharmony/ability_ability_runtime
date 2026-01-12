@@ -60,6 +60,7 @@ ohos_unittest("app_mgr_service_fourth_test") {
     "${ability_runtime_path}/utils/global/common:runtime_utils",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:hisysevent_report",
     "${ability_runtime_test_path}/moduletest/common/ams:appmgr_mst_source",
     "${ability_runtime_services_path}/common:task_handler_wrap",
     "${ability_runtime_services_path}/common:user_controller",

@@ -27,7 +27,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "js_runtime.h"
 #include "ohos_application.h"
 #include "parameter.h"
@@ -307,14 +307,21 @@ void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
         faultData.procStatm = GetProcStatm(pid);
         if (BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
-                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+            std::string packageName = "";
+            auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+            hisyseventReport->InsertParam("PID", pid);
+            hisyseventReport->InsertParam("PACKAGE_NAME", packageName);
+            hisyseventReport->InsertParam("FAULT_TIME", faultTimeStr);
+            int32_t ret = hisyseventReport->Report("AAFWK", "FREEZE_HALF_HIVIEW_LOG", HISYSEVENT_FAULT);
             faultData.errorObject.message += (ret == 0) ? "FREEZE_HALF_HIVIEW_LOG write success" : "";
         }
     } else {
         if (!BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
-                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
+            std::string packageName = "";
+            auto hisyseventReport = std::make_shared<HisyseventReport>(2);
+            hisyseventReport->InsertParam("PID", pid);
+            hisyseventReport->InsertParam("PACKAGE_NAME", packageName);
+            int32_t ret = hisyseventReport->Report("AAFWK", "FREEZE_HALF_HIVIEW_LOG", HISYSEVENT_FAULT);
             TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:,"
                 " ret:%{public}d", pid, ret);
         }
@@ -473,14 +480,21 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent, uint64_t sc
 #endif
         faultData.procStatm = GetProcStatm(pid);
         if (BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
-                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+            std::string packageName = "";
+            auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+            hisyseventReport->InsertParam("PID", pid);
+            hisyseventReport->InsertParam("PACKAGE_NAME", packageName);
+            hisyseventReport->InsertParam("FAULT_TIME", faultTimeStr);
+            int32_t ret = hisyseventReport->Report("AAFWK", "FREEZE_HALF_HIVIEW_LOG", HISYSEVENT_FAULT);
             faultData.errorObject.message += (ret == 0) ? "FREEZE_HALF_HIVIEW_LOG write success" : "";
         }
     } else {
         if (!BETA_VERSION) {
-            int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
-                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
+            std::string packageName = "";
+            auto hisyseventReport = std::make_shared<HisyseventReport>(2);
+            hisyseventReport->InsertParam("PID", pid);
+            hisyseventReport->InsertParam("PACKAGE_NAME", packageName);
+            int32_t ret = hisyseventReport->Report("AAFWK", "FREEZE_HALF_HIVIEW_LOG", HISYSEVENT_FAULT);
             TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:,"
                 " ret:%{public}d", pid, ret);
         }

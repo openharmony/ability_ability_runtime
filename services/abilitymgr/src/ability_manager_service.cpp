@@ -50,6 +50,7 @@
 #include "global_constant.h"
 #include "hidden_start_observer_manager.h"
 #include "hitrace_meter.h"
+#include "hisysevent_report.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_db_cache.h"
 #include "insight_intent_utils.h"
@@ -274,7 +275,7 @@ constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig
 constexpr const char* UD_KEY = "ability.want.params.udKey";
 constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 
-void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void SendAbilityEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     ffrt::submit([eventName, type, eventInfo]() {
         EventReport::SendAbilityEvent(eventName, type, eventInfo);
@@ -696,7 +697,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 #ifdef SUPPORT_SCREEN
     DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
 #endif
@@ -758,7 +759,7 @@ int32_t AbilityManagerService::StartAbilityByFreeInstall(const StartAbilityWrapP
     }
     auto flags = param.want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(param.want, param.userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not allow startAbility with continuation flags:%{public}d",
             ERR_INVALID_CONTINUATION_FLAG);
@@ -799,7 +800,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed:%{public}d",
             ERR_INVALID_CONTINUATION_FLAG);
@@ -964,7 +965,7 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, DEFAULT_INVAL_VALUE);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility not allowed:%{public}d", ERR_INVALID_CONTINUATION_FLAG);
         AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, ERR_INVALID_CONTINUATION_FLAG, "not allowed");
@@ -1018,7 +1019,7 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
     auto flags = want.GetFlags();
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed:%{public}d",
             ERR_INVALID_CONTINUATION_FLAG);
@@ -1755,7 +1756,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (IsCrossUserCall(userId)) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (!DlpUtils::AccessCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
@@ -2106,7 +2107,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if (!DlpUtils::AccessCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
@@ -2837,7 +2838,7 @@ int32_t AbilityManagerService::ReportDrawnCompleted(const sptr<IRemoteObject> &c
     eventInfo.bundleName = abilityInfo.bundleName;
     eventInfo.moduleName = abilityInfo.moduleName;
     eventInfo.abilityName = abilityInfo.name;
-    EventReport::SendAppEvent(EventName::DRAWN_COMPLETED, HiSysEventType::BEHAVIOR, eventInfo);
+    EventReport::SendAppEvent(EventName::DRAWN_COMPLETED, HISYSEVENT_BEHAVIOR, eventInfo);
     return ERR_OK;
 }
 
@@ -3071,7 +3072,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
 
     (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
     EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     auto requestCode = sessionInfo->requestCode;
     int32_t appIndex = 0;
@@ -3925,7 +3926,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, INVALID_CALLER_TOKEN, true);
         } else {
             eventInfo.errCode = ERR_INVALID_VALUE;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return ERR_INVALID_CALLER;
     }
@@ -3938,7 +3939,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, ERR_APP_CLONE_INDEX_INVALID, true);
         } else {
             eventInfo.errCode = ERR_APP_CLONE_INDEX_INVALID;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return ERR_APP_CLONE_INDEX_INVALID;
     }
@@ -3956,7 +3957,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, result, true);
         } else {
             eventInfo.errCode = result;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return AbilityErrorUtil::ConvertToOriginErrorCode(result);
     }
@@ -3964,7 +3965,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     if (!JudgeMultiUserConcurrency(validUserId)) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "multi-user non-concurrent unsatisfied");
         eventInfo.errCode = ERR_CROSS_USER;
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_CROSS_USER;
     }
 
@@ -3985,7 +3986,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
                 SendExtensionReport(eventInfo, result, true);
             } else {
                 eventInfo.errCode = result;
-                EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
         }
         return AbilityErrorUtil::ConvertToOriginErrorCode(result);
@@ -4000,7 +4001,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, result, true);
         } else {
             eventInfo.errCode = result;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return result;
     }
@@ -4029,7 +4030,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, result, true);
         } else {
             eventInfo.errCode = result;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return result;
     }
@@ -4046,7 +4047,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, result, true);
         } else {
             eventInfo.errCode = result;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return result;
     }
@@ -4060,7 +4061,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             SendExtensionReport(eventInfo, CONNECT_MAMAGER_NOT_FIND_BY_USERID, true);
         } else {
             eventInfo.errCode = ERR_INVALID_VALUE;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return ERR_INVALID_VALUE;
     }
@@ -4077,7 +4078,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             eventInfo.appIndex = appIndex;
             SendExtensionReport(eventInfo, eventInfo.errCode, true);
         } else {
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
     }
     ReportAbilityAssociatedStartInfoToRSS(abilityRequest.abilityInfo, RES_TYPE_EXTENSION_START_ABILITY, callerToken);
@@ -4224,7 +4225,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.persistentId = extensionSessionInfo->persistentId;
     eventInfo.lifeCycle = LIFE_CYCLE_START;
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (extensionSessionInfo->want.HasParameter(AAFwk::SCREEN_MODE_KEY)) {
         int32_t screenMode = extensionSessionInfo->want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
@@ -4464,7 +4465,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
         if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(DMS_PROCESS_NAME)) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "verificationAllToken failed");
             eventInfo.errCode = ERR_INVALID_VALUE;
-            EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
             return ERR_INVALID_CALLER;
         }
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "Caller is specific system ability.");
@@ -4474,7 +4475,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     if (!JudgeMultiUserConcurrency(validUserId)) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "multi-user non-concurrent unsatisfied");
         eventInfo.errCode = ERR_INVALID_VALUE;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_CROSS_USER;
     }
 
@@ -4490,7 +4491,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "generate ability request local error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return result;
     }
 
@@ -4503,7 +4504,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "checkOptExtensionAbility error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return result;
     }
 
@@ -4511,13 +4512,13 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     if (!connectManager) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "connectManager null userId=%{public}d", validUserId);
         eventInfo.errCode = ERR_INVALID_VALUE;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "Stop extension begin, name:%{public}s", abilityInfo.name.c_str());
     eventInfo.errCode = connectManager->StopServiceAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
     return eventInfo.errCode;
 }
@@ -4558,7 +4559,7 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request local error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return;
     }
 
@@ -4568,7 +4569,7 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check extensionAbility type error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return;
     }
 
@@ -4576,14 +4577,14 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId:%{public}d", stopUserId);
         eventInfo.errCode = ERR_INVALID_VALUE;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return;
     }
 
     eventInfo.errCode = connectManager->StopServiceAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "eventInfo errCode=%{public}d", eventInfo.errCode);
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
 }
 
@@ -4727,7 +4728,7 @@ int AbilityManagerService::CloseAbility(const sptr<IRemoteObject> &token, int re
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     EventInfo eventInfo;
-    SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::CLOSE_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     return TerminateAbilityWithFlag(token, resultCode, resultWant, false);
 }
 
@@ -4802,7 +4803,7 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, extensionSessionInfo->userId);
     eventInfo.lifeCycle = LIFE_CYCLE_TERMINATE;
-    SendAbilityEvent(EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::TERMINATE_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     // self terminate or caller terminate is allowed.
     if (!JudgeSelfCalled(targetRecord) && abilityRecord != nullptr && !JudgeSelfCalled(abilityRecord)) {
@@ -4923,7 +4924,7 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
-    SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::CLOSE_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if (isUserRequestedExit) {
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
         AAFwk::ExitReason exitReason = { REASON_NORMAL, "User Request" };
@@ -4934,7 +4935,7 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
         &(sessionInfo->want), sessionInfo->isClearSession, false);
     if (eventInfo.errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "close UIAbility by SCB failed: %{public}d", eventInfo.errCode);
-        SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
     return AbilityErrorUtil::ConvertToOriginErrorCode(eventInfo.errCode);
 }
@@ -5121,7 +5122,7 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, extensionSessionInfo->userId);
     eventInfo.lifeCycle = LIFE_CYCLE_MINIMIZE;
-    SendAbilityEvent(EventName::ABILITY_ONBACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::ABILITY_ONBACKGROUND, HISYSEVENT_BEHAVIOR, eventInfo);
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
@@ -5280,7 +5281,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
             SendExtensionReport(eventInfo, result, true);
         } else {
             eventInfo.errCode = result;
-            EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
         return result;
     }
@@ -5298,7 +5299,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
                 SendExtensionReport(eventInfo, GET_LOCAL_DEVICE_ID_FAILED, true);
             } else {
                 eventInfo.errCode = ERR_INVALID_VALUE;
-                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
             return ERR_INVALID_VALUE;
         }
@@ -5309,7 +5310,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
                 SendExtensionReport(eventInfo, result, true);
             } else {
                 eventInfo.errCode = result;
-                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
             return result;
         }
@@ -5334,7 +5335,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
                 SendExtensionReport(eventInfo, EXTENSION_ABILITY_INFO_NOT_QUERY_BY_URI, true);
             } else {
                 eventInfo.errCode = ERR_INVALID_VALUE;
-                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
             return ERR_INVALID_VALUE;
         }
@@ -5349,7 +5350,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
                 eventInfo.errReason = "ConnectRemoteAbility error";
                 SendExtensionReport(eventInfo, eventInfo.errCode, true);
             } else {
-                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
         }
         return eventInfo.errCode;
@@ -5365,7 +5366,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
                 eventInfo.errReason = "ConnectLocalAbility error";
                 SendExtensionReport(eventInfo, eventInfo.errCode, true);
             } else {
-                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+                EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
             }
         }
         return eventInfo.errCode;
@@ -5377,7 +5378,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
             eventInfo.errReason = "ConnectLocalAbility error";
             SendExtensionReport(eventInfo, eventInfo.errCode, true);
         } else {
-            EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
     }
     return eventInfo.errCode;
@@ -5512,7 +5513,7 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     TAG_LOGE(AAFwkTag::SERVICE_EXT, "Disconnect error %{public}d", err);
     EventInfo eventInfo;
     eventInfo.errCode = err;
-    EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+    EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE_ERROR, HISYSEVENT_FAULT, eventInfo);
     return err;
 }
 
@@ -10063,13 +10064,14 @@ void AbilityManagerService::ScheduleClearRecoveryPageStack()
 void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const AppExecFwk::ApplicationInfo &appInfo,
     const std::string& abilityName, const std::string& result)
 {
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "APP_RECOVERY", HiSysEvent::EventType::BEHAVIOR,
-        "APP_UID", appId,
-        "VERSION_CODE", std::to_string(appInfo.versionCode),
-        "VERSION_NAME", appInfo.versionName,
-        "BUNDLE_NAME", appInfo.bundleName,
-        "ABILITY_NAME", abilityName,
-        "RECOVERY_RESULT", result);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(6);
+    hisyseventReport->InsertParam("APP_UID", appId);
+    hisyseventReport->InsertParam("VERSION_CODE", std::to_string(appInfo.versionCode));
+    hisyseventReport->InsertParam("VERSION_NAME", appInfo.versionName);
+    hisyseventReport->InsertParam("BUNDLE_NAME", appInfo.bundleName);
+    hisyseventReport->InsertParam("ABILITY_NAME", abilityName);
+    hisyseventReport->InsertParam("RECOVERY_RESULT", result);
+    int32_t ret = hisyseventReport->Report("AAFWK", "APP_RECOVERY", HISYSEVENT_BEHAVIOR);
 }
 
 void AbilityManagerService::SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token)
@@ -10287,7 +10289,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request local error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return;
     }
 
@@ -10298,7 +10300,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check extensionAbility type error");
         eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
         return;
     }
 
@@ -10312,7 +10314,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
         if (connectManager == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", startUserId);
             eventInfo.errCode = ERR_INVALID_VALUE;
-            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
             return;
         }
     }
@@ -10320,7 +10322,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
     eventInfo.errCode = connectManager->StartAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "eventInfo errCode:%{public}d", eventInfo.errCode);
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
 }
 
@@ -10773,9 +10775,9 @@ void AbilityManagerService::SendExtensionReport(EventInfo &eventInfo, int32_t er
     eventInfo.errCode = errCode;
     eventInfo.callerBundleName = InsightIntentGetcallerBundleName();
     if (isService) {
-        EventReport::SendExtensionEvent(EventName::UI_SERVICE_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::UI_SERVICE_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
     } else {
-        EventReport::SendExtensionEvent(EventName::UI_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(EventName::UI_EXTENSION_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
 }
 
@@ -10784,7 +10786,7 @@ void AbilityManagerService::SendIntentReport(EventInfo &eventInfo, int32_t errCo
     eventInfo.errCode = errCode;
     eventInfo.callerBundleName = InsightIntentGetcallerBundleName();
     eventInfo.intentName = intentName;
-    EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
+    EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HISYSEVENT_FAULT, eventInfo);
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -12439,7 +12441,7 @@ int AbilityManagerService::CheckDlpForExtension(
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
-        EventReport::SendExtensionEvent(eventName, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendExtensionEvent(eventName, HISYSEVENT_FAULT, eventInfo);
         return CHECK_PERMISSION_FAILED;
     }
     return ERR_OK;
@@ -13252,7 +13254,7 @@ int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentE
     want.SetAction(IParam->GetStringParam(static_cast<std::string>("action")));
 
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     StartAbilityWrapParam startAbilityWrapParam = {
         .want = want,
         .requestCode = requestCode,
@@ -13406,7 +13408,7 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     StartAbilityWrapParam startAbilityWrapParam = {
         .want = want,
         .requestCode = requestCode,
@@ -14670,15 +14672,16 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
         "Prevent start ability debug log CALLER_BUNDLE_NAME %{public}s CALLEE_BUNDLE_NAME"
         "%{public}s ABILITY_NAME %{public}s",
         callerAbilityInfo.bundleName.c_str(), abilityInfo.name.c_str(), abilityInfo.name.c_str());
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::BEHAVIOR,
-        "CALLER_UID", callerUid,
-        "CALLER_PID", callerPid,
-        "CALLER_PROCESS_NAME", callerAbilityInfo.process,
-        "CALLER_BUNDLE_NAME", callerAbilityInfo.bundleName,
-        "CALLEE_BUNDLE_NAME", abilityInfo.bundleName,
-        "CALLEE_PROCESS_NAME", abilityInfo.process,
-        "EXTENSION_ABILITY_TYPE", extensionAbilityType,
-        "ABILITY_NAME", abilityInfo.name);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(8);
+    hisyseventReport->InsertParam("CALLER_UID", callerUid);
+    hisyseventReport->InsertParam("CALLER_PID", callerPid);
+    hisyseventReport->InsertParam("CALLER_PROCESS_NAME", callerAbilityInfo.process);
+    hisyseventReport->InsertParam("CALLER_BUNDLE_NAME", callerAbilityInfo.bundleName);
+    hisyseventReport->InsertParam("CALLEE_BUNDLE_NAME", abilityInfo.bundleName);
+    hisyseventReport->InsertParam("CALLEE_PROCESS_NAME", abilityInfo.process);
+    hisyseventReport->InsertParam("EXTENSION_ABILITY_TYPE", extensionAbilityType);
+    hisyseventReport->InsertParam("ABILITY_NAME", abilityInfo.name);
+    hisyseventReport->Report("AAFWK", "PREVENT_START_ABILITY", HISYSEVENT_BEHAVIOR);
 }
 
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
@@ -14917,7 +14920,7 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
     sptr<IRemoteObject> callerToken = taskInfo.callerToken;
 
     EventInfo eventInfo = BuildEventInfo(want, taskInfo.userId);
-    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "PreStartInner StartAbilityError:%{public}d", ERR_INVALID_CALLER);
@@ -15452,10 +15455,10 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
     eventInfo.errCode = errCode;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
-    SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    SendAbilityEvent(EventName::CLOSE_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if (eventInfo.errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to terminate ability: %{public}d", eventInfo.errCode);
-        SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HISYSEVENT_FAULT, eventInfo);
     }
 }
 
