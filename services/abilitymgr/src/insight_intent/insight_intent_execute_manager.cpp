@@ -629,7 +629,7 @@ std::map<int32_t, int64_t> InsightIntentExecuteManager::GetAllIntentExemptionInf
 void InsightIntentExecuteManager::SendIntentReport(EventInfo &eventInfo, int32_t errCode)
 {
     eventInfo.errCode = errCode;
-    EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
+    EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HISYSEVENT_FAULT, eventInfo);
 }
 
 void InsightIntentExecuteManager::OnInsightAppDied(const std::string &bundleName)

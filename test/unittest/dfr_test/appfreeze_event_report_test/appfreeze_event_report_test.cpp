@@ -89,7 +89,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_001, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -126,7 +126,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_002, TestSize.Level1)
     eventInfo.mainStack = "test";
     eventInfo.enableFreeze = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -159,7 +159,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_003, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -192,7 +192,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_004, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -228,7 +228,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_005, TestSize.Level1)
     eventInfo.applicationHeapInfo = "size1:1234,size2:1234";
     eventInfo.processLifeTime = "21s";
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -261,7 +261,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_006, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = true;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -294,7 +294,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_007, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = true;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -332,7 +332,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_008, TestSize.Level1)
     eventInfo.processedId = 11;
     eventInfo.markedId = 10;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -365,7 +365,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_009, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -398,7 +398,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_010, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -443,7 +443,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_011, TestSize.Level1)
     eventInfo.hitraceInfo = "HitraceIdInfo: hitrace_id: a92ab27238f409a, span_id: "
         "1cd61c9, parent_span_id: 3072e, trace_flag: 0";
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -471,7 +471,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_012, TestSize.Level1)
     eventInfo.foregroundState = true;
     eventInfo.processLifeTime = 16;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -504,7 +504,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_013, TestSize.Level1)
     eventInfo.processedId = 24;
     eventInfo.markedId = 25;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 
@@ -531,7 +531,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_014, TestSize.Level1)
     eventInfo.hitraceInfo = testName;
     eventInfo.foregroundState = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+        HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
 }
 }  // namespace AppExecFwk

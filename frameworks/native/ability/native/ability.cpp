@@ -295,7 +295,7 @@ void Ability::OnActive()
         TAG_LOGE(AAFwkTag::ABILITY, "null setWant_");
     }
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONACTIVE,
-        HiSysEventType::BEHAVIOR, eventInfo);
+        HISYSEVENT_BEHAVIOR, eventInfo);
     TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
@@ -327,7 +327,7 @@ void Ability::OnInactive()
     eventInfo.abilityName = abilityInfo_->name;
     eventInfo.bundleType = static_cast<int32_t>(abilityInfo_->applicationInfo.bundleType);
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONINACTIVE,
-        HiSysEventType::BEHAVIOR, eventInfo);
+        HISYSEVENT_BEHAVIOR, eventInfo);
     TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
@@ -1489,7 +1489,7 @@ void Ability::OnForeground(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITY, "null abilityInfo_");
     }
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONFOREGROUND,
-        HiSysEventType::BEHAVIOR, eventInfo);
+        HISYSEVENT_BEHAVIOR, eventInfo);
 }
 
 void Ability::OnBackground()
@@ -1538,7 +1538,7 @@ void Ability::OnBackground()
     eventInfo.abilityName = abilityInfo_->name;
     eventInfo.bundleType = static_cast<int32_t>(abilityInfo_->applicationInfo.bundleType);
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND,
-        HiSysEventType::BEHAVIOR, eventInfo);
+        HISYSEVENT_BEHAVIOR, eventInfo);
 }
 
 bool Ability::OnBackPress()
@@ -1632,7 +1632,7 @@ void Ability::SetShowOnLockScreen(bool showOnLockScreen)
         eventInfo.bundleName = abilityInfo_->bundleName;
         eventInfo.moduleName = abilityInfo_->moduleName;
         eventInfo.abilityName = abilityInfo_->name;
-        AAFwk::EventReport::SendKeyEvent(AAFwk::EventName::FA_SHOW_ON_LOCK, HiSysEventType::BEHAVIOR, eventInfo);
+        AAFwk::EventReport::SendKeyEvent(AAFwk::EventName::FA_SHOW_ON_LOCK, HISYSEVENT_BEHAVIOR, eventInfo);
     } else {
         window->RemoveWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }

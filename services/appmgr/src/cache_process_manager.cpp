@@ -22,7 +22,7 @@
 #include "app_mgr_service_inner.h"
 #include "app_utils.h"
 #include "cache_process_manager.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "record_cost_time_util.h"
 #include "res_sched_util.h"
 #include "ui_extension_wrapper.h"
@@ -137,9 +137,13 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         appRecord->ScheduleCacheProcess();
     }
     auto appInfo = appRecord->GetApplicationInfo();
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
-        EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "processEnterCache");
+    std::string eventState = "processEnterCache";
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, appInfo->versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, appInfo->versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, appInfo->bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CACHE_STATE, eventState);
+    hisyseventReport->Report("AAFWK", "CACHE_START_APP", HISYSEVENT_BEHAVIOR);
     auto notifyCached = [appRecord]() {
         DelayedSingleton<CacheProcessManager>::GetInstance()->CheckAndNotifyCachedState(appRecord);
     };
@@ -228,9 +232,13 @@ void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord
     }
     RemoveCacheRecord(appRecord);
     auto appInfo = appRecord->GetApplicationInfo();
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
-        EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "destroyedByExternal");
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+    std::string eventState = "destroyedByExternal";
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, appInfo->versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, appInfo->versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, appInfo->bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CACHE_STATE, eventState);
+    hisyseventReport->Report("AAFWK", "CACHE_START_APP", HISYSEVENT_BEHAVIOR);
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s is killed, %{public}s", appRecord->GetName().c_str(),
         PrintCacheQueue().c_str());
 }
@@ -250,12 +258,20 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         return false;
     }
     RemoveCacheRecord(appRecord);
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
-        EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "exitCacheNormal");
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
-        EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "processCacheLaunch");
+    auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+    std::string eventState = "exitCacheNormal";
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, appInfo->versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, appInfo->versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, appInfo->bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CACHE_STATE, eventState);
+    hisyseventReport->Report("AAFWK", "CACHE_START_APP", HISYSEVENT_BEHAVIOR);
+    std::string eventLaunchState = "processCacheLaunch";
+    auto eventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+    eventReport->InsertParam(EVENT_KEY_VERSION_CODE, appInfo->versionCode);
+    eventReport->InsertParam(EVENT_KEY_VERSION_NAME, appInfo->versionName);
+    eventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, appInfo->bundleName);
+    eventReport->InsertParam(EVENT_KEY_CACHE_STATE, eventLaunchState);
+    eventReport->Report("AAFWK", "CACHE_START_APP", HISYSEVENT_BEHAVIOR);
     auto appMgrSptr = appMgr_.lock();
     if (appMgrSptr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
@@ -473,9 +489,13 @@ void CacheProcessManager::ShrinkAndKillCache()
     }
     for (auto& tmpAppRecord : cleanList) {
         auto appInfo = tmpAppRecord->GetApplicationInfo();
-        HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
-            EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
-            EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "killForOverload");
+        std::string eventState = "killForOverload";
+        auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
+        hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, appInfo->versionCode);
+        hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, appInfo->versionName);
+        hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, appInfo->bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_CACHE_STATE, eventState);
+        hisyseventReport->Report("AAFWK", "CACHE_START_APP", HISYSEVENT_BEHAVIOR);
         KillProcessByRecord(tmpAppRecord);
     }
 }

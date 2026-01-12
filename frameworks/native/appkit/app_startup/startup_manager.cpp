@@ -957,7 +957,7 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
         eventInfo.errCode = ERR_STARTUP_CONFIG_PATH_ERROR;
         eventInfo.errReason = "failed to get startup";
         AAFwk::EventReport::SendLaunchFrameworkEvent(
-            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::STARTUP_TASK_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_STARTUP_CONFIG_PATH_ERROR;
     }
     std::string configData(startupConfig.get(), startupConfig.get() + len);
@@ -967,7 +967,7 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
         eventInfo.errCode = ERR_STARTUP_CONFIG_PARSE_ERROR;
         eventInfo.errReason = "bad profile file";
         AAFwk::EventReport::SendLaunchFrameworkEvent(
-            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::STARTUP_TASK_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_STARTUP_CONFIG_PARSE_ERROR;
     }
     config = profileJson.dump();

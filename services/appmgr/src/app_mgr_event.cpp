@@ -95,7 +95,7 @@ bool AppMgrEventUtil::SendCreateAtomicServiceProcessEvent(const std::shared_ptr<
         eventInfo.callerProcessName = callerAppRecord->GetProcessName();
     }
     auto eventName = AAFwk::EventName::CREATE_ATOMIC_SERVICE_PROCESS;
-    AAFwk::EventReport::SendAtomicServiceEvent(eventName, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAtomicServiceEvent(eventName, HISYSEVENT_BEHAVIOR, eventInfo);
     return true;
 }
 
@@ -283,7 +283,7 @@ void AppMgrEventUtil::SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32
     eventInfo.time = restartTime;
     eventInfo.appUid = appUid;
     AAFwk::EventReport::SendKeyEvent(AAFwk::EventName::RESTART_PROCESS_BY_SAME_APP,
-        HiSysEventType::BEHAVIOR, eventInfo);
+        HISYSEVENT_BEHAVIOR, eventInfo);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

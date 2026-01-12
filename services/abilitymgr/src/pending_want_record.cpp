@@ -41,7 +41,7 @@ void SendTriggerFailedEvent(const Want &want, int32_t appIndex, int32_t userId,
     eventInfo.userId = userId;
     eventInfo.startType = TRIGGER_FAILED;
 
-    EventReport::SendTriggerEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    EventReport::SendTriggerEvent(EventName::START_ABILITY_ERROR, HISYSEVENT_FAULT, eventInfo);
 }
 
 PendingWantRecord::PendingWantRecord()

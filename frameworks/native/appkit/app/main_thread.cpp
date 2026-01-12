@@ -100,7 +100,7 @@
 #include "task_handler_client.h"
 #include "time_util.h"
 #include "uncaught_exception_callback.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 #include "os_account_manager_wrapper.h"
@@ -1394,13 +1394,19 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             std::string errMsg = errorObj.message ? errorObj.message : "[none]";
             std::string errStack = errorObj.stack ? errorObj.stack : "[none]";
             std::string errSummary = summary + "\nException info: " + errMsg + "\n" + "Stacktrace:\n" + errStack;
-            HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::CJ_RUNTIME, "CJ_ERROR",
-                OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-                EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION, std::to_string(versionCode),
-                EVENT_KEY_TYPE, CJERROR_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
-                EVENT_KEY_REASON, errName, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, errSummary,
-                EVENT_KEY_PNAME, processName, EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName(),
-                EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+            auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+            hisyseventReport->InsertParam(EVENT_KEY_PACKAGE_NAME, bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION, std::to_string(versionCode));
+            hisyseventReport->InsertParam(EVENT_KEY_TYPE, CJERROR_TYPE);
+            hisyseventReport->InsertParam(EVENT_KEY_HAPPEN_TIME, timet);
+            hisyseventReport->InsertParam(EVENT_KEY_REASON, errName);
+            hisyseventReport->InsertParam(EVENT_KEY_JSVM, JSVM_TYPE);
+            hisyseventReport->InsertParam(EVENT_KEY_SUMMARY, errSummary);
+            hisyseventReport->InsertParam(EVENT_KEY_PNAME, processName);
+            hisyseventReport->InsertParam(EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
+            hisyseventReport->InsertParam(EVENT_KEY_PROCESS_RSS_MEMINFO,
+                std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+            hisyseventReport->Report("CJ_RUNTIME", "CJ_ERROR", HISYSEVENT_FAULT);
             ErrorObject appExecErrorObj = {
                 .name = errName,
                 .message = errMsg,
@@ -1469,13 +1475,20 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         }
         time_t timet;
         time(&timet);
-        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName,
-            EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
-            EVENT_KEY_REASON, errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
-            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId,
-            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
-            EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
+        auto hisyseventReport = std::make_shared<HisyseventReport>(11);
+        hisyseventReport->InsertParam(EVENT_KEY_PACKAGE_NAME, bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_VERSION, std::to_string(versionCode));
+        hisyseventReport->InsertParam(EVENT_KEY_TYPE, JSCRASH_TYPE);
+        hisyseventReport->InsertParam(EVENT_KEY_HAPPEN_TIME, timet);
+        hisyseventReport->InsertParam(EVENT_KEY_REASON, errorObj.name);
+        hisyseventReport->InsertParam(EVENT_KEY_JSVM, JSVM_TYPE);
+        hisyseventReport->InsertParam(EVENT_KEY_SUMMARY, summary);
+        hisyseventReport->InsertParam(EVENT_KEY_PNAME, processName);
+        hisyseventReport->InsertParam(EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_RSS_MEMINFO,
+            std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+        hisyseventReport->InsertParam(EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
+        hisyseventReport->Report("AAFWK", "JS_ERROR", HISYSEVENT_FAULT);
         ErrorObject appExecErrorObj = { .name = errorObj.name, .message = errorObj.message, .stack = errorObj.stack };
         FaultData faultData;
         faultData.faultType = FaultDataType::JS_ERROR;
@@ -1492,10 +1505,15 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
             appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
             foreground = true;
         }
-        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", KILL_REASON,
-            EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId, EVENT_KEY_REASON, "JsError",
-            "FOREGROUND", foreground);
+        std::string eventKeyReason = "JsError";
+        auto exitReport = std::make_shared<HisyseventReport>(6);
+        exitReport->InsertParam("PID", pid);
+        exitReport->InsertParam("PROCESS_NAME", processName);
+        exitReport->InsertParam("MSG", KILL_REASON);
+        exitReport->InsertParam(EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId);
+        exitReport->InsertParam(EVENT_KEY_REASON, eventKeyReason);
+        exitReport->InsertParam("FOREGROUND", foreground);
+        int result = exitReport->Report("FRAMEWORK", "PROCESS_KILL", HISYSEVENT_FAULT);
         TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event "
             "[FRAMEWORK,PROCESS_KILL],"
             " pid=%{public}d, processName=%{public}s, msg=%{public}s, "
@@ -2067,13 +2085,21 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         time(&timet);
         std::string lifeTime = GetProcessLifeCycleByPid(pid);
         if (!ApplicationDataManager::jsErrorHasReport_.exchange(true)) {
-            int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-                OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION,
-                std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
-                EVENT_KEY_REASON, errorObject.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
-                EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId,
-                EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
-                EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName(), EVENT_KEY_PROCESS_LIFETIME, lifeTime);
+            auto hisyseventReport = std::make_shared<HisyseventReport>(12);
+            hisyseventReport->InsertParam(EVENT_KEY_PACKAGE_NAME, bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION, std::to_string(versionCode));
+            hisyseventReport->InsertParam(EVENT_KEY_TYPE, JSCRASH_TYPE);
+            hisyseventReport->InsertParam(EVENT_KEY_HAPPEN_TIME, timet);
+            hisyseventReport->InsertParam(EVENT_KEY_REASON, errorObject.name);
+            hisyseventReport->InsertParam(EVENT_KEY_JSVM, JSVM_TYPE);
+            hisyseventReport->InsertParam(EVENT_KEY_SUMMARY, summary);
+            hisyseventReport->InsertParam(EVENT_KEY_PNAME, processName);
+            hisyseventReport->InsertParam(EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId);
+            hisyseventReport->InsertParam(EVENT_KEY_PROCESS_RSS_MEMINFO,
+                std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+            hisyseventReport->InsertParam(EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
+            hisyseventReport->InsertParam(EVENT_KEY_PROCESS_LIFETIME, lifeTime);
+            int result = hisyseventReport->Report("AAFWK", "JS_ERROR", HISYSEVENT_FAULT);
             TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,JS_ERROR],"
                 " packageName=%{public}s, pid=%{public}d, appRunningId=%{public}s, threadName=%{public}s,"
                 " isUncatchable=%{public}d", result, bundleName.c_str(), pid, appRunningId.c_str(),
@@ -2122,10 +2148,16 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
     // if app's callback has been registered, let app decide whether exit or not.
     TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n"
         "%{public}s", info.bundleName.c_str(), info.errorObjectName.c_str(), info.summary.c_str());
-    int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-        HiviewDFX::HiSysEvent::EventType::FAULT, "PID", info.pid, "PROCESS_NAME", info.processName,
-        EVENT_KEY_APP_RUNNING_UNIQUE_ID, info.appRunningId, EVENT_KEY_REASON, "JsError",
-        "MSG", KILL_REASON, "FOREGROUND", info.foreground, "IS_UNCATCHABLE", info.isUncatchable);
+    std::string eventKeyReason = "JsError";
+    auto hisyseventReport = std::make_shared<HisyseventReport>(12);
+    hisyseventReport->InsertParam("PID", info.pid);
+    hisyseventReport->InsertParam("PROCESS_NAME", info.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_RUNNING_UNIQUE_ID, info.appRunningId);
+    hisyseventReport->InsertParam(EVENT_KEY_REASON, eventKeyReason);
+    hisyseventReport->InsertParam("MSG", KILL_REASON);
+    hisyseventReport->InsertParam("FOREGROUND", info.foreground);
+    hisyseventReport->InsertParam("IS_UNCATCHABLE", info.isUncatchable);
+    int result = hisyseventReport->Report("FRAMEWORK", "PROCESS_KILL", HISYSEVENT_FAULT);
     TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
         " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);

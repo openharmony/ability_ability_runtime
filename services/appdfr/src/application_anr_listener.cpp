@@ -22,7 +22,7 @@
 #include "app_mgr_client.h"
 #include "fault_data.h"
 #include "hilog_tag_wrapper.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "parameters.h"
 #include "time_util.h"
 
@@ -38,8 +38,12 @@ ApplicationAnrListener::~ApplicationAnrListener() {}
 void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
 {
     std::string faultTimeStr = "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
-    int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "FREEZE_HALF_HIVIEW_LOG",
-        HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "", "FAULT_TIME", faultTimeStr);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+    std::string packageName = "";
+    hisyseventReport->InsertParam("PID", pid);
+    hisyseventReport->InsertParam("PACKAGE_NAME", packageName);
+    hisyseventReport->InsertParam("FAULT_TIME", faultTimeStr);
+    int32_t ret = hisyseventReport->Report("AAFWK", "FREEZE_HALF_HIVIEW_LOG", HISYSEVENT_FAULT);
     TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write FREEZE_HALF_HIVIEW_LOG, pid:%{public}d, packageName:, ret:%{public}d",
         pid, ret);
     AppExecFwk::AppFaultDataBySA faultData;

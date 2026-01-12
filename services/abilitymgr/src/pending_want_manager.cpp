@@ -85,7 +85,7 @@ void SendWantAgentNumberEvent(std::shared_ptr<PendingWantKey> pendingKey, int32_
     eventInfo.callerBundleName = bundleName;
     eventInfo.callerUid = appIndex;
     eventInfo.wantAgentNumber = wantAgentNumber;
-    EventReport::SendWantAgentEvent(EventName::WANTAGENT_NUMBER, HiSysEventType::STATISTIC, eventInfo);
+    EventReport::SendWantAgentEvent(EventName::WANTAGENT_NUMBER, HISYSEVENT_STATISTIC, eventInfo);
 }
 
 void PendingWantManager::HandleAddWantAgentNumber(std::shared_ptr<PendingWantKey> pendingKey)
