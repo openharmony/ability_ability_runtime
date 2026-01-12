@@ -46,6 +46,7 @@ public:
     int32_t DeleteStorageInsightIntentData(const std::string &bundleName,
         const std::string &moduleName, const int32_t userId);
     int32_t DeleteStorageInsightIntentByUserId(const int32_t userId);
+    void BackupRdb();
 
 private:
     void Transform(std::unordered_map<std::string, std::string> value,

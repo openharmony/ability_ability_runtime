@@ -253,5 +253,11 @@ int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentData(const std::string &
     }
     return ERR_OK;
 }
+
+void InsightRdbStorageMgr::BackupRdb()
+{
+    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->BackupRdb();
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
