@@ -52,7 +52,7 @@ bool SetFds(ani_env* env, ani_object object, std::map<std::string, int32_t> &fds
     }
     ani_method recordSetMethod = nullptr;
     status = env->Class_FindMethod(recordCls, "$_set",
-        "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}C{std.core.Object}:", &recordSetMethod);
+        "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}Y:", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Class_FindMethod failed status: %{public}d", status);
         return false;

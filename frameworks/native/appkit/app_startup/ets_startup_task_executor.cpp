@@ -43,7 +43,7 @@ int32_t ETSStartupTaskExecutor::RunOnTaskPool(ani_env *env, ani_ref startupTask,
     ani_class cls = nullptr;
     ani_method ctor = nullptr;
     ani_object object = nullptr;
-    
+
     if ((status = env->FindClass("appstartup.StartupTaskExecutor.StartupTaskExecutor", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "FindClass failed, status: %{public}d", status);
         return ERR_STARTUP_INTERNAL_ERROR;
@@ -195,7 +195,7 @@ void ETSStartupTaskExecutor::NativeOnTaskFailure(ani_env *env, ani_object thisOb
         TAG_LOGE(AAFwkTag::STARTUP, "null callback");
         return;
     }
-    
+
     std::string strErrorMessage;
     if (!AppExecFwk::GetStdString(env, errorMessage, strErrorMessage)) {
         TAG_LOGE(AAFwkTag::STARTUP, "GetStdString failed.");
@@ -242,7 +242,7 @@ void ETSStartupTaskExecutorInit(ani_env *env)
     }
 
     std::array startupTaskExecutorNativeFuncs = {
-        ani_native_function { "nativeOnTaskSuccess", "lC{std.core.Object}:",
+        ani_native_function { "nativeOnTaskSuccess", "lY:",
             reinterpret_cast<void*>(ETSStartupTaskExecutor::NativeOnTaskSuccess) },
         ani_native_function { "nativeOnTaskFailure", "lC{std.core.String}:",
             reinterpret_cast<void*>(ETSStartupTaskExecutor::NativeOnTaskFailure) },

@@ -531,7 +531,7 @@ void EtsAutoFillExtensionUtil::SetViewDataArray(ani_env *env, ani_object &object
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null etsSubValue");
             break;
         }
-        if ((status = env->Object_CallMethodByName_Void(object, "$_set", "iC{std.core.Object}:", index,
+        if ((status = env->Object_CallMethodByName_Void(object, "$_set", "iY:", index,
             etsSubValue)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status : %{public}d", status);
             break;
