@@ -2634,7 +2634,8 @@ private:
     std::function<void(int32_t)> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
-    void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber);
+    void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber,
+        bool isUserUnlockSubscriber = false);
     void RemoveScreenUnlockInterceptor();
     void AddWatchParameters();
 
