@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-import StartOptions from '@ohos.app.ability.StartOptions';
-import { RecordData } from '@ohos.base';
-import CompletionHandlerForAtomicService from '@ohos.app.ability.CompletionHandlerForAtomicService';
+export enum FailureCode {
+    FAILURE_CODE_SYSTEM_MALFUNCTION = 0,
+    FAILURE_CODE_USER_CANCEL = 1,
+    FAILURE_CODE_USER_REFUSE = 2,
+}
 
-export default class AtomicServiceOptions extends StartOptions {
-  flags?: int;
-  parameters?: Record<string, RecordData>;
-  completionHandlerForAtomicService?: CompletionHandlerForAtomicService;
+type OnAtomicServiceRequestSuccessFn = (appId: string) => void;
+
+type OnAtomicServiceRequestFailureFn = (appId: string, failureCode: FailureCode, failureMessage: string) => void;
+
+export default class CompletionHandlerForAtomicService {
+    onAtomicServiceRequestSuccess?: OnAtomicServiceRequestSuccessFn;
+    onAtomicServiceRequestFailure?: OnAtomicServiceRequestFailureFn;
 }
