@@ -15,7 +15,9 @@
 #include "abilitypermissionutil_fuzzer.h"
 
 #define private public
+#define protected public
 #include "ability_permission_util.h"
+#undef protected
 #undef private
 
 #include <fuzzer/FuzzedDataProvider.h>
@@ -69,6 +71,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     util.IsStartSelfUIAbility();
     util.CheckPrepareTerminateEnable(abilityRecord);
     util.NeedCheckStatusBar(abilityRecord, abilityRequest);
+    abilityRequest.Dump(info);
+    int srcRequestCode = fdp.ConsumeIntegral<int>();
+    std::shared_ptr<AbilityStartSetting> srcStartSetting = std::make_shared<AbilityStartSetting>();
+    int srcCallerUid = fdp.ConsumeIntegral<int>();
+    abilityRequest.Voluation(want, srcRequestCode, callerToken, srcStartSetting, srcCallerUid);
     return true;
 }
 }
