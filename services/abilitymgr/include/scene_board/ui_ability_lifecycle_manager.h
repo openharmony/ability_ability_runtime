@@ -543,6 +543,8 @@ public:
     ErrCode IsUIAbilityAlreadyExist(const Want &want, const std::string &specifiedFlag,
         int32_t appIndex, const std::string &instanceKey, AppExecFwk::LaunchMode launchMode);
 
+    void HandleUIAbilityDiedByPid(int32_t pid);
+
 private:
     /**
      * @brief Add starting process ID to tracking list

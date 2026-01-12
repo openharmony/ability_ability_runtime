@@ -49,7 +49,8 @@ void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::Bu
     TAG_LOGD(AAFwkTag::TEST, "NotifyStartResidentProcess called");
 }
 
-void AppStateCallbackHost::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+void AppStateCallbackHost::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t diedPid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }

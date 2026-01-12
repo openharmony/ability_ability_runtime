@@ -2333,7 +2333,8 @@ protected:
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
-    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid = AppExecFwk::INVALID_DIED_PID) override;
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -2992,6 +2993,10 @@ private:
     void StartKeepAliveAppsInner(int32_t userId);
 
     bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
+
+    void TimeSequenceKeepAliveRestart(int32_t userId, int32_t pid,
+        std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> &bundleInfosMap,
+        std::vector<AppExecFwk::BundleInfo> &bundleInfosForU1);
 
     struct StartSelfUIAbilityParam {
         Want want;

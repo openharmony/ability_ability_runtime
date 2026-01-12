@@ -94,7 +94,8 @@ void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::Bu
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void AppStateCallbackHost::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+void AppStateCallbackHost::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t diedPid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -194,7 +195,8 @@ int32_t AppStateCallbackHost::HandleNotifyStartKeepAliveProcess(MessageParcel &d
         }
         bundleInfos.emplace_back(*bundleInfo);
     }
-    NotifyStartKeepAliveProcess(bundleInfos);
+    int32_t diedPid = data.ReadInt32();
+    NotifyStartKeepAliveProcess(bundleInfos, diedPid);
     return NO_ERROR;
 }
 
