@@ -44,7 +44,7 @@ constexpr const char *TOOL_CLASS_NAME = "@ohos.app.ability.Want.RecordSerializeT
 constexpr const char *INNER_CLASS_NAME = "ability.abilityResult.AbilityResultInner";
 constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 constexpr const char *RECORD_SET_NAME =
-    "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}C{std.core.Object}:";
+    "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}Y:";
 const int PROPERTIES_SIZE = 2;
 
 bool InnerWrapWantParams(ani_env *env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams &wantParams)
@@ -1081,7 +1081,7 @@ bool InnerCreateArrayRecordFromJson(ani_env *env, const nlohmann::json &jsonArra
     ani_size index = 0;
     for (const auto &item : jsonArray) {
         ani_object elementValue = nullptr;
-        
+
         if (item.is_object()) {
             if (!CreateRecordObjectFromJson(env, item, elementValue)) {
                 TAG_LOGE(AAFwkTag::ANI, "failed to create object element");

@@ -353,7 +353,7 @@ bool EtsWantParams::SetArrayString(ani_env *env, const std::string &key, ani_obj
 
     for (int i = 0; i < length; i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(value, "$_get", "i:C{std.core.Object}", &itemRef, i);
+        status = env->Object_CallMethodByName_Ref(value, "$_get", "i:Y", &itemRef, i);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANT, "status: %{public}d, index: %{public}d", status, i);
             return false;
