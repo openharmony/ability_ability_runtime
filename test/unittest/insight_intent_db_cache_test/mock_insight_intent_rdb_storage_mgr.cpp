@@ -185,5 +185,8 @@ int32_t InsightRdbStorageMgr::LoadConfigInsightIntentInfoByName(const std::strin
     infos.clear();
     return ERR_INVALID_VALUE;
 }
+
+void InsightRdbStorageMgr::BackupRdb()
+{}
 }
 }

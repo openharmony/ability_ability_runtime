@@ -213,6 +213,7 @@ HWTEST_F(InsightIntentDbCacheTest, InsightIntentDbCacheTest_004, TestSize.Level0
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
         moduleName, userId, profileInfos, configInfos);
+    DelayedSingleton<InsightIntentDbCache>::GetInstance()->BackupRdb();
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     MockSaveData(true);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
