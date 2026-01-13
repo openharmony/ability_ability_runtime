@@ -26,6 +26,7 @@ namespace AbilityRuntime {
 void JsExtensionContext::ConfigurationUpdated(napi_env env, const std::shared_ptr<NativeReference>& jsContext,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
+    HandleScope handleScope(env);
     if (env == nullptr || jsContext == nullptr || config == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null engine or jsContext or config");
         return;
@@ -56,7 +57,7 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return nullptr;
     }
-    HandleEscape handleScope(env);
+    HandleEscape handleEscape(env);
     napi_value object = CreateJsBaseContext(env, context);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
@@ -96,7 +97,7 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
     std::string type = "ExtensionContext";
     napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
 
-    return handleScope.Escape(object);
+    return handleEscape.Escape(object);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
