@@ -1268,6 +1268,7 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete = [observerId](napi_env env, NapiAsyncTask& task, int32_t status) {
             TAG_LOGI(AAFwkTag::JSNAPI, "complete called");
+            HandleScope handleScope(env);
             std::lock_guard<std::recursive_mutex> lock(errorMtx);
             if (!observerList.count(env) || observerId == -1) {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
@@ -1380,6 +1381,7 @@ private:
     {
         std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
             ([number](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 if (loopObserver_ == nullptr) {
                     TAG_LOGE(AAFwkTag::JSNAPI, "null loopObserver_");
                     return;
