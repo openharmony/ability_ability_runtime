@@ -155,15 +155,6 @@ inline bool IsPublicForConstrainedEmbedded(const AppExecFwk::ExtensionAbilityTyp
     return publicForConstrainedEmbeddedSet.find(type) != publicForConstrainedEmbeddedSet.end();
 }
 
-inline bool IsOnlyForModal(const AppExecFwk::ExtensionAbilityType type)
-{
-    const std::unordered_set<AppExecFwk::ExtensionAbilityType> onlyForMoadalSet = {
-        AppExecFwk::ExtensionAbilityType::AWC_WEBPAGE,
-        AppExecFwk::ExtensionAbilityType::AWC_NEWSFEED
-    };
-    return onlyForMoadalSet.find(type) != onlyForMoadalSet.end();
-}
-
 inline bool IsEnterpriseAdmin(const AppExecFwk::ExtensionAbilityType type)
 {
     bool enterpriseAdminSa = (IPCSkeleton::GetCallingUid() == EDM_SA_UID);
