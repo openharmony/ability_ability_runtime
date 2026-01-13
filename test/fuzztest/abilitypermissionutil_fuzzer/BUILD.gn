@@ -39,6 +39,7 @@ ohos_fuzztest("AbilityPermissionUtilFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_start_setting.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/ability_permission_util.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "abilitypermissionutil_fuzzer.cpp",
