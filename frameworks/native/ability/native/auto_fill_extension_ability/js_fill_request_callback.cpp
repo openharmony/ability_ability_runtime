@@ -239,6 +239,7 @@ napi_value JsFillRequestCallback::CreateJsFillRequestCallback(napi_env env,
     const sptr<AAFwk::SessionInfo> &sessionInfo, const sptr<Rosen::Window> &uiWindow)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -255,7 +256,7 @@ napi_value JsFillRequestCallback::CreateJsFillRequestCallback(napi_env env,
     BindNativeFunction(env, object, "onFailure", moduleName, FillRequestFailed);
     BindNativeFunction(env, object, "onCancel", moduleName, FillRequestCanceled);
     BindNativeFunction(env, object, "setAutoFillPopupConfig", moduleName, FillRequestAutoFillPopupConfig);
-    return object;
+    return handleEscape.Escape(object);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
