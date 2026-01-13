@@ -114,6 +114,7 @@ void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info, NapiCall
 
 void SetNamedNativePointer(napi_env env, napi_value object, const char* name, void* ptr, napi_finalize func)
 {
+    HandleScope handleScope(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_wrap(env, objValue, ptr, func, nullptr, nullptr);
@@ -256,6 +257,7 @@ void NapiAsyncTask::Resolve(napi_env env, napi_value value)
         deferred_ = nullptr;
     }
     if (callbackRef_) {
+        HandleScope handleScope(env);
         napi_value argv[] = {
             CreateJsError(env, 0),
             value,
@@ -276,6 +278,7 @@ void NapiAsyncTask::ResolveWithNoError(napi_env env, napi_value value)
         deferred_ = nullptr;
     }
     if (callbackRef_) {
+        HandleScope handleScope(env);
         napi_value argv[] = {
             CreateJsNull(env),
             value,
