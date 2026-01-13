@@ -1990,7 +1990,7 @@ std::shared_ptr<Context> ContextImpl::CreateTargetPluginContext(const std::strin
 std::shared_ptr<Context> ContextImpl::CreateModuleOrPluginContext(const std::string &bundleName,
     const std::string &moduleName)
 {
-    if (bundleName .empty() || moduleName.empty()) {
+    if (bundleName.empty() || moduleName.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "input params is null");
         return nullptr;
     }
@@ -1998,7 +1998,10 @@ std::shared_ptr<Context> ContextImpl::CreateModuleOrPluginContext(const std::str
     std::shared_ptr<Context> currentContext = shared_from_this();
     std::shared_ptr<Context> appContext = CreateModuleContext(bundleName, moduleName, currentContext);
     if (appContext == nullptr) {
-        appContext = CreatePluginContext(bundleName, moduleName, currentContext);
+        auto appInfo = GetApplicationInfo();
+        if (appInfo && appInfo->hasPlugin) {
+            appContext = CreatePluginContext(bundleName, moduleName, currentContext);
+        }
     }
 
     return appContext;

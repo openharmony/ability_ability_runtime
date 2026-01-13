@@ -1366,6 +1366,12 @@ std::shared_ptr<Context> AbilityContextImpl::CreateAreaModeContext(int areaMode)
     return stageContext_ ? stageContext_->CreateAreaModeContext(areaMode) : nullptr;
 }
 
+std::shared_ptr<Context> AbilityContextImpl::CreateModuleOrPluginContext(const std::string &bundleName,
+    const std::string &moduleName)
+{
+    return stageContext_ ? stageContext_->CreateModuleOrPluginContext(bundleName, moduleName) : nullptr;
+}
+
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> AbilityContextImpl::CreateDisplayContext(uint64_t displayId)
 {
