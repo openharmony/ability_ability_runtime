@@ -30,6 +30,7 @@ ohos_fuzztest("AbilityMgrAbilityManagerStubFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/interfaces/inner_api/connectionobs_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/session_info/include",
   ]
   cflags = [

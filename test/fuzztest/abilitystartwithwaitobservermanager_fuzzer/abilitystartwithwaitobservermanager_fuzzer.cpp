@@ -34,6 +34,19 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace {
 constexpr size_t U32_AT_SIZE = 4;
+class IAbilityStartWithWaitObserverFUZZ : public IAbilityStartWithWaitObserver {
+public:
+    explicit IAbilityStartWithWaitObserverFUZZ() {};
+    virtual ~ IAbilityStartWithWaitObserverFUZZ() {};
+    int32_t NotifyAATerminateWait(const AbilityStartWithWaitObserverData &abilityStartWithWaitData) override
+    {
+        return 0;
+    };
+    sptr<IRemoteObject> AsObject() override
+    {
+    return nullptr;
+    }
+};
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -52,6 +65,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     infos->NotifyAATerminateWait(abilityRecord);
     infos->SetColdStartForShellCall(abilityRecord);
     infos->GenerateDeathRecipient(observer);
+    sptr<IAbilityStartWithWaitObserver> observer1 = new IAbilityStartWithWaitObserverFUZZ();
+    infos->RegisterObserver(want, observer1);
     return true;
 }
 }

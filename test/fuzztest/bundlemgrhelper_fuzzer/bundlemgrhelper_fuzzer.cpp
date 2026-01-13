@@ -115,6 +115,11 @@ void BundleMgrHelperFuzztest1(bool boolParam, std::string &stringParam, int32_t 
     bmHelper->GetAppControlProxy();
     bmHelper->QueryExtensionAbilityInfos(want, int32Param, int32Param, extensionInfos);
     bmHelper->GetBundleInfoV9(stringParam, int32Param, bundleInfo, int32Param);
+    bmHelper->ConnectTillSuccess();
+    bmHelper->SetBmsReady(boolParam);
+    bmHelper->GetBundleInfoForSelfWithOutCache(int32Param, bundleInfo);
+    ExtensionAbilityInfo pluginExtensionInfo;
+    bmHelper->GetPluginExtensionInfo(stringParam, want, int32Param, pluginExtensionInfo);
 }
 
 void BundleMgrHelperFuzztest2(bool boolParam, std::string &stringParam, int32_t int32Param)

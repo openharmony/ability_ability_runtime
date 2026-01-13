@@ -20,6 +20,8 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
 #include "ability_fuzz_util.h"
+#include "message_parcel.h"
+#include "window_config.h"
 #include "window_options_utils.h"
 
 using namespace OHOS::AAFwk;
@@ -54,6 +56,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     int32_t windowMode = fdp.ConsumeIntegral<int32_t>();
     WindowOptionsUtils::SetWindowPositionAndSize(want, callerToken, startOptions);
     WindowOptionsUtils::WindowModeMap(windowMode);
+
+    WindowConfig windowConfig;
+    MessageParcel parcel;
+    parcel.WriteString(fdp.ConsumeRandomLengthString());
+    WindowConfig* unmarshalled = WindowConfig::Unmarshalling(parcel);
+    if (unmarshalled != nullptr) {
+        delete unmarshalled;
+    }
+
+    MessageParcel parcel1;
+    windowConfig.Marshalling(parcel1);
     return true;
 }
 } // namespace OHOS

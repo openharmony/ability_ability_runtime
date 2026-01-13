@@ -20,6 +20,7 @@
 #undef private
 
 #include "keep_alive_info.h"
+#include "background_app_info.h"
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
@@ -28,6 +29,7 @@
 namespace OHOS {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AbilityRuntime;
+using namespace OHOS::AppExecFwk;
 namespace {
 constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t STRING_MAX_LENGTH = 128;
@@ -65,6 +67,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     abilityKeepAliveService.GetKeepAliveApplications(int32Param, infoList);
     abilityKeepAliveService.QueryKeepAliveAppServiceExtensions(infoList);
     abilityKeepAliveService.ClearKeepAliveAppServiceExtension(info);
+
+    Parcel parcel;
+    BackgroundAppInfo backgroundAppInfo;
+    backgroundAppInfo.bandleName = fdp.ConsumeRandomLengthString();
+    backgroundAppInfo.appIndex = fdp.ConsumeIntegral<int32_t>();
+    backgroundAppInfo.Marshalling(parcel);
     return true;
 }
 }
