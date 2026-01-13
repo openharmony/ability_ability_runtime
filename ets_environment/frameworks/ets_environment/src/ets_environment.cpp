@@ -258,6 +258,7 @@ bool ETSEnvironment::Initialize(const std::shared_ptr<AppExecFwk::EventRunner> e
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
+    options.push_back(ani_option { "--ext:--verification-mode=ahead-of-time", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
     options.push_back(ani_option { "--ext:taskpool-support-interop=true", nullptr });
     std::string interpreerMode = "--ext:--interpreter-type=cpp";
