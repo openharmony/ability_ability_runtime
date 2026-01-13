@@ -19,6 +19,7 @@
 #include "js_auto_fill_extension_util.h"
 #include "js_error_utils.h"
 #include "js_extension_context.h"
+#include "js_runtime_utils.h"
 #include "napi/native_api.h"
 #include "napi_common_want.h"
 #include "napi_common_util.h"
@@ -49,6 +50,7 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
         return CreateJsUndefined(env);
     }
 
+    HandleEscape handleEscape(env);
     napi_value jsCustomData = GetPropertyValueByPropertyName(env, info.argv[INDEX_ZERO], "data", napi_object);
     CustomData customData;
     if (jsCustomData == nullptr || !AppExecFwk::UnwrapWantParams(env, jsCustomData, customData.data)) {
@@ -73,6 +75,7 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
     };
 
     NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
         if (ret == nullptr) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null ret");
             task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -88,7 +91,7 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAutoFillExtensionContext::OnReloadInModal",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(
@@ -99,6 +102,7 @@ napi_value JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(
     if (context != nullptr) {
         abilityInfo = context->GetAbilityInfo();
     }
+    HandleEscape handleEscape(env);
     napi_value objValue = CreateJsExtensionContext(env, context, abilityInfo);
 
     auto jsContext = std::make_unique<JsAutoFillExtensionContext>(context);
@@ -110,7 +114,7 @@ napi_value JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(
     std::string type = "AutoFillExtensionContext";
     napi_set_named_property(env, objValue, "contextType", CreateJsValue(env, type));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

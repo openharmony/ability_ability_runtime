@@ -91,6 +91,7 @@ napi_value JsSaveRequestCallback::CreateJsSaveRequestCallback(napi_env env,
     const sptr<AAFwk::SessionInfo> &sessionInfo, const sptr<Rosen::Window> &uiWindow)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -105,7 +106,7 @@ napi_value JsSaveRequestCallback::CreateJsSaveRequestCallback(napi_env env,
     const char *moduleName = "JsSaveRequestCallback";
     BindNativeFunction(env, object, "onSuccess", moduleName, SaveRequestSuccess);
     BindNativeFunction(env, object, "onFailure", moduleName, SaveRequestFailed);
-    return object;
+    return handleEscape.Escape(object);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
