@@ -304,6 +304,18 @@ public:
      */
     virtual std::shared_ptr<Context> CreateAreaModeContext(int areaMode) = 0;
 
+    /**
+     * @brief Creates a module or plugin context with the given bundleName and moduleName.
+     *
+     * @param bundleName Indicates the app name of the application.
+
+     * @param moduleName Indicates the module name of the hap.
+     *
+     * @return Returns a module or plugin context created for the specified hap and app.
+     */
+    virtual std::shared_ptr<Context> CreateModuleOrPluginContext(const std::string &bundleName,
+        const std::string &moduleName) = 0;
+
     virtual ConfigUpdateReason GetConfigUpdateReason()
     {
         return ConfigUpdateReason::CONFIG_UPDATE_REASON_DEFAULT;
