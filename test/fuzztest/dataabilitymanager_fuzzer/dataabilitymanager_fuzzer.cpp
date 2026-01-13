@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "data_ability_manager.h"
 #undef private
 
+#include "ability_fuzz_util.h"
 #include "ability_record.h"
 
 using namespace OHOS::AAFwk;
@@ -81,25 +82,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::vector<std::string> info;
     AbilityRequest abilityRequest;
     FuzzedDataProvider fdp(data, size);
+    AbilityFuzzUtil::GenerateAbilityRequestInfo(fdp, abilityRequest);
     boolParam = fdp.ConsumeBool();
     isClient = fdp.ConsumeBool();
     intParam = fdp.ConsumeIntegral<int>();
     int32Param = fdp.ConsumeIntegral<int32_t>();
     int64Param = fdp.ConsumeIntegral<int64_t>();
     stringParam = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    bool tryBind = fdp.ConsumeBool();
     sptr<IRemoteObject> client;
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
-    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::DATA;
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
-    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
-    abilityRequest.abilityInfo.bundleName = "";
-    abilityRequest.abilityInfo.name = "";
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
-    boolParam = true;
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
-    boolParam = false;
-    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    bool isNotHap = fdp.ConsumeBool();
+    dataAbilityManager->Acquire(abilityRequest, tryBind, client, isNotHap);
     sptr<IAbilityScheduler> scheduler;
     dataAbilityManager->Release(scheduler, client, boolParam);
     dataAbilityManager->ContainsDataAbility(scheduler);

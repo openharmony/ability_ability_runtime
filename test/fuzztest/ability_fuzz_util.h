@@ -619,69 +619,6 @@ std::vector<DisposedRule> GetRandomDisposedRulesList(FuzzedDataProvider& fdp, si
     return result;
 }
 
-void GenerateBundleInfo(FuzzedDataProvider& fdp, BundleInfo& bundleInfo)
-{
-    bundleInfo.isNewVersion = fdp.ConsumeBool();
-    bundleInfo.isKeepAlive = fdp.ConsumeBool();
-    bundleInfo.singleton = fdp.ConsumeBool();
-    bundleInfo.isPreInstallApp = fdp.ConsumeBool();
-    bundleInfo.isNativeApp = fdp.ConsumeBool();
-    bundleInfo.entryInstallationFree = fdp.ConsumeBool();
-    bundleInfo.isDifferentName = fdp.ConsumeBool();
-    bundleInfo.versionCode = fdp.ConsumeIntegral<uint32_t>();
-    bundleInfo.minCompatibleVersionCode = fdp.ConsumeIntegral<uint32_t>();
-    bundleInfo.compatibleVersion = fdp.ConsumeIntegral<uint32_t>();
-    bundleInfo.targetVersion = fdp.ConsumeIntegral<uint32_t>();
-    bundleInfo.appIndex = fdp.ConsumeIntegral<int32_t>();
-    bundleInfo.minSdkVersion = fdp.ConsumeIntegral<int32_t>();
-    bundleInfo.maxSdkVersion = fdp.ConsumeIntegral<int32_t>();
-    bundleInfo.overlayType = fdp.ConsumeIntegralInRange<int32_t>(CODE_ONE, CODE_THREE);
-    bundleInfo.uid = fdp.ConsumeIntegral<int>();
-    bundleInfo.gid = fdp.ConsumeIntegral<int>();
-    bundleInfo.installTime = fdp.ConsumeIntegral<int64_t>();
-    bundleInfo.updateTime = fdp.ConsumeIntegral<int64_t>();
-    bundleInfo.firstInstallTime = fdp.ConsumeIntegral<int64_t>();
-    bundleInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.vendor = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.releaseType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.mainEntry = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.entryModuleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.appId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.cpuAbi = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.seInfo = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.label = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.description = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    bundleInfo.jointUserId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-
-    GenerateSignatureInfo(fdp, bundleInfo.signatureInfo);
-
-    bundleInfo.oldAppIds = GenerateStringArray(fdp);
-    bundleInfo.hapModuleNames = GenerateStringArray(fdp);
-    bundleInfo.moduleNames = GenerateStringArray(fdp);
-    bundleInfo.modulePublicDirs = GenerateStringArray(fdp);
-    bundleInfo.moduleDirs = GenerateStringArray(fdp);
-    bundleInfo.moduleResPaths = GenerateStringArray(fdp);
-
-    bundleInfo.reqPermissions = GenerateStringArray(fdp);
-    bundleInfo.defPermissions = GenerateStringArray(fdp);
-}
-
-std::vector<AppExecFwk::BundleInfo> GenerateBundleInfoArray(FuzzedDataProvider& fdp, size_t arraySizeMax = CODE_TEN)
-{
-    std::vector<AppExecFwk::BundleInfo> result;
-    size_t arraySize = fdp.ConsumeIntegralInRange<size_t>(0, arraySizeMax);
-    result.reserve(arraySize);
-
-    for (size_t i = 0; i < arraySize; ++i) {
-        AppExecFwk::BundleInfo bundleInfo;
-        GenerateBundleInfo(fdp, bundleInfo);
-        result.emplace_back(bundleInfo);
-    }
-
-    return result;
-}
-
 void GenerateApplicationInfo(FuzzedDataProvider& fdp, ApplicationInfo& applicationInfo)
 {
     applicationInfo.keepAlive = fdp.ConsumeBool();
