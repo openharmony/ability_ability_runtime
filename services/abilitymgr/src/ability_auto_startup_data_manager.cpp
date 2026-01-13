@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "ability_manager_constants.h"
 #include "accesstoken_kit.h"
+#include "database_write_counter.h"
 #include "hilog_tag_wrapper.h"
 #include "json_utils.h"
 #include "os_account_manager_wrapper.h"
@@ -152,6 +153,7 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
         }
         return ERR_INVALID_OPERATION;
     }
+    dbWriteCounter_.UpdateWriteCount(AUTO_STARTUP_STORAGE_DIR);
     return ERR_OK;
 }
 
@@ -205,6 +207,7 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
         }
         return ERR_INVALID_OPERATION;
     }
+    dbWriteCounter_.UpdateWriteCount(AUTO_STARTUP_STORAGE_DIR);
 
     return ERR_OK;
 }
