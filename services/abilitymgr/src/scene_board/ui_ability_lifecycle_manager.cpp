@@ -79,6 +79,7 @@ constexpr int32_t DEFAULT_REQUEST_CODE = -1;
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
 constexpr int REMOVE_STARTING_BUNDLE_TIMEOUT_MICRO_SECONDS = 5000000; // 5s
 constexpr int32_t BY_CALL_TIMEOUT = 10 * 1000 * 1000; // 10s
+constexpr int32_t SCENE_FLAG_BYCALL = 4;
 
 auto g_deleteLifecycleEventTask = [](const sptr<Token> &token) {
     CHECK_POINTER_LOG(token, "token is nullptr.");
@@ -1561,12 +1562,6 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved: %{public}d", ret);
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
-
-            std::string currentName = abilityRequest.abilityInfo.bundleName;
-            std::string callerBundleName = abilityRequest.want.GetBundle();
-            EventInfo eventInfo = { .bundleName = currentName, .callerBundleName = callerBundleName, .uri = "ByCall" };
-            EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION ,eventInfo);
-
             auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
             if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
                 HandleForegroundCollaborate(abilityRequest, uiAbilityRecord);
@@ -1584,7 +1579,9 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
                 return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
             }
             uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-            uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
+            ForegroundOptions options;
+            options.sceneFlag = SCENE_FLAG_BYCALL;
+            uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, options);
             return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
         } else {
             if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
