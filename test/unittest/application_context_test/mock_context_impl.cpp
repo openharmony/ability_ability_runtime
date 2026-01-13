@@ -198,6 +198,12 @@ std::shared_ptr<Context> MockContextImpl::CreateAreaModeContext(int areaMode)
     return nullptr;
 }
 
+std::shared_ptr<Context> MockContextImpl::CreateModuleOrPluginContext(const std::string &bundleName,
+    const std::string &moduleName)
+{
+    return nullptr;
+}
+
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> MockContextImpl::CreateDisplayContext(uint64_t displayId)
 {
