@@ -29,8 +29,8 @@ using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
 
 namespace {
-const std::string VASSISTANT_BUNDLE_NAME = "com.huawei.hmos.vassistant";
-const std::string VASSISTANT_B2 = "com.huawei.hmos.vassistant.test";
+const std::string VASSISTANT_BUNDLE_NAME = "com.hmos.vassistant";
+const std::string VASSISTANT_B2 = "com.hmos.vassistant.test";
 constexpr size_t LOAD_TIMEOUT = 0;
 constexpr size_t ACTIVE_TIMEOUT = 1;
 constexpr size_t INACTIVE_TIMEOUT = 2;
