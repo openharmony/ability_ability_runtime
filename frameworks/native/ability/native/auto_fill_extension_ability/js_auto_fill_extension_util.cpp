@@ -14,7 +14,7 @@
  */
 
 #include "js_auto_fill_extension_util.h"
-
+#include "js_runtime_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -62,6 +62,7 @@ constexpr const char *TRIGGER_TYPE = "triggerType";
 napi_value JsAutoFillExtensionUtil::WrapViewData(const napi_env env, const AbilityBase::ViewData &viewData)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     napi_value jsValue = nullptr;
@@ -100,23 +101,25 @@ napi_value JsAutoFillExtensionUtil::WrapViewData(const napi_env env, const Abili
     SetPropertyValueByPropertyName(env, jsObject, VIEW_DATA_PAGE_RECT, jsValue);
 
     SetPropertyValueByPropertyName(env, jsObject, VIEW_DATA_PAGE_NODE_INFOS, jsArray);
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value JsAutoFillExtensionUtil::WrapCustomData(const napi_env env, const AAFwk::WantParams &param)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     napi_value jsValue = nullptr;
     jsValue = WrapWantParams(env, param);
     SetPropertyValueByPropertyName(env, jsObject, CUSTOM_DATA_DATA, jsValue);
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value JsAutoFillExtensionUtil::WrapPageNodeInfo(const napi_env env, const AbilityBase::PageNodeInfo &pageNodeInfo)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     napi_value jsValue = nullptr;
@@ -153,12 +156,13 @@ napi_value JsAutoFillExtensionUtil::WrapPageNodeInfo(const napi_env env, const A
     jsValue = WrapBoolToJS(env, pageNodeInfo.isFocus);
     SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_IS_FOCUS, jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value JsAutoFillExtensionUtil::WrapRectData(const napi_env env, const AbilityBase::Rect &rect)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     napi_value jsValue = nullptr;
@@ -174,7 +178,7 @@ napi_value JsAutoFillExtensionUtil::WrapRectData(const napi_env env, const Abili
     jsValue = AppExecFwk::WrapDoubleToJS(env, rect.height);
     SetPropertyValueByPropertyName(env, jsObject, RECT_HEIGHT, jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 void JsAutoFillExtensionUtil::UnwrapViewData(
@@ -276,6 +280,7 @@ void JsAutoFillExtensionUtil::SetTriggerTypeParam(const napi_env env, napi_value
 napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, const napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
@@ -322,12 +327,13 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
         SetPropertyValueByPropertyName(env, jsObject, CUSTOM_DATA_CUSTOM_DATA, customValue);
     }
     SetTriggerTypeParam(env, jsObject, want);
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value JsAutoFillExtensionUtil::WrapUpdateRequest(const AAFwk::WantParams &wantParams, const napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
@@ -345,7 +351,7 @@ napi_value JsAutoFillExtensionUtil::WrapUpdateRequest(const AAFwk::WantParams &w
     viewData.FromJsonString(viewDataString);
     napi_value viewDataValue = WrapViewData(env, viewData);
     SetPropertyValueByPropertyName(env, jsObject, VIEW_DATA_VIEW_DATA, viewDataValue);
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 void JsAutoFillExtensionUtil::UnwrapFillResponse(const napi_env env, const napi_value value, FillResponse &response)
