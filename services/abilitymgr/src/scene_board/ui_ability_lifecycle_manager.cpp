@@ -1561,6 +1561,12 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved: %{public}d", ret);
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
+
+            std::string currentName = abilityRequest.abilityInfo.bundleName;
+            std::string callerBundleName = abilityRequest.want.GetBundle();
+            EventInfo eventInfo = { .bundleName = currentName, .callerBundleName = callerBundleName, .uri = "ByCall" };
+            EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION ,eventInfo);
+
             auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
             if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
                 HandleForegroundCollaborate(abilityRequest, uiAbilityRecord);
