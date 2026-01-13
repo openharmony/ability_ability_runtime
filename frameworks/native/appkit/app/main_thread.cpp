@@ -190,6 +190,7 @@ const int32_t CJERROR_TYPE = 9;
 const std::string CANGJIE_TYPE = "CJNATIVE";
 
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
+constexpr int32_t LAUNCH_TASK_QOS = 5;
 
 const std::string OVERLAY_STATE_CHANGED = "usual.event.OVERLAY_STATE_CHANGED";
 const std::string JSON_KEY_APP_FONT_SIZE_SCALE = "fontSizeScale";
@@ -1515,6 +1516,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication begin");
+    ffrt::submit([]() {}, ffrt::task_attr().qos(LAUNCH_TASK_QOS));
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
         return;
