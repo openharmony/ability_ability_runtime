@@ -169,6 +169,7 @@ ohos_shared_library("abilityms") {
     "ability_base:view_data",
     "ability_base:want",
     "ability_base:zuri",
+    "appspawn:appspawn_client",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
