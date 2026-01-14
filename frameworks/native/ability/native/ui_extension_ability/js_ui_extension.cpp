@@ -68,6 +68,7 @@ bool IsEmbeddableStart(int32_t screenMode)
 napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    HandleEscape handleEscape(env);
     if (value == nullptr || extValue == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameter");
         return nullptr;
@@ -105,7 +106,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
         return nullptr;
     }
 
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 JsUIExtension* JsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
@@ -204,6 +205,7 @@ void JsUIExtension::CreateJSContext(napi_env env, napi_value &contextObj,
 
 void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want)
 {
+    HandleScope handleScope(env);
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null context");
@@ -244,8 +246,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer for weak_ptr ui extension context is called");
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
-        },
-        nullptr, nullptr);
+        }, nullptr, nullptr);
     if (status != napi_ok && workContext != nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
         delete workContext;
@@ -723,6 +724,7 @@ std::unique_ptr<NativeReference> JsUIExtension::CreateAppWindowStage(sptr<Rosen:
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     auto env = jsRuntime_.GetNapiEnv();
+    HandleScope handleScope(env);
     napi_value jsWindowStage = Rosen::JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(
         env, uiWindow, sessionInfo);
     if (jsWindowStage == nullptr) {
