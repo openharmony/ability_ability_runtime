@@ -1707,6 +1707,10 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, SetProcessPrepareExit_001, TestSize
     auto originAppMgr = AppMgrUtil::appMgr_;
     AppMgrUtil::appMgr_ = appMgr;
     EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(1);
+    mgr->SetProcessPrepareExit(0, 1u, 1u, true);
+    EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(0);
+    mgr->SetProcessPrepareExit(0, 1u, 0u, true);
+    EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(0);
     mgr->SetProcessPrepareExit(0, 0u, 0u, true);
     EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(0);
     mgr->SetProcessPrepareExit(0, 0u, 1u, true);
@@ -1714,6 +1718,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, SetProcessPrepareExit_001, TestSize
     mgr->SetProcessPrepareExit(0, 0u, 0u, false);
     EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(0);
     mgr->SetProcessPrepareExit(0, 0u, 1u, false);
+    EXPECT_CALL(*appMgr, SetProcessPrepareExit).Times(0);
+    mgr->SetProcessPrepareExit(0, 1u, 1u, false);
     AppMgrUtil::appMgr_ = originAppMgr;
 }
 
