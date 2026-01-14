@@ -50,6 +50,7 @@ void JSAppForegroundStateObserver::OnAppStateChanged(const AppStateData &appStat
 void JSAppForegroundStateObserver::HandleOnAppStateChanged(const AppStateData &appStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    HandleScope handleScope(env_);
     std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
     for (auto &item : jsObserverObjectSet_) {
         napi_value obj = item->GetNapiValue();
