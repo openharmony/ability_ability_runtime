@@ -140,6 +140,8 @@ public:
     std::shared_ptr<AppExecFwk::SpecifiedRequest> specifiedProcessRequest_ = nullptr;
     std::shared_ptr<AppExecFwk::SpecifiedRequest> specifiedAbilityRequest_ = nullptr;
     std::string specifiedProcessFlag_;
+    bool queryExtensionAbilityInfos_ = false;
+    bool getBundleInfo_ = false;
 private:
     MyStatus() = default;
 };

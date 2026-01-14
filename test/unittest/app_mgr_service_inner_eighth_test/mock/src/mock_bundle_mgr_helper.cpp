@@ -53,7 +53,7 @@ ErrCode BundleMgrHelper::GetNameAndIndexForUid(const int32_t uid, std::string& b
 bool BundleMgrHelper::GetBundleInfo(const std::string& bundleName,
     const BundleFlag flag, BundleInfo& bundleInfo, int32_t userId)
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().getBundleInfo_;
 }
 
 ErrCode BundleMgrHelper::InstallSandboxApp(const std::string& bundleName,
@@ -189,7 +189,7 @@ sptr<IAppControlMgr> BundleMgrHelper::GetAppControlProxy()
 bool BundleMgrHelper::QueryExtensionAbilityInfos(const Want& want, const int32_t& flag, const int32_t& userId,
     std::vector<ExtensionAbilityInfo>& extensionInfos)
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().queryExtensionAbilityInfos_;
 }
 
 ErrCode BundleMgrHelper::GetBundleInfoV9(const std::string& bundleName,

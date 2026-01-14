@@ -3306,5 +3306,186 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GenerateUid_0400, TestSize.Level1)
     EXPECT_EQ(uid, 20600003);
     TAG_LOGI(AAFwkTag::TEST, "GenerateUid_0400 end");
 }
+
+/**
+ * @tc.name: PreloadExtension_0100
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PreloadExtension_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0100 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0200
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PreloadExtension_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = -1;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    AAFwk::MyStatus::GetInstance().getCallingUid_ = 0;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = true;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+
+    AAFwk::MyStatus::GetInstance().getCallingUid_ = 1;
+    ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0200 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0300
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PreloadExtension_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    appMgrServiceInner->appPreloader_ = nullptr;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0300 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0400
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PreloadExtension_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0400 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    ASSERT_NE(appMgrServiceInner->appPreloader_, nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().queryAbilityInfo_ = false;
+    AAFwk::MyStatus::GetInstance().queryExtensionAbilityInfos_ = false;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+
+    AAFwk::MyStatus::GetInstance().queryAbilityInfo_ = true;
+    AAFwk::MyStatus::GetInstance().getBundleInfo_ = false;
+
+    ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, AAFwk::GET_BUNDLE_INFO_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0400 end");
+}
+
+/**
+ * @tc.name: PreloadExtension_0500
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadExtension
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PreloadExtension_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0500 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+
+    std::string bundleName = "com.example.hmos.inputmethod";
+    std::string abilityName = "InputService";
+    int32_t appIndex = 0;
+    int32_t userId = 100;
+
+    AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().queryAbilityInfo_ = true;
+    AAFwk::MyStatus::GetInstance().getBundleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    appMgrServiceInner->taskHandler_ = nullptr;
+
+    int32_t ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    appMgrServiceInner->taskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler("example_queue", 1);
+    ret = appMgrServiceInner->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadExtension_0500 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

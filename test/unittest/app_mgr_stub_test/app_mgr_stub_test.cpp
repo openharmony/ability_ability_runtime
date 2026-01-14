@@ -1111,13 +1111,12 @@ HWTEST_F(AppMgrStubTest, HandlePreloadExtension_0200, TestSize.Level1)
     int32_t userId = 100;
     int32_t appIndex = 0;
 
-    AAFwk::Want want;
-    want.SetElementName(bundleName, abilityName);
     data.WriteInt32(appIndex);
     data.WriteInt32(userId);
 
-    mockAppMgrService_->OnRemoteRequest(
+    auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_EXTENSION), data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 /**
