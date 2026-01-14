@@ -20,9 +20,9 @@
 #include <mutex>
 #include <queue>
 #include <memory>
-#include "cpp/mutex.h"
 
 #include "ability_running_info.h"
+#include "ffrt.h"
 #include "mission_list.h"
 #include "mission_list_manager_interface.h"
 #include "mission_listener_controller.h"
@@ -1306,7 +1306,9 @@ private:
      *
      * @param abilityRecord A reference to the ability record for which to set the last exit reason.
      */
-    void SetLastExitReason(std::shared_ptr<AbilityRecord> abilityRecord);
+    static void SetLastExitReason(std::shared_ptr<AbilityRecord> abilityRecord);
+    void LoadLastExitReasonAsync(MissionAbilityRecordPtr abilityRecord);
+    void SyncLoadExitReasonTask(int32_t abilityRecordId);
 
     /**
      * @brief Checks if the specified ability record is the last ability of its application.
@@ -1372,6 +1374,9 @@ private:
 
     std::queue<AbilityRequest> waitingAbilityQueue_;
     mutable ffrt::mutex managerLock_;
+
+    std::mutex exitReasonTaskMutex_;
+    std::unordered_map<int32_t, ffrt::task_handle> exitReasonTasks_; // for sync querying exit-reason task
 };
 }  // namespace AAFwk
 }  // namespace OHOS
