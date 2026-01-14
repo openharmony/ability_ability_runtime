@@ -1237,7 +1237,7 @@ private:
     };
     bool IsWindowIdsEmpty();
 
-    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    std::atomic_bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
@@ -1246,8 +1246,8 @@ private:
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;
-    bool isFocused_ = false; // if process is focused.
-    ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
+    std::atomic_bool isFocused_ = false; // if process is focused.
+    std::atomic<ApplicationState> curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
     ApplicationScheduleState scheduleState_ = ApplicationScheduleState::SCHEDULE_READY;
     WatchdogVisibilityState watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_READY;
@@ -1293,7 +1293,7 @@ private:
     std::atomic<bool> isPreForeground_ = false;
 
     int32_t appRecordId_ = 0;
-    int32_t mainUid_ = -1;
+    std::atomic<int32_t> mainUid_ = -1;
     int restartResidentProcCount_ = 0;
     int32_t exitReason_ = 0;
     int32_t appIndex_ = 0; // render record
