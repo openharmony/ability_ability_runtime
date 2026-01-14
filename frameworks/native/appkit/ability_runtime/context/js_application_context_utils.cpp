@@ -219,6 +219,7 @@ napi_value JsApplicationContextUtils::OnCreateModuleContext(napi_env env, NapiCa
 
 napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext)
 {
+    HandleEscape handleEscape(env);
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -245,7 +246,7 @@ napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const 
         delete workContext;
         return CreateJsUndefined(env);
     }
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 napi_value JsApplicationContextUtils::CreateSystemHspModuleResourceManager(napi_env env, napi_callback_info info)
@@ -556,6 +557,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
             *path = context->GetGroupDir(groupId);
         };
     auto complete = [innerErrCode, path](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, *path));
         } else {
@@ -667,6 +669,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         context->KillProcessBySelf(clearPageStack);
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*innerErrCode != ERR_OK) {
             task.Reject(env, CreateJsError(env, *innerErrCode, "applicationContext is already released."));
             return;
@@ -840,6 +843,7 @@ napi_value JsApplicationContextUtils::OnPreloadUIExtensionAbility(napi_env env, 
         *innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(want, hostBundleName);
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*innerErrCode == ERR_OK) {
             task.Resolve(env, CreateJsUndefined(env));
         } else {
@@ -879,6 +883,7 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
     };
     NapiAsyncTask::CompleteCallback complete =
         [applicationContext = applicationContext_, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
@@ -919,6 +924,7 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
         *innerErrCode = context->GetProcessRunningInformation(*processInfo);
     };
     auto complete = [innerErrCode, processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*innerErrCode == ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST) {
             task.Reject(env, CreateJsError(env, *innerErrCode,
                 "applicationContext if already released."));
@@ -979,6 +985,7 @@ napi_value JsApplicationContextUtils::OnGetAllWindowStages(napi_env env, NapiCal
         context->GetAllUIAbilities(*uiAbility);
     };
     auto complete = [uiAbility](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         napi_value array = nullptr;
         napi_create_array(env, &array);
         if (array == nullptr) {
@@ -1091,6 +1098,7 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
     };
     auto complete = [applicationContext = applicationContext_, innerErrCode, instanceKeys](
         napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*innerErrCode == ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST ||
             *innerErrCode == static_cast<int>(AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED)) {
             TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", *innerErrCode);
@@ -1197,6 +1205,7 @@ napi_value JsApplicationContextUtils::OnCreateDisplayContext(napi_env env, NapiC
 
 napi_value JsApplicationContextUtils::CreateJsContext(napi_env env, const std::shared_ptr<Context> &context)
 {
+    HandleEscape handleEscape(env);
     napi_value value = CreateJsBaseContext(env, context, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -1229,7 +1238,7 @@ napi_value JsApplicationContextUtils::CreateJsContext(napi_env env, const std::s
         delete workContext;
         return CreateJsUndefined(env);
     }
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 void JsApplicationContextUtils::Finalizer(napi_env env, void *data, void *hint)
@@ -1298,6 +1307,7 @@ napi_value JsApplicationContextUtils::OnUnregisterAbilityLifecycleCallback(
 
     NapiAsyncTask::CompleteCallback complete = [callbackWeak, callbackId, errCode](
             napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (errCode != 0) {
                 task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                 return;
@@ -1383,6 +1393,7 @@ napi_value JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
     std::weak_ptr<JsEnvironmentCallback> envCallbackWeak(envCallback_);
     NapiAsyncTask::CompleteCallback complete = [envCallbackWeak, callbackId, errCode](
             napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (errCode != 0) {
                 task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                 return;
@@ -1555,6 +1566,7 @@ napi_value JsApplicationContextUtils::OnOffAbilityLifecycle(
     std::weak_ptr<JsAbilityLifecycleCallback> callbackWeak(callback_);
     NapiAsyncTask::CompleteCallback complete = [callbackWeak, callbackId](
             napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             auto callback = callbackWeak.lock();
             if (callback == nullptr) {
                 TAG_LOGE(AAFwkTag::APPKIT, "null callback");
@@ -1667,7 +1679,6 @@ napi_value JsApplicationContextUtils::OnOnEnvironment(
     napi_env env, NapiCallbackInfo& info, bool isSync)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
@@ -1701,6 +1712,7 @@ napi_value JsApplicationContextUtils::OnOffEnvironment(
     std::weak_ptr<JsEnvironmentCallback> envCallbackWeak(envCallback_);
     NapiAsyncTask::CompleteCallback complete = [envCallbackWeak, callbackId](
             napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             auto env_callback = envCallbackWeak.lock();
             if (env_callback == nullptr) {
                 TAG_LOGE(AAFwkTag::APPKIT, "null env_callback");
@@ -1875,6 +1887,7 @@ bool JsApplicationContextUtils::CheckCallerIsSystemApp()
 napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "start");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -1914,7 +1927,7 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
 
     BindNativeApplicationContextOne(env, object);
     BindNativeApplicationContextTwo(env, object);
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value JsApplicationContextUtils::SetSupportedProcessCacheSelf(napi_env env, napi_callback_info info)

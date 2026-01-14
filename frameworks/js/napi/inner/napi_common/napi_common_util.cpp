@@ -73,16 +73,18 @@ napi_value WrapUndefinedToJS(napi_env env)
 
 napi_value CreateJSObject(napi_env env)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value WrapInt32ToJS(napi_env env, int32_t value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_int32(env, value, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 int UnwrapInt32FromJS(napi_env env, napi_value param, int defaultValue)
@@ -106,9 +108,10 @@ bool UnwrapInt32FromJS2(napi_env env, napi_value param, int &value)
 
 napi_value WrapLongToJS(napi_env env, long value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_int32(env, value, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 long UnwrapLongFromJS(napi_env env, napi_value param, long defaultValue)
@@ -134,9 +137,10 @@ bool UnwrapLongFromJS2(napi_env env, napi_value param, long &value)
 
 napi_value WrapInt64ToJS(napi_env env, int64_t value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_int64(env, value, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 int64_t UnwrapInt64FromJS(napi_env env, napi_value param, int64_t defaultValue)
@@ -160,9 +164,10 @@ bool UnwrapInt64FromJS2(napi_env env, napi_value param, int64_t &value)
 
 napi_value WrapBoolToJS(napi_env env, bool value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_boolean(env, value, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool UnwrapBoolFromJS(napi_env env, napi_value param, bool defaultValue)
@@ -186,9 +191,10 @@ bool UnwrapBoolFromJS2(napi_env env, napi_value param, bool &value)
 
 napi_value WrapDoubleToJS(napi_env env, double value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_double(env, value, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 double UnwrapDoubleFromJS(napi_env env, napi_value param, double defaultValue)
@@ -212,9 +218,10 @@ bool UnwrapDoubleFromJS2(napi_env env, napi_value param, double &value)
 
 napi_value WrapStringToJS(napi_env env, const std::string &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string &defaultValue)
@@ -280,6 +287,7 @@ bool UnwrapStringFromJS2(napi_env env, napi_value param, std::string &value)
 napi_value WrapArrayInt32ToJS(napi_env env, const std::vector<int> &value)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -293,7 +301,7 @@ napi_value WrapArrayInt32ToJS(napi_env env, const std::vector<int> &value)
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int> &value)
@@ -327,6 +335,7 @@ bool UnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int> &va
 
 napi_value WrapArrayLongToJS(napi_env env, const std::vector<long> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -340,7 +349,7 @@ napi_value WrapArrayLongToJS(napi_env env, const std::vector<long> &value)
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long> &value)
@@ -374,6 +383,7 @@ bool UnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long> &va
 
 napi_value WrapArrayInt64ToJS(napi_env env, const std::vector<int64_t> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -387,7 +397,7 @@ napi_value WrapArrayInt64ToJS(napi_env env, const std::vector<int64_t> &value)
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayInt64FromJS(napi_env env, napi_value param, std::vector<int64_t> &value)
@@ -421,6 +431,7 @@ bool UnwrapArrayInt64FromJS(napi_env env, napi_value param, std::vector<int64_t>
 
 napi_value WrapArrayDoubleToJS(napi_env env, const std::vector<double> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -434,7 +445,7 @@ napi_value WrapArrayDoubleToJS(napi_env env, const std::vector<double> &value)
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayDoubleFromJS(napi_env env, napi_value param, std::vector<double> &value)
@@ -468,6 +479,7 @@ bool UnwrapArrayDoubleFromJS(napi_env env, napi_value param, std::vector<double>
 
 napi_value WrapArrayBoolToJS(napi_env env, const std::vector<bool> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -481,7 +493,7 @@ napi_value WrapArrayBoolToJS(napi_env env, const std::vector<bool> &value)
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayBoolFromJS(napi_env env, napi_value param, std::vector<bool> &value)
@@ -513,6 +525,7 @@ bool UnwrapArrayBoolFromJS(napi_env env, napi_value param, std::vector<bool> &va
 
 napi_value WrapArrayStringToJS(napi_env env, const std::vector<std::string> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -526,7 +539,7 @@ napi_value WrapArrayStringToJS(napi_env env, const std::vector<std::string> &val
             }
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 bool UnwrapArrayStringFromJS(napi_env env, napi_value param, std::vector<std::string> &value)
@@ -883,12 +896,13 @@ void ClearThreadReturnData(ThreadReturnData *data)
 
 napi_value GetCallbackErrorValue(napi_env env, int errCode)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
     NAPI_CALL(env, napi_create_int32(env, errCode, &jsValue));
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "code", jsValue));
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 /**
@@ -960,6 +974,7 @@ void FreeAsyncJSCallbackInfo(AsyncJSCallbackInfo **asyncCallbackInfo)
  */
 bool WrapThreadReturnData(napi_env env, const ThreadReturnData *data, napi_value *value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (data == nullptr || value == nullptr) {
         return false;
     }
@@ -981,6 +996,7 @@ bool WrapThreadReturnData(napi_env env, const ThreadReturnData *data, napi_value
             NAPI_CALL_BASE(env, napi_get_null(env, value), false);
             break;
     }
+    *value = handleEscape.Escape(*value);
     return true;
 }
 
@@ -1283,6 +1299,7 @@ std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue)
 
 napi_value WrapLocaleToJS(napi_env env, const std::string &locale)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value global = nullptr;
     napi_status status = napi_get_global(env, &global);
     if (status != napi_ok || global == nullptr) {
@@ -1318,7 +1335,7 @@ napi_value WrapLocaleToJS(napi_env env, const std::string &locale)
         TAG_LOGE(AAFwkTag::JSNAPI, "Create Intl.Locale instance failed");
         return nullptr;
     }
-    return intlLocale;
+    return handleEscape.Escape(intlLocale);
 }
 
 bool UnwrapLocaleByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, std::string &value)

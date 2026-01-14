@@ -155,6 +155,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
@@ -206,6 +207,7 @@ private:
             *innerErrCode= context->TerminateSelf();
         };
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
             } else if (*innerErrCode == ERROR_CODE_ONE) {
@@ -263,6 +265,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
@@ -394,6 +397,7 @@ private:
         auto execute = GetConnectAbilityExecFunc(want, connection, connectId, innerErrorCode);
         NapiAsyncTask::CompleteCallback complete = [this, connection, connectId, innerErrorCode](napi_env env,
             NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == 0) {
                 TAG_LOGI(AAFwkTag::UISERVC_EXT, "connect ability success");
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -449,6 +453,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
                     return;
@@ -475,6 +480,7 @@ private:
 napi_value CreateJsUIServiceExtensionContext(napi_env env, std::shared_ptr<UIServiceExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "Call");
+    HandleEscape handleEscape(env);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     if (context) {
         abilityInfo = context->GetAbilityInfo();
@@ -497,7 +503,7 @@ napi_value CreateJsUIServiceExtensionContext(napi_env env, std::shared_ptr<UISer
         JSUIServiceExtensionContext::ConnectServiceExtensionAbility);
     BindNativeFunction(env, object, "disconnectServiceExtensionAbility", moduleName,
         JSUIServiceExtensionContext::DisConnectServiceExtensionAbility);
-    return object;
+    return handleEscape.Escape(object);
 }
 
 JSUIServiceExtensionConnection::JSUIServiceExtensionConnection(napi_env env) : env_(env) {}
@@ -684,6 +690,7 @@ void JSUIServiceExtensionConnection::RemoveConnectionObject()
 void JSUIServiceExtensionConnection::CallJsFailed(int32_t errorCode)
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "CallJsFailed begin");
+    HandleScope handleScope(env_);
     if (jsConnectionObject_ == nullptr) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "null jsConnectionObject_");
         return;
