@@ -675,7 +675,7 @@ std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
     return result_;
 }
 
-void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
+void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId, bool schedulerdied)
 {
 }
 
