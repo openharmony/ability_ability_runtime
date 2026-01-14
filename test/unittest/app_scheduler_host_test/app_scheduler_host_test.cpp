@@ -176,5 +176,23 @@ HWTEST_F(AppSchedulerHostTest, HandleDetachAppDebug_002, TestSize.Level1)
     auto result = mockAppScheduler_->OnRemoteRequest(UNKNOWN_CODE, data, reply, option);
     EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
 }
+
+/**
+ * @tc.name: HandleScheduleDumpArkWeb_001
+ * @tc.desc: Verify that the HandleScheduleDumpArkWeb interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSchedulerHostTest, HandleScheduleDumpArkWeb_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    data.WriteString("");
+    EXPECT_CALL(*mockAppScheduler_, ScheduleDumpArkWeb(_, _)).Times(1);
+    auto result = mockAppScheduler_->OnRemoteRequest(
+            static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_DUMP_ARKWEB), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

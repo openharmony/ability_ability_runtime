@@ -218,6 +218,12 @@ public:
     {
         return 0;
     }
+
+    int32_t ScheduleDumpArkWeb(const std::string &customArgs, std::string &result) override
+    {
+        return 0;
+    }
+
     void SetWatchdogBackgroundStatus(bool status) override
     {}
 

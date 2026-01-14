@@ -1954,6 +1954,45 @@ HWTEST_F(AppMgrServiceInnerEighthTest, DumpFfrt_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpArkWeb_001
+ * @tc.desc: test DumpArkWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DumpArkWeb_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpArkWeb_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->appRunningManager_ = nullptr;
+
+    std::string customArgs;
+    std::string result;
+    std::vector<int32_t> pids;
+    auto ret = appMgrServiceInner->DumpArkWeb(pids, customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_INTERNAL_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "DumpArkWeb_001 end");
+}
+
+/**
+ * @tc.name: DumpArkWeb_002
+ * @tc.desc: test DumpArkWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DumpArkWeb_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpArkWeb_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().dumpArkWeb_ = DumpErrorCode::ERR_OK;
+
+    std::string customArgs;
+    std::string result;
+    std::vector<int32_t> pids;
+    auto ret = appMgrServiceInner->DumpArkWeb(pids, customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "DumpArkWeb_002 end");
+}
+
+
+/**
  * @tc.name: IsFinalAppProcessByBundleName_001
  * @tc.desc: test IsFinalAppProcessByBundleName_001
  * @tc.type: FUNC

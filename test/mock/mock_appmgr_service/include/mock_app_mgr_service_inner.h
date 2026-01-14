@@ -82,6 +82,8 @@ public:
     MOCK_METHOD2(DumpIpcStop, int(const int32_t pid, std::string& result));
     MOCK_METHOD2(DumpIpcStat, int(const int32_t pid, std::string& result));
     MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
+    MOCK_METHOD3(DumpArkWeb, int32_t(const std::vector<int32_t> &pids, const std::string &customArgs,
+        std::string &result));
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
     MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
     MOCK_METHOD1(NotifyProcMemoryLevel, int32_t(const std::map<pid_t, MemoryLevel> &procLevelMap));

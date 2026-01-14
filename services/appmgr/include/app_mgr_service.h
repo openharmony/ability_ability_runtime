@@ -1108,6 +1108,8 @@ private:
         const std::string& optionPid, std::string& result);
 
     int DumpFfrtInner(const std::string& pidsRaw, std::string& result);
+    int32_t DumpParsePids(const std::string &pidsRaw, std::vector<int32_t> &pids);
+    int32_t DumpArkWeb(const std::vector<std::u16string> &args, std::string &result);
 
 private:
     AppMgrServiceState appMgrServiceState_;

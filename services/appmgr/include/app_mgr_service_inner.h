@@ -1485,6 +1485,8 @@ public:
 
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
+    virtual int32_t DumpArkWeb(const std::vector<int32_t> &pids, const std::string &customArgs, std::string &result);
+
     /**
      * @brief set support process cache by self
      */
