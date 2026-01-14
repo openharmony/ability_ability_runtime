@@ -49,6 +49,7 @@
 #include "context_deal.h"
 #include "context_impl.h"
 #include "display_util.h"
+#include "dump_arkweb_helper.h"
 #include "dump_ffrt_helper.h"
 #include "dump_ipc_helper.h"
 #include "dump_process_helper.h"
@@ -4038,6 +4039,12 @@ int32_t MainThread::ScheduleDumpFfrt(std::string& result)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
     return DumpFfrtHelper::DumpFfrt(result);
+}
+
+int32_t MainThread::ScheduleDumpArkWeb(const std::string &customArgs, std::string &result)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleDumpArkWeb");
+    return DumpArkWebHelper::DumpArkWeb(customArgs, result);
 }
 
 /**

@@ -50,11 +50,14 @@ using AAFwk::FdGuard;
 constexpr const char* OPTION_KEY_HELP = "-h";
 constexpr const char* OPTION_KEY_DUMP_IPC = "--ipc";
 constexpr const char* OPTION_KEY_DUMP_FFRT = "--ffrt";
+constexpr const char* OPTION_KEY_DUMP_WEB = "--web";
 const int32_t HIDUMPER_SERVICE_UID = 1212;
 constexpr const int INDEX_PID = 1;
 constexpr const int INDEX_CMD = 2;
+constexpr const int INDEX_WEB_CUSTOM_ARGS = 2;
 constexpr const size_t VALID_DUMP_IPC_ARG_SIZE = 3;
 constexpr const size_t VALID_DUMP_FFRT_ARG_SIZE = 2;
+constexpr const size_t VALID_DUMP_WEB_ARG_SIZE = 2;
 constexpr const int MAX_DUMP_FFRT_PID_NUMBER = 3;
 constexpr const int BASE_TEN = 10;
 constexpr const char SIGN_TERMINAL = '\0';
@@ -762,6 +765,9 @@ int AppMgrService::Dump(const std::vector<std::u16string>& args, std::string& re
     if (optionKey == OPTION_KEY_DUMP_FFRT) {
         return DumpFfrt(args, result);
     }
+    if (optionKey == OPTION_KEY_DUMP_WEB) {
+        return DumpArkWeb(args, result);
+    }
     result.append("error: unkown option.\n");
     TAG_LOGE(AAFwkTag::APPMGR, "option key %{public}s does not exist", optionKey.c_str());
     return DumpErrorCode::ERR_UNKNOWN_OPTION_ERROR;
@@ -776,7 +782,9 @@ int AppMgrService::ShowHelp(const std::vector<std::u16string>& args, std::string
         .append("dump ffrt info\n")
         .append("--ipc pid ARG               ")
         .append("ipc load statistic; pid must be specified or set to -a dump all processes. ARG must be one of "
-            "--start-stat | --stop-stat | --stat\n");
+            "--start-stat | --stop-stat | --stat\n")
+        .append("--web pid1[,pid2,pid3] [ARG]    ")
+        .append("dump arkweb info, ARG must be one of (--all | --nweb | ...)\n");
 
     return ERR_OK;
 }
@@ -840,6 +848,16 @@ int AppMgrService::DumpIpcWithPidInner(const AppMgrService::DumpIpcKey key,
 int AppMgrService::DumpFfrtInner(const std::string& pidsRaw, std::string& result)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
+    std::vector<int32_t> pids;
+    auto ret = DumpParsePids(pidsRaw, pids);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    return appMgrServiceInner_->DumpFfrt(pids, result);
+}
+
+int32_t AppMgrService::DumpParsePids(const std::string &pidsRaw, std::vector<int32_t> &pids)
+{
     std::vector<std::string> pidsStr;
     SplitStr(pidsRaw, ",", pidsStr);
     if (pidsStr.empty()) {
@@ -849,7 +867,6 @@ int AppMgrService::DumpFfrtInner(const std::string& pidsRaw, std::string& result
     if (pidsStr.size() > MAX_DUMP_FFRT_PID_NUMBER) {
         pidsStr.resize(MAX_DUMP_FFRT_PID_NUMBER);
     }
-    std::vector<int32_t> pids;
     for (const auto& pidStr : pidsStr) {
         int pid = -1;
         char* end = nullptr;
@@ -865,12 +882,11 @@ int AppMgrService::DumpFfrtInner(const std::string& pidsRaw, std::string& result
         TAG_LOGD(AAFwkTag::APPMGR, "valid pid:%{public}d", pid);
         pids.push_back(pid);
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "number of valid pids:%{public}d", static_cast<int>(pids.size()));
     if (pids.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "pids are empty");
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
-    return appMgrServiceInner_->DumpFfrt(pids, result);
+    return ERR_OK;
 }
 
 bool AppMgrService::GetDumpIpcKeyByOption(const std::string &option, DumpIpcKey &key)
@@ -983,6 +999,41 @@ int AppMgrService::DumpIpcStat(const int32_t pid, std::string& result)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcStat(pid, result);
+}
+
+int32_t AppMgrService::DumpArkWeb(const std::vector<std::u16string> &args, std::string &result)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "DumpArkWeb start");
+    if (args.size() < VALID_DUMP_WEB_ARG_SIZE) {
+        result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_INVALILD_NUM_ARGS, strlen(MSG_DUMP_FAIL_REASON_INVALILD_NUM_ARGS));
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid number of arguments.");
+        return DumpErrorCode::ERR_INVALID_NUM_ARGS_ERROR;
+    }
+
+    auto isHidumperServiceCall = (IPCSkeleton::GetCallingUid() == HIDUMPER_SERVICE_UID);
+    if (!isHidumperServiceCall) {
+        result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_PERMISSION_DENY, strlen(MSG_DUMP_FAIL_REASON_PERMISSION_DENY));
+        TAG_LOGE(AAFwkTag::APPMGR, "permission deny");
+        return DumpErrorCode::ERR_PERMISSION_DENY_ERROR;
+    }
+
+    std::string pidsRaw = Str16ToStr8(args[INDEX_PID]);
+    std::string customArgs;
+    if (args.size() > INDEX_WEB_CUSTOM_ARGS) {
+        customArgs = Str16ToStr8(args[INDEX_WEB_CUSTOM_ARGS]);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "pids:%{public}s, customArgs:%{public}s", pidsRaw.c_str(), customArgs.c_str());
+    std::vector<int32_t> pids;
+    auto ret = DumpParsePids(pidsRaw, pids);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (appMgrServiceInner_ == nullptr) {
+        return DumpErrorCode::ERR_INTERNAL_ERROR;
+    }
+    return appMgrServiceInner_->DumpArkWeb(pids, customArgs, result);
 }
 
 void AppMgrService::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag)

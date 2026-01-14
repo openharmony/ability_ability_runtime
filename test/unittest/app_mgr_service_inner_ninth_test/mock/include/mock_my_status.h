@@ -80,6 +80,7 @@ public:
     int dumpIpcStop_ = ERR_OK;
     int dumpIpcStat_ = ERR_OK;
     int dumpFfrt_ = ERR_OK;
+    int32_t dumpArkWeb_ = ERR_OK;
     int32_t getAllAppRunningRecordCount_ = 0;
     pid_t handleUserRequestCleanPid_ = 0;
     pid_t handleUserRequestCleanUid_ = 0;

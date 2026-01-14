@@ -1102,6 +1102,11 @@ int AppRunningRecord::DumpFfrt(std::string& result)
     return 0;
 }
 
+int32_t AppRunningRecord::DumpArkWeb(const std::string &customArgs, std::string &result)
+{
+    return 0;
+}
+
 void AppRunningRecord::SetWatchdogBackgroundStatusRunning(bool status)
 {
 }

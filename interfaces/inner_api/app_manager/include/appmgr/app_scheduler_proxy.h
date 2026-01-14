@@ -314,6 +314,8 @@ public:
      */
     virtual int32_t ScheduleDumpFfrt(std::string& result) override;
 
+    virtual int32_t ScheduleDumpArkWeb(const std::string &customArgs, std::string &result) override;
+
     /**
      * SetWatchdogBackgroundStatus, call SetWatchdogBackgroundStatus(bool status) through proxy project,
      * Notify application to set watchdog background status.

@@ -930,6 +930,7 @@ public:
     int DumpIpcStat(std::string& result);
 
     int DumpFfrt(std::string &result);
+    int32_t DumpArkWeb(const std::string &customArgs, std::string &result);
 
     void SetExitReason(int32_t reason);
     int32_t GetExitReason() const;

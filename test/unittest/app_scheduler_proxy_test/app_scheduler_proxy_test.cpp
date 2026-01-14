@@ -20,6 +20,7 @@
 #include "fault_data.h"
 #include "mock_app_scheduler.h"
 #undef private
+#include "app_mgr_service_dump_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -125,6 +126,25 @@ HWTEST_F(AppSchedulerProxyTest, DetachAppDebug_001, TestSize.Level1)
     
     EXPECT_CALL(*mockAppScheduler_, DetachAppDebug()).Times(1);
     appSchedulerProxy->DetachAppDebug();
+}
+
+/**
+ * @tc.name: ScheduleDumpArkWeb_001
+ * @tc.desc: Verify that ScheduleDumpArkWeb interface calls normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSchedulerProxyTest, ScheduleDumpArkWeb_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScheduleDumpArkWeb_001 start";
+    ASSERT_NE(mockAppScheduler_, nullptr);
+    sptr<AppSchedulerProxy> appSchedulerProxy = new AppSchedulerProxy(mockAppScheduler_);
+    ASSERT_NE(appSchedulerProxy, nullptr);
+
+    EXPECT_CALL(*mockAppScheduler_, ScheduleDumpArkWeb(_, _)).Times(1);
+    std::string customArgs = "";
+    std::string result;
+    appSchedulerProxy->ScheduleDumpArkWeb(customArgs, result);
+    GTEST_LOG_(INFO) << "ScheduleDumpArkWeb_001 end";
 }
 } // namespace AppExecFwk
 } // namespace OHOS

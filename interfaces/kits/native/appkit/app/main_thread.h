@@ -403,6 +403,8 @@ public:
      */
     int32_t ScheduleDumpFfrt(std::string& result) override;
 
+    int32_t ScheduleDumpArkWeb(const std::string &customArgs, std::string &result) override;
+
     /**
      *
      * @brief Set watchdog background status of application.
