@@ -395,7 +395,7 @@ public:
      * send result object to caller ability thread.
      *
      */
-    void SendResult(bool isSandboxApp, uint32_t tokeId);
+    void SendResult(bool isSandboxApp, uint32_t tokeId, bool schedulerdied = false);
 
     /**
      * send result object to caller ability thread.
