@@ -657,7 +657,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetMission->UpdateMissionTime(info.missionInfo.time);
         targetRecord->SetMissionId(targetMission->GetMissionId());
         targetRecord->SetOwnerMissionUserId(userId_);
-        SetLastExitReason(targetRecord);
+        LoadLastExitReasonAsync(targetRecord);
 
         // handle specified
         if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
@@ -1027,7 +1027,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityMS attach abilityThread, name is %{public}s.",
         abilityRecord->GetAbilityInfo().name.c_str());
-
+    SyncLoadExitReasonTask(abilityRecord->GetRecordId());
     auto eventHandler = AbilityManagerService::GetPubInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     abilityRecord->RemoveLoadTimeoutTask();
@@ -2737,7 +2737,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
     mission->SetUnclearable(innerMissionInfo.missionInfo.unclearable);
     abilityRecord->SetMissionId(mission->GetMissionId());
     abilityRecord->SetOwnerMissionUserId(userId_);
-    SetLastExitReason(abilityRecord);
+    LoadLastExitReasonAsync(abilityRecord);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
     return newMissionList;
 }
@@ -4195,6 +4195,7 @@ void MissionListManager::GetActiveAbilityList(int32_t uid, std::vector<std::stri
 
 void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> abilityRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return;
@@ -4217,6 +4218,33 @@ void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> abilit
 
     if (isSetReason) {
         abilityRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
+    }
+}
+
+void MissionListManager::LoadLastExitReasonAsync(MissionAbilityRecordPtr abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    std::weak_ptr<AbilityRecord> weakRecord(abilityRecord);
+    std::lock_guard lock(exitReasonTaskMutex_);
+    exitReasonTasks_.emplace(abilityRecord->GetRecordId(), ffrt::submit_h([weakRecord]() {
+        MissionListManager::SetLastExitReason(weakRecord.lock());
+        }));
+}
+
+void MissionListManager::SyncLoadExitReasonTask(int32_t abilityRecordId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::optional<ffrt::task_handle> taskHandle;
+    {
+        std::lock_guard lock(exitReasonTaskMutex_);
+        auto it = exitReasonTasks_.find(abilityRecordId);
+        if (it != exitReasonTasks_.end()) {
+            taskHandle = it->second;
+            exitReasonTasks_.erase(it);
+        }
+    }
+    if (taskHandle.has_value()) {
+        ffrt::wait({taskHandle.value()});
     }
 }
 
