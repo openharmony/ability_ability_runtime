@@ -276,5 +276,50 @@ HWTEST_F(MissionListManagerThirdTest, DoAbilityForeground_002, TestSize.Level1)
     int ret = missionListManager->DoAbilityForeground(abilityRecord, 0);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/*
+ * Feature: MissionListManager
+ * Function: LoadLastExitReasonAsync
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager LoadLastExitReasonAsync
+ * EnvConditions: NA
+ * CaseDescription: Verify LoadLastExitReasonAsync
+ */
+HWTEST_F(MissionListManagerThirdTest, LoadLastExitReasonAsync_001, TestSize.Level1)
+{
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    MissionAbilityRecordPtr abilityRecord = nullptr;
+    missionListManager->LoadLastExitReasonAsync(abilityRecord);
+    EXPECT_TRUE(missionListManager->exitReasonTasks_.empty());
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    abilityRecord = MissionAbilityRecord::CreateAbilityRecord(abilityRequest);
+    missionListManager->LoadLastExitReasonAsync(abilityRecord);
+    EXPECT_FALSE(missionListManager->exitReasonTasks_.empty());
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: SyncLoadExitReasonTask
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager SyncLoadExitReasonTask
+ * EnvConditions: NA
+ * CaseDescription: Verify SyncLoadExitReasonTask
+ */
+HWTEST_F(MissionListManagerThirdTest, SyncLoadExitReasonTask_001, TestSize.Level1)
+{
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    missionListManager->exitReasonTasks_.emplace(0, ffrt::task_handle());
+    missionListManager->SyncLoadExitReasonTask(1);
+    EXPECT_FALSE(missionListManager->exitReasonTasks_.empty());
+
+    missionListManager->SyncLoadExitReasonTask(0);
+    EXPECT_TRUE(missionListManager->exitReasonTasks_.empty());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
