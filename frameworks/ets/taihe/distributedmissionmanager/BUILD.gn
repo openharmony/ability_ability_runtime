@@ -60,6 +60,7 @@ taihe_shared_library("distributedmissionmanager_ani") {
   taihe_generated_file_path = "$taihe_generated_file_path"
   subsystem_name = "$subsystem_name"
   part_name = "$part_name"
+  shlib_type = "ani"
   include_dirs = [
     "${ability_runtime_path}/frameworks/ets/taihe/distributedmissionmanager/include",
     "${ability_runtime_path}/frameworks/js/napi/mission_manager",
@@ -90,6 +91,7 @@ taihe_shared_library("distributedmissionmanager_ani") {
       debug = false
     }
   }
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
   cflags = [
     "-DHILOG_ENABLE",
     "-fPIC",
