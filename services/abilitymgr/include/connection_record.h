@@ -177,7 +177,7 @@ private:
     int32_t callerUid_ = 0;                             // caller uid
     int32_t callerPid_ = 0;                             // caller pid
     uint32_t callerTokenId_ = 0;                        // caller pid
-    int recordId_ = 0;                                  // record id
+    std::atomic<int32_t> recordId_ = 0;                                  // record id
     ConnectionState state_;                         // service connection state
     sptr<IRemoteObject> callerToken_ = nullptr;               // from:caller token
     std::shared_ptr<BaseExtensionRecord> targetService_ = nullptr;  // target:service need to be connected
