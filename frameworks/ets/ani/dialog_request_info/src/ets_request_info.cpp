@@ -46,7 +46,7 @@ ani_object RequestInfo::WrapRequestInfo(ani_env *env, RequestInfo *request)
     }
 
     ani_class cls {};
-    ani_status status = env->FindClass("@ohos.app.ability.dialogRequest.RequestInfoInner", &cls);
+    ani_status status = env->FindClass("@ohos.app.ability.dialogRequest.dialogRequest.RequestInfoInner", &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "FindClass failed: %{public}d", status);
         return nullptr;
@@ -99,7 +99,7 @@ bool SetWindowRect(ani_env *env,
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Int(object, "height", left)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "height", height)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DIALOG, "pid failed status:%{public}d", status);
         return false;
     }

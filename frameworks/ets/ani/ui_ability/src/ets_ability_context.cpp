@@ -2332,8 +2332,16 @@ ani_object EtsAbilityContext::WrapRequestDialogResult(ani_env *env, int32_t resu
         TAG_LOGE(AAFwkTag::CONTEXT, "resultItem failed, or null resultItem");
         return nullptr;
     }
-    env->Object_SetPropertyByName_Ref(object, "result", resultItem);
-    env->Object_SetPropertyByName_Ref(object, "want", AppExecFwk::WrapWant(env, want));
+    status = env->Object_SetPropertyByName_Ref(object, "result", resultItem);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Object_SetPropertyByName_Ref status: %{public}d", status);
+        return nullptr;
+    }
+    status = env->Object_SetPropertyByName_Ref(object, "want", AppExecFwk::WrapWant(env, want));
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Object_SetPropertyByName_Ref status: %{public}d", status);
+        return nullptr;
+    }
     return object;
 }
 
@@ -2394,7 +2402,8 @@ void EtsAbilityContext::OnRequestDialogService(ani_env *env, ani_object aniObj, 
             TAG_LOGW(AAFwkTag::CONTEXT, "null requestResult");
             EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         } else {
-            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef), nullptr, requestResult);
+            ani_object errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef), errorObj, requestResult);
         }
         env->GlobalReference_Delete(callbackRef);
         AppExecFwk::DetachAniEnv(vm, isAttachThread);

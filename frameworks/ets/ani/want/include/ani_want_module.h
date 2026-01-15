@@ -56,6 +56,9 @@ public:
     static ani_boolean NativeSetRemoteObjectParam(ani_env *env, ani_object, ani_long nativeWantParams,
         ani_string key, ani_object value);
 
+    static ani_boolean NativeSetRemoteProxyParam(ani_env *env, ani_object, ani_long nativeWantParams,
+        ani_string key, ani_object value);
+
 private:
     static bool SetArrayString(ani_env *env, const std::string &key, ani_object value,
         AAFwk::WantParams& wantParams);
