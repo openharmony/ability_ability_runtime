@@ -183,6 +183,38 @@ HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0200, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetPkgContextInfoListMap_0300
+ * @tc.desc: JsRuntimeLiteTest test for GetPkgContextInfoListMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0300, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0300 start");
+
+    std::map<std::string, std::string> modulePkgContentMap;
+    std::string pkgContentJsonString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+                "library","version":"1.0.0","entryPath":"","isSO":false}})";
+    modulePkgContentMap["entry"] = pkgContentJsonString;
+
+    std::string libraryString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+                "library","version":"1.0.0","entryPath":"","isSO":false}})";
+    modulePkgContentMap["library"] = libraryString;
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    std::unordered_map<std::string, std::pair<std::unique_ptr<uint8_t[]>, size_t>> pkgInfoMap;
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(modulePkgContentMap, pkgInfoMap);
+    std::string expectString = "library:packageName:library:bundleName:";
+    expectString += "com.xxx.xxxx:moduleName:library:version:1.0.0:entryPath::isSO:false:";
+    auto it = pkgInfoMap.find("entry");
+    ASSERT_EQ(it, pkgInfoMap.end());
+    auto libraryIt = pkgInfoMap.find("library");
+    ASSERT_EQ(libraryIt, pkgInfoMap.end());
+    TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0300 end");
+}
+
+/**
  * @tc.name: Init_0100
  * @tc.desc: JsRuntimeLiteTest test for Init.
  * @tc.type: FUNC
