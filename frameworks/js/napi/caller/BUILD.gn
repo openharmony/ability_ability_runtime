@@ -42,7 +42,7 @@ ohos_shared_library("caller_napi") {
     "-ffunction-sections",
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
-    "-Os",
+    "-Oz",
   ]
   cflags_cc = [
     "-flto=full",
@@ -50,7 +50,7 @@ ohos_shared_library("caller_napi") {
     "-ffunction-sections",
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
-    "-Os",
+    "-Oz",
   ]
   ldflags = [
     "-flto=full",
