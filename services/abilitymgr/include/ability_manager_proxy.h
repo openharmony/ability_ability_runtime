@@ -883,9 +883,10 @@ public:
      * Start Ability for prelauch.
      *
      * @param want, Special want for service type's ability.
+     * @param frameNum, Special frameNum for remove start window num.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityForPrelaunch(const Want &want) override;
+    virtual int StartAbilityForPrelaunch(const Want &want, const int32_t frameNum) override;
 
     /**
      * Start Ability, connect session with common ability.

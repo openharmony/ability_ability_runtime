@@ -545,6 +545,7 @@ private:
     static void OnOffOldInner(sptr<OHOS::AppExecFwk::IAppMgr> appManager, sptr<JSAppStateObserver> observer,
         int64_t observerId, napi_env env, NapiAsyncTask *task)
     {
+        HandleScope handleScope(env);
         if (observer == nullptr || appManager == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null observer or appMgr");
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -687,6 +688,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -721,6 +723,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -780,6 +783,7 @@ private:
             };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, info](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrorCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsRunningMultiAppInfo(env, *info));
                 } else {
@@ -817,6 +821,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, bundleType, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -849,6 +854,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -872,6 +878,7 @@ private:
     static void OnKillProcessesByBundleNameInner(std::string bundleName, bool clearPageStack, int32_t appIndex,
         sptr<OHOS::AAFwk::IAbilityManager> abilityManager, napi_env env, NapiAsyncTask *task)
     {
+        HandleScope handleScope(env);
         if (abilityManager == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -950,6 +957,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [bundleName, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1001,6 +1009,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
         auto asyncTask = [bundleName, appCloneIndex, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1043,6 +1052,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
         auto asyncTask = [missionId, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
             if (amsClient == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null amsClient");
@@ -1091,6 +1101,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [bundleName, versionCode, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1149,6 +1160,7 @@ private:
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, bundleName, appIndex, accountId, clearPageStack,
             env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr or amsMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1197,6 +1209,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
                 return;
@@ -1217,6 +1230,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1243,6 +1257,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1283,6 +1298,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [pid, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1310,6 +1326,7 @@ private:
     static void OnGetRunningProcessInfoByBundleNameInner(std::string bundleName, int userId,
         sptr<OHOS::AppExecFwk::IAppMgr> appManager, napi_env env, NapiAsyncTask *task)
     {
+        HandleScope handleScope(env);
         if (appManager == nullptr) {
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
@@ -1402,6 +1419,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, isRunning](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsValue(env, *isRunning));
             } else {
@@ -1453,6 +1471,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, isRunning](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsValue(env, *isRunning));
             } else {
@@ -1497,6 +1516,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
@@ -1528,6 +1548,7 @@ private:
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [bundleName, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            HandleScope handleScope(env);
             if (appManager == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -1573,6 +1594,7 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1642,6 +1664,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [infoList, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (infoList == nullptr || innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1704,6 +1727,7 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1766,6 +1790,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [infoList, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (infoList == nullptr || innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,

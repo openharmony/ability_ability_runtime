@@ -69,7 +69,7 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
             !AbilityRuntime::InsightIntentProfile::TransformTo(profile, configIntentInfos) ||
             configIntentInfos.size() == 0);
         if (isTransformExtractIntent && isTransformConfigIntent) {
-            TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
+            TAG_LOGD(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
             continue;
         }
 
@@ -100,8 +100,11 @@ void InsightIntentSysEventReceiver::LoadInsightIntentInfos(int32_t userId)
     }
 
     TAG_LOGI(AAFwkTag::INTENT, "init insight intent cache start, userId: %{public}d", userId);
-    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->InitInsightIntentCache(userId);
-    TAG_LOGI(AAFwkTag::INTENT, "init insight intent cache end, userId: %{public}d", userId);
+    if (DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->
+        InitInsightIntentCache(userId) == ERR_OK) {
+        TAG_LOGI(AAFwkTag::INTENT, "Load intent from db success");
+        return;
+    }
 
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
@@ -117,13 +120,18 @@ void InsightIntentSysEventReceiver::LoadInsightIntentInfos(int32_t userId)
     }
 
     TAG_LOGI(AAFwkTag::INTENT, "bundleInfos size: %{public}zu", bundleInfos.size());
+    bool hasIntent = false;
     for (auto &bundleInfo : bundleInfos) {
         for (const auto &hapInfo : bundleInfo.hapModuleInfos) {
             if (!hapInfo.hasIntent) {
                 continue;
             }
             SaveInsightIntentInfos(bundleInfo.name, hapInfo.moduleName, userId);
+            hasIntent = true;
         }
+    }
+    if (hasIntent) {
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
     }
 }
 

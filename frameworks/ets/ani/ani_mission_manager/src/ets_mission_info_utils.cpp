@@ -38,7 +38,7 @@ constexpr const char* KEY_ABILITY_STATE = "abilityState";
 constexpr const char* KEY_UNCLEARABLE = "unclearable";
 constexpr const char* KEY_WANT = "want";
 constexpr const char *WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
-constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iY:";
 }
 
 bool InnerCreateEtsWantParams(ani_env *env, ani_class wantCls, ani_object wantObject,

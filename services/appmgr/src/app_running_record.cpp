@@ -620,10 +620,10 @@ void AppRunningRecord::ScheduleTrimMemory()
     }
 }
 
-void AppRunningRecord::ScheduleMemoryLevel(int32_t level, bool isShellCall)
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
 {
     if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleMemoryLevel(level, isShellCall);
+        appLifeCycleDeal_->ScheduleMemoryLevel(level);
     }
 }
 
@@ -916,7 +916,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
-            serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false);
+            serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false, false);
         }
         return;
     }
@@ -1295,6 +1295,12 @@ bool AppRunningRecord::IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clear
 
 bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
+    {
+        std::lock_guard lock(specifiedMutex_);
+        if (!IsTerminating() && specifiedAbilityRequest_ != nullptr) {
+            return false;
+        }
+    }
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
@@ -1323,6 +1329,12 @@ bool AppRunningRecord::ExtensionAbilityRecordExists()
 
 bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
 {
+    {
+        std::lock_guard lock(specifiedMutex_);
+        if (!IsTerminating() && specifiedAbilityRequest_ != nullptr) {
+            return false;
+        }
+    }
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");

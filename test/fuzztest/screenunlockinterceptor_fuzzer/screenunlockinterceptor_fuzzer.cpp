@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@
 #include <cstdint>
 
 #include "bundle_mgr_helper.h"
+#define private public
 #include "screen_unlock_interceptor.h"
+#undef private
 
 #include "ability_record.h"
 
@@ -73,7 +75,10 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     auto shouldBlockFunc = []() { return false; };
     AbilityInterceptorParam param(want, intParam, int32Param, boolParam, token, shouldBlockFunc);
+    AbilityInfo targetAbilityInfo;
     screenUnlockInterceptor->DoProcess(param);
+    screenUnlockInterceptor->QueryTargetAbilityInfo(param, targetAbilityInfo);
+    screenUnlockInterceptor->RecordExtensionEventWhenScreenUnlock(param, targetAbilityInfo);
     return true;
 }
 } // namespace OHOS

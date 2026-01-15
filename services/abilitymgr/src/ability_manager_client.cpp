@@ -1183,14 +1183,14 @@ ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, spt
     return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent, promotePriority);
 }
 
-ErrCode AbilityManagerClient::StartAbilityForPrelaunch(const Want &want)
+ErrCode AbilityManagerClient::StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "prelaunch, ability:%{public}s/%{public}s",
         want.GetElement().GetBundleName().c_str(),
         want.GetElement().GetAbilityName().c_str());
-    return abms->StartAbilityForPrelaunch(want);
+    return abms->StartAbilityForPrelaunch(want, frameNum);
 }
 
 void AbilityManagerClient::CallRequestDone(sptr<IRemoteObject> token, sptr<IRemoteObject> callStub)

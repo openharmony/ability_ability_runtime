@@ -32,29 +32,26 @@ export default class AsyncCallbackWrapper<T, E = void> {
 }
 
 export class AbilityUtils {
-  public static getClassType(obj: Object): ClassType | undefined {
+  public static getClassType(obj: Object): Class | undefined {
     try {
-      let type = Type.of(obj);
-      return type as ClassType;
+      return Class.of(obj);
     } catch (err) {
       hilog.error(DOMAIN_ID, TAG, `getClassType error: ${err}`);
       return undefined;
     }
   }
 
-  public static isOverride(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
+  public static isOverride(type: Class, methodName: string, stopBaseClassType: Class): boolean | undefined {
     let currType = type;
     let level = 0;
-    while (!currType.equals(stopBaseClassType)) {
+    while (currType != stopBaseClassType) {
       try {
-        for (let methodIdx = 0; methodIdx < currType.getMethodsNum(); methodIdx++) {
-          const method = currType.getMethod(methodIdx)
-          if (method.getName().equals(methodName) && method.getOwnerType().equals(currType)) {
-            return true;
-          }
+        const method = currType.getInstanceMethod(methodName);
+        if (method != undefined && (method!.getOwner() == currType)) {
+          return true;
         }
-        let baseType = currType.getBaseType();
-        if (baseType.equals(currType)) {
+        let baseType = currType.getSuper();
+        if (baseType == currType) {
           hilog.error(DOMAIN_ID, TAG, `isOverride: baseType equals currType (${currType.getName()})`);
           return undefined;
         }
@@ -63,7 +60,7 @@ export class AbilityUtils {
           hilog.error(DOMAIN_ID, TAG, `isOverride: inheritance level >= ${LEVEL}, abort`);
           return undefined;
         }
-        currType = baseType;
+        currType = baseType!;
       } catch (err) {
         hilog.error(DOMAIN_ID, TAG, `isOverride error: ${err}`);
         return undefined;

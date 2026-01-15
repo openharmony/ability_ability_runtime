@@ -28,6 +28,7 @@ namespace AbilityRuntime {
 napi_value CreateJsAppStateData(napi_env env, const AppStateData &appStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -38,12 +39,13 @@ napi_value CreateJsAppStateData(napi_env env, const AppStateData &appStateData)
     napi_set_named_property(env, object, "uid", CreateJsValue(env, appStateData.uid));
     napi_set_named_property(env, object, "state", CreateJsValue(env, appStateData.state));
     TAG_LOGD(AAFwkTag::APPMGR, "end");
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -60,12 +62,13 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
 
     TAG_LOGD(AAFwkTag::APPMGR, "end");
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -79,33 +82,36 @@ napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
     napi_set_named_property(env, object, "isContinuousTask", CreateJsValue(env, processData.isContinuousTask));
     napi_set_named_property(env, object, "isKeepAlive", CreateJsValue(env, processData.isKeepAlive));
     TAG_LOGD(AAFwkTag::APPMGR, "end");
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value CreateJsAppStateDataArray(napi_env env, const std::vector<AppStateData> &appStateDatas)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, appStateDatas.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto &appStateData : appStateDatas) {
         napi_set_element(env, arrayValue, index++, CreateJsAppStateData(env, appStateData));
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 napi_value CreateJsProcessRunningInfoArray(napi_env env, const std::vector<RunningProcessInfo> &infos)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto &runningInfo : infos) {
         napi_set_element(env, arrayValue, index++, CreateJsProcessRunningInfo(env, runningInfo));
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 napi_value CreateJsProcessRunningInfo(napi_env env, const RunningProcessInfo &info)
 {
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -118,7 +124,7 @@ napi_value CreateJsProcessRunningInfo(napi_env env, const RunningProcessInfo &in
     napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, info.bundleNames));
     napi_set_named_property(env, object, "state", CreateJsValue(env,
         ConvertToJsAppProcessState(info.state_, info.isFocused)));
-    return object;
+    return handleEscape.Escape(object);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

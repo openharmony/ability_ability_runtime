@@ -161,7 +161,7 @@ void AppLifeCycleDeal::ScheduleTrimMemory(int32_t timeLevel)
     appThread->ScheduleShrinkMemory(timeLevel);
 }
 
-void AppLifeCycleDeal::ScheduleMemoryLevel(int32_t Level, bool isShellCall)
+void AppLifeCycleDeal::ScheduleMemoryLevel(int32_t Level)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
@@ -169,7 +169,7 @@ void AppLifeCycleDeal::ScheduleMemoryLevel(int32_t Level, bool isShellCall)
         return;
     }
 
-    appThread->ScheduleMemoryLevel(Level, isShellCall);
+    appThread->ScheduleMemoryLevel(Level);
 }
 
 void AppLifeCycleDeal::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)

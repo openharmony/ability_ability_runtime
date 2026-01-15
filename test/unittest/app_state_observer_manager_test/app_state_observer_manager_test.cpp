@@ -34,6 +34,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int BUNDLE_NAME_LIST_MAX_SIZE = 128;
+constexpr int32_t RESOURCE_MANAGER_UID = 1096;
 }
 class MockApplicationStateObserver : public IApplicationStateObserver {
 public:
@@ -218,7 +219,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_001, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord;
     ApplicationState state = ApplicationState::APP_STATE_CREATE;
     bool needNotifyApp = false;
-    manager->OnAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->OnAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -237,7 +238,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_002, TestSize.Level1)
     ApplicationState state = ApplicationState::APP_STATE_CREATE;
     bool needNotifyApp = false;
     manager->Init();
-    manager->OnAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->OnAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -647,7 +648,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -670,7 +671,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -692,7 +693,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level2)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -714,7 +715,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level2)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -737,7 +738,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -761,7 +762,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level2)
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
     manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -783,7 +784,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level2)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -802,7 +803,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_008, TestSize.Level2)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     ApplicationState state = ApplicationState::APP_STATE_END;
     bool needNotifyApp = false;
-    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
+    manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false, false);
 }
 
 /*
@@ -1763,6 +1764,31 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessResued_004, TestSize.Level2)
     manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNames});
     EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(0);
     manager->HandleOnProcessResued(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: PreventNotify
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager PreventNotify
+ * EnvConditions: NA
+ * CaseDescription: Verify PreventNotify
+ */
+HWTEST_F(AppSpawnSocketTest, PreventNotify_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ApplicationState state = ApplicationState::APP_STATE_CREATE;
+
+    EXPECT_FALSE(manager->PreventNotify(state, 0, false));
+    EXPECT_FALSE(manager->PreventNotify(state, 0, true));
+    EXPECT_FALSE(manager->PreventNotify(state, RESOURCE_MANAGER_UID, false));
+    EXPECT_FALSE(manager->PreventNotify(state, RESOURCE_MANAGER_UID, true));
+
+    state = ApplicationState::APP_STATE_BACKGROUND;
+    EXPECT_FALSE(manager->PreventNotify(state, 0, false));
+    EXPECT_FALSE(manager->PreventNotify(state, 0, true));
+    EXPECT_FALSE(manager->PreventNotify(state, RESOURCE_MANAGER_UID, false));
+    EXPECT_TRUE(manager->PreventNotify(state, RESOURCE_MANAGER_UID, true));
 }
 } // namespace AppExecFwk
 } // namespace OHOS

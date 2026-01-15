@@ -104,6 +104,7 @@ public:
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     bool CheckInBackGround(const FaultData &faultData);
     bool CheckAppfreezeHappend(const std::string& key, const std::string& eventName);
+    bool CheckNeedRecordAppRunningUnquieId(const std::string& eventName);
     bool IsBetaVersion();
     void InsertKillThread(int32_t state, int32_t pid, int32_t uid, const std::string& bundleName);
     bool IsSkipDetect(int32_t pid, int32_t uid, const std::string& bundleName,

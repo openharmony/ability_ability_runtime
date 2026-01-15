@@ -231,7 +231,7 @@ int UIAbilityLifecycleManager::ResolveLocked(const AbilityRequest &abilityReques
     return 0;
 }
 
-int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
+int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest, const int32_t frameNum)
 {
     return 0;
 }
@@ -760,6 +760,11 @@ ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const Want &want,
     const std::string &instanceKey, AppExecFwk::LaunchMode launchMode)
 {
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::HandleUIAbilityDiedByPid(int32_t pid)
+{
+    return;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

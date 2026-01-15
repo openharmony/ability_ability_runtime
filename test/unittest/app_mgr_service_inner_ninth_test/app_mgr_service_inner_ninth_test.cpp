@@ -118,9 +118,14 @@ public:
     {
         AAFwk::MyStatus::GetInstance().notifyStartResidentProcessCalled_ = true;
     }
-    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid) override
     {
         AAFwk::MyStatus::GetInstance().notifyStartKeepAliveProcessCalled_ = true;
+    }
+    void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName) override
+    {
+        AAFwk::MyStatus::GetInstance().recordAppExitSignalReasonCall_ = true;
     }
     sptr<IRemoteObject> AsObject() override
     {

@@ -1153,9 +1153,10 @@ public:
      * Start Ability for prelaunch
      *
      * @param want, Special want for service type's ability.
+     * @param frameNum, Special frameNum for remove start window num.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityForPrelaunch(const Want &want)
+    virtual int StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
     {
         return 0;
     };

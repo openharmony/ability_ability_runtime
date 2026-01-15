@@ -74,6 +74,8 @@ public:
     int32_t CreateSystemHspModuleResourceManager(const std::string &bundleName,
         const std::string &moduleName, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager) override;
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
+    std::shared_ptr<Context> CreateModuleOrPluginContext(const std::string &bundleName,
+        const std::string &moduleName) override;
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) override;
 #endif

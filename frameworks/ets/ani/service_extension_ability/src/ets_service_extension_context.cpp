@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "ani_common_ability_result.h"
 #include "ani_common_start_options.h"
 #include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "remote_object_taihe_ani.h"
 #include "common_fun_ani.h"
 #include "ets_caller_complex.h"
@@ -50,6 +51,8 @@ constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION_WITH_ACCOUNT =
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
     "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
+constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
+    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode;";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
@@ -1432,12 +1435,9 @@ void EtsServiceExtensionContext::CreateOnAtomicRequestFailureResultCallback(ani_
             env->GlobalReference_Delete(refCompletionHandler);
             return;
         }
-        ani_object failureCodeObj = AppExecFwk::CreateInt(env, failureCode);
-        if (failureCodeObj == nullptr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null failureCodeObj");
-            env->GlobalReference_Delete(refCompletionHandler);
-            return;
-        }
+        ani_enum_item failureCodeObj {};
+        OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
+            env, COMPLETION_HANDLER_FAILURE_CODE, failureCode, failureCodeObj);
         ani_string messageStr = nullptr;
         if (env->String_NewUTF8(message.c_str(), message.size(), &messageStr) != ANI_OK || !messageStr) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "String_NewUTF8 for messageStr failed");

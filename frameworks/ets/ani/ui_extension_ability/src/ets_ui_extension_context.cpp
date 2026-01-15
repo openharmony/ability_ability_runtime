@@ -60,6 +60,7 @@ constexpr const char *SIGNATURE_START_UI_ABILITIES_IN_SPLIT_WINDOWMODE =
     "iC{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
+constexpr int32_t ARGC_THREE = 3;
 constexpr int32_t ARGC_FOUR = 4;
 constexpr const char *SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
     "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
@@ -67,6 +68,8 @@ constexpr const char *SIGNATURE_OPEN_LINK = "C{std.core.String}C{utils.AbilityUt
     "C{@ohos.app.ability.OpenLinkOptions.OpenLinkOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
+constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
+    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode;";
 constexpr const char* JSON_KEY_ERR_MSG = "errMsg";
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 
@@ -666,6 +669,162 @@ void EtsUIExtensionContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_stri
         !isOptionsUndefined, !isCallbackUndefined);
 }
 
+void EtsUIExtensionContext::CreateOnAtomicRequestSuccessResultCallback(ani_env *env, ani_ref refCompletionHandler,
+    OnAtomicRequestSuccess &onRequestCallback, const char *callbackName)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "CreateOnAtomicRequestSuccessResultCallback called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    ani_vm *etsVm = nullptr;
+    ani_status status = env->GetVM(&etsVm);
+    if (status != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed, status: %{public}d", status);
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    onRequestCallback = [etsVm, refCompletionHandler, callbackName](const std::string &appId) {
+        ani_env *env = nullptr;
+        ani_status status = etsVm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
+            return;
+        }
+        ani_string appIdStr = nullptr;
+        if (env->String_NewUTF8(appId.c_str(), appId.size(), &appIdStr) != ANI_OK || appIdStr == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "String_NewUTF8 for appId failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref funcRef;
+        if ((status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(refCompletionHandler),
+            callbackName, &funcRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Object_GetFieldByName_Ref failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        if (!AppExecFwk::IsValidProperty(env, funcRef)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "IsValidProperty failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref result = nullptr;
+        std::vector<ani_ref> argv = { appIdStr };
+        if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funcRef), ARGC_ONE, argv.data(),
+            &result)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "FunctionalObject_Call failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        env->GlobalReference_Delete(refCompletionHandler);
+    };
+}
+
+void EtsUIExtensionContext::CreateOnAtomicRequestFailureResultCallback(ani_env *env, ani_ref refCompletionHandler,
+    OnAtomicRequestFailure &onRequestCallback, const char *callbackName)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "CreateOnAtomicRequestFailureResultCallback called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    ani_vm *etsVm = nullptr;
+    ani_status status = env->GetVM(&etsVm);
+    if (status != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed, status: %{public}d", status);
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    onRequestCallback = [etsVm, refCompletionHandler, callbackName](const std::string &appId,
+        int32_t failureCode, const std::string &message) {
+        ani_env *env = nullptr;
+        ani_status status = etsVm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
+            return;
+        }
+        ani_string appIdStr = nullptr;
+        if (env->String_NewUTF8(appId.c_str(), appId.size(), &appIdStr) != ANI_OK || appIdStr == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "String_NewUTF8 for appId failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_enum_item failureCodeObj {};
+        OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
+            env, COMPLETION_HANDLER_FAILURE_CODE, failureCode, failureCodeObj);
+        ani_string messageStr = nullptr;
+        if (env->String_NewUTF8(message.c_str(), message.size(), &messageStr) != ANI_OK || messageStr == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "String_NewUTF8 for messageStr failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref funcRef;
+        if ((status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(refCompletionHandler),
+            callbackName, &funcRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Object_GetFieldByName_Ref failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        if (!AppExecFwk::IsValidProperty(env, funcRef)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "IsValidProperty failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref result = nullptr;
+        std::vector<ani_ref> argv = { appIdStr, failureCodeObj, messageStr };
+        if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funcRef), ARGC_THREE, argv.data(),
+            &result)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "FunctionalObject_Call failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        env->GlobalReference_Delete(refCompletionHandler);
+    };
+}
+
+void EtsUIExtensionContext::UnWrapCompletionHandlerForAtomicService(
+    ani_env *env, ani_object param, AAFwk::StartOptions &options, const std::string &appId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "UnWrapCompletionHandlerForAtomicService called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+    ani_ref completionHandler = nullptr;
+    if (!AppExecFwk::GetFieldRefByName(env, param, "completionHandlerForAtomicService", completionHandler) ||
+        completionHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null completionHandlerForAtomicService");
+        return;
+    }
+    ani_ref refCompletionHandler = nullptr;
+    if (env->GlobalReference_Create(completionHandler, &refCompletionHandler) != ANI_OK ||
+        refCompletionHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to create global ref for completionHandler.");
+        return;
+    }
+    TAG_LOGI(AAFwkTag::UI_EXT, "completionHandlerForAtomicService exists");
+    OnAtomicRequestSuccess onRequestSucc;
+    OnAtomicRequestFailure onRequestFail;
+    CreateOnAtomicRequestSuccessResultCallback(env, refCompletionHandler, onRequestSucc,
+        "onAtomicServiceRequestSuccess");
+    CreateOnAtomicRequestFailureResultCallback(env, refCompletionHandler, onRequestFail,
+        "onAtomicServiceRequestFailure");
+    std::string requestId =
+        std::to_string(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count()));
+    if (context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "add completionHandler failed");
+        return;
+    }
+    options.requestId_ = requestId;
+}
+
 void EtsUIExtensionContext::OnOpenAtomicService(
     ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackobj, ani_object optionsObj)
 {
@@ -693,6 +852,7 @@ void EtsUIExtensionContext::OnOpenAtomicService(
             AppExecFwk::AsyncCallback(env, callbackobj, errorObject, nullptr);
             return;
         }
+        UnWrapCompletionHandlerForAtomicService(env, optionsObj, startOptions, appId);
     }
     OpenAtomicServiceInner(env, aniObj, want, startOptions, appId, callbackobj);
 }

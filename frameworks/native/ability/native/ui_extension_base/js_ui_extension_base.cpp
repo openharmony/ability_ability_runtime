@@ -60,6 +60,7 @@ constexpr const char* UIEXTENSION_LAUNCH_TIMESTAMP_LOW = "ohos.ability.params.ui
 napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    HandleEscape handleEscape(env);
     if (value == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null value");
         return nullptr;
@@ -109,7 +110,7 @@ napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
         return nullptr;
     }
 
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 JsUIExtensionBase::JsUIExtensionBase(const std::unique_ptr<Runtime> &runtime)
@@ -176,13 +177,15 @@ void JsUIExtensionBase::RegisterAbilityConfigUpdateCallback()
 {
     auto uiExtensionAbility = std::static_pointer_cast<JsUIExtensionBase>(shared_from_this());
     std::weak_ptr<JsUIExtensionBase> abilityWptr = uiExtensionAbility;
+    std::weak_ptr<UIExtensionContext> abilityContextWptr = context_;
     context_->RegisterAbilityConfigUpdateCallback(
-        [abilityWptr, abilityContext = context_](AppExecFwk::Configuration &config) {
+        [abilityWptr, abilityContextWptr](AppExecFwk::Configuration &config) {
         std::shared_ptr<JsUIExtensionBase> abilitySptr = abilityWptr.lock();
         if (abilitySptr == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilitySptr");
             return;
         }
+        std::shared_ptr<UIExtensionContext> abilityContext = abilityContextWptr.lock();
         if (abilityContext == nullptr || abilityContext->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext or null GetAbilityInfo");
             return;
@@ -341,6 +344,7 @@ void JsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *cal
         TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
         context_->SetTerminating(true);
     }
+    ApplicationConfigurationManager::GetInstance().DeleteIgnoreContext(context_);
     HandleScope handleScope(jsRuntime_);
     napi_value result = CallObjectMethod("onDestroy", nullptr, 0, true);
     if (!CheckPromise(result)) {

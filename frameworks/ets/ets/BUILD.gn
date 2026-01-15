@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1446,6 +1446,22 @@ ohos_prebuilt_etc("ability_runtime_ability_mission_manager_abc_etc") {
   deps = [ ":ability_runtime_ability_mission_manager_abc" ]
 }
 
+generate_static_abc("completion_handler_for_atomic_service_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.CompletionHandlerForAtomicService.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/completion_handler_for_atomic_service_abc.abc"
+}
+
+ohos_prebuilt_etc("completion_handler_for_atomic_service_abc_etc") {
+  source = "$target_out_dir/completion_handler_for_atomic_service_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":completion_handler_for_atomic_service_abc" ]
+}
+
 generate_static_abc("atomic_service_options_abc") {
   base_url = "./"
   files = [ "./@ohos.app.ability.AtomicServiceOptions.ets" ]
@@ -2122,6 +2138,7 @@ group("ets_packages") {
     ":atomic_service_options_abc_etc",
     ":business_ability_info_abc_etc",
     ":business_ability_router_abc_etc",
+    ":completion_handler_for_atomic_service_abc_etc",
     ":form_extension_ability_etc",
     ":photo_editor_extension_ability_etc",
     ":quick_fix_manager_abc_etc",

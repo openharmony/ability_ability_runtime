@@ -32,7 +32,6 @@ public:
     ~PermissionVerification() = default;
 
     bool VerifyUpdateConfigurationPerm() const;
-    bool VerifyPreloadApplicationPermission() const;
 };
 } // namespace AAFwk
 } // namespace OHOS

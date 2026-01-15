@@ -137,7 +137,8 @@ void AppStateCallbackProxy::NotifyStartResidentProcess(std::vector<AppExecFwk::B
     }
 }
 
-void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t diedPid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -157,6 +158,10 @@ void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
             TAG_LOGE(AAFwkTag::APPMGR, "write bundle info failed");
             return;
         }
+    }
+    if (!data.WriteInt32(diedPid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write diedPid failed.");
+        return;
     }
     auto ret = SendTransactCmd(
         static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS),

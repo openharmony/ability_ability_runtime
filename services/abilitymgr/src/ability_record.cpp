@@ -1858,6 +1858,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability on scheduler died: '%{public}s'", abilityInfo_.name.c_str());
     auto task = [ability = shared_from_this()]() {
+        CHECK_POINTER_LOG(ability, "ability nullptr");
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
     handler->SubmitTask(task, AAFwk::TaskAttribute{
@@ -1883,7 +1884,7 @@ void AbilityRecord::OnProcessDied()
 {
     CancelPrepareTerminate();
     std::lock_guard<ffrt::mutex> guard(lock_);
-    if (!IsSceneBoard() && scheduler_ != nullptr) {
+    if (!IsSceneBoard() && scheduler_ != nullptr && !isKeepAliveDied_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnProcessDied: '%{public}s', attached.", abilityInfo_.name.c_str());
         return;
     }
@@ -1894,6 +1895,7 @@ void AbilityRecord::OnProcessDied()
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnProcessDied: '%{public}s'", abilityInfo_.name.c_str());
     auto task = [ability = shared_from_this()]() {
+        CHECK_POINTER_LOG(ability, "ability nullptr");
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
     if (IsSceneBoard()) {

@@ -61,6 +61,7 @@ public:
     static constexpr char BUSSINESS_THREAD_BLOCK_3S[] = "BUSSINESS_THREAD_BLOCK_3S";
     static constexpr char BUSSINESS_THREAD_BLOCK_6S[] = "BUSSINESS_THREAD_BLOCK_6S";
     static constexpr char BACKGROUND_WARNING[] = "BACKGROUND_WARNING";
+    static constexpr char BUSINESS_INPUT_BLOCK[] = "BUSINESS_INPUT_BLOCK";
 };
 /**
  * @struct FaultData

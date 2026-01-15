@@ -77,7 +77,7 @@ public:
      *
      * @return
      */
-    virtual void ScheduleMemoryLevel(int32_t level, bool isShellCall = false) override;
+    virtual void ScheduleMemoryLevel(int32_t level) override;
 
     /**
      * ScheduleHeapMemory, call ScheduleHeapMemory() through proxy project,
@@ -331,7 +331,7 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
-    void ScheduleMemoryCommon(const int32_t level, const uint32_t operation, bool isShellCall = false);
+    void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
     static inline BrokerDelegator<AppSchedulerProxy> delegator_;
 };

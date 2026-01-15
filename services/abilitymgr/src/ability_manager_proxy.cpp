@@ -3954,7 +3954,7 @@ int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sp
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartAbilityForPrelaunch(const Want &want)
+int AbilityManagerProxy::StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityForPrelaunch begin.");
     int error;
@@ -3968,6 +3968,10 @@ int AbilityManagerProxy::StartAbilityForPrelaunch(const Want &want)
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(frameNum)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "frameNum write fail");
         return ERR_INVALID_VALUE;
     }
 

@@ -67,6 +67,10 @@ export default class FormExtensionAbility {
     console.log(`FormExtensionAbility onConfigurationUpdate`);
   }
 
+  onSizeChanged(formId: string, newDimension: formInfo.FormDimension, newRect: formInfo.Rect): void {
+    console.log('FormExtensionAbility onSizeChanged');
+  }
+
   public onAcquireFormState?: OnAcquireFormStateFn;
   
   public onStop?: OnStopFn;

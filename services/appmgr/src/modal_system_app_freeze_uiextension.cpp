@@ -34,13 +34,15 @@ namespace OHOS {
 namespace AppExecFwk {
 const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_SYS_COMMON_UI = "sysDialog/common";
-const std::string APP_FREEZE_PID = "APP_FREEZE_PID";
+const std::string APP_FREEZE_PID = "pid";
 const std::string FREEZE_WINDOW_POSX = "FREEZE_WINDOW_POSX";
 const std::string FREEZE_WINDOW_POSY = "FREEZE_WINDOW_POSY";
 const std::string FREEZE_WINDOW_WIDTH = "FREEZE_WINDOW_WIDTH";
 const std::string FREEZE_WINDOW_HEIGHT = "FREEZE_WINDOW_HEIGHT";
 const std::string START_BUNDLE_NAME = "startBundleName";
 const std::string APP_FREEZE_TOKEN = "freezeToken";
+const std::string APP_FREEZE_EVENT_NAME = "eventName";
+const std::string APP_FREEZE_RUNNING_UNIQUE_ID = "appRunningUniqueId";
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 constexpr uint32_t COMMAND_START_DIALOG = 1;
@@ -57,7 +59,7 @@ ModalSystemAppFreezeUIExtension::~ModalSystemAppFreezeUIExtension()
 {}
 
 void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const FaultData &faultData, std::string pid,
-    std::string bundleName, std::function<void()> callback, bool isDialogExist)
+    std::string bundleName, std::function<void()> callback)
 {
     const std::string SCENE_BAOARD_NAME = "com.ohos.sceneboard";
     if ((bundleName == SCENE_BAOARD_NAME || faultData.waitSaveState) && callback) {
@@ -66,39 +68,29 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     }
     FaultDataType faultType = faultData.faultType;
     std::string name = faultData.errorObject.name;
-    bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
-        name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
-    uint64_t now =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-            .count();
-    bool timeout = now - lastFreezeTime > TIMEOUT_INTERVAL_MS;
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s", bundleName.c_str(),
-        focusFlag ? "focus" : "not focus", pid.c_str(), lastFreezePid.c_str());
-    bool isPullUpBox =
-        isAppFreezeDialog && (pid != lastFreezePid || (pid == lastFreezePid && timeout && !isDialogExist));
-    bool updateTypeName = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
-    if (pid == lastFreezePid && updateTypeName) {
-        lastFreezeTime = now;
+    if (name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+        return;
     }
-    if (focusFlag && isPullUpBox) {
-        CreateModalUIExtension(pid, bundleName);
+    bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S ||
+        name == AppFreezeType::APP_INPUT_BLOCK || name == AppFreezeType::BUSINESS_INPUT_BLOCK;
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "ProcessAppFreeze %{public}s is %{public}s pid:%{public}s eventName:%{public}s", bundleName.c_str(),
+        focusFlag ? "focus" : "not focus", pid.c_str(), name.c_str());
+    if (focusFlag && isAppFreezeDialog) {
+        CreateModalUIExtension(pid, bundleName, faultData);
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
         callback();
     }
-    if (!isDialogExist && !focusFlag && lastFreezePid == pid) {
-        lastFreezePid = INVALID_PID;
-        lastFocusStatus = false;
-    }
 }
 
-bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string& pid, std::string& bundleName)
+bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string& pid, std::string& bundleName,
+    const FaultData &faultData)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Create Modal UIExtension Called");
     sptr<IRemoteObject> token;
     AAFwk::Want want;
     std::unique_lock<std::mutex> lockAssertResult(appFreezeResultMutex_);
-    if (!CreateSystemDialogWant(pid, bundleName, token, want)) {
+    if (!CreateSystemDialogWant(pid, bundleName, token, want, faultData)) {
         return false;
     }
     auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
@@ -111,21 +103,20 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string& pid, s
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartExtensionAbility failed, result = %{public}d", result);
         return false;
     }
-    lastFreezePid = pid;
-    lastFocusStatus = true;
-    lastFreezeTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "success, result = %{public}d", result);
     return true;
 }
 
 bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
-    std::string& pid, std::string& bundleName, sptr<IRemoteObject> token, AAFwk::Want &want)
+    std::string& pid, std::string& bundleName, sptr<IRemoteObject> token, AAFwk::Want &want,
+    const FaultData &faultData)
 {
     want.SetElementName(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY);
     want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
     want.SetParam(APP_FREEZE_PID, pid);
     want.SetParam(START_BUNDLE_NAME, bundleName);
+    want.SetParam(APP_FREEZE_EVENT_NAME, faultData.errorObject.name);
+    want.SetParam(APP_FREEZE_RUNNING_UNIQUE_ID, faultData.appRunningUniqueId);
 
     auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
     if (!sceneSessionManager) {
@@ -151,15 +142,13 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
     uint32_t height  = 10;
     int32_t focusPid = -1;
     for (const auto &info : infos) {
-        if (info != nullptr) {
-            if (info->IsFocused()) {
-                posX = info->rect_.posX_;
-                posY = info->rect_.posY_;
-                width = info->rect_.width_;
-                height = info->rect_.height_;
-                focusPid = info->pid_;
-                break;
-            }
+        if (info != nullptr && info->IsFocused()) {
+            posX = info->rect_.posX_;
+            posY = info->rect_.posY_;
+            width = info->rect_.width_;
+            height = info->rect_.height_;
+            focusPid = info->pid_;
+            break;
         }
     }
     if ((focusPid == -1) || (std::to_string(focusPid) != pid)) {

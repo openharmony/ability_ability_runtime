@@ -120,6 +120,7 @@ private:
             pid_t pid = 0;
             ChildProcessManagerErrorCode errorCode =
                 ChildProcessManager::GetInstance().StartChildProcessBySelfFork(srcEntry, pid);
+            HandleScope handleScope(env);
             if (errorCode == ChildProcessManagerErrorCode::ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsValue(env, pid));
             } else {
@@ -145,6 +146,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [pid, innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (!pid || !innerErrorCode) {
                 TAG_LOGE(AAFwkTag::PROCESSMGR, "null innerErrorCode or pid");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -284,6 +286,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [pid, innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (!pid || !innerErrorCode) {
                 TAG_LOGE(AAFwkTag::PROCESSMGR, "null pid or innerErrorCode");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));

@@ -19,7 +19,7 @@ ohos_unittest("modal_system_app_freeze_uiextension_test") {
 
   defines = [
     "APP_NO_RESPONSE_DIALOG=1",
-    "APP_NO_RESPONSE_BUNDLENAME=\"com.huawei.hmos.abnormal\"",
+    "APP_NO_RESPONSE_BUNDLENAME=\"com.hmos.abnormal\"",
   ]
 
   include_dirs = [

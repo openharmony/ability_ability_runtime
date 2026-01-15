@@ -843,24 +843,6 @@ HWTEST_F(EtsEnvironmentTest, AddAbcFiles_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: AddAbcFiles_0200
- * @tc.desc: Test AddAbcFiles.
- * @tc.type: FUNC
- */
-HWTEST_F(EtsEnvironmentTest, AddAbcFiles_0200, TestSize.Level0)
-{
-    auto etsEnv = std::make_shared<ETSEnvironment>();
-    ASSERT_NE(etsEnv, nullptr);
-
-    MockAniEnv mockEnv;
-    mockEnv.GetState().findClassStatus = ANI_ERROR;
-
-    std::string obj;
-    auto result = etsEnv->AddAbcFiles(mockEnv.GetEnv(), obj);
-    EXPECT_TRUE(result);
-}
-
-/**
  * @tc.name: AddAbcFiles_0300
  * @tc.desc: Test AddAbcFiles.
  * @tc.type: FUNC

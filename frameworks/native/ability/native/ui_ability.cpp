@@ -178,9 +178,11 @@ void UIAbility::AttachAbilityContext(const std::shared_ptr<AbilityRuntime::Abili
 {
     abilityContext_ = abilityContext;
     std::weak_ptr<UIAbility> abilityWptr = weak_from_this();
+    std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextWptr = abilityContext_;
     abilityContext_->RegisterAbilityConfigUpdateCallback(
-        [abilityWptr, abilityContext = abilityContext_](AppExecFwk::Configuration &config) {
+        [abilityWptr, abilityContextWptr](AppExecFwk::Configuration &config) {
         std::shared_ptr<UIAbility> abilitySptr = abilityWptr.lock();
+        std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = abilityContextWptr.lock();
         if (abilitySptr == nullptr || abilityContext == nullptr ||
             abilityContext->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilitySptr or null abilityContext or null GetAbilityInfo");
