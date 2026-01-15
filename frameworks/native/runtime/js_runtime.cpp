@@ -595,7 +595,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return nullptr;
     }
-
+    HandleScope handleScope(env);
     napi_value globalObj = nullptr;
     napi_get_global(env, &globalObj);
     napi_value propertyValue = nullptr;
@@ -1023,6 +1023,7 @@ napi_value JsRuntime::LoadJsBundle(const std::string& path, const std::string& h
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto env = GetNapiEnv();
     CHECK_POINTER_AND_RETURN(env, nullptr);
+    HandleEscape handleEscape(env);
     napi_value globalObj = nullptr;
     napi_get_global(env, &globalObj);
     napi_value exports = nullptr;
@@ -1048,7 +1049,7 @@ napi_value JsRuntime::LoadJsBundle(const std::string& path, const std::string& h
         return nullptr;
     }
 
-    return exportObj;
+    return handleEscape.Escape(exportObj);
 }
 
 napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& hapPath, const std::string& srcEntrance)
