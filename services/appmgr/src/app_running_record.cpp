@@ -899,9 +899,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
     }
 
     TAG_LOGI(AAFwkTag::APPMGR, "appState: %{public}d, pState: %{public}d, %{public}s/%{public}s",
-        curState_.load(), pendingState_, mainBundleName_.c_str(), ability->GetName().c_str());
+        GetState(), pendingState_, mainBundleName_.c_str(), ability->GetName().c_str());
     // We need schedule application to foregrounded when current application state is ready or background running.
-    if (curState_.load() == ApplicationState::APP_STATE_FOREGROUND
+    if (GetState() == ApplicationState::APP_STATE_FOREGROUND
         && pendingState_ != ApplicationPendingState::BACKGROUNDING) {
         // Just change ability to foreground if current application state is foreground or focus.
         auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
@@ -916,13 +916,13 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
-            serviceInner->OnAppStateChanged(shared_from_this(), curState_.load(), false, false, false);
+            serviceInner->OnAppStateChanged(shared_from_this(), GetState(), false, false, false);
         }
         return;
     }
-    if (curState_.load() == ApplicationState::APP_STATE_READY
-        || curState_.load() == ApplicationState::APP_STATE_BACKGROUND
-        || curState_.load() == ApplicationState::APP_STATE_FOREGROUND) {
+    if (GetState() == ApplicationState::APP_STATE_READY
+        || GetState() == ApplicationState::APP_STATE_BACKGROUND
+        || GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         auto pendingState = pendingState_;
         SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         if (pendingState == ApplicationPendingState::READY && !ScheduleForegroundRunning()) {
@@ -960,10 +960,10 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
     StateChangedNotifyObserver(
         ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
-    if (curState_.load() != ApplicationState::APP_STATE_FOREGROUND &&
-        curState_.load() != ApplicationState::APP_STATE_CACHED &&
-        curState_.load() != ApplicationState::APP_STATE_READY) {
-        TAG_LOGW(AAFwkTag::APPMGR, "wrong state: %{public}d", curState_.load());
+    if (GetState() != ApplicationState::APP_STATE_FOREGROUND &&
+        GetState() != ApplicationState::APP_STATE_CACHED &&
+        GetState() != ApplicationState::APP_STATE_READY) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wrong state: %{public}d", GetState());
         return;
     }
     int32_t foregroundSize = 0;
@@ -2100,10 +2100,10 @@ void AppRunningRecord::OnWindowVisibilityChanged(
 void AppRunningRecord::OnWindowVisibilityChangedWithPendingState()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "wnd call, %{public}s_%{public}d, isEmpty_%{public}d, c_%{public}d -> p_%{public}d",
-        GetBundleName().c_str(), GetPid(), IsWindowIdsEmpty(), curState_.load(), pendingState_);
+        GetBundleName().c_str(), GetPid(), IsWindowIdsEmpty(), GetState(), pendingState_);
     if (pendingState_ == ApplicationPendingState::READY) {
         if (!IsWindowIdsEmpty()) {
-            if (curState_.load() != ApplicationState::APP_STATE_FOREGROUND) {
+            if (GetState() != ApplicationState::APP_STATE_FOREGROUND) {
                 SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
                 ScheduleForegroundRunning();
             }
@@ -2112,7 +2112,7 @@ void AppRunningRecord::OnWindowVisibilityChangedWithPendingState()
                 SetWatchdogBackgroundStatusRunning(false);
             }
         } else {
-            if (IsAbilitiesBackground() && curState_.load() == ApplicationState::APP_STATE_FOREGROUND) {
+            if (IsAbilitiesBackground() && GetState() == ApplicationState::APP_STATE_FOREGROUND) {
                 SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
                 ScheduleBackgroundRunning();
             }
