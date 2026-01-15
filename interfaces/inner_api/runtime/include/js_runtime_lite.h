@@ -36,6 +36,8 @@ public:
     void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
         std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
         std::map<std::string, std::string> &pkgAliasMap);
+    void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
+        std::unordered_map<std::string, std::pair<std::unique_ptr<uint8_t[]>, size_t>> &pkgInfoMap);
     static JsRuntimeLite& GetInstance();
     static void InitJsRuntimeLite(const Options& options);
     std::shared_ptr<Options> GetChildOptions();
