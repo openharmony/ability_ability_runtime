@@ -145,6 +145,13 @@ class RecordWriter {
           localWantParams?.setParam(key, newWantParams);
        }
       return true;
+    } else if (this.isRemoteProxyFormat(obj)) { // consistent with napi behavior
+      hilog.debug(DOMAIN_ID, TAG, `key: %{public}s, value is rpc.RemoteProxy type`, JSON.stringify(key));
+      let newWantParams = new NativeWantParams();
+       if (this.writeRemoteProxyToNative(obj as Object as Record<string, valueType>, newWantParams) === true) {
+          localWantParams?.setParam(key, newWantParams);
+       }
+      return true;
     } else if (obj instanceof Record) {
       let newWantParams = new NativeWantParams();
       this.writeRecordToNative(obj as Object as Record<string, valueType>, newWantParams);
@@ -548,6 +555,46 @@ class RecordWriter {
     return true;
   }
 
+  private isRemoteProxyFormat(obj: valueType): boolean {
+    if (!(obj instanceof Record)) {
+      return false;
+    }
+    let hasType = false;
+    let hasValue = false;
+    let typeValue: valueType = undefined;
+    let valueValue: valueType = undefined;
+    let count = 0;
+    let rec: Record<string, valueType> = obj as Object as Record<string, valueType>;
+    for (let key of rec.keys()) {
+      if (rec[key] === undefined || rec[key] === null) {
+        return false;
+      }
+      if (key === TYPE_PROPERTY) {
+        hasType = true;
+        typeValue = rec[key];
+      } else if (key === VALUE_PROPERTY) {
+        hasValue = true;
+        valueValue = rec[key];
+      }
+      count++;
+    }
+
+    if (count !== PROPERTIES_SIZE) {
+      return false;
+    }
+    if (!hasType || !hasValue) {
+      return false;
+    }
+    if (typeof typeValue !== 'string' || typeValue !== REMOTE_OBJECT) {
+      return false;
+    }
+    if (!(valueValue instanceof rpc.RemoteProxy)) {
+      return false;
+    }
+
+    return true;
+  }
+
   private writeRemoteObjectToNative(obj: Record<string, valueType>, wantParams: NativeWantParams | null): boolean {
     for (let key of obj.keys()) {
       if (key === TYPE_PROPERTY) {
@@ -555,6 +602,20 @@ class RecordWriter {
       } else if (key === VALUE_PROPERTY) {
         if (wantParams === null || wantParams.setParam(VALUE_PROPERTY, obj[key] as rpc.RemoteObject) != true) {
           hilog.error(DOMAIN_ID, TAG, `write RemoteObject to native failed`);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private writeRemoteProxyToNative(obj: Record<string, valueType>, wantParams: NativeWantParams | null): boolean {
+    for (let key of obj.keys()) {
+      if (key === TYPE_PROPERTY) {
+        wantParams?.setParam(TYPE_PROPERTY, REMOTE_OBJECT);
+      } else if (key === VALUE_PROPERTY) {
+        if (wantParams === null || wantParams.setParam(VALUE_PROPERTY, obj[key] as rpc.RemoteProxy) != true) {
+          hilog.error(DOMAIN_ID, TAG, `write RemoteProxy to native failed`);
           return false;
         }
       }
@@ -807,6 +868,8 @@ class NativeWantParams {
 
   private static native nativeSetRemoteObjectParam(
     nativeWantParams: long, key: string, value: rpc.RemoteObject): boolean;
+  private static native nativeSetRemoteProxyParam(
+    nativeWantParams: long, key: string, value: rpc.RemoteProxy): boolean;
 
   private registerCleaner(nativeWantParams: long): void {
     this.cleaner = new NativeWantParamsCleaner(nativeWantParams);
@@ -919,6 +982,14 @@ class NativeWantParams {
       return false;
     }
     return NativeWantParams.nativeSetRemoteObjectParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: rpc.RemoteProxy): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetRemoteProxyParam(this.nativeWantParams, key, value);
   }
 }
 

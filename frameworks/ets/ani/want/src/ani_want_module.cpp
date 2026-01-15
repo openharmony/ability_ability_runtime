@@ -795,6 +795,42 @@ ani_boolean EtsWantParams::NativeSetRemoteObjectParam(ani_env *env, ani_object, 
     return true;
 }
 
+ani_boolean EtsWantParams::NativeSetRemoteProxyParam(ani_env *env, ani_object, ani_long nativeWantParams,
+    ani_string key, ani_object value)
+{
+    TAG_LOGD(AAFwkTag::WANT, "call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::WANT, "null env");
+        return false;
+    }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGW(AAFwkTag::WANT, "not system app");
+        return false;
+    }
+
+    auto *params = reinterpret_cast<AAFwk::WantParams *>(nativeWantParams);
+    if (params == nullptr) {
+        TAG_LOGE(AAFwkTag::WANT, "null nativeWantParams");
+        return false;
+    }
+
+    std::string keyString;
+    if (!GetStdString(env, key, keyString)) {
+        TAG_LOGE(AAFwkTag::WANT, "get key failed");
+        return false;
+    }
+
+    auto remoteObject = AniGetNativeRemoteObject(env, value);
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::WANT, "null remoteProxy");
+        return false;
+    }
+    params->SetParam(keyString, AAFwk::RemoteObjectWrap::Box(remoteObject));
+    return true;
+}
+
 ani_status BindNativeFunctions(ani_env *aniEnv)
 {
     TAG_LOGD(AAFwkTag::WANT, "call");
@@ -866,6 +902,10 @@ ani_status BindNativeFunctions(ani_env *aniEnv)
         ani_native_function{
             "nativeSetRemoteObjectParam", "lC{std.core.String}C{@ohos.rpc.rpc.RemoteObject}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetRemoteObjectParam)
+        },
+        ani_native_function{
+            "nativeSetRemoteProxyParam", "lC{std.core.String}C{@ohos.rpc.rpc.RemoteProxy}:z",
+            reinterpret_cast<void *>(EtsWantParams::NativeSetRemoteProxyParam)
         },
     };
     status = aniEnv->Class_BindStaticNativeMethods(nativeWantParamsCls, nativeFuncs.data(), nativeFuncs.size());
