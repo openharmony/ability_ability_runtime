@@ -3742,6 +3742,14 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(
     abilityRequest.extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     abilityRequest.want.SetParam(IS_PRELOAD_UIEXTENSION_ABILITY, true);
     auto abilityInfo = abilityRequest.abilityInfo;
+    abilityRequest.moduleProcess = "";
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    if (DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->GetHapModuleInfo(
+        abilityRequest.abilityInfo, hapModuleInfo) &&
+        abilityRequest.abilityInfo.process == hapModuleInfo.process) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "hapModule process: %{public}s", hapModuleInfo.process.c_str());
+        abilityRequest.moduleProcess = hapModuleInfo.process;
+    }
     auto res = JudgeAbilityVisibleControl(abilityInfo);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "target ability invisible");
