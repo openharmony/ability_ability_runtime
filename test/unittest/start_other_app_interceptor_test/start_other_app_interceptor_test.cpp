@@ -110,7 +110,7 @@ HWTEST_F(StartOtherAppInterceptorTest, CheckAncoShellCall_001, TestSize.Level1)
     auto interceptor = std::make_shared<StartOtherAppInterceptor>();
     AppExecFwk::ApplicationInfo applicationInfo;
     Want want;
-    ElementName element("", "com.huawei.shell_assistant", "MainAbility");
+    ElementName element("", "com.shell_assistant", "MainAbility");
     want.SetElement(element);
     bool res = interceptor->CheckAncoShellCall(applicationInfo, want);
     EXPECT_FALSE(res);

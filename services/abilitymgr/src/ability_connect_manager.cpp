@@ -73,7 +73,7 @@ const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 5;
 #endif
 constexpr const int32_t LOAD_TIMEOUT_MAX = 30;
 const int32_t AUTO_DISCONNECT_INFINITY = -1;
-constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
+constexpr const char* FROZEN_WHITE_DIALOG = "com.hmos.cast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
@@ -83,7 +83,7 @@ constexpr int32_t HALF_TIMEOUT = 2;
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 
-const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
+const std::string XIAOYI_BUNDLE_NAME = "com.hmos.vassistant";
 
 }
 

@@ -841,16 +841,35 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo, DataObsO
     return SUCCESS;
 }
 
-void DataObsMgrService::GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const
+DataObsMgrService::FocusedAppInfo DataObsMgrService::GetFocusedWindowInfo() const
 {
     Rosen::FocusChangeInfo info;
+    DataObsMgrService::FocusedAppInfo appInfo = { 0 };
+    std::vector<sptr<Rosen::WindowVisibilityInfo>> windowVisibilityInfos;
+    Rosen::WMError result = Rosen::WMError::WM_OK;
 #ifdef SCENE_BOARD_ENABLE
     Rosen::WindowManagerLite::GetInstance().GetFocusWindowInfo(info);
+    result = Rosen::WindowManagerLite::GetInstance().GetVisibilityWindowInfo(windowVisibilityInfos);
 #else
     Rosen::WindowManager::GetInstance().GetFocusWindowInfo(info);
+    result = Rosen::WindowManager::GetInstance().GetVisibilityWindowInfo(windowVisibilityInfos);
 #endif
-    windowId = info.windowId_;
-    abilityToken = info.abilityToken_;
+    if (result == Rosen::WMError::WM_OK) {
+        for (const auto& windowInfo : windowVisibilityInfos) {
+            if (windowInfo == nullptr) {
+                continue;
+            }
+            if (windowInfo->windowId_ == static_cast<uint32_t>(info.windowId_)) {
+                appInfo.left = windowInfo->rect_.posX_;
+                appInfo.top = windowInfo->rect_.posY_;
+                appInfo.width = windowInfo->rect_.width_;
+                appInfo.height = windowInfo->rect_.height_;
+                break;
+            }
+        }
+    }
+    appInfo.abilityToken = info.abilityToken_;
+    return appInfo;
 }
 
 sptr<IRemoteObject> DataObsMgrService::GetAbilityManagerService() const
@@ -881,9 +900,7 @@ Status DataObsMgrService::NotifyProcessObserver(const std::string &key, const sp
     }
     auto abilityManager = iface_cast<IAbilityManager>(remote);
 
-    int32_t windowId;
-    sptr<IRemoteObject> callerToken;
-    GetFocusedAppInfo(windowId, callerToken);
+    FocusedAppInfo appInfo = GetFocusedWindowInfo();
 
     Want want;
     want.SetElementName(DIALOG_APP, PROGRESS_ABILITY);
@@ -892,12 +909,15 @@ Status DataObsMgrService::NotifyProcessObserver(const std::string &key, const sp
     want.SetParam("remoteDeviceName", std::string());
     want.SetParam("progressKey", key);
     want.SetParam("isRemote", false);
-    want.SetParam("windowId", windowId);
     want.SetParam("ipcCallback", observer);
-    if (callerToken != nullptr) {
-        want.SetParam("tokenKey", callerToken);
+    want.SetParam("rectLeft", appInfo.left);
+    want.SetParam("rectTop", appInfo.top);
+    want.SetParam("rectWidth", static_cast<int32_t>(appInfo.width));
+    want.SetParam("rectHeight", static_cast<int32_t>(appInfo.height));
+    if (appInfo.abilityToken != nullptr) {
+        want.SetParam("tokenKey", appInfo.abilityToken);
     } else {
-        TAG_LOGW(AAFwkTag::DBOBSMGR, "CallerToken is nullptr.");
+        TAG_LOGW(AAFwkTag::DBOBSMGR, "abilityToken is nullptr.");
     }
 
     int32_t status = IN_PROCESS_CALL(abilityManager->StartAbility(want));

@@ -1122,9 +1122,10 @@ public:
      * Start Ability for prelauch.
      *
      * @param want, Special want for service type's ability.
+     * @param frameNum, Special frameNum for remove start window num.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityForPrelaunch(const Want &want) override;
+    virtual int StartAbilityForPrelaunch(const Want &want, const int32_t frameNum) override;
 
     /**
      * As abilityRequest is prepared, just execute starting ability procedure.
@@ -2332,7 +2333,8 @@ protected:
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
-    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        int32_t diedPid = AppExecFwk::INVALID_DIED_PID) override;
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -2567,7 +2569,7 @@ private:
     int SwitchToUser(int32_t oldUserId, int32_t userId, uint64_t displayId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void SwitchManagers(int32_t userId, bool switchUser = true);
-    void StartUserApps();
+    bool StartUserApps(int32_t oldUserId);
     void PauseOldUser(int32_t userId);
     void PauseOldMissionListManager(int32_t userId);
     void PauseOldConnectManager(int32_t userId);
@@ -2633,7 +2635,8 @@ private:
     std::function<void(int32_t)> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
-    void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber);
+    void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber,
+        bool isUserUnlockSubscriber = false);
     void RemoveScreenUnlockInterceptor();
     void AddWatchParameters();
 
@@ -2990,6 +2993,10 @@ private:
     void StartKeepAliveAppsInner(int32_t userId);
 
     bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
+
+    void TimeSequenceKeepAliveRestart(int32_t userId, int32_t pid,
+        std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> &bundleInfosMap,
+        std::vector<AppExecFwk::BundleInfo> &bundleInfosForU1);
 
     struct StartSelfUIAbilityParam {
         Want want;

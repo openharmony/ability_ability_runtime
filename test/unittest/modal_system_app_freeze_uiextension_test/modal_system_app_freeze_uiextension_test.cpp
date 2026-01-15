@@ -67,7 +67,10 @@ HWTEST_F(ModalSystemAppFreezeUiextensionTest, CreateModalUIExtension_001, TestSi
 {
     std::string pid = "1";
     std::string bundleName = "Test";
-    bool ret = ModalSystemAppFreezeUIExtension::GetInstance().CreateModalUIExtension(pid, bundleName);
+    FaultData faultData;
+    faultData.errorObject.name = "Test";
+    faultData.appRunningUniqueId = "1";
+    bool ret = ModalSystemAppFreezeUIExtension::GetInstance().CreateModalUIExtension(pid, bundleName, faultData);
     EXPECT_NE(ret, true);
 }
 
@@ -84,7 +87,11 @@ HWTEST_F(ModalSystemAppFreezeUiextensionTest, CreateSystemDialogWant_001, TestSi
     AAFwk::Want want;
     std::string pid = "1";
     std::string bundleName = "Test";
-    bool ret = ModalSystemAppFreezeUIExtension::GetInstance().CreateSystemDialogWant(pid, bundleName, token, want);
+    FaultData faultData;
+    faultData.errorObject.name = "Test";
+    faultData.appRunningUniqueId = "1";
+    bool ret = ModalSystemAppFreezeUIExtension::GetInstance().CreateSystemDialogWant(
+        pid, bundleName, token, want, faultData);
     EXPECT_NE(ret, true);
 }
 

@@ -1222,7 +1222,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_PreloadExtension_001, TestSize.Level2)
 
     auto result = appMgrClient->ConnectAppMgrService();
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-    
+
     std::string bundleName = "com.example.inputmethod";
     std::string abilityName = "InputService";
     int32_t userId = 100;

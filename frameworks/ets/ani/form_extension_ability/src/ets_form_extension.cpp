@@ -39,6 +39,10 @@ constexpr const char* RECORD_CLASS_NAME = "std.core.Record";
 constexpr const char *FORM_LOCATION_STATE_ENUM_NAME = "@ohos.app.form.formInfo.formInfo.FormLocation";
 constexpr const char *FORM_LOCATION_CHANGED_STATE_NAME =
     "C{std.core.String}C{@ohos.app.form.formInfo.formInfo.FormLocation}:";
+constexpr const char *FORM_DIMENSION_ENUM_NAME = "@ohos.app.form.formInfo.formInfo.FormDimension";
+constexpr const char *FORM_SIZE_CHANGED_NAME =
+    "C{std.core.String}C{@ohos.app.form.formInfo.formInfo.FormDimension}C{@ohos.app.form.formInfo.formInfo.Rect}:";
+constexpr const char* FORM_RECT_NAME = "@ohos.app.form.formInfo.formInfo.RectInner";
 }
 
 extern "C" __attribute__((visibility("default"))) FormExtension *OHOS_ABILITY_ETSFormExtension(
@@ -601,7 +605,9 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", "C{std.core.Object}C{std.core.Object}:", &recordSetMethod);
+    status = env->Class_FindMethod(recordCls, "$_set",
+        "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}Y:",
+        &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
@@ -649,7 +655,7 @@ void ETSFormExtension::OnStop()
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return;
     }
-    
+
     ani_ref result;
     status = env->FunctionalObject_Call(static_cast<ani_fn_object>(nameRef), 0, nullptr, &result);
     if (status != ANI_OK) {
@@ -740,7 +746,7 @@ void ETSFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t
     ani_enum_item formLocationStateItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
         env, FORM_LOCATION_STATE_ENUM_NAME, formLocation, formLocationStateItem);
-    
+
     ani_method function;
     ani_status status = ANI_ERROR;
     if ((status = env->Class_FindMethod(
@@ -829,6 +835,120 @@ FormState ETSFormExtension::OnAcquireFormState(const Want &want)
     }
     TAG_LOGI(AAFwkTag::FORM_EXT, "OnAcquireFormState End");
     return static_cast<AppExecFwk::FormState>(state);
+}
+
+void ETSFormExtension::OnSizeChanged(int64_t formId, int32_t newDimension, const Rect &newRect)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "Form size changed, formId: %{public}" PRId64, formId);
+    FormExtension::OnSizeChanged(formId, newDimension, newRect);
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "env nullptr");
+        return;
+    }
+    if (etsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "etsAbilityObj nullptr");
+        return;
+    }
+
+    ani_string formIdStr = AppExecFwk::GetAniString(env, std::to_string(formId));
+    ani_enum_item newDimensionItem = nullptr;
+    if (!OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env, FORM_DIMENSION_ENUM_NAME,
+        newDimension, newDimensionItem) || newDimensionItem == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "newDimensionItem NativeToEts failed");
+        return;
+    }
+    
+    ani_object formRectObject = WrapFormRect(env, newRect);
+    if (formRectObject == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "wrap formRectObject failed");
+        return;
+    }
+
+    ani_method function;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Class_FindMethod(
+        etsAbilityObj_->aniCls, "onSizeChanged", FORM_SIZE_CHANGED_NAME, &function))) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod status: %{public}d", status);
+        return;
+    }
+
+    status = env->Object_CallMethod_Void(etsAbilityObj_->aniObj, function,
+        formIdStr, newDimensionItem, formRectObject);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_CallMethod status : %{public}d", status);
+        return;
+    }
+}
+
+ani_object ETSFormExtension::WrapFormRect(ani_env *env, const Rect &rect)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "env nullptr");
+        return nullptr;
+    }
+
+    ani_object etsObject = nullptr;
+    if (!CreateObject(env, etsObject, FORM_RECT_NAME)) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "CreateObject failed");
+        return nullptr;
+    }
+
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_SetPropertyByName_Double(etsObject, "left", rect.left)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_SetPropertyByName_Double(etsObject, "top", rect.top)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_SetPropertyByName_Double(etsObject, "width", rect.width)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_SetPropertyByName_Double(etsObject, "height", rect.height)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    return etsObject;
+}
+
+bool ETSFormExtension::CreateObject(ani_env *env, ani_object &object, const std::string &className)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(className.c_str(), &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return false;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null cls");
+        return false;
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return false;
+    }
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null method");
+        return false;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return false;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null object");
+        return false;
+    }
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

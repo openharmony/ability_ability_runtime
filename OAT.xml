@@ -81,6 +81,21 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="services/dialog_ui/ams_system_dialog/AppScope/resources/base/media/selectedMark.png" desc="icon"/>
                 <filteritem type="filepath" name="test/moduletest/ui_extension_ability_test/ui_extension_user_bundle/entry/src/main/resources/base/media/startIcon.png" desc="icon"/>
                 <filteritem type="filepath" name="test/moduletest/ui_extension_ability_test/ui_extension_provider_bundle/entry/src/main/resources/base/media/startIcon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForStart/entry/src/main/resources/base/media/icon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStart/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForDump/entry/src/main/resources/base/media/startIcon.png" desc="startIcon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/dataAbilityBundleForDump/entry/src/main/resources/base/media/icon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStop/entry/src/main/resources/base/media/icon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForDump/entry/src/main/resources/base/media/icon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStart/entry/src/main/resources/base/media/icon.png" desc="icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForDump/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/dataAbilityBundleForDump/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForStart/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStop/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/pageAbilityBundleForStart/entry/src/main/resources/base/media/startIcon.png" desc="startIcon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/dataAbilityBundleForDump/entry/src/main/resources/base/media/startIcon.png" desc="startIcon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStop/entry/src/main/resources/base/media/startIcon.png" desc="startIcon"/>
+                <filteritem type="filepath" name="tools/test/resource/aa/serviceAbilityBundleForStart/entry/src/main/resources/base/media/startIcon.png" desc="startIcon"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>

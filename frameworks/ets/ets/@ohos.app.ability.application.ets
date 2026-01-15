@@ -136,7 +136,7 @@ export default namespace application {
 
   export function demoteCurrentFromCandidateMasterProcess(): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
@@ -180,7 +180,7 @@ export default namespace application {
 
   export function exitMasterProcessRole(): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=> {
           if (err == null || err.code == 0) {
             resolve(undefined);

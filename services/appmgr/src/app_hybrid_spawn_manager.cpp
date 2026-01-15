@@ -152,8 +152,9 @@ void AppHybridSpawnManager::InitHybridSpawnMsgPipe(std::weak_ptr<AppMgrServiceIn
 
 void AppHybridSpawnManager::RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
 {
-    if (appMgrServiceInner_.lock()) {
-        appMgrServiceInner_.lock()->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+    auto appMgrServiceInner = appMgrServiceInner_.lock();
+    if (appMgrServiceInner) {
+        appMgrServiceInner->RecordAppExitSignalReason(pid, uid, signal, bundleName);
     }
 }
 } // end AppExecFwk

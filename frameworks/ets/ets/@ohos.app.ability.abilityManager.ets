@@ -133,7 +133,7 @@ export default namespace abilityManager {
 
   function isEmbeddedOpenAllowed(context: Context, appId: string): Promise<boolean> {
     abilityManager.nativeIsEmbeddedOpenAllowedCheck(context);
-    return new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError | null)=>void):void => {
+    return new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError)=>void):void => {
       let asyncCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined)=>{
         if (err == null || err.code == 0) {
           resolve(data as boolean);
@@ -232,7 +232,7 @@ export default namespace abilityManager {
 
   function queryAtomicServiceStartupRule(context: Context, appId: string): Promise<AtomicServiceStartupRule> {
     abilityManager.nativeQueryAtomicServiceStartupRuleCheck(context);
-    return new Promise<AtomicServiceStartupRule>((resolve:(data:AtomicServiceStartupRule)=>void, reject:(err: BusinessError | null)=>void):void => {
+    return new Promise<AtomicServiceStartupRule>((resolve:(data:AtomicServiceStartupRule)=>void, reject:(err: Error)=>void):void => {
       let asyncCall = new AsyncCallbackWrapper<AtomicServiceStartupRule>((err: BusinessError | null, data: AtomicServiceStartupRule | undefined)=>{
         if (err == null || err.code == 0) {
           resolve(data as AtomicServiceStartupRule);

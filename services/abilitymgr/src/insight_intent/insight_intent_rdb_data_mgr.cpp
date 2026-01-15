@@ -112,7 +112,6 @@ bool InsightIntentRdbDataMgr::InsertData(const std::string &key, const std::stri
         TAG_LOGE(AAFwkTag::INTENT, "Insert data error ret:%{public}d", ret);
         return false;
     }
-    BackupRdb();
     return true;
 }
 

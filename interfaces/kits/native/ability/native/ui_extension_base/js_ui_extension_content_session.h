@@ -49,7 +49,7 @@ public:
         std::shared_ptr<AbilityResultListeners>& abilityResultListeners);
     JsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow);
-    virtual ~JsUIExtensionContentSession() = default;
+    virtual ~JsUIExtensionContentSession();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value CreateJsUIExtensionContentSession(napi_env env,
         sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,

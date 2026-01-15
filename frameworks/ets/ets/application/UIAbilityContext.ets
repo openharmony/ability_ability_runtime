@@ -662,8 +662,8 @@ hideAbility(): Promise<void> {
     let syncCall = new AsyncCallbackWrapper<dialogRequest.RequestResult>(result);
     taskpool.execute((): void => {
       this.nativeRequestDialogService(want, syncCall);
-    }).catch((err: BusinessError): void => {
-      result(err, undefined);
+    }).catch((err: Error): void => {
+      result(err as BusinessError, undefined);
     });
   }
 
@@ -950,8 +950,8 @@ hideAbility(): Promise<void> {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityWithAccountSync(want, accountId, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -959,8 +959,8 @@ hideAbility(): Promise<void> {
     let asyncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityWithAccountSync(want, accountId, options, asyncCall);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -993,8 +993,8 @@ hideAbility(): Promise<void> {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCallback, undefined);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -1002,8 +1002,8 @@ hideAbility(): Promise<void> {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilityAsCaller(want, asyncCallback, options);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -1028,8 +1028,8 @@ hideAbility(): Promise<void> {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartRecentAbility(want, asyncCallback, undefined);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -1037,8 +1037,8 @@ hideAbility(): Promise<void> {
     let asyncCallback = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartRecentAbility(want, asyncCallback, options);
-    }).catch((err: BusinessError): void => {
-      callback(err, undefined);
+    }).catch((err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 

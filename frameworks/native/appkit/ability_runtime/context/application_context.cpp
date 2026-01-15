@@ -1247,6 +1247,12 @@ std::shared_ptr<Context> ApplicationContext::CreateAreaModeContext(int areaMode)
     return contextImpl_ ? contextImpl_->CreateAreaModeContext(areaMode) : nullptr;
 }
 
+std::shared_ptr<Context> ApplicationContext::CreateModuleOrPluginContext(const std::string &bundleName,
+    const std::string &moduleName)
+{
+    return contextImpl_ ? contextImpl_->CreateModuleOrPluginContext(bundleName, moduleName) : nullptr;
+}
+
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> ApplicationContext::CreateDisplayContext(uint64_t displayId)
 {

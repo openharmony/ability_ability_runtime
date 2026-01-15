@@ -31,12 +31,12 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags,targetBundleName: string): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data: undefined)=>void,
-            reject:(err: BusinessError | null)=>void):void => {
+            reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
-                    reject(err);
+                    reject(err as BusinessError);
                 }
             });
             taskpool.execute((): void => {
@@ -49,12 +49,12 @@ export default namespace uriPermissionManager {
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: int): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void,
-            reject:(err: BusinessError | null)=>void):void => {
+            reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
-                    reject(err);
+                    reject(err as BusinessError);
                 }
             });
             taskpool.execute((): void => {
@@ -75,12 +75,12 @@ export default namespace uriPermissionManager {
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data: undefined)=>void,
-            reject:(err: BusinessError | null)=>void):void => {
+            reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
-                    reject(err);
+                    reject(err as BusinessError);
                 }
             });
             taskpool.execute((): void => {
@@ -92,12 +92,12 @@ export default namespace uriPermissionManager {
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: int): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void,
-            reject:(err: BusinessError | null)=>void):void => {
+            reject:(err: BusinessError)=>void):void => {
             let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
-                    reject(err);
+                    reject(err as BusinessError);
                 }
             });
             taskpool.execute((): void => {

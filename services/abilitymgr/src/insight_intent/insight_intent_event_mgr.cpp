@@ -95,15 +95,10 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
             }
 
             // save database
-            ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
+            DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
                 bundleName, moduleNameLocal, userId, infos, configIntentInfos);
-            if (ret != ERR_OK) {
-                TAG_LOGW(AAFwkTag::INTENT, "update intent info failed, bundleName: %{public}s", bundleName.c_str());
-                continue;
-            }
-
-            TAG_LOGI(AAFwkTag::INTENT, "update intent info success, bundleName: %{public}s", bundleName.c_str());
         }
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
     });
 }
 

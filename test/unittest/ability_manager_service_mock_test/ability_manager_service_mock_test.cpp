@@ -355,5 +355,22 @@ HWTEST_F(AbilityManagerServiceMockTest, StartUIExtensionAbility_0200, TestSize.L
     auto ret = abilityMs->StartUIExtensionAbility(sessionInfo, 1);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: StartUIExtensionAbility_0300
+ * @tc.desc: Test getabilityInfos error
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, StartUIExtensionAbility_0300, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    Want want;
+    want.SetParam(AAFwk::SCREEN_MODE_KEY, AAFwk::EMBEDDED_HALF_SCREEN_MODE);
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->want = want;
+    auto ret = abilityMs->StartUIExtensionAbility(sessionInfo, 1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }
 }

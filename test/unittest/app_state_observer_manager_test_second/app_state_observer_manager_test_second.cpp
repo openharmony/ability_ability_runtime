@@ -213,7 +213,7 @@ HWTEST_F(AppStateObserverManagerTestSecond, OnAppStateChanged_001, TestSize.Leve
     EXPECT_CALL(*mockObserver, OnForegroundApplicationChanged(_)).Times(1);
     EXPECT_CALL(*mockObserver, OnAppStateChanged(_)).Times(1);
 
-    manager->OnAppStateChanged(appRecord, state, true, false);
+    manager->OnAppStateChanged(appRecord, state, true, false, false);
 }
 
 /*

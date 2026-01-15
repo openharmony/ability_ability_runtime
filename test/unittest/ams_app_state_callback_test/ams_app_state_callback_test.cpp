@@ -125,6 +125,25 @@ HWTEST_F(AmsAppStateCallBackTest, NotifyStartResidentProcess_001, TestSize.Level
 /*
  * Feature: AppStateCallBackHost
  * Function: AppStateCallBackHost
+ * SubFunction: RecordAppExitSignalReason Function
+ * FunctionPoints: RecordAppExitSignalReason Onreceived interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Verify if Onreceived works when ability request done.
+ */
+HWTEST_F(AmsAppStateCallBackTest, RecordAppExitSignalReason_001, TestSize.Level1)
+{
+    sptr<AppStateCallbackHost> host(new AppStateCallbackHost());
+    EXPECT_NE(host, nullptr);
+    int32_t pid = 12345;
+    int32_t uid = 1000;
+    int32_t signal = 9;
+    std::string bundleName = "com.example.test";
+    host->RecordAppExitSignalReason(pid, uid, signal, bundleName);
+}
+
+/*
+ * Feature: AppStateCallBackHost
+ * Function: AppStateCallBackHost
  * SubFunction: NotifyStartKeepAliveProcess Function
  * FunctionPoints: NotifyStartKeepAliveProcess Onreceived interface
  * EnvConditions: Mobile that can run ohos test framework

@@ -50,8 +50,8 @@ constexpr const char* ON_OFF_TYPE_APP_FOREGROUND_STATE = "appForegroundState";
 constexpr const char *APPLICATION_STATE_WITH_BUNDLELIST_ON_SIGNATURE =
     "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}C{std.core.Array}:i";
 constexpr const char *APPLICATION_STATE_WITH_APP_STATE_FILTER_ON_SIGNATURE =
-    "Lstd/core/String;Lapplication/ApplicationStateObserver/ApplicationStateObserver;"
-    "L@ohos/app/ability/appManager/appManager/AppStateFilter;:I";
+    "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}"
+    "C{@ohos.app.ability.appManager.appManager.AppStateFilter}:i";
 constexpr const char *APPLICATION_STATE_ON_SIGNATURE =
     "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}:i";
 constexpr const char *APPLICATION_STATE_OFF_SIGNATURE =

@@ -68,7 +68,7 @@ export default namespace dialogSession {
   }
 
   export function sendDialogResult(dialogSessionId: string, targetWant: Want, isAllowed: boolean): Promise<void> {
-    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: Error)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {
           resolve(undefined);
