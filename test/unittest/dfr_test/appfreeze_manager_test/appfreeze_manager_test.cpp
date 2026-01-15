@@ -612,5 +612,26 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckThreadKilled_Test001, T
     result = appfreezeManager->CheckThreadKilled(pid, uid, bundleName);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.number: AppfreezeManagerTest CheckNeedRecordAppRunningUnquieId Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckNeedRecordAppRunningUnquieId_Test001, TestSize.Level1)
+{
+    bool result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("THREAD_BLOCK_3S");
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("THREAD_BLOCK_6S");
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("BUSSINESS_THREAD_BLOCK_3S");
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("BUSSINESS_THREAD_BLOCK_6S");
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("BUSINESS_INPUT_BLOCK");
+    EXPECT_EQ(result, true);
+    result = appfreezeManager->CheckNeedRecordAppRunningUnquieId("TEST");
+    EXPECT_EQ(result, false);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

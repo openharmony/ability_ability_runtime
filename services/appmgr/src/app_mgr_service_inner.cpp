@@ -7737,7 +7737,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
 
-    if (appRunningManager_ && eventName.find("THREAD_BLOCK_") != std::string::npos) {
+    if (appRunningManager_ && AppExecFwk::AppfreezeManager::GetInstance()->CheckNeedRecordAppRunningUnquieId(eventName)) {
         std::string appRunningUniqueId;
         int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
         TAG_LOGI(AAFwkTag::APPDFR, "ret=%{public}d, appRunningUniqueId=%{public}s", ret, appRunningUniqueId.c_str());
@@ -7755,12 +7755,9 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     }
 
 #ifdef APP_NO_RESPONSE_DIALOG
-    // A dialog box is displayed when the PC appfreeze
-    bool isDialogExist = appRunningManager_ ?
-        appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) : false;
     auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData, false);
     ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(appRecord->GetFocusFlag(), faultData,
-        std::to_string(pid), bundleName, killFaultApp, isDialogExist);
+        std::to_string(pid), bundleName, killFaultApp);
 #else
     KillFaultApp(pid, bundleName, faultData);
 #endif
@@ -7813,12 +7810,9 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
         (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
 #ifdef APP_NO_RESPONSE_DIALOG
-    bool isDialogExist = appRunningManager_ ?
-        appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
-        false;
     auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData, isNeedExit);
     ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(true, faultData, std::to_string(pid),
-        bundleName, killFaultApp, isDialogExist);
+        bundleName, killFaultApp);
 #else
     KillFaultApp(pid, bundleName, faultData, isNeedExit);
 #endif
