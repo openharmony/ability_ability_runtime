@@ -88,7 +88,7 @@ bool GetFds(ani_env* env, ani_string aniKey, ani_object aniValue, std::map<std::
         return false;
     }
     ani_int value;
-    ani_status status = env->Object_CallMethodByName_Int(aniValue, "intValue", nullptr, &value);
+    ani_status status = env->Object_CallMethodByName_Int(aniValue, "toInt", nullptr, &value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Object_CallMethodByName_Int failed status: %{public}d", status);
         return false;

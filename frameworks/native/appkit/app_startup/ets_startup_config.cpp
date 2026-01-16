@@ -170,7 +170,7 @@ bool ETSStartupConfig::GetTimeoutMs(ani_env *env, ani_object config, int32_t &ti
     }
     ani_int aniInt = 0;
     if ((status = env->Object_CallMethodByName_Int(
-        reinterpret_cast<ani_object>(iTimeoutMsRef), "intValue", nullptr, &aniInt)) != ANI_OK) {
+        reinterpret_cast<ani_object>(iTimeoutMsRef), "toInt", nullptr, &aniInt)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "Object_CallMethodByName failed, status: %{public}d", status);
         return false;
     }
