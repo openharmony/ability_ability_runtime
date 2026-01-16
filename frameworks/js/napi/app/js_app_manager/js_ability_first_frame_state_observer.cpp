@@ -49,7 +49,6 @@ void JSAbilityFirstFrameStateObserver::HandleOnAbilityFirstFrameState(
     const AbilityFirstFrameStateData &AbilityFirstFrameStateData)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    HandleScope handleScope(env_);
     napi_value obj = jsObserverObject_->GetNapiValue();
     napi_value argv[] = { CreateJsAbilityFirstFrameStateData(env_, AbilityFirstFrameStateData) };
     CallJsFunction(obj, "onAbilityFirstFrameDrawn", argv, ARGC_ONE);

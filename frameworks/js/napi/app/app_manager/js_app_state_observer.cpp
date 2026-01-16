@@ -36,7 +36,6 @@ void JSAppStateObserver::OnForegroundApplicationChanged(const AppStateData &appS
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnForegroundApplicationChanged(appStateData);
         });
     napi_ref callback = nullptr;
@@ -67,7 +66,6 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnAbilityStateChanged(abilityStateData);
         });
     napi_ref callback = nullptr;
@@ -97,7 +95,6 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserver");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
         });
     napi_ref callback = nullptr;
@@ -127,7 +124,6 @@ void JSAppStateObserver::OnProcessCreated(const ProcessData &processData)
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserver");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnProcessCreated(processData);
         });
     napi_ref callback = nullptr;
@@ -157,7 +153,6 @@ void JSAppStateObserver::OnProcessStateChanged(const ProcessData &processData)
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnProcessStateChanged(processData);
         });
     napi_ref callback = nullptr;
@@ -187,7 +182,6 @@ void JSAppStateObserver::OnProcessDied(const ProcessData &processData)
                 TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
-            HandleScope handleScope(env);
             jsObserverSptr->HandleOnProcessDied(processData);
         });
     napi_ref callback = nullptr;
