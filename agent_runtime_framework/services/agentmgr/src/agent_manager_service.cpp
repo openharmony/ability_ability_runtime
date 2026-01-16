@@ -103,5 +103,20 @@ void AgentManagerService::RegisterBundleEventCallback()
         TAG_LOGE(AAFwkTag::SER_ROUTER, "register bundle event error");
     }
 }
+
+int32_t AgentManagerService::GetAllAgentCards(AgentCardsRawData &cards)
+{
+    return ERR_OK;
+}
+
+int32_t AgentManagerService::GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards)
+{
+    return ERR_OK;
+}
+
+int32_t AgentManagerService::GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card)
+{
+    return ERR_OK;
+}
 }  // namespace AgentRuntime
 }  // namespace OHOS

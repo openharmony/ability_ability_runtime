@@ -47,6 +47,12 @@ public:
 
     virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) noexcept override;
 
+    int32_t GetAllAgentCards(AgentCardsRawData &cards) override;
+
+    int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards) override;
+
+    int32_t GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card) override;
+
 private:
     AgentManagerService();
     void Init();
