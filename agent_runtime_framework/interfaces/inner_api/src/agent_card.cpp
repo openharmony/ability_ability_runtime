@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,21 @@
  */
 
 #include "agent_card.h"
+ 
+#include <sstream>
 
+#include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
+#include "securec.h"
 #include "string_ex.h"
+
+using namespace OHOS::AAFwk;
 
 namespace OHOS {
 namespace AgentRuntime {
 constexpr int32_t SKILLS_MAX_SIZE = 100;
+constexpr uint32_t MAX_AGENT_CARD_COUNT = 200000;
+
 bool Provider::ReadFromParcel(Parcel &parcel)
 {
     organization = parcel.ReadString();
@@ -292,6 +300,10 @@ Skill Skill::FromJson(const nlohmann::json &jsonObject)
 
 bool AgentCard::ReadFromParcel(Parcel &parcel)
 {
+    bundleName = parcel.ReadString();
+    moduleName = parcel.ReadString();
+    abilityName = parcel.ReadString();
+    appIndex = parcel.ReadInt32();
     name = parcel.ReadString();
     description = parcel.ReadString();
     url = parcel.ReadString();
@@ -322,6 +334,22 @@ bool AgentCard::ReadFromParcel(Parcel &parcel)
 
 bool AgentCard::Marshalling(Parcel &parcel) const
 {
+    if (!parcel.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write bundleName failed");
+        return false;
+    }
+    if (!parcel.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write moduleName failed");
+        return false;
+    }
+    if (!parcel.WriteString(abilityName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write abilityName failed");
+        return false;
+    }
+    if (!parcel.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write appIndex failed");
+        return false;
+    }
     if (!parcel.WriteString(name)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write name failed");
         return false;
@@ -389,6 +417,10 @@ AgentCard *AgentCard::Unmarshalling(Parcel &parcel)
 nlohmann::json AgentCard::ToJson() const
 {
     nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", bundleName },
+        { "moduleName", moduleName },
+        { "abilityName", abilityName },
+        { "appIndex", appIndex },
         { "name", name },
         { "description", description },
         { "url", url },
@@ -430,6 +462,18 @@ AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
     AgentCard agentCard;
 
     // Required fields
+    if (jsonObject.contains("bundleName") && jsonObject["bundleName"].is_string()) {
+        agentCard.bundleName = jsonObject["bundleName"];
+    }
+    if (jsonObject.contains("moduleName") && jsonObject["moduleName"].is_string()) {
+        agentCard.moduleName = jsonObject["moduleName"];
+    }
+    if (jsonObject.contains("abilityName") && jsonObject["abilityName"].is_string()) {
+        agentCard.abilityName = jsonObject["abilityName"];
+    }
+    if (jsonObject.contains("appIndex") && jsonObject["appIndex"].is_number()) {
+        agentCard.appIndex = jsonObject["appIndex"];
+    }
     if (jsonObject.contains("name") && jsonObject["name"].is_string()) {
         agentCard.name = jsonObject["name"];
     }
@@ -486,6 +530,87 @@ AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
     }
 
     return agentCard;
+}
+
+int32_t AgentCardsRawData::RawDataCpy(const void *readdata)
+{
+    if (readdata == nullptr || size == 0) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null data or zero size");
+        return ERR_INVALID_AGENT_CARD_DATA;
+    }
+    void* newData = malloc(size);
+    if (newData == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "malloc failed");
+        return ERR_INVALID_AGENT_CARD_DATA;
+    }
+    if (memcpy_s(newData, size, readdata, size) != EOK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "memcpy_s failed");
+        free(newData);
+        return ERR_INVALID_AGENT_CARD_DATA;
+    }
+    isMalloc = true;
+    if (data != nullptr) {
+        free(const_cast<void*>(data));
+        data = nullptr;
+    }
+    data = newData;
+    return ERR_OK;
+}
+
+int32_t AgentCardsRawData::ToAgentCardVec(const AgentCardsRawData &rawData, std::vector<AgentCard> &cards)
+{
+    std::stringstream ss;
+    ss.write(reinterpret_cast<const char *>(rawData.data), rawData.size);
+    ss.seekg(0, std::ios::beg);
+    uint32_t ssLength = static_cast<uint32_t>(ss.str().length());
+    uint32_t count = 0;
+    ss.read(reinterpret_cast<char *>(&count), sizeof(count));
+    if (count == 0 || count > MAX_AGENT_CARD_COUNT) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "cards empty or exceed maxSize %{public}d, count: %{public}d",
+            MAX_AGENT_CARD_COUNT, count);
+        return ERR_AGENT_CARD_LIST_OUT_OF_RANGE;
+    }
+    cards.resize(count);
+    for (uint32_t i = 0; i < count; ++i) {
+        uint32_t cardSize = 0;
+        ss.read(reinterpret_cast<char *>(&cardSize), sizeof(cardSize));
+        if (cardSize > ssLength - static_cast<uint32_t>(ss.tellg())) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "cardSize:%{public}u is invalid", cardSize);
+            return ERR_INVALID_AGENT_CARD_DATA;
+        }
+        std::string cardStr(cardSize, '\0');
+        ss.read(cardStr.data(), cardSize);
+        nlohmann::json jsonObject = nlohmann::json::parse(cardStr, nullptr, false);
+        cards[i] = AgentCard::FromJson(jsonObject);
+    }
+    return ERR_OK;
+}
+
+AgentCardsRawData::~AgentCardsRawData()
+{
+    if (data != nullptr && isMalloc) {
+        free(const_cast<void*>(data));
+        isMalloc = false;
+        data = nullptr;
+    }
+}
+
+void AgentCardsRawData::FromAgentCardVec(const std::vector<AgentCard> &cards, AgentCardsRawData &rawData)
+{
+    std::stringstream ss;
+    uint32_t count = cards.size();
+    ss.write(reinterpret_cast<const char*>(&count), sizeof(count));
+
+    for (uint32_t i = 0; i < count; ++i) {
+        std::string dumped = cards[i].ToJson().dump();
+        uint32_t strLen = dumped.length();
+        ss.write(reinterpret_cast<const char*>(&strLen), sizeof(strLen));
+        ss.write(dumped.c_str(), strLen);
+    }
+    std::string result = ss.str();
+    rawData.ownedData = std::move(result);
+    rawData.data = rawData.ownedData.data();
+    rawData.size = rawData.ownedData.size();
 }
 } // namespace AgentRuntime
 } // namespace OHOS

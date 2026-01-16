@@ -231,6 +231,23 @@ ohos_prebuilt_etc("ability_runtime_child_process_manager_abc_etc") {
   deps = [ ":ability_runtime_child_process_manager_abc" ]
 }
 
+generate_static_abc("ability_runtime_agent_card_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.AgentCard.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_agent_card_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_agent_card_abc_etc") {
+  source = "$target_out_dir/ability_runtime_agent_card_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_agent_card_abc" ]
+}
+
 generate_static_abc("ability_runtime_child_process_options_abc") {
   base_url = "./"
   files = [ "./@ohos.app.ability.ChildProcessOptions.ets" ]
@@ -515,6 +532,22 @@ ohos_prebuilt_etc("ability_runtime_multi_app_mode_abc_etc") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
   deps = [ ":ability_runtime_multi_app_mode_abc" ]
+}
+
+generate_static_abc("ability_runtime_agent_manager_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.agentManager.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_agent_manager_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_agent_manager_abc_etc") {
+  source = "$target_out_dir/ability_runtime_agent_manager_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_agent_manager_abc" ]
 }
 
 generate_static_abc("ability_runtime_app_manager_abc") {
@@ -2055,6 +2088,8 @@ group("ets_packages") {
     ":ability_runtime_ability_state_data_abc_etc",
     ":ability_runtime_ability_utils_abc_etc",
     ":ability_runtime_action_extension_ability_abc_etc",
+    ":ability_runtime_agent_card_abc_etc",
+    ":ability_runtime_agent_manager_abc_etc",
     ":ability_runtime_app_manager_abc_etc",
     ":ability_runtime_app_state_data_abc_etc",
     ":ability_runtime_application_context_abc_etc",
