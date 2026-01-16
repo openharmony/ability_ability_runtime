@@ -2310,29 +2310,29 @@ sptr<IWantSender> AbilityManagerProxy::GetWantSender(
         return nullptr;
     }
     if (!data.WriteParcelable(&wantSenderInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeParcelable fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "writeParcelable fail");
         return nullptr;
     }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and callerToken write fail");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "flag and callerToken write fail");
             return nullptr;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "flag write fail");
             return nullptr;
         }
     }
 
     if (!data.WriteInt32(uid)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "uid write fail");
         return nullptr;
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return nullptr;
     }
     sptr<IWantSender> wantSender = iface_cast<IWantSender>(reply.ReadRemoteObject());
@@ -2351,21 +2351,21 @@ int AbilityManagerProxy::SendWantSender(sptr<IWantSender> target, SenderInfo &se
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&senderInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::SEND_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return error;
     }
     std::unique_ptr<SenderInfo> completedDataReply(reply.ReadParcelable<SenderInfo>());
     if (!completedDataReply) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "readParcelableInfo fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "readParcelableInfo fail");
         return INNER_ERR;
     }
     senderInfo = *completedDataReply;
@@ -2381,12 +2381,12 @@ int AbilityManagerProxy::SendLocalWantSender(const SenderInfo &senderInfo)
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&senderInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -2401,12 +2401,12 @@ void AbilityManagerProxy::CancelWantSender(const sptr<IWantSender> &sender)
         return;
     }
     if (sender == nullptr || !data.WriteRemoteObject(sender->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sender write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write fail");
         return;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::CANCEL_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return;
     }
 }
@@ -2420,12 +2420,12 @@ int AbilityManagerProxy::GetPendingWantUid(const sptr<IWantSender> &target)
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return ERR_INVALID_VALUE;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_UID, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return INNER_ERR;
     }
     return reply.ReadInt32();
@@ -2440,12 +2440,12 @@ int AbilityManagerProxy::GetPendingWantUserId(const sptr<IWantSender> &target)
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return ERR_INVALID_VALUE;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_USERID, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return INNER_ERR;
     }
     return reply.ReadInt32();
@@ -2460,12 +2460,12 @@ std::string AbilityManagerProxy::GetPendingWantBundleName(const sptr<IWantSender
         return "";
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return "";
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_BUNDLENAME, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return "";
     }
     return Str16ToStr8(reply.ReadString16());
@@ -2480,12 +2480,12 @@ int AbilityManagerProxy::GetPendingWantCode(const sptr<IWantSender> &target)
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return ERR_INVALID_VALUE;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_CODE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return INNER_ERR;
     }
     return reply.ReadInt32();
@@ -2500,12 +2500,12 @@ int AbilityManagerProxy::GetPendingWantType(const sptr<IWantSender> &target)
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return ERR_INVALID_VALUE;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_TYPE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return INNER_ERR;
     }
     return reply.ReadInt32();
@@ -2520,16 +2520,16 @@ void AbilityManagerProxy::RegisterCancelListener(const sptr<IWantSender> &sender
         return;
     }
     if (sender == nullptr || !data.WriteRemoteObject(sender->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sender write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write fail");
         return;
     }
     if (receiver == nullptr || !data.WriteRemoteObject(receiver->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "receiver write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver write fail");
         return;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::REGISTER_CANCEL_LISTENER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return;
     }
 }
@@ -2543,16 +2543,16 @@ void AbilityManagerProxy::UnregisterCancelListener(const sptr<IWantSender> &send
         return;
     }
     if (sender == nullptr || !data.WriteRemoteObject(sender->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sender write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write fail");
         return;
     }
     if (receiver == nullptr || !data.WriteRemoteObject(receiver->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "receiver write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver write fail");
         return;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::UNREGISTER_CANCEL_LISTENER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return;
     }
 }
@@ -2566,21 +2566,21 @@ int AbilityManagerProxy::GetPendingRequestWant(const sptr<IWantSender> &target, 
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return INNER_ERR;
     }
     if (want == nullptr || !data.WriteParcelable(want.get())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "want write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return error;
     }
     std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
     if (!wantInfo) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "readParcelableInfo fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "readParcelableInfo fail");
         return INNER_ERR;
     }
     want = std::move(wantInfo);
@@ -2597,21 +2597,21 @@ int AbilityManagerProxy::GetWantSenderInfo(const sptr<IWantSender> &target, std:
         return INNER_ERR;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "target write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
         return INNER_ERR;
     }
     if (info == nullptr || !data.WriteParcelable(info.get())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "info write fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "info write fail");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
         return error;
     }
     std::unique_ptr<WantSenderInfo> wantSenderInfo(reply.ReadParcelable<WantSenderInfo>());
     if (!wantSenderInfo) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "readParcelable Info fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "readParcelable Info fail");
         return INNER_ERR;
     }
     info = std::move(wantSenderInfo);
