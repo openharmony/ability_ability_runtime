@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_types.h"
@@ -59,6 +60,10 @@ bool AmsMgrProxy::IsProcessContainsOnlyUIAbility(const pid_t pid)
 
 bool AmsMgrProxy::WriteInterfaceToken(MessageParcel &data)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: WriteInterfaceToken");
+        return false;
+    }
     if (!data.WriteInterfaceToken(AmsMgrProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::APPMGR, "write token failed");
         return false;
