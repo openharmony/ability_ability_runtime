@@ -36,7 +36,7 @@ bool UnwrapFilterBundleTypeFromEts(ani_env *env,
     }
 
     ani_int mid = 0;
-    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &mid);
+    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "toInt", nullptr, &mid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
@@ -66,7 +66,7 @@ bool UnwrapFilterAppStateTypesFromEts(ani_env *env,
     }
 
     ani_int mid = 0;
-    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &mid);
+    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "toInt", nullptr, &mid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
@@ -97,7 +97,7 @@ bool UnwrapFilterProcessStateTypeFromEts(ani_env *env,
     }
 
     ani_int mid = 0;
-    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &mid);
+    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "toInt", nullptr, &mid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
@@ -129,7 +129,7 @@ bool UnwrapFilterAbilityStateTypeFromEts(ani_env *env,
     }
 
     ani_int mid = 0;
-    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &mid);
+    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "toInt", nullptr, &mid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
@@ -171,7 +171,7 @@ bool UnwrapFilterCallbackFromEts(ani_env *env,
     }
 
     ani_int mid = 0;
-    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &mid);
+    status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "toInt", nullptr, &mid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
         return false;
