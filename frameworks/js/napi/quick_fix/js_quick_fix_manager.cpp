@@ -60,6 +60,7 @@ public:
 
     static void Throw(napi_env env, int32_t errCode)
     {
+        HandleScope handleScope(env);
         auto externalErrCode = AAFwk::QuickFixErrorUtil::GetErrorCode(errCode);
         auto errMsg = AAFwk::QuickFixErrorUtil::GetErrorMessage(errCode);
         napi_value error = CreateJsError(env, externalErrCode, errMsg);
@@ -68,15 +69,17 @@ public:
 
     static napi_value CreateJsErrorByErrorCode(napi_env env, int32_t errCode)
     {
+        HandleEscape handleEscape(env);
         auto externalErrCode = AAFwk::QuickFixErrorUtil::GetErrorCode(errCode);
         auto errMsg = AAFwk::QuickFixErrorUtil::GetErrorMessage(errCode);
-        return CreateJsError(env, externalErrCode, errMsg);
+        return handleEscape.Escape(CreateJsError(env, externalErrCode, errMsg));
     }
 
 private:
     napi_value OnGetApplyedQuickFixInfo(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
+        HandleEscape handleEscape(env);
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
@@ -91,6 +94,7 @@ private:
         }
 
         auto complete = [bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             AppExecFwk::ApplicationQuickFixInfo quickFixInfo;
             auto errCode = AAFwk::QuickFixManagerClient::GetInstance()->GetApplyedQuickFixInfo(
                 bundleName, quickFixInfo);
@@ -105,12 +109,13 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JsQuickFixManager::OnGetApplyedQuickFixInfo", env,
             CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnApplyQuickFix(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
+        HandleEscape handleEscape(env);
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
@@ -125,6 +130,7 @@ private:
         }
 
         auto complete = [hapQuickFixFiles](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             auto errcode = AAFwk::QuickFixManagerClient::GetInstance()->ApplyQuickFix(
                 hapQuickFixFiles);
             if (errcode == 0) {
@@ -138,12 +144,13 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JsQuickFixManager::OnApplyQuickFix", env,
             CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnRevokeQuickFix(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
+        HandleEscape handleEscape(env);
         if (info.argc == ARGC_ZERO) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
@@ -172,6 +179,7 @@ private:
 
         auto complete = [retval = errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             TAG_LOGD(AAFwkTag::QUICKFIX, "Revoke quick fix complete called");
+            HandleScope handleScope(env);
             if (*retval != AAFwk::ERR_OK) {
                 TAG_LOGE(AAFwkTag::QUICKFIX, "retval %{public}d", *retval);
                 task.Reject(env, CreateJsErrorByErrorCode(env, *retval));
@@ -186,13 +194,14 @@ private:
         NapiAsyncTask::Schedule("JsQuickFixManager::OnRevokeQuickFix", env,
             CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         TAG_LOGD(AAFwkTag::QUICKFIX, "Function finished");
-        return result;
+        return handleEscape.Escape(result);
     }
 };
 
 napi_value CreateJsQuickFixManager(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
+    HandleScope handleScope(env);
     if (env == nullptr || exportObj == nullptr) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "null env or exportObj");
         return nullptr;

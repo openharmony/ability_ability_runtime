@@ -55,6 +55,7 @@ private:
     napi_value OnGetAbilityDelegator(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::DELEGATOR, "called");
+        HandleEscape handleEscape(env);
         if (!AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "null dgt");
             return CreateJsNull(env);
@@ -67,20 +68,20 @@ private:
             reference.reset(reinterpret_cast<NativeReference*>(ref));
         }
 
-        return reference->GetNapiValue();
+        return handleEscape.Escape(reference->GetNapiValue());
     }
 
     napi_value OnGetArguments(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGI(AAFwkTag::DELEGATOR, "called");
-
+        HandleEscape handleEscape(env);
         std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs =
             AppExecFwk::AbilityDelegatorRegistry::GetArguments();
         if (!abilityDelegatorArgs) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "get delegator args object failed");
             return CreateJsNull(env);
         }
-        return CreateJsAbilityDelegatorArguments(env, abilityDelegatorArgs);
+        return handleEscape.Escape(CreateJsAbilityDelegatorArguments(env, abilityDelegatorArgs));
     }
 };
 } // namespace
@@ -93,6 +94,7 @@ napi_value JsAbilityDelegatorRegistryInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     std::unique_ptr<JsAbilityDelegatorRegistry> jsDelegatorManager = std::make_unique<JsAbilityDelegatorRegistry>();
     napi_wrap(env, exportObj, jsDelegatorManager.release(), JsAbilityDelegatorRegistry::Finalizer, nullptr, nullptr);
 
@@ -116,6 +118,7 @@ napi_value AbilityLifecycleStateInit(napi_env env)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -133,7 +136,7 @@ napi_value AbilityLifecycleStateInit(napi_env env)
     napi_set_named_property(env, objValue, "DESTROY",
         CreateJsValue(env, static_cast<int32_t>(AbilityLifecycleState::DESTROY)));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS

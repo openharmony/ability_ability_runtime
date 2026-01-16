@@ -35,6 +35,7 @@ napi_value ExecuteModeInit(napi_env env)
         TAG_LOGE(AAFwkTag::INTENT, "null env");
         return nullptr;
     }
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -47,7 +48,7 @@ napi_value ExecuteModeInit(napi_env env)
     napi_set_named_property(env, objValue, "SERVICE_EXTENSION_ABILITY",
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_THREE)));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value ReturnModeInit(napi_env env)
@@ -56,6 +57,7 @@ napi_value ReturnModeInit(napi_env env)
         TAG_LOGE(AAFwkTag::INTENT, "null env");
         return nullptr;
     }
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -63,7 +65,7 @@ napi_value ReturnModeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_ZERO)));
     napi_set_named_property(env, objValue, "FUNCTION",
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_ONE)));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value JsInsightIntentInit(napi_env env, napi_value exportObj)
@@ -73,7 +75,7 @@ napi_value JsInsightIntentInit(napi_env env, napi_value exportObj)
         TAG_LOGE(AAFwkTag::INTENT, "null env or exportObj");
         return nullptr;
     }
-
+    HandleScope handleScope(env);
     napi_set_named_property(env, exportObj, "ExecuteMode", ExecuteModeInit(env));
     napi_set_named_property(env, exportObj, "ReturnMode", ReturnModeInit(env));
     return exportObj;

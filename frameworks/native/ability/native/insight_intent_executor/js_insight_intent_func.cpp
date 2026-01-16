@@ -127,6 +127,7 @@ void JsInsightIntentFunc::ReplySucceededInner(std::shared_ptr<AppExecFwk::Insigh
 bool JsInsightIntentFunc::HandleResultReturnedFromJsFunc(napi_value resultJs)
 {
     TAG_LOGD(AAFwkTag::INTENT, "handle result returned");
+    HandleScope handleScope(runtime_);
     auto* env = runtime_.GetNapiEnv();
     if (resultJs == nullptr) {
         return ExecuteIntentCheckError();

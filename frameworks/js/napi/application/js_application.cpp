@@ -59,6 +59,7 @@ napi_value JsApplication::GetApplicationContextInstance(napi_env env, napi_callb
 napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    HandleEscape handleEscape(env);
     napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
@@ -91,12 +92,13 @@ napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo
             return CreateJsUndefined(env);
         }
     }
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value JsApplication::OnGetApplicationContextInstance(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    HandleEscape handleEscape(env);
     std::shared_ptr<ApplicationContext> applicationContext = Context::GetApplicationContext();
     if (applicationContext == nullptr) {
         TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
@@ -149,7 +151,7 @@ napi_value JsApplication::OnGetApplicationContextInstance(napi_env env, NapiCall
     ApplicationContextManager::GetApplicationContextManager()
         .AddGlobalObject(env, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
     applicationContext->SetApplicationInfoUpdateFlag(false);
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value JsApplication::CreateModuleContext(napi_env env, napi_callback_info info)
@@ -179,14 +181,14 @@ napi_value JsApplication::GetAppPreloadType(napi_env env, napi_callback_info inf
 
 napi_value JsApplication::OnCreatePluginModuleContext(napi_env env, NapiCallbackInfo &info)
 {
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_THREE) {
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
 
     bool stageMode = false;
-    napi_status status = OHOS::AbilityRuntime::IsStageContext(env, info.argv[ARGC_ZERO], stageMode);
-    if (status != napi_ok || !stageMode) {
+    if (OHOS::AbilityRuntime::IsStageContext(env, info.argv[ARGC_ZERO], stageMode) != napi_ok || !stageMode) {
         ThrowInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
         return CreateJsUndefined(env);
     }
@@ -235,11 +237,12 @@ napi_value JsApplication::OnCreatePluginModuleContext(napi_env env, NapiCallback
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnCreatePluginModuleContext",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsApplication::OnCreatePluginModuleContextForBundle(napi_env env, NapiCallbackInfo &info)
 {
+    HandleEscape handleEscape(env);
     std::string moduleName = "";
     std::string pluginBundleName = "";
     std::string hostBundleName = "";
@@ -291,7 +294,7 @@ napi_value JsApplication::OnCreatePluginModuleContextForBundle(napi_env env, Nap
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnCreatePluginModuleContext",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool JsApplication::VerifyCreatePluginContextParams(napi_env env, NapiCallbackInfo &info, std::string &moduleName,
@@ -324,6 +327,7 @@ bool JsApplication::VerifyCreatePluginContextParams(napi_env env, NapiCallbackIn
 napi_value JsApplication::OnCreateModuleContext(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_TWO) {
         TAG_LOGE(AAFwkTag::APPKIT, "invalid argc");
         ThrowTooFewParametersError(env);
@@ -408,7 +412,7 @@ napi_value JsApplication::OnCreateModuleContext(napi_env env, NapiCallbackInfo &
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnCreateModuleContext",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool JsApplication::CheckCallerIsSystemApp()
@@ -434,6 +438,7 @@ bool JsApplication::CheckCallerPermission(const std::string &permission)
 napi_value JsApplication::OnCreateBundleContext(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
+    HandleEscape handleEscape(env);
     if (!CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPKIT, "no system app");
         ThrowNotSystemAppError(env);
@@ -497,7 +502,7 @@ napi_value JsApplication::OnCreateBundleContext(napi_env env, NapiCallbackInfo &
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnCreateBundleContext",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void JsApplication::SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Context>> contextPtr,
@@ -505,6 +510,7 @@ void JsApplication::SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Co
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
     complete = [contextPtr](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
         auto context = *contextPtr;
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
@@ -548,6 +554,7 @@ void JsApplication::SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Co
 
 napi_value JsApplication::CreateJsContext(napi_env env, const std::shared_ptr<Context> &context)
 {
+    HandleEscape handleEscape(env);
     napi_value value = CreateJsBaseContext(env, context, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -577,7 +584,7 @@ napi_value JsApplication::CreateJsContext(napi_env env, const std::shared_ptr<Co
         return CreateJsUndefined(env);
     }
 
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value JsApplication::PromoteCurrentToCandidateMasterProcess(napi_env env, napi_callback_info info)
@@ -595,6 +602,7 @@ napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env,
         return CreateJsUndefined(env);
     }
     
+    HandleEscape handleEscape(env);
     bool isInsertToHead = false;
     if (!ConvertFromJsValue(env, info.argv[ARGC_ZERO], isInsertToHead)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse isInsertToHead failed");
@@ -614,6 +622,7 @@ napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env,
         *errCode = appMgrClient->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
     };
     NapiAsyncTask::CompleteCallback complete = [errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*errCode == ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "promote to candidate master process success");
             task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -624,7 +633,7 @@ napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env,
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnPromoteCurrentToCandidateMasterProcess",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsApplication::DemoteCurrentFromCandidateMasterProcess(napi_env env, napi_callback_info info)
@@ -635,6 +644,7 @@ napi_value JsApplication::DemoteCurrentFromCandidateMasterProcess(napi_env env, 
 
 napi_value JsApplication::OnDemoteCurrentFromCandidateMasterProcess(napi_env env, NapiCallbackInfo& info)
 {
+    HandleEscape handleEscape(env);
     auto errCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute = [errCode]() {
         auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
@@ -646,6 +656,7 @@ napi_value JsApplication::OnDemoteCurrentFromCandidateMasterProcess(napi_env env
         *errCode = appMgrClient->DemoteCurrentFromCandidateMasterProcess();
     };
     NapiAsyncTask::CompleteCallback complete = [errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*errCode == ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "demote to candidate master process success");
             task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -656,7 +667,7 @@ napi_value JsApplication::OnDemoteCurrentFromCandidateMasterProcess(napi_env env
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnDemoteCurrentFromCandidateMasterProcess",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsApplication::ExitMasterProcessRole(napi_env env, napi_callback_info info)
@@ -667,6 +678,7 @@ napi_value JsApplication::ExitMasterProcessRole(napi_env env, napi_callback_info
 
 napi_value JsApplication::OnExitMasterProcessRole(napi_env env, NapiCallbackInfo& info)
 {
+    HandleEscape handleEscape(env);
     auto errCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute = [errCode]() {
         auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
@@ -678,6 +690,7 @@ napi_value JsApplication::OnExitMasterProcessRole(napi_env env, NapiCallbackInfo
         *errCode = appMgrClient->ExitMasterProcessRole();
     };
     NapiAsyncTask::CompleteCallback complete = [errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
         if (*errCode == ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "exit master process role success");
             task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -688,15 +701,16 @@ napi_value JsApplication::OnExitMasterProcessRole(napi_env env, NapiCallbackInfo
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplication::OnExitMasterProcessRole",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsApplication::OnGetAppPreloadType(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "GetAppPreloadType called");
+    HandleEscape handleEscape(env);
     auto appPreload = GetAppPreload();
     AppPreloadType appPreloadType = static_cast<AppPreloadType>(appPreload);
-    return CreateJsValue(env, appPreloadType);
+    return handleEscape.Escape(CreateJsValue(env, appPreloadType));
 }
 
 napi_value ApplicationInit(napi_env env, napi_value exportObj)
@@ -707,6 +721,7 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     auto jsApplication = std::make_unique<JsApplication>();
     napi_wrap(env, exportObj, jsApplication.release(), JsApplication::Finalizer, nullptr, nullptr);
     JsApplicationInitProperty(env, exportObj);
@@ -747,6 +762,7 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 
 void JsApplicationInitProperty(napi_env env, napi_value exportObj)
 {
+    HandleScope handleScope(env);
     napi_set_named_property(env, exportObj, "AppPreloadType", AppPreloadTypeInit(env));
 }
 } // namespace AbilityRuntime

@@ -129,11 +129,11 @@ void JsPanelStartCallback::OnResult(int32_t resultCode, const AAFwk::Want &want)
 void JsPanelStartCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::VERTICAL_PANEL, "CallJsResult call");
-    HandleScope handleScope(env_);
     if (env_ == nullptr) {
         TAG_LOGE(AAFwkTag::VERTICAL_PANEL, "null env_");
         return;
     }
+    HandleScope handleScope(env_);
 
     napi_value abilityResult = OHOS::AppExecFwk::WrapAbilityResult(env_, resultCode, want);
     if (abilityResult == nullptr) {
@@ -170,6 +170,7 @@ void JsPanelStartCallback::CallJsError(int32_t number)
         TAG_LOGE(AAFwkTag::VERTICAL_PANEL, "null env_ ");
         return;
     }
+    HandleScope handleScope(env_);
     std::string name;
     std::string message;
 #ifdef SUPPORT_SCREEN
