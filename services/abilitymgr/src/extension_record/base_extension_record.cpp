@@ -327,17 +327,20 @@ void BaseExtensionRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "post timeout %{public}d, id %{public}d", messageId, recordId);
     switch (messageId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+            uint32_t timeout = static_cast<uint32_t>(
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime()) *
                 static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId, true);
             SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout, recordId, true);
             break;
         }
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+            uint32_t timeout = static_cast<uint32_t>(
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime()) *
                 static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             if (InsightIntentExecuteParam::IsInsightIntentExecute(GetWant())) {
-                timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                timeout = static_cast<uint32_t>(
+                    AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime()) *
                     static_cast<uint32_t>(INSIGHT_INTENT_TIMEOUT_MULTIPLE);
             }
             SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId, true);
