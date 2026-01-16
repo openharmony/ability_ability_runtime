@@ -21,6 +21,7 @@
 #undef private
 
 #include "application_info.h"
+#include "app_mgr_service_dump_error_code.h"
 #include "mock_ability_token.h"
 #include "hilog_tag_wrapper.h"
 
@@ -436,6 +437,41 @@ HWTEST_F(AppLifecycleDealTest, DumpFfrt_001, TestSize.Level1)
     std::string result;
     EXPECT_CALL(*mockAppScheduler, ScheduleDumpFfrt(_)).Times(1);
     appLifeCycle->DumpFfrt(result);
+}
+
+/**
+ * @tc.name: ScheduleDumpArkWeb_001
+ * @tc.desc: Test ScheduleDumpArkWeb func
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleDumpArkWeb_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ScheduleDumpArkWeb_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    appLifeCycle->SetApplicationClient(nullptr);
+    std::string result;
+    std::string customArgs = "gpu";
+    auto ret = appLifeCycle->DumpArkWeb(customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_INTERNAL_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "ScheduleDumpArkWeb_001 end.");
+}
+
+/**
+ * @tc.name: ScheduleDumpArkWeb_002
+ * @tc.desc: Test ScheduleDumpArkWeb func
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleDumpArkWeb_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleDumpArkWeb_002 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    std::string result;
+    std::string customArgs = "gpu";
+    EXPECT_CALL(*mockAppScheduler, ScheduleDumpArkWeb(_, _)).Times(1);
+    appLifeCycle->DumpArkWeb(customArgs, result);
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleDumpArkWeb_002 end.");
 }
 
 /**

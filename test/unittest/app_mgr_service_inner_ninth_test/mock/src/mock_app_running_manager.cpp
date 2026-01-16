@@ -470,6 +470,12 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
     return AAFwk::MyStatus::GetInstance().dumpFfrt_;
 }
 
+int32_t AppRunningManager::DumpArkWeb(const std::vector<int32_t> &pids, const std::string &customArgs,
+    std::string &result)
+{
+    return AAFwk::MyStatus::GetInstance().dumpArkWeb_;
+}
+
 bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid)
 {
     pid = AAFwk::MyStatus::GetInstance().handleUserRequestCleanPid_;

@@ -197,5 +197,25 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_0400, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_0400 end");
 }
+
+/*
+ * @tc.number    : AppMgrServiceDump_0500
+ * @tc.name      : AppMgrService dump
+ * @tc.desc      : 1.Test dump interface
+ */
+HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_0500 start");
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+
+    std::string result;
+    std::vector<std::u16string> args;
+    auto arg = Str8ToStr16("--web");
+    args.emplace_back(arg);
+    auto ret = appMgrService->Dump(args, result);
+    EXPECT_NE(ret, DumpErrorCode::ERR_UNKNOWN_OPTION_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_0500 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

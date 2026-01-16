@@ -422,6 +422,8 @@ public:
 
     int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
+    int32_t DumpArkWeb(const std::vector<int32_t> &pids, const std::string &customArgs, std::string &result);
+
     bool IsAppProcessesAllCached(const std::string &bundleName, int32_t uid,
         const std::set<std::shared_ptr<AppRunningRecord>> &cachedSet);
 
