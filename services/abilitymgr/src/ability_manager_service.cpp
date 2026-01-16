@@ -112,6 +112,7 @@
 #include "user_controller/user_controller.h"
 #include "utils/ability_permission_util.h"
 #include "utils/dump_utils.h"
+#include "utils/exit_reason_util.h"
 #include "utils/extension_permissions_util.h"
 #include "utils/modal_system_dialog_util.h"
 #include "utils/update_caller_info_util.h"
@@ -269,7 +270,6 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action", "navigation", "mail", "finance", "flight", "express", "photoEditor"
 };
 std::atomic<bool> g_isDmsAlive = false;
-constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig.screenmode";
@@ -468,6 +468,7 @@ bool AbilityManagerService::Init()
     SubscribeUserUnlockedEvent();
     AddWatchParameters();
     appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(subManagersHelper_);
+    InitAppSpawnMsgPipe();
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
@@ -508,6 +509,37 @@ void AbilityManagerService::InitInterceptor()
         interceptorExecuter_->AddInterceptor("BlockAllAppStart", std::make_shared<BlockAllAppStartInterceptor>());
     }
 }
+
+ void AbilityManagerService::InitAppSpawnMsgPipe()
+ {
+     int32_t pipeFd[2];
+     if (pipe(pipeFd) != 0) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "create pipe failed");
+         return;
+     }
+     rFd_ = pipeFd[0];
+     wFd_ = pipeFd[1];
+     *ptrRFd_ = rFd_;
+     auto context = new (std::nothrow) std::weak_ptr<AbilityManagerService>(shared_from_this());
+     if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "context null");
+        return;
+     }
+     int32_t ret = WatchParameter(APPSPAWN_STARTED, ExitReasonUtil::AppSpawnStartCallback, context);
+     if (ret != 0) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "watch parameter ret: %{public}d", ret);
+         return;
+     }
+     ffrt_qos_t taskQos = 0;
+     ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, rFd_, EPOLLIN, static_cast<void*>(ptrRFd_.get()),
+        ExitReasonUtil::ProcessSignalData);
+     if (ret != 0) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "ffrt_epoll_ctl failed, ret: %{public}d", ret);
+         close(rFd_);
+         return;
+     }
+     TAG_LOGI(AAFwkTag::ABILITYMGR, "Listen signal msg ...");
+ }
 
 void AbilityManagerService::InitInterceptorForScreenUnlock()
 {
