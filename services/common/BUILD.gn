@@ -80,8 +80,6 @@ ohos_shared_library("perm_verification") {
 
   include_dirs = [ "${ability_runtime_utils_path}/server/constant" ]
 
-  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
-
   public_configs = [ ":common_config" ]
 
   sources = [ "src/permission_verification.cpp" ]
