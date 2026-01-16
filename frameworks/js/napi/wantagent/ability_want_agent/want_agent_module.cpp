@@ -42,6 +42,7 @@ napi_value JsNapiWantAgentInit(napi_env env, napi_value exportObj)
         TAG_LOGE(AAFwkTag::WANTAGENT, "null env or exportObj");
         return nullptr;
     }
+    AbilityRuntime::HandleScope handleScope(env);
     if (!CheckTypeForNapiValue(env, exportObj, napi_object)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null object");
         return nullptr;

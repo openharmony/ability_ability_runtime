@@ -38,6 +38,7 @@ public:
 
 static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, const char* value)
 {
+    HandleScope handleScope(env);
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -53,13 +54,14 @@ static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* 
 
 static napi_value InitLinkParamCategory(napi_env env)
 {
+    HandleEscape handleEscape(env);
     napi_value napiObject;
     NAPI_CALL(env, napi_create_object(env, &napiObject));
 
     NAPI_CALL(env, SetEnumItem(env, napiObject, "LINK", "link"));
     NAPI_CALL(env, SetEnumItem(env, napiObject, "WANT", "want"));
 
-    return napiObject;
+    return handleEscape.Escape(napiObject);
 }
 
 napi_value JsInsightIntentDecoratorInit(napi_env env, napi_value exportObj)
@@ -70,6 +72,7 @@ napi_value JsInsightIntentDecoratorInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     std::unique_ptr<JsInsightIntentDecorator> jsIntentDecorator = std::make_unique<JsInsightIntentDecorator>();
     auto res = napi_wrap(
         env, exportObj, jsIntentDecorator.release(), JsInsightIntentDecorator::Finalizer, nullptr, nullptr);

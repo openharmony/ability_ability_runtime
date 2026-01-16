@@ -47,6 +47,7 @@ napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     auto callback = [](napi_env env, napi_callback_info info) -> napi_value {
         napi_value thisVar = nullptr;
         napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
@@ -85,7 +86,7 @@ napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
     }
     napi_set_named_property(env, result, "windowRect",
         CreateJsWindowRect(env, request->left_, request->top_, request->width_, request->height_));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value RequestInfo::CreateJsWindowRect(
@@ -93,6 +94,7 @@ napi_value RequestInfo::CreateJsWindowRect(
 {
     TAG_LOGD(AAFwkTag::DIALOG, "left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         left, top, width, height);
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -103,7 +105,7 @@ napi_value RequestInfo::CreateJsWindowRect(
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, top));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, width));
     napi_set_named_property(env, objValue, "height", CreateJsValue(env, height));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 std::shared_ptr<RequestInfo> RequestInfo::UnwrapRequestInfo(napi_env env, napi_value jsParam)

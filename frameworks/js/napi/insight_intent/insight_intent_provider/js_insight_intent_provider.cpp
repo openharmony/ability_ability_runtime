@@ -67,6 +67,7 @@ private:
     napi_value OnSendExecuteResultCommon(napi_env env, NapiCallbackInfo& info, bool isDecorator)
     {
         TAG_LOGD(AAFwkTag::INTENT, "called");
+        HandleEscape handleEscape(env);
         if (info.argc < ARGC_TWO) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
             ThrowTooFewParametersError(env);
@@ -91,6 +92,7 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode != ERR_OK) {
                 TAG_LOGE(AAFwkTag::INTENT, "error: %{public}d",
                     *innerErrorCode);
@@ -104,7 +106,7 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JsInsightIntentProvider::OnSendIntentResult", env,
             CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 };
 
@@ -116,6 +118,7 @@ napi_value CreateJsInsightIntentProvider(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     std::unique_ptr<JsInsightIntentProvider> provider = std::make_unique<JsInsightIntentProvider>();
     napi_wrap(env, exportObj, provider.release(), JsInsightIntentProvider::Finalizer, nullptr, nullptr);
     BindNativeFunction(env, exportObj, "sendExecuteResult", JS_INSIGHT_INTENT_PROVIDER_NAME,

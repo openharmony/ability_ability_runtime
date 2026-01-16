@@ -55,6 +55,7 @@ std::vector<DAHelperOnOffCB *> g_registerInstances;
 napi_value DataAbilityHelperInit(napi_env env, napi_value exports)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("insert", NAPI_Insert),
         DECLARE_NAPI_FUNCTION("notifyChange", NAPI_NotifyChange),
@@ -89,6 +90,7 @@ napi_value DataAbilityHelperInit(napi_env env, napi_value exports)
 
 napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argc = ARGS_TWO;
     napi_value argv[ARGS_TWO] = {nullptr};
     napi_value thisVar = nullptr;
@@ -175,7 +177,7 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
     }
 
     dataAbilityHelperStatus = true;
-    return thisVar;
+    return handleEscape.Escape(thisVar);
 }
 
 /**
@@ -189,6 +191,7 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
 napi_value NAPI_Insert(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperInsertCB *insertCB = new (std::nothrow) DAHelperInsertCB;
     if (insertCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null insertCB");
@@ -207,7 +210,7 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
     TAG_LOGI(AAFwkTag::FA, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -221,6 +224,7 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
 napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *insertCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -253,11 +257,12 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
         ret = InsertPromise(env, insertCB);
     }
     TAG_LOGI(AAFwkTag::FA, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 void AnalysisValuesBucket(NativeRdb::ValuesBucket &valuesBucket, const napi_env &env, const napi_value &arg)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value keys = nullptr;
     napi_get_property_names(env, arg, &keys);
     uint32_t arrLen = 0;
@@ -281,6 +286,7 @@ void AnalysisValuesBucket(NativeRdb::ValuesBucket &valuesBucket, const napi_env 
 void SetValuesBucketObject(
     NativeRdb::ValuesBucket &valuesBucket, const napi_env &env, std::string keyStr, napi_value value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_string) {
@@ -325,6 +331,7 @@ void SetValuesBucketObject(
 napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, args, &valueType);
     if (valueType != napi_object) {
@@ -344,7 +351,7 @@ napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args)
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
     TAG_LOGI(AAFwkTag::FA, "end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 /**
@@ -358,6 +365,7 @@ napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args)
 napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperNotifyChangeCB *notifyChangeCB = new DAHelperNotifyChangeCB;
     notifyChangeCB->cbBase.cbInfo.env = env;
     notifyChangeCB->cbBase.asyncWork = nullptr;
@@ -372,7 +380,7 @@ napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
     TAG_LOGI(AAFwkTag::FA, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -386,6 +394,7 @@ napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
 napi_value NotifyChangeWrap(napi_env env, napi_callback_info info, DAHelperNotifyChangeCB *notifyChangeCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_TWO;
     const size_t argcPromise = ARGS_ONE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -412,7 +421,7 @@ napi_value NotifyChangeWrap(napi_env env, napi_callback_info info, DAHelperNotif
     } else {
         ret = NotifyChangePromise(env, notifyChangeCB);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -426,6 +435,7 @@ napi_value NotifyChangeWrap(napi_env env, napi_callback_info info, DAHelperNotif
 napi_value NAPI_Register(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperOnOffCB *onCB = new DAHelperOnOffCB;
     onCB->cbBase.cbInfo.env = env;
     onCB->cbBase.asyncWork = nullptr;
@@ -440,7 +450,7 @@ napi_value NAPI_Register(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
     TAG_LOGI(AAFwkTag::FA, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -454,6 +464,7 @@ napi_value NAPI_Register(napi_env env, napi_callback_info info)
 napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *onCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -494,13 +505,14 @@ napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *
     GetDataAbilityHelper(env, thisVar, onCB->dataAbilityHelper);
 
     ret = RegisterAsync(env, args, argcAsync, argcPromise, onCB);
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value RegisterAsync(
     napi_env env, napi_value *args, size_t argcAsync, const size_t argcPromise, DAHelperOnOffCB *onCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleScope handleScope(env);
     if (args == nullptr || onCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
@@ -598,6 +610,7 @@ void RegisterCompleteCB(napi_env env, napi_status status, void *data)
 napi_value NAPI_UnRegister(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperOnOffCB *offCB = new DAHelperOnOffCB;
     offCB->cbBase.cbInfo.env = env;
     offCB->cbBase.asyncWork = nullptr;
@@ -612,7 +625,7 @@ napi_value NAPI_UnRegister(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
     TAG_LOGI(AAFwkTag::FA, "end");
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -626,6 +639,7 @@ napi_value NAPI_UnRegister(napi_env env, napi_callback_info info)
 napi_value UnRegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *offCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argCountWithAsync = ARGS_TWO + ARGS_ASYNC_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
@@ -688,12 +702,13 @@ napi_value UnRegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB
     GetDataAbilityHelper(env, thisVar, offCB->dataAbilityHelper);
 
     ret = UnRegisterSync(env, offCB);
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
 {
     TAG_LOGI(AAFwkTag::FA, "syncCallback");
+    AbilityRuntime::HandleScope handleScope(env);
     if (offCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null offCB");
         return nullptr;
@@ -768,6 +783,7 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
 napi_value NAPI_GetType(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperGetTypeCB *gettypeCB = new (std::nothrow) DAHelperGetTypeCB;
     if (gettypeCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null gettypeCB");
@@ -785,12 +801,13 @@ napi_value NAPI_GetType(napi_env env, napi_callback_info info)
         gettypeCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value GetTypeWrap(napi_env env, napi_callback_info info, DAHelperGetTypeCB *gettypeCB)
 {
     TAG_LOGI(AAFwkTag::FA, "start");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_TWO;
     const size_t argcPromise = ARGS_ONE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -819,12 +836,13 @@ napi_value GetTypeWrap(napi_env env, napi_callback_info info, DAHelperGetTypeCB 
     } else {
         ret = GetTypePromise(env, gettypeCB);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_GetFileTypes(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperGetFileTypesCB *getfiletypesCB = new (std::nothrow) DAHelperGetFileTypesCB;
     if (getfiletypesCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null getfiletypesCB");
@@ -842,12 +860,13 @@ napi_value NAPI_GetFileTypes(napi_env env, napi_callback_info info)
         getfiletypesCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value GetFileTypesWrap(napi_env env, napi_callback_info info, DAHelperGetFileTypesCB *getfiletypesCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -882,12 +901,13 @@ napi_value GetFileTypesWrap(napi_env env, napi_callback_info info, DAHelperGetFi
         ret = GetFileTypesPromise(env, getfiletypesCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_NormalizeUri(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperNormalizeUriCB *normalizeuriCB = new (std::nothrow) DAHelperNormalizeUriCB;
     if (normalizeuriCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null normalizeuriCB");
@@ -906,12 +926,13 @@ napi_value NAPI_NormalizeUri(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperNormalizeUriCB *normalizeuriCB)
 {
     TAG_LOGI(AAFwkTag::FA, "begin");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_TWO;
     const size_t argcPromise = ARGS_ONE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -939,12 +960,13 @@ napi_value NormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperNorma
         ret = NormalizeUriPromise(env, normalizeuriCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperDenormalizeUriCB *denormalizeuriCB = new (std::nothrow) DAHelperDenormalizeUriCB;
     if (denormalizeuriCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null denormalizeuriCB");
@@ -963,12 +985,13 @@ napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value DenormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperDenormalizeUriCB *denormalizeuriCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_TWO;
     const size_t argcPromise = ARGS_ONE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -996,7 +1019,7 @@ napi_value DenormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperDen
         ret = DenormalizeUriPromise(env, denormalizeuriCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 void UnwrapDataAbilityPredicates(NativeRdb::DataAbilityPredicates &predicates, napi_env env, napi_value value)
@@ -1020,6 +1043,7 @@ void UnwrapDataAbilityPredicates(NativeRdb::DataAbilityPredicates &predicates, n
 napi_value NAPI_Delete(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperDeleteCB *deleteCB = new DAHelperDeleteCB;
     deleteCB->cbBase.cbInfo.env = env;
     deleteCB->cbBase.asyncWork = nullptr;
@@ -1034,7 +1058,7 @@ napi_value NAPI_Delete(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1048,6 +1072,7 @@ napi_value NAPI_Delete(napi_env env, napi_callback_info info)
 napi_value DeleteWrap(napi_env env, napi_callback_info info, DAHelperDeleteCB *deleteCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1077,7 +1102,7 @@ napi_value DeleteWrap(napi_env env, napi_callback_info info, DAHelperDeleteCB *d
         ret = DeletePromise(env, deleteCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1091,6 +1116,7 @@ napi_value DeleteWrap(napi_env env, napi_callback_info info, DAHelperDeleteCB *d
 napi_value NAPI_Update(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperUpdateCB *updateCB = new DAHelperUpdateCB;
     updateCB->cbBase.cbInfo.env = env;
     updateCB->cbBase.asyncWork = nullptr;
@@ -1105,7 +1131,7 @@ napi_value NAPI_Update(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1119,6 +1145,7 @@ napi_value NAPI_Update(napi_env env, napi_callback_info info)
 napi_value UpdateWrap(napi_env env, napi_callback_info info, DAHelperUpdateCB *updateCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_FOUR;
     const size_t argcPromise = ARGS_THREE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1150,7 +1177,7 @@ napi_value UpdateWrap(napi_env env, napi_callback_info info, DAHelperUpdateCB *u
         ret = UpdatePromise(env, updateCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 void SetPacMapObject(AppExecFwk::PacMap &pacMap, const napi_env &env, std::string keyStr, napi_value value)
 {
@@ -1207,6 +1234,7 @@ void AnalysisPacMap(AppExecFwk::PacMap &pacMap, const napi_env &env, const napi_
 napi_value CallWrap(napi_env env, napi_callback_info info, DAHelperCallCB *callCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_FIVE;
     const size_t argcPromise = ARGS_FOUR;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1228,13 +1256,13 @@ napi_value CallWrap(napi_env env, napi_callback_info info, DAHelperCallCB *callC
     if (valuetype == napi_string) {
         callCB->uri = NapiValueToStringUtf8(env, args[PARAM0]);
     } else {
-        return CallErrorWrap(env, thisVar, info, args, isPromise);
+        return handleEscape.Escape(CallErrorWrap(env, thisVar, info, args, isPromise));
     }
     NAPI_CALL(env, napi_typeof(env, args[PARAM1], &valuetype));
     if (valuetype == napi_string) {
         callCB->method = NapiValueToStringUtf8(env, args[PARAM1]);
     } else {
-        return CallErrorWrap(env, thisVar, info, args, isPromise);
+        return handleEscape.Escape(CallErrorWrap(env, thisVar, info, args, isPromise));
     }
     NAPI_CALL(env, napi_typeof(env, args[PARAM2], &valuetype));
     if (valuetype == napi_string) {
@@ -1250,7 +1278,7 @@ napi_value CallWrap(napi_env env, napi_callback_info info, DAHelperCallCB *callC
     } else {
         ret = CallPromise(env, callCB);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1264,6 +1292,7 @@ napi_value CallWrap(napi_env env, napi_callback_info info, DAHelperCallCB *callC
 napi_value NAPI_Call(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperCallCB *callCB = new (std::nothrow) DAHelperCallCB;
     if (callCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null callCB");
@@ -1282,7 +1311,7 @@ napi_value NAPI_Call(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1296,6 +1325,7 @@ napi_value NAPI_Call(napi_env env, napi_callback_info info)
 napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperOpenFileCB *openFileCB = new (std::nothrow) DAHelperOpenFileCB;
     if (openFileCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null openFileCB");
@@ -1314,7 +1344,7 @@ napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1328,6 +1358,7 @@ napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
 napi_value OpenFileWrap(napi_env env, napi_callback_info info, DAHelperOpenFileCB *openFileCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1361,7 +1392,7 @@ napi_value OpenFileWrap(napi_env env, napi_callback_info info, DAHelperOpenFileC
         ret = OpenFilePromise(env, openFileCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1375,6 +1406,7 @@ napi_value OpenFileWrap(napi_env env, napi_callback_info info, DAHelperOpenFileC
 napi_value NAPI_BatchInsert(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperBatchInsertCB *BatchInsertCB = new (std::nothrow) DAHelperBatchInsertCB;
     if (BatchInsertCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null BatchInsertCB");
@@ -1393,7 +1425,7 @@ napi_value NAPI_BatchInsert(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 std::vector<NativeRdb::ValuesBucket> NapiValueObject(napi_env env, napi_value param)
@@ -1445,6 +1477,7 @@ bool UnwrapArrayObjectFromJS(napi_env env, napi_value param, std::vector<NativeR
 napi_value BatchInsertWrap(napi_env env, napi_callback_info info, DAHelperBatchInsertCB *batchInsertCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1474,7 +1507,7 @@ napi_value BatchInsertWrap(napi_env env, napi_callback_info info, DAHelperBatchI
         ret = BatchInsertPromise(env, batchInsertCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1488,6 +1521,7 @@ napi_value BatchInsertWrap(napi_env env, napi_callback_info info, DAHelperBatchI
 napi_value NAPI_Query(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperQueryCB *queryCB = new DAHelperQueryCB;
     queryCB->cbBase.cbInfo.env = env;
     queryCB->cbBase.asyncWork = nullptr;
@@ -1502,7 +1536,7 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 /**
@@ -1515,6 +1549,7 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info)
  */
 napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *queryCB)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_FOUR;
     const size_t argcPromise = ARGS_THREE;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1550,12 +1585,13 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     } else {
         ret = QueryPromise(env, queryCB);
     }
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "start");
+    AbilityRuntime::HandleEscape handleEscape(env);
     DAHelperExecuteBatchCB *executeBatchCB = new (std::nothrow) DAHelperExecuteBatchCB;
     if (executeBatchCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null executeBatchCB");
@@ -1574,7 +1610,7 @@ napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
         ret = WrapVoidToJS(env);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 bool UnwrapArrayOperationFromJS(
@@ -1609,6 +1645,7 @@ bool UnwrapArrayOperationFromJS(
 napi_value ExecuteBatchWrap(napi_env env, napi_callback_info info, DAHelperExecuteBatchCB *executeBatchCB)
 {
     TAG_LOGI(AAFwkTag::FA, "start");
+    AbilityRuntime::HandleEscape handleEscape(env);
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -1643,7 +1680,7 @@ napi_value ExecuteBatchWrap(napi_env env, napi_callback_info info, DAHelperExecu
         ret = ExecuteBatchPromise(env, executeBatchCB);
     }
 
-    return ret;
+    return handleEscape.Escape(ret);
 }
 
 

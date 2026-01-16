@@ -33,6 +33,7 @@ napi_value DataAbilityOperationInit(napi_env env, napi_value exports)
     const int ASSERT = 4;
     TAG_LOGD(AAFwkTag::FA, "called");
 
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value dataAbilityOperationType = nullptr;
     napi_create_object(env, &dataAbilityOperationType);
     SetNamedProperty(env, dataAbilityOperationType, "TYPE_INSERT", INSERT);
@@ -52,13 +53,14 @@ napi_value UnwrapDataAbilityOperation(
     std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         TAG_LOGE(AAFwkTag::FA, "invalid params");
         return nullptr;
     }
 
     napi_value result = BuildDataAbilityOperation(dataAbilityOperation, env, param);
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool ParseUriAndType(napi_env env, napi_value &param, std::shared_ptr<Uri> &uri, int &type)
@@ -86,6 +88,7 @@ napi_value BuildDataAbilityOperation(
     std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
 {
     TAG_LOGI(AAFwkTag::FA, "start");
+    AbilityRuntime::HandleEscape handleEscape(env);
     std::shared_ptr<Uri> uri = nullptr;
     int type = 0;
     if (!ParseUriAndType(env, param, uri, type)) {
@@ -143,7 +146,7 @@ napi_value BuildDataAbilityOperation(
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 bool GetDataAbilityOperationBuilder(
@@ -174,6 +177,7 @@ napi_value UnwrapValuesBucket(const std::shared_ptr<NativeRdb::ValuesBucket> &pa
     napi_value valueBucketParam)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value result;
 
     if (param == nullptr) {
@@ -184,7 +188,7 @@ napi_value UnwrapValuesBucket(const std::shared_ptr<NativeRdb::ValuesBucket> &pa
     AnalysisValuesBucket(*param, env, valueBucketParam);
 
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value UnwrapDataAbilityPredicatesBackReferences(
@@ -192,6 +196,7 @@ napi_value UnwrapDataAbilityPredicatesBackReferences(
 {
     TAG_LOGI(AAFwkTag::FA, "called");
 
+    AbilityRuntime::HandleEscape handleEscape(env);
     if (!IsTypeForNapiValue(env, predicatesBackReferencesParam, napi_object)) {
         TAG_LOGE(AAFwkTag::FA, "invalid predicatesBackReferencesParam");
         return nullptr;
@@ -222,11 +227,12 @@ napi_value UnwrapDataAbilityPredicatesBackReferences(
     }
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void SetNamedProperty(napi_env env, napi_value obj, const char *propName, int propValue)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value prop = nullptr;
     napi_create_int32(env, propValue, &prop);
     napi_set_named_property(env, obj, propName, prop);
