@@ -21,29 +21,22 @@
 
 namespace OHOS {
 namespace AAFwk {
+constexpr uint32_t DOMAIN_ID = 0xD001300;
 class FdGuard {
 public:
     FdGuard() = default;
     explicit FdGuard(int32_t fd) : fd_(fd) {}
     ~FdGuard()
     {
-        if (fd_ > -1) {
-            close(fd_);
-        }
+        Reset();
     }
     FdGuard(const FdGuard &) = delete;
-    FdGuard(FdGuard &&other) : fd_(other.fd_)
-    {
-        other.fd_ = -1;
-    }
+    FdGuard(FdGuard &&other) : fd_(other.Release()) {}
     void operator=(const FdGuard &) = delete;
     FdGuard &operator=(FdGuard &&other)
     {
-        if (fd_ > -1) {
-            close(fd_);
-        }
-        fd_ = other.fd_;
-        other.fd_ = -1;
+        Reset();
+        fd_ = other.Release();
         return *this;
     }
 
@@ -62,7 +55,7 @@ public:
     void Reset()
     {
         if (fd_ > -1) {
-            close(fd_);
+            fdsan_close_with_tag(fd_, DOMAIN_ID);
         }
         fd_ = -1;
     }
