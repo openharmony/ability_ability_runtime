@@ -783,7 +783,6 @@ private:
             };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, info](napi_env env, NapiAsyncTask &task, int32_t status) {
-                HandleScope handleScope(env);
                 if (*innerErrorCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsRunningMultiAppInfo(env, *info));
                 } else {
@@ -1209,7 +1208,6 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
-            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
                 return;
@@ -1419,7 +1417,6 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, isRunning](napi_env env, NapiAsyncTask &task, int32_t status) {
-            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsValue(env, *isRunning));
             } else {
@@ -1471,7 +1468,6 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, isRunning](napi_env env, NapiAsyncTask &task, int32_t status) {
-            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsValue(env, *isRunning));
             } else {
@@ -1516,7 +1512,6 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
-            HandleScope handleScope(env);
             if (*innerErrorCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
@@ -1594,7 +1589,6 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            HandleScope handleScope(env);
             if (innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1664,7 +1658,6 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [infoList, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-            HandleScope handleScope(env);
             if (infoList == nullptr || innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1727,7 +1720,6 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            HandleScope handleScope(env);
             if (innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,
@@ -1790,7 +1782,6 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [infoList, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-            HandleScope handleScope(env);
             if (infoList == nullptr || innerErrCode == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
                 task.Reject(env, CreateJsErrorByNativeErr(env,

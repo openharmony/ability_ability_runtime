@@ -180,7 +180,6 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, observer = observer_, observerId, errCode](
                 napi_env env, NapiAsyncTask& task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -219,7 +218,6 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -259,7 +257,6 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -292,7 +289,6 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -333,7 +329,6 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
                 int32_t status) {
-            HandleScope handleScope(env);
             if (errCode != 0) {
                 task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                 return;
@@ -379,7 +374,6 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, appManager = appManager_, errCode](napi_env env, NapiAsyncTask& task,
                 int32_t status) {
-            HandleScope handleScope(env);
             if (errCode != 0) {
                 task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                 return;
@@ -430,7 +424,6 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, bundleName, accountId, errCode](
                 napi_env env, NapiAsyncTask &task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -462,7 +455,6 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -495,7 +487,6 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                HandleScope handleScope(env);
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
