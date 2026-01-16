@@ -6059,7 +6059,12 @@ int AbilityManagerService::RegisterOnListener(const std::string &type,
     }
     DistributedClient dmsClient;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    return dmsClient.RegisterOnListener(type, listener->AsObject(), callingUid);
+    int32_t ret = dmsClient.RegisterOnListener(type, listener->AsObject(), callingUid);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed with code: %{public}d", ret);
+        return INNER_ERR;
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::RegisterOffListener(const std::string &type,
@@ -6073,7 +6078,12 @@ int AbilityManagerService::RegisterOffListener(const std::string &type,
     }
     DistributedClient dmsClient;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    return dmsClient.RegisterOffListener(type, listener->AsObject(), callingUid);
+    int32_t ret = dmsClient.RegisterOffListener(type, listener->AsObject(), callingUid);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed with code: %{public}d", ret);
+        return INNER_ERR;
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::UnRegisterMissionListener(const std::string &deviceId,

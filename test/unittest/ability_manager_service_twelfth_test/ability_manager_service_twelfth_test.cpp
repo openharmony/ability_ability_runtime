@@ -389,7 +389,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, RegisterOffListener_001, TestSize.Lev
 
     listener = new RemoteOnListenerStubMock();
     MyFlag::flag_ = true;
-    EXPECT_EQ(abilityMs_->RegisterOffListener(type, listener), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(abilityMs_->RegisterOffListener(type, listener), INNER_ERR);
 
     MyFlag::flag_ = false;
     EXPECT_EQ(abilityMs_->RegisterOffListener(type, listener), CHECK_PERMISSION_FAILED);
