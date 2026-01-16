@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include "parcel.h"
 #include "securec.h"
+#include "start_specified_ability_params.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -57,6 +58,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         want = nullptr;
     }
 
+    StartSpecifiedAbilityParams startSpecifiedAbilityParams;
+    Parcel parcel;
+    startSpecifiedAbilityParams.Marshalling(parcel);
     return true;
 }
 }
