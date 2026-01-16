@@ -63,6 +63,7 @@ public:
     MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD1(ScheduleJsHeapMemory, void(OHOS::AppExecFwk::JsHeapDumpInfo &info));
     MOCK_METHOD1(ScheduleDumpFfrt, int32_t(std::string& result));
+    MOCK_METHOD2(ScheduleDumpArkWeb, int32_t(const std::string &customArgs, std::string &result));
     MOCK_METHOD0(ScheduleClearPageStack, void());
     MOCK_METHOD0(ScheduleCacheProcess, void());
 

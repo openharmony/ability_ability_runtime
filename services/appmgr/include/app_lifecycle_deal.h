@@ -298,6 +298,8 @@ public:
 
     int DumpFfrt(std::string& result);
 
+    int32_t DumpArkWeb(const std::string &customArgs, std::string &result);
+
     /**
      * SetWatchdogBackgroundStatusRunning , call SetWatchdogBackgroundStatusRunning(bool status) through proxy project,
      * Notify application to set watchdog background status.

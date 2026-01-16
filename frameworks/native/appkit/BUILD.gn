@@ -121,6 +121,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app/application_impl.cpp",
     "${ability_runtime_native_path}/appkit/app/assert_fault_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/assert_fault_task_thread.cpp",
+    "${ability_runtime_native_path}/appkit/app/dump_arkweb_helper.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_ffrt_helper.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_ipc_helper.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_runtime_helper.cpp",

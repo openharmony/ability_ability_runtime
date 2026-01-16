@@ -9536,6 +9536,19 @@ int AppMgrServiceInner::DumpFfrt(const std::vector<int32_t>& pids, std::string& 
     return appRunningManager_->DumpFfrt(pids, result);
 }
 
+int32_t AppMgrServiceInner::DumpArkWeb(const std::vector<int32_t> &pids, const std::string &customArgs,
+    std::string &result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "DumpArkWeb called");
+    if (!appRunningManager_) {
+        result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return DumpErrorCode::ERR_INTERNAL_ERROR;
+    }
+    return appRunningManager_->DumpArkWeb(pids, customArgs, result);
+}
+
 void AppMgrServiceInner::NotifyAppRunningStatusEvent(
     const std::string &bundle, int32_t uid, AbilityRuntime::RunningStatus runningStatus)
 {

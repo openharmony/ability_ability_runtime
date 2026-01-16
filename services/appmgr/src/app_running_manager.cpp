@@ -2151,6 +2151,37 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
     return DumpErrorCode::ERR_OK;
 }
 
+int32_t AppRunningManager::DumpArkWeb(const std::vector<int32_t> &pids, const std::string &customArgs,
+    std::string &result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "DumpArkWeb called");
+    bool hasValidPid = false;
+    for (const auto &pid : pids) {
+        TAG_LOGD(AAFwkTag::APPMGR, "DumpArkWeb current pid:%{public}d", pid);
+        auto appRecord = GetAppRunningRecordByPid(pid);
+        if (!appRecord) {
+            TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
+            continue;
+        }
+        hasValidPid = true;
+        std::string currentResult;
+        auto errCode = appRecord->DumpArkWeb(customArgs, currentResult);
+        if (errCode != DumpErrorCode::ERR_OK) {
+            continue;
+        }
+        result += currentResult + "\n";
+    }
+    if (!hasValidPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no valid pid");
+        return DumpErrorCode::ERR_INVALID_PID_ERROR;
+    }
+    if (result.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "arkWeb empty");
+        return DumpErrorCode::ERR_INTERNAL_ERROR;
+    }
+    return DumpErrorCode::ERR_OK;
+}
+
 bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid)
 {
     if (abilityToken == nullptr) {

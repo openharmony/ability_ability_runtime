@@ -324,6 +324,17 @@ public:
     virtual int32_t ScheduleDumpFfrt(std::string& result) = 0;
 
     /**
+     * ScheduleDumpArkWeb, call ScheduleDumpArkWeb(std::string &customArgs, std::string& result) through proxy project,
+     * Start querying the application's arkWeb usage.
+     *
+     * @param customArgs, customArgs for dump.
+     * @param result, arkWeb dump result output.
+     *
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t ScheduleDumpArkWeb(const std::string &customArgs, std::string &result) = 0;
+
+    /**
      * SetWatchdogBackgroundStatus, call SetWatchdogBackgroundStatus(bool status) through proxy project,
      * Notify application to set watchdog background status.
      *
@@ -374,6 +385,7 @@ public:
         WATCHDOG_BACKGROUND_STATUS_TRANSACTION,
         SCHEDULE_CJHEAP_MEMORY_APPLICATION_TRANSACTION,
         ON_LOAD_ABILITY_FINISHED,
+        SCHEDULE_DUMP_ARKWEB,
     };
 };
 }  // namespace AppExecFwk

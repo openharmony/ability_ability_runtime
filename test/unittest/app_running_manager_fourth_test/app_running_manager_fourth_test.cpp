@@ -916,6 +916,80 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_DumpFfrt_0100, TestSize.
 }
 
 /**
+ * @tc.name: AppRunningManager_DumpArkWeb_0100
+ * @tc.desc: Test the state of DumpArkWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_DumpArkWeb_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+
+    std::string customArgs;
+    std::string result;
+    std::vector<int32_t> pids = {1, 2, 3};
+    auto ret = appRunningManager->DumpArkWeb(pids, customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_INVALID_PID_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_DumpArkWeb_0200
+ * @tc.desc: Test the state of DumpArkWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_DumpArkWeb_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0200 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, PROCESS_NAME);
+    auto priorityObject = appRecord->GetPriorityObject();
+    if (priorityObject) {
+        priorityObject->SetPid(1);
+    }
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRecord));
+
+    std::string customArgs;
+    std::string result;
+    std::vector<int32_t> pids = {1, 2, 3};
+    auto ret = appRunningManager->DumpArkWeb(pids, customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_INTERNAL_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0200 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_DumpArkWeb_0300
+ * @tc.desc: Test the state of DumpArkWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_DumpArkWeb_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0300 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, PROCESS_NAME);
+    auto priorityObject = appRecord->GetPriorityObject();
+    if (priorityObject) {
+        priorityObject->SetPid(1);
+    }
+    appRecord->appLifeCycleDeal_ = std::make_shared<AppLifeCycleDeal>();
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRecord));
+
+    std::string customArgs;
+    std::string result = "Result:";
+    std::vector<int32_t> pids = {1, 2, 3};
+    auto ret = appRunningManager->DumpArkWeb(pids, customArgs, result);
+    EXPECT_EQ(ret, DumpErrorCode::ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_DumpArkWeb_0300 end");
+}
+
+/**
  * @tc.name: AppRunningManager_OnRemoteRenderDied_0100
  * @tc.desc: Test the state of OnRemoteRenderDied
  * @tc.type: FUNC
