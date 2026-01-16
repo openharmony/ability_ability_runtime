@@ -53,7 +53,7 @@ std::mutex EtsAbilityContext::requestCodeMutex_;
 namespace {
 static std::once_flag g_bindNativeMethodsFlag;
 std::recursive_mutex g_connectsLock;
-uint32_t g_serialNumber = 0;
+int64_t g_serialNumber = 0;
 constexpr uint64_t MAX_REQUEST_CODE = (1ULL << 49) - 1;
 constexpr size_t MAX_REQUEST_CODE_LENGTH = 15;
 constexpr int32_t BASE_REQUEST_CODE_NUM = 10;\
