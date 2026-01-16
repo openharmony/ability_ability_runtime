@@ -105,6 +105,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     service->InnerCancelApplicationAutoStartup(info);
     service->SetApplicationAutoStartupByEDM(info, flag);
     service->CancelApplicationAutoStartupByEDM(info, flag);
+    service->AddHandledAutoStartupUsers(int32Param);
+    service->RemoveHandledAutoStartupUsers(int32Param);
+    service->FindHandledAutoStartupUsers(int32Param);
 
     AutoStartupStatus status =
         DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);

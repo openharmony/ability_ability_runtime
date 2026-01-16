@@ -21,12 +21,15 @@
 
 #define private public
 #include "page_state_data.h"
+#include "app_cjheap_mem_info.h"
+#include "start_params_by_SCB.h"
 #undef private
 
 #include "securec.h"
 #include "ability_record.h"
 
 using namespace OHOS::AAFwk;
+using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
@@ -37,6 +40,19 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     parcel.WriteString(fdp->ConsumeRandomLengthString());
     info.ReadFromParcel(parcel);
     info.Marshalling(parcel);
+
+    CjHeapDumpInfo cj;
+    cj.needGc = fdp->ConsumeBool();
+    cj.needSnapshot = fdp->ConsumeBool();
+    cj.pid = fdp->ConsumeIntegral<int32_t>();
+    Parcel parcel1;
+    cj.Marshalling(parcel1);
+    cj.Unmarshalling(parcel1);
+
+    StartParamsBySCB bySCB;
+    Parcel parcel2;
+    parcel2.WriteString(fdp->ConsumeRandomLengthString());
+    bySCB.Marshalling(parcel2);
     return true;
 }
 }

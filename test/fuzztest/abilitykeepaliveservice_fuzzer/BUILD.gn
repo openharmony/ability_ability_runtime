@@ -23,6 +23,7 @@ ohos_fuzztest("AbilityKeepAliveServiceFuzzTest") {
       "${ability_runtime_test_path}/fuzztest/abilitykeepaliveservice_fuzzer"
 
   include_dirs = [
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/include/appmgr",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_path}/test/fuzztest",
   ]
@@ -34,6 +35,7 @@ ohos_fuzztest("AbilityKeepAliveServiceFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/background_app_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/ability_keep_alive_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/ability_keep_alive_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",

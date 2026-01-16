@@ -94,6 +94,9 @@ void AbilityStartupServiceFuzztest(bool boolParam, std::string &stringParam, int
     service->CheckAutoStartupData(stringParam, int32Param);
     service->ExecuteCallbacks(boolParam, info);
     service->GetAutoStartupStatusForSelf(int32Param, isAutoStartEnabled);
+    service->AddHandledAutoStartupUsers(int32Param);
+    service->RemoveHandledAutoStartupUsers(int32Param);
+    service->FindHandledAutoStartupUsers(int32Param);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

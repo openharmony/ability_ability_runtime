@@ -21,6 +21,7 @@ ohos_fuzztest("AbilityAppMgrPageStateDataFuzzTest") {
   fuzz_config_file =
       "${ability_runtime_test_path}/fuzztest/abilityappmgrpagestatedata_fuzzer"
   include_dirs = [
+    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
@@ -32,7 +33,10 @@ ohos_fuzztest("AbilityAppMgrPageStateDataFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "abilityappmgrpagestatedata_fuzzer.cpp" ]
+  sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/start_params_by_SCB.cpp",
+    "abilityappmgrpagestatedata_fuzzer.cpp",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",

@@ -83,6 +83,15 @@ bool DoSomethingInterestingWithMyAPI(const char *ch, size_t size, const uint8_t 
     extensionConfig->LoadExtensionSAEnable(object, strParam);
     extensionConfig->IsExtensionNetworkEnable(strParam);
     extensionConfig->IsExtensionSAEnable(strParam);
+    ElementName targetElementName;
+    std::unordered_set<std::string> list;
+    std::string extensionTypeName1 = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    bool isSystemApp1 = fdp.ConsumeBool();
+    std::string bundleName1 = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::string abilityName1 = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    extensionConfig->FindTargetUriInList(targetElementName, list);
+    extensionConfig->IsScreenUnlockIntercept(extensionTypeName1, isSystemApp1, bundleName1);
+    extensionConfig->IsScreenUnlockAllowAbility(extensionTypeName1, bundleName1, abilityName1);
     return true;
 }
 } // namespace OHOS

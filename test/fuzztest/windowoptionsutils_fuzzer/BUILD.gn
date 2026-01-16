@@ -54,6 +54,7 @@ ohos_fuzztest("WindowOptionsUtilsFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "ipc:ipc_core",
     "image_framework:image_native",
     "safwk:system_ability_fwk",
   ]
