@@ -284,6 +284,10 @@ ani_object CreateEtsAppServiceExtensionContext(ani_env *env, std::shared_ptr<App
     }
     auto serviceContextPtr = new (std::nothrow)
         std::weak_ptr<AppServiceExtensionContext> (workContext->GetAbilityContext());
+    if (serviceContextPtr == nullptr) {
+        TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "create serviceContextPtr failed");
+        return nullptr;
+    }
     if ((status = env->Object_New(cls, method, &contextObj, (ani_long)workContext.release())) != ANI_OK ||
         contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "Failed to create object, status : %{public}d", status);
