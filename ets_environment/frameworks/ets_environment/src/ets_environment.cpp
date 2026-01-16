@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,6 @@
 #include "file_path_utils.h"
 #include "runtime.h"
 #include "ets/runtime/ets_namespace_manager.h"
-#include "tooling/inspector/debugger_arkapi.h"
 #include "ark_vm_api.h"
 #include "ets_ani_expo.h"
 #include "tooling/inspector/debugger_arkapi.h"
@@ -645,7 +644,6 @@ bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
     commonHspBundleInfos_ = commonHspBundleInfos;
 
     ARKVM_RegisterExternalScheduler(PostTaskWrapper);
-    PostCoroutineScheduleTask();
 
     return true;
 }
@@ -969,15 +967,6 @@ static void PostTaskWrapper(void(*task)(void *), void *data, const char *taskNam
     ETSEnvironment::GetInstance()->PostTask([task, data]() { task(data); }, taskName, delayMs);
 }
 
-void ETSEnvironment::PostCoroutineScheduleTask()
-{
-    static constexpr uint64_t COROUTINE_SCHEDULE_PERIODIC_TIME = 100;
-    auto scheduleTask = []() {
-        ARKVM_RunScheduler(ARKVM_SCHEDULER_RUN_ONCE);
-        GetInstance()->PostCoroutineScheduleTask();
-    };
-    PostTask(scheduleTask, "ScheduleCoroutinePeriodically", COROUTINE_SCHEDULE_PERIODIC_TIME);
-}
 
 } // namespace EtsEnv
 } // namespace OHOS
