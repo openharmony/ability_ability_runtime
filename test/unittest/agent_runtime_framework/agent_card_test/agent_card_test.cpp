@@ -1107,16 +1107,16 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
     std::vector<std::string> defaultInputModes;
     std::vector<std::string> defaultOutputModes;
     Skill skill;
-    nlohmann::json jsonArray = { skill };
+    nlohmann::json jsonArray = { skill.ToJson() };
     nlohmann::json jsonObject = nlohmann::json {
         { "name", "test" },
         { "description", "test" },
         { "url", "test" },
-        { "provider", provider },
+        { "provider", provider.ToJson() },
         { "version", "test" },
         { "documentationUrl", "test" },
-        { "capabilities", capabilities },
-        { "authentication", authentication },
+        { "capabilities", capabilities.ToJson() },
+        { "authentication", authentication.ToJson() },
         { "defaultInputModes", defaultInputModes },
         { "defaultOutputModes", defaultOutputModes },
         { "skills", jsonArray },
@@ -1124,6 +1124,161 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
     AgentCard agentCard = AgentCard::FromJson(jsonObject);
 
     EXPECT_TRUE(agentCard.name == "test");
+}
+
+/**
+ * @tc.name: ProviderToJson_001
+ * @tc.desc: ProviderToJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderToJson_001, TestSize.Level1)
+{
+    Provider provider;
+    provider.organization = "test";
+    nlohmann::json jsonObject = provider.ToJson();
+
+    EXPECT_TRUE(jsonObject["organization"] == "test");
+}
+
+/**
+ * @tc.name: ProviderFromJson_001
+ * @tc.desc: ProviderFromJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_001, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "test" },
+        { "url", "test" },
+    };
+    Provider provider = Provider::FromJson(jsonObject);
+    EXPECT_TRUE(jsonObject["organization"] == provider.organization);
+
+    nlohmann::json jsonObject1 = nlohmann::json {
+        { "organization", "test" },
+    };
+    Provider provider1 = Provider::FromJson(jsonObject1);
+    EXPECT_TRUE(jsonObject1["organization"] == provider1.organization);
+
+    nlohmann::json jsonObject2 = nlohmann::json {
+        { "url", "test" },
+    };
+    Provider provider2 = Provider::FromJson(jsonObject2);
+    EXPECT_TRUE(provider2.url == "test");
+}
+
+/**
+ * @tc.name: CapabilitiesToJson_001
+ * @tc.desc: CapabilitiesToJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, CapabilitiesToJson_001, TestSize.Level1)
+{
+    Capabilities capabilities;
+    capabilities.streaming = true;
+    nlohmann::json jsonObject = capabilities.ToJson();
+
+    EXPECT_TRUE(jsonObject["streaming"]);
+}
+
+/**
+ * @tc.name: CapabilitiesFromJson_001
+ * @tc.desc: CapabilitiesFromJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, CapabilitiesFromJson_001, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "streaming", true },
+        { "pushNotifications", true },
+        { "stateTransitionHistory", true },
+    };
+    Capabilities capabilities = Capabilities::FromJson(jsonObject);
+    EXPECT_TRUE(jsonObject["streaming"]);
+
+    jsonObject = nlohmann::json {};
+    capabilities = Capabilities::FromJson(jsonObject);
+    EXPECT_TRUE(jsonObject.contains("streaming") == false);
+}
+
+/**
+ * @tc.name: AuthenticationToJson_001
+ * @tc.desc: AuthenticationToJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AuthenticationToJson_001, TestSize.Level1)
+{
+    Authentication authentication;
+    std::vector<std::string> schemes;
+    authentication.schemes = schemes;
+    nlohmann::json jsonObject = authentication.ToJson();
+
+    EXPECT_TRUE(jsonObject["schemes"].size() == 0);
+}
+
+/**
+ * @tc.name: AuthenticationFromJson_001
+ * @tc.desc: AuthenticationFromJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AuthenticationFromJson_001, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "schemes", nlohmann::json::array({ "test", "test" }) },
+        { "credentials", "test" },
+    };
+    Authentication authentication = Authentication::FromJson(jsonObject);
+    EXPECT_TRUE(authentication.credentials == "test");
+
+    jsonObject = nlohmann::json {};
+    authentication = Authentication::FromJson(jsonObject);
+    EXPECT_TRUE(authentication.schemes.size() == 0);
+}
+
+/**
+ * @tc.name: SkillToJson_001
+ * @tc.desc: SkillToJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillToJson_001, TestSize.Level1)
+{
+    Skill skill;
+    skill.id = "test";
+    nlohmann::json jsonObject = skill.ToJson();
+
+    EXPECT_TRUE(jsonObject["id"] == "test");
+}
+
+/**
+ * @tc.name: SkillFromJson_001
+ * @tc.desc: SkillFromJson_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_001, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test", "test" }) },
+        { "examples", nlohmann::json::array({ "test", "test" }) },
+        { "inputModes", nlohmann::json::array({ "test", "test" }) },
+        { "outputModes", nlohmann::json::array({ "test", "test" }) },
+    };
+    Skill skill = Skill::FromJson(jsonObject);
+    EXPECT_TRUE(skill.id == "test");
+
+    jsonObject = nlohmann::json {};
+    skill = Skill::FromJson(jsonObject);
+    EXPECT_TRUE(skill.id.empty());
 }
 } // namespace AgentRuntime
 } // namespace OHOS

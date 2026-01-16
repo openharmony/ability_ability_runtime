@@ -52,6 +52,26 @@ Provider *Provider::Unmarshalling(Parcel &parcel)
     return provider;
 }
 
+nlohmann::json Provider::ToJson()
+{
+    return nlohmann::json {
+        { "organization", organization },
+        { "url", url },
+    };
+}
+
+Provider Provider::FromJson(const nlohmann::json &jsonObject)
+{
+    Provider provider;
+    if (jsonObject.contains("organization") && jsonObject["organization"].is_string()) {
+        provider.organization = jsonObject.at("organization");
+    }
+    if (jsonObject.contains("url") && jsonObject["url"].is_string()) {
+        provider.url = jsonObject.at("url");
+    }
+    return provider;
+}
+
 bool Capabilities::ReadFromParcel(Parcel &parcel)
 {
     streaming = parcel.ReadBool();
@@ -88,6 +108,30 @@ Capabilities *Capabilities::Unmarshalling(Parcel &parcel)
     return capabilities;
 }
 
+nlohmann::json Capabilities::ToJson()
+{
+    return nlohmann::json {
+        { "streaming", streaming },
+        { "pushNotifications", pushNotifications },
+        { "stateTransitionHistory", stateTransitionHistory },
+    };
+}
+
+Capabilities Capabilities::FromJson(const nlohmann::json &jsonObject)
+{
+    Capabilities capabilities;
+    if (jsonObject.contains("streaming") && jsonObject["streaming"].is_boolean()) {
+        capabilities.streaming = jsonObject.at("streaming");
+    }
+    if (jsonObject.contains("pushNotifications") && jsonObject["pushNotifications"].is_boolean()) {
+        capabilities.pushNotifications = jsonObject.at("pushNotifications");
+    }
+    if (jsonObject.contains("stateTransitionHistory") && jsonObject["stateTransitionHistory"].is_boolean()) {
+        capabilities.stateTransitionHistory = jsonObject.at("stateTransitionHistory");
+    }
+    return capabilities;
+}
+
 bool Authentication::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadStringVector(&schemes)) {
@@ -118,6 +162,26 @@ Authentication *Authentication::Unmarshalling(Parcel &parcel)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "authentication unmarshalling failed");
         delete authentication;
         authentication = nullptr;
+    }
+    return authentication;
+}
+
+nlohmann::json Authentication::ToJson()
+{
+    return nlohmann::json {
+        { "schemes", schemes },
+        { "credentials", credentials },
+    };
+}
+
+Authentication Authentication::FromJson(const nlohmann::json &jsonObject)
+{
+    Authentication authentication;
+    if (jsonObject.contains("schemes") && jsonObject["schemes"].is_array()) {
+        authentication.schemes = jsonObject.at("schemes");
+    }
+    if (jsonObject.contains("credentials") && jsonObject["credentials"].is_string()) {
+        authentication.credentials = jsonObject.at("credentials");
     }
     return authentication;
 }
@@ -182,6 +246,46 @@ Skill *Skill::Unmarshalling(Parcel &parcel)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "skill unmarshalling failed");
         delete skill;
         skill = nullptr;
+    }
+    return skill;
+}
+
+nlohmann::json Skill::ToJson()
+{
+    return nlohmann::json {
+        { "id", id },
+        { "name", name },
+        { "description", description },
+        { "tags", tags},
+        { "examples", examples},
+        { "inputModes", inputModes},
+        { "outputModes", outputModes},
+    };
+}
+
+Skill Skill::FromJson(const nlohmann::json &jsonObject)
+{
+    Skill skill;
+    if (jsonObject.contains("id") && jsonObject["id"].is_string()) {
+        skill.id = jsonObject.at("id");
+    }
+    if (jsonObject.contains("name") && jsonObject["name"].is_string()) {
+        skill.name = jsonObject.at("name");
+    }
+    if (jsonObject.contains("description") && jsonObject["description"].is_string()) {
+        skill.description = jsonObject.at("description");
+    }
+    if (jsonObject.contains("tags") && jsonObject["tags"].is_array()) {
+        skill.tags = jsonObject.at("tags");
+    }
+    if (jsonObject.contains("examples") && jsonObject["examples"].is_array()) {
+        skill.examples = jsonObject.at("examples");
+    }
+    if (jsonObject.contains("inputModes") && jsonObject["inputModes"].is_array()) {
+        skill.inputModes = jsonObject.at("inputModes");
+    }
+    if (jsonObject.contains("outputModes") && jsonObject["outputModes"].is_array()) {
+        skill.outputModes = jsonObject.at("outputModes");
     }
     return skill;
 }
@@ -296,22 +400,22 @@ nlohmann::json AgentCard::ToJson() const
 
     // Add optional fields if they are not empty/null
     if (provider != nullptr) {
-        jsonObject["provider"] = *provider;
+        jsonObject["provider"] = provider->ToJson();
     }
 
     if (capabilities != nullptr) {
-        jsonObject["capabilities"] = *capabilities;
+        jsonObject["capabilities"] = capabilities->ToJson();
     }
 
     if (authentication != nullptr) {
-        jsonObject["authentication"] = *authentication;
+        jsonObject["authentication"] = authentication->ToJson();
     }
 
     if (!skills.empty()) {
         nlohmann::json skillsArray = nlohmann::json::array();
         for (const auto& skill : skills) {
             if (skill != nullptr) {
-                nlohmann::json skillJson = *skill;
+                nlohmann::json skillJson = skill->ToJson();
                 skillsArray.push_back(skillJson);
             }
         }
@@ -354,19 +458,19 @@ AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
     // Optional objects
     if (jsonObject.contains("provider") && jsonObject["provider"].is_object()) {
         auto provider = std::make_shared<Provider>();
-        *provider = jsonObject["provider"].get<Provider>();
+        *provider = Provider::FromJson(jsonObject["provider"]);
         agentCard.provider = provider;
     }
 
     if (jsonObject.contains("capabilities") && jsonObject["capabilities"].is_object()) {
         auto capabilities = std::make_shared<Capabilities>();
-        *capabilities = jsonObject["capabilities"].get<Capabilities>();
+        *capabilities = Capabilities::FromJson(jsonObject["capabilities"]);
         agentCard.capabilities = capabilities;
     }
 
     if (jsonObject.contains("authentication") && jsonObject["authentication"].is_object()) {
         auto authentication = std::make_shared<Authentication>();
-        *authentication = jsonObject["authentication"].get<Authentication>();
+        *authentication = Authentication::FromJson(jsonObject["authentication"]);
         agentCard.authentication = authentication;
     }
 
@@ -375,7 +479,7 @@ AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
         for (const auto& skillJson : jsonObject["skills"]) {
             if (skillJson.is_object()) {
                 auto skill = std::make_shared<Skill>();
-                *skill = skillJson.get<Skill>();
+                *skill = Skill::FromJson(skillJson);
                 agentCard.skills.push_back(skill);
             }
         }
