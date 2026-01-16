@@ -2005,7 +2005,7 @@ int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &r
 {
     std::unique_ptr<WantSenderInfo> wantSenderInfo(data.ReadParcelable<WantSenderInfo>());
     if (wantSenderInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSenderInfo null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wantSenderInfo null");
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -2016,7 +2016,7 @@ int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &r
     int32_t uid = data.ReadInt32();
     sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken, uid);
     if (!reply.WriteRemoteObject(((wantSender == nullptr) ? nullptr : wantSender->AsObject()))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed reply wantSender to client, for write parcel error");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "failed reply wantSender to client, for write parcel error");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -2026,12 +2026,12 @@ int AbilityManagerStub::SendWantSenderInner(MessageParcel &data, MessageParcel &
 {
     sptr<IWantSender> wantSender = iface_cast<IWantSender>(data.ReadRemoteObject());
     if (wantSender == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSender null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wantSender null");
         return ERR_INVALID_VALUE;
     }
     std::unique_ptr<SenderInfo> senderInfo(data.ReadParcelable<SenderInfo>());
     if (senderInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo null");
         return ERR_INVALID_VALUE;
     }
     int32_t result = SendWantSender(wantSender, *senderInfo);
@@ -2197,14 +2197,14 @@ int AbilityManagerStub::GetWantSenderInfoInner(MessageParcel &data, MessageParce
 {
     sptr<IWantSender> wantSender = iface_cast<IWantSender>(data.ReadRemoteObject());
     if (wantSender == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSender null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wantSender null");
         return ERR_INVALID_VALUE;
     }
 
     std::shared_ptr<WantSenderInfo> info(data.ReadParcelable<WantSenderInfo>());
     int32_t result = GetWantSenderInfo(wantSender, info);
     if (result != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "getWantSenderInfo fail");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "getWantSenderInfo fail");
         return ERR_INVALID_VALUE;
     }
     reply.WriteParcelable(info.get());
