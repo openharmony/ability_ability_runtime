@@ -85,6 +85,7 @@ napi_value JsStartupManager::OnRun(napi_env env, NapiCallbackInfo &info)
     napi_create_promise(env, &nativeDeferred, &promise);
     auto callback = std::make_shared<OnCompletedCallback>(
         [env, nativeDeferred](const std::shared_ptr<StartupTaskResult> &result) {
+            HandleScope handleScope(env);
             if (result == nullptr || result->GetResultCode() != ERR_OK) {
                 napi_value error = JsStartupConfig::BuildResult(env, result);
                 napi_reject_deferred(env, nativeDeferred, error);
