@@ -412,6 +412,12 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
             TAG_LOGD(AAFwkTag::ABILITYMGR, "in trustlist: %{public}s", str.c_str());
         }
     }
+    if (abilityRequest.want.HasParameter("show_default_appselect")) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "show_default_appselect: %{public}d",
+            abilityRequest.want.GetIntParam("show_default_appselect", -1));
+        sessionWant.SetParam("show_default_appselect",
+            abilityRequest.want.GetIntParam("show_default_appselect", -1));
+    }
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
         dialogAppInfos, SelectorType::IMPLICIT_START_SELECTOR, needGrantUriPermission);
