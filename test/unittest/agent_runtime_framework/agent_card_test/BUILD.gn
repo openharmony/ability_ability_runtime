@@ -38,9 +38,7 @@ ohos_unittest("agent_card_test") {
     "${agent_runtime_framework_path}/interfaces/inner_api/include",
   ]
 
-  deps = [
-    "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
-  ]
+  deps = []
 
   external_deps = [
     "c_utils:utils",
