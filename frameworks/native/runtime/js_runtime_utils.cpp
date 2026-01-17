@@ -54,6 +54,7 @@ napi_value CreateJsError(napi_env env, int32_t errCode, const std::string& messa
 void BindNativeFunction(napi_env env, napi_value object, const char* name,
     const char* moduleName, napi_callback func)
 {
+    HandleScope handleScope(env);
     std::string fullName(moduleName);
     fullName += ".";
     fullName += name;
