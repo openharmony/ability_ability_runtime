@@ -16,6 +16,14 @@
 #include "parcel.h"
 
 namespace OHOS {
+bool Parcel::WriteInt32(int32_t value)
+{
+    if (value == 0) {
+        return false;
+    }
+    return true;
+}
+
 bool Parcel::WriteUint32(uint32_t value)
 {
     if (value == 0) {
