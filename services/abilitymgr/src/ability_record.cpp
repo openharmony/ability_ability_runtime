@@ -1270,17 +1270,24 @@ std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
     return result_;
 }
 
-void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
+void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId, bool schedulerdied)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResult:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResult:%{public}s,tokeId:%{public}u,%{public}d",
+        abilityInfo_.name.c_str(), tokeId, static_cast<int32_t>(schedulerdied));
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
 #ifdef SUPPORT_UPMS
-    GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId, false);
+    if (!schedulerdied) {
+        GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId, false);
+    }
 #endif // SUPPORT_UPMS
-    scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
+    if (result->requestCode_ != -1) {
+        scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "requestCode_ -1");
+    }
     // reset result to avoid send result next time
     SetResult(nullptr);
 }
@@ -1351,7 +1358,7 @@ void AbilityRecord::SendResultToCallers(bool schedulerdied)
         std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
         if (callerAbilityRecord != nullptr && callerAbilityRecord->GetResult() != nullptr) {
             bool isSandboxApp = appIndex_ > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX ? true : false;
-            callerAbilityRecord->SendResult(isSandboxApp, abilityInfo_.applicationInfo.accessTokenId);
+            callerAbilityRecord->SendResult(isSandboxApp, abilityInfo_.applicationInfo.accessTokenId, schedulerdied);
         } else {
             std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord = caller->GetSaCaller();
             if (callerSystemAbilityRecord != nullptr) {
@@ -1541,7 +1548,8 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
     std::string srcAbilityId, uint32_t callingTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call, callingTokenId:%{public}u", callingTokenId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call, callingTokenId:%{public}u,requestCode:%{public}d",
+        callingTokenId, requestCode);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord == nullptr) {
         RecordSaCallerInfo(want);

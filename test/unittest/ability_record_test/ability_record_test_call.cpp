@@ -442,9 +442,20 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Result, TestSize.Level1)
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SendResult, TestSize.Level1)
 {
     OHOS::sptr<AbilitySchedulerMock> scheduler = new AbilitySchedulerMock();
+    abilityResult_->requestCode_ = -1;
     abilityRecord_->SetScheduler(scheduler);
     abilityRecord_->SetResult(abilityResult_);
-    abilityRecord_->SendResult(0, 0);
+    abilityRecord_->SendResult(0, 0, false);
+    EXPECT_EQ(nullptr, abilityRecord_->GetResult());
+
+    abilityResult_->requestCode_ = 1;
+    abilityRecord_->SetResult(abilityResult_);
+    abilityRecord_->SendResult(0, 0, false);
+    EXPECT_EQ(nullptr, abilityRecord_->GetResult());
+
+    abilityResult_->requestCode_ = 2;
+    abilityRecord_->SetResult(abilityResult_);
+    abilityRecord_->SendResult(0, 0, true);
     EXPECT_EQ(nullptr, abilityRecord_->GetResult());
 }
 
