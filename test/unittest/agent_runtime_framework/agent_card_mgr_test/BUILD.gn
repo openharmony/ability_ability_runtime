@@ -12,35 +12,36 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("agentmgr") {
+ohos_unittest("agent_card_mgr_test") {
+  module_out_path = "ability_runtime/ability_runtime/agent_card_mgr_test"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "../../../cfi_blocklist.txt"
   }
 
-  include_dirs = [
-    "include",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "${ability_runtime_services_path}/common/include",
-  ]
   sources = [
-    "src/agent_bundle_event_callback.cpp",
-    "src/agent_card_db_mgr.cpp",
-    "src/agent_card_mgr.cpp",
-    "src/agent_event_handler.cpp",
-    "src/agent_manager_service.cpp",
+    "agent_card_mgr_test.cpp",
+    "mock/src/bundle_mgr_client.cpp",
+    "${agent_runtime_framework_path}/services/agentmgr/src/agent_card_db_mgr.cpp",
+    "${agent_runtime_framework_path}/services/agentmgr/src/agent_card_mgr.cpp",
   ]
 
-  public_configs = []
+  include_dirs = [
+    "mock/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_services_path}/common/include",
+    "${agent_runtime_framework_path}/interfaces/inner_api/include",
+    "${agent_runtime_framework_path}/services/agentmgr/include",
+  ]
 
   deps = [
-    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
-    "${ability_runtime_services_path}/common:task_handler_wrap",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
-    "${agent_runtime_framework_path}/interfaces/inner_api:agent_manager",
   ]
 
   external_deps = [
@@ -48,17 +49,20 @@ ohos_shared_library("agentmgr") {
     "bundle_framework:appexecfwk_core",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
-  innerapi_tags = [ "platformsdk" ]
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
+  cflags_cc = []
+
+  configs = []
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":agent_card_mgr_test" ]
 }

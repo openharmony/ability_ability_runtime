@@ -18,6 +18,8 @@ group("unittest") {
   testonly = true
   deps = [
     "agent_bundle_event_callback_test:agent_bundle_event_callback_test",
+    "agent_card_db_mgr_test:agent_card_db_mgr_test",
+    "agent_card_mgr_test:agent_card_mgr_test",
     "agent_card_test:agent_card_test",
     "agent_load_callback_test:agent_load_callback_test",
     "agent_manager_client_test:agent_manager_client_test",
