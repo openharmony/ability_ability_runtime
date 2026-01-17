@@ -3261,7 +3261,7 @@ void AbilityManagerService::AppUpgradeCompleted(int32_t uid, int32_t installType
 
     std::vector<AppExecFwk::BundleInfo> bundleInfos = { bundleInfo };
     if (type == KeepAliveType::THIRD_PARTY && installType == INSTALL_TYPE_UPGRADE) {
-        KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfos, userId);
+        KeepAliveProcessManager::GetInstance().StartKeepAliveAfterAppUpgrade(bundleInfos, uid);
         if (IN_PROCESS_CALL(KeepAliveProcessManager::GetInstance().CheckNeedRestartAfterUpgrade(uid))) {
             IN_PROCESS_CALL_WITHOUT_RET(
                 KeepAliveProcessManager::GetInstance().StartKeepAliveAppServiceExtension(bundleInfos));
@@ -8358,6 +8358,8 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
         AAFwk::ExitReason exitReason = { REASON_UPGRADE, exitMsg };
         appExitReasonHelper_->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
+        IN_PROCESS_CALL_WITHOUT_RET(
+            KeepAliveProcessManager::GetInstance().SaveKeepAliveAppRestartAfterUpgrade(bundleName, uid));
         IN_PROCESS_CALL_WITHOUT_RET(
             KeepAliveProcessManager::GetInstance().SaveAppSeriviceRestartAfterUpgrade(bundleName, uid));
     } else {
@@ -13643,6 +13645,10 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
     std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> bundleInfosMap;
     std::vector<AppExecFwk::BundleInfo> bundleInfosForU1;
     for (const auto &item: bundleInfos) {
+        if (KeepAliveProcessManager::GetInstance().KeepAliveIsRestartAfterUpdate(item.uid)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "KeepAliveIsRestartAfterUpdate uid: %{public}d", item.uid);
+            return;
+        }
         auto user = item.uid / BASE_USER_RANGE;
         if (user == U1_USER_ID) {
             bundleInfosForU1.push_back(item);
