@@ -22,9 +22,11 @@
 namespace OHOS {
 class Parcel {
 public:
+    bool WriteInt32(int32_t value);
     bool WriteUint32(uint32_t value);
     bool WriteString(const std::string& value);
     bool WriteParcelable(const Parcelable* parcelable);
+    int32_t ReadInt32();
     uint32_t ReadUint32();
     const std::string ReadString();
 
