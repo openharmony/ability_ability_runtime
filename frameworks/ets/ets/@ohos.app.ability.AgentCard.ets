@@ -19,8 +19,8 @@ export interface Provider {
 }
 
 class ProviderImpl implements Provider {
-  public organization: string = "";
-  public url: string = "";
+  public organization: string = '';
+  public url: string = '';
 }
 
 export interface Capabilities {
@@ -56,9 +56,9 @@ export interface Skill {
 }
 
 class SkillImpl implements Skill {
-  public id: string = "";
-  public name: string = "";
-  public description: string = "";
+  public id: string = '';
+  public name: string = '';
+  public description: string = '';
   public tags: Array<string> = {};
   public examples?: Array<string>;
   public inputModes?: Array<string>;
@@ -84,15 +84,15 @@ export interface AgentCard {
 }
 
 class AgentCardImpl implements AgentCard {
-  public bundleName: string = "";
-  public moduleName: string = "";
-  public abilityName: string = "";
+  public bundleName: string = '';
+  public moduleName: string = '';
+  public abilityName: string = '';
   public appIndex: int;
-  public name: string = "";
-  public description: string = "";
-  public url: string = "";
+  public name: string = '';
+  public description: string = '';
+  public url: string = '';
   public provider?: Provider;
-  public version: string = "";
+  public version: string = '';
   public documentationUrl?: string;
   public capabilities: Capabilities = new CapabilitiesImpl() as Capabilities;
   public authentication?: Authentication;
