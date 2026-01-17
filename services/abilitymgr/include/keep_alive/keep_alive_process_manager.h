@@ -159,7 +159,12 @@ public:
 
     void SaveAppSeriviceRestartAfterUpgrade(const std::string &bundleName, int32_t uid);
 
+    void SaveKeepAliveAppRestartAfterUpgrade(const std::string &bundleName, int32_t uid);
+
     bool CheckNeedRestartAfterUpgrade(int32_t uid);
+    bool KeepAliveIsRestartAfterUpdate(int32_t uid);
+    bool KeepAliveCheckNeedRestartAfterUpgrade(int32_t uid);
+    void StartKeepAliveAfterAppUpgrade(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t uid);
 
     void FilterNeedRestartKeepAliveBundleInfos(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
     void AddNeedRestartKeepAliveUid(int32_t uid);
@@ -182,6 +187,7 @@ private:
     std::vector<std::shared_ptr<CheckStatusBarTask>> checkStatusBarTasks_;
     std::mutex restartAfterUpgradeMutex_;
     std::set<int32_t> restartAfterUpgradeList_;
+    std::set<int32_t> keepAliveRestartAfterUpgradeList_;
 
     DISALLOW_COPY_AND_MOVE(KeepAliveProcessManager);
 
