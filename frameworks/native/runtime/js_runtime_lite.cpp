@@ -222,11 +222,9 @@ napi_status JsRuntimeLite::Init(const Options& options, napi_env env)
                 hapPath = options.hapModulePath.find(moduleName)->second;
                 return true;
             });
-        std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
-        std::map<std::string, std::string> pkgAliasMap;
-        GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
-        panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
-        panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
+        std::unordered_map<std::string, std::pair<std::unique_ptr<uint8_t[]>, size_t>> pkgInfoMap;
+        GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgInfoMap);
+        panda::JSNApi::SetPkgContextInfoList(vm, pkgInfoMap);
         panda::JSNApi::SetPkgNameList(vm, options.packageNameList);
     }
 
@@ -451,6 +449,30 @@ std::shared_ptr<Options> JsRuntimeLite::GetChildOptions()
     std::lock_guard<std::mutex> lock(childOptionsMutex_);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     return childOptions_;
+}
+
+void JsRuntimeLite::GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
+    std::unordered_map<std::string, std::pair<std::unique_ptr<uint8_t[]>, size_t>> &pkgInfoMap)
+{
+    for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
+        std::string filePath = it->second;
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
+            ExtractorUtil::GetLoadFilePath(filePath), newCreate, false);
+        if (!extractor) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
+            continue;
+        }
+        std::unique_ptr<uint8_t[]> data;
+        size_t dataLen = 0;
+        if (!extractor->ExtractToBufByName("pkgContextInfo.json", data, dataLen)) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
+            continue;
+        }
+        pkgInfoMap[it->first] = std::make_pair(std::move(data), dataLen);
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo success, dataLen: %{public}zu",
+            it->first.c_str(), dataLen);
+    }
 }
 
 void JsRuntimeLite::GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
