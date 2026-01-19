@@ -35,6 +35,7 @@ static constexpr int32_t ARGC_ONE = 1;
 napi_ref JsUIServiceHostProxy::CreateJsUIServiceHostProxy(napi_env env, const sptr<IRemoteObject>& impl)
 {
     TAG_LOGI(AAFwkTag::UISERVC_EXT, "called");
+    HandleScope handleScope(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {

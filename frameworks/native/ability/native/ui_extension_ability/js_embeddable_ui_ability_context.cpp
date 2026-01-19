@@ -708,6 +708,7 @@ napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi
     std::shared_ptr<AbilityContext> uiAbiContext, std::shared_ptr<UIExtensionContext> uiExtContext, int32_t screenMode)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     if (screenMode == AAFwk::JUMP_SCREEN_MODE) {
         WrapJsUIAbilityContext(env, uiAbiContext, objValue, screenMode);
@@ -760,7 +761,7 @@ napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi
     BindNativeFunction(env, objValue, "setMissionIcon", moduleName, SetMissionIcon);
     BindNativeFunction(env, objValue, "moveAbilityToBackground", moduleName, MoveAbilityToBackground);
 #endif
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
