@@ -22,6 +22,7 @@ namespace AbilityRuntime {
 napi_value CreateJsApplicationQuickFixInfo(
     napi_env env, const AAFwk::ApplicationQuickFixInfo &appQuickFixInfo)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, appQuickFixInfo.bundleName));
@@ -35,11 +36,12 @@ napi_value CreateJsApplicationQuickFixInfo(
         CreateJsValue(env, appQuickFixInfo.appqfInfo.versionName));
     napi_set_named_property(env, objValue, "hapModuleQuickFixInfo",
         CreateJsHapModuleQuickFixInfoArray(env, appQuickFixInfo.appqfInfo.hqfInfos));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsHapModuleQuickFixInfoArray(napi_env env, const std::vector<AppExecFwk::HqfInfo> &hqfInfos)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, hqfInfos.size(), &arrayValue);
     uint32_t index = 0;
@@ -51,7 +53,7 @@ napi_value CreateJsHapModuleQuickFixInfoArray(napi_env env, const std::vector<Ap
         napi_set_named_property(env, objValue, "quickFixFilePath", CreateJsValue(env, hqfInfo.hqfFilePath));
         napi_set_element(env, arrayValue, index++, objValue);
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

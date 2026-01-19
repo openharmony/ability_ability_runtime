@@ -28,6 +28,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentExecuteResult &result)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (result.isDecorator) {
@@ -43,39 +44,43 @@ napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentEx
         napi_set_named_property(env, objValue, "uris", CreateNativeArray(env, result.uris));
     }
     napi_set_named_property(env, objValue, "flags", CreateJsValue(env, result.flags));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateLinkInfoForQuery(napi_env env, const LinkInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "uri", CreateJsValue(env, info.uri));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreatePageInfoForQuery(napi_env env, const PageInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "uiAbility", CreateJsValue(env, info.uiAbility));
     napi_set_named_property(env, objValue, "pagePath", CreateJsValue(env, info.pagePath));
     napi_set_named_property(env, objValue, "navigationId", CreateJsValue(env, info.navigationId));
     napi_set_named_property(env, objValue, "navDestinationName", CreateJsValue(env, info.navDestinationName));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateEntryInfoForQuery(napi_env env, const EntryInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
     napi_set_named_property(env, objValue, "executeMode", CreateNativeArray(env, info.executeMode));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateUiAbilityInfoForQuery(napi_env env, const UIAbilityIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (info.abilityName.empty()) {
@@ -84,33 +89,36 @@ napi_value CreateUiAbilityInfoForQuery(napi_env env, const UIAbilityIntentInfoFo
     
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
     napi_set_named_property(env, objValue, "executeMode", CreateNativeArray(env, info.supportExecuteMode));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateUiExtensionInfoForQuery(napi_env env, const UIExtensionIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (info.abilityName.empty()) {
         return nullptr;
     }
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateServiceExtensionInfoForQuery(napi_env env, const ServiceExtensionIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (info.abilityName.empty()) {
         return nullptr;
     }
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateFormIntentInfoForQuery(napi_env env, const FormIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (info.abilityName.empty()) {
@@ -118,27 +126,30 @@ napi_value CreateFormIntentInfoForQuery(napi_env env, const FormIntentInfoForQue
     }
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
     napi_set_named_property(env, objValue, "formName", CreateJsValue(env, info.formName));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateFunctionInfoForQuery(napi_env env, const FunctionInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateFormInfoForQuery(napi_env env, const FormInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
     napi_set_named_property(env, objValue, "formName", CreateJsValue(env, info.formName));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateEntityInfoForArray(napi_env env, const std::vector<EntityInfoForQuery> &infos)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_status status = napi_create_array_with_length(env, infos.size(), &arrayValue);
     if (status != napi_ok) {
@@ -150,11 +161,12 @@ napi_value CreateEntityInfoForArray(napi_env env, const std::vector<EntityInfoFo
         NAPI_CALL(env, napi_set_element(env, arrayValue, index++, entityInfoObj));
     }
 
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 napi_value CreateJsEntityInfo(napi_env env, const EntityInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &objValue));
     if (objValue == nullptr) {
@@ -168,11 +180,12 @@ napi_value CreateJsEntityInfo(napi_env env, const EntityInfoForQuery &info)
     napi_set_named_property(env, objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
     napi_set_named_property(env, objValue, "parentClassName", CreateJsValue(env, info.parentClassName));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &jsonObject)
 {
+    HandleEscape handleEscape(env);
     if (jsonObject.is_object()) {
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
@@ -191,7 +204,7 @@ napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &j
                     env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<double>()));
             }
         }
-        return objValue;
+        return handleEscape.Escape(objValue);
     } else if (jsonObject.is_array()) {
         napi_value arrayValue = nullptr;
         napi_create_array_with_length(env, jsonObject.size(), &arrayValue);
@@ -207,7 +220,7 @@ napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &j
                 napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<double>()));
             }
         }
-        return arrayValue;
+        return handleEscape.Escape(arrayValue);
     }
     TAG_LOGE(AAFwkTag::INTENT, "Creat js param fail");
     return nullptr;
@@ -215,6 +228,7 @@ napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &j
 
 napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramStr)
 {
+    HandleEscape handleEscape(env);
     if (paramStr.empty()) {
         TAG_LOGD(AAFwkTag::INTENT, "paramStr empty");
         return nullptr;
@@ -224,11 +238,12 @@ napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramSt
         TAG_LOGE(AAFwkTag::INTENT, "Parse param str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoWithJson(env, jsonObject);
+    return handleEscape.Escape(CreateInsightIntentInfoWithJson(env, jsonObject));
 }
 
 napi_value CreateJsConfigPutParams(napi_env env, const std::vector<std::string> &inputParams)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     NAPI_CALL(env, napi_create_array_with_length(env, inputParams.size(), &arrayValue));
     uint32_t index = 0;
@@ -244,11 +259,12 @@ napi_value CreateJsConfigPutParams(napi_env env, const std::vector<std::string> 
         napi_value jsValue = CreateInsightIntentInfoWithJson(env, json);
         NAPI_CALL(env, napi_set_element(env, arrayValue, index++, jsValue));
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &resultStr)
 {
+    HandleEscape handleEscape(env);
     if (resultStr.empty()) {
         TAG_LOGD(AAFwkTag::INTENT, "resultStr empty");
         return nullptr;
@@ -258,27 +274,29 @@ napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &result
         TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoWithJson(env, jsonObject);
+    return handleEscape.Escape(CreateInsightIntentInfoWithJson(env, jsonObject));
 }
 
 napi_value CreateInsightIntentConfigEntities(napi_env env, const std::string &entities)
 {
+    HandleEscape handleEscape(env);
     if (entities.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "entities empty");
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
-        return objValue;
+        return handleEscape.Escape(objValue);
     }
     nlohmann::json jsonObject = nlohmann::json::parse(entities, nullptr, false);
     if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoWithJson(env, jsonObject);
+    return handleEscape.Escape(CreateInsightIntentInfoWithJson(env, jsonObject));
 }
 
 napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info.bundleName));
@@ -325,11 +343,12 @@ napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfo
     if (info.isConfig) {
         napi_set_named_property(env, objValue, "subIntentInfoForConfiguration", CreateConfigIntentInfo(env, info));
     }
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateConfigIntentInfo(napi_env env, const InsightIntentInfoForQuery &info)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "srcEntry", CreateJsValue(env, info.srcEntry));
@@ -358,19 +377,20 @@ napi_value CreateConfigIntentInfo(napi_env env, const InsightIntentInfoForQuery 
     if (!info.cfgEntities.empty()) {
         napi_set_named_property(env, objValue, "entities", CreateInsightIntentConfigEntities(env, info.cfgEntities));
     }
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 
 napi_value CreateInsightIntentInfoForQueryArray(napi_env env, const std::vector<InsightIntentInfoForQuery> &infos)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto &info : infos) {
         napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoForQuery(env, info));
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

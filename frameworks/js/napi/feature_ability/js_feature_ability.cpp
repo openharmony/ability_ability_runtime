@@ -90,6 +90,7 @@ napi_value JsFeatureAbility::UnsubscribeMsg(napi_env env, napi_callback_info inf
 napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    HandleEscape handleEscape(env);
     if (info.argc != 1) {
         TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return CreateJsUndefined(env);
@@ -111,6 +112,7 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
     Want want = GetWant(requestParam);
     NapiAsyncTask::CompleteCallback complete =
         [want, ability](napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             auto errcode = ability->StartAbility(want);
             task.Resolve(env, JsFeatureAbility::CreateJsResult(env, errcode, "Start Ability failed."));
         };
@@ -118,12 +120,13 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSFeatureAbility::OnStartAbility",
         env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    HandleEscape handleEscape(env);
     if (info.argc != 1) {
         TAG_LOGE(AAFwkTag::FA, "Params not match");
         return CreateJsUndefined(env);
@@ -147,6 +150,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
     FeatureAbilityTask task = [env, asyncTask](int resultCode, const AAFwk::Want& want) {
         TAG_LOGI(AAFwkTag::FA, "asyncCallback start");
+        HandleScope handleScope(env);
         std::string data = want.GetStringParam(RESULT_DATA_TAG);
         napi_value abilityResult = JsFeatureAbility::CreateJsResult(env, resultCode, data);
         if (abilityResult == nullptr) {
@@ -163,12 +167,13 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
     ability->StartFeatureAbilityForResult(want, requestCode_, std::move(task));
 
     TAG_LOGI(AAFwkTag::FA, "end");
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsFeatureAbility::OnFinishWithResult(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
+    HandleEscape handleEscape(env);
     if (info.argc != 1) {
         TAG_LOGE(AAFwkTag::FA, "Params not match");
         return CreateJsUndefined(env);
@@ -213,16 +218,16 @@ napi_value JsFeatureAbility::OnFinishWithResult(napi_env env, NapiCallbackInfo& 
     want.SetParam(RESULT_DATA_TAG, resultStr);
     ability->SetResult(code, want);
 
-    NapiAsyncTask::CompleteCallback complete =
-        [ability](napi_env env, NapiAsyncTask &task, int32_t status) {
-            auto errCode = ability->TerminateAbility();
-            task.Resolve(env, JsFeatureAbility::CreateJsResult(env, errCode, "FinishWithResult failed."));
-        };
+    NapiAsyncTask::CompleteCallback complete = [ability](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
+        auto errCode = ability->TerminateAbility();
+        task.Resolve(env, JsFeatureAbility::CreateJsResult(env, errCode, "FinishWithResult failed."));
+    };
 
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSFeatureAbility::OnFinishWithResult",
         env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsFeatureAbility::OnGetDeviceList(napi_env env, const NapiCallbackInfo& info)
@@ -445,6 +450,7 @@ bool JsFeatureAbility::UnWrapRequestParams(napi_env env, napi_value param, Distr
 
 napi_value JsFeatureAbility::CreateJsResult(napi_env env, int32_t errCode, const std::string &message)
 {
+    HandleEscape handleEscape(env);
     napi_value jsResult = nullptr;
     napi_status createStatus = napi_create_object(env, &jsResult);
     if (createStatus != napi_ok || jsResult == nullptr) {
@@ -462,11 +468,12 @@ napi_value JsFeatureAbility::CreateJsResult(napi_env env, int32_t errCode, const
         }
     }
 
-    return jsResult;
+    return handleEscape.Escape(jsResult);
 }
 
 napi_value JsFeatureAbility::CreateJsFeatureAbility(napi_env env)
 {
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_status createStatus = napi_create_object(env, &object);
     if (createStatus != napi_ok || object == nullptr) {
@@ -491,7 +498,7 @@ napi_value JsFeatureAbility::CreateJsFeatureAbility(napi_env env)
     BindNativeFunction(env, object, "subscribeMsg", moduleName, JsFeatureAbility::SubscribeMsg);
     BindNativeFunction(env, object, "unsubscribeMsg", moduleName, JsFeatureAbility::UnsubscribeMsg);
 
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
@@ -501,7 +508,7 @@ napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
         TAG_LOGE(AAFwkTag::FA, "null env");
         return nullptr;
     }
-
+    HandleScope handleScope(env);
     napi_value global = nullptr;
     napi_get_global(env, &global);
     if (!CheckTypeForNapiValue(env, global, napi_object)) {

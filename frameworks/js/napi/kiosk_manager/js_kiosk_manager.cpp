@@ -65,6 +65,7 @@ private:
 napi_value JsKioskManager::CreateJsKioskStatus(napi_env env,
                                                std::shared_ptr<AAFwk::KioskStatus> kioskStatus)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -80,7 +81,7 @@ napi_value JsKioskManager::CreateJsKioskStatus(napi_env env,
     napi_set_named_property(env, objValue, "kioskBundleName",
                             CreateJsValue(env, kioskStatus->kioskBundleName_));
     napi_set_named_property(env, objValue, "kioskBundleUid", CreateJsValue(env, kioskStatus->kioskBundleUid_));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value JsKioskManager::UpdateKioskApplicationList(napi_env env, napi_callback_info info)
@@ -91,6 +92,7 @@ napi_value JsKioskManager::UpdateKioskApplicationList(napi_env env, napi_callbac
 napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Update Kiosk AppList");
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
@@ -126,7 +128,7 @@ napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallba
     NapiAsyncTask::Schedule("JsKioskManager::OnUpdateKioskApplicationList", env,
                             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute),
                                                          std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsKioskManager::EnterKioskMode(napi_env env, napi_callback_info info)
@@ -137,6 +139,7 @@ napi_value JsKioskManager::EnterKioskMode(napi_env env, napi_callback_info info)
 napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Enter KioskMode  start");
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
@@ -182,7 +185,7 @@ napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo &info
     NapiAsyncTask::Schedule("JsKioskManager::OnEnterKioskMode", env,
                             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute),
                                                          std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsKioskManager::ExitKioskMode(napi_env env, napi_callback_info info)
@@ -193,6 +196,7 @@ napi_value JsKioskManager::ExitKioskMode(napi_env env, napi_callback_info info)
 napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Exit KioskMode");
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
@@ -236,7 +240,7 @@ napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo &info)
     NapiAsyncTask::Schedule("JsKioskManager::OnExitKioskMode", env,
                             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute),
                                                          std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsKioskManager::GetKioskStatus(napi_env env, napi_callback_info info)
@@ -247,6 +251,7 @@ napi_value JsKioskManager::GetKioskStatus(napi_env env, napi_callback_info info)
 napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Get KioskStatus");
+    HandleEscape handleEscape(env);
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     std::shared_ptr<AAFwk::KioskStatus> kioskStatus = std::make_shared<AAFwk::KioskStatus>();
 
@@ -272,11 +277,12 @@ napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo &info
     NapiAsyncTask::Schedule("JsKioskManager::OnGetKioskStatus", env,
                             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute),
                                                          std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsKioskManagerInit(napi_env env, napi_value exportObj)
 {
+    HandleScope handleScope(env);
     std::unique_ptr<JsKioskManager> jsKioskManager = std::make_unique<JsKioskManager>();
     napi_wrap(env, exportObj, jsKioskManager.release(), JsKioskManager::Finalizer, nullptr,
               nullptr);

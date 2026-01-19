@@ -83,6 +83,7 @@ void TriggerCompleteCallBack::SetWantAgentInstance(std::shared_ptr<WantAgent> wa
 
 napi_value RetErrMsg(napi_env env, napi_value lastParam, int32_t errorCode)
 {
+    HandleEscape handleEscape(env);
     auto complete = [err = errorCode] (napi_env env, NapiAsyncTask &task, int32_t status) {
         task.Reject(env, CreateJsError(env, err, "PARAMETER_ERROR"));
     };
@@ -91,14 +92,15 @@ napi_value RetErrMsg(napi_env env, napi_value lastParam, int32_t errorCode)
     NapiAsyncTask::ScheduleHighQos("RetErrMsg",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value CreateErrorValue(napi_env env, int32_t errCode)
 {
+    HandleEscape handleEscape(env);
     napi_value error =  NapiGetNull(env);
     if (errCode == NO_ERROR) {
-        return error;
+        return handleEscape.Escape(error);
     }
 
     napi_value code = nullptr;
@@ -110,7 +112,7 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode)
 
     napi_create_error(env, nullptr, message, &error);
     napi_set_named_property(env, error, "code", code);
-    return error;
+    return handleEscape.Escape(error);
 }
 
 void NapiThrow(napi_env env, int32_t errCode)
@@ -338,16 +340,18 @@ napi_value JsWantAgent::NapiSetWantAgentMultithreading(napi_env env, napi_callba
 
 napi_value JsWantAgent::HandleInvalidParam(napi_env env, napi_value lastParam, const std::string &errorMessage)
 {
+    HandleEscape handleEscape(env);
     #ifdef ENABLE_ERRCODE
         ThrowInvalidParamError(env, errorMessage);
         return CreateJsUndefined(env);
     #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
     #endif
 }
 
 void HandleAsyncTaskResult(napi_env env, NapiAsyncTask &task, ErrCode retCode)
 {
+    HandleScope handleScope(env);
     bool ret = false;
     #ifdef ENABLE_ERRCODE
         if (retCode == ERR_NOT_OK) {
@@ -372,6 +376,7 @@ void HandleAsyncTaskResult(napi_env env, NapiAsyncTask &task, ErrCode retCode)
 
 napi_value JsWantAgent::OnEqual(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -388,25 +393,28 @@ napi_value JsWantAgent::OnEqual(napi_env env, napi_callback_info info)
     napi_value lastParam = (argc >= ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
     if (!CheckTypeForNapiValue(env, argv[0], napi_object)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Argument not Object");
-        return HandleInvalidParam(env, lastParam, "Wrong argument type. Agent must be a WantAgent.");
+        return handleEscape.Escape(
+            HandleInvalidParam(env, lastParam, "Wrong argument type. Agent must be a WantAgent."));
     }
 
     UnwrapWantAgent(env, argv[0], reinterpret_cast<void **>(&pWantAgentFirst));
     if (pWantAgentFirst == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse first failed");
-        return HandleInvalidParam(env, lastParam, "Parse pWantAgentFirst failed. Agent must be a WantAgent.");
+        return handleEscape.Escape(
+            HandleInvalidParam(env, lastParam, "Parse pWantAgentFirst failed. Agent must be a WantAgent."));
     }
 
     if (!CheckTypeForNapiValue(env, argv[1], napi_object)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Argument type not Object");
-        return HandleInvalidParam(env, lastParam, "Wrong argument type. OtherAgent must be a WantAgent.");
+        return handleEscape.Escape(
+            HandleInvalidParam(env, lastParam, "Wrong argument type. OtherAgent must be a WantAgent."));
     }
 
     UnwrapWantAgent(env, argv[1], reinterpret_cast<void **>(&pWantAgentSecond));
     if (pWantAgentSecond == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse second failed");
-        return HandleInvalidParam(env, lastParam,
-            "Parse pWantAgentSceond failed. OtherAgent must be a WantAgent.");
+        return handleEscape.Escape(
+            HandleInvalidParam(env, lastParam, "Parse pWantAgentSceond failed. OtherAgent must be a WantAgent."));
     }
 
     std::shared_ptr<WantAgent> wantAgentFirst = std::make_shared<WantAgent>(*pWantAgentFirst);
@@ -421,11 +429,12 @@ napi_value JsWantAgent::OnEqual(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnEqual",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnGetWant(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -442,7 +451,7 @@ napi_value JsWantAgent::OnGetWant(napi_env env, napi_callback_info info)
         TAG_LOGE(AAFwkTag::WANTAGENT, "parameter type not Object");
         ThrowInvalidParamError(env, "Wrong argument type. Agent must be a WantAgent.");
         errCode = ERR_NOT_OK;
-        return RetErrMsg(env, lastParam, errCode);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, errCode));
     }
 
     UnwrapWantAgent(env, argv[0], reinterpret_cast<void **>(&pWantAgent));
@@ -450,7 +459,7 @@ napi_value JsWantAgent::OnGetWant(napi_env env, napi_callback_info info)
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse first error");
         ThrowInvalidParamError(env, "Parse pWantAgent error. Agent must be a WantAgent.");
         errCode = ERR_NOT_OK;
-        return RetErrMsg(env, lastParam, errCode);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, errCode));
     }
 
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
@@ -466,11 +475,12 @@ napi_value JsWantAgent::OnGetWant(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetWant",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnGetOperationType(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -487,7 +497,7 @@ napi_value JsWantAgent::OnGetOperationType(napi_env env, napi_callback_info info
         TAG_LOGE(AAFwkTag::WANTAGENT, "type not Object");
         ThrowInvalidParamError(env, "Wrong argument type. Agent must be a WantAgent.");
         errCode = ERR_NOT_OK;
-        return RetErrMsg(env, lastParam, errCode);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, errCode));
     }
 
     UnwrapWantAgent(env, argv[0], reinterpret_cast<void **>(&pWantAgent));
@@ -495,7 +505,7 @@ napi_value JsWantAgent::OnGetOperationType(napi_env env, napi_callback_info info
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
         ThrowInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         errCode = ERR_NOT_OK;
-        return RetErrMsg(env, lastParam, errCode);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, errCode));
     }
 
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
@@ -507,12 +517,13 @@ napi_value JsWantAgent::OnGetOperationType(napi_env env, napi_callback_info info
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetOperationType",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "get bundle name");
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -532,7 +543,7 @@ napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Wrong argument type. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -543,7 +554,7 @@ napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -555,7 +566,7 @@ napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetBundleName",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgent,
@@ -569,6 +580,7 @@ void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgen
     };
     complete = [retCode, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+        HandleScope handleScope(env);
 #ifdef ENABLE_ERRCODE
         if (*retCode != NO_ERROR) {
             task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
@@ -584,6 +596,7 @@ void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgen
 napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "get uid");
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -603,7 +616,7 @@ napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Wrong argument type. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -614,7 +627,7 @@ napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parse pWantAgent error. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -625,7 +638,7 @@ napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetUid",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
@@ -633,6 +646,7 @@ void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
 {
     complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+        HandleScope handleScope(env);
         int uid = -1;
 #ifdef ENABLE_ERRCODE
         ErrCode result = WantAgentHelper::GetUid(wantAgent, uid);
@@ -651,6 +665,7 @@ void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
 napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "on cancel");
+    HandleEscape handleEscape(env);
     WantAgent* pWantAgent = nullptr;
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
@@ -660,7 +675,7 @@ napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
 #ifdef ENABLE_ERRCODE
         ThrowTooFewParametersError(env);
 #endif
-        return CreateJsUndefined(env);
+        return handleEscape.Escape(CreateJsUndefined(env));
     }
 
     napi_value lastParam = (argc >= ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
@@ -670,7 +685,7 @@ napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Wrong argument type. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -681,7 +696,7 @@ napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parse pWantAgent error. Agent must be a WantAgent.");
         return CreateJsUndefined(env);
 #else
-        return RetErrMsg(env, lastParam, ERR_NOT_OK);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ERR_NOT_OK));
 #endif
     }
 
@@ -692,7 +707,7 @@ napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWantAgent::OnCancel",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void JsWantAgent::SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,
@@ -700,6 +715,7 @@ void JsWantAgent::SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,
 {
     complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
             TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+            HandleScope handleScope(env);
 #ifdef ENABLE_ERRCODE
             ErrCode result = WantAgentHelper::Cancel(wantAgent);
             if (result != NO_ERROR) {
@@ -716,6 +732,7 @@ void JsWantAgent::SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,
 
 napi_value JsWantAgent::OnTrigger(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -730,7 +747,7 @@ napi_value JsWantAgent::OnTrigger(napi_env env, napi_callback_info info)
     auto triggerObj = std::make_shared<TriggerCompleteCallBack>();
     int32_t errCode = UnWrapTriggerInfoParam(env, info, wantAgent, triggerInfo, triggerObj);
     if (errCode != BUSINESS_ERROR_CODE_OK) {
-        return RetErrMsg(env, argv[ARGC_TWO], errCode);
+        return handleEscape.Escape(RetErrMsg(env, argv[ARGC_TWO], errCode));
     }
 
     // Public api trigger does not support localWantAgent, switch to triggerAsync.
@@ -1068,6 +1085,7 @@ int32_t JsWantAgent::GetWantAgentParam(napi_env env, napi_callback_info info, Wa
 
 napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1082,7 +1100,7 @@ napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
     int32_t ret = GetWantAgentParam(env, info, *spParas);
     if (ret != 0) {
         ThrowInvalidParamError(env, "Failed to get wantAgent parameter. Agent must be a WantAgent.");
-        return RetErrMsg(env, lastParam, ret);
+        return handleEscape.Escape(RetErrMsg(env, lastParam, ret));
     }
 
     NapiAsyncTask::CompleteCallback complete = [weak = weak_from_this(), parasobj = spParas](napi_env env,
@@ -1116,12 +1134,13 @@ napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetWantAgent",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "on get want");
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1131,8 +1150,7 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
         return CreateJsUndefined(env);
     }
     WantAgent* pWantAgent = nullptr;
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app forbidden to call");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
@@ -1163,6 +1181,7 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
 
     NapiAsyncTask::CompleteCallback complete = [retCode, want](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "start");
+        HandleScope handleScope(env);
         if (*retCode != NO_ERROR) {
             task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
             return;
@@ -1173,7 +1192,7 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetWant",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
@@ -1218,6 +1237,7 @@ napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
 
 napi_value JsWantAgent::OnNapiTriggerAsync(napi_env env, napi_callback_info info)
 {
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1277,7 +1297,7 @@ napi_value JsWantAgent::OnNapiTriggerAsync(napi_env env, napi_callback_info info
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiTriggerAsync",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
 
-    return result;
+    return handleEscape.Escape(result);
 }
 
 std::shared_ptr<AbilityRuntime::Context> JsWantAgent::ConvertToContext(std::shared_ptr<AbilityRuntime::Context> context)
@@ -1314,6 +1334,7 @@ napi_value JsWantAgent::CreateJsCompletedData(napi_env env, const CompletedDispa
 napi_value JsWantAgent::OnNapiGetWantAgent(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "on get wantAgent");
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1338,7 +1359,7 @@ napi_value JsWantAgent::OnNapiGetWantAgent(napi_env env, napi_callback_info info
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetWantAgent",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsParas> spParas,
@@ -1347,6 +1368,7 @@ void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsPa
     complete = [weak = weak_from_this(), parasobj = spParas](napi_env env,
         NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+        HandleScope handleScope(env);
         auto self = weak.lock();
         std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>(parasobj->extraInfo);
         WantAgentInfo wantAgentInfo(parasobj->requestCode,
@@ -1478,6 +1500,7 @@ napi_value JsWantAgent::OnNapiIsLocalWantAgent(napi_env env, napi_callback_info 
 napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    HandleEscape handleEscape(env);
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1511,6 +1534,7 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
     };
     NapiAsyncTask::CompleteCallback complete = [retCode, operType](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+        HandleScope handleScope(env);
         if (*retCode != NO_ERROR) {
             task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
         } else {
@@ -1522,7 +1546,7 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetOperationType",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JsWantAgent::OnNapiSetWantAgentMultithreading(napi_env env, napi_callback_info info)
@@ -1569,6 +1593,7 @@ napi_value WantAgentFlagsInit(napi_env env)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -1595,7 +1620,7 @@ napi_value WantAgentFlagsInit(napi_env env)
     napi_set_named_property(env, objValue, "ALLOW_CANCEL_FLAG",
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_TEN)));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value WantAgentOperationTypeInit(napi_env env)
@@ -1605,6 +1630,7 @@ napi_value WantAgentOperationTypeInit(napi_env env)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -1623,7 +1649,7 @@ napi_value WantAgentOperationTypeInit(napi_env env)
     napi_set_named_property(env, objValue, "START_SERVICE_EXTENSION",
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_SIX)));
 
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value JsWantAgentInit(napi_env env, napi_value exportObj)
@@ -1633,6 +1659,7 @@ napi_value JsWantAgentInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     std::unique_ptr<JsWantAgent> jsWantAgent = std::make_unique<JsWantAgent>();
     napi_wrap(env, exportObj, jsWantAgent.release(), JsWantAgent::Finalizer, nullptr, nullptr);
 
