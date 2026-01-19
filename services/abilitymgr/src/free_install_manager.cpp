@@ -102,6 +102,15 @@ bool FreeInstallManager::IsTopAbility(sptr<IRemoteObject> callerToken)
         OHOS::Rosen::FocusChangeInfo focusChangeInfo;
         OHOS::Rosen::WindowManager::GetInstance().GetFocusWindowInfoByAbilityToken(focusChangeInfo, callerToken);
         return focusChangeInfo.abilityToken_ == callerToken;
+    } else {
+        auto wmsHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetWMSHandler();
+        if (!wmsHandler) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "wmsHandler null");
+            return false;
+        }
+        sptr<IRemoteObject> token;
+        wmsHandler->GetFocusWindow(token);
+        return token == callerToken;
     }
 #endif
     return false;
