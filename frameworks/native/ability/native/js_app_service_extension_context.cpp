@@ -123,6 +123,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
@@ -207,6 +208,7 @@ private:
         auto execute = GetConnectAbilityExecFunc(want, connection, connectId, innerErrorCode);
         NapiAsyncTask::CompleteCallback complete = [connection, connectId, innerErrorCode](napi_env env,
             NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrorCode == 0) {
                 TAG_LOGI(AAFwkTag::APP_SERVICE_EXT, "Connect ability success");
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -283,6 +285,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
@@ -346,6 +349,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
@@ -367,6 +371,7 @@ private:
 napi_value CreateJsAppServiceExtensionContext(napi_env env, std::shared_ptr<AppServiceExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "called");
+    HandleEscape handleEscape(env);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     if (context) {
         abilityInfo = context->GetAbilityInfo();
@@ -387,7 +392,7 @@ napi_value CreateJsAppServiceExtensionContext(napi_env env, std::shared_ptr<AppS
     BindNativeFunction(env, object, "startAbility", moduleName, JsAppServiceExtensionContext::StartAbility);
     BindNativeFunction(
         env, object, "terminateSelf", moduleName, JsAppServiceExtensionContext::TerminateSelf);
-    return object;
+    return handleEscape.Escape(object);
 }
 
 }  // namespace AbilityRuntime

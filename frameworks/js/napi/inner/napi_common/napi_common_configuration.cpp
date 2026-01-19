@@ -64,6 +64,7 @@ EXTERN_C_START
 bool InnerWrapConfigurationString(
     napi_env env, napi_value jsObject, const std::string &key, const std::string &value)
 {
+    AbilityRuntime::HandleScope handleScope(env);
     if (!value.empty()) {
         TAG_LOGI(AAFwkTag::JSNAPI, "key=%{public}s, value=%{private}s", key.c_str(), value.c_str());
         napi_value jsValue = WrapStringToJS(env, value);
@@ -78,6 +79,7 @@ bool InnerWrapConfigurationString(
 napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &configuration)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called, config size %{public}d", static_cast<int>(configuration.GetItemSize()));
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
 
@@ -130,7 +132,7 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
     jsValue = WrapStringToJS(env, configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     SetPropertyValueByPropertyName(env, jsObject, "mnc", jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 bool UnwrapConfiguration(napi_env env, napi_value param, Configuration &config)

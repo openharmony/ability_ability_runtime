@@ -115,6 +115,7 @@ bool UnwrapChildProcessOptions(napi_env env, napi_value jsValue, AppExecFwk::Chi
 
 napi_value WrapChildProcessArgs(napi_env env, AppExecFwk::ChildProcessArgs &args)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArgs = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsArgs));
 
@@ -124,7 +125,7 @@ napi_value WrapChildProcessArgs(napi_env env, AppExecFwk::ChildProcessArgs &args
     napi_value jsFds = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsFds));
     if (!args.CheckFdsSize()) {
-        return jsArgs;
+        return handleEscape.Escape(jsArgs);
     }
     auto &fds = args.fds;
     for (auto iter = fds.begin(); iter != fds.end(); iter++) {
@@ -134,7 +135,7 @@ napi_value WrapChildProcessArgs(napi_env env, AppExecFwk::ChildProcessArgs &args
     }
 
     SetPropertyValueByPropertyName(env, jsArgs, "fds", jsFds);
-    return jsArgs;
+    return handleEscape.Escape(jsArgs);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

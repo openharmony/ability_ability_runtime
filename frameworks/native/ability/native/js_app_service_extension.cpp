@@ -71,6 +71,7 @@ using namespace OHOS::AppExecFwk;
 
 napi_value AttachAppServiceExtensionContext(napi_env env, void *value, void *)
 {
+    HandleEscape handleEscape(env);
     if (value == nullptr) {
         TAG_LOGW(AAFwkTag::APP_SERVICE_EXT, "null value");
         return nullptr;
@@ -102,7 +103,7 @@ napi_value AttachAppServiceExtensionContext(napi_env env, void *value, void *)
         delete workContext;
         return nullptr;
     }
-    return contextObj;
+    return handleEscape.Escape(contextObj);
 }
 
 JsAppServiceExtension* JsAppServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
@@ -213,6 +214,7 @@ void JsAppServiceExtension::ListenWMS()
 
 void JsAppServiceExtension::BindContext(napi_env env, napi_value obj)
 {
+    HandleScope handleScope(env);
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null context");
@@ -414,6 +416,7 @@ void JsAppServiceExtension::GetSrcPath(std::string &srcPath)
 napi_value JsAppServiceExtension::CallOnConnect(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HandleEscape handleEscape(jsRuntime_);
     Extension::OnConnect(want);
     TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "call");
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -446,7 +449,7 @@ napi_value JsAppServiceExtension::CallOnConnect(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null remoteNative");
     }
     TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "ok");
-    return remoteNative;
+    return handleEscape.Escape(remoteNative);
 }
 
 napi_value JsAppServiceExtension::CallOnDisconnect(const AAFwk::Want &want, bool withResult)
