@@ -143,5 +143,91 @@ HWTEST_F(ApplicationContextSecondTest, InitPluginExtensionInfo_0100, TestSize.Le
     EXPECT_EQ(context_->contextImpl_->GetPluginExtensionInfo(), nullptr);
     GTEST_LOG_(INFO) << "InitPluginExtensionInfo_0100 end";
 }
+
+/**
+ * @tc.number: ApplicationContext_CreateModuleOrPluginContext_001
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationContextSecondTest, ApplicationContext_CreateModuleOrPluginContext_001, TestSize.Level1)
+{
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::string bundleName = "com.example.bundleName";
+    std::string moduleName = "moduleName";
+
+    auto context = applicationContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: ApplicationContext_CreateModuleOrPluginContext_002
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationContextSecondTest, ApplicationContext_CreateModuleOrPluginContext_002, TestSize.Level1)
+{
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::string bundleName = "";
+    std::string moduleName = "moduleName";
+
+    auto context = applicationContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: ApplicationContext_CreateModuleOrPluginContext_003
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationContextSecondTest, ApplicationContext_CreateModuleOrPluginContext_003, TestSize.Level1)
+{
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::string bundleName = "com.example.hostBundleName";
+    std::string moduleName = "";
+
+    auto context = applicationContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: ApplicationContext_CreateModuleOrPluginContext_004
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationContextSecondTest, ApplicationContext_CreateModuleOrPluginContext_004, TestSize.Level1)
+{
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    auto context = applicationContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: ApplicationContext_CreateModuleOrPluginContext_005
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationContextSecondTest, ApplicationContext_CreateModuleOrPluginContext_005, TestSize.Level1)
+{
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+    applicationContext->contextImpl_ = nullptr;
+
+    auto context = applicationContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
