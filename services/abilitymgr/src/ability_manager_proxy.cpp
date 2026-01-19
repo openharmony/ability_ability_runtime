@@ -51,6 +51,7 @@ constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
 constexpr int32_t MAX_WANT_LIST_SIZE = 4;
 constexpr int32_t MAX_IPC_CAPACITY_FOR_WANT_LIST = 4 * 216 * 1024;
 constexpr int32_t MAX_DUMP_STATE_SIZE = 10000;
+constexpr int32_t MAX_INTENT_SIZE = 10000;
 bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
@@ -6907,6 +6908,11 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
         return error;
     }
     int32_t infoSize = reply.ReadInt32();
+    if (infoSize < 0 || infoSize >= MAX_INTENT_SIZE) {
+        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
+        return ERR_INVALID_VALUE;
+    }
+
     infos.clear();
     for (int32_t i = 0; i < infoSize; i++) {
         std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
@@ -6955,6 +6961,11 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
         return error;
     }
     int32_t infoSize = reply.ReadInt32();
+    if (infoSize < 0 || infoSize >= MAX_INTENT_SIZE) {
+        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
+        return ERR_INVALID_VALUE;
+    }
+
     infos.clear();
     for (int32_t i = 0; i < infoSize; i++) {
         std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
