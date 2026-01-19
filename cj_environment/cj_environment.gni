@@ -35,4 +35,7 @@ if (current_os == "ohos") {
 } else if (current_os == "mingw") {
   cj_config.platform_name = "windows"
   cj_config.common_defines = [ "__WINDOWS__" ]
+} else if (current_os == "mac") {
+  cj_config.platform_name = "mac"
+  cj_config.common_defines = [ "__APPLE__" ]
 }
