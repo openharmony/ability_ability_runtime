@@ -30,6 +30,7 @@ napi_value AppPreloadTypeInit(napi_env env)
         return nullptr;
     }
 
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
@@ -48,7 +49,7 @@ napi_value AppPreloadTypeInit(napi_env env)
     napi_set_named_property(env, object, "TYPE_CREATE_BACKGROUND_ABILITY",
         CreateJsValue(env, static_cast<int32_t>(AppPreloadType::TYPE_CREATE_BACKGROUND_ABILITY)));
 
-    return object;
+    return handleEscape.Escape(object);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

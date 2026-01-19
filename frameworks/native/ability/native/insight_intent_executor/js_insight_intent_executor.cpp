@@ -232,18 +232,19 @@ napi_value JsInsightIntentExecutor::CallJsFunctionWithResultInner(
     const napi_value* argv)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
+    HandleEscape handleEscape(runtime_);
     auto* env = runtime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_valuetype::napi_object)) {
         TAG_LOGE(AAFwkTag::INTENT, "CallJsFunctionWithResultInner Type error");
         return nullptr;
     }
-    return JsInsightIntentExecutor::CallJsFunctionWithResult(
+    return handleEscape.Escape(JsInsightIntentExecutor::CallJsFunctionWithResult(
         env,
         obj,
         funcName,
         argc,
-        argv);
+        argv));
 }
 
 std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> JsInsightIntentExecutor::GetResultFromJs(
@@ -414,6 +415,7 @@ bool JsInsightIntentExecutor::HandlePromiseResult(napi_env env, napi_value resul
     std::shared_ptr<InsightIntentContext> context)
 {
     TAG_LOGI(AAFwkTag::INTENT, "Is promise");
+    HandleScope handleScope(env);
     auto* callback = callback_.release();
 
     napi_value then = nullptr;

@@ -71,6 +71,7 @@ constexpr int COMMON_FAILED = -1;
 napi_value ThrowJsError(napi_env env, int32_t errCode, std::string errMsg)
 {
 #ifdef ENABLE_ERRCODE
+    HandleScope handleScope(env);
     napi_value error = CreateJsError(env, errCode, errMsg);
     napi_throw(env, error);
 #endif
@@ -97,6 +98,7 @@ void ResolveWithNoError(napi_env env, NapiAsyncTask &task, napi_value value = nu
 napi_value AttachAppContext(napi_env env, void *value, void *)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
+    HandleEscape handleEscape(env);
     if (value == nullptr) {
         TAG_LOGW(AAFwkTag::DELEGATOR, "null value");
         return nullptr;
@@ -120,7 +122,7 @@ napi_value AttachAppContext(napi_env env, void *value, void *)
         delete workContext;
         return nullptr;
     }
-    return object;
+    return handleEscape.Escape(object);
 }
 
 JSAbilityDelegator::JSAbilityDelegator()
@@ -263,7 +265,7 @@ napi_value JSAbilityDelegator::SetMockList(napi_env env, napi_callback_info info
 napi_value JSAbilityDelegator::OnAddAbilityMonitor(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
-
+    HandleEscape handleEscape(env);
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -273,6 +275,7 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitor(napi_env env, NapiCallbackInf
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling AddAbilityMonitor failed."));
@@ -286,13 +289,13 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitor(napi_env env, NapiCallbackInf
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnAddAbilityMonitor",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnAddAbilityMonitorSync(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
-
+    HandleScope handleScope(env);
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -312,6 +315,7 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitor(napi_env env, NapiCallba
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     bool isExisted = false;
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, false)) {
@@ -322,6 +326,7 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitor(napi_env env, NapiCallba
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling AddAbilityStageMonitor failed."));
@@ -339,13 +344,14 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitor(napi_env env, NapiCallba
     if (!isExisted) {
         AddStageMonitorRecord(env, info.argv[INDEX_ZERO], monitor);
     }
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnAddAbilityStageMonitorSync(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleScope handleScope(env);
     bool isExisted = false;
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, true)) {
@@ -369,6 +375,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitor(napi_env env, NapiCallback
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -379,6 +386,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitor(napi_env env, NapiCallback
     NapiAsyncTask::CompleteCallback complete =
         [monitor](napi_env env, NapiAsyncTask &task, int32_t status) mutable {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling RemoveAbilityMonitor failed."));
@@ -405,7 +413,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitor(napi_env env, NapiCallback
             }
         }
     }
-    return result;
+    return handleEscape.Escape(result);
 }
 
 
@@ -413,6 +421,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitorSync(napi_env env, NapiCall
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleScope handleScope(env);
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -441,6 +450,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitor(napi_env env, NapiCal
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     bool isExisted = false;
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, false)) {
@@ -452,6 +462,7 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitor(napi_env env, NapiCal
     NapiAsyncTask::CompleteCallback complete =
         [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
 
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
@@ -470,13 +481,14 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitor(napi_env env, NapiCal
     if (isExisted) {
         RemoveStageMonitorRecord(env, info.argv[INDEX_ZERO]);
     }
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitorSync(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleScope handleScope(env);
     bool isExisted = false;
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, true)) {
@@ -501,6 +513,7 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     TimeoutCallback opt {false, false};
     int64_t timeout = 0;
@@ -514,8 +527,7 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
     NapiAsyncTask::ExecuteCallback execute = [monitor, timeout, opt, abilityObjectBox]() {
         TAG_LOGI(AAFwkTag::DELEGATOR, "execute called");
         if (!abilityObjectBox) {
-            TAG_LOGE(
-                AAFwkTag::DELEGATOR, "null abilityObjectBox");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null abilityObjectBox");
             return;
         }
 
@@ -540,6 +552,7 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
 
     NapiAsyncTask::CompleteCallback complete = [abilityObjectBox](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "called");
+        HandleScope handleScope(env);
         if (abilityObjectBox && !abilityObjectBox->object_.expired()) {
             ResolveWithNoError(env, task, abilityObjectBox->object_.lock()->GetNapiValue());
         } else {
@@ -555,20 +568,20 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnWaitAbilityMonitor",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     TimeoutCallback opt {false, false};
     int64_t timeout = 0;
     if (!ParseWaitAbilityStageMonitorPara(env, info, monitor, opt, timeout)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
-        return ThrowJsError(env, INCORRECT_PARAMETERS,
-            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
+        return ThrowJsError(env, INCORRECT_PARAMETERS, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
 
     auto abilityStageObjBox = std::make_shared<AbilityStageObjBox>();
@@ -596,6 +609,7 @@ napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallb
 
     NapiAsyncTask::CompleteCallback complete = [abilityStageObjBox](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         if (abilityStageObjBox && !abilityStageObjBox->object_.expired()) {
             ResolveWithNoError(env, task, abilityStageObjBox->object_.lock()->GetNapiValue());
         } else {
@@ -609,13 +623,14 @@ napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallb
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnWaitAbilityStageMonitor",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnPrint(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::string msg;
     if (!ParsePrintPara(env, info, msg)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -624,6 +639,7 @@ napi_value JSAbilityDelegator::OnPrint(napi_env env, NapiCallbackInfo& info)
     }
 
     NapiAsyncTask::CompleteCallback complete = [msg](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
@@ -638,13 +654,14 @@ napi_value JSAbilityDelegator::OnPrint(napi_env env, NapiCallbackInfo& info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnPrint",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnPrintSync(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleScope handleScope(env);
     std::string msg;
     if (!ParsePrintPara(env, info, msg)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -666,6 +683,7 @@ napi_value JSAbilityDelegator::OnExecuteShellCommand(napi_env env, NapiCallbackI
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::string cmd;
     TimeoutCallback opt {false, false};
     int64_t timeoutSecs = 0;
@@ -693,6 +711,7 @@ napi_value JSAbilityDelegator::OnExecuteShellCommand(napi_env env, NapiCallbackI
     };
 
     NapiAsyncTask::CompleteCallback complete = [shellCmdResultBox](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
         if (!shellCmdResultBox) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "null shellCmdResultBox");
@@ -716,13 +735,14 @@ napi_value JSAbilityDelegator::OnExecuteShellCommand(napi_env env, NapiCallbackI
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnExecuteShellCommand:" + cmd,
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnGetAppContext(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
@@ -750,13 +770,14 @@ napi_value JSAbilityDelegator::OnGetAppContext(napi_env env, NapiCallbackInfo& i
         delete workContext;
         return CreateJsNull(env);
     }
-    return value;
+    return handleEscape.Escape(value);
 }
 
 napi_value JSAbilityDelegator::OnGetAbilityState(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid argc");
         return CreateJsUndefined(env);
@@ -776,13 +797,14 @@ napi_value JSAbilityDelegator::OnGetAbilityState(napi_env env, NapiCallbackInfo&
     AbilityDelegator::AbilityState lifeState = delegator->GetAbilityState(remoteObject);
     AbilityLifecycleState abilityLifeState = AbilityLifecycleState::UNINITIALIZED;
     AbilityLifecycleStateToJs(lifeState, abilityLifeState);
-    return CreateJsValue(env, static_cast<int>(abilityLifeState));
+    return handleEscape.Escape(CreateJsValue(env, static_cast<int>(abilityLifeState)));
 }
 
 napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     if (info.argc >= ARGC_ONE && !AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
         return ThrowJsError(env, INCORRECT_PARAMETERS, "Parse callback failed, callback must be function");
@@ -790,6 +812,7 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
 
     NapiAsyncTask::CompleteCallback complete = [](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
@@ -815,13 +838,14 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSAbilityDelegator::OnGetCurrentTopAbility",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnStartAbility(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     AAFwk::Want want;
     if (!ParseStartAbilityPara(env, info, want)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "parse startAbility param failed");
@@ -831,6 +855,7 @@ napi_value JSAbilityDelegator::OnStartAbility(napi_env env, NapiCallbackInfo& in
 
     NapiAsyncTask::CompleteCallback complete = [want](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "startAbility failed."));
@@ -854,13 +879,14 @@ napi_value JSAbilityDelegator::OnStartAbility(napi_env env, NapiCallbackInfo& in
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSAbilityDelegator::OnStartAbility",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnDoAbilityForeground(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
     if (!ParseAbilityCommonPara(env, info, remoteObject)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -870,6 +896,7 @@ napi_value JSAbilityDelegator::OnDoAbilityForeground(napi_env env, NapiCallbackI
 
     NapiAsyncTask::CompleteCallback complete = [remoteObject](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling DoAbilityForeground failed."));
@@ -886,13 +913,14 @@ napi_value JSAbilityDelegator::OnDoAbilityForeground(napi_env env, NapiCallbackI
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSAbilityDelegator::OnDoAbilityForeground",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnDoAbilityBackground(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
     if (!ParseAbilityCommonPara(env, info, remoteObject)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -902,6 +930,7 @@ napi_value JSAbilityDelegator::OnDoAbilityBackground(napi_env env, NapiCallbackI
 
     NapiAsyncTask::CompleteCallback complete = [remoteObject](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling DoAbilityBackground failed."));
@@ -918,13 +947,14 @@ napi_value JSAbilityDelegator::OnDoAbilityBackground(napi_env env, NapiCallbackI
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JSAbilityDelegator::OnDoAbilityBackground",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnFinishTest(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleEscape handleEscape(env);
     std::string msg;
     int64_t code = 0;
     if (!ParseFinishTestPara(env, info, msg, code)) {
@@ -935,6 +965,7 @@ napi_value JSAbilityDelegator::OnFinishTest(napi_env env, NapiCallbackInfo& info
 
     NapiAsyncTask::CompleteCallback complete = [msg, code](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
+        HandleScope handleScope(env);
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling FinishTest failed."));
@@ -947,13 +978,14 @@ napi_value JSAbilityDelegator::OnFinishTest(napi_env env, NapiCallbackInfo& info
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JSAbilityDelegator::OnFinishTest",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    return handleEscape.Escape(result);
 }
 
 napi_value JSAbilityDelegator::OnSetMockList(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
 
+    HandleScope handleScope(env);
     std::map<std::string, std::string> mockList;
     if (!ParseMockListPara(env, info, mockList)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid params");
@@ -970,6 +1002,7 @@ napi_value JSAbilityDelegator::ParseMonitorPara(
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "monitorRecord size: %{public}zu", g_monitorRecord.size());
 
+    HandleScope handleScope(env);
     for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
         std::shared_ptr<NativeReference> jsMonitor = iter->first;
         bool isEquals = false;
@@ -1028,6 +1061,7 @@ napi_value JSAbilityDelegator::ParseStageMonitorPara(
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "stageMonitorRecord size: %{public}zu", g_stageMonitorRecord.size());
 
+    HandleScope handleScope(env);
     isExisted = false;
     for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end(); ++iter) {
         std::shared_ptr<NativeReference> jsMonitor = iter->first;
@@ -1073,6 +1107,7 @@ napi_value JSAbilityDelegator::ParseAbilityPara(
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    HandleScope handleScope(env);
     std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
     for (auto iter = g_abilityRecord.begin(); iter != g_abilityRecord.end();) {
         if (iter->first.expired()) {
@@ -1100,6 +1135,7 @@ napi_value JSAbilityDelegator::CreateAbilityObject(napi_env env, const sptr<IRem
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    HandleEscape handleEscape(env);
     if (!remoteObject) {
         return nullptr;
     }
@@ -1118,7 +1154,7 @@ napi_value JSAbilityDelegator::CreateAbilityObject(napi_env env, const sptr<IRem
 
     std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
     g_abilityRecord[reference] = remoteObject;
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 void JSAbilityDelegator::AbilityLifecycleStateToJs(

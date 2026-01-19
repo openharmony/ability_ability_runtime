@@ -145,6 +145,7 @@ void NAPIDataAbilityObserver::CallJsMethod()
         }
         isCallingback_ = true;
     }
+    AbilityRuntime::HandleScope handleScope(env_);
     napi_value result[ARGS_TWO] = {nullptr};
     result[PARAM0] = GetCallbackErrorValue(env_, NO_ERROR);
     napi_value callback = nullptr;

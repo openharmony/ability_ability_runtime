@@ -62,6 +62,7 @@ public:
         TAG_LOGI(AAFwkTag::INTENT, "complete");
         NapiAsyncTask::CompleteCallback complete = [resultCode = resultCode, executeResult = executeResult]
             (napi_env env, NapiAsyncTask &task, int32_t status) {
+            HandleScope handleScope(env);
             if (resultCode != 0) {
                 task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(resultCode)));
             } else {
@@ -143,6 +144,7 @@ private:
     }
     napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
+        HandleEscape handleEscape(env);
         TAG_LOGI(AAFwkTag::INTENT, "on execute");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
@@ -195,11 +197,12 @@ private:
             asyncTask->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(err)));
             InsightIntentHostClient::GetInstance()->RemoveInsightIntentExecute(key);
         }
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGetAllInsightIntentInfo(napi_env env, NapiCallbackInfo& info)
     {
+        HandleEscape handleEscape(env);
         TAG_LOGI(AAFwkTag::INTENT, "OnGetAllInsightIntentInfo");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
@@ -223,6 +226,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrorCode == 0) {
                     task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
                 } else {
@@ -232,11 +236,12 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetAllInsightIntentInfo",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGetInsightIntentInfoByBundleName(napi_env env, NapiCallbackInfo& info)
     {
+        HandleEscape handleEscape(env);
         TAG_LOGI(AAFwkTag::INTENT, "OnGetInsightIntentInfoByBundleName");
         if (info.argc < ARGC_TWO) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
@@ -267,6 +272,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrorCode == 0) {
                     task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
                 } else {
@@ -276,11 +282,12 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByBundleName",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGetInsightIntentInfoByIntentName(napi_env env, NapiCallbackInfo& info)
     {
+        HandleEscape handleEscape(env);
         TAG_LOGI(AAFwkTag::INTENT, "OnGetInsightIntentInfoByIntentName");
         if (info.argc < ARGC_FOUR) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
@@ -324,6 +331,7 @@ private:
             };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, intentInfo](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
                 if (*innerErrorCode == 0) {
                     task.ResolveWithNoError(env, CreateInsightIntentInfoForQuery(env, *intentInfo));
                 } else {
@@ -333,11 +341,12 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByIntentName",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGetInsightIntentInfoByFilter(napi_env env, NapiCallbackInfo& info)
     {
+        HandleEscape handleEscape(env);
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
             ThrowTooFewParametersError(env);
@@ -357,42 +366,43 @@ private:
             return CreateJsUndefined(env);
         }
 
-        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto error = std::make_shared<int32_t>(ERR_OK);
         auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
-        NapiAsyncTask::ExecuteCallback execute = [infos, innerErrorCode, filter]() {
+        NapiAsyncTask::ExecuteCallback execute = [infos, error, filter]() {
             if (filter.bundleName_.empty()) {
-                *innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(
+                *error = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(
                     filter.intentFlags_, *infos, filter.userId_);
             } else if (!filter.moduleName_.empty() && !filter.intentName_.empty()) {
                 auto intentInfo = std::make_shared<InsightIntentInfoForQuery>();
-                *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
+                *error = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
                     filter.intentFlags_, filter.bundleName_, filter.moduleName_,
                     filter.intentName_, *intentInfo, filter.userId_);
                 if (intentInfo != nullptr && (!intentInfo->intentType.empty() || intentInfo->isConfig)) {
                     infos->push_back(*intentInfo);
                 }
             } else if (filter.moduleName_.empty() && filter.intentName_.empty()) {
-                *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
+                *error = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
                     filter.intentFlags_, filter.bundleName_, *infos, filter.userId_);
             }
         };
-        NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
-                if (*innerErrorCode == 0) {
+        NapiAsyncTask::CompleteCallback complete = [error, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                HandleScope handleScope(env);
+                if (*error == 0) {
                     task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
                 } else {
-                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*error)));
                 }
             };
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByFilter",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 };
 
 static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, int32_t value)
 {
+    HandleScope handleScope(env);
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -408,6 +418,7 @@ static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* 
 
 static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, const char* value)
 {
+    HandleScope handleScope(env);
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -423,6 +434,7 @@ static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* 
 
 static napi_value InitGetInsightIntentFlagObject(napi_env env)
 {
+    HandleEscape handleEscape(env);
     napi_value napiObject;
     NAPI_CALL(env, napi_create_object(env, &napiObject));
 
@@ -433,11 +445,12 @@ static napi_value InitGetInsightIntentFlagObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(
         env, napiObject, "GET_ENTITY_INFO", GetInsightIntentFlag::GET_ENTITY_INFO));
 
-    return napiObject;
+    return handleEscape.Escape(napiObject);
 }
 
 static napi_value InitInsightIntentTypeObject(napi_env env)
 {
+    HandleEscape handleEscape(env);
     napi_value napiObject;
     NAPI_CALL(env, napi_create_object(env, &napiObject));
 
@@ -447,18 +460,19 @@ static napi_value InitInsightIntentTypeObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, napiObject, "FUNCTION", "@InsightIntentFunctionMethod"));
     NAPI_CALL(env, SetEnumItem(env, napiObject, "FORM", "@InsightIntentForm"));
 
-    return napiObject;
+    return handleEscape.Escape(napiObject);
 }
 
 static napi_value InitIntentDevelopTypeObject(napi_env env)
 {
+    HandleEscape handleEscape(env);
     napi_value napiObject;
     NAPI_CALL(env, napi_create_object(env, &napiObject));
 
     NAPI_CALL(env, SetEnumItem(env, napiObject, "CONFIGURATION", "configuration"));
     NAPI_CALL(env, SetEnumItem(env, napiObject, "DECORATOR", "decorator"));
 
-    return napiObject;
+    return handleEscape.Escape(napiObject);
 }
 
 napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
@@ -469,6 +483,7 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
+    HandleScope handleScope(env);
     std::unique_ptr<JsInsightIntentDriver> jsIntentDriver = std::make_unique<JsInsightIntentDriver>();
     napi_wrap(env, exportObj, jsIntentDriver.release(), JsInsightIntentDriver::Finalizer, nullptr, nullptr);
 
