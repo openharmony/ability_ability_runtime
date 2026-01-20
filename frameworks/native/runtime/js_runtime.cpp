@@ -980,9 +980,9 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
-    jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
     JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
+    jsEnv_->InitSourceMap(operatorObj);
 }
 
 void JsRuntime::InitSourceMap(const std::string hqfFilePath)
