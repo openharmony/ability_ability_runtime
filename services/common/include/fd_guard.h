@@ -25,7 +25,12 @@ constexpr uint32_t DOMAIN_ID = 0xD001300;
 class FdGuard {
 public:
     FdGuard() = default;
-    explicit FdGuard(int32_t fd) : fd_(fd) {}
+    explicit FdGuard(int32_t fd) : fd_(fd)
+    {
+        if (fd_ > -1) {
+            fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
+        }
+    }
     ~FdGuard()
     {
         Reset();
