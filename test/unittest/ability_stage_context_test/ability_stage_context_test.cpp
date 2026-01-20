@@ -349,5 +349,91 @@ HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_GetSystemPreferencesDi
 
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.number: AbilityStageContext_CreateModuleOrPluginContext_001
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContext_CreateModuleOrPluginContext_001, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    std::string bundleName = "com.example.bundleName";
+    std::string moduleName = "moduleName";
+
+    auto context = abilityStageContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: AbilityStageContext_CreateModuleOrPluginContext_002
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContext_CreateModuleOrPluginContext_002, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    std::string bundleName = "";
+    std::string moduleName = "moduleName";
+
+    auto context = abilityStageContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: AbilityStageContext_CreateModuleOrPluginContext_003
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContext_CreateModuleOrPluginContext_003, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    std::string bundleName = "com.example.hostBundleName";
+    std::string moduleName = "";
+
+    auto context = abilityStageContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: AbilityStageContext_CreateModuleOrPluginContext_004
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContext_CreateModuleOrPluginContext_004, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    auto context = abilityStageContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
+
+/**
+ * @tc.number: AbilityStageContext_CreateModuleOrPluginContext_005
+ * @tc.name: CreateModuleOrPluginContext
+ * @tc.desc: Test CreateModuleOrPluginContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContext_CreateModuleOrPluginContext_005, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+    abilityStageContext->contextImpl_ = nullptr;
+
+    auto context = abilityStageContext->CreateModuleOrPluginContext(bundleName, moduleName);
+    EXPECT_EQ(context, nullptr);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
