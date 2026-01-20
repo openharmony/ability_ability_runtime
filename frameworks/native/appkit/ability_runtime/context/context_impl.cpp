@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <regex>
+#include <charconv>
 
 #include "ability_manager_client.h"
 #include "app_mgr_client.h"
@@ -97,6 +98,26 @@ const int AREA2 = 2;
 const int AREA3 = 3;
 const int AREA4 = 4;
 constexpr int32_t FOUNDATION_UID = 5523;
+
+bool StringToUint32(const std::string& str, uint32_t& outVal)
+{
+    if (str.empty()) {
+        return false;
+    }
+
+    uint32_t val = 0;
+    const auto [ptr, ec] = std::from_chars(
+        str.data(),
+        str.data() + str.size(),
+        val,
+        10);
+
+    if (ec == std::errc{} && ptr == str.data() + str.size()) {
+        outVal = val;
+        return true;
+    }
+    return false;
+}
 
 ContextImpl::ContextImpl()
 {
@@ -1207,11 +1228,19 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     if (config_) {
         std::string mcc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
         std::string mnc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-        try {
-            resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
-            resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
-        } catch (...) {
-            TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+        uint32_t mcc_val = 0;
+        uint32_t mnc_val = 0;
+        bool mcc_ok = StringToUint32(mcc, mcc_val);
+        bool mnc_ok = StringToUint32(mnc, mnc_val);
+        if (mcc_ok) {
+            resConfig->SetMcc(mcc_val);
+        } else {
+            TAG_LOGD(AAFwkTag::APPKIT, "Set mcc failed mcc:%{public}s", mcc.c_str());
+        }
+        if (mnc_ok) {
+            resConfig->SetMnc(mnc_val);
+        } else {
+            TAG_LOGD(AAFwkTag::APPKIT, "Set mnc failed mnc:%{public}s", mnc.c_str());
         }
     }
     resourceManager->UpdateResConfig(*resConfig);
