@@ -211,7 +211,14 @@ bool EtsAbilityLifecycleCallback::Unregister(int32_t callbackId)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "Unregister callbackId : %{public}d", callbackId);
     std::lock_guard<std::mutex> lock(mutex_);
-    return callbacks_.erase(callbackId);
+    auto itr = callbacks_.find(callbackId);
+    if (itr != callbacks_.end() && itr->second != nullptr) {
+        ani_env *aniEnv = GetAniEnv();
+        if (aniEnv != nullptr) {
+            aniEnv->GlobalReference_Delete(itr->second);
+        }
+    }
+    return callbacks_.erase(callbackId) == 1;
 }
 
 void EtsAbilityLifecycleCallback::OnAbilityCreate(const AbilityLifecycleCallbackArgs &ability)

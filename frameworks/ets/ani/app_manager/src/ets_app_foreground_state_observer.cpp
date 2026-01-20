@@ -183,6 +183,7 @@ ani_ref ETSAppForegroundStateObserver::GetObserverObject(const ani_object &obser
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return nullptr;
     }
+    std::lock_guard<std::mutex> lock(etsObserverObjectSetLock_);
     for (auto& item : etsObserverObjects_) {
         if (IsStrictEquals(item, observerObject)) {
             return item;
