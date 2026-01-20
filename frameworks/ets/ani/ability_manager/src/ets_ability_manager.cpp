@@ -59,6 +59,9 @@ constexpr const char *PRELOAD_UI_EXTENSION_ABILITY_SIGNATURE =
     "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *CLEAR_PRELOAD_UI_EXTENSION_ABILITY_SIGNATURE = "iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *CLEAR_PRELOAD_UI_EXTENSION_ABILITIES_SIGNATURE = "C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *NOTIFY_SAVE_AS_RESULT_SIGNATURE =
+    "C{ability.abilityResult.AbilityResult}iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char *NOTIFY_SAVE_AS_RESULT_CHECK_SIGNATURE = "C{ability.abilityResult.AbilityResult}:";
 constexpr int32_t ERR_FAILURE = -1;
 const std::string MAX_UINT64_VALUE = "18446744073709551615";
 std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
@@ -147,6 +150,9 @@ public:
     static void NativeClearPreloadedUIExtensionAbility(ani_env *env, ani_int preloadId, ani_object callback);
     static void NativeClearPreloadedUIExtensionAbilities(ani_env *env, ani_object callback);
     static void CheckPreloadUIExtensionAbilityPermission(ani_env *env);
+    static void nativeNotifySaveAsResult(ani_env *env, ani_object aniParameter,
+        ani_int requestCode, ani_object callback);
+    static void nativeNotifySaveAsResultCheck(ani_env *env, ani_object aniParameter);
 
 private:
     static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
@@ -1037,6 +1043,46 @@ void EtsAbilityManager::NativeClearPreloadedUIExtensionAbilities(ani_env *env, a
     }
 }
 
+void EtsAbilityManager::nativeNotifySaveAsResultCheck(ani_env *env, ani_object aniParameter)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call NotifySaveAsResultCheck");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    AppExecFwk::Want want;
+    int resultCode = ERR_OK;
+    if (!AppExecFwk::UnWrapAbilityResult(env, aniParameter, resultCode, want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unwrap abilityResult failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param parameter failed, must be a AbilityResult.");
+        return;
+    }
+}
+
+void EtsAbilityManager::nativeNotifySaveAsResult(
+    ani_env *env, ani_object aniParameter, ani_int requestCode, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call NotifySaveAsResult");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    AppExecFwk::Want want;
+    int resultCode = ERR_OK;
+    if (!AppExecFwk::UnWrapAbilityResult(env, aniParameter, resultCode, want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unwrap abilityResult failed");
+        return;
+    }
+    ErrCode errorCode = AAFwk::AbilityManagerClient::GetInstance()->
+        NotifySaveAsResult(want, resultCode, static_cast<int32_t>(requestCode));
+    if (errorCode != ERR_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(errorCode)), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callback, nullptr, nullptr);
+}
+
 void EtsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call EtsAbilityManagerRegistryInit");
@@ -1118,6 +1164,10 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAbilityManager::NativeClearPreloadedUIExtensionAbilities) },
         ani_native_function { "nativeCheckPreloadUIExtensionAbilityPermission", ETS_ABILITY_MANAGER_SIGNATURE_VOID,
             reinterpret_cast<void *>(EtsAbilityManager::CheckPreloadUIExtensionAbilityPermission) },
+        ani_native_function { "nativeNotifySaveAsResult", NOTIFY_SAVE_AS_RESULT_SIGNATURE,
+            reinterpret_cast<void *>(EtsAbilityManager::nativeNotifySaveAsResult) },
+        ani_native_function { "nativeNotifySaveAsResultCheck", NOTIFY_SAVE_AS_RESULT_CHECK_SIGNATURE,
+            reinterpret_cast<void *>(EtsAbilityManager::nativeNotifySaveAsResultCheck) },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {

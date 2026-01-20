@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_APP_STATE_FILTER
 #define OHOS_ABILITY_RUNTIME_ANI_COMMON_APP_STATE_FILTER
 
-#include "application_state_filter.h"
 #include "ani.h"
+#include "application_state_filter.h"
 
 namespace OHOS {
 namespace AppExecFwk {

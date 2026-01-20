@@ -614,12 +614,17 @@ ani_object NativeCreateSystemHspModuleResourceManager(ani_env *env, ani_object a
     }
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
     int32_t retCode = context->CreateSystemHspModuleResourceManager(bundleName, moduleName, resourceManager);
-    if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager, errorCode:%{public}d", retCode);
-        EtsErrorUtil::ThrowError(env, retCode);
+    if (resourceManager == nullptr && retCode == ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP);
         return reinterpret_cast<ani_object>(undefRef);
     }
-    return Global::Resource::ResMgrAddon::CreateResMgr(env, "", resourceManager, context);
+    if (resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager, errorCode:%{public}d", retCode);
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return reinterpret_cast<ani_object>(undefRef);
+    }
+    return Global::Resource::ResMgrAddon::CreateResMgr(env, "", resourceManager, nullptr);
 }
 
 ani_object CreateContextObject(ani_env* env, ani_class contextClass, std::shared_ptr<Context> nativeContext)
