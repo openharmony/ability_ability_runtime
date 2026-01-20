@@ -21,6 +21,7 @@
 #include "process_options.h"
 #include "start_window_option.h"
 #include "parcel.h"
+#include "ani_window_animation_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -109,6 +110,16 @@ void UnwrapStartOptionsWindowOptions(ani_env *env, ani_object param, AAFwk::Star
         TAG_LOGD(AAFwkTag::ANI, "maxWindowHeight:%{public}d", maxWindowHeight);
         startOptions.SetMaxWindowHeight(maxWindowHeight);
         startOptions.maxWindowHeightUsed_ = true;
+    }
+
+    ani_ref windowEtsObject = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetPropertyByName_Ref(param, "windowCreateParams", &windowEtsObject)) == ANI_OK) {
+        Rosen::WindowCreateParams windowCreateParams;
+        if (Rosen::ConvertWindowCreateParamsFromAniValue(
+            env, static_cast<ani_object>(windowEtsObject), windowCreateParams)) {
+            startOptions.windowCreateParams_ = std::make_shared<Rosen::WindowCreateParams>(windowCreateParams);
+        }
     }
 }
 

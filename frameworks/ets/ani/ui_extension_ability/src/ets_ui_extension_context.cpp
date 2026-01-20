@@ -1275,9 +1275,20 @@ void EtsUIExtensionContext::OpenAtomicServiceInner(ani_env *env, ani_object aniO
     };
     want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
     auto requestCode = context->GenerateCurRequestCode();
-    ErrCode ErrCode = context->OpenAtomicService(want, options, requestCode, std::move(task));
-    if (ErrCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "OpenAtomicService failed, ErrCode: %{public}d", ErrCode);
+    ErrCode errCode = context->OpenAtomicService(want, options, requestCode, std::move(task));
+    if (errCode != 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "OpenAtomicService failed: %{public}d", errCode);
+        if (freeInstallObserver_ != nullptr) {
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, errCode);
+        }
+        if (!options.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "failed to call openAtomicService" }
+            };
+            context->OnRequestFailure(options.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
 }
 
