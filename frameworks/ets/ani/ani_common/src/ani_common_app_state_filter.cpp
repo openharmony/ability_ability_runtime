@@ -15,8 +15,8 @@
 
 #include "ani_common_app_state_filter.h"
 
-#include "application_state_filter.h"
 #include "ani_common_util.h"
+#include "application_state_filter.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {

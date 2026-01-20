@@ -213,6 +213,8 @@ export default class UIAbilityContext extends Context {
   private native nativeStartAbilityForResultWithAccountCheck(): void;
   private native nativeSetMissionWindowIcon(windowIcon: image.PixelMap, callback: AsyncCallbackWrapper<void>): void;
 
+  private native nativeSetOnNewWantSkipScenarios(scenarios: int, callback: AsyncCallbackWrapper<void>): void;
+
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -1076,6 +1078,23 @@ hideAbility(): Promise<void> {
       });
       taskpool.execute(() => {
         this.nativeSetMissionWindowIcon(windowIcon, syncCall);
+      });
+    });
+  }
+
+  setOnNewWantSkipScenarios(scenarios: int): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let callback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeSetOnNewWantSkipScenarios(scenarios, callback);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
       });
     });
   }
