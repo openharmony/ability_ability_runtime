@@ -68,9 +68,10 @@ HWTEST_F(PendingWantManagerDumpTest, PendingWantManagerDump_DumpByRecordId_0100,
     EXPECT_NE(pendingKey, nullptr);
     pendingKey->SetCode(CODE);
 
-    auto pendingWantRecord = std::make_shared<PendingWantRecord>(pendingManager, UID, 0, nullptr, pendingKey);
-    EXPECT_NE(pendingWantRecord, nullptr);
-    pendingManager->wantRecords_ = { {pendingKey, pendingWantRecord.get()} };
+    sptr<PendingWantRecord> rec =
+        new (std::nothrow) PendingWantRecord(pendingManager, UID, 0, nullptr, pendingKey);
+    EXPECT_NE(rec, nullptr);
+    pendingManager->wantRecords_.insert(std::make_pair(pendingKey, rec));
 
     std::vector<std::string> info;
     std::string args = std::to_string(CODE);
