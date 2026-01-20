@@ -151,6 +151,7 @@ public:
     static void OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink);
     static void OpenAtomicServiceCheck(ani_env *env, ani_object aniObj);
     static void StartAbilityForResultWithAccountCheck(ani_env *env, ani_object aniObj);
+    static void SetOnNewWantSkipScenarios(ani_env *env, ani_object aniObj, ani_int etsScenarios, ani_object callback);
 
 #ifdef SUPPORT_GRAPHICS
 public:
@@ -241,6 +242,7 @@ private:
     void OnRequestDialogService(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     void OnStartAbilityWithAccount(
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
+    void OnSetOnNewWantSkipScenarios(ani_env *env, ani_object aniObj, ani_int etsScenarios, ani_object callback);
     void OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
         ani_object callbackObj);
     void UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &options);

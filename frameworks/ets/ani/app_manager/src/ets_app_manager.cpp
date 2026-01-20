@@ -504,6 +504,12 @@ ani_int EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, 
         std::lock_guard<std::mutex> lock(appStateObserverLock_);
         if (appStateObserver_ == nullptr) {
             appStateObserver_ = new (std::nothrow) AbilityRuntime::EtsAppStateObserver(aniVM);
+            if (appStateObserver_ == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "create appStateObserver_ failed");
+                AbilityRuntime::EtsErrorUtil::ThrowError(env,
+                    static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+                return ANI_ERROR;
+            }
         }
     }
     if (appStateObserver_->GetEtsObserverMapSize() == 0) {
@@ -592,6 +598,12 @@ ani_int EtsAppManager::OnOnApplicationStateWithAppStateFilter(ani_env *env, ani_
         std::lock_guard<std::mutex> lock(appStateObserverLock_);
         if (appStateObserver_ == nullptr) {
             appStateObserver_ = new (std::nothrow) AbilityRuntime::EtsAppStateObserver(aniVM);
+            if (appStateObserver_ == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "create appStateObserver_ failed");
+                AbilityRuntime::EtsErrorUtil::ThrowError(env,
+                    static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+                return ANI_ERROR;
+            }
         }
     }
     std::vector<std::string> bundleNameList;

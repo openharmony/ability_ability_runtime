@@ -837,6 +837,18 @@ void EtsAbilityContext::StartRecentAbility(ani_env *env, ani_object aniObj, ani_
     etsContext->OnStartAbility(env, aniObj, wantObj, startOptionsObj, callbackObj, true);
 }
 
+void EtsAbilityContext::SetOnNewWantSkipScenarios(ani_env *env, ani_object aniObj, ani_int etsScenarios,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetOnNewWantSkipScenarios called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnSetOnNewWantSkipScenarios(env, aniObj, etsScenarios, callback);
+}
+
 int32_t EtsAbilityContext::GenerateRequestCode()
 {
     static int32_t curRequestCode_ = 0;
@@ -1278,7 +1290,6 @@ void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string a
         if (ret == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
             TAG_LOGI(AAFwkTag::CONTEXT, "start ability by default succeeded");
             freeInstallObserver_->OnInstallFinishedByUrl(startTime, link, ERR_OK);
-            return;
         }
         freeInstallObserver_->OnInstallFinishedByUrl(startTime, link, ret);
         std::string requestId = want.GetStringParam(KEY_REQUEST_ID);
@@ -2256,9 +2267,20 @@ void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, 
     };
     want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
     auto requestCode = GenerateRequestCode();
-    ErrCode ErrCode = context->OpenAtomicService(want, options, requestCode, std::move(task));
-    if (ErrCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "OpenAtomicService failed, ErrCode: %{public}d", ErrCode);
+    ErrCode errCode = context->OpenAtomicService(want, options, requestCode, std::move(task));
+    if (errCode != 0) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "OpenAtomicService failed: %{public}d", errCode);
+        if (freeInstallObserver_ != nullptr) {
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, errCode);
+        }
+        if (!options.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "failed to call openAtomicService" }
+            };
+            context->OnRequestFailure(options.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
 }
 
@@ -2892,6 +2914,29 @@ void EtsAbilityContext::OnStartAbilityWithAccount(
     }
 }
 
+void EtsAbilityContext::OnSetOnNewWantSkipScenarios(ani_env *env, ani_object aniObj, ani_int etsScenarios,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnSetOnNewWantSkipScenarios called");
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "context null");
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    int32_t scenarios = static_cast<int32_t>(etsScenarios);
+    ErrCode innerErrCode = ERR_OK;
+    innerErrCode = context->SetOnNewWantSkipScenarios(scenarios);
+    if (innerErrCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "SetOnNewWantSkipScenarios failed, innerErrCode: %{public}d", innerErrCode);
+        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER),
+            nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env, ERR_OK), nullptr);
+}
+
 namespace {
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -3055,6 +3100,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "C{@ohos.app.ability.AbilityConstant.AbilityConstant.ContinueState}"
                 "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void*>(EtsAbilityContext::SetMissionContinueState) },
+            ani_native_function { "nativeSetOnNewWantSkipScenarios",
+                "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
+                reinterpret_cast<void*>(EtsAbilityContext::SetOnNewWantSkipScenarios) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
