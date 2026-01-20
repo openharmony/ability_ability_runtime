@@ -50,9 +50,9 @@ constexpr const char* STRING_UIABILITY_NUMBER = "C{@ohos.app.ability.UIAbility.U
 constexpr const char* STRING_CALLBACK_UIABILITY =
     "C{utils.AbilityUtils.AsyncCallbackWrapper}:C{@ohos.app.ability.UIAbility.UIAbility}";
 constexpr const char* RECORD_GET_NAME =
-    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:Y";
 constexpr const char* RECORD_SET_NAME =
-    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}Y:";
 }
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
