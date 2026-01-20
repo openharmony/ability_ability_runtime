@@ -144,6 +144,7 @@ void InsightIntentSysEventReceiver::DeleteInsightIntentInfoByUserId(int32_t user
             userId, ret);
         return;
     }
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
 }
 
 void InsightIntentSysEventReceiver::HandleBundleScanFinished()
