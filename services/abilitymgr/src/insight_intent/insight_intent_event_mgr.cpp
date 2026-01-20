@@ -42,6 +42,7 @@ void InsightIntentEventMgr::DeleteInsightIntent(const std::string &bundleName, c
         TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
         DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
             bundleName, moduleName, userId);
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
     }
 
     return;
@@ -132,7 +133,7 @@ void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementNa
             "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
         return;
     }
-
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
     TAG_LOGI(AAFwkTag::INTENT, "delete intent info success, bundleName: %{public}s, "
         "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
 }
