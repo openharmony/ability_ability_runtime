@@ -25,7 +25,7 @@ int32_t InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
     std::lock_guard<std::mutex> lock(genericInfosMutex_);
     if (userId_ == userId) {
         TAG_LOGD(AAFwkTag::INTENT, "no need init, userId %{public}d.", userId_);
-        return ERR_INVALID_VALUE;
+        return ERR_OK;
     }
     std::vector<ExtractInsightIntentInfo> totalInfos;
     std::vector<InsightIntentInfo> configInfos;

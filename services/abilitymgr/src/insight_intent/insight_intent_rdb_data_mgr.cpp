@@ -144,7 +144,6 @@ bool InsightIntentRdbDataMgr::UpdateData(const std::string &key, const std::stri
         TAG_LOGE(AAFwkTag::INTENT, "Update data error ret:%{public}d", ret);
         return false;
     }
-    BackupRdb();
     return true;
 }
 
@@ -174,7 +173,6 @@ bool InsightIntentRdbDataMgr::DeleteDataBeginWithKey(const std::string &key)
         TAG_LOGE(AAFwkTag::INTENT, "Delete data error ret:%{public}d", ret);
         return false;
     }
-    BackupRdb();
     return true;
 }
 
@@ -204,7 +202,6 @@ bool InsightIntentRdbDataMgr::DeleteData(const std::string &key)
         TAG_LOGE(AAFwkTag::INTENT, "Delete data error ret:%{public}d", ret);
         return false;
     }
-    BackupRdb();
     return true;
 }
 
