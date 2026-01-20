@@ -147,7 +147,7 @@ bool FUDUtils::IsPrivilegedSACall()
     if (PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
         return true;
     }
-    uint32_t callerUId = IPCSkeleton::GetCallingUid();
+    int32_t callerUId = IPCSkeleton::GetCallingUid();
     return callerUId == COLLABORATION_FWK_UID;
 }
 
