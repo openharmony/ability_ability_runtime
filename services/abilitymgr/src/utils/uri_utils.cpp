@@ -461,7 +461,7 @@ bool UriUtils::GrantUriPermissionInner(const std::vector<std::string> &uriVec,
         return false;
     }
     std::vector<int32_t> permissionTypes;
-    for (auto i = 0; i < checkResults.size(); i++) {
+    for (size_t i = 0; i < checkResults.size(); i++) {
         boolResults[i] = checkResults[i].result;
         if (checkResults[i].result) {
             permissionTypes.emplace_back(checkResults[i].permissionType);
