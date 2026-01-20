@@ -110,8 +110,7 @@ bool StringToUint32(const std::string& str, uint32_t& outVal)
         str.data(),
         str.data() + str.size(),
         val,
-        10
-    );
+        10);
 
     if (ec == std::errc{} && ptr == str.data() + str.size()) {
         outVal = val;
