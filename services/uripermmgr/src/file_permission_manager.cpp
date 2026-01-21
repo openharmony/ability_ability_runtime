@@ -59,6 +59,10 @@ bool DllWrapper::InitDlSymbol(const char* name, const char* funcName)
         return true;
     }
     if (handle_ == nullptr) {
+        if (name == nullptr) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "dlopen failed: name is nullptr");
+            return false;
+        }
         handle_ = dlopen(name, RTLD_NOW);
         if (handle_ == nullptr) {
             TAG_LOGE(AAFwkTag::URIPERMMGR, "dlopen failed %{public}s, %{public}s", name, dlerror());

@@ -9672,7 +9672,7 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
     AbilityRuntime::UserController::GetInstance().SetForegroundUserId(userId, displayId);
     auto ret = SwitchToUser(oldUserId, userId, displayId, callback, isAppRecovery);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SwitchToUser filed，oldUserId:%{public}d, hasDisplayId:%{public}d", oldUserId, hasDisplayId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SwitchToUser filed, oldUserId:%{public}d, hasDisplayId:%{public}d", oldUserId, hasDisplayId);
         if (hasDisplayId) {
             AbilityRuntime::UserController::GetInstance().SetForegroundUserId(oldUserId, displayId);
         } else {
