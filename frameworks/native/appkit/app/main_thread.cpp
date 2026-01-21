@@ -153,6 +153,7 @@ constexpr int32_t UNSPECIFIED_USERID = -2;
 constexpr int32_t JS_ERROR_EXIT = -2;
 constexpr int32_t TIME_OUT = 120;
 constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
+constexpr int32_t PROCESS_EXIT_DELAY_TIME = 20000;
 
 enum class SignalType {
     SIGNAL_JSHEAP_OLD,
@@ -2123,6 +2124,7 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
     TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
         " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
+    usleep(PROCESS_EXIT_DELAY_TIME);
     _exit(JS_ERROR_EXIT);
 }
 
