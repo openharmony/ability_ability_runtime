@@ -34,6 +34,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsMissionInfo(napi_env menv, const AAFwk::MissionInfo &missionInfo)
 {
+    HandleEscape handleEscape(menv);
     napi_value objValue = nullptr;
     napi_create_object(menv, &objValue);
 
@@ -45,11 +46,12 @@ napi_value CreateJsMissionInfo(napi_env menv, const AAFwk::MissionInfo &missionI
     napi_set_named_property(menv, objValue, "want", CreateJsWant(menv, missionInfo.want));
     napi_set_named_property(menv, objValue, "label", CreateJsValue(menv, missionInfo.label));
     napi_set_named_property(menv, objValue, "iconPath", CreateJsValue(menv, missionInfo.iconPath));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsWant(napi_env menv, const AAFwk::Want &want)
 {
+    HandleEscape handleEscape(menv);
     napi_value objValue = nullptr;
     napi_create_object(menv, &objValue);
 
@@ -62,11 +64,12 @@ napi_value CreateJsWant(napi_env menv, const AAFwk::Want &want)
     napi_set_named_property(menv, objValue, "action", CreateJsValue(menv, want.GetAction()));
     napi_set_named_property(menv, objValue, "parameters", CreateJsWantParams(menv, want.GetParams()));
     napi_set_named_property(menv, objValue, "entities", CreateNativeArray(menv, want.GetEntities()));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsWantParams(napi_env menv, const AAFwk::WantParams &wantParams)
 {
+    HandleEscape handleEscape(menv);
     napi_value object = nullptr;
     napi_create_object(menv, &object);
     const std::map<std::string, sptr<AAFwk::IInterface>> paramList = wantParams.GetParams();
@@ -108,11 +111,12 @@ napi_value CreateJsWantParams(napi_env menv, const AAFwk::WantParams &wantParams
             InnerWrapJsWantParamsWantParams(menv, object, iter->first, wantParams);
         }
     }
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value CreateJsMissionInfoArray(napi_env menv, const std::vector<AAFwk::MissionInfo> &missionInfos)
 {
+    HandleEscape handleEscape(menv);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(menv, missionInfos.size(), &arrayValue);
     uint32_t index = 0;
@@ -120,7 +124,7 @@ napi_value CreateJsMissionInfoArray(napi_env menv, const std::vector<AAFwk::Miss
         napi_set_element(menv, arrayValue, index++, CreateJsMissionInfo(menv, missionInfo));
     }
     TAG_LOGD(AAFwkTag::MISSION, "end");
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 bool InnerWrapJsWantParamsWantParams(

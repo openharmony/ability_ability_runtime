@@ -43,6 +43,7 @@ napi_value JsAutoFillManager::RequestAutoSave(napi_env env, napi_callback_info i
 napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    HandleScope handleScope(env);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "invalid argc");
         ThrowTooFewParametersError(env);
@@ -170,6 +171,7 @@ void SetAutoFillTypePropertyPartTwo(napi_env env, napi_value objValue)
 napi_value CreateJsAutoFillType(napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_status createStatus = napi_create_object(env, &objValue);
     if (createStatus != napi_ok || objValue == nullptr) {
@@ -220,12 +222,13 @@ napi_value CreateJsAutoFillType(napi_env env)
     napi_set_named_property(env, objValue, "FORMAT_ADDRESS",
         CreateJsValue(env, AbilityBase::AutoFillType::FORMAT_ADDRESS));
     SetAutoFillTypePropertyPartTwo(env, objValue);
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsPopupPlacement(napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_status createStatus = napi_create_object(env, &objValue);
     if (createStatus != napi_ok || objValue == nullptr) {
@@ -248,7 +251,7 @@ napi_value CreateJsPopupPlacement(napi_env env)
     napi_set_named_property(env, objValue, "RIGHT_BOTTOM",
         CreateJsValue(env, AbilityBase::PopupPlacement::RIGHT_BOTTOM));
     napi_set_named_property(env, objValue, "NONE", CreateJsValue(env, AbilityBase::PopupPlacement::NONE));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value JsAutoFillManagerInit(napi_env env, napi_value exportObj)

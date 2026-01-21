@@ -27,6 +27,7 @@ namespace OHOS {
 namespace AppExecFwk {
 napi_value WrapArrayDialogAbilityInfoToJS(napi_env env, const std::vector<DialogAbilityInfo> &value)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
     uint32_t index = 0;
@@ -38,11 +39,12 @@ napi_value WrapArrayDialogAbilityInfoToJS(napi_env env, const std::vector<Dialog
             index++;
         }
     }
-    return jsArray;
+    return handleEscape.Escape(jsArray);
 }
 
 napi_value WrapDialogAbilityInfo(napi_env env, const AAFwk::DialogAbilityInfo &dialogAbilityInfo)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
@@ -75,11 +77,12 @@ napi_value WrapDialogAbilityInfo(napi_env env, const AAFwk::DialogAbilityInfo &d
     SetPropertyValueByPropertyName(env, jsObject, "codePath", jsValue);
     jsValue = WrapStringToJS(env, dialogAbilityInfo.installSource);
     SetPropertyValueByPropertyName(env, jsObject, "installSource", jsValue);
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value WrapDialogSessionInfo(napi_env env, const AAFwk::DialogSessionInfo &dialogSessionInfo)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
@@ -94,11 +97,12 @@ napi_value WrapDialogSessionInfo(napi_env env, const AAFwk::DialogSessionInfo &d
     jsValue = AppExecFwk::WrapWantParams(env, dialogSessionInfo.parameters);
     SetPropertyValueByPropertyName(env, jsObject, "parameters", jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 
 napi_value WrapMultiAppModeData(napi_env env, const AppExecFwk::MultiAppModeData &multiAppMode)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObject = nullptr;
     napi_value jsValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
@@ -109,7 +113,7 @@ napi_value WrapMultiAppModeData(napi_env env, const AppExecFwk::MultiAppModeData
     jsValue = WrapInt32ToJS(env, static_cast<int32_t>(multiAppMode.maxCount));
     SetPropertyValueByPropertyName(env, jsObject, "maxCount", jsValue);
 
-    return jsObject;
+    return handleEscape.Escape(jsObject);
 }
 } // namespace AbilityRuntime
 } // nampspace OHOS
