@@ -27,7 +27,9 @@ ohos_shared_library("completionhandlerforatomicservice") {
 
   sources = [ "completion_handler_for_atomic_service_module.cpp" ]
 
-  deps = []
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
