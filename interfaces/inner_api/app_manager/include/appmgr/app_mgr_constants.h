@@ -81,6 +81,7 @@ enum AppMgrResultCode {
     ERROR_SERVICE_NOT_CONNECTED,
     ERROR_KILL_APPLICATION,
     ERROR_KILL_PROCESSES_BY_PIDS,
+    ERROR_APP_INDEX,
 };
 
 enum class ProcessChangeReason {
