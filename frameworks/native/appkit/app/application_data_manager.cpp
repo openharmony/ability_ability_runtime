@@ -34,6 +34,7 @@ namespace {
 }
 
 std::atomic<bool> ApplicationDataManager::jsErrorHasReport_{false};
+std::atomic<bool> ApplicationDataManager::processKillHasReport_{false};
 ApplicationDataManager::ApplicationDataManager() {}
 
 ApplicationDataManager::~ApplicationDataManager() {}

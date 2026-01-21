@@ -2094,6 +2094,11 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
             return;
         }
 
+        if (ApplicationDataManager::processKillHasReport_.exchange(true)) {
+            TAG_LOGW(AAFwkTag::APPKIT, "PROCESS_KILL has reported");
+            return;
+        }
+
         bool foreground = (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
             ApplicationImpl::APP_STATE_FOREGROUND) ? true : false;
         ProcessExitInfo info = {bundleName, errorObject.name, summary, appRunningId, processName, pid, foreground,
