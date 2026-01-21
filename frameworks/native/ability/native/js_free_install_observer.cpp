@@ -37,6 +37,7 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
         ([jsObserver, bundleName, abilityName, startTime, resultCode](napi_env env, NapiAsyncTask &task,
             int32_t status) {
+            AbilityRuntime::HandleScope handleScope(env);
             sptr<JsFreeInstallObserver> jsObserverSptr = jsObserver.promote();
             if (jsObserverSptr) {
                 jsObserverSptr->HandleOnInstallFinished(bundleName, abilityName, startTime, resultCode);
@@ -56,6 +57,7 @@ void JsFreeInstallObserver::OnInstallFinishedByUrl(const std::string &startTime,
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
         ([jsObserver, startTime, url, resultCode](napi_env env, NapiAsyncTask &task,
             int32_t status) {
+            AbilityRuntime::HandleScope handleScope(env);
             sptr<JsFreeInstallObserver> jsObserverSptr = jsObserver.promote();
             if (jsObserverSptr) {
                 jsObserverSptr->HandleOnInstallFinishedByUrl(startTime, url, resultCode);
@@ -193,6 +195,7 @@ void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &star
 void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callback, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
+    AbilityRuntime::HandleScope handleScope(env_);
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null callback");
         return;
@@ -211,6 +214,7 @@ void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callba
 void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callback, napi_value abilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
+    AbilityRuntime::HandleScope handleScope(env_);
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null callback");
         return;
@@ -225,6 +229,7 @@ void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callba
 
 void JsFreeInstallObserver::CallPromise(napi_deferred deferred, int32_t resultCode)
 {
+    AbilityRuntime::HandleScope handleScope(env_);
     if (deferred == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null deferred");
         return;

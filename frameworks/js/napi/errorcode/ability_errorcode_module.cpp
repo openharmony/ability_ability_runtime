@@ -14,6 +14,7 @@
  */
 
 #include "hilog_tag_wrapper.h"
+#include "js_runtime_utils.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 
@@ -29,6 +30,7 @@ enum ErrorCode {
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "SetEnumItem called");
+    AbilityRuntime::HandleScope handleScope(env);
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -45,13 +47,14 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
 static napi_value InitErrorCodeEnum(napi_env env)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "InitErrorCodeEnum called");
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "NO_ERROR", ErrorCode::NO_ERROR));
     NAPI_CALL(env, SetEnumItem(env, object, "INVALID_PARAMETER", ErrorCode::INVALID_PARAMETER));
     NAPI_CALL(env, SetEnumItem(env, object, "ABILITY_NOT_FOUND", ErrorCode::ABILITY_NOT_FOUND));
     NAPI_CALL(env, SetEnumItem(env, object, "PERMISSION_DENY", ErrorCode::PERMISSION_DENY));
-    return object;
+    return handleEscape.Escape(object);
 }
 
 /*
@@ -59,6 +62,7 @@ static napi_value InitErrorCodeEnum(napi_env env)
  */
 static napi_value ErrorCodeEnumInit(napi_env env, napi_value exports)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value errorCode = InitErrorCodeEnum(env);
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("ErrorCode", errorCode),
@@ -68,7 +72,7 @@ static napi_value ErrorCodeEnumInit(napi_env env, napi_value exports)
         TAG_LOGE(AAFwkTag::JSNAPI, "define properties failed");
         return nullptr;
     }
-    return exports;
+    return handleEscape.Escape(exports);
 }
 
 /*
