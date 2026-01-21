@@ -246,6 +246,21 @@ HWTEST_F(FilePermissionManagerTest, InitDlSymbol_002, TestSize.Level1)
 }
 
 /*
+ * Feature: InitDlSymbol
+ * Function: InitDlSymbol
+ * SubFunction: NA
+ * FunctionPoints: InitDlSymbol
+ */
+HWTEST_F(FilePermissionManagerTest, InitDlSymbol_003, TestSize.Level1)
+{
+    DllWrapper wrapper;
+    const char* soName = nullptr;
+    const char* funcName = "testFunc";
+    bool ret = wrapper.InitDlSymbol(soName, funcName);
+    ASSERT_FALSE(ret);
+}
+
+/*
  * Feature: GetFunc
  * Function: GetFunc
  * SubFunction: NA
