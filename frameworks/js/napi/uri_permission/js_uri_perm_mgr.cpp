@@ -53,6 +53,7 @@ struct UriPermissionParam {
 static void ResolveGrantUriPermissionTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -69,6 +70,7 @@ static void ResolveGrantUriPermissionTask(napi_env env, NapiAsyncTask &task, int
 static void ResolveGrantUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionWithAppIndexTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -86,6 +88,7 @@ static void ResolveGrantUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTas
 static void ResolveRevokeUriPermissionTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -101,6 +104,7 @@ static void ResolveRevokeUriPermissionTask(napi_env env, NapiAsyncTask &task, in
 static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionWithAppIndexTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -117,6 +121,7 @@ static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTa
 static void ResolveGrantUriPermissionByKeyAsCallerTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionByKeyAsCallerTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -128,6 +133,7 @@ static void ResolveGrantUriPermissionByKeyAsCallerTask(napi_env env, NapiAsyncTa
 static void ResolveGrantUriPermissionByKeyTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionByKeyTask");
+    HandleScope handleScope(env);
     if (errCode == ERR_OK) {
         task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
@@ -311,6 +317,7 @@ private:
     napi_value OnGrantUriPermission(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "start");
+        HandleEscape handleEscape(env);
         UriPermissionParam param;
         if (!ParseGrantUriPermissionParams(env, info, param)) {
             return CreateJsUndefined(env);
@@ -343,12 +350,13 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnGrantUriPermission",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGrantUriPermissionByKey(napi_env env, const NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "OnGrantUriPermissionByKey start");
+        HandleEscape handleEscape(env);
         UriPermissionParam param;
         if (!ParseGrantUriPermissionByKeyParams(env, info, param)) {
             return CreateJsUndefined(env);
@@ -375,12 +383,13 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnGrantUriPermissionByKey",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnGrantUriPermissionByKeyAsCaller(napi_env env, const NapiCallbackInfo& info)
     {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "OnGrantUriPermissionByKeyAsCaller start");
+        HandleEscape handleEscape(env);
         UriPermissionParam param;
         if (!ParseGrantUriPermissionByKeyAsCallerParams(env, info, param)) {
             return CreateJsUndefined(env);
@@ -407,12 +416,13 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnGrantUriPermissionByKeyAsCaller",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 
     napi_value OnRevokeUriPermission(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "start");
+        HandleEscape handleEscape(env);
         UriPermissionParam param;
         if (!ParseRevokeUriPermissionParams(env, info, param)) {
             return CreateJsUndefined(env);
@@ -444,7 +454,7 @@ private:
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnRevokeUriPermission",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-        return result;
+        return handleEscape.Escape(result);
     }
 };
 

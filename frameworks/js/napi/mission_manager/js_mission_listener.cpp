@@ -102,6 +102,7 @@ void JsMissionListener::CallJsMethod(const std::string &methodName, int32_t miss
 
 void JsMissionListener::CallJsMethodInner(const std::string &methodName, int32_t missionId)
 {
+    HandleScope handleScope(env_);
     auto tmpMap = jsListenerObjectMap_;
     for (auto &item : tmpMap) {
         napi_value obj = (item.second)->GetNapiValue();
@@ -158,6 +159,7 @@ void JsMissionListener::CallJsMissionIconUpdated(int32_t missionId, const std::s
         return;
     }
 
+    HandleScope handleScope(env_);
     napi_value nativeMissionId = CreateJsValue(env_, missionId);
     auto nativeIcon = Media::PixelMapNapi::CreatePixelMap(env_, icon);
 

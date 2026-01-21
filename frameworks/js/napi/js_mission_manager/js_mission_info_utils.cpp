@@ -34,6 +34,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsMissionInfo(napi_env env, const AAFwk::MissionInfo &missionInfo)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -47,11 +48,12 @@ napi_value CreateJsMissionInfo(napi_env env, const AAFwk::MissionInfo &missionIn
     napi_set_named_property(env, objValue, "iconPath", CreateJsValue(env, missionInfo.iconPath));
     napi_set_named_property(env, objValue, "abilityState", CreateJsValue(env, missionInfo.abilityState));
     napi_set_named_property(env, objValue, "unclearable", CreateJsValue(env, missionInfo.unclearable));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsWant(napi_env env, const AAFwk::Want &want)
 {
+    HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -64,11 +66,12 @@ napi_value CreateJsWant(napi_env env, const AAFwk::Want &want)
     napi_set_named_property(env, objValue, "action", CreateJsValue(env, want.GetAction()));
     napi_set_named_property(env, objValue, "parameters", CreateJsWantParams(env, want.GetParams()));
     napi_set_named_property(env, objValue, "entities", CreateNativeArray(env, want.GetEntities()));
-    return objValue;
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsWantParams(napi_env env, const AAFwk::WantParams &wantParams)
 {
+    HandleEscape handleEscape(env);
     napi_value object = nullptr;
     napi_create_object(env, &object);
     const std::map<std::string, sptr<AAFwk::IInterface>> paramList = wantParams.GetParams();
@@ -110,18 +113,19 @@ napi_value CreateJsWantParams(napi_env env, const AAFwk::WantParams &wantParams)
             InnerWrapJsWantParamsWantParams(env, object, iter->first, wantParams);
         }
     }
-    return object;
+    return handleEscape.Escape(object);
 }
 
 napi_value CreateJsMissionInfoArray(napi_env env, const std::vector<AAFwk::MissionInfo> &missionInfos)
 {
+    HandleEscape handleEscape(env);
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, missionInfos.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto &missionInfo : missionInfos) {
         napi_set_element(env, arrayValue, index++, CreateJsMissionInfo(env, missionInfo));
     }
-    return arrayValue;
+    return handleEscape.Escape(arrayValue);
 }
 
 bool InnerWrapJsWantParamsWantParams(
