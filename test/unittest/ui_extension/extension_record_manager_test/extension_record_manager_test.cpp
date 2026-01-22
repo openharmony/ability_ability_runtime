@@ -911,14 +911,14 @@ HWTEST_F(ExtensionRecordManagerTest, GetRemoteCallback_0400, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandlePreloadUIExtensionLoadedById_0300
+ * @tc.name: HandlePreloadUIExtensionLoaded_0100
  * @tc.desc: Test Success Scenario.
  *           Verify OnLoadedDone is actually called.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionLoadedById_0300, TestSize.Level1)
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionLoaded_0100, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoadedById_0300 start");
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoaded_0100 start");
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
 
     AAFwk::AbilityRequest abilityRequest;
@@ -926,12 +926,13 @@ HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionLoadedById_0300, Te
     abilityRequest.abilityInfo.name = "TestAbility";
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
-    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
 
     int32_t recordId = 200;
     int32_t hostPid = 8888;
     
     extRecord->hostPid_ = hostPid;
+    extRecord->extensionRecordId_ = recordId;
     extRecordMgr->AddExtensionRecord(recordId, extRecord);
 
     sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
@@ -940,20 +941,20 @@ HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionLoadedById_0300, Te
         std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
         extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
     }
-    extRecordMgr->HandlePreloadUIExtensionLoadedById(recordId);
+    extRecordMgr->HandlePreloadUIExtensionLoaded(extRecord);
     EXPECT_EQ(mockCallback->lastCalledId, recordId);
-
-    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoadedById_0300 end");
+    extRecordMgr->RemoveExtensionRecord(recordId);
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionLoaded_0100 end");
 }
 
 /**
- * @tc.name: HandlePreloadUIExtensionDestroyedById_0200
+ * @tc.name: HandlePreloadUIExtensionDestroyed_0100
  * @tc.desc: Test destroyed logic - Success scenario.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionDestroyedById_0200, TestSize.Level1)
+HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionDestroyed_0100, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyedById_0200 start");
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyed_0100 start");
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
 
     AAFwk::AbilityRequest abilityRequest;
@@ -961,11 +962,12 @@ HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionDestroyedById_0200,
     abilityRequest.abilityInfo.name = "DestroyAbility";
     abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     auto abilityRecord = AAFwk::BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
-    auto extRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
 
     int32_t recordId = 300;
     int32_t hostPid = 3333;
     extRecord->hostPid_ = hostPid;
+    extRecord->extensionRecordId_ = recordId;
     extRecordMgr->AddExtensionRecord(recordId, extRecord);
 
     sptr<MockPreloadCallback> mockCallback = new (std::nothrow) MockPreloadCallback();
@@ -974,10 +976,10 @@ HWTEST_F(ExtensionRecordManagerTest, HandlePreloadUIExtensionDestroyedById_0200,
         std::lock_guard<std::mutex> lock(extRecordMgr->preloadUIExtensionHostClientMutex_);
         extRecordMgr->preloadUIExtensionHostClientCallerTokens_[hostPid] = mockCallback->AsObject();
     }
-
-    extRecordMgr->HandlePreloadUIExtensionDestroyedById(recordId);
+    extRecordMgr->HandlePreloadUIExtensionDestroyed(extRecord);
     EXPECT_TRUE(mockCallback->onDestroyCalled);
-    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyedById_0200 end");
+    extRecordMgr->RemoveExtensionRecord(recordId);
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadUIExtensionDestroyed_0100 end");
 }
 
 /**
