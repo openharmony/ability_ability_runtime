@@ -66,7 +66,8 @@ public:
     static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResultWithOptions(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
-    static ani_object StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj);
+    static ani_object StartAbilityByCallWithAccount(
+        ani_env *env, ani_object aniObj, ani_object wantObj, ani_int aniAccount);
     static void TerminateSelf(ani_env *env, ani_object aniObj, ani_object callback);
     static void TerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     static void ReportDrawnCompleted(ani_env *env, ani_object aniObj, ani_object call);

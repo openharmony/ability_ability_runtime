@@ -957,9 +957,14 @@ void EtsAbilityContext::OnStartAbilityForResult(
     StartAbilityForResultInner(env, startOptions, want, context, startOptionsObj, callback);
 }
 
-ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
+ani_object EtsAbilityContext::StartAbilityByCallWithAccount(
+    ani_env *env, ani_object aniObj, ani_object wantObj, ani_int aniAccount)
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "StartAbilityByCall");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return nullptr;
+    }
     auto etsContext = GetEtsAbilityContext(env, aniObj);
     if (etsContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
@@ -980,7 +985,7 @@ ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj
     auto callData = std::make_shared<StartAbilityByCallData>();
     auto callerCallBack = std::make_shared<CallerCallBack>();
     CallUtil::GenerateCallerCallBack(callData, callerCallBack);
-    auto ret = context->StartAbilityByCall(want, callerCallBack, -1);
+    auto ret = context->StartAbilityByCall(want, callerCallBack, static_cast<int32_t>(aniAccount));
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "startAbility failed");
         EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
@@ -2969,9 +2974,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeTerminateSelfWithResult",
                 "C{ability.abilityResult.AbilityResult}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelfWithResult) },
-            ani_native_function { "nativeStartAbilityByCallSync",
-                "C{@ohos.app.ability.Want.Want}:C{@ohos.app.ability.UIAbility.Caller}",
-                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByCall) },
+            ani_native_function { "nativeStartAbilityByCallWithAccountSync",
+                "C{@ohos.app.ability.Want.Want}i:C{@ohos.app.ability.UIAbility.Caller}",
+                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByCallWithAccount) },
             ani_native_function { "nativeReportDrawnCompletedSync", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<ani_int *>(EtsAbilityContext::ReportDrawnCompleted) },
             ani_native_function { "nativeStartServiceExtensionAbility",

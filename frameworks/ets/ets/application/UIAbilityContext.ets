@@ -110,7 +110,7 @@ export default class UIAbilityContext extends Context {
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
     callback: AsyncCallbackWrapper<AbilityResult>): void;
 
-  private native nativeStartAbilityByCallSync(want: Want): Caller;
+  private native nativeStartAbilityByCallWithAccountSync(want: Want, accountId: int): Caller;
 
   private native nativeTerminateSelfSync(callback: AsyncCallbackWrapper<void>): void;
 
@@ -300,8 +300,12 @@ export default class UIAbilityContext extends Context {
   }
 
   startAbilityByCall(want: Want): Promise<Caller> {
+    return this.startAbilityByCallWithAccount(want, -1);
+  }
+
+  startAbilityByCallWithAccount(want: Want, accountId: int): Promise<Caller> {
     return taskpool.execute((): Caller => {
-      return this.nativeStartAbilityByCallSync(want);
+      return this.nativeStartAbilityByCallWithAccountSync(want, accountId);
     }) as Promise<Caller>;
   }
 
