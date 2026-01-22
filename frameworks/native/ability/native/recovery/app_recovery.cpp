@@ -203,7 +203,7 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
             TAG_LOGE(AAFwkTag::RECOVERY, "block main thread failed");
             return false;
         }
-        panda::ecmascript::EcmaVM* vm = runtime.GetEcmaVMPtr(abilityPtr);
+        panda::ecmascript::EcmaVM* vm = GetEcmaVMPtr(abilityPtr);
 #ifdef SUPPORT_SCREEN
         if (!panda::JSNApi::CheckAndSetAllowCrossThreadExecution(vm)) {
             TAG_LOGE(AAFwkTag::RECOVERY, "VM is in gc process");
