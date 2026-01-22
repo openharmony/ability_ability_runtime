@@ -2746,7 +2746,8 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<BaseExtensionR
         .bundleName = ability->GetAbilityInfo().bundleName,
         .msg = msgContent
     };
-    if (!UIExtensionWrapper::IsUIExtension(ability->GetAbilityInfo().extensionAbilityType) && !ability->IsSceneBoard()) {
+    if (!UIExtensionWrapper::IsUIExtension(ability->GetAbilityInfo().extensionAbilityType) &&
+        !ability->IsSceneBoard()) {
         info.needKillProcess = false;
         info.eventName = isHalf ? AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING :
             AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT_WARNING;
