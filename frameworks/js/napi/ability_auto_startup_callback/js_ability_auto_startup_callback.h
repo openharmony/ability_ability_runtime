@@ -46,6 +46,7 @@ private:
     void JSCallFunction(const AutoStartupInfo &info, const std::string &methodName);
     void JSCallFunctionWorker(const AutoStartupInfo &info, const std::string &methodName);
     bool IsJsCallbackEquals(const std::shared_ptr<NativeReference> &callback, napi_value value);
+    std::vector<std::shared_ptr<NativeReference>> GetCallbacks();
 
     napi_env env_;
     std::vector<std::shared_ptr<NativeReference>> callbacks_;
