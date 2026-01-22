@@ -415,6 +415,7 @@ HWTEST_F(BatchUriTest, SetCheckProxyByPolicyResult_0100, TestSize.Level2)
 
     batchUri.proxyIndexesByPolicy = { 0 };
     proxyResultByPolicy = { true };
+    batchUri.isTargetBundleUri = { true };
     ret = batchUri.SetCheckProxyByPolicyResult(proxyResultByPolicy);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(batchUri.checkResult[0].result);
