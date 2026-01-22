@@ -416,9 +416,6 @@ protected:
         int connectRecordId, int64_t recordId);
 
     void PrintTimeOutLog(const std::shared_ptr<BaseExtensionRecord> &ability, uint32_t msgId, bool isHalf = false);
-
-    void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
-    
     /**
      * When a service is under starting, enque the request and handle it after the service starting completes
      */
@@ -543,6 +540,7 @@ protected:
         std::shared_ptr<ConnectionRecord>& connectRecord);
     virtual void TerminateOrCacheAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord);
     virtual void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
+    virtual void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 protected:
 
     /**

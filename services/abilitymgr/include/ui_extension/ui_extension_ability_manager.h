@@ -257,6 +257,7 @@ private:
 
     void TerminateOrCacheAbility(std::shared_ptr<BaseExtensionRecord> abilityRecord) override;
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo) override;
+    void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
     class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
