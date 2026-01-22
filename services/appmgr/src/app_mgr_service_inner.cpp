@@ -6200,12 +6200,8 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
         return ret;
     }
     // all app
-    int32_t result = appRunningManager_->UpdateConfiguration(config, notifyUserId);
+    appRunningManager_->UpdateConfiguration(config, notifyUserId);
     HandleConfigurationChange(config, notifyUserId);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "update error");
-        return result;
-    }
     // notify
     std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
     for (auto &item : configurationObservers_) {
@@ -6214,7 +6210,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
         }
     }
 
-    return result;
+    return ERR_OK;
 }
 
 int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
