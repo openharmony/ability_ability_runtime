@@ -926,7 +926,8 @@ void UIExtensionAbilityManager::SetLastExitReason(
     const AbilityRequest &abilityRequest, std::shared_ptr<BaseExtensionRecord> &targetRecord)
 {
     TAG_LOGD(AAFwkTag::EXT, "called");
-    if (targetRecord == nullptr || !UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+    if (targetRecord == nullptr ||
+        !UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
         TAG_LOGD(AAFwkTag::EXT, "Failed to set UIExtensionAbility last exit reason.");
         return;
     }
