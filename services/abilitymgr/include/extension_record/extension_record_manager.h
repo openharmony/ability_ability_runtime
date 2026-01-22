@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,8 +141,8 @@ public:
                                           const int32_t hostPid,
                                           int32_t &recordNum);
 
-    void HandlePreloadUIExtensionLoadedById(int32_t extensionRecordId);
-    void HandlePreloadUIExtensionDestroyedById(int32_t extensionRecordId);
+    void HandlePreloadUIExtensionLoaded(const std::shared_ptr<ExtensionRecord> &extensionRecord);
+    void HandlePreloadUIExtensionDestroyed(const std::shared_ptr<ExtensionRecord> &extensionRecord);
     void HandlePreloadUIExtensionSuccess(int32_t extensionRecordId, bool isPreloadedSuccess);
     int32_t ClearPreloadedUIExtensionAbility(int32_t extensionRecordId);
     int32_t ClearAllPreloadUIExtensionRecordForHost();
