@@ -113,8 +113,7 @@ void UnwrapStartOptionsWindowOptions(ani_env *env, ani_object param, AAFwk::Star
     }
 
     ani_ref windowEtsObject = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->Object_GetPropertyByName_Ref(param, "windowCreateParams", &windowEtsObject)) == ANI_OK) {
+    if (GetFieldRefByName(env, param, "windowCreateParams", windowEtsObject)) {
         Rosen::WindowCreateParams windowCreateParams;
         if (Rosen::ConvertWindowCreateParamsFromAniValue(
             env, static_cast<ani_object>(windowEtsObject), windowCreateParams)) {
