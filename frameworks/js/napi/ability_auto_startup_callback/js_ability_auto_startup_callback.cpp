@@ -32,19 +32,19 @@ JsAbilityAutoStartupCallBack::~JsAbilityAutoStartupCallBack() {}
 
 void JsAbilityAutoStartupCallBack::OnAutoStartupOn(const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called OnAutoStartupOn");
     JSCallFunction(info, METHOD_ON);
 }
 
 void JsAbilityAutoStartupCallBack::OnAutoStartupOff(const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called OnAutoStartupOff");
     JSCallFunction(info, METHOD_OFF);
 }
 
 void JsAbilityAutoStartupCallBack::Register(napi_value value)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called Register");
     std::lock_guard<std::mutex> lock(mutexlock_);
     for (const auto &callback : callbacks_) {
         if (IsJsCallbackEquals(callback, value)) {
@@ -64,7 +64,7 @@ void JsAbilityAutoStartupCallBack::Register(napi_value value)
 
 void JsAbilityAutoStartupCallBack::UnRegister(napi_value value)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called UnRegister");
     napi_valuetype type = napi_undefined;
     napi_typeof(env_, value, &type);
     std::lock_guard<std::mutex> lock(mutexlock_);
@@ -83,8 +83,15 @@ void JsAbilityAutoStartupCallBack::UnRegister(napi_value value)
     }
 }
 
+std::vector<std::shared_ptr<NativeReference>> JsAbilityAutoStartupCallBack::GetCallbacks()
+{
+    std::lock_guard<std::mutex> lock(mutexlock_);
+    return callbacks_;
+}
+
 bool JsAbilityAutoStartupCallBack::IsCallbacksEmpty()
 {
+    std::lock_guard<std::mutex> lock(mutexlock_);
     return callbacks_.empty();
 }
 
@@ -109,9 +116,9 @@ void JsAbilityAutoStartupCallBack::JSCallFunction(const AutoStartupInfo &info, c
 
 void JsAbilityAutoStartupCallBack::JSCallFunctionWorker(const AutoStartupInfo &info, const std::string &methodName)
 {
-    std::lock_guard<std::mutex> lock(mutexlock_);
     AbilityRuntime::HandleScope handleScope(env_);
-    for (auto callback : callbacks_) {
+    std::vector<std::shared_ptr<NativeReference>> callbacks = GetCallbacks();
+    for (auto callback : callbacks) {
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null callback");
             continue;
