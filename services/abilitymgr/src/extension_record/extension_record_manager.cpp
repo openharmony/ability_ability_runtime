@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -191,7 +191,7 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecord(const AAFwk::AbilityR
         std::string moduleName = abilityRequest.want.GetElement().GetModuleName();
         auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostPid);
         RemovePreloadUIExtensionRecord(extensionRecordMapKey);
-        HandlePreloadUIExtensionLoadedById(extensionRecord->extensionRecordId_);
+        HandlePreloadUIExtensionLoaded(extensionRecord);
     } else {
         int32_t ret = GetOrCreateExtensionRecordInner(abilityRequest, hostBundleName, extensionRecord, isLoaded);
         if (ret != ERR_OK) {
@@ -459,7 +459,8 @@ bool ExtensionRecordManager::RemovePreloadUIExtensionRecordById(
     }
     for (auto it = item->second.begin(); it != item->second.end(); ++it) {
         if ((*it)->extensionRecordId_ == extensionRecordId) {
-            HandlePreloadUIExtensionDestroyedById(extensionRecordId);
+            std::shared_ptr<ExtensionRecord> extensionRecord = *it;
+            HandlePreloadUIExtensionDestroyed(extensionRecord);
             item->second.erase(it);
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Remove extension record by id: %{public}d success.", extensionRecordId);
             if (item->second.empty()) {
@@ -949,15 +950,15 @@ sptr<AAFwk::IPreloadUIExtensionExecuteCallback> ExtensionRecordManager::GetRemot
     return remoteCallback;
 }
 
-void ExtensionRecordManager::HandlePreloadUIExtensionLoadedById(int32_t extensionRecordId)
+void ExtensionRecordManager::HandlePreloadUIExtensionLoaded(
+    const std::shared_ptr<ExtensionRecord> &uiExtensionRecord)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "HandlePreloadUIExtensionLoadedById called, id: %{public}d", extensionRecordId);
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
     if (uiExtensionRecord == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtensionRecord");
         return;
     }
-
+    int32_t extensionRecordId = uiExtensionRecord->extensionRecordId_;
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandlePreloadUIExtensionLoaded called, id: %{public}d", extensionRecordId);
     sptr<AAFwk::IPreloadUIExtensionExecuteCallback> remoteCallback = GetRemoteCallback(uiExtensionRecord);
     if (remoteCallback == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null remoteCallback");
@@ -966,15 +967,15 @@ void ExtensionRecordManager::HandlePreloadUIExtensionLoadedById(int32_t extensio
     remoteCallback->OnLoadedDone(extensionRecordId);
 }
 
-void ExtensionRecordManager::HandlePreloadUIExtensionDestroyedById(int32_t extensionRecordId)
+void ExtensionRecordManager::HandlePreloadUIExtensionDestroyed(
+    const std::shared_ptr<ExtensionRecord> &uiExtensionRecord)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "HandlePreloadUIExtensionDestroyedById called, id: %{public}d", extensionRecordId);
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
     if (uiExtensionRecord == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtensionRecord");
         return;
     }
-
+    int32_t extensionRecordId = uiExtensionRecord->extensionRecordId_;
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandlePreloadUIExtensionDestroyed called, id: %{public}d", extensionRecordId);
     sptr<AAFwk::IPreloadUIExtensionExecuteCallback> remoteCallback = GetRemoteCallback(uiExtensionRecord);
     if (remoteCallback == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null remoteCallback");
@@ -1073,7 +1074,8 @@ int32_t ExtensionRecordManager::ClearAllPreloadUIExtensionRecordForHost()
     }
     for (const auto &record : recordsToUnload) {
         if (record != nullptr) {
-            HandlePreloadUIExtensionDestroyedById(record->extensionRecordId_);
+            std::shared_ptr<ExtensionRecord> extensionRecord = record;
+            HandlePreloadUIExtensionDestroyed(extensionRecord);
             record->UnloadUIExtensionAbility();
         }
     }
