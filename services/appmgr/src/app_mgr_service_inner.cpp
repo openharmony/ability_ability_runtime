@@ -91,7 +91,7 @@
 #endif
 #include "system_ability_definition.h"
 #include "time_util.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
 #endif // SUPPORT_UPMS
@@ -503,7 +503,7 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         appInfo->uid);
     std::string customProcessFlag = "";
     if (masterAppRecord == nullptr) {
-        if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
+        if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo.extensionAbilityType)) {
             customProcessFlag = customProcess;
         } else {
             customProcessFlag = abilityInfo.process;
@@ -1197,13 +1197,13 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
     } else {
         HandleExistingAppRecordAfterFound(appRecord, abilityInfo, hapModuleInfo, want, isProcCache, loadParam);
-        if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
             AddUIExtensionBindItem(want, appRecord, loadParam->token);
             AddUIExtensionLauncherItem(want, appRecord, loadParam->token);
         }
     }
 
-    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType) &&
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType) &&
         appRecord != nullptr && want != nullptr) {
         auto abilityRunningRecord = appRecord->GetAbilityRunningRecordByToken(loadParam->token);
         auto uiExtensionAbilityId = want->GetIntParam(UIEXTENSION_ABILITY_ID, -1);
@@ -1225,7 +1225,7 @@ void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_p
         return;
     }
 
-    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
         int hostPid = want->GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1);
         auto hostAppRecord = appRunningManager_->GetAppRunningRecordByPid(hostPid);
@@ -1275,7 +1275,7 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
         rssTaskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
     //UIExtension notifies Extension & Ability state changes
-    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     }
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
@@ -1378,7 +1378,7 @@ void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunnin
         return;
     }
 
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (!AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         return;
     }
 
@@ -1443,7 +1443,7 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
     }
     if (!abilityInfo->process.empty() && (isCallerSetProcess || specifiedProcessFlag.empty())) {
         TAG_LOGD(AAFwkTag::APPMGR, "Process not null");
-        if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
             processName = abilityInfo->process;
             return;
         }
@@ -1580,7 +1580,7 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(const AbilityInfo &abili
         specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "specifiedProcessFlag: %{public}s", specifiedProcessFlag.c_str());
     }
-    if (abilityInfo.isolationProcess && AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType) &&
+    if (abilityInfo.isolationProcess && AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo.extensionAbilityType) &&
         AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "UIExtension process, specifiedProcessFlag: %{public}s",
@@ -1976,8 +1976,8 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         appRecord->GetState() == ApplicationState::APP_STATE_READY) {
         auto isByCall = appRecord->GetState() == ApplicationState::APP_STATE_READY;
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
-        bool needNotifyApp = !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
-            && !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+        bool needNotifyApp = !AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())
+            && !AAFwk::UIExtensionWrapper::IsWindowExtension(appRecord->GetExtensionType())
             && appRunningManager_->IsApplicationBackground(*appRecord);
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND, needNotifyApp, false, isByCall);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord, false, isByCall);
@@ -2068,7 +2068,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     taskHandler_->CancelTask("DELAY_KILL_PROCESS_" + std::to_string(recordId));
     auto uid = appRecord->GetUid();
     if (appRecord->GetExtensionType() == ExtensionAbilityType::UNSPECIFIED ||
-        AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())) {
         SendProcessKillEvent(appRecord, "Kill Reason:app exit");
     }
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
@@ -3440,7 +3440,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         return nullptr;
     }
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
-    if (abilityInfo && AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (abilityInfo && AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         appRecord = appRunningManager_->CreateAppRunningRecord(
             appInfo, processName, bundleInfo, loadParam->instanceKey, loadParam->customProcessFlag);
     } else {
@@ -4783,13 +4783,13 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     appRecord->SetStartMsg(startMsg);
     appRecord->SetAppMgrServiceInner(weak_from_this());
     appRecord->SetSpawned();
-    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(extensionAbilityType)) {
         TAG_LOGD(AAFwkTag::APPMGR, "Add UIExtension LauncherItem.");
         AddUIExtensionLauncherItem(want, appRecord, token);
     }
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false, false, false);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord, isPreload);
-    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(extensionAbilityType)) {
         AddUIExtensionBindItem(want, appRecord, token);
     }
     if (!appExistFlag) {
@@ -4988,7 +4988,7 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     }
 
     if (abilityInfo && abilityInfo->type != AppExecFwk::AbilityType::PAGE &&
-        !AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        !AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         return;
     }
 
@@ -5036,7 +5036,7 @@ static bool GetAbilityNames(
         bundleName = it->second->GetBundleName();
         if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
             abilityNames.push_back(abilityName);
-        } else if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        } else if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
             uiExtensionNames.push_back(moduleName + ":" + abilityName);
         }
     }
@@ -5150,7 +5150,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     for (const auto &item : appRecord->GetAbilities()) {
         const auto &abilityRecord = item.second;
         //UIExtension notifies Extension & Ability state changes
-        if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        if (AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())) {
             appRecord->StateChangedNotifyObserver(abilityRecord,
                 static_cast<int32_t>(ExtensionState::EXTENSION_STATE_TERMINATED), false, false);
         }
@@ -10881,7 +10881,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
         return;
     }
 
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (!AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         TAG_LOGD(AAFwkTag::APPMGR, "not uiextension");
         return;
     }

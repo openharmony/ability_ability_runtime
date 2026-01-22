@@ -22,7 +22,7 @@
 #include "display_manager.h"
 #include "hitrace_meter.h"
 #include "scene_board_judgement.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -136,7 +136,7 @@ Want SystemDialogScheduler::GetTipsDialogWant(const sptr<IRemoteObject> &callerT
     want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord && !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (abilityRecord && !UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         want.SetParam(CALLER_TOKEN, callerToken);
     }
     return want;
@@ -414,7 +414,7 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
         if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
             isCallerStageBasedModel = false;
         }
-        if (abilityRecord && UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        if (abilityRecord && UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
             // SelectorDialog can't bind to the window of UIExtension, so set CALLER_TOKEN to null.
             requestWant.RemoveParam(CALLER_TOKEN);
         } else {

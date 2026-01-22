@@ -24,7 +24,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "res_sched_util.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -205,7 +205,7 @@ void BaseExtensionRecord::DumpService(std::vector<std::string> &info, std::vecto
                       std::to_string(GetStartTime()) + "]");
     info.emplace_back("      main name [" + GetAbilityInfo().name + "]");
     info.emplace_back("      bundle name [" + GetAbilityInfo().bundleName + "]");
-    bool isUIExtension = UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType);
+    bool isUIExtension = UIExtensionWrapper::IsUIExtension(GetAbilityInfo().extensionAbilityType);
     if (isUIExtension) {
         info.emplace_back("      ability type [UIEXTENSION]");
     } else {
@@ -246,7 +246,7 @@ void BaseExtensionRecord::DumpService(std::vector<std::string> &info, std::vecto
 
 void BaseExtensionRecord::DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const
 {
-    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+    if (!UIExtensionWrapper::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
         // Dump host info only for uiextension.
         return;
     }

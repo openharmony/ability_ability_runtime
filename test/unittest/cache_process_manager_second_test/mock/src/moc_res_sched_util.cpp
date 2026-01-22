@@ -18,7 +18,7 @@
 #include <string>
 
 #include "ability_info.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_my_status.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE

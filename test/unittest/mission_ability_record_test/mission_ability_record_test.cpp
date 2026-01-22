@@ -32,7 +32,7 @@
 #include "process_options.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "int_wrapper.h"
 #include "uri_utils.h"
 #ifdef SUPPORT_SCREEN

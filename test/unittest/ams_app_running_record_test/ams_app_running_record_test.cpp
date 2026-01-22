@@ -45,7 +45,7 @@
 #include "mock_system_ability_manager.h"
 #include "param.h"
 #include "refbase.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "window_visibility_info.h"
 
 using namespace testing::ext;
@@ -2887,12 +2887,12 @@ HWTEST_F(AmsAppRunningRecordTest, IsUIExtension_001, TestSize.Level1)
         loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
-    EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(record->extensionType_), false);
+    EXPECT_EQ(AAFwk::UIExtensionWrapper::IsUIExtension(record->extensionType_), false);
 
     auto otherRecord = service_->GetAppRunningRecordByAppRecordId(record->GetRecordId());
     EXPECT_TRUE(otherRecord != nullptr);
 
-    EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(otherRecord->extensionType_), false);
+    EXPECT_EQ(AAFwk::UIExtensionWrapper::IsUIExtension(otherRecord->extensionType_), false);
 }
 
 /*
@@ -2925,12 +2925,12 @@ HWTEST_F(AmsAppRunningRecordTest, IsUIExtension_002, TestSize.Level1)
         loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
-    EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(record->extensionType_), true);
+    EXPECT_EQ(AAFwk::UIExtensionWrapper::IsUIExtension(record->extensionType_), true);
 
     auto otherRecord = service_->GetAppRunningRecordByAppRecordId(record->GetRecordId());
     EXPECT_TRUE(otherRecord != nullptr);
 
-    EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(otherRecord->extensionType_), true);
+    EXPECT_EQ(AAFwk::UIExtensionWrapper::IsUIExtension(otherRecord->extensionType_), true);
 }
 
 /*
