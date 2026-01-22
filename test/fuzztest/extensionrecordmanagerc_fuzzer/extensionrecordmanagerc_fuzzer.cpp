@@ -162,8 +162,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     extensionRecordManager->ConvertToUnloadExtensionRecords(recordsToUnload, recordsToUnload);
     extensionRecordManager->GetRemoteCallback(validRecord);
     extensionRecordManager->GetRemoteCallback(emptyRecord);
-    extensionRecordManager->HandlePreloadUIExtensionLoadedById(validExtId);
-    extensionRecordManager->HandlePreloadUIExtensionDestroyedById(validExtId);
+    extensionRecordManager->HandlePreloadUIExtensionLoaded(validRecord);
+    extensionRecordManager->HandlePreloadUIExtensionDestroyed(validRecord);
     extensionRecordManager->HandlePreloadUIExtensionSuccess(validExtId, preloadFlag);
 
     return true;
