@@ -1728,7 +1728,10 @@ ohos_unittest("data_uri_utils_test") {
     "data_uri_utils_test.cpp",
   ]
 
-  deps = [ "${ability_runtime_native_path}/appkit:app_context" ]
+  deps = [ 
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/global/common:runtime_utils",
+  ]
 
   external_deps = [
     "ability_base:extractortool",

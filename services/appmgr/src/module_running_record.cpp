@@ -21,7 +21,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "cache_process_manager.h"
 
 namespace OHOS {
@@ -342,7 +342,7 @@ bool ModuleRunningRecord::IsAbilitiesBackgrounded()
         const auto &abilityInfo = ability->GetAbilityInfo();
         // uiextensionability also has foreground and background states.
         if (abilityInfo != nullptr && abilityInfo->type != AbilityType::PAGE &&
-            !AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+            !AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
             continue;
         }
 

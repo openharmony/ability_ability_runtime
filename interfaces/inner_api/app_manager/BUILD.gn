@@ -45,6 +45,7 @@ ohos_shared_library("app_manager") {
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/dfr",
+    "${ability_runtime_path}/utils/global/common/include",
     "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_services_path}/appmgr/include",
@@ -148,6 +149,7 @@ ohos_shared_library("app_manager") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_path}/utils/global/common:runtime_utils",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",
@@ -212,10 +214,14 @@ ohos_shared_library("app_state_data") {
 
   include_dirs = [
     "include/appmgr",
+    "${ability_runtime_path}/utils/global/common/include",
     "${ability_runtime_services_path}/common/include",
   ]
 
-  sources = [ "src/appmgr/app_state_data.cpp" ]
+  sources = [ 
+    "src/appmgr/app_state_data.cpp",
+    "${ability_runtime_path}/utils/global/common/src/ui_extension_wrapper.cpp"
+  ]
 
   defines = [ "AMS_LOG_TAG = \"AppexecfwkCore\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001306" ]
