@@ -232,23 +232,26 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 
 bool AppRecovery::ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
 {
+    if (!abilityPtr) {
+        return false;
+    }
 #ifdef SUPPORT_SCREEN
-        OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
-        AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
-        panda::ecmascript::EcmaVM* vm = runtime.GetEcmaVm();
-        if (!panda::JSNApi::CheckAndSetAllowCrossThreadExecution(vm)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "VM is in gc process");
-            return false;
-        }
+    OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
+    AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
+    panda::ecmascript::EcmaVM* vm = runtime.GetEcmaVm();
+    if (!panda::JSNApi::CheckAndSetAllowCrossThreadExecution(vm)) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "VM is in gc process");
+        return false;
+    }
 #endif
-        if (this->freezeCallback) {
-            this->freezeCallback();
-            TAG_LOGW(AAFwkTag::RECOVERY, "Freeze callback execution completed");
-        }
+    if (this->freezeCallback) {
+        this->freezeCallback();
+        TAG_LOGW(AAFwkTag::RECOVERY, "Freeze callback execution completed");
+    }
 #ifdef SUPPORT_SCREEN
-        panda::JSNApi::DisallowCrossThreadExecution(vm);
+    panda::JSNApi::DisallowCrossThreadExecution(vm);
 #endif
-        return true;
+    return true;
 }
 
 void AppRecovery::SetRestartWant(std::shared_ptr<AAFwk::Want> want)
