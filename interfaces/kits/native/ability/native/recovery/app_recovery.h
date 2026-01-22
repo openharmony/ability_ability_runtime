@@ -30,6 +30,7 @@
 #include "ui_ability.h"
 #include "want.h"
 #include "want_params.h"
+#include "js_runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
