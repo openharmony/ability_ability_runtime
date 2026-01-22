@@ -30,7 +30,6 @@
 #include "ui_ability.h"
 #include "want.h"
 #include "want_params.h"
-#include "js_runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -70,7 +69,7 @@ private:
     void DoSaveAppState(StateReason reason, uintptr_t ability = 0);
     void DeleteInValidMissionFileById(std::string path, int32_t missionId);
     bool GetMissionIds(std::string path, std::vector<int32_t> &missionIds);
-    panda::ecmascript::EcmaVM* GetEcmaVMPtr(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr);
+    bool ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr);
     
     bool isEnable_;
     uint16_t restartFlag_;
