@@ -438,6 +438,18 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_007, TestSize.Level0)
 }
 
 /**
+ * @tc.name:  ScheduleSaveAppState_008
+ * @tc.desc:  ScheduleSaveAppState when enable flag is false.
+ * @tc.type: FUNC
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_008, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name:  ShouldRecoverApp_001
  * @tc.desc:  ShouldRecoverApp when state is not support save,RestartFlag = NO_RESTART.
  * @tc.type: FUNC
