@@ -43,7 +43,7 @@ RateLimiter::LimitResult RateLimiter::CheckExtensionLimit(int32_t uid)
     auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
     timestamps.erase(timestamps.begin(), it);
     timestamps.emplace_back(currentTimeMillis);
-    int currentCount = timestamps.size();
+    int32_t currentCount = static_cast<int32_t>(timestamps.size());
     LimitResult result{false, 0};
     for (auto tierIt = EXTENSION_TIERS.rbegin(); tierIt != EXTENSION_TIERS.rend(); ++tierIt) {
         int32_t limit = *tierIt;
