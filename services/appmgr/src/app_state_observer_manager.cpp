@@ -50,7 +50,8 @@ AppStateObserverManager::~AppStateObserverManager()
 void AppStateObserverManager::Init()
 {
     if (!handler_) {
-        handler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("app_state_task_queue");
+        handler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("app_state_task_queue",
+            AAFwk::TaskQoS::USER_INTERACTIVE);
     }
 }
 
