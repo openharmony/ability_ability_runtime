@@ -853,6 +853,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
 const std::unique_ptr<AbilityRuntime::Runtime> &OHOSApplication::GetSpecifiedRuntime(
     const std::string &arkTSMode) const
 {
+    std::lock_guard<std::mutex> lock(runtimeMutex_);
     if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0 &&
         runtime_ != nullptr &&
         runtime_->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
@@ -1276,8 +1277,11 @@ bool OHOSApplication::UpdateETSRuntime(AbilityRuntime::Runtime::Options &option)
         TAG_LOGE(AAFwkTag::APPKIT, "create etsRuntime failed");
         return false;
     }
-    etsRuntime->SetJsRuntime(runtime_);
-    runtime_ = std::move(etsRuntime);
+    {
+        std::lock_guard<std::mutex> lock(runtimeMutex_);
+        etsRuntime->SetJsRuntime(runtime_);
+        runtime_ = std::move(etsRuntime);
+    }
     return true;
 }
 

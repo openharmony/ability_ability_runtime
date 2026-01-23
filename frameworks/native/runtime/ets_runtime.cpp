@@ -291,10 +291,12 @@ bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<Runtime> &js
         return false;
     }
 
+    std::unique_ptr<Runtime> *jsRuntimeValid = &jsRuntime;
     if (isMove) {
         if (jsRuntime != nullptr) {
             jsRuntime_ = std::move(jsRuntime);
         }
+        jsRuntimeValid = &jsRuntime_;
     }
     if (!CreateEtsEnv(options)) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "CreateEtsEnv failed");
@@ -312,6 +314,19 @@ bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<Runtime> &js
     }
     OHOS::Ace::ArkTSModulePreloader::Preload(aniEngine);
 #endif
+    if (!options.preload) {
+        napi_env napiEnv = nullptr;
+        if (jsRuntimeValid != nullptr && jsRuntimeValid->get() != nullptr) {
+            napiEnv = static_cast<JsRuntime *>(jsRuntimeValid->get())->GetNapiEnv();
+        }
+
+        if (g_etsEnvFuncs == nullptr ||
+            g_etsEnvFuncs->FinishPreload == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or FinishPreload");
+            return false;
+        }
+        g_etsEnvFuncs->FinishPreload(napiEnv);
+    }
     return true;
 }
 
