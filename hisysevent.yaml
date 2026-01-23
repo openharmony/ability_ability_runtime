@@ -99,10 +99,10 @@ START_ABILITY_ERROR:
   __BASE: {type: FAULT, level: MINOR, tag: ability, desc: start ability error}
   USER_ID: {type: INT32, desc: userId}
   ERROR_CODE: {type: INT32, desc: error code}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
+  APP_INDEX: {type: INT32, desc: app index}
   ERROR_MESSAGE: {type: STRING, desc: start ability error message}
   CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
 
@@ -110,7 +110,6 @@ TERMINATE_ABILITY_ERROR:
   __BASE: {type: FAULT, level: MINOR, tag: ability, desc: terminate ability error}
   USER_ID: {type: INT32, desc: userId}
   ERROR_CODE: {type: INT32, desc: error code}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
@@ -203,7 +202,6 @@ STARTUP_TASK_ERROR:
 START_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: start ability}
   USER_ID: {type: INT32, desc: userId}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
@@ -213,28 +211,23 @@ CLOSE_ABILITY:
 
 TERMINATE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: terminate ability}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   ABILITY_NAME: {type: STRING, desc: ability name}
 
 ABILITY_ONFOREGROUND:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: ability onForeground}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
   BUNDLE_TYPE: {type: INT32, desc: 'type of componment, atomic service or normal app'}
   CALLER_BUNDLENAME: {type: STRING, desc: caller bundle name}
-  LIFE_CYCLE_STATE: {type: STRING, desc: life cycle state}
 
 ABILITY_ONBACKGROUND:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: ability onBackground}
-  APP_INDEX: {type: INT32, desc: app index}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
   BUNDLE_TYPE: {type: INT32, desc: 'type of componment, atomic service or normal app'}
-  LIFE_CYCLE_STATE: {type: STRING, desc: life cycle state}
 
 ABILITY_ONACTIVE:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: ability onActive}
