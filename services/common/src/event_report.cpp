@@ -62,7 +62,6 @@ constexpr const char *EVENT_KEY_REASON = "REASON";
 constexpr const char *EVENT_KEY_SUB_REASON = "SUB_REASON";
 constexpr const char *INVALID_EVENT_NAME = "INVALIDEVENTNAME";
 constexpr const char *EVENT_KEY_APP_INDEX = "APP_INDEX";
-constexpr const char *EVENT_KEY_LIFE_CYCLE_STATE = "LIFE_CYCLE_STATE";
 constexpr const char *EVENT_KEY_ERR_REASON = "ERR_REASON";
 constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
@@ -138,7 +137,6 @@ void EventReport::LogErrorEvent(const std::string &name, HiSysEventType type, co
         name,
         type,
         EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
@@ -211,7 +209,6 @@ void EventReport::LogStartAbilityEvent(const std::string &name, HiSysEventType t
         name,
         type,
         EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
@@ -223,7 +220,6 @@ void EventReport::LogTerminateAbilityEvent(const std::string &name, HiSysEventTy
         HiSysEvent::Domain::AAFWK,
         name,
         type,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
 }
@@ -234,13 +230,11 @@ void EventReport::LogAbilityOnForegroundEvent(const std::string &name, HiSysEven
         HiSysEvent::Domain::AAFWK,
         name,
         type,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
         EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_LIFE_CYCLE_STATE, eventInfo.lifeCycleState);
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
 }
 
 void EventReport::LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
@@ -249,12 +243,10 @@ void EventReport::LogAbilityOnBackgroundEvent(const std::string &name, HiSysEven
         HiSysEvent::Domain::AAFWK,
         name,
         type,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_LIFE_CYCLE_STATE, eventInfo.lifeCycleState);
+        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
 }
 
 void EventReport::LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
@@ -269,18 +261,6 @@ void EventReport::LogAbilityOnActiveEvent(const std::string &name, HiSysEventTyp
         EVENT_KEY_ABILITY_TYPE, eventInfo.abilityType,
         EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
         EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
-}
-
-void EventReport::LogAbilityOnInactiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
-{
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
 }
 
 void EventReport::LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
@@ -395,10 +375,8 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
             LogAbilityOnForegroundEvent(name, type, eventInfo);
             break;
         case EventName::ABILITY_ONBACKGROUND:
-            LogAbilityOnBackgroundEvent(name, type, eventInfo);
-            break;
         case EventName::ABILITY_ONINACTIVE:
-            LogAbilityOnInactiveEvent(name, type, eventInfo);
+            LogAbilityOnBackgroundEvent(name, type, eventInfo);
             break;
         case EventName::ABILITY_ONACTIVE:
             LogAbilityOnActiveEvent(name, type, eventInfo);
