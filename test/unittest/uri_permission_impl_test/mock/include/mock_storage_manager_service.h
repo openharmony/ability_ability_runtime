@@ -219,11 +219,6 @@ public:
         return E_OK;
     }
 
-    virtual int32_t DeleteUserKeys(uint32_t userId) override
-    {
-        return E_OK;
-    }
-
     virtual int32_t UpdateUserAuth(uint32_t userId, uint64_t secureUid,
                                    const std::vector<uint8_t> &token,
                                    const std::vector<uint8_t> &oldSecret,
@@ -353,11 +348,6 @@ public:
         return E_OK;
     }
 
-    virtual int32_t UpdateMemoryPara(int32_t size, int32_t &oldSize) override
-    {
-        return E_OK;
-    }
-
     virtual int32_t MountMediaFuse(int32_t userId, int32_t &devFd) override
     {
         return E_OK;
@@ -461,6 +451,16 @@ public:
     }
 
     virtual int32_t NotifyCreateBundleDataDirWithEl(uint32_t userId, uint8_t elx) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t QueryActiveOsAccountIds(std::vector<int32_t> &ids) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t IsOsAccountExists(unsigned int userId, bool &isOsAccountExists) override
     {
         return E_OK;
     }
