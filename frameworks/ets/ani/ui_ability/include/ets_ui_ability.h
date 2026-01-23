@@ -349,6 +349,8 @@ private:
     void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
     void RemoveShareRouterByBundleType(const Want &want);
+    int32_t CallSaveState(ani_value args[], WantParams &wantParams, AppExecFwk::StateReason stateReason,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_;
