@@ -131,6 +131,7 @@ enum class AppStartReason {
     PRELOAD_BY_PHASE_PROCESS_CREATED = 5,
     PRELOAD_BY_PHASE_ABILITY_STAGE_CREATED = 6,
     STARTUP_HIDE = 7,
+    PRE_LAUNCH = 8,
 };
 
 enum class PreloadState {
