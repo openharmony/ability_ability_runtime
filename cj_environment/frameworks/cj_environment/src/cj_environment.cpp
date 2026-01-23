@@ -24,6 +24,10 @@
 #ifdef __OHOS__
 #include <dlfcn.h>
 #endif
+#ifdef __APPLE__
+#include <cstdlib>
+#include <filesystem>
+#endif
 #include "dynamic_loader.h"
 #ifdef WITH_EVENT_HANDLER
 #include "event_handler.h"
@@ -90,6 +94,37 @@ using RegisterUncaughtExceptionType = void (*)(const CJUncaughtExceptionInfo& ha
 
 #ifdef WITH_EVENT_HANDLER
 static std::shared_ptr<AppExecFwk::EventHandler> g_handler = nullptr;
+#endif
+
+#ifdef __APPLE__
+std::string getLibPath(const char* dlName) {
+    if (!dlName) {
+        LOGE("dlName is nullptr");
+        return std::string("");
+    }
+
+    const char* value = getenv("CJENV_LIBRARY_PATH");
+    if (!value) {
+        return std::string(dlName);
+    }
+    std::string paths(value);
+
+    size_t start = 0;
+    size_t end = paths.size();
+    do {
+        end = paths.find(':', start);
+        std::string str = paths.substr(start, end - start);
+        start = end + 1;
+        if (!str.empty()) {
+            auto path = std::filesystem::path(str) / dlName;
+            if (std::filesystem::exists(path)) {
+                return path;
+            }
+        }
+    }while (end != std::string::npos);
+
+    return std::string(dlName);
+}
 #endif
 
 bool LoadSymbolInitCJRuntime(void* handle, CJRuntimeAPI& apis)
@@ -351,7 +386,6 @@ void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
     return dso;
 }
 #endif
-
 bool CJEnvironment::LoadRuntimeApis()
 {
     if (isRuntimeApiLoaded) {
@@ -360,13 +394,20 @@ bool CJEnvironment::LoadRuntimeApis()
     lazyApis_ = new CJRuntimeAPI();
 #ifdef __WINDOWS__
 #define RTLIB_NAME "libcangjie-runtime.dll"
+#elif defined(__APPLE__)
+#define RTLIB_NAME "libcangjie-runtime.dylib"
 #else
 #define RTLIB_NAME "libcangjie-runtime.so"
 #endif
+
 #ifdef __OHOS__
     auto dso = LoadRuntimeLib(RTLIB_NAME);
 #else
+#ifdef __APPLE__
+    auto dso = DynamicLoadLibrary(getLibPath(RTLIB_NAME).c_str(), 1);
+#else
     auto dso = DynamicLoadLibrary(RTLIB_NAME, 1);
+#endif
 #endif
     if (!dso) {
         LOGE("load library failed: %{public}s", RTLIB_NAME);
@@ -740,7 +781,11 @@ void* CJEnvironment::LoadCJLibrary(OHOS::CJEnvironment::LibraryKind kind, const 
     }
     auto handle = DynamicLoadLibrary(&ns, dlName, 0);
 #else
+#ifdef __APPLE__
+    auto handle = DynamicLoadLibrary(getLibPath(dlName).c_str(), 1);
+#else
     auto handle = DynamicLoadLibrary(dlName, 1);
+#endif
 #endif
     if (!handle) {
         LOGE("load cj library failed: %{public}s", DynamicGetError());
@@ -772,7 +817,11 @@ bool CJEnvironment::StartDebugger()
     dlns_get(CJEnvironment::cjSysNSName, &ns);
     auto handle = DynamicLoadLibrary(&ns, DEBUGGER_LIBNAME, 0);
 #else
+#ifdef __APPLE__
+    auto handle = DynamicLoadLibrary(getLibPath(DEBUGGER_LIBNAME).c_str(), 0);
+#else
     auto handle = DynamicLoadLibrary(DEBUGGER_LIBNAME, 0);
+#endif
 #endif
     if (!handle) {
         LOGE("failed to load library: %{public}s", DEBUGGER_LIBNAME);
