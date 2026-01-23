@@ -450,6 +450,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     }
 #endif // SUPPORT_UPMS
     if (!isReady_) {
+        isPrelaunch_ = false;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = options.sceneFlag;
         LoadAbility(options.isShellCall, options.isStartupHide, options.callingPid,
@@ -481,7 +482,12 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     lifeCycleStateInfo_.sceneFlagBak = options.sceneFlag;
     ResSchedUtil::GetInstance().ReportEventToRSS(GetUid(), GetAbilityInfo().bundleName,
         "THAW_BY_FOREGROUND_ABILITY", GetPid(), GetCallerRecord() ? GetCallerRecord()->GetPid() : -1);
-    SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    if (isPrelaunch_) {
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::WARM, AppExecFwk::AppStartReason::PRE_LAUNCH);
+        isPrelaunch_ = false;
+    } else {
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    }
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
 }
@@ -3129,7 +3135,8 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
     want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
 }
 
-void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType)
+void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType,
+    const AppExecFwk::AppStartReason startReason)
 {
     AAFwk::EventInfo eventInfo;
     auto abilityInfo = GetAbilityInfo();
@@ -3140,6 +3147,7 @@ void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType start
     eventInfo.versionCode = applicationInfo.versionCode;
     eventInfo.pid = static_cast<int32_t>(GetPid());
     eventInfo.startType = static_cast<int32_t>(startType);
+    eventInfo.startReason = static_cast<int32_t>(startReason);
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
