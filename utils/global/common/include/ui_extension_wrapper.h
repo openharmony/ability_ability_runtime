@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-namespace UIExtensionWrapper {    //UIExtensionWrapper
+namespace UIExtensionWrapper {
 
 bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type);
 
