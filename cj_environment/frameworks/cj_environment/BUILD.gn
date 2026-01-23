@@ -68,8 +68,8 @@ ohos_shared_library("cj_environment") {
       "eventhandler:libeventhandler"
     ]
     defines += [ "WITH_EVENT_HANDLER" ]
-  } else if (current_os == "linux") {
-    sources += [ "src/dynamic_loader_linux.cpp" ]
+  } else if (current_os == "linux" || current_os == "mac") {
+    sources += [ "src/dynamic_loader_unix.cpp" ]
   } else if (current_os == "mingw") {
     sources += [ "src/dynamic_loader_win.cpp" ]
   } else {
