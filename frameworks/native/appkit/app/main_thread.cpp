@@ -4233,8 +4233,18 @@ void MainThread::SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpAppli
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
-        auto &nativeEngine = (static_cast<AbilityRuntime::JsRuntime &>(*runtime)).GetNativeEngine();
-        nativeEngine.NotifyIdleTime(idleTime);
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+            auto &etsRuntime = static_cast<AbilityRuntime::ETSRuntime &>(*runtime);
+            auto &jsRuntime =  etsRuntime.GetJsRuntime();
+            if (jsRuntime != nullptr) {
+                auto &nativeEngine =
+                    (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime)).GetNativeEngine();
+                nativeEngine.NotifyIdleTime(idleTime);
+            }
+        } else {
+            auto &nativeEngine = (static_cast<AbilityRuntime::JsRuntime &>(*runtime)).GetNativeEngine();
+            nativeEngine.NotifyIdleTime(idleTime);
+        }
     };
     idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
     idleTime_->Start();
@@ -4376,6 +4386,7 @@ bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord>
     GetEtsNativeLibPath(bundleInfo, hspList, etsAppLibPaths, abcPathsToBundleModuleNameMap);
     AbilityRuntime::ETSRuntime::SetAppLibPath(
         etsAppLibPaths, abcPathsToBundleModuleNameMap, applicationInfo_->isSystemApp);
+    runtimeUpdateParam_.option.preload = false;
     if (!application_->UpdateETSRuntime(runtimeUpdateParam_.option)) {
         TAG_LOGE(AAFwkTag::APPKIT, "UpdateETSRuntime failed");
         return false;

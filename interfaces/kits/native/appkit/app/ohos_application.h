@@ -20,6 +20,7 @@
 #include <string>
 #include <list>
 #include <memory>
+#include <mutex>
 
 #include "ability_stage.h"
 #include "app_context.h"
@@ -177,6 +178,7 @@ public:
      */
     const std::unique_ptr<AbilityRuntime::Runtime> &GetRuntime() const
     {
+        std::lock_guard<std::mutex> lock(runtimeMutex_);
         return runtime_;
     }
 
@@ -314,6 +316,7 @@ private:
     std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext_ = nullptr;
     std::unordered_map<std::string, std::shared_ptr<AbilityRuntime::AbilityStage>> abilityStages_;
     std::unique_ptr<AbilityRuntime::Runtime> runtime_ = nullptr;
+    mutable std::mutex runtimeMutex_;
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
     std::string entryLoadPath_ = "";
