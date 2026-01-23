@@ -341,7 +341,6 @@ UIAbilityRecordPtr UIAbilityLifecycleManager::HandleAbilityRecordReused(
         return nullptr;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo.isNewWant);
-    uiAbilityRecord->SetPrelaunchFlag(false);
     if (sessionInfo.sessionToken != uiAbilityRecord->GetSessionInfo()->sessionToken) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
         return nullptr;
