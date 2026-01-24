@@ -2059,6 +2059,7 @@ bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
         if ((status = env->Object_CallMethod_Boolean_V(obj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "Object_CallMethod_Boolean_V status: %{public}d", status);
             etsRuntime_.HandleUncaughtError();
+            va_end(args);
             return false;
         }
         va_end(args);
@@ -2069,6 +2070,7 @@ bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     if ((status = env->Object_CallMethod_Void_V(obj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "Object_CallMethod_Void_V status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
+        va_end(args);
         return false;
     }
     va_end(args);

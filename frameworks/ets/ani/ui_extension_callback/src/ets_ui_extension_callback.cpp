@@ -146,6 +146,7 @@ void EtsUIExtensionCallback::CallObjectMethod(const char *name, const char *sign
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(reinterpret_cast<ani_object>(callback_), method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::EXT, "Object_CallMethod name: %{public}s, status: %{public}d", name, status);
+        va_end(args);
         return;
     }
     va_end(args);

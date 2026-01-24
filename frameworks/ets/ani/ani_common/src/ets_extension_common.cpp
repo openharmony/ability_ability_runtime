@@ -102,6 +102,7 @@ void EtsExtensionCommon::CallObjectMethod(const char *name, const char *signatur
     if ((status = env->Object_CallMethod_Void_V(etsObj_.aniObj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::EXT, "Object_CallMethod_Void_V status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
+        va_end(args);
         return;
     }
     va_end(args);

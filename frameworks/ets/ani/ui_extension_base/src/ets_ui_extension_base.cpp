@@ -911,6 +911,7 @@ bool EtsUIExtensionBase::CallObjectMethod(bool withResult, const char *name, con
     if ((status = env->Object_CallMethodByName_Void_V(etsObj_->aniObj, name, signature, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
+        va_end(args);
         return false;
     }
     va_end(args);
@@ -946,6 +947,7 @@ ani_object EtsUIExtensionBase::CallObjectMethod(const char *name, const char *si
     if ((status = env->Object_CallMethod_Ref(obj, method, &res, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         etsRuntime_.HandleUncaughtError();
+        va_end(args);
         return nullptr;
     }
     va_end(args);
