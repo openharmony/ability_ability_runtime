@@ -37,7 +37,7 @@ public:
         return 0;
     }
 
-    virtual int32_t GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card)
+    virtual int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card)
     {
         return 0;
     }

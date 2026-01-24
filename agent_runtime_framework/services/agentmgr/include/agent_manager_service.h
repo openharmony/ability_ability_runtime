@@ -51,7 +51,7 @@ public:
 
     int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards) override;
 
-    int32_t GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card) override;
+    int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card) override;
 
 private:
     AgentManagerService();

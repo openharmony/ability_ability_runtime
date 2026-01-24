@@ -64,14 +64,15 @@ int32_t AgentManagerClient::GetAgentCardsByBundleName(const std::string &bundleN
     return agentMgr->GetAgentCardsByBundleName(bundleName, cards);
 }
 
-int32_t AgentManagerClient::GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card)
+int32_t AgentManagerClient::GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId,
+    AgentCard &card)
 {
     auto agentMgr = GetAgentMgrProxy();
     if (agentMgr == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
         return ERR_NULL_AGENT_MGR_PROXY;
     }
-    return agentMgr->GetAgentCardByUrl(bundleName, url, card);
+    return agentMgr->GetAgentCardByAgentId(bundleName, agentId, card);
 }
 
 sptr<IAgentManager> AgentManagerClient::GetAgentMgrProxy()
@@ -153,7 +154,7 @@ bool AgentManagerClient::LoadAgentMgrService()
 
     {
         std::unique_lock<std::mutex> lock(loadSaMutex_);
-        auto waitStatus = loadSaCondation_.wait_for(lock, std::chrono::milliseconds(LOAD_SA_TIMEOUT_MS),
+        auto waitStatus = loadSaCondition_.wait_for(lock, std::chrono::milliseconds(LOAD_SA_TIMEOUT_MS),
             [this]() {
                 return loadSaFinished_;
             });
@@ -183,7 +184,7 @@ void AgentManagerClient::OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &r
     SetAgentMgr(remoteObject);
     std::unique_lock<std::mutex> lock(loadSaMutex_);
     loadSaFinished_ = true;
-    loadSaCondation_.notify_one();
+    loadSaCondition_.notify_one();
 }
 
 void AgentManagerClient::OnLoadSystemAbilityFail()
@@ -191,7 +192,7 @@ void AgentManagerClient::OnLoadSystemAbilityFail()
     SetAgentMgr(nullptr);
     std::unique_lock<std::mutex> lock(loadSaMutex_);
     loadSaFinished_ = true;
-    loadSaCondation_.notify_one();
+    loadSaCondition_.notify_one();
 }
 }  // namespace AgentRuntime
 }  // namespace OHOS
