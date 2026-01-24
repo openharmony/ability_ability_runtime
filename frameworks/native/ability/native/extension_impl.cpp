@@ -23,7 +23,7 @@
 #include "ipc_object_proxy.h"
 #include "extension_context.h"
 #include "hilog_tag_wrapper.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 
 
 namespace OHOS {
@@ -52,7 +52,7 @@ void ExtensionImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     extension_ = extension;
     if (record->GetAbilityInfo() != nullptr) {
         extensionType_ = record->GetAbilityInfo()->extensionAbilityType;
-        if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_)) {
+        if (AAFwk::UIExtensionWrapper::IsUIExtension(extensionType_)) {
             extension_->SetExtensionWindowLifeCycleListener(
                 sptr<ExtensionWindowLifeCycleImpl>(new ExtensionWindowLifeCycleImpl(token_, shared_from_this())));
         }
@@ -125,7 +125,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
 
 bool ExtensionImpl::UIExtensionAbilityExecuteInsightIntent(const Want &want)
 {
-    return AAFwk::UIExtensionUtils::IsUIExtension(extensionType_) &&
+    return AAFwk::UIExtensionWrapper::IsUIExtension(extensionType_) &&
         AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want);
 }
 
@@ -171,7 +171,7 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 
     TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW ||
-        AAFwk::UIExtensionUtils::IsUIExtension(extension_->abilityInfo_->extensionAbilityType)) {
+        AAFwk::UIExtensionWrapper::IsUIExtension(extension_->abilityInfo_->extensionAbilityType)) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
@@ -208,7 +208,7 @@ void ExtensionImpl::Stop(bool &isAsyncCallback, const Want &want, sptr<AAFwk::Se
         return;
     }
 
-    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_) && sessionInfo != nullptr) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(extensionType_) && sessionInfo != nullptr) {
         CommandExtensionWindow(want, sessionInfo, AAFwk::WIN_CMD_DESTROY);
     }
 
@@ -516,7 +516,7 @@ void ExtensionImpl::Background(const Want &want, sptr<AAFwk::SessionInfo> sessio
         return;
     }
 
-    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_) && sessionInfo != nullptr) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(extensionType_) && sessionInfo != nullptr) {
         CommandExtensionWindow(want, sessionInfo, AAFwk::WIN_CMD_BACKGROUND);
     }
 

@@ -25,7 +25,7 @@
 #include "hisysevent.h"
 #include "record_cost_time_util.h"
 #include "res_sched_util.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
@@ -284,7 +284,7 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
         return false;
     }
     if (!appRecord->HasUIAbilityLaunched() &&
-        !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        !AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
@@ -360,7 +360,7 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
     }
     if (warmStartProcesEnable_) {
         if (!appRecord->HasUIAbilityLaunched() &&
-            !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+            !AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())) {
             return false;
         }
     }

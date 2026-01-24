@@ -598,6 +598,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/global/common:runtime_utils",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
@@ -1069,6 +1070,7 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/utils/global/common:runtime_utils",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
   ]
@@ -1180,6 +1182,7 @@ ohos_shared_library("ability_thread") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/global/common:runtime_utils",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 

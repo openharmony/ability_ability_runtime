@@ -31,7 +31,7 @@
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
 #endif // SUPPORT_UPMS
@@ -532,7 +532,7 @@ bool UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abili
 bool UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest)
 {
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
-    if (UIExtensionUtils::IsUIExtension(extensionType) || IsServiceExtensionType(extensionType)) {
+    if (UIExtensionWrapper::IsUIExtension(extensionType) || IsServiceExtensionType(extensionType)) {
         auto &abilityInfo = abilityRequest.abilityInfo;
         auto &want = const_cast<Want &>(abilityRequest.want);
         auto callerTokenId = abilityRequest.specifyTokenId > 0 ? abilityRequest.specifyTokenId :

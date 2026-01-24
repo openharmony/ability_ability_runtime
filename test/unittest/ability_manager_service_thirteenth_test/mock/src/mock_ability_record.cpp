@@ -41,7 +41,7 @@
 #include "scene_board_judgement.h"
 #include "startup_util.h"
 #include "system_ability_token_callback.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
 #endif // SUPPORT_UPMS
@@ -1046,7 +1046,7 @@ void AbilityRecord::NotifyAnimationAbilityDied()
 
 bool AbilityRecord::IsNeverStarted() const
 {
-    if (UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
         return startId_ == 0;
     }
     return startId_ == 0 && IsCreateByConnect();

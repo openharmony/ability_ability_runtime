@@ -18,7 +18,7 @@
 #include <string>
 
 #include "ability_info.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "hilog_tag_wrapper.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
@@ -143,7 +143,7 @@ std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityI
                abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         reason = "THAW_BY_START_SERVICE_EXTENSION";
     } else if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-               AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
+               AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo.extensionAbilityType)) {
         reason = "THAW_BY_START_UI_EXTENSION";
     } else {
         reason = "THAW_BY_START_NOT_PAGE_ABILITY";

@@ -39,7 +39,7 @@
 #include "timeout_state_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "uri_utils.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "cache_extension_utils.h"
 #include "datetime_ex.h"
 #include "init_reboot.h"
@@ -347,7 +347,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     }
     std::shared_ptr<BaseExtensionRecord> targetService;
     bool isLoadedAbility = false;
-    if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType) &&
+    if (UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType) &&
         abilityRequest.uiExtensionAbilityConnectInfo != nullptr) {
         ret = GetOrCreateExtensionRecord(abilityRequest, targetService, isLoadedAbility);
     } else {
@@ -389,7 +389,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         abilityRequest.abilityInfo.bundleName + "/" + abilityRequest.abilityInfo.name);
     targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_CONNECT_EXTENSION);
 
-    if (UIExtensionUtils::IsWindowExtension(targetService->GetAbilityInfo().extensionAbilityType)
+    if (UIExtensionWrapper::IsWindowExtension(targetService->GetAbilityInfo().extensionAbilityType)
         && abilityRequest.sessionInfo) {
         std::lock_guard guard(windowExtensionMapMutex_);
         windowExtensionMap_.emplace(connectObject,
@@ -2748,7 +2748,8 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<BaseExtensionR
         .bundleName = ability->GetAbilityInfo().bundleName,
         .msg = msgContent
     };
-    if (!UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo().extensionAbilityType) && !ability->IsSceneBoard()) {
+    if (!UIExtensionWrapper::IsUIExtension(ability->GetAbilityInfo().extensionAbilityType) &&
+        !ability->IsSceneBoard()) {
         info.needKillProcess = false;
         info.eventName = isHalf ? AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING :
             AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT_WARNING;
@@ -3163,7 +3164,7 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // lifecycle is not complete when window extension is reused
-    bool noReuse = UIExtensionUtils::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
+    bool noReuse = UIExtensionWrapper::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
     std::string serviceKey = element.GetURI();

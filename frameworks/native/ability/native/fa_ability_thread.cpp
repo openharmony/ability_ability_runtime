@@ -39,7 +39,7 @@
 #include "page_ability_impl.h"
 #endif
 #include "time_util.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "values_bucket.h"
 
 namespace OHOS {
@@ -205,7 +205,7 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
         abilityName = FORM_EXTENSION;
     }
 
-    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+    if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
         if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SHARE) {
             abilityName = SHARE_EXTENSION;
         } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ACTION) {
