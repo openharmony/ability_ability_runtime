@@ -430,6 +430,7 @@ void EtsAppStateObserver::CallEtsFunction(
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(EtsObserverObject, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to call %{public}s method,status: %{public}d", methodName, status);
+        va_end(args);
         return;
     }
     va_end(args);
