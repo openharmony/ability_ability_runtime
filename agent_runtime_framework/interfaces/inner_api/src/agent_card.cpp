@@ -303,7 +303,7 @@ bool AgentCard::ReadFromParcel(Parcel &parcel)
     bundleName = parcel.ReadString();
     moduleName = parcel.ReadString();
     abilityName = parcel.ReadString();
-    appIndex = parcel.ReadInt32();
+    agentId = parcel.ReadString();
     name = parcel.ReadString();
     description = parcel.ReadString();
     url = parcel.ReadString();
@@ -346,8 +346,8 @@ bool AgentCard::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write abilityName failed");
         return false;
     }
-    if (!parcel.WriteInt32(appIndex)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "write appIndex failed");
+    if (!parcel.WriteString(agentId)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write agentId failed");
         return false;
     }
     if (!parcel.WriteString(name)) {
@@ -420,7 +420,7 @@ nlohmann::json AgentCard::ToJson() const
         { "bundleName", bundleName },
         { "moduleName", moduleName },
         { "abilityName", abilityName },
-        { "appIndex", appIndex },
+        { "agentId", agentId },
         { "name", name },
         { "description", description },
         { "url", url },
@@ -471,8 +471,8 @@ AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
     if (jsonObject.contains("abilityName") && jsonObject["abilityName"].is_string()) {
         agentCard.abilityName = jsonObject["abilityName"];
     }
-    if (jsonObject.contains("appIndex") && jsonObject["appIndex"].is_number()) {
-        agentCard.appIndex = jsonObject["appIndex"];
+    if (jsonObject.contains("agentId") && jsonObject["agentId"].is_string()) {
+        agentCard.agentId = jsonObject["agentId"];
     }
     if (jsonObject.contains("name") && jsonObject["name"].is_string()) {
         agentCard.name = jsonObject["name"];

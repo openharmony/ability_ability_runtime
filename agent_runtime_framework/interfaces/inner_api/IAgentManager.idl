@@ -18,5 +18,5 @@ rawdata AgentCard..OHOS.AgentRuntime.AgentCardsRawData;
 interface OHOS.AgentRuntime.IAgentManager {
     void GetAllAgentCards([out] AgentCardsRawData cards);
     void GetAgentCardsByBundleName([in] String bundleName, [out] AgentCard[] cards);
-    void GetAgentCardByUrl([in] String bundleName, [in] String url, [out] AgentCard card);
+    void GetAgentCardByAgentId([in] String bundleName, [in] String agentId, [out] AgentCard card);
 }

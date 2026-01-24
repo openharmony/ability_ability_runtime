@@ -81,5 +81,19 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_001, TestSize.Level1)
     ret = agentCardMgr.HandleBundleInstall("test1", 100);
     EXPECT_TRUE(ret != -1);
 }
+
+/**
+ * @tc.name: GetAgentCardByAgentId_001
+ * @tc.desc: GetAgentCardByAgentId_001
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardMgrTest, GetAgentCardByAgentId_001, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    AgentCard card;
+    int ret = agentCardMgr.GetAgentCardByAgentId("test", "test", card);
+    EXPECT_TRUE(ret != 0);
+}
 } // namespace AgentRuntime
 } // namespace OHOS

@@ -15,6 +15,7 @@
 
 #include "agent_bundle_event_callback.h"
 
+#include "agent_card_mgr.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -43,14 +44,17 @@ void AgentBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData ev
         bundleName.c_str(), action.c_str(), userId, uid);
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        AgentCardMgr::GetInstance().HandleBundleInstall(bundleName, userId);
         return;
     }
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        AgentCardMgr::GetInstance().HandleBundleInstall(bundleName, userId);
         return;
     }
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
+        AgentCardMgr::GetInstance().HandleBundleRemove(bundleName, userId);
         return;
     }
 }

@@ -36,6 +36,8 @@ public:
 
     int32_t QueryData(const std::string &bundleName, int32_t userId, std::vector<AgentCard> &cards);
 
+    int32_t QueryAllData(std::vector<AgentCard> &cards);
+
 private:
     AgentCardDbMgr();
     ~AgentCardDbMgr();

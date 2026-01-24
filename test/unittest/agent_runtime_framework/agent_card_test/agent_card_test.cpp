@@ -629,7 +629,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_001, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -669,7 +669,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_002, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -709,7 +709,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_003, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test";
     agentCard.url = "test1";
@@ -749,7 +749,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_004, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test";
@@ -789,7 +789,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_005, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -829,7 +829,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_006, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -869,7 +869,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_007, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -909,7 +909,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_008, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -949,7 +949,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_009, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -989,7 +989,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_010, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -1028,7 +1028,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_011, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -1067,7 +1067,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_012, TestSize.Level1)
     agentCard.bundleName = "bundleName";
     agentCard.moduleName = "moduleName";
     agentCard.abilityName = "abilityName";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
     agentCard.url = "test1";
@@ -1166,7 +1166,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
         { "bundleName", "test" },
         { "moduleName", "test" },
         { "abilityName", "test" },
-        { "appIndex", 1 },
+        { "agentId", "1" },
         { "name", "test" },
         { "description", "test" },
         { "url", "test" },
@@ -1184,7 +1184,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
     EXPECT_TRUE(agentCard.bundleName == "test");
     EXPECT_TRUE(agentCard.moduleName == "test");
     EXPECT_TRUE(agentCard.abilityName == "test");
-    EXPECT_TRUE(agentCard.appIndex == 1);
+    EXPECT_TRUE(agentCard.agentId == "1");
     EXPECT_TRUE(agentCard.name == "test");
 }
 
@@ -1355,7 +1355,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_001, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1417,9 +1417,9 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Marshalling_ShouldReturnFalse_WhenWriteAppIndexFails
+* @tc.name  : Marshalling_ShouldReturnFalse_WhenWriteAgentIdFails
 * @tc.number: AgentCard_Marshalling_005
-* @tc.desc  : Test that Marshalling returns false when writing appIndex fails.
+* @tc.desc  : Test that Marshalling returns false when writing agentId fails.
 */
 HWTEST_F(AgentCardTest, AgentCard_Marshalling_005, TestSize.Level1)
 {
@@ -1428,7 +1428,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_005, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 0;
+    agentCard->agentId = "0";
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
 }
@@ -1445,7 +1445,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_006, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "test";
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
@@ -1463,7 +1463,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_007, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "test";
 
@@ -1482,7 +1482,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_008, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "test";
@@ -1502,7 +1502,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_009, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1522,7 +1522,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_010, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1544,7 +1544,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_011, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1567,7 +1567,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_012, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1590,7 +1590,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_013, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1614,7 +1614,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_014, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1639,7 +1639,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_015, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1665,7 +1665,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_016, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1692,7 +1692,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_017, TestSize.Level1)
     agentCard->bundleName = "com.example.bundle";
     agentCard->moduleName = "ExampleModule";
     agentCard->abilityName = "ExampleAbility";
-    agentCard->appIndex = 1;
+    agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->url = "http://example.com";
@@ -1858,7 +1858,7 @@ HWTEST_F(AgentCardTest, ToAgentCardVec_004, TestSize.Level1)
     agentCard.bundleName = "com.example.bundle";
     agentCard.moduleName = "ExampleModule";
     agentCard.abilityName = "ExampleAbility";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "ExampleName";
     agentCard.description = "ExampleDescription";
     agentCard.url = "http://example.com";
@@ -1894,7 +1894,7 @@ HWTEST_F(AgentCardTest, FromAgentCardVec_001, TestSize.Level1)
     agentCard.bundleName = "com.example.bundle";
     agentCard.moduleName = "ExampleModule";
     agentCard.abilityName = "ExampleAbility";
-    agentCard.appIndex = 1;
+    agentCard.agentId = "1";
     agentCard.name = "ExampleName";
     agentCard.description = "ExampleDescription";
     agentCard.url = "http://example.com";
