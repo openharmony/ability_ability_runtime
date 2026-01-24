@@ -808,6 +808,8 @@ public:
 
     bool ReportAbilityConnectionRelations();
 
+    void ReportAbilityConnectionForResultTerminate();
+
     void SetPromotePriority(bool promotePriority);
 
     bool GetPromotePriority();
