@@ -34,7 +34,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
 #include "timeout_state_utils.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
 #include "uri_utils.h"
 #include "app_utils.h"
@@ -92,7 +92,7 @@ int UIExtensionAbilityManager::PreloadUIExtensionAbilityInner(
     const AbilityRequest &abilityRequest, std::string &hostBundleName, int32_t hostPid)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    if (!UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+    if (!UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "can't preload non-uiextension type");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -523,7 +523,7 @@ int32_t UIExtensionAbilityManager::StartAbilityLocked(const AbilityRequest &abil
     bool isLoadedAbility = false;
     std::string hostBundleName;
 
-    if (!UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+    if (!UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not a UI extension ability");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -599,7 +599,7 @@ void UIExtensionAbilityManager::HandleLoadAbilityOrStartSpecifiedProcess(
     const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
 {
     if (abilityRecord->GetAbilityInfo().isolationProcess &&
-        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        AAFwk::UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
         AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         TAG_LOGD(AAFwkTag::EXT, "Is UIExtension and isolationProcess, StartSpecifiedProcess");
         LoadAbilityContext context{ std::make_shared<AbilityRuntime::LoadParam>(loadParam),
@@ -775,7 +775,7 @@ void UIExtensionAbilityManager::HandleUIExtWindowDiedTask(const sptr<IRemoteObje
 bool UIExtensionAbilityManager::IsUIExtensionAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
 {
     CHECK_POINTER_AND_RETURN(abilityRecord, false);
-    return UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType);
+    return UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType);
 }
 
 bool UIExtensionAbilityManager::CheckUIExtensionAbilitySessionExist(
@@ -849,7 +849,7 @@ void UIExtensionAbilityManager::UpdateUIExtensionInfo(const std::shared_ptr<Base
     int32_t hostPid)
 {
     if (abilityRecord == nullptr ||
-        !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        !UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         return;
     }
 
@@ -875,7 +875,7 @@ void UIExtensionAbilityManager::UpdateUIExtensionBindInfo(
     const std::shared_ptr<BaseExtensionRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind)
 {
     if (abilityRecord == nullptr ||
-        !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        !UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "record null or abilityType not match");
         return;
     }
@@ -926,7 +926,8 @@ void UIExtensionAbilityManager::SetLastExitReason(
     const AbilityRequest &abilityRequest, std::shared_ptr<BaseExtensionRecord> &targetRecord)
 {
     TAG_LOGD(AAFwkTag::EXT, "called");
-    if (targetRecord == nullptr || !UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+    if (targetRecord == nullptr ||
+        !UIExtensionWrapper::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
         TAG_LOGD(AAFwkTag::EXT, "Failed to set UIExtensionAbility last exit reason.");
         return;
     }
@@ -1054,7 +1055,7 @@ int UIExtensionAbilityManager::TerminateAbilityLocked(const sptr<IRemoteObject> 
     auto ret = AbilityConnectManager::TerminateAbilityLocked(token);
     auto abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD);
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         AddUIExtensionAbilityRecordToTerminatedList(abilityRecord);
     } else {
         RemoveUIExtensionAbilityRecord(abilityRecord);
@@ -1064,7 +1065,7 @@ int UIExtensionAbilityManager::TerminateAbilityLocked(const sptr<IRemoteObject> 
 
 void UIExtensionAbilityManager::HandleStartTimeoutTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
 {
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "consume session timeout, Uri: %{public}s/%{public}s",
             abilityRecord->GetElementName().GetBundleName().c_str(),
             abilityRecord->GetElementName().GetAbilityName().c_str());
@@ -1076,7 +1077,7 @@ void UIExtensionAbilityManager::HandleStartTimeoutTaskInner(const std::shared_pt
 void UIExtensionAbilityManager::HandleForegroundTimeoutTaskInner(
     const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
 {
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         ForegroundTimeout(abilityRecord);
     }
     AbilityConnectManager::HandleForegroundTimeoutTaskInner(abilityRecord);
@@ -1084,7 +1085,7 @@ void UIExtensionAbilityManager::HandleForegroundTimeoutTaskInner(
 
 void UIExtensionAbilityManager::HandleStopTimeoutTaskInner(const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
 {
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TerminateTimeout(abilityRecord);
         PrintTimeOutLog(abilityRecord, AbilityManagerService::TERMINATE_TIMEOUT_MSG);
     }
@@ -1114,7 +1115,7 @@ void UIExtensionAbilityManager::TerminateDone(const std::shared_ptr<BaseExtensio
     }
     abilityRecord->RemoveAbilityDeathRecipient();
     DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(abilityRecord->GetToken(), false);
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         RemoveUIExtensionAbilityRecord(abilityRecord);
     }
     RemoveServiceAbility(abilityRecord);
@@ -1132,7 +1133,7 @@ bool UIExtensionAbilityManager::HandleExtensionAbilityRemove(const std::shared_p
     } else if (GetExtensionByIdFromServiceMap(abilityRecord->GetAbilityRecordId()) != nullptr) {
         MoveToTerminatingMap(abilityRecord);
         RemoveServiceAbility(abilityRecord);
-        if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
             RemoveUIExtensionAbilityRecord(abilityRecord);
         }
         isRemove = true;
@@ -1160,7 +1161,7 @@ void UIExtensionAbilityManager::PostLoadTimeoutTask(const std::shared_ptr<BaseEx
     auto recordId = abilityRecord->GetAbilityRecordId();
     TAG_LOGD(AAFwkTag::EXT, "task: %{public}s/%{public}s, %{public}" PRId64,
         abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str(), recordId);
-    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         return abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
     }
     
@@ -1296,7 +1297,7 @@ void UIExtensionAbilityManager::MoveToBackground(const std::shared_ptr<BaseExten
             return;
         }
         CHECK_POINTER(abilityRecord);
-        if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        if (UIExtensionWrapper::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Start background timeout.");
             BackgroundTimeout(abilityRecord);
         }

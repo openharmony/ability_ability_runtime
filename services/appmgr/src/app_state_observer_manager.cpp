@@ -22,7 +22,7 @@
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "remote_client_manager.h"
-#include "ui_extension_utils.h"
+#include "ui_extension_wrapper.h"
 #include "parameters.h"
 
 namespace OHOS {
@@ -574,8 +574,8 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 }
             }
         }
-        if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
-            !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+        if (!AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType()) &&
+            !AAFwk::UIExtensionWrapper::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
             TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
                 data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
