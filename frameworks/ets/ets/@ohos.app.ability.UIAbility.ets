@@ -45,11 +45,15 @@ export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
   private prepareToTerminateCallbackPointer: long;
   private continueCallbackPoint: long;
+  private saveStateCallbackPoint: long;
 
   private native nativeOnDestroyCallback(): void;
   private native nativeOnPrepareToTerminateCallback(prepareTermination: boolean): void;
 
   private native nativeOnContinueCallback(result: AbilityConstant.OnContinueResult): void;
+
+  private native nativeOnSaveStateCallback(wantParam: Record<string, RecordData>, saveResult: AbilityConstant.OnSaveResult,
+    stateReason: int): void;
 
   private callOnDestroy(): boolean {
     let p = this.onDestroy();
@@ -85,6 +89,25 @@ export default class UIAbility extends Ability {
       return undefined;
     }
     return p as AbilityConstant.OnContinueResult;
+  }
+
+  private callOnSaveState(stateType: AbilityConstant.StateType,
+    wantParam: Record<string, RecordData>, stateReason: int): boolean {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
+      return false;
+    }
+    const uiAbilityClassType = AbilityUtils.getClassType(new UIAbility());
+    if (uiAbilityClassType === undefined) {
+      return false;
+    }
+    if (AbilityUtils.isOverride(derivedClassType, "onSaveStateAsync", uiAbilityClassType)) {
+      this.onSaveStateAsync(stateType, wantParam)
+        .then((saveResult: AbilityConstant.OnSaveResult) => this.nativeOnSaveStateCallback(wantParam, saveResult,
+          stateReason));
+      return true;
+    }
+    return false;
   }
 
   context: UIAbilityContext = new UIAbilityContext();
@@ -140,6 +163,13 @@ export default class UIAbility extends Ability {
 
   onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, RecordData>): AbilityConstant.OnSaveResult {
     return AbilityConstant.OnSaveResult.RECOVERY_AGREE;
+  }
+
+  onSaveStateAsync(stateType: AbilityConstant.StateType,
+    wantParam: Record<string, RecordData>): Promise<AbilityConstant.OnSaveResult> {
+    return new Promise<AbilityConstant.OnSaveResult>((resolve: (saveResult: AbilityConstant.OnSaveResult) => void,
+      reject: (err: Error) => void): void => {
+    });
   }
 
   onPrepareToTerminate(): boolean {
