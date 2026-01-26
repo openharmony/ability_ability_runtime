@@ -2812,5 +2812,216 @@ HWTEST_F(MainThreadTest, GetBundleAndHspListForUpdateRuntime_0100, TestSize.Leve
     HspList hsplist;
     EXPECT_TRUE(mainThread_->GetHspListForUpdateRuntime(bundleInfo, "com.ohos.myapplication", hsplist));
 }
+
+/**
+ * @tc.name: GetNativeLibPath_0500
+ * @tc.desc: Get native library path when paths end with '/'.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetNativeLibPath_0500, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    HspList hspList;
+    AppLibPathMap appLibPaths;
+
+    // Test with paths ending with '/'
+    bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm/";
+    bundleInfo.applicationInfo.nativeLibraryPath = "libs/arm/";
+
+    HapModuleInfo hapModuleInfo1;
+    hapModuleInfo1.isLibIsolated = false;
+    hapModuleInfo1.compressNativeLibs = true;
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo1);
+
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    ASSERT_EQ(appLibPaths["default"].size(), size_t(2));
+    // Verify trailing '/' is removed
+    EXPECT_EQ(appLibPaths["default"][1], "/data/storage/el1/bundle/libs/arm");
+}
+
+/**
+ * @tc.name: GetNativeLibPath_0600
+ * @tc.desc: Get native library path when LOCAL_CODE_PATH ends with '/'.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetNativeLibPath_0600, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    HspList hspList;
+    AppLibPathMap appLibPaths;
+
+    // Test when LOCAL_CODE_PATH ends with '/' (simulated by checking the branch)
+    bundleInfo.applicationInfo.nativeLibraryPath = "libs/arm";
+
+    HapModuleInfo hapModuleInfo1;
+    hapModuleInfo1.isLibIsolated = false;
+    hapModuleInfo1.compressNativeLibs = true;
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo1);
+
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    ASSERT_EQ(appLibPaths["default"].size(), size_t(1));
+    EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/libs/arm");
+}
+
+/**
+ * @tc.name: GetNativeLibPath_0700
+ * @tc.desc: Get native library path when patch path ends with '/'.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetNativeLibPath_0700, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    HspList hspList;
+    AppLibPathMap appLibPaths;
+
+    // Test with patch path ending with '/'
+    bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm/";
+    bundleInfo.applicationInfo.nativeLibraryPath = "libs/arm";
+
+    HapModuleInfo hapModuleInfo1;
+    hapModuleInfo1.isLibIsolated = false;
+    hapModuleInfo1.compressNativeLibs = true;
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo1);
+
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    ASSERT_EQ(appLibPaths["default"].size(), size_t(2));
+    // Verify patch path with trailing '/' is handled correctly
+    EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/patch_1001/libs/arm/");
+}
+
+/**
+ * @tc.name: GetNativeLibPath_0800
+ * @tc.desc: Get native library path with all empty paths.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetNativeLibPath_0800, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    HspList hspList;
+    AppLibPathMap appLibPaths;
+
+    // Test with empty paths
+    bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "";
+    bundleInfo.applicationInfo.nativeLibraryPath = "";
+
+    HapModuleInfo hapModuleInfo1;
+    hapModuleInfo1.isLibIsolated = false;
+    hapModuleInfo1.compressNativeLibs = true;
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo1);
+
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    // appLibPaths should be empty when all paths are empty
+    ASSERT_EQ(appLibPaths.size(), size_t(0));
+}
+
+/**
+ * @tc.name: GetPluginNativeLibPath_0300
+ * @tc.desc: Get plugin native library path when libPath is empty.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetPluginNativeLibPath_0300, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    pluginBundleInfo1.nativeLibraryPath = "";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "moduleName";
+    pluginModuleInfo1.nativeLibraryPath = "";
+    pluginModuleInfo1.isLibIsolated = true;
+
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    // appLibPaths should be empty when libPath is empty
+    ASSERT_EQ(appLibPaths.size(), size_t(0));
+}
+
+/**
+ * @tc.name: GetPluginNativeLibPath_0400
+ * @tc.desc: Get plugin native library path when bundle libPath is used for non-isolated module.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetPluginNativeLibPath_0400, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    pluginBundleInfo1.nativeLibraryPath = "bundle/libs/arm";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "moduleName";
+    pluginModuleInfo1.nativeLibraryPath = "module/libs/arm"; // Should be ignored
+    pluginModuleInfo1.isLibIsolated = false; // Not isolated, use bundle path
+
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    // Verify bundle nativeLibraryPath is used instead of module path
+    EXPECT_EQ(appLibPaths["pluginBundleName/moduleName"][0],
+        "/data/storage/el1/bundle/+plugins/bundle/libs/arm");
+}
+
+/**
+ * @tc.name: GetPluginNativeLibPath_0500
+ * @tc.desc: Get plugin native library path with mixed empty and non-empty paths.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetPluginNativeLibPath_0500, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+
+    // First module with empty path - should be skipped
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "emptyModule";
+    pluginModuleInfo1.nativeLibraryPath = "";
+    pluginModuleInfo1.isLibIsolated = true;
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+
+    // Second module with valid path - should be added
+    AppExecFwk::PluginModuleInfo pluginModuleInfo2;
+    pluginModuleInfo2.moduleName = "validModule";
+    pluginModuleInfo2.nativeLibraryPath = "libs/arm";
+    pluginModuleInfo2.isLibIsolated = true;
+    pluginModuleInfos.emplace_back(pluginModuleInfo2);
+
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    // Only validModule should be in appLibPaths
+    EXPECT_EQ(appLibPaths["pluginBundleName/validModule"].size(), size_t(1));
+    EXPECT_EQ(appLibPaths["pluginBundleName/validModule"][0],
+        "/data/storage/el1/bundle/+plugins/libs/arm");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
