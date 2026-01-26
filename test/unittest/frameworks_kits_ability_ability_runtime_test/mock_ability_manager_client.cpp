@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -497,13 +497,14 @@ ErrCode AbilityManagerClient::GetMissionIdByToken(sptr<IRemoteObject> token, int
     return MyFlag::GetInstance()->GetMissionIdByToken();
 }
 
-ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent)
+ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent,
+    bool isVisible)
 {
     return ERR_OK;
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent, bool promotePriority)
+    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent, bool promotePriority, bool isVisible)
 {
     return ERR_OK;
 }
@@ -514,7 +515,8 @@ ErrCode StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent, bool promotePriority)
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent, bool promotePriority,
+    bool isVisible)
 {
     return ERR_OK;
 }

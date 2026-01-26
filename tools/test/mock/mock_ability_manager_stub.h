@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,7 +189,7 @@ public:
 
     virtual int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t userId = DEFAULT_INVAL_VALUE, bool isSilent = false,
-        bool promotePriority = false)
+        bool promotePriority = false, bool isVisible = false)
     {
         return 0;
     }

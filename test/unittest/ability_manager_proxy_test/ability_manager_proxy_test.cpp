@@ -918,6 +918,26 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityByCall_003, Te
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartAbilityByCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityByCall
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityByCall is normal flow.
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityByCall_004, TestSize.Level1)
+{
+    Want want;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    EXPECT_EQ(proxy_->StartAbilityByCall(want, connect, callerToken, -1, true, false, true), ERR_OK);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_CALL_ABILITY), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: ReleaseCall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ReleaseCall
