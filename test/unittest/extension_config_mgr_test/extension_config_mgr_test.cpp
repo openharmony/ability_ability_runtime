@@ -41,7 +41,6 @@ namespace {
     constexpr int32_t EXTENSION_TYPE_ENTERPRISE_ADMIN = 11;
     constexpr int32_t EXTENSION_TYPE_FILE_ACCESS = 12;
     constexpr int32_t EXTENSION_TYPE_DRIVER = 18;
-    constexpr int32_t EXTENSION_TYPE_UNKNOWN = 255;
     constexpr char BLOCK_LIST_ITEM_SERVICE_EXTENSION[] = "ServiceExtension";
     constexpr char BLOCK_LIST_ITEM_FORM_EXTENSION[] = "FormExtension";
     constexpr char BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION[] = "FileAccessExtension";
