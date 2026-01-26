@@ -28,15 +28,16 @@ namespace {
     constexpr char EXTENSION_BLOCKLIST_FILE_PATH[] = "/system/etc/extension_blocklist_config.json";
 }
 
-void ExtensionConfigMgr::Init()
+void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName, int32_t type)
 {
+    extensionType_ = type;
+    auto iter = extensionBlockList_.find(extensionType_);
+    if (iter != extensionBlockList_.end()) {
+        TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d. is loaded", extensionType_);
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "Init begin");
-    // clear cached data
-    blocklistConfig_.clear();
-    extensionBlocklist_.clear();
-    extensionEtsBlocklist_.clear();
-
     // read blocklist from extension_blocklist_config.json
     std::ifstream inFile;
     inFile.open(EXTENSION_BLOCKLIST_FILE_PATH, std::ios::in);
@@ -59,6 +60,9 @@ void ExtensionConfigMgr::Init()
     auto blackList = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
     std::unordered_set<std::string> currentBlockList;
     for (const auto& item : blackList.items()) {
+        if (item.key() != extensionName) {
+            continue;
+        }
         if (!blackList[item.key()].is_array()) {
             continue;
         }
@@ -67,22 +71,11 @@ void ExtensionConfigMgr::Init()
                 currentBlockList.emplace(value.get<std::string>());
             }
         }
-        blocklistConfig_.emplace(item.key(), std::move(currentBlockList));
+        extensionBlockList_.emplace(type, std::move(currentBlockList));
         currentBlockList.clear();
     }
     inFile.close();
     TAG_LOGD(AAFwkTag::EXT, "Init end");
-}
-
-void ExtensionConfigMgr::AddBlockListItem(const std::string& name, int32_t type)
-{
-    TAG_LOGD(AAFwkTag::EXT, "name: %{public}s, type: %{public}d", name.c_str(), type);
-    auto iter = blocklistConfig_.find(name);
-    if (iter == blocklistConfig_.end()) {
-        TAG_LOGD(AAFwkTag::EXT, "Extension name: %{public}s not exist", name.c_str());
-        return;
-    }
-    extensionBlocklist_.emplace(type, iter->second);
 }
 
 void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
