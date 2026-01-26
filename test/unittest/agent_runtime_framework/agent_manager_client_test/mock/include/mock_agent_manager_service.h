@@ -30,7 +30,8 @@ public:
 
     virtual int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards) override;
 
-    virtual int32_t GetAgentCardByUrl(const std::string &bundleName, const std::string &url, AgentCard &card) override;
+    virtual int32_t GetAgentCardByAgentId(const std::string &bundleName,
+        const std::string &agentId, AgentCard &card) override;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

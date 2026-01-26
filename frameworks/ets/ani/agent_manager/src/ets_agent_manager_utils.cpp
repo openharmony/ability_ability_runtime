@@ -285,17 +285,17 @@ ani_object CreateEtsAgentCard(ani_env *env, const AgentCard &card)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
         return nullptr;
     }
-    status = env->Object_SetPropertyByName_Int(object, "appIndex", card.appIndex);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
-        return nullptr;
-    }
     status = env->Object_SetPropertyByName_Ref(object, "name", GetAniString(env, card.name));
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
         return nullptr;
     }
     status = env->Object_SetPropertyByName_Ref(object, "description", GetAniString(env, card.description));
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
+        return nullptr;
+    }
+    status = env->Object_SetPropertyByName_Ref(object, "agentId", GetAniString(env, card.agentId));
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
         return nullptr;

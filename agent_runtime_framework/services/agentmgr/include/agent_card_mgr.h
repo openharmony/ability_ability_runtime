@@ -34,6 +34,12 @@ public:
 
     int32_t HandleBundleRemove(const std::string &bundleName, int32_t userId);
 
+    int32_t GetAllAgentCards(AgentCardsRawData &cards);
+
+    int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards);
+
+    int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card);
+
 private:
     OHOS::AppExecFwk::BundleMgrClient bundleMgrClient_;
     AgentCardMgr();

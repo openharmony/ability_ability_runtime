@@ -36,7 +36,7 @@ class EtsAgentManager final {
 public:
     static ani_object GetAllAgentCards(ani_env *env);
     static ani_object GetAgentCardsByBundleName(ani_env *env, ani_string aniBundleName);
-    static ani_object GetAgentCardByUrl(ani_env *env, ani_string aniBundleName, ani_string aniUrl);
+    static ani_object GetAgentCardByAgentId(ani_env *env, ani_string aniBundleName, ani_string aniAgentId);
 };
 
 ani_object EtsAgentManager::GetAllAgentCards(ani_env *env)
@@ -82,9 +82,9 @@ ani_object EtsAgentManager::GetAgentCardsByBundleName(ani_env *env, ani_string a
     return CreateEtsAgentCardArray(env, cards);
 }
 
-ani_object EtsAgentManager::GetAgentCardByUrl(ani_env *env, ani_string aniBundleName, ani_string aniUrl)
+ani_object EtsAgentManager::GetAgentCardByAgentId(ani_env *env, ani_string aniBundleName, ani_string aniAgentId)
 {
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "GetAgentCardByUrl");
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "GetAgentCardByAgentId");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return nullptr;
@@ -95,18 +95,18 @@ ani_object EtsAgentManager::GetAgentCardByUrl(ani_env *env, ani_string aniBundle
         AbilityRuntime::EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert bundleName fail.");
         return nullptr;
     }
-    std::string url;
-    if (!AppExecFwk::GetStdString(env, aniUrl, url)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "param url err");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert url fail.");
+    std::string agentId;
+    if (!AppExecFwk::GetStdString(env, aniAgentId, agentId)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "param agentId err");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert agentId fail.");
         return nullptr;
     }
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "bundleName: %{public}s, url: %{public}s", bundleName.c_str(), url.c_str());
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "bundleName: %{public}s, agentId: %{public}s", bundleName.c_str(), agentId.c_str());
 
     AgentCard card;
-    int32_t ret = AgentManagerClient::GetInstance().GetAgentCardByUrl(bundleName, url, card);
+    int32_t ret = AgentManagerClient::GetInstance().GetAgentCardByAgentId(bundleName, agentId, card);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "get card by url failed: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "get card by agentId failed: %{public}d", ret);
         AbilityRuntime::EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
         return nullptr;
     }
@@ -135,9 +135,9 @@ void EtsAgentManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAgentManager::GetAllAgentCards) },
         ani_native_function{ "nativeGetAgentCardsByBundleName", "C{std.core.String}:C{std.core.Array}",
             reinterpret_cast<void *>(EtsAgentManager::GetAgentCardsByBundleName) },
-        ani_native_function{ "nativeGetAgentCardByUrl",
+        ani_native_function{ "nativeGetAgentCardByAgentId",
             "C{std.core.String}C{std.core.String}:C{@ohos.app.ability.AgentCard.AgentCard}",
-            reinterpret_cast<void *>(EtsAgentManager::GetAgentCardByUrl) },
+            reinterpret_cast<void *>(EtsAgentManager::GetAgentCardByAgentId) },
 	};
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {
