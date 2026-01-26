@@ -46,25 +46,7 @@ public:
      * @brief ExtensionConfigMgr initialization
      *
      */
-    void Init();
-
-    /**
-     * @brief Set the Process Extension Type object
-     *
-     * @param extensionType
-     */
-    void SetProcessExtensionType(int32_t extensionType)
-    {
-        extensionType_ = extensionType;
-    }
-
-    /**
-     * @brief Add extension blocklist item
-     *
-     * @param name Extension name
-     * @param type Extension type
-     */
-    void AddBlockListItem(const std::string &name, int32_t type);
+    void LoadExtensionBlockList(const std::string &extensionName, int32_t type);
 
     /**
      * @brief Update runtime module checker
@@ -102,7 +84,6 @@ private:
      * @param runtime the runtime pointer
      */
     void SetExtensionEtsCheckCallback(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
-    std::unordered_map<std::string, std::unordered_set<std::string>> blocklistConfig_;
     std::unordered_map<int32_t, std::unordered_set<std::string>> extensionBlocklist_;
     std::unordered_set<std::string> extensionEtsBlocklist_;
     int32_t extensionType_ = EXTENSION_TYPE_UNKNOWN;
