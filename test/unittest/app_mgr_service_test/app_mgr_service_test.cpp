@@ -2299,13 +2299,17 @@ HWTEST_F(AppMgrServiceTest, PreloadExtension_0200, TestSize.Level1)
 
     std::string bundleName = "com.example.hmos.inputmethod";
     std::string abilityName = "InputService";
-    int32_t appIndex = 0;
+    int32_t appIndex = -1;
     int32_t userId = 100;
 
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
 
     int32_t ret = appMgrService->PreloadExtension(want, appIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+
+    appIndex = 0;
+    ret = appMgrService->PreloadExtension(want, appIndex, userId);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
 }
 
