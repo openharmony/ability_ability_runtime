@@ -41,8 +41,8 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
     // Check cache with lock protection
     {
         std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
-        auto iter = extensionBlockList_.find(extensionType_);
-        if (iter != extensionBlockList_.end()) {
+        auto iter = extensionBlocklist_.find(extensionType_);
+        if (iter != extensionBlocklist_.end()) {
             TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d is already loaded", extensionType_);
             return;
         }
@@ -109,11 +109,11 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
     {
         std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
         // Double-check after releasing lock for file I/O
-        auto iter = extensionBlockList_.find(type);
-        if (iter != extensionBlockList_.end()) {
+        auto iter = extensionBlocklist_.find(type);
+        if (iter != extensionBlocklist_.end()) {
             TAG_LOGD(AAFwkTag::EXT, "Extension type %{public}d was loaded by another thread", type);
         } else {
-            auto result = extensionBlockList_.emplace(type, std::move(currentBlockList));
+            auto result = extensionBlocklist_.emplace(type, std::move(currentBlockList));
             TAG_LOGI(AAFwkTag::EXT, "Loaded blocklist for type %{public}d, count: %{public}zu",
                 type, result.first->second.size());
         }
