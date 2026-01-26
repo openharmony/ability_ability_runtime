@@ -1122,13 +1122,14 @@ public:
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
-     * @param isSilent, whether show window when start fail.
+     * @param isSilent, whether show window when start fail by interceptorExecuter.
      * @param promotePriority, whether to promote priority for sa.
+     * @param isVisible, whether show window when start fail by afterCheckExecuter.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false,
-        bool promotePriority = false) = 0;
+        bool promotePriority = false, bool isVisible = false) = 0;
 
     /**
      * Start Ability, connect session with common ability.
@@ -1138,13 +1139,14 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
-     * @param isSilent, whether show window when start fail.
+     * @param isSilent, whether show window when start fail by interceptorExecuter.
      * @param promotePriority, whether to promote priority for sa.
+     * @param isVisible, whether show window when start fail by afterCheckExecuter.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent = false,
-        bool promotePriority = false)
+        bool promotePriority = false, bool isVisible = false)
     {
         return 0;
     };
