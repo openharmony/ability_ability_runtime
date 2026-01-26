@@ -9439,6 +9439,7 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
     result = CheckStartByCallPermission(abilityRequest);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "checkStartByCallPermission fail, result:%{public}d", result);
+        errMsg = "CheckStartByCallPermission failed";
         return result;
     }
 
@@ -12223,6 +12224,12 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
         abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "called ability not common ability");
         return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+
+    // plugin not supported.
+    if (AbilityRuntime::StartupUtil::IsStartPlugin(abilityRequest.want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "called ability cannot be plugin");
+        return RESOLVE_CALL_NO_PERMISSIONS;
     }
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
