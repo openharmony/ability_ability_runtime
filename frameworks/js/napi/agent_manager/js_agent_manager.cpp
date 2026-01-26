@@ -59,9 +59,9 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnGetAgentCardsByBundleName);
     }
 
-    static napi_value GetAgentCardByUrl(napi_env env, napi_callback_info info)
+    static napi_value GetAgentCardByAgentId(napi_env env, napi_callback_info info)
     {
-        GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnGetAgentCardByUrl);
+        GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnGetAgentCardByAgentId);
     }
 
 private:
@@ -127,7 +127,7 @@ private:
         return result;
     }
 
-    napi_value OnGetAgentCardByUrl(napi_env env, size_t argc, napi_value* argv)
+    napi_value OnGetAgentCardByAgentId(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc < ARGC_TWO) {
             ThrowTooFewParametersError(env);
@@ -141,17 +141,17 @@ private:
             return CreateJsUndefined(env);
         }
 
-        std::string url;
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], url)) {
-            TAG_LOGE(AAFwkTag::SER_ROUTER, "url not string");
-            ThrowInvalidParamError(env, "Parse param url failed, must be a string.");
+        std::string agentId;
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], agentId)) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "agentId not string");
+            ThrowInvalidParamError(env, "Parse param agentId failed, must be a string.");
             return CreateJsUndefined(env);
         }
 
         auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
         auto card = std::make_shared<AgentCard>();
-        NapiAsyncTask::ExecuteCallback execute = [bundleName, url, innerErrorCode, card]() {
-            *innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByUrl(bundleName, url, *card);
+        NapiAsyncTask::ExecuteCallback execute = [bundleName, agentId, innerErrorCode, card]() {
+            *innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByAgentId(bundleName, agentId, *card);
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrorCode, card](
@@ -165,7 +165,7 @@ private:
         };
 
         napi_value result = nullptr;
-        NapiAsyncTask::Schedule("JsAgentManager::OnGetAgentCardByUrl", env,
+        NapiAsyncTask::Schedule("JsAgentManager::OnGetAgentCardByAgentId", env,
             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
         return result;
     }
@@ -186,7 +186,7 @@ napi_value JsAgentManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getAllAgentCards", moduleName, JsAgentManager::GetAllAgentCards);
     BindNativeFunction(env, exportObj, "getAgentCardsByBundleName", moduleName,
         JsAgentManager::GetAgentCardsByBundleName);
-    BindNativeFunction(env, exportObj, "getAgentCardByUrl", moduleName, JsAgentManager::GetAgentCardByUrl);
+    BindNativeFunction(env, exportObj, "getAgentCardByAgentId", moduleName, JsAgentManager::GetAgentCardByAgentId);
     TAG_LOGD(AAFwkTag::SER_ROUTER, "end");
     return CreateJsUndefined(env);
 }

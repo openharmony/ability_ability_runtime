@@ -27,7 +27,7 @@ class MyFlag {
 public:
     static int retGetAllAgentCards;
     static int retGetAgentCardsByBundleName;
-    static int retGetAgentCardByUrl;
+    static int retGetAgentCardByAgentId;
     static int retToAgentCardVec;
     static std::vector<AgentCard> convertedCards;
     static bool nullSystemAbility;

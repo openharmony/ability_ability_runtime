@@ -189,6 +189,32 @@ int32_t AgentCardDbMgr::QueryData(const std::string &bundleName, int32_t userId,
     return ERR_OK;
 }
 
+int32_t AgentCardDbMgr::QueryAllData(std::vector<AgentCard> &cards)
+{
+    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+    if (!CheckKvStore()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null kvStore");
+        return ERR_NO_INIT;
+    }
+    std::vector<DistributedKv::Entry> allEntries;
+    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    if (status != DistributedKv::Status::SUCCESS) {
+        status = RestoreKvStore(status);
+        return ERR_INVALID_OPERATION;
+    }
+
+    for (const auto &item : allEntries) {
+        if (!nlohmann::json::accept(item.value.ToString())) {
+            return AAFwk::INNER_ERR;
+        }
+        nlohmann::json jsonArray = nlohmann::json::parse(item.value.ToString(), nullptr, false);
+        for (const auto &item : jsonArray) {
+            cards.push_back(AgentCard::FromJson(item));
+        }
+    }
+    return ERR_OK;
+}
+
 DistributedKv::Value AgentCardDbMgr::ConvertValue(const std::vector<AgentCard> &cards)
 {
     nlohmann::json jsonArray = nlohmann::json::array();

@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AgentRuntime {
 int MyFlag::retGetAllAgentCards = 0;
 int MyFlag::retGetAgentCardsByBundleName = 0;
-int MyFlag::retGetAgentCardByUrl = 0;
+int MyFlag::retGetAgentCardByAgentId = 0;
 
 MockAgentManagerService::MockAgentManagerService()
 {}
@@ -40,10 +40,10 @@ int32_t MockAgentManagerService::GetAgentCardsByBundleName(const std::string &bu
     return MyFlag::retGetAgentCardsByBundleName;
 }
 
-int32_t MockAgentManagerService::GetAgentCardByUrl(const std::string &bundleName, const std::string &url,
+int32_t MockAgentManagerService::GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId,
     AgentCard &card)
 {
-    return MyFlag::retGetAgentCardByUrl;
+    return MyFlag::retGetAgentCardByAgentId;
 }
 }  // namespace AgentRuntime
 }  // namespace OHOS

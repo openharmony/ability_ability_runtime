@@ -129,5 +129,313 @@ HWTEST_F(AgentCardDbMgrTest, QueryDataTest_001, TestSize.Level1)
     int ret = agentCardDbMgr.QueryData("test", 100, cards);
     EXPECT_TRUE(ret != ERR_OK);
 }
+
+/**
+ * @tc.name: QueryAllDataTest_001
+ * @tc.desc: Test QueryAllData with valid data - should return ERR_OK with cards
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_001, TestSize.Level1)
+{
+    // Arrange: Prepare test data
+    std::vector<AgentCard> insertCards;
+    AgentCard card1;
+    card1.bundleName = "com.test.agent1";
+    card1.moduleName = "entry";
+    card1.abilityName = "AgentAbility";
+    card1.agentId = "agent_001";
+    card1.name = "Test Agent 1";
+    card1.description = "Test agent 1 description";
+    card1.url = "https://test1.com";
+    card1.version = "1.0.0";
+    insertCards.push_back(card1);
+
+    // Act: Insert data and then query all
+    AgentCardDbMgr agentCardDbMgr;
+    int insertRet = agentCardDbMgr.InsertData("com.test.agent1", 100, insertCards);
+    EXPECT_TRUE(insertRet == ERR_OK);
+
+    std::vector<AgentCard> queryCards;
+    int queryRet = agentCardDbMgr.QueryAllData(queryCards);
+
+    // Assert: Verify the query result
+    EXPECT_TRUE(queryRet == ERR_OK);
+    EXPECT_TRUE(queryCards.size() >= 1);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_002
+ * @tc.desc: Test QueryAllData with empty database - should return ERR_OK with empty cards
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_002, TestSize.Level1)
+{
+    // Arrange: Clear database by deleting test data
+    AgentCardDbMgr agentCardDbMgr;
+    agentCardDbMgr.DeleteData("com.test.queryall", 100);
+
+    // Act: Query all data from empty database
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryAllData(cards);
+
+    // Assert: Should return success with empty cards (no error thrown)
+    EXPECT_TRUE(ret == ERR_OK);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_003
+ * @tc.desc: Test QueryAllData after inserting multiple cards - should return all cards
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
+{
+    // Arrange: Insert multiple cards with different bundle names and users
+    AgentCardDbMgr agentCardDbMgr;
+
+    std::vector<AgentCard> cards1;
+    AgentCard card1;
+    card1.bundleName = "com.test.multiple1";
+    card1.moduleName = "entry";
+    card1.abilityName = "AgentAbility";
+    card1.agentId = "agent_multi_001";
+    card1.name = "Multi Test Agent 1";
+    card1.url = "https://multi1.com";
+    card1.version = "1.0.0";
+    cards1.push_back(card1);
+
+    std::vector<AgentCard> cards2;
+    AgentCard card2;
+    card2.bundleName = "com.test.multiple2";
+    card2.moduleName = "entry";
+    card2.abilityName = "AgentAbility";
+    card2.agentId = "agent_multi_002";
+    card2.name = "Multi Test Agent 2";
+    card2.url = "https://multi2.com";
+    card2.version = "1.0.0";
+    cards2.push_back(card2);
+
+    std::vector<AgentCard> cards3;
+    AgentCard card3;
+    card3.bundleName = "com.test.multiple3";
+    card3.moduleName = "entry";
+    card3.abilityName = "AgentAbility";
+    card3.agentId = "agent_multi_003";
+    card3.name = "Multi Test Agent 3";
+    card3.url = "https://multi3.com";
+    card3.version = "1.0.0";
+    cards3.push_back(card3);
+
+    // Act: Insert cards for different bundles/users
+    int ret1 = agentCardDbMgr.InsertData("com.test.multiple1", 100, cards1);
+    int ret2 = agentCardDbMgr.InsertData("com.test.multiple2", 101, cards2);
+    int ret3 = agentCardDbMgr.InsertData("com.test.multiple3", 102, cards3);
+
+    EXPECT_TRUE(ret1 == ERR_OK);
+    EXPECT_TRUE(ret2 == ERR_OK);
+    EXPECT_TRUE(ret3 == ERR_OK);
+
+    // Query all data
+    std::vector<AgentCard> queryCards;
+    int queryRet = agentCardDbMgr.QueryAllData(queryCards);
+
+    // Assert: Should return success with all cards
+    EXPECT_TRUE(queryRet == ERR_OK);
+    EXPECT_TRUE(queryCards.size() >= 3);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_004
+ * @tc.desc: Test QueryAllData with multiple cards in single bundle - should return all cards
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
+{
+    // Arrange: Insert multiple cards for the same bundle
+    std::vector<AgentCard> insertCards;
+    AgentCard card1;
+    card1.bundleName = "com.test.singlebundle";
+    card1.moduleName = "entry";
+    card1.abilityName = "AgentAbility";
+    card1.agentId = "agent_single_001";
+    card1.name = "Single Bundle Agent 1";
+    card1.url = "https://single1.com";
+    card1.version = "1.0.0";
+    insertCards.push_back(card1);
+
+    AgentCard card2;
+    card2.bundleName = "com.test.singlebundle";
+    card2.moduleName = "entry";
+    card2.abilityName = "AgentAbility";
+    card2.agentId = "agent_single_002";
+    card2.name = "Single Bundle Agent 2";
+    card2.url = "https://single2.com";
+    card2.version = "1.0.0";
+    insertCards.push_back(card2);
+
+    AgentCard card3;
+    card3.bundleName = "com.test.singlebundle";
+    card3.moduleName = "entry";
+    card3.abilityName = "AgentAbility";
+    card3.agentId = "agent_single_003";
+    card3.name = "Single Bundle Agent 3";
+    card3.url = "https://single3.com";
+    card3.version = "1.0.0";
+    insertCards.push_back(card3);
+
+    // Act: Insert multiple cards for same bundle
+    AgentCardDbMgr agentCardDbMgr;
+    int insertRet = agentCardDbMgr.InsertData("com.test.singlebundle", 100, insertCards);
+    EXPECT_TRUE(insertRet == ERR_OK);
+
+    // Query all data
+    std::vector<AgentCard> queryCards;
+    int queryRet = agentCardDbMgr.QueryAllData(queryCards);
+
+    // Assert: Should return success with all cards
+    EXPECT_TRUE(queryRet == ERR_OK);
+    EXPECT_TRUE(queryCards.size() >= 3);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_005
+ * @tc.desc: Test QueryAllData - verify cards contain correct data
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
+{
+    // Arrange: Insert a card with specific data
+    std::vector<AgentCard> insertCards;
+    AgentCard card;
+    card.bundleName = "com.test.verify";
+    card.moduleName = "entry";
+    card.abilityName = "AgentAbility";
+    card.agentId = "agent_verify_001";
+    card.name = "Verify Test Agent";
+    card.description = "This is a verification test";
+    card.url = "https://verify.com";
+    card.version = "2.0.0";
+
+    std::vector<std::string> inputModes = {"text", "voice"};
+    std::vector<std::string> outputModes = {"text", "voice"};
+    card.defaultInputModes = inputModes;
+    card.defaultOutputModes = outputModes;
+    insertCards.push_back(card);
+
+    // Act: Insert and query
+    AgentCardDbMgr agentCardDbMgr;
+    int insertRet = agentCardDbMgr.InsertData("com.test.verify", 100, insertCards);
+    EXPECT_TRUE(insertRet == ERR_OK);
+
+    std::vector<AgentCard> queryCards;
+    int queryRet = agentCardDbMgr.QueryAllData(queryCards);
+
+    // Assert: Verify the returned data matches
+    EXPECT_TRUE(queryRet == ERR_OK);
+    bool found = false;
+    for (const auto &queryCard : queryCards) {
+        if (queryCard.agentId == "agent_verify_001") {
+            EXPECT_TRUE(queryCard.bundleName == "com.test.verify");
+            EXPECT_TRUE(queryCard.name == "Verify Test Agent");
+            EXPECT_TRUE(queryCard.url == "https://verify.com");
+            EXPECT_TRUE(queryCard.version == "2.0.0");
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_006
+ * @tc.desc: Test QueryAllData after delete - should not contain deleted data
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_006, TestSize.Level1)
+{
+    // Arrange: Insert data then delete it
+    std::vector<AgentCard> insertCards;
+    AgentCard card;
+    card.bundleName = "com.test.todelete";
+    card.moduleName = "entry";
+    card.abilityName = "AgentAbility";
+    card.agentId = "agent_delete_001";
+    card.name = "Delete Test Agent";
+    card.url = "https://delete.com";
+    card.version = "1.0.0";
+    insertCards.push_back(card);
+
+    AgentCardDbMgr agentCardDbMgr;
+    int insertRet = agentCardDbMgr.InsertData("com.test.todelete", 100, insertCards);
+    EXPECT_TRUE(insertRet == ERR_OK);
+
+    // Verify it exists
+    std::vector<AgentCard> queryCards1;
+    agentCardDbMgr.QueryAllData(queryCards1);
+    bool foundBeforeDelete = false;
+    for (const auto &c : queryCards1) {
+        if (c.agentId == "agent_delete_001") {
+            foundBeforeDelete = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundBeforeDelete);
+
+    // Act: Delete the data
+    int deleteRet = agentCardDbMgr.DeleteData("com.test.todelete", 100);
+    EXPECT_TRUE(deleteRet == ERR_OK);
+
+    // Query all again
+    std::vector<AgentCard> queryCards2;
+    int queryRet = agentCardDbMgr.QueryAllData(queryCards2);
+
+    // Assert: Deleted data should not exist
+    EXPECT_TRUE(queryRet == ERR_OK);
+    bool foundAfterDelete = false;
+    for (const auto &c : queryCards2) {
+        if (c.agentId == "agent_delete_001") {
+            foundAfterDelete = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(!foundAfterDelete);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_007
+ * @tc.desc: Test QueryAllData with empty cards vector input - should work correctly
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_007, TestSize.Level1)
+{
+    // Arrange: Prepare a fresh empty vector
+    std::vector<AgentCard> insertCards;
+    AgentCard card;
+    card.bundleName = "com.test.emptyvec";
+    card.moduleName = "entry";
+    card.abilityName = "AgentAbility";
+    card.agentId = "agent_emptyvec_001";
+    card.name = "Empty Vector Test";
+    card.url = "https://emptyvec.com";
+    card.version = "1.0.0";
+    insertCards.push_back(card);
+
+    AgentCardDbMgr agentCardDbMgr;
+    agentCardDbMgr.InsertData("com.test.emptyvec", 100, insertCards);
+
+    // Act: Query with empty vector
+    std::vector<AgentCard> queryCards;  // Empty vector
+    int ret = agentCardDbMgr.QueryAllData(queryCards);
+
+    // Assert: Should populate the vector correctly
+    EXPECT_TRUE(ret == ERR_OK);
+    EXPECT_TRUE(queryCards.size() >= 1);
+}
 } // namespace AgentRuntime
 } // namespace OHOS

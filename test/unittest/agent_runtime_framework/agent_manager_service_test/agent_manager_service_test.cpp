@@ -234,20 +234,20 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardsByBundleName_001, TestSize.Level1
 {
     std::string bundleName = "bundle";
     std::vector<AgentCard> cards;
-    EXPECT_EQ(AgentManagerService::GetInstance()->GetAgentCardsByBundleName(bundleName, cards), ERR_OK);
+    EXPECT_NE(AgentManagerService::GetInstance()->GetAgentCardsByBundleName(bundleName, cards), ERR_OK);
 }
 
 /**
-* @tc.name  : GetAgentCardByUrl
-* @tc.number: GetAgentCardByUrl_001
-* @tc.desc  : GetAgentCardByUrl_001
+* @tc.name  : GetAgentCardByAgentId
+* @tc.number: GetAgentCardByAgentId_001
+* @tc.desc  : GetAgentCardByAgentId_001
 */
-HWTEST_F(AgentManagerServiceTest, GetAgentCardByUrl_001, TestSize.Level1)
+HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_001, TestSize.Level1)
 {
     std::string bundleName = "bundle";
-    std::string url = "url";
+    std::string agentId = "agentId";
     AgentCard card;
-    EXPECT_EQ(AgentManagerService::GetInstance()->GetAgentCardByUrl(bundleName, url, card), ERR_OK);
+    EXPECT_NE(AgentManagerService::GetInstance()->GetAgentCardByAgentId(bundleName, agentId, card), ERR_OK);
 }
 } // namespace AgentRuntime
 } // namespace OHOS

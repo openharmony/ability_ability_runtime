@@ -86,7 +86,7 @@ struct AgentCard : public Parcelable {
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
-    int32_t appIndex;
+    std::string agentId;
     std::string name;
     std::string description;
     std::string url;

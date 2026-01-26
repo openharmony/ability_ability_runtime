@@ -180,59 +180,59 @@ HWTEST_F(AgentManagerClientTest, GetAgentCardsByBundleName_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : GetAgentCardByUrl_ShouldReturnError_WhenProxyIsNull
-* @tc.number: GetAgentCardByUrl_001
-* @tc.desc  : Test that GetAgentCardByUrl returns ERR_NULL_AGENT_MGR_PROXY when the agent manager proxy is null.
+* @tc.name  : GetAgentCardByAgentId_ShouldReturnError_WhenProxyIsNull
+* @tc.number: GetAgentCardByAgentId_001
+* @tc.desc  : Test that GetAgentCardByAgentId returns ERR_NULL_AGENT_MGR_PROXY when the agent manager proxy is null.
 */
-HWTEST_F(AgentManagerClientTest, GetAgentCardByUrl_001, TestSize.Level1)
+HWTEST_F(AgentManagerClientTest, GetAgentCardByAgentId_001, TestSize.Level1)
 {
     AgentManagerClient client;
     MyFlag::nullSystemAbility = true;
-    
+
     AgentCard card;
     std::string bundleName = "bundle";
-    std::string url = "url";
-    int32_t result = client.GetAgentCardByUrl(bundleName, url, card);
+    std::string agentId = "agentId";
+    int32_t result = client.GetAgentCardByAgentId(bundleName, agentId, card);
     EXPECT_EQ(result, ERR_NULL_AGENT_MGR_PROXY);
 }
 
 /**
-* @tc.name  : GetAgentCardByUrl_ShouldReturnError_WhenRawDataRetrievalFails
-* @tc.number: GetAgentCardByUrl_002
-* @tc.desc  : Test that GetAgentCardByUrl returns the error code when retrieving raw data fails.
+* @tc.name  : GetAgentCardByAgentId_ShouldReturnError_WhenRawDataRetrievalFails
+* @tc.number: GetAgentCardByAgentId_002
+* @tc.desc  : Test that GetAgentCardByAgentId returns the error code when retrieving raw data fails.
 */
-HWTEST_F(AgentManagerClientTest, GetAgentCardByUrl_002, TestSize.Level1)
+HWTEST_F(AgentManagerClientTest, GetAgentCardByAgentId_002, TestSize.Level1)
 {
     AgentManagerClient client;
     MyFlag::nullSystemAbility = false;
     auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
     client.agentMgr_ = mockAgentMgr;
-    MyFlag::retGetAgentCardByUrl = -1;
+    MyFlag::retGetAgentCardByAgentId = -1;
 
     AgentCard card;
     std::string bundleName = "bundle";
-    std::string url = "url";
-    int32_t result = client.GetAgentCardByUrl(bundleName, url, card);
+    std::string agentId = "agentId";
+    int32_t result = client.GetAgentCardByAgentId(bundleName, agentId, card);
     EXPECT_EQ(result, -1);
 }
 
 /**
-* @tc.name  : GetAgentCardByUrl_ShouldReturnSuccess_WhenAllOperationsSucceed
-* @tc.number: GetAgentCardByUrl_003
-* @tc.desc  : Test that GetAgentCardByUrl returns ERR_OK when all operations succeed.
+* @tc.name  : GetAgentCardByAgentId_ShouldReturnSuccess_WhenAllOperationsSucceed
+* @tc.number: GetAgentCardByAgentId_003
+* @tc.desc  : Test that GetAgentCardByAgentId returns ERR_OK when all operations succeed.
 */
-HWTEST_F(AgentManagerClientTest, GetAgentCardByUrl_003, TestSize.Level1)
+HWTEST_F(AgentManagerClientTest, GetAgentCardByAgentId_003, TestSize.Level1)
 {
     AgentManagerClient client;
     MyFlag::nullSystemAbility = false;
     auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
     client.agentMgr_ = mockAgentMgr;
-    MyFlag::retGetAgentCardByUrl = ERR_OK;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
 
     AgentCard card;
     std::string bundleName = "bundle";
-    std::string url = "url";
-    int32_t result = client.GetAgentCardByUrl(bundleName, url, card);
+    std::string agentId = "agentId";
+    int32_t result = client.GetAgentCardByAgentId(bundleName, agentId, card);
     EXPECT_EQ(result, ERR_OK);
 }
 
