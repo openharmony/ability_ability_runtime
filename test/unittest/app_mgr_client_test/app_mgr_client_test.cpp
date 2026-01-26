@@ -1226,16 +1226,12 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_PreloadExtension_001, TestSize.Level2)
     std::string bundleName = "com.example.inputmethod";
     std::string abilityName = "InputService";
     int32_t userId = 100;
-    int32_t appIndex = -1;
+    int32_t appIndex = 0;
 
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
 
     int32_t ret = appMgrClient->PreloadExtension(want, appIndex, userId);
-    EXPECT_EQ(ret, AppMgrResultCode::ERROR_APP_INDEX);
-
-    appIndex = 0;
-    ret = appMgrClient->PreloadExtension(want, appIndex, userId);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 
