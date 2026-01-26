@@ -41,6 +41,7 @@ namespace {
     constexpr int32_t EXTENSION_TYPE_ENTERPRISE_ADMIN = 11;
     constexpr int32_t EXTENSION_TYPE_FILE_ACCESS = 12;
     constexpr int32_t EXTENSION_TYPE_DRIVER = 18;
+    constexpr int32_t EXTENSION_TYPE_UNKNOWN = 255;
     constexpr char BLOCK_LIST_ITEM_SERVICE_EXTENSION[] = "ServiceExtension";
     constexpr char BLOCK_LIST_ITEM_FORM_EXTENSION[] = "FormExtension";
     constexpr char BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION[] = "FileAccessExtension";
@@ -573,6 +574,94 @@ HWTEST_F(ExtensionConfigMgrTest, UpdateRuntimeModuleChecker_ShouldHandleNotEtsRu
     MockRuntime &mockRuntime = static_cast<MockRuntime&>(*runtime);
     EXPECT_TRUE(mockRuntime.loadCheckerFlag_);
     EXPECT_FALSE(mockRuntime.extensionApiCheckerFlag_);
+}
+
+/**
+ * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsNegative
+ * @tc.desc: Test LoadExtensionBlockList with negative type value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsNegative, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, -1);
+    bool result = (mgr.extensionBlocklist_.find(-1) != mgr.extensionBlocklist_.end());
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsUnknown
+ * @tc.desc: Test LoadExtensionBlockList with EXTENSION_TYPE_UNKNOWN type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsUnknown, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_UNKNOWN);
+    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_UNKNOWN) != mgr.extensionBlocklist_.end());
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeExceedsUnknown
+ * @tc.desc: Test LoadExtensionBlockList with type greater than EXTENSION_TYPE_UNKNOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeExceedsUnknown, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_UNKNOWN + 1);
+    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_UNKNOWN + 1) != mgr.extensionBlocklist_.end());
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenAlreadyLoaded
+ * @tc.desc: Test LoadExtensionBlockList when the same type is already loaded.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenAlreadyLoaded, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    // First load
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
+    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE) != mgr.extensionBlocklist_.end());
+    EXPECT_TRUE(result);
+
+    // Get the size after first load
+    auto iter = mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE);
+    size_t firstSize = iter->second.size();
+
+    // Second load with same type - should return early and not modify
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE) != mgr.extensionBlocklist_.end());
+    EXPECT_TRUE(result);
+
+    // Verify size hasn't changed
+    iter = mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE);
+    EXPECT_EQ(iter->second.size(), firstSize);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldReturnOriginal_WhenNameStartsWithAtButNoDot
+ * @tc.desc: func should return original name when it starts with @ but has no dot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldReturnOriginal_WhenNameStartsWithAtButNoDot,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "@ohos";
+    std::string expectOutput = "@ohos";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+
+    input = "@xxx";
+    expectOutput = "@xxx";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+
+    input = "@";
+    expectOutput = "@";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
