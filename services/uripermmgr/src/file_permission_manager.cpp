@@ -36,7 +36,7 @@ constexpr const char* URI_CHECK_FUNC_NAME = "CheckCollaboratorUriPermission";
 }
 const std::string FILE_MANAGER_AUTHORITY = "docs";
 const std::string STORAGE_URI = "/storage";
-const std::string APPDATA_URI = "/storage/Users/currentUser/appdata";
+const std::string APPDATA_URI = "/storage/Users/currentUser/appdata/";
 const std::string DOWNLOAD_PATH = "/storage/Users/currentUser/Download";
 const std::string DESKTOP_PATH = "/storage/Users/currentUser/Desktop";
 const std::string DOCUMENTS_PATH = "/storage/Users/currentUser/Documents";
@@ -180,6 +180,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         resultIndex.emplace_back(i);
         persistPolicys.emplace_back(policyInfo);
     }
+
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     if (persistPolicys.empty()) {
         return resultCodes;

@@ -33,7 +33,7 @@ public:
     static bool SendShareUnPrivilegeUriEvent(uint32_t callTokenId, uint32_t targetTokenId);
     static bool SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
                                                      const std::vector<std::string> &uriVec,
-                                                     const std::vector<bool> &resVec);
+                                                     const std::vector<CheckResult> &resVec);
     static int32_t GetCurrentAccountId();
     static bool IsFoundationCall();
     static bool IsSAOrSystemAppCall();
@@ -52,6 +52,7 @@ public:
     static bool IsUdmfOrPasteboardCall();
     static bool IsDFSCall();
     static bool IsSandboxApp(uint32_t tokenId);
+    static bool IsBrokerCaller();
 
 private:
     static bool CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo);
