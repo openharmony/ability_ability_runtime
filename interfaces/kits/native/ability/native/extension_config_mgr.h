@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_EXTENSION_CONFIG_HANDLER_H
 #define OHOS_ABILITY_RUNTIME_EXTENSION_CONFIG_HANDLER_H
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -84,8 +85,17 @@ private:
      * @param runtime the runtime pointer
      */
     void SetExtensionEtsCheckCallback(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
+
+    /// Mutex to protect extensionBlocklist_ from concurrent access
+    std::mutex extensionBlockListMutex_;
+
+    /// Blocklist cache for loaded extensions, key is extensionType
     std::unordered_map<int32_t, std::unordered_set<std::string>> extensionBlocklist_;
+
+    /// ETS runtime blocklist cache
     std::unordered_set<std::string> extensionEtsBlocklist_;
+
+    /// Current process extension type
     int32_t extensionType_ = EXTENSION_TYPE_UNKNOWN;
 };
 } // namespace OHOS::AbilityRuntime

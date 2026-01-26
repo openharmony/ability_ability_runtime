@@ -30,52 +30,96 @@ namespace {
 
 void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName, int32_t type)
 {
-    extensionType_ = type;
-    auto iter = extensionBlockList_.find(extensionType_);
-    if (iter != extensionBlockList_.end()) {
-        TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d. is loaded", extensionType_);
+    // Boundary check: validate type parameter
+    if (type < 0 || type >= EXTENSION_TYPE_UNKNOWN) {
+        TAG_LOGE(AAFwkTag::EXT, "Invalid extension type: %{public}d", type);
         return;
     }
+
+    extensionType_ = type;
+
+    // Check cache with lock protection
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        auto iter = extensionBlockList_.find(extensionType_);
+        if (iter != extensionBlockList_.end()) {
+            TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d is already loaded", extensionType_);
+            return;
+        }
+    }
+
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "Init begin");
-    // read blocklist from extension_blocklist_config.json
+    TAG_LOGD(AAFwkTag::EXT, "Loading blocklist for extension: %{public}s, type: %{public}d",
+        extensionName.c_str(), type);
+
+    // Read blocklist from extension_blocklist_config.json
     std::ifstream inFile;
     inFile.open(EXTENSION_BLOCKLIST_FILE_PATH, std::ios::in);
     if (!inFile.is_open()) {
-        TAG_LOGE(AAFwkTag::EXT, "read extension config error");
+        TAG_LOGW(AAFwkTag::EXT, "Extension config file not found: %{public}s", EXTENSION_BLOCKLIST_FILE_PATH);
         return;
     }
+
     nlohmann::json extensionConfig;
     inFile >> extensionConfig;
     if (extensionConfig.is_discarded()) {
-        TAG_LOGE(AAFwkTag::EXT, "extension config json discarded error");
+        TAG_LOGE(AAFwkTag::EXT, "Extension config JSON parse error");
         inFile.close();
         return;
     }
+
     if (!extensionConfig.contains(ExtensionConfigItem::ITEM_NAME_BLOCKLIST)) {
-        TAG_LOGE(AAFwkTag::EXT, "extension config file have no blocklist node");
+        TAG_LOGW(AAFwkTag::EXT, "Extension config file has no blocklist node");
         inFile.close();
         return;
     }
+
     auto blackList = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
     std::unordered_set<std::string> currentBlockList;
+    bool found = false;
+
     for (const auto& item : blackList.items()) {
         if (item.key() != extensionName) {
             continue;
         }
+
         if (!blackList[item.key()].is_array()) {
+            TAG_LOGW(AAFwkTag::EXT, "Blocklist for %{public}s is not an array", extensionName.c_str());
             continue;
         }
+
         for (const auto& value : blackList[item.key()]) {
             if (value.is_string()) {
                 currentBlockList.emplace(value.get<std::string>());
             }
         }
-        extensionBlockList_.emplace(type, std::move(currentBlockList));
-        currentBlockList.clear();
+
+        found = true;
+        break;
     }
+
     inFile.close();
-    TAG_LOGD(AAFwkTag::EXT, "Init end");
+
+    if (!found) {
+        TAG_LOGW(AAFwkTag::EXT, "Extension name: %{public}s not found in config", extensionName.c_str());
+        return;
+    }
+
+    // Insert into cache with lock protection
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        // Double-check after releasing lock for file I/O
+        auto iter = extensionBlockList_.find(type);
+        if (iter != extensionBlockList_.end()) {
+            TAG_LOGD(AAFwkTag::EXT, "Extension type %{public}d was loaded by another thread", type);
+        } else {
+            auto result = extensionBlockList_.emplace(type, std::move(currentBlockList));
+            TAG_LOGI(AAFwkTag::EXT, "Loaded blocklist for type %{public}d, count: %{public}zu",
+                type, result.first->second.size());
+        }
+    }
+
+    TAG_LOGD(AAFwkTag::EXT, "LoadExtensionBlockList end");
 }
 
 void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
@@ -85,15 +129,23 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
         return;
     }
     TAG_LOGD(AAFwkTag::EXT, "extensionType_: %{public}d", extensionType_);
+
     if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
         TAG_LOGD(AAFwkTag::EXT, "ets runtime");
         GenerateExtensionEtsBlocklists();
         SetExtensionEtsCheckCallback(runtime);
     }
 
-    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, extensionBlocklist_);
+    // Copy blocklist with lock protection to avoid holding lock during moduleChecker creation
+    std::unordered_map<int32_t, std::unordered_set<std::string>> localBlocklist;
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        localBlocklist = extensionBlocklist_;
+        // Note: Don't clear here, let the cache remain for potential reuse
+    }
+
+    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, localBlocklist);
     runtime->SetModuleLoadChecker(moduleChecker);
-    extensionBlocklist_.clear();
 }
 
 void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
@@ -102,12 +154,20 @@ void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
         TAG_LOGD(AAFwkTag::EXT, "extension ets block list not empty.");
         return;
     }
-    auto iter = extensionBlocklist_.find(extensionType_);
-    if (iter == extensionBlocklist_.end()) {
-        TAG_LOGD(AAFwkTag::EXT, "null extension block, extensionType: %{public}d.", extensionType_);
-        return;
+
+    // Access extensionBlocklist_ with lock protection
+    std::unordered_set<std::string> targetBlocklist;
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        auto iter = extensionBlocklist_.find(extensionType_);
+        if (iter == extensionBlocklist_.end()) {
+            TAG_LOGW(AAFwkTag::EXT, "No blocklist found for extensionType: %{public}d", extensionType_);
+            return;
+        }
+        targetBlocklist = iter->second;
     }
-    for (const auto& module: iter->second) {
+
+    for (const auto& module: targetBlocklist) {
         extensionEtsBlocklist_.emplace(module);
     }
 }
