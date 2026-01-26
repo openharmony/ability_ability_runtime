@@ -78,119 +78,161 @@ void ExtensionConfigMgrTest::TearDown()
 {}
 
 /**
- * @tc.name: Init_0100
- * @tc.desc: Init Test
+ * @tc.name: LoadExtensionBlockList_0100
+ * @tc.desc: Test LoadExtensionBlockList with multiple extensions
  * @tc.type: FUNC
  * @tc.require: issueI581T3
  */
-HWTEST_F(ExtensionConfigMgrTest, Init_0100, TestSize.Level0)
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_0100, TestSize.Level0)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    bool result = false;
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_SERVICE_EXTENSION) != mgr.blocklistConfig_.end());
+    // Load multiple extension blocklists
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
+    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_FORM_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_FORM_EXTENSION, EXTENSION_TYPE_FORM);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION, EXTENSION_TYPE_FILE_ACCESS);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FILE_ACCESS) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_BACKUP_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_BACKUP_EXTENSION, EXTENSION_TYPE_BACKUP);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_BACKUP) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_ENTERPRISE_ADMIN_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_ENTERPRISE_ADMIN_EXTENSION, EXTENSION_TYPE_ENTERPRISE_ADMIN);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_ENTERPRISE_ADMIN) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_WINDOW_EXTENSION_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WINDOW_EXTENSION_EXTENSION, EXTENSION_TYPE_WINDOW);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WINDOW) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_WALLPAPER_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WALLPAPER_EXTENSION, EXTENSION_TYPE_WALLPAPER);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WALLPAPER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_STATIC_SUBSCRIBER_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_STATIC_SUBSCRIBER_EXTENSION, EXTENSION_TYPE_STATICSUBSCRIBER);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_STATICSUBSCRIBER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_ACCESSIBILITY_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_ACCESSIBILITY_EXTENSION, EXTENSION_TYPE_ACCESSIBILITY);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_ACCESSIBILITY) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_INPUT_METHOD_EXTENSION_ABILITY) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_INPUT_METHOD_EXTENSION_ABILITY, EXTENSION_TYPE_INPUTMETHOD);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_INPUTMETHOD) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_WORK_SCHEDULER_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WORK_SCHEDULER_EXTENSION, EXTENSION_TYPE_WORK_SCHEDULER);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WORK_SCHEDULER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_DATA_SHARE_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DATA_SHARE_EXTENSION, EXTENSION_TYPE_DATASHARE);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_DATASHARE) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
 }
 
 /**
- * @tc.name: Init_0200
- * @tc.desc: Init Test
+ * @tc.name: LoadExtensionBlockList_0200
+ * @tc.desc: Test LoadExtensionBlockList and verify blocklist content
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConfigMgrTest, Init_0200, TestSize.Level0)
+HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_0200, TestSize.Level0)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    bool result = false;
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_SERVICE_EXTENSION) != mgr.blocklistConfig_.end());
+    // Load extension blocklist
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
+    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_FORM_EXTENSION) != mgr.blocklistConfig_.end());
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_FORM_EXTENSION, EXTENSION_TYPE_FORM);
+    result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    EXPECT_FALSE(mgr.blocklistConfig_[BLOCK_LIST_ITEM_FORM_EXTENSION].empty());
+
+    // Verify blocklist content is not empty
+    auto iter = mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM);
+    EXPECT_TRUE(iter != mgr.extensionBlocklist_.end());
+    if (iter != mgr.extensionBlocklist_.end()) {
+        EXPECT_FALSE(iter->second.empty());
+    }
 }
 
 /**
  * @tc.name: AddBlockListItem_0100
- * @tc.desc: AddBlockListItem Test
+ * @tc.desc: Test LoadExtensionBlockList with multiple extensions
  * @tc.type: FUNC
  * @tc.require: issueI581T3
  */
 HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0100, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
     bool result = false;
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_FORM_EXTENSION, EXTENSION_TYPE_FORM);
+
+    // Load extension blocklists using new API
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_FORM_EXTENSION, EXTENSION_TYPE_FORM);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_WORK_SCHEDULER_EXTENSION, EXTENSION_TYPE_WORK_SCHEDULER);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WORK_SCHEDULER_EXTENSION, EXTENSION_TYPE_WORK_SCHEDULER);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WORK_SCHEDULER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_INPUT_METHOD_EXTENSION_ABILITY, EXTENSION_TYPE_INPUTMETHOD);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_INPUT_METHOD_EXTENSION_ABILITY, EXTENSION_TYPE_INPUTMETHOD);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_INPUTMETHOD) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_SERVICE);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_SERVICE) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_ACCESSIBILITY_EXTENSION, EXTENSION_TYPE_ACCESSIBILITY);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_ACCESSIBILITY_EXTENSION, EXTENSION_TYPE_ACCESSIBILITY);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_ACCESSIBILITY) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DATA_SHARE_EXTENSION, EXTENSION_TYPE_DATASHARE);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DATA_SHARE_EXTENSION, EXTENSION_TYPE_DATASHARE);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_DATASHARE) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_STATIC_SUBSCRIBER_EXTENSION, EXTENSION_TYPE_STATICSUBSCRIBER);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_STATIC_SUBSCRIBER_EXTENSION, EXTENSION_TYPE_STATICSUBSCRIBER);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_STATICSUBSCRIBER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_WALLPAPER_EXTENSION, EXTENSION_TYPE_WALLPAPER);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WALLPAPER_EXTENSION, EXTENSION_TYPE_WALLPAPER);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WALLPAPER) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_BACKUP_EXTENSION, EXTENSION_TYPE_BACKUP);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_BACKUP_EXTENSION, EXTENSION_TYPE_BACKUP);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_BACKUP) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_WINDOW_EXTENSION_EXTENSION, EXTENSION_TYPE_WINDOW);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_WINDOW_EXTENSION_EXTENSION, EXTENSION_TYPE_WINDOW);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_WINDOW) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_ENTERPRISE_ADMIN_EXTENSION, EXTENSION_TYPE_ENTERPRISE_ADMIN);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_ENTERPRISE_ADMIN_EXTENSION, EXTENSION_TYPE_ENTERPRISE_ADMIN);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_ENTERPRISE_ADMIN) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION, EXTENSION_TYPE_FILE_ACCESS);
+
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION, EXTENSION_TYPE_FILE_ACCESS);
     result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FILE_ACCESS) != mgr.extensionBlocklist_.end());
     EXPECT_TRUE(result);
 }
 
 /**
  * @tc.name: AddBlockListItem_0200
- * @tc.desc: AddBlockListItem Test
+ * @tc.desc: Test LoadExtensionBlockList with invalid extension name
  * @tc.type: FUNC
  * @tc.require: issueI5825N
  */
 HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0200, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(INVAILD_BLOCK_LIST_ITEM, EXTENSION_TYPE_FORM);
+    // Try to load blocklist with invalid extension name
+    mgr.LoadExtensionBlockList(INVAILD_BLOCK_LIST_ITEM, EXTENSION_TYPE_FORM);
     bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM) != mgr.extensionBlocklist_.end());
     EXPECT_FALSE(result);
 }
@@ -388,8 +430,7 @@ HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFi
     TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable("@ohos.abilityAccessCtrl.abilityAccessCtrl", "@ohos.abilityAccessCtrl"));
@@ -404,8 +445,7 @@ HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFi
     TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable("@xxx.app.ability.appManager", "@xxx.app.ability.appManager"));
@@ -420,8 +460,7 @@ HWTEST_F(ExtensionConfigMgrTest,
     CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndNotStartsWithPrefix, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
 
@@ -440,8 +479,7 @@ HWTEST_F(ExtensionConfigMgrTest,
     TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
 
@@ -459,8 +497,7 @@ HWTEST_F(ExtensionConfigMgrTest,
     TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
 
@@ -490,8 +527,7 @@ HWTEST_F(ExtensionConfigMgrTest,
     CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameNotInBlockListAndStartsWithPrefix, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
-    mgr.Init();
-    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
     mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
     mgr.GenerateExtensionEtsBlocklists();
 
