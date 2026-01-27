@@ -2228,5 +2228,262 @@ HWTEST_F(ContinuationTest, continue_manager_GetProcessState_001, TestSize.Level1
     EXPECT_EQ(ContinuationManager::ProgressState::INITIAL, result);
     GTEST_LOG_(INFO) << "continue_manager_GetProcessState_001 end";
 }
+
+/*
+ * @tc.number: HandleStartContinuationWithStack_001
+ * @tc.name: HandleStartContinuationWithStack
+ * @tc.desc: call HandleStartContinuationWithStack true
+ */
+HWTEST_F(ContinuationTest, HandleStartContinuationWithStack_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleStartContinuationWithStack_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+    ability_->abilityInfo_->isStageBasedModel = true;
+    std::string deviceId = "testDeviceId";
+    uint32_t versionCode = 0;
+
+    bool ret = continuationHandlerStage->HandleStartContinuationWithStack(token, deviceId, versionCode);
+    EXPECT_TRUE(continuationHandlerStage != nullptr);
+    EXPECT_TRUE(ret);
+    GTEST_LOG_(INFO) << "HandleStartContinuationWithStack_001 end";
+}
+
+/*
+ * @tc.number: HandleStartContinuationWithStack_002
+ * @tc.name: HandleStartContinuationWithStack
+ * @tc.desc: call HandleStartContinuationWithStack false
+ */
+HWTEST_F(ContinuationTest, HandleStartContinuationWithStack_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleStartContinuationWithStack_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+    sptr<IRemoteObject> token = nullptr;
+    std::string deviceId = "testDeviceId";
+    uint32_t versionCode = 0;
+
+    bool ret = continuationHandlerStage->HandleStartContinuationWithStack(token, deviceId, versionCode);
+    EXPECT_FALSE(ret);
+
+    token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    continuationHandlerStage->abilityInfo_ = nullptr;
+    ret = continuationHandlerStage->HandleStartContinuationWithStack(token, deviceId, versionCode);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "HandleStartContinuationWithStack_002 end";
+}
+
+/*
+ * @tc.number: HandleStartContinuation_001
+ * @tc.name: HandleStartContinuation
+ * @tc.desc: call HandleStartContinuation false
+ */
+HWTEST_F(ContinuationTest, HandleStartContinuation_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleStartContinuation_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+    sptr<IRemoteObject> token = nullptr;
+    std::string deviceId = "testDeviceId";
+
+    bool ret = continuationHandlerStage->HandleStartContinuation(token, deviceId);
+    EXPECT_FALSE(ret);
+
+    token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    continuationHandlerStage->abilityInfo_ = nullptr;
+    ret = continuationHandlerStage->HandleStartContinuation(token, deviceId);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "HandleStartContinuation_001 end";
+}
+
+/*
+ * @tc.number: HandleStartContinuation_002
+ * @tc.name: HandleStartContinuation
+ * @tc.desc: call HandleStartContinuation fail with null continuationManagerTmp
+ */
+HWTEST_F(ContinuationTest, HandleStartContinuation_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleStartContinuation_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    continuationManagerStage.reset();
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+    std::string deviceId = "testDeviceId";
+
+    bool ret = continuationHandlerStage->HandleStartContinuation(token, deviceId);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "HandleStartContinuation_002 end";
+}
+
+/*
+ * @tc.number: HandleStartContinuation_003
+ * @tc.name: HandleStartContinuation
+ * @tc.desc: call HandleStartContinuation StartContinuation fail
+ */
+HWTEST_F(ContinuationTest, HandleStartContinuation_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleStartContinuation_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+    std::string deviceId = "testDeviceId";
+
+    bool ret = continuationHandlerStage->HandleStartContinuation(token, deviceId);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "HandleStartContinuation_003 end";
+}
+
+/*
+ * @tc.number: ReverseContinuation_001
+ * @tc.name: ReverseContinuation
+ * @tc.desc: call ReverseContinuation false
+ */
+HWTEST_F(ContinuationTest, ReverseContinuation_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ReverseContinuation_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool ret = continuationHandlerStage->ReverseContinuation();
+    EXPECT_FALSE(ret);
+
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) AAFwk::AbilityConnectCallback();
+    sptr<MockReverseContinuationSchedulerPrimaryProxy> primary =
+        new (std::nothrow) MockReverseContinuationSchedulerPrimaryProxy(remoteObject);
+    continuationHandlerStage->remotePrimaryProxy_ = primary;
+    ret = continuationHandlerStage->ReverseContinuation();
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "ReverseContinuation_001 end";
+}
+
+/*
+ * @tc.number: ReverseContinuation_002
+ * @tc.name: ReverseContinuation
+ * @tc.desc: call ReverseContinuation fail with null continuationManagerTmp
+ */
+HWTEST_F(ContinuationTest, ReverseContinuation_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ReverseContinuation_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    continuationManagerStage.reset();
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) AAFwk::AbilityConnectCallback();
+    sptr<MockReverseContinuationSchedulerPrimaryProxy> primary =
+        new (std::nothrow) MockReverseContinuationSchedulerPrimaryProxy(remoteObject);
+    continuationHandlerStage->remotePrimaryProxy_ = primary;
+    continuationHandlerStage->SetAbilityInfo(abilityInfo_);
+
+    bool ret = continuationHandlerStage->ReverseContinuation();
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "ReverseContinuation_002 end";
+}
+
+/*
+ * @tc.number: ContinuationBack_001
+ * @tc.name: ContinuationBack
+ * @tc.desc: call ContinuationBack true
+ */
+HWTEST_F(ContinuationTest, ContinuationBack_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinuationBack_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> stub = new (std::nothrow) MockReverseContinuationSchedulerReplicaStub();
+    sptr<MockReverseContinuationSchedulerReplicaProxy> primary =
+        new (std::nothrow) MockReverseContinuationSchedulerReplicaProxy(stub);
+    continuationHandlerStage->remoteReplicaProxy_ = primary;
+    Want want;
+
+    bool ret = continuationHandlerStage->ContinuationBack(want);
+    EXPECT_TRUE(ret);
+    GTEST_LOG_(INFO) << "ContinuationBack_001 end";
+}
+
+/*
+ * @tc.number: ContinuationBack_002
+ * @tc.name: ContinuationBack
+ * @tc.desc: call ContinuationBack fail with null continuationManagerTmp
+ */
+HWTEST_F(ContinuationTest, ContinuationBack_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinuationBack_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    continuationManagerStage.reset();
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    sptr<IRemoteObject> stub = new (std::nothrow) MockReverseContinuationSchedulerReplicaStub();
+    sptr<MockReverseContinuationSchedulerReplicaProxy> primary =
+        new (std::nothrow) MockReverseContinuationSchedulerReplicaProxy(stub);
+    continuationHandlerStage->remoteReplicaProxy_ = primary;
+    Want want;
+
+    bool ret = continuationHandlerStage->ContinuationBack(want);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "ContinuationBack_002 end";
+}
+
+/*
+ * @tc.number: ReverseContinueAbility_001
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility true
+ */
+HWTEST_F(ContinuationTest, ReverseContinueAbility_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ReverseContinueAbility_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    continuationManagerStage_->continuationState_ = ContinuationState::REMOTE_RUNNING;
+    sptr<IRemoteObject> stub = new (std::nothrow) MockReverseContinuationSchedulerReplicaStub();
+    sptr<MockReverseContinuationSchedulerReplicaProxy> primary =
+        new (std::nothrow) MockReverseContinuationSchedulerReplicaProxy(stub);
+    EXPECT_CALL(*primary, ReverseContinuation()).Times(1).WillOnce(Return(true));
+    continuationHandlerStage->remoteReplicaProxy_ = primary;
+
+    bool ret = continuationHandlerStage->ReverseContinueAbility();
+    EXPECT_TRUE(ret);
+    GTEST_LOG_(INFO) << "ReverseContinueAbility_001 end";
+}
+
+/*
+ * @tc.number: ReverseContinueAbility_002
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility fail remoteReplicaProxy is null
+ */
+HWTEST_F(ContinuationTest, ReverseContinueAbility_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ReverseContinueAbility_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+
+    bool ret = continuationHandlerStage->ReverseContinueAbility();
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "ReverseContinueAbility_002 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
