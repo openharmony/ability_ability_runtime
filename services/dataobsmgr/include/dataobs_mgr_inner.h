@@ -39,7 +39,8 @@ public:
 
     int HandleRegisterObserver(const Uri &uri, struct ObserverNode observerNode);
     int HandleUnregisterObserver(const Uri &uri, struct ObserverNode observerNode);
-    int HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission, bool isSilentUri);
+    int HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission,
+        bool isSilentUri, uint32_t token);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -48,6 +49,7 @@ private:
     void RemoveObs(sptr<IRemoteObject> dataObserver);
     bool HaveRegistered(sptr<IDataAbilityObserver> dataObserver);
 
+    static const constexpr char RELATIONAL_STORE[] = "rdb";
     static constexpr uint32_t OBS_NUM_MAX = 50;
     static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;
     ffrt::mutex innerMutex_;

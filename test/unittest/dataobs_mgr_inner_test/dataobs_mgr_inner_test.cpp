@@ -267,7 +267,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0100, TestSize.
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
     dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST, 0, 0));
-    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false);
+    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 1);
 }
 
 /*
@@ -283,7 +283,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0200, TestSize.
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     dataObsMgrInner->observers_.clear();
-    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false);
+    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 1);
     EXPECT_EQ(res, NO_OBS_FOR_URI);
 }
 
@@ -302,7 +302,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0300, TestSize.
     ObsListType obsList;
     obsList.push_back(ObserverNode(nullptr, USER_TEST, 0, 0));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false);
+    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 1);
     EXPECT_EQ(res, NO_ERROR);
 }
 
