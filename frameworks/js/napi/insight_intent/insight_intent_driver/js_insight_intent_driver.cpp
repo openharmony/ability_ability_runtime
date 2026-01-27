@@ -26,10 +26,13 @@
 #include "js_error_utils.h"
 #include "js_insight_intent_driver_utils.h"
 #include "js_runtime_utils.h"
+#include "js_ui_extension_callback.h"
 #include "napi_common_execute_param.h"
 #include "napi_common_intent_info_filter.h"
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
+#include "string_wrapper.h"
+#include "int_wrapper.h"
 
 #include <mutex>
 
@@ -142,6 +145,83 @@ private:
 
         g_distributeFunc(param);
     }
+
+    std::shared_ptr<AbilityContext> GetAbilityContext(napi_env env, napi_value object)
+    {
+        void* wrapped = nullptr;
+        napi_status ret = napi_unwrap(env, object, &wrapped);
+        if (ret != napi_ok) {
+            return nullptr;
+        }
+
+        auto weakContext = static_cast<std::weak_ptr<AbilityContext>*>(wrapped);
+        return weakContext != nullptr ? weakContext->lock() : nullptr;
+    }
+
+    std::shared_ptr<JsUIExtensionCallback> GetJsUIExtensionCallback(napi_env env)
+    {
+        std::shared_ptr<JsUIExtensionCallback> callback = std::make_shared<JsUIExtensionCallback>(env);
+        napi_value callbackFunc = nullptr;
+        auto func = [](napi_env env, napi_callback_info info) -> napi_value { return nullptr; };
+        napi_create_function(env, "", 0, func, nullptr, &callbackFunc);
+        callback->SetJsCallbackObject(callbackFunc);
+
+        return callback;
+    }
+
+    napi_value HandleServiceMatch(napi_env env, NapiCallbackInfo& info, InsightIntentExecuteParam& param)
+    {
+        napi_value napiIntentParam = nullptr;
+        napi_get_named_property(env, info.argv[INDEX_ZERO], "insightIntentParam", &napiIntentParam);
+        if (napiIntentParam == nullptr) {
+            ThrowInvalidParamError(env, "Invalid insightIntentParam");
+            return CreateJsUndefined(env);
+        }
+        napi_value inputContext = nullptr;
+        napi_get_named_property(env, napiIntentParam, "abilityContext", &inputContext);
+        if (inputContext == nullptr) {
+            ThrowInvalidParamError(env, "Invalid abilityContext");
+            return CreateJsUndefined(env);
+        }
+        auto abilityContext = GetAbilityContext(env, inputContext);
+        if (abilityContext == nullptr) {
+            ThrowInvalidParamError(env, "Invalid abilityContext");
+            return CreateJsUndefined(env);
+        }
+        auto callback = GetJsUIExtensionCallback(env);
+        if (callback == nullptr) {
+            ThrowInvalidParamError(env, "Invalid callback");
+            return CreateJsUndefined(env);
+        }
+
+        if (param.insightIntentParam_ != nullptr) {
+            if (param.insightIntentParam_->GetStringParam("startType") == "startAbilityByType") {
+                abilityContext->StartAbilityByType(abilityContext, *param.insightIntentParam_, callback);
+            }
+        }
+        return CreateJsUndefined(env);
+    }
+
+    bool IsServiceMatch(InsightIntentExecuteParam &param) const
+    {
+        if (param.insightIntentParam_ != nullptr &&
+            param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
+                param.isServiceMatch_ = false;
+                ParseParam(param);
+                return true;
+            }
+
+        return false;
+    }
+
+    bool NeedStartByServiceMatch(const InsightIntentExecuteParam &param) const
+    {
+        if (param.insightIntentParam_ != nullptr &&
+            param.insightIntentParam_->GetBoolParam("startByServiceMatch")) {
+            return true;
+        }
+        return false;
+    }
     napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
         HandleEscape handleEscape(env);
@@ -182,13 +262,13 @@ private:
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
-        param.isServiceMatch_ = false;
-        if (param.insightIntentParam_ != nullptr &&
-            param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
-            ParseParam(param);
+        if (IsServiceMatch(param)) {
             if (!param.isServiceMatch_) {
-                ThrowInvalidParamError(env, "Invalid service_match param");
+                ThrowInvalidParamError(env, "Parameter error: Service match failed.");
                 return CreateJsUndefined(env);
+            }
+            if (NeedStartByServiceMatch(param)) {
+                return HandleServiceMatch(env, info, param);
             }
         }
         auto err = AbilityManagerClient::GetInstance()->ExecuteIntent(key,
