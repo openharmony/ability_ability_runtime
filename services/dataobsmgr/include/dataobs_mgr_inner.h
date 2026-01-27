@@ -49,7 +49,6 @@ private:
     void RemoveObs(sptr<IRemoteObject> dataObserver);
     bool HaveRegistered(sptr<IDataAbilityObserver> dataObserver);
 
-    static const constexpr char RELATIONAL_STORE[] = "rdb";
     static constexpr uint32_t OBS_NUM_MAX = 50;
     static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;
     ffrt::mutex innerMutex_;

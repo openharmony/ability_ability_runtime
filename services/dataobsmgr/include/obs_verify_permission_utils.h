@@ -29,9 +29,11 @@ class OBSVerifyPermissionUtils {
 public:
     static OBSVerifyPermissionUtils &GetInstance();
     bool VerifyPermission(uint32_t listenerTokenId, int32_t userId, const Uri &uri, uint32_t tokenId);
+    static const constexpr char RELATIONAL_STORE[] = "rdb";
 private:
-    std::pair<bool, std::string> GetCallingName(uint32_t callingTokenid);
-    std::vector<std::string> GetGroupInfosFromCache(const std::string &bundleName, int32_t userId, const std::string &uri);
+    std::pair<bool, std::string> GetCallingInfo(uint32_t callingTokenid);
+    std::vector<std::string> GetGroupInfosFromCache(const std::string &bundleName, int32_t userId,
+        const std::string &uri);
     static constexpr int32_t CACHE_SIZE_THRESHOLD = 20;
     std::shared_mutex groupsIdMutex_;
     std::list<std::pair<std::string, std::vector<std::string>>> groupsIdCache_;
