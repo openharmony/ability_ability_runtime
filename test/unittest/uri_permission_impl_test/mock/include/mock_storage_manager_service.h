@@ -464,6 +464,11 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t UMountCryptoPathAgain(uint32_t userId, const std::string &bundleName) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
