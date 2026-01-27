@@ -268,7 +268,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0100, T
 
     Uri notifyUri("sharepreferences://data/preferences/preferences_test?key");
     dataObsMgrInnerPref_->HandleRegisterObserver(uri, ObserverNode(mockDataAbilityObserverStub, USER_TEST, 0, 0));
-    dataObsMgrInnerPref_->HandleNotifyChange(notifyUri, USER_TEST);
+    dataObsMgrInnerPref_->HandleNotifyChange(notifyUri, USER_TEST, 1);
     EXPECT_EQ("key", mockDataAbilityObserverStub->key_);
 }
 
@@ -285,7 +285,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0200, T
     std::shared_ptr<DataObsMgrInnerPref> dataObsMgrInner = std::make_shared<DataObsMgrInnerPref>();
     Uri uri("sharepreferences://data/preferences/preferences_test?key");
     dataObsMgrInner->observers_.clear();
-    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST);
+    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, 1);
     EXPECT_EQ(res, NO_OBS_FOR_URI);
 }
 
@@ -305,7 +305,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0300, T
     obsList.push_back(ObserverNode(nullptr, USER_TEST, 0, 0));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
     Uri notifyUri("sharepreferences://data/preferences/preferences_test?key");
-    int res = dataObsMgrInner->HandleNotifyChange(notifyUri, USER_TEST);
+    int res = dataObsMgrInner->HandleNotifyChange(notifyUri, USER_TEST, 1);
     EXPECT_EQ(res, NO_ERROR);
 }
 

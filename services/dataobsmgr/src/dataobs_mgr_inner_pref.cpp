@@ -18,6 +18,7 @@
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
++#include "obs_verify_permission_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -97,7 +98,7 @@ int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, struct Observe
     return NO_ERROR;
 }
 
-int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId)
+int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId, uint32_t tokenId)
 {
     std::list<struct ObserverNode> obsList;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -128,6 +129,10 @@ int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId)
         if (obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
             TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
                 userId, obs.userId_, CommonUtils::Anonymous(uri.ToString()).c_str());
+            continue;
+        }
+        Uri uriTemp = uri;
+        if (!OBSVerifyPermissionUtils::GetInstance().VerifyPermission(obs.tokenId_, obs.userId_, uriTemp, tokenId)) {
             continue;
         }
         obs.observer_->OnChangePreferences(const_cast<Uri &>(uri).GetQuery());
