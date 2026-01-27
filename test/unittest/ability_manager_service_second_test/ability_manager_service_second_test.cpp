@@ -410,6 +410,24 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckStartByCallPermission_001, TestSi
 
 /*
  * Feature: AbilityManagerService
+ * Function: CheckStartByCallPermission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartByCallPermission with plugin ability
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckStartByCallPermission_003, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+
+    // Test case: ability type is PAGE and IsStartPlugin returns true
+    abilityRequest_.abilityInfo.type = AbilityType::PAGE;
+    abilityRequest_.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    abilityRequest_.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+
+    EXPECT_EQ(abilityMs_->CheckStartByCallPermission(abilityRequest_), RESOLVE_CALL_NO_PERMISSIONS);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbility
