@@ -155,6 +155,9 @@ bool BatchUri::SetCheckProxyByPolicyResult(const std::vector<bool> &proxyResultB
         checkResult[index].result = proxyResultByPolicy[i];
         if (checkResult[index].result) {
             checkResult[index].permissionType = PolicyType::AUTHORIZATION_PATH;
+            if (isTargetBundleUri[index]) {
+                targetBundleUriCount++;
+            }
         }
     }
     proxyIndexesByPolicy.clear();
