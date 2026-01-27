@@ -20,6 +20,7 @@
 #include "datashare_errno.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
+#include "obs_verify_permission_utils.h"
 #include <string>
 namespace OHOS {
 namespace AAFwk {
@@ -104,7 +105,8 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, struct ObserverNod
     return NO_ERROR;
 }
 
-int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission, bool isSilentUri)
+int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission,
+    bool isSilentUri, uint32_t tokenId)
 {
     std::string uriStr = uri.ToString();
     std::list<struct ObserverNode> obsList;
@@ -125,14 +127,19 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
         if (obs.observer_ == nullptr) {
             continue;
         }
+        uint32_t token = obs.tokenId_;
+        Uri uriTemp(uriStr);
+        if (uriTemp.GetScheme() == RELATIONAL_STORE) {
+            if (!OBSVerifyPermissionUtils::GetInstance().VerifyPermission(token, userId, uriTemp ,tokenId)) {
+                continue;
+            }
+        }
         if (!DataShare::DataSharePermission::IsSingletonTrustUri(uri) &&
             obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
             TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
                 userId, obs.userId_, CommonUtils::Anonymous(uriStr).c_str());
             continue;
         }
-        uint32_t token = obs.tokenId_;
-        Uri uriTemp(uriStr);
         if (!DataShare::DataSharePermission::VerifyPermission(uriTemp, token, readPermission, isSilentUri)) {
             TAG_LOGE(AAFwkTag::DBOBSMGR, "HandleNotifyChange readpermission denied, token %{public}d permission "
                 "%{public}s uri %{public}s pid %{public}d", token, readPermission.c_str(),
