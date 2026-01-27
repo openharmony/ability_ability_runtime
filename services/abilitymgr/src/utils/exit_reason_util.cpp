@@ -36,7 +36,7 @@ void ExitReasonUtil::ProcessSignalData(void *token, uint32_t event)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read pipe failed");
     } else if (count == 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write end closed");
-        close(rFd);
+        fdsan_close_with_tag(rFd, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
     } else {
         int32_t pid = -1;
         int32_t signal = -1;
@@ -89,8 +89,8 @@ void ExitReasonUtil::AppSpawnStartCallback(const char *key, const char *value, v
     int32_t ret = SpawnListenFdSet(wFd);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "send fd to appspawn failed, ret: %{public}d", ret);
-        close(rFd);
-        close(wFd);
+        fdsan_close_with_tag(rFd, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
+        fdsan_close_with_tag(wFd, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
         return;
     }
     // set flag
