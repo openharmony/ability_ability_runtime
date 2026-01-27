@@ -506,6 +506,8 @@ void AbilityManagerService::InitInterceptor()
      }
      rFd_ = pipeFd[0];
      wFd_ = pipeFd[1];
+     fdsan_exchange_owner_tag(rFd_, 0, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
+     fdsan_exchange_owner_tag(wFd_, 0, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
      *ptrRFd_ = rFd_;
      auto context = new (std::nothrow) std::weak_ptr<AbilityManagerService>(shared_from_this());
      if (context == nullptr) {
@@ -522,7 +524,7 @@ void AbilityManagerService::InitInterceptor()
         ExitReasonUtil::ProcessSignalData);
      if (ret != 0) {
          TAG_LOGE(AAFwkTag::ABILITYMGR, "ffrt_epoll_ctl failed, ret: %{public}d", ret);
-         close(rFd_);
+         fdsan_close_with_tag(rFd_, static_cast<uint32_t>(AAFwkTag::ABILITYMGR));
          return;
      }
      TAG_LOGI(AAFwkTag::ABILITYMGR, "Listen signal msg ...");
