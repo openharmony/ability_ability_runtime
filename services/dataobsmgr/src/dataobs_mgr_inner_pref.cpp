@@ -18,7 +18,7 @@
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
-+#include "obs_verify_permission_utils.h"
+#include "obs_verify_permission_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
