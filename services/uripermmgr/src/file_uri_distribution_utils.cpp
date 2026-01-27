@@ -339,7 +339,6 @@ bool FUDUtils::CheckUriTypeIsValid(Uri &uri)
     return true;
 }
 
-// toDo: 优化名字
 bool FUDUtils::IsDocsCloudUri(Uri &uri)
 {
     return (uri.GetAuthority() == FUDConstants::DOCS_AUTHORITY &&
