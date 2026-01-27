@@ -31,9 +31,10 @@ OBSVerifyPermissionUtils& OBSVerifyPermissionUtils::GetInstance()
     return instance_;
 }
 
-bool OBSVerifyPermissionUtils::VerifyPermission(uint32_t listenerTokenId, int32_t userId, const Uri &uri, uint32_t tokenId)
+bool OBSVerifyPermissionUtils::VerifyPermission(uint32_t listenerTokenId, int32_t userId,
+    const Uri &uri, uint32_t tokenId)
 {
-    auto [isSA, listenerCallingName] = GetCallingName(listenerTokenId);
+    auto [isSA, listenerCallingName] = GetCallingInfo(listenerTokenId);
     if (isSA) {
         return true;
     }
@@ -48,17 +49,18 @@ bool OBSVerifyPermissionUtils::VerifyPermission(uint32_t listenerTokenId, int32_
         }
     }
     std::string scheme = uriTemp.GetScheme();
-    std::string errMsg = scheme + "checkfailed:" + std::string(listenerGroupIds.empty() ? "empty" : "notEmpty");
+    std::string errMsg = scheme + " checkfailed:" + std::string(listenerGroupIds.empty() ? "empty" : "notEmpty");
     TAG_LOGE(AAFwkTag::DBOBSMGR, "verify failed listenerCallingName:%{public}s, scheme:%{public}s",
         listenerCallingName.c_str(), scheme.c_str());
-    auto invalidUri = (scheme == "rdb") ? DATAOBS_RDB_INVALID_URI : DATAOBS_PREFERENCE_INVALID_URI;
+    auto invalidUri = (scheme == RELATIONAL_STORE) ? DATAOBS_RDB_INVALID_URI : DATAOBS_PREFERENCE_INVALID_URI;
     DataShare::DataSharePermission::ReportExtensionFault(invalidUri, listenerTokenId, listenerCallingName, errMsg);
     return false;
 }
 
-std::pair<bool, std::string> OBSVerifyPermissionUtils::GetCallingName(uint32_t callingTokenid)
+std::pair<bool, std::string> OBSVerifyPermissionUtils::GetCallingInfo(uint32_t callingTokenid)
 {
     std::string callingName;
+    bool isSA = false;
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenid);
 
     int result = -1;
@@ -71,11 +73,11 @@ std::pair<bool, std::string> OBSVerifyPermissionUtils::GetCallingName(uint32_t c
     } else if (tokenType == Security::AccessToken::TOKEN_NATIVE || tokenType == Security::AccessToken::TOKEN_SHELL) {
         Security::AccessToken::NativeTokenInfo tokenInfo;
         result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenid, tokenInfo);
-        return {true, callingName};
+        isSA = true;
     } else {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "tokenType is invalid, tokenType:%{public}d", tokenType);
     }
-    return {false, callingName};
+    return {isSA, callingName};
 }
 
 std::vector<std::string> OBSVerifyPermissionUtils::GetGroupInfosFromCache(const std::string &bundleName,
