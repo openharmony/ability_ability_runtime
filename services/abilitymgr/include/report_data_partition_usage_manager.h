@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,12 @@ using namespace OHOS::AAFwk;
 class ReportDataPartitionUsageManager {
 public:
     static void SendReportDataPartitionUsageEvent();
+    static void SendReportDatabaseReadEvent(const std::string &dbPath);
+    static void IncrementAndReportWriteCount(const std::string &dbPath);
 
 private:
     static void HandleSendReportDataPartitionUsageEvent();
+    static void HandleSendReportDatabaseWriteEvent(const std::string &dbPath);
     static void GenerateEventInfo(EventInfo &eventInfo);
     static uint64_t GetFilePathSize(const std::string &filePath);
     static uint64_t GetPartitionRemainSize(const std::string &filePath);

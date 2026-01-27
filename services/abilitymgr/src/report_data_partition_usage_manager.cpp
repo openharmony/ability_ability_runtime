@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,25 @@ void ReportDataPartitionUsageManager::HandleSendReportDataPartitionUsageEvent()
     ffrt::submit(HandleSendReportDataPartitionUsageEvent,
         ffrt::task_attr().delay(ONE_DAY_US).name("SendReportDataPartitionUsageTask")
         .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+}
+
+void ReportDataPartitionUsageManager::SendReportDatabaseReadEvent(const std::string &dbPath)
+{
+    ffrt::submit([dbPath]() {
+        HandleSendReportDatabaseWriteEvent(dbPath);
+        }, ffrt::task_attr().name("SendReportDatabaseReadEventTask")
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+}
+
+void ReportDataPartitionUsageManager::HandleSendReportDatabaseWriteEvent(const std::string &dbPath)
+{
+    EventInfo eventInfo;
+    eventInfo.componentName = COMPONENT_NAME;
+    eventInfo.partitionName = USER_DATA_DIR;
+    eventInfo.remainPartitionSize = GetPartitionRemainSize(USER_DATA_DIR);
+    eventInfo.fileOfFolderPath.push_back(dbPath);
+    EventReport::SendReportDataPartitionUsageEvent(EventName::USER_DATA_SIZE,
+        HiSysEventType::STATISTIC, eventInfo);
 }
 
 void ReportDataPartitionUsageManager::GenerateEventInfo(EventInfo &eventInfo)

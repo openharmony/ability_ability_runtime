@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,6 +37,8 @@ ohos_fuzztest("AbilityAutoStartupDataManagerFuzzTest") {
   sources = [
     "${ability_runtime_innerkits_path}/deps_wrapper/src/os_account_manager_wrapper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_data_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/database_write_counter.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/report_data_partition_usage_manager.cpp",
     "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "abilityautostartupdatamanager_fuzzer.cpp",
@@ -52,6 +54,7 @@ ohos_fuzztest("AbilityAutoStartupDataManagerFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -68,6 +71,7 @@ ohos_fuzztest("AbilityAutoStartupDataManagerFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "hisysevent:libhisysevent",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
