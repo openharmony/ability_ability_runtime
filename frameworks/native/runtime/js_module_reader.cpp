@@ -157,6 +157,7 @@ std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) cons
         TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
+    needFindPluginHsp_ = false;
     return realHapPath;
 }
 
@@ -180,6 +181,7 @@ std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) co
         TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
+    needFindPluginHsp_ = false;
     return realHapPath;
 }
 
