@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -147,6 +147,7 @@ abilityms_files = [
 
   #report data
   "src/report_data_partition_usage_manager.cpp",
+  "src/database_write_counter.cpp",
 
   # keep alive
   "src/keep_alive/ability_keep_alive_data_manager.cpp",

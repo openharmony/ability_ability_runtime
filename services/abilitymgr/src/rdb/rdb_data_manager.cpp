@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,12 @@ int32_t RdbDataManager::InsertData(const NativeRdb::ValuesBucket &valuesBucket)
     }
 
     int64_t rowId = -1;
-    return rdbStore_->InsertWithConflictResolution(
+    int32_t errCode = rdbStore_->InsertWithConflictResolution(
         rowId, amsRdbConfig_.tableName, valuesBucket, NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    if (errCode == NativeRdb::E_OK) {
+        dbWriteCounter_.UpdateWriteCount(ABILITY_RDB_PATH);
+    }
+    return errCode;
 }
 
 int32_t RdbDataManager::BatchInsert(int64_t &outInsertNum, const std::vector<NativeRdb::ValuesBucket> &valuesBuckets)
@@ -61,6 +65,9 @@ int32_t RdbDataManager::BatchInsert(int64_t &outInsertNum, const std::vector<Nat
         return NativeRdb::E_ERROR;
     }
     auto ret = rdbStore_->BatchInsert(outInsertNum, amsRdbConfig_.tableName, valuesBuckets);
+    if (ret == NativeRdb::E_OK) {
+        dbWriteCounter_.UpdateWriteCount(ABILITY_RDB_PATH);
+    }
     return ret == NativeRdb::E_OK;
 }
 
@@ -77,7 +84,11 @@ int32_t RdbDataManager::UpdateData(
         return NativeRdb::E_ERROR;
     }
     int32_t rowId = -1;
-    return rdbStore_->Update(rowId, valuesBucket, absRdbPredicates);
+    int32_t errCode = rdbStore_->Update(rowId, valuesBucket, absRdbPredicates);
+    if (errCode == NativeRdb::E_OK) {
+        dbWriteCounter_.UpdateWriteCount(ABILITY_RDB_PATH);
+    }
+    return errCode;
 }
 
 int32_t RdbDataManager::DeleteData(const NativeRdb::AbsRdbPredicates &absRdbPredicates)

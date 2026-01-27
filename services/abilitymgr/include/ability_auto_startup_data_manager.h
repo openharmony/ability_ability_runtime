@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "auto_startup_info.h"
+#include "database_write_counter.h"
 #include "distributed_kv_data_manager.h"
 #include "nlohmann/json.hpp"
 #include "singleton.h"
@@ -207,6 +208,7 @@ private:
     DistributedKv::DistributedKvDataManager dataManager_;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_;
     mutable std::mutex kvStorePtrMutex_;
+    DatabaseWriteCounter dbWriteCounter_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,6 +46,7 @@ ohos_unittest("ability_manager_service_first_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_record/ability_record_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/database_write_counter.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/preload_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/report_data_partition_usage_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/exit_reason_util.cpp",
