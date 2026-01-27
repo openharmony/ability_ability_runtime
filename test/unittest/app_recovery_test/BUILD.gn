@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_runtime/ability_runtime/app"
 
 ohos_unittest("AppRecoveryUnitTest") {
-  module_out_path = "ability_runtime/AppRecovery/app"
+  module_out_path = "ability_runtime/ability_runtime/app"
   cflags_cc = [ "-DUNITTEST" ]
   cflags = [ "-DUNITTEST" ]
   include_dirs = [
