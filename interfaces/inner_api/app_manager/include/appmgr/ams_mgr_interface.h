@@ -265,7 +265,7 @@ public:
      * @param requestId request id to callback
      */
     virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0) = 0;
+        int32_t requestId = 0, const std::string &customProcess = "") = 0;
 
     /**
      * Register response of start specified ability.
