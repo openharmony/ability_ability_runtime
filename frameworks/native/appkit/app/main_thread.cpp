@@ -2349,7 +2349,7 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
-void MainThread::DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+void MainThread::DoUpdatePluginInfoInstalled(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
     const std::vector<std::string> &pluginModuleNames)
 {
     if (!applicationInfo_) {
