@@ -1165,7 +1165,7 @@ pid_t AppRunningRecord::GetGPUPid()
 
 pid_t AppRunningRecord::GetPid()
 {
-    return 0;
+    return AAFwk::MyStatus::GetInstance().appRecordGetPid_;
 }
 
 void AppRunningRecord::SetAttachedToStatusBar(bool isAttached)

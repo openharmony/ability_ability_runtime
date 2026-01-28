@@ -46,6 +46,9 @@ public:
     static constexpr uint32_t START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG = 9;
     static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG = 10;
     static constexpr uint32_t START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG = 11;
+    static constexpr uint32_t RENDER_ATTACH_TIMEOUT_MSG = 12;
+    static constexpr uint32_t CHILD_PROCESS_ATTACH_TIMEOUT_MSG = 13;
+    static constexpr uint32_t PRELOAD_ATTACH_TIMEOUT_MSG = 14;
 #ifdef SUPPORT_ASAN
     static constexpr int32_t TERMINATE_ABILITY_TIMEOUT = 45000; // ms
     static constexpr int32_t TERMINATE_APPLICATION_TIMEOUT = 150000; // ms

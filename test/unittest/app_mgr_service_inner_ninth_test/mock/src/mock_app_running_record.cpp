@@ -135,6 +135,21 @@ void AppRunningRecord::SetUid(const int32_t uid)
     mainUid_ = uid;
 }
 
+void AppRunningRecord::SetPreloadAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time)
+{
+    preloadAttachTimeoutStartTime_ = time;
+}
+
+std::chrono::system_clock::time_point AppRunningRecord::GetPreloadAttachTimeoutStartTime() const
+{
+    return preloadAttachTimeoutStartTime_;
+}
+
+bool AppRunningRecord::ShouldSkipTimeout() const
+{
+    return isDebugApp_ || isNativeDebug_ || isAttachDebug_;
+}
+
 int32_t AppRunningRecord::GetUserId() const
 {
     return mainUid_ / Constants::BASE_USER_RANGE;

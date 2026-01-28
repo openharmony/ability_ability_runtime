@@ -309,6 +309,7 @@ constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 constexpr int32_t NO_ABILITY_RECORD_ID = -1;
 constexpr int32_t EXIT_REASON_UNKNOWN = 0;
 constexpr int32_t PROCESS_START_FAILED_SUB_REASON_UNKNOWN = 0;
+constexpr int32_t ATTACH_TIMEOUT_SUB_REASON_TIMEOUT = 0;
 
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
@@ -1675,6 +1676,9 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
+    }
+    if (eventHandler_) {
+        eventHandler_->RemoveEvent(AMSEventHandler::PRELOAD_ATTACH_TIMEOUT_MSG, pid);
     }
     AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(pid, "ServiceInner::AttachApplication");
     auto appRecord = GetAppRunningRecordByPid(pid);
@@ -4775,6 +4779,10 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     CHECK_POINTER_AND_RETURN_VALUE(appRecord->GetPriorityObject(), ERR_INVALID_VALUE);
     appRecord->GetPriorityObject()->SetPid(pid);
     appRecord->SetUid(startMsg.uid);
+    if (isPreload) {
+        PostPreloadAttachTimeoutTask(appRecord);
+    }
+
     appRecord->SetStartMsg(startMsg);
     appRecord->SetAppMgrServiceInner(weak_from_this());
     appRecord->SetSpawned();
@@ -5228,6 +5236,17 @@ void AppMgrServiceInner::HandleTimeOut(const AAFwk::EventWrap &event)
         case AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG:
         case AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG:
             SendHiSysEvent(event.GetEventId(), appRecord);
+            break;
+        case AMSEventHandler::RENDER_ATTACH_TIMEOUT_MSG:
+            HandleRenderAttachTimeout(event.GetParam());
+            break;
+#ifdef SUPPORT_CHILD_PROCESS
+        case AMSEventHandler::CHILD_PROCESS_ATTACH_TIMEOUT_MSG:
+            HandleChildProcessAttachTimeout(event.GetParam());
+            break;
+#endif // SUPPORT_CHILD_PROCESS
+        case AMSEventHandler::PRELOAD_ATTACH_TIMEOUT_MSG:
+            HandlePreloadAttachTimeout(event.GetParam());
             break;
         default:
             break;
@@ -6886,6 +6905,9 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
         TAG_LOGE(AAFwkTag::APPMGR, "invalid render process pid:%{public}d", pid);
         return;
     }
+    if (eventHandler_) {
+        eventHandler_->RemoveEvent(AMSEventHandler::RENDER_ATTACH_TIMEOUT_MSG, pid);
+    }
     if (!scheduler) {
         TAG_LOGE(AAFwkTag::APPMGR, "render scheduler null");
         return;
@@ -6907,6 +6929,7 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
         TAG_LOGE(AAFwkTag::APPMGR, "no renderRecord, pid:%{public}d", pid);
         return;
     }
+    CheckRenderAttachTimeout(renderRecord);
 
     sptr<AppDeathRecipient> appDeathRecipient = new AppDeathRecipient();
     appDeathRecipient->SetTaskHandler(taskHandler_);
@@ -7056,6 +7079,7 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
         userId,
         isPreload);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord, isPreload);
+    PostRenderAttachTimeoutTask(renderRecord);
     return 0;
 }
 
@@ -9138,7 +9162,41 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
         "processName:%{public}s", pid, childProcessRecord->GetHostPid(), startMsg.uid,
         childProcessRecord->GetProcessName().c_str());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessCreated(childProcessRecord);
+    PostChildProcessAttachTimeoutTask(childProcessRecord);
     return ERR_OK;
+}
+
+void AppMgrServiceInner::PostChildProcessAttachTimeoutTask(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(childRecord, "childRecord is null");
+    auto appRecord = childRecord->GetHostRecord();
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    if (appRecord->ShouldSkipTimeout()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Debug mode, skip child process attach timeout check");
+        return;
+    }
+    auto pid = childRecord->GetPid();
+    if (pid <= 0) {
+        return;
+    }
+
+    CHECK_POINTER_AND_RETURN_LOG(eventHandler_, "eventHandler_ is null");
+    auto timeout = GetLoadTimeout(0);
+    TAG_LOGD(AAFwkTag::APPMGR, "PostChildProcessAttachTimeoutTask, timeout:%{public}d, pid:%{public}d", timeout, pid);
+    childRecord->SetAttachTimeoutStartTime(std::chrono::system_clock::now());
+    eventHandler_->SendEvent(AAFwk::EventWrap(AMSEventHandler::CHILD_PROCESS_ATTACH_TIMEOUT_MSG, pid), timeout, false);
+}
+
+void AppMgrServiceInner::HandleChildProcessAttachTimeout(int64_t pid)
+{
+    TAG_LOGW(AAFwkTag::APPMGR, "Child process attach timeout, pid: %{public}" PRId64 "", pid);
+    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "appRunningManager_ is null");
+    auto appRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(pid);
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    auto childRecord = appRecord->GetChildProcessRecordByPid(pid);
+    CHECK_POINTER_AND_RETURN_LOG(childRecord, "childRecord is null");
+    AppMgrEventUtil::SendChildProcessStartFailedEvent(childRecord,
+        ProcessStartFailedReason::ATTACH_TIMEOUT, ATTACH_TIMEOUT_SUB_REASON_TIMEOUT);
 }
 
 int32_t AppMgrServiceInner::GetChildProcessInfoForSelf(ChildProcessInfo &info)
@@ -9267,6 +9325,9 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
         TAG_LOGE(AAFwkTag::APPMGR, "invalid child process pid:%{public}d", pid);
         return;
     }
+    if (eventHandler_) {
+        eventHandler_->RemoveEvent(AMSEventHandler::CHILD_PROCESS_ATTACH_TIMEOUT_MSG, pid);
+    }
     if (!childScheduler) {
         TAG_LOGE(AAFwkTag::APPMGR, "childScheduler null");
         return;
@@ -9285,6 +9346,7 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
         TAG_LOGE(AAFwkTag::APPMGR, "no child process record, pid:%{public}d", pid);
         return;
     }
+    CheckChildProcessAttachTimeout(childRecord);
 
     sptr<AppDeathRecipient> appDeathRecipient = new AppDeathRecipient();
     appDeathRecipient->SetTaskHandler(taskHandler_);
@@ -9300,6 +9362,29 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
         childScheduler->ScheduleRunNativeProc(childRecord->GetMainProcessCallback());
         childRecord->ClearMainProcessCallback();
     }
+}
+
+void AppMgrServiceInner::CheckChildProcessAttachTimeout(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(childRecord, "childRecord is null");
+    auto pid = childRecord->GetPid();
+    TAG_LOGD(AAFwkTag::APPMGR, "CheckChildProcessAttachTimeout, pid: %{public}d", pid);
+
+    auto startTime = childRecord->GetAttachTimeoutStartTime();
+    if (startTime.time_since_epoch().count() == 0) {
+        return;
+    }
+    auto now = std::chrono::system_clock::now();
+    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+    auto timeoutMs = GetLoadTimeout(0);
+    if (elapsedMs <= timeoutMs) {
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::APPMGR,"Child process attached after timeout, pid: %{public}d, elapsed: %{public}lld ms",
+        pid, elapsedMs);
+    AppMgrEventUtil::SendChildProcessStartFailedEvent(childRecord,
+        ProcessStartFailedReason::ATTACH_TIMEOUT, elapsedMs);
 }
 
 void AppMgrServiceInner::RemoveRenderProcessIsolationUid(int32_t uid)
@@ -11215,5 +11300,89 @@ void AppMgrServiceInner::SetProcessPrepareExit(int32_t pid)
     appRecord->SetPrepareExit();
 }
 
+void AppMgrServiceInner::PostRenderAttachTimeoutTask(std::shared_ptr<RenderRecord> renderRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(renderRecord, "renderRecord is null");
+    auto appRecord = renderRecord->GetHostRecord();
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    if (appRecord->ShouldSkipTimeout()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Debug mode, skip render attach timeout check");
+        return;
+    }
+    auto pid = renderRecord->GetPid();
+    if (pid <= 0) {
+        return;
+    }
+
+    CHECK_POINTER_AND_RETURN_LOG(eventHandler_, "eventHandler_ is null");
+    auto timeout = GetLoadTimeout(0);
+    TAG_LOGD(AAFwkTag::APPMGR, "PostRenderAttachTimeoutTask, timeout:%{public}d, pid:%{public}d", timeout, pid);
+    renderRecord->SetAttachTimeoutStartTime(std::chrono::system_clock::now());
+    eventHandler_->SendEvent(AAFwk::EventWrap(AMSEventHandler::RENDER_ATTACH_TIMEOUT_MSG, pid), timeout, false);
+}
+
+void AppMgrServiceInner::PostPreloadAttachTimeoutTask(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    if (appRecord->ShouldSkipTimeout()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Debug mode, skip preload attach timeout check");
+        return;
+    }
+    auto pid = appRecord->GetPid();
+    if (pid <= 0) {
+        return;
+    }
+
+    CHECK_POINTER_AND_RETURN_LOG(eventHandler_, "eventHandler_ is null");
+    auto timeout = GetLoadTimeout(0);
+    TAG_LOGD(AAFwkTag::APPMGR, "PostPreloadAttachTimeoutTask, timeout:%{public}d, pid:%{public}d", timeout, pid);
+    appRecord->SetPreloadAttachTimeoutStartTime(std::chrono::system_clock::now());
+    eventHandler_->SendEvent(AAFwk::EventWrap(AMSEventHandler::PRELOAD_ATTACH_TIMEOUT_MSG, pid), timeout, false);
+}
+
+void AppMgrServiceInner::HandleRenderAttachTimeout(int64_t pid)
+{
+    TAG_LOGW(AAFwkTag::APPMGR,"Render process attach timeout, pid: %{public}" PRId64 "", pid);
+    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "appRunningManager_ is null");
+    auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(pid);
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    auto renderRecord = appRecord->GetRenderRecordByPid(pid);
+    CHECK_POINTER_AND_RETURN_LOG(renderRecord, "renderRecord is null");
+    AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
+        ProcessStartFailedReason::ATTACH_TIMEOUT, ATTACH_TIMEOUT_SUB_REASON_TIMEOUT);
+}
+
+void AppMgrServiceInner::HandlePreloadAttachTimeout(int64_t pid)
+{
+    TAG_LOGW(AAFwkTag::APPMGR, "Preload attach timeout, pid: %{public}" PRId64 "", pid);
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    KillProcessByPid(pid, "PreloadAttachTimeout");
+    ClearData(appRecord);
+    SendProcessStartFailedEvent(appRecord,
+        ProcessStartFailedReason::ATTACH_TIMEOUT, ATTACH_TIMEOUT_SUB_REASON_TIMEOUT);
+}
+
+void AppMgrServiceInner::CheckRenderAttachTimeout(std::shared_ptr<RenderRecord> renderRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(renderRecord, "renderRecord is null");
+    auto pid = renderRecord->GetPid();
+    TAG_LOGD(AAFwkTag::APPMGR, "CheckRenderAttachTimeout, pid: %{public}d", pid);
+    auto startTime = renderRecord->GetAttachTimeoutStartTime();
+    if (startTime.time_since_epoch().count() == 0) {
+        return;
+    }
+    auto now = std::chrono::system_clock::now();
+    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+    auto timeoutMs = GetLoadTimeout(0);
+    if (elapsedMs <= timeoutMs) {
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::APPMGR, "Render process attached after timeout, pid: %{public}d, elapsed: %{public}lld ms",
+        pid, elapsedMs);
+    AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
+        ProcessStartFailedReason::ATTACH_TIMEOUT, elapsedMs);
+}
 } // namespace AppExecFwk
 }  // namespace OHOS
