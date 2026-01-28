@@ -196,13 +196,13 @@ private:
 
         if (param.insightIntentParam_ != nullptr) {
             if (param.insightIntentParam_->GetStringParam("startType") == "startAbilityByType") {
-                abilityContext->StartAbilityByType(abilityContext, *param.insightIntentParam_, callback);
+                abilityContext->StartAbilityByType("navigation", *param.insightIntentParam_, callback);
             }
         }
         return CreateJsUndefined(env);
     }
 
-    bool IsServiceMatch(InsightIntentExecuteParam &param) const
+    bool IsServiceMatch(InsightIntentExecuteParam &param)
     {
         if (param.insightIntentParam_ != nullptr &&
             param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
@@ -214,10 +214,10 @@ private:
         return false;
     }
 
-    bool NeedStartByServiceMatch(const InsightIntentExecuteParam &param) const
+    bool NeedStartByServiceMatch(const InsightIntentExecuteParam &param)
     {
         if (param.insightIntentParam_ != nullptr &&
-            param.insightIntentParam_->GetBoolParam("startByServiceMatch")) {
+            !param.insightIntentParam_->GetStringParam("startType").empty()) {
             return true;
         }
         return false;
