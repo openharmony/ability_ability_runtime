@@ -26,13 +26,13 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "extension_record.h"
 #include "bundlemgr/mock_bundle_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_sa_call.h"
 #include "mock_task_handler_wrap.h"
-#include "mock_ability_scheduler.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
 #include "session/host/include/session.h"
@@ -2321,7 +2321,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, HandleUIExtWindowDiedTask_003, TestSize.
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(connectManager, nullptr);
 
-    sptr<IRemoteObject> remote = new MockAbilityScheduler();
+    sptr<IRemoteObject> remote = new AbilityScheduler();
     
     connectManager->HandleUIExtWindowDiedTask(remote);
     TAG_LOGI(AAFwkTag::TEST, "HandleUIExtWindowDiedTask_003 end");
@@ -2433,7 +2433,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, RemoveUIExtensionBySessionInfoToken_004,
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(connectManager, nullptr);
 
-    sptr<IRemoteObject> token = new MockAbilityScheduler();
+    sptr<IRemoteObject> token = new AbilityScheduler();
     
     int res = connectManager->RemoveUIExtensionBySessionInfoToken(token);
     EXPECT_EQ(res, 0);
@@ -2819,7 +2819,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, UnPreloadUIExtensionAbilityInner_001, Te
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(connectManager, nullptr);
 
-    int32_t extensionAbilityId = INVALID_EXTENSION_RECORD_ID;
+    int32_t extensionAbilityId = AbilityRuntime::INVALID_EXTENSION_RECORD_ID;
     
     int res = connectManager->UnPreloadUIExtensionAbilityInner(extensionAbilityId);
     EXPECT_EQ(res, ERR_CODE_INVALID_ID);
@@ -2904,7 +2904,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, RegisterPreloadUIExtensionHostClient_005
     EXPECT_NE(connectManager, nullptr);
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
 
-    sptr<IRemoteObject> callerToken = new MockAbilityScheduler();
+    sptr<IRemoteObject> callerToken = new AbilityScheduler();
     
     int32_t res = connectManager->RegisterPreloadUIExtensionHostClient(callerToken);
     EXPECT_EQ(res, ERR_NULL_OBJECT);
@@ -2995,7 +2995,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, IsUIExtensionFocused_007, TestSize.Level
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
 
     uint32_t uiExtensionTokenId = 1234;
-    sptr<IRemoteObject> focusToken = new MockAbilityScheduler();
+    sptr<IRemoteObject> focusToken = new AbilityScheduler();
     
     bool result = connectManager->IsUIExtensionFocused(uiExtensionTokenId, focusToken);
     EXPECT_FALSE(result);
@@ -3038,7 +3038,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionRootHostInfo_004, TestSize
     EXPECT_NE(connectManager, nullptr);
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
 
-    sptr<IRemoteObject> token = new MockAbilityScheduler();
+    sptr<IRemoteObject> token = new AbilityScheduler();
     
     auto result = connectManager->GetUIExtensionRootHostInfo(token);
     EXPECT_EQ(result, nullptr);
@@ -3082,7 +3082,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionSessionInfo_004, TestSize.
     EXPECT_NE(connectManager, nullptr);
     connectManager->uiExtensionAbilityRecordMgr_ = nullptr;
 
-    sptr<IRemoteObject> token = new MockAbilityScheduler();
+    sptr<IRemoteObject> token = new AbilityScheduler();
     UIExtensionSessionInfo sessionInfo;
     
     int32_t res = connectManager->GetUIExtensionSessionInfo(token, sessionInfo);
@@ -3168,7 +3168,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, GetUIExtensionSourceToken_009, TestSize.
     std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
     EXPECT_NE(connectManager, nullptr);
 
-    sptr<IRemoteObject> token = new MockAbilityScheduler();
+    sptr<IRemoteObject> token = new AbilityScheduler();
     
     auto result = connectManager->GetUIExtensionSourceToken(token);
     EXPECT_EQ(result, nullptr);
