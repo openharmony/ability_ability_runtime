@@ -141,7 +141,26 @@ std::unique_ptr<ETSRuntime> ETSRuntime::PreFork(const Options &options,
     if (!instance->Initialize(options, jsRuntime, isMove)) {
         return std::unique_ptr<ETSRuntime>();
     }
+    PreloadLibrary();
     return instance;
+}
+
+void ETSRuntime::PreloadLibrary()
+{
+    const char *ETS_ANI_LIBNAME_UI_ABILITY = "libui_ability_ani.z.so";
+    const char *ETS_ANI_LIBNAME_ABILITY_STAGE = "libability_stage_ani.z.so";
+
+    auto handleUIAbility = dlopen(ETS_ANI_LIBNAME_UI_ABILITY, RTLD_LAZY);
+    if (handleUIAbility == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "dlopen failed %{public}s, %{public}s",
+            ETS_ANI_LIBNAME_UI_ABILITY, dlerror());
+    }
+
+    auto handleAbilityStage = dlopen(ETS_ANI_LIBNAME_ABILITY_STAGE, RTLD_LAZY);
+    if (handleAbilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "dlopen failed %{public}s, %{public}s",
+            ETS_ANI_LIBNAME_ABILITY_STAGE, dlerror());
+    }
 }
 
 bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<Runtime> &jsRuntime, bool isMove)
