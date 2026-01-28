@@ -2349,6 +2349,26 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
+void MainThread::DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos, const std::vector<std::string> &pluginModuleNames)
+{
+    if (!applicationInfo_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
+        return;
+    }
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+    applicationInfo_->hasPlugin = true;
+    application_->UpdateApplicationInfoInstalled(*applicationInfo_);
+    AppLibPathMap appLibPaths {};
+    GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, applicationInfo_->isSystemApp);
+    if (IsPluginNamespaceInherited()) {
+        AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+    }
+}
+
 void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -2399,14 +2419,7 @@ void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAp
         }
     }
     if (!pluginModuleNames.empty()) {
-        applicationInfo_->hasPlugin = true;
-        application_->UpdateApplicationInfoInstalled(*applicationInfo_);
-        AppLibPathMap appLibPaths {};
-        GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
-        AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, applicationInfo_->isSystemApp);
-        if (IsPluginNamespaceInherited()) {
-            AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
-        }
+        DoUpdatePluginInfoInstalled(pluginBundleInfos, pluginModuleNames);
     }
 }
 

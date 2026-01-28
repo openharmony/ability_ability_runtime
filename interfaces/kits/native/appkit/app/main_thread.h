@@ -713,6 +713,8 @@ private:
 
     bool IsBgWorkingThread(const AbilityInfo &info);
 
+    void DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos, const std::string &moduleName);
+
     void HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName);
 
     bool IsPluginNamespaceInherited();
