@@ -109,6 +109,7 @@ private:
     bool PostFork(const Options &options, std::unique_ptr<Runtime> &jsRuntime, bool isMove = true);
     std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
     void HandleOhmUrlFileName(std::string &fileName);
+    static void PreloadLibrary();
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     std::string moduleName_;
