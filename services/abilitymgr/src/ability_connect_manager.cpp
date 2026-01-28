@@ -79,6 +79,7 @@ constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr int32_t HALF_TIMEOUT = 2;
+const std::string IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
 
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
@@ -2735,6 +2736,9 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<BaseExtensionR
     std::string msgContent = "ability:" + ability->GetAbilityInfo().name + " ";
     if (!GetTimeoutMsgContent(msgId, msgContent, typeId)) {
         return;
+    }
+    if (ability->GetWant() && ability->GetWant()->GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
+        msgContent += "\nabilityLoadType: PreloadUIExtension\n";
     }
 
     std::string eventName = isHalf ?
