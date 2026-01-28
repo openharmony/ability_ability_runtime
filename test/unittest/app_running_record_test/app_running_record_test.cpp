@@ -1476,5 +1476,89 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_DumpArkWeb_0200, TestSize.Level1
     EXPECT_EQ(ret, lifeCycleRet);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_DumpArkWeb_0200 end.");
 }
+
+/**
+ * @tc.name: AppRunningRecord_ShouldSkipTimeout_0100
+ * @tc.desc: Test ShouldSkipTimeout works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ShouldSkipTimeout_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0100 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName;
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, processName);
+    ASSERT_NE(appRecord, nullptr);
+    
+    appRecord->SetDebugApp(true);
+    appRecord->SetNativeDebug(false);
+    appRecord->SetAttachDebug(false, false);
+    auto ret = appRecord->ShouldSkipTimeout();
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0100 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_ShouldSkipTimeout_0200
+ * @tc.desc: Test ShouldSkipTimeout works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ShouldSkipTimeout_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0200 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName;
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, processName);
+    ASSERT_NE(appRecord, nullptr);
+    
+    appRecord->SetDebugApp(false);
+    appRecord->SetNativeDebug(true);
+    appRecord->SetAttachDebug(false, false);
+    auto ret = appRecord->ShouldSkipTimeout();
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0200 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_ShouldSkipTimeout_0300
+ * @tc.desc: Test ShouldSkipTimeout works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ShouldSkipTimeout_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0300 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName;
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, processName);
+    ASSERT_NE(appRecord, nullptr);
+    
+    appRecord->SetDebugApp(false);
+    appRecord->SetNativeDebug(false);
+    appRecord->SetAttachDebug(true, false);
+    auto ret = appRecord->ShouldSkipTimeout();
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0300 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_ShouldSkipTimeout_0400
+ * @tc.desc: Test ShouldSkipTimeout works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ShouldSkipTimeout_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0400 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName;
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, processName);
+    ASSERT_NE(appRecord, nullptr);
+    
+    appRecord->SetDebugApp(false);
+    appRecord->SetNativeDebug(false);
+    appRecord->SetAttachDebug(false, false);
+    auto ret = appRecord->ShouldSkipTimeout();
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0400 end.");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

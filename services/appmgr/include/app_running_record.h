@@ -238,6 +238,22 @@ public:
     void SetUid(const int32_t uid);
 
     /**
+     * @brief Set preload attach timeout start time.
+     */
+    void SetPreloadAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time);
+
+    /**
+     * @brief Get preload attach timeout start time.
+     */
+    std::chrono::system_clock::time_point GetPreloadAttachTimeoutStartTime() const;
+
+    /**
+     * @brief Check if timeout handling should be skipped (debug mode).
+     * @return Returns true if in debug mode (isDebugApp_, isNativeDebug_, or isAttachDebug_).
+     */
+    bool ShouldSkipTimeout() const;
+
+    /**
      * @brief Obtains the application userid.
      *
      * @return Returns the application userid.
@@ -1312,6 +1328,7 @@ private:
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
+    std::chrono::system_clock::time_point preloadAttachTimeoutStartTime_;
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     std::string processName_;  // the name of this process

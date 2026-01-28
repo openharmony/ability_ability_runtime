@@ -1818,6 +1818,15 @@ private:
 
     void HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppRunningRecord> appRecord);
 
+    // Attach timeout functions
+    void PostRenderAttachTimeoutTask(std::shared_ptr<RenderRecord> renderRecord);
+    void PostPreloadAttachTimeoutTask(std::shared_ptr<AppRunningRecord> appRecord);
+
+    void HandleRenderAttachTimeout(int64_t pid);
+    void HandlePreloadAttachTimeout(int64_t pid);
+
+    void CheckRenderAttachTimeout(std::shared_ptr<RenderRecord> renderRecord);
+
     void InitGlobalConfiguration();
 
     /**
@@ -1884,6 +1893,12 @@ private:
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
         const ChildProcessOptions &options);
+        
+    void PostChildProcessAttachTimeoutTask(std::shared_ptr<ChildProcessRecord> childRecord);
+
+    void HandleChildProcessAttachTimeout(int64_t pid);
+
+    void CheckChildProcessAttachTimeout(std::shared_ptr<ChildProcessRecord> childRecord);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
