@@ -153,7 +153,6 @@ constexpr int32_t UNSPECIFIED_USERID = -2;
 constexpr int32_t JS_ERROR_EXIT = -2;
 constexpr int32_t TIME_OUT = 120;
 constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
-constexpr int32_t PROCESS_EXIT_DELAY_TIME = 20000;
 
 enum class SignalType {
     SIGNAL_JSHEAP_OLD,
@@ -2078,6 +2077,7 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
                 " packageName=%{public}s, pid=%{public}d, appRunningId=%{public}s, threadName=%{public}s,"
                 " isUncatchable=%{public}d", result, bundleName.c_str(), pid, appRunningId.c_str(),
                 DumpProcessHelper::GetThreadName().c_str(), isUncatchable);
+            ApplicationDataManager::jsErrorEnv_.store(env, std::memory_order_relaxed);
         }
 
         ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
@@ -2094,8 +2094,8 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
             return;
         }
 
-        if (ApplicationDataManager::processKillHasReport_.exchange(true)) {
-            TAG_LOGW(AAFwkTag::APPKIT, "PROCESS_KILL has reported");
+        if (ApplicationDataManager::jsErrorEnv_.load(std::memory_order_relaxed) != env) {
+            TAG_LOGW(AAFwkTag::APPKIT, "Current thread does not need to exit the process");
             return;
         }
 
@@ -2129,7 +2129,6 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
     TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
         " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
-    usleep(PROCESS_EXIT_DELAY_TIME);
     _exit(JS_ERROR_EXIT);
 }
 
