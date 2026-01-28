@@ -713,7 +713,7 @@ private:
 
     bool IsBgWorkingThread(const AbilityInfo &info);
 
-    void DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+    void DoUpdatePluginInfoInstalled(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
         const std::vector<std::string> &pluginModuleNames);
 
     void HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName);
