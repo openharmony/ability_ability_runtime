@@ -35,7 +35,7 @@ public:
     };
 
     static std::atomic<bool> jsErrorHasReport_;
-    static std::atomic<bool> processKillHasReport_;
+    static std::atomic<napi_env> jsErrorEnv_;
     static ApplicationDataManager &GetInstance();
     void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
     bool NotifyUnhandledException(const std::string &errMsg);
