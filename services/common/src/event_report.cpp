@@ -79,274 +79,249 @@ constexpr const char *EVENT_KEY_SHOULD_KILL_FOREGROUND = "SHOULD_KILL_FOREGROUND
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
 
-void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendAppEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     RecordCostTimeUtil timeRecord("SendAppEvent");
     std::string name = ConvertEventName(eventName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(8);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
     switch (eventName) {
         case EventName::APP_STARTUP_TYPE:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_APP_PID, eventInfo.pid,
-                EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
-                EVENT_KEY_VERSION_NAME, eventInfo.versionName,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-                EVENT_KEY_START_TYPE, eventInfo.startType,
-                EVENT_KEY_START_REASON, eventInfo.startReason);
+            hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, eventInfo.versionCode);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, eventInfo.versionName);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_START_TYPE, eventInfo.startType);
+            hisyseventReport->InsertParam(EVENT_KEY_START_REASON, eventInfo.startReason);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         case EventName::DRAWN_COMPLETED:
             TAG_LOGI(AAFwkTag::DEFAULT,
                 "DRAWN_COMPLETED, bundle: %{public}s, ability: %{public}s",
                 eventInfo.bundleName.c_str(), eventInfo.abilityName.c_str());
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_USERID, eventInfo.userId,
-                EVENT_KEY_APP_PID, eventInfo.pid,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+            hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         default:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_APP_PID, eventInfo.pid,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_VERSION_NAME, eventInfo.versionName,
-                EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
-                EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+            hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, eventInfo.versionName);
+            hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, eventInfo.versionCode);
+            hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
     }
 }
 
-void EventReport::LogErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(8);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogStartErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogStartErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(8);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogWantAgentNumberEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogWantAgentNumberEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_WANTAGENT_NUMBER, eventInfo.wantAgentNumber);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_WANTAGENT_NUMBER, eventInfo.wantAgentNumber);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogTriggerFailedEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogTriggerFailedEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_START_TYPE, eventInfo.startType);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(9);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_START_TYPE, eventInfo.startType);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogSystemErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(6);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogStartAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogStartAbilityEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogTerminateAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogTerminateAbilityEvent(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogAbilityOnForegroundEvent(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(7);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogAbilityOnBackgroundEvent(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(6);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogAbilityOnActiveEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ABILITY_TYPE, eventInfo.abilityType,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(6);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_TYPE, eventInfo.abilityType);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogStartStandardEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "EventInfo: [%{public}d, %{public}s, %{public}s, %{public}s]",
         eventInfo.userId, eventInfo.bundleName.c_str(), eventInfo.moduleName.c_str(),
         eventInfo.abilityName.c_str());
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ABILITY_NUMBER, eventInfo.abilityNumber);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NUMBER, eventInfo.abilityNumber);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogStartAbilityByAppLinking(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "EventInfo, bundleName: %{public}s, callerBundleName: %{public}s, uri: %{public}s",
         eventInfo.bundleName.c_str(), eventInfo.callerBundleName.c_str(), eventInfo.uri.c_str());
-    auto ret = HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_URI, eventInfo.uri);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(3);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_URI, eventInfo.uri);
+    auto ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
 }
 
-void EventReport::LogKillProcessWithReason(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogKillProcessWithReason(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_CALLER_PID, eventInfo.callerPid,
-        EVENT_KEY_PID, eventInfo.pid,
-        EVENT_KEY_EXIT_MESSAGE, eventInfo.exitMsg,
-        EVENT_KEY_SHOULD_KILL_FOREGROUND, eventInfo.shouldKillForeground,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PID, eventInfo.callerPid);
+    hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_EXIT_MESSAGE, eventInfo.exitMsg);
+    hisyseventReport->InsertParam(EVENT_KEY_SHOULD_KILL_FOREGROUND, eventInfo.shouldKillForeground);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogUIExtensionErrorEvent(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_ERR_REASON, eventInfo.errReason,
-        EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle,
-        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-        EVENT_KEY_PERSISTENT_ID, eventInfo.persistentId);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(11);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_ERR_REASON, eventInfo.errReason);
+    hisyseventReport->InsertParam(EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+    hisyseventReport->InsertParam(EVENT_KEY_PERSISTENT_ID, eventInfo.persistentId);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::LogUIServiceExtErrorEvent(
+    const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_ERR_REASON, eventInfo.errReason,
-        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-        EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_ERR_REASON, eventInfo.errReason);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+    hisyseventReport->InsertParam(EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendAbilityEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string name = ConvertEventName(eventName);
@@ -395,7 +370,8 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
     }
 }
 
-void EventReport::SendWantAgentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendWantAgentEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string name = ConvertEventName(eventName);
@@ -409,7 +385,8 @@ void EventReport::SendWantAgentEvent(const EventName &eventName, HiSysEventType 
     }
 }
 
-void EventReport::SendTriggerEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendTriggerEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string name = ConvertEventName(eventName);
@@ -421,34 +398,30 @@ void EventReport::SendTriggerEvent(const EventName &eventName, HiSysEventType ty
     LogTriggerFailedEvent(name, type, eventInfo);
 }
 
-void EventReport::SendAtomicServiceEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendAtomicServiceEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
     switch (eventName) {
         case EventName::ATOMIC_SERVICE_DRAWN_COMPLETE:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         case EventName::CREATE_ATOMIC_SERVICE_PROCESS:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-                EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-                EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-                EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         default:
             break;
@@ -462,30 +435,26 @@ void EventReport::SendGrantUriPermissionEvent(const EventName &eventName, const 
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName: %{public}s", name.c_str());
         return;
     }
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
     switch (eventName) {
         case EventName::GRANT_URI_PERMISSION:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                HiSysEventType::BEHAVIOR,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-                EVENT_KEY_URI, eventInfo.uri);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_URI, eventInfo.uri);
+            hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
             break;
         case EventName::SHARE_UNPRIVILEGED_FILE_URI:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                HiSysEventType::BEHAVIOR,
-                EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
             break;
         default:
             break;
     }
 }
 
-void EventReport::SendExtensionEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendExtensionEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string name = ConvertEventName(eventName);
@@ -493,22 +462,21 @@ void EventReport::SendExtensionEvent(const EventName &eventName, HiSysEventType 
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
     switch (eventName) {
         case EventName::START_EXTENSION_ERROR:
         case EventName::STOP_EXTENSION_ERROR:
         case EventName::CONNECT_SERVICE_ERROR:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_USERID, eventInfo.userId,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-                EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+            hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         case EventName::DISCONNECT_SERVICE_ERROR:
-            HiSysEventWrite(HiSysEvent::Domain::AAFWK, name, type, EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+            hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         case EventName::UI_EXTENSION_ERROR:
             LogUIExtensionErrorEvent(name, type, eventInfo);
@@ -521,7 +489,7 @@ void EventReport::SendExtensionEvent(const EventName &eventName, HiSysEventType 
     }
 }
 
-void EventReport::SendKeyEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendKeyEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
@@ -529,27 +497,22 @@ void EventReport::SendKeyEvent(const EventName &eventName, HiSysEventType type, 
         return;
     }
     TAG_LOGI(AAFwkTag::DEFAULT, "name: %{public}s", name.c_str());
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
     switch (eventName) {
         case EventName::FA_SHOW_ON_LOCK:
         case EventName::START_PRIVATE_ABILITY:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+            hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         case EventName::RESTART_PROCESS_BY_SAME_APP:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_RESTART_TIME, eventInfo.time,
-                EVENT_KEY_APP_UID, eventInfo.appUid,
-                EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-                EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->InsertParam(EVENT_KEY_RESTART_TIME, eventInfo.time);
+            hisyseventReport->InsertParam(EVENT_KEY_APP_UID, eventInfo.appUid);
+            hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+            hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+            hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+            hisyseventReport->Report("AAFWK", name.c_str(), type);
             break;
         default:
             break;
@@ -563,20 +526,18 @@ void EventReport::SendAppLaunchEvent(const EventName &eventName, const EventInfo
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_APP_PID, eventInfo.pid,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_VERSION_NAME, eventInfo.versionName,
-        EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_CALLER_VERSION_NAME, eventInfo.callerVersionName,
-        EVENT_KEY_CALLER_VERSION_CODE, eventInfo.callerVersionCode,
-        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-        EVENT_KEY_CALLER_STATE, eventInfo.callerState);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, eventInfo.versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, eventInfo.versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_VERSION_NAME, eventInfo.callerVersionName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_VERSION_CODE, eventInfo.callerVersionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_STATE, eventInfo.callerState);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendAppForegroundEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -586,18 +547,16 @@ void EventReport::SendAppForegroundEvent(const EventName &eventName, const Event
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    auto ret = HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_APP_PID, eventInfo.pid,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_VERSION_NAME, eventInfo.versionName,
-        EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, eventInfo.versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, eventInfo.versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+    auto ret = hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
@@ -610,17 +569,15 @@ void EventReport::SendAppBackgroundEvent(const EventName &eventName, const Event
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    auto ret = HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_APP_PID, eventInfo.pid,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_VERSION_NAME, eventInfo.versionName,
-        EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
-        EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_NAME, eventInfo.versionName);
+    hisyseventReport->InsertParam(EVENT_KEY_VERSION_CODE, eventInfo.versionCode);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+    auto ret = hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
@@ -635,34 +592,30 @@ void EventReport::SendProcessStartEvent(const EventName &eventName, const EventI
         return;
     }
     if (eventInfo.extensionType == defaultVal) {
-        HiSysEventWrite(
-            HiSysEvent::Domain::AAFWK,
-            name,
-            HiSysEventType::BEHAVIOR,
-            EVENT_KEY_STARTUP_TIME, eventInfo.time,
-            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
-            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-            EVENT_KEY_PID, eventInfo.pid,
-            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_TIME, eventInfo.time);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+        hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
     } else {
-        HiSysEventWrite(
-            HiSysEvent::Domain::AAFWK,
-            name,
-            HiSysEventType::BEHAVIOR,
-            EVENT_KEY_STARTUP_TIME, eventInfo.time,
-            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
-            EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
-            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-            EVENT_KEY_PID, eventInfo.pid,
-            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_TIME, eventInfo.time);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+        hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
     }
 }
 
@@ -676,38 +629,34 @@ void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const 
     TAG_LOGD(AAFwkTag::DEFAULT, "eventName:%{public}s,processName:%{public}s,reason:%{public}d,subReason:%{public}d",
         name.c_str(), eventInfo.processName.c_str(), eventInfo.reason, eventInfo.subReason);
     if (eventInfo.extensionType == DEFAULT_EXTENSION_TYPE) {
-        HiSysEventWrite(
-            HiSysEvent::Domain::AAFWK,
-            name,
-            HiSysEventType::FAULT,
-            EVENT_KEY_STARTUP_TIME, eventInfo.time,
-            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
-            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-            EVENT_KEY_PROCESS_TYPE, eventInfo.processType,
-            EVENT_KEY_REASON, eventInfo.reason,
-            EVENT_KEY_SUB_REASON, eventInfo.subReason);
+        auto hisyseventReport = std::make_shared<HisyseventReport>(11);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_TIME, eventInfo.time);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+        hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+        hisyseventReport->InsertParam(EVENT_KEY_REASON, eventInfo.reason);
+        hisyseventReport->InsertParam(EVENT_KEY_SUB_REASON, eventInfo.subReason);
+        hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_FAULT);
     } else {
-        HiSysEventWrite(
-            HiSysEvent::Domain::AAFWK,
-            name,
-            HiSysEventType::FAULT,
-            EVENT_KEY_STARTUP_TIME, eventInfo.time,
-            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
-            EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
-            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
-            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-            EVENT_KEY_PROCESS_TYPE, eventInfo.processType,
-            EVENT_KEY_REASON, eventInfo.reason,
-            EVENT_KEY_SUB_REASON, eventInfo.subReason);
+        auto hisyseventReport = std::make_shared<HisyseventReport>(12);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_TIME, eventInfo.time);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType);
+        hisyseventReport->InsertParam(EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_UID, eventInfo.callerUid);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+        hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+        hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+        hisyseventReport->InsertParam(EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
+        hisyseventReport->InsertParam(EVENT_KEY_REASON, eventInfo.reason);
+        hisyseventReport->InsertParam(EVENT_KEY_SUB_REASON, eventInfo.subReason);
+        hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_FAULT);
     }
 }
 
@@ -718,16 +667,14 @@ void EventReport::SendProcessExitEvent(const EventName &eventName, const EventIn
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_EXIT_TIME, eventInfo.time,
-        EVENT_KEY_EXIT_RESULT, eventInfo.exitResult,
-        EVENT_KEY_EXIT_PID, eventInfo.pid,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
-        EVENT_KEY_EXIT_REASON, eventInfo.exitReason);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(12);
+    hisyseventReport->InsertParam(EVENT_KEY_EXIT_TIME, eventInfo.time);
+    hisyseventReport->InsertParam(EVENT_KEY_EXIT_RESULT, eventInfo.exitResult);
+    hisyseventReport->InsertParam(EVENT_KEY_EXIT_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType);
+    hisyseventReport->InsertParam(EVENT_KEY_EXIT_REASON, eventInfo.exitReason);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendStartServiceEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -737,20 +684,18 @@ void EventReport::SendStartServiceEvent(const EventName &eventName, const EventI
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_TIME, eventInfo.time,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
-        EVENT_KEY_PID, eventInfo.pid,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-        EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_TIME, eventInfo.time);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType);
+    hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendStopServiceEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -760,20 +705,18 @@ void EventReport::SendStopServiceEvent(const EventName &eventName, const EventIn
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
-        EVENT_KEY_TIME, eventInfo.time,
-        EVENT_KEY_PID, eventInfo.pid,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-        EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType);
+    hisyseventReport->InsertParam(EVENT_KEY_TIME, eventInfo.time);
+    hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendConnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -783,19 +726,17 @@ void EventReport::SendConnectServiceEvent(const EventName &eventName, const Even
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_TIME, eventInfo.time,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_PID, eventInfo.pid,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-        EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_TIME, eventInfo.time);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -805,14 +746,13 @@ void EventReport::SendDisconnectServiceEvent(const EventName &eventName, const E
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_TIME, eventInfo.time,
-        EVENT_KEY_PID, eventInfo.pid,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
-        EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_KEY_TIME, eventInfo.time);
+    hisyseventReport->InsertParam(EVENT_KEY_PID, eventInfo.pid);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
 void EventReport::SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo)
@@ -822,60 +762,57 @@ void EventReport::SendStartAbilityOtherExtensionEvent(const EventName &eventName
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK,
-        name,
-        HiSysEventType::BEHAVIOR,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
-        // Historical reason: Word spelling error during event definition
-        "CALLER_BUNLED_NAME", eventInfo.callerBundleName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType);
+    // Historical reason: Word spelling error during event definition
+    hisyseventReport->InsertParam("CALLER_BUNLED_NAME", eventInfo.callerBundleName);
+    hisyseventReport->Report("AAFWK", name.c_str(), HISYSEVENT_BEHAVIOR);
 }
 
-void EventReport::SendExecuteIntentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendExecuteIntentEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_ERR_REASON, eventInfo.errReason,
-        EVENT_KEY_INTENT_NAME, eventInfo.intentName);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_ERR_REASON, eventInfo.errReason);
+    hisyseventReport->InsertParam(EVENT_KEY_INTENT_NAME, eventInfo.intentName);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::SendLaunchFrameworkEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendLaunchFrameworkEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_ERR_REASON, eventInfo.errReason);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_NAME, eventInfo.processName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_ERR_REASON, eventInfo.errReason);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
-void EventReport::SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventType type,
+void EventReport::SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventEventType type,
     const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
@@ -884,38 +821,35 @@ void EventReport::SendReportDataPartitionUsageEvent(const EventName &eventName, 
         return;
     }
 
-    HiSysEventWrite(
+    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    hisyseventReport->InsertParam(EVENT_COMPONENT_NAME_KEY, eventInfo.componentName);
+    hisyseventReport->InsertParam(EVENT_PARTITION_NAME_KEY, eventInfo.partitionName);
+    hisyseventReport->InsertParam(EVENT_REMAIN_PARTITION_SIZE_KEY, eventInfo.remainPartitionSize);
+    hisyseventReport->InsertParam(EVENT_FILE_OR_FOLDER_PATH, eventInfo.fileOfFolderPath);
+    hisyseventReport->InsertParam(EVENT_FILE_OR_FOLDER_SIZE, eventInfo.fileOfFolderSize);
 #ifdef USE_EXTENSION_DATA
-        OHOS::HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT,
+    hisyseventReport->Report("FILEMANAGEMENT", name.c_str(), type);
 #else
-        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 #endif
-        name,
-        type,
-        EVENT_COMPONENT_NAME_KEY, eventInfo.componentName,
-        EVENT_PARTITION_NAME_KEY, eventInfo.partitionName,
-        EVENT_REMAIN_PARTITION_SIZE_KEY, eventInfo.remainPartitionSize,
-        EVENT_FILE_OR_FOLDER_PATH, eventInfo.fileOfFolderPath,
-        EVENT_FILE_OR_FOLDER_SIZE, eventInfo.fileOfFolderSize);
 }
 
-void EventReport::SendAppStartupErrorEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void EventReport::SendAppStartupErrorEvent(
+    const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    HiSysEventWrite(
-        HiSysEvent::Domain::AAFWK,
-        name,
-        type,
-        EVENT_KEY_USERID, eventInfo.userId,
-        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
-        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
+    hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+    hisyseventReport->InsertParam(EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+    hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
 std::string EventReport::ConvertEventName(const EventName &eventName)

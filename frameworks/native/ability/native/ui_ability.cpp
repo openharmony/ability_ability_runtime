@@ -857,7 +857,7 @@ void UIAbility::OnForeground(const AAFwk::Want &want)
     } else {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
     }
-    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONFOREGROUND, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONFOREGROUND, HISYSEVENT_BEHAVIOR, eventInfo);
 }
 
 void UIAbility::OnBackground()
@@ -896,7 +896,7 @@ void UIAbility::OnBackground()
     eventInfo.moduleName = abilityInfo_->moduleName;
     eventInfo.abilityName = abilityInfo_->name;
     eventInfo.bundleType = static_cast<int32_t>(abilityInfo_->applicationInfo.bundleType);
-    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND, HISYSEVENT_BEHAVIOR, eventInfo);
 }
 
 void UIAbility::OnWillForeground()

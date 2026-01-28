@@ -166,7 +166,7 @@ void CJInsightIntentExecutorImpl::ReplyFailed(
     eventInfo.errCode = innerErr;
     eventInfo.errReason = "ReplyFailed";
     AAFwk::EventReport::SendExecuteIntentEvent(
-        AAFwk::EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
+        AAFwk::EventName::EXECUTE_INSIGHT_INTENT_ERROR, HISYSEVENT_FAULT, eventInfo);
     callback->Call(errorResult);
 }
 

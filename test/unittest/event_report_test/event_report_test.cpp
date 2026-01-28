@@ -109,7 +109,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAppEvent(eventName, type, eventInfo);
 }
@@ -124,7 +124,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::APP_STARTUP_TYPE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_STARTUP_TYPE");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAppEvent(eventName, type, eventInfo);
 }
@@ -139,7 +139,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::DRAWN_COMPLETED;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "DRAWN_COMPLETED");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     eventInfo.extensionType = 0;
     EventReport::SendAppEvent(eventName, type, eventInfo);
@@ -155,7 +155,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::APP_ATTACH;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_ATTACH");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAppEvent(eventName, type, eventInfo);
 }
@@ -170,7 +170,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -185,7 +185,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::START_ABILITY_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_ABILITY_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -200,7 +200,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::TERMINATE_ABILITY_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "TERMINATE_ABILITY_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -215,7 +215,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::START_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_ABILITY");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -230,7 +230,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::TERMINATE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "TERMINATE_ABILITY");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -245,7 +245,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::CLOSE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "CLOSE_ABILITY");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -260,7 +260,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0700, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONFOREGROUND;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ABILITY_ONFOREGROUND");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -275,7 +275,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0800, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONBACKGROUND;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ABILITY_ONBACKGROUND");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -291,7 +291,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0900, TestSize.Level2)
     EventName eventName = EventName::ABILITY_ONACTIVE;
     std::string name  = "ABILITY_ONACTIVE";
     EXPECT_EQ(EventReport::ConvertEventName(eventName), name);
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -307,7 +307,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_1000, TestSize.Level2)
     EventName eventName = EventName::ABILITY_ONINACTIVE;
     std::string name  = "ABILITY_ONINACTIVE";
     EXPECT_EQ(EventReport::ConvertEventName(eventName), name);
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -323,7 +323,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_1100, TestSize.Level2)
     EventName eventName = EventName::DISCONNECT_SERVICE;
     std::string name  = "DISCONNECT_SERVICE";
     EXPECT_EQ(EventReport::ConvertEventName(eventName), name);
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAbilityEvent(eventName, type, eventInfo);
 }
@@ -338,7 +338,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -353,7 +353,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::START_EXTENSION_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_EXTENSION_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -368,7 +368,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::STOP_EXTENSION_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "STOP_EXTENSION_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -383,7 +383,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::CONNECT_SERVICE_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "CONNECT_SERVICE_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -398,7 +398,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::DISCONNECT_SERVICE_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "DISCONNECT_SERVICE_ERROR");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -413,7 +413,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::START_SERVICE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_SERVICE");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -428,7 +428,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
-    HiSysEventType type = HiSysEventType::FAULT;
+    HiSysEventEventType type = HISYSEVENT_FAULT;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -443,7 +443,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::GRANT_URI_PERMISSION;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "GRANT_URI_PERMISSION");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -458,7 +458,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::FA_SHOW_ON_LOCK;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "FA_SHOW_ON_LOCK");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -473,7 +473,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::START_PRIVATE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_PRIVATE_ABILITY");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -488,7 +488,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::RESTART_PROCESS_BY_SAME_APP;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "RESTART_PROCESS_BY_SAME_APP");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -503,7 +503,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::START_SERVICE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_SERVICE");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendExtensionEvent(eventName, type, eventInfo);
 }
@@ -706,7 +706,7 @@ HWTEST_F(EventReportTest, SendAtomicServiceEvent_0100, TestSize.Level2)
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
     EventInfo eventInfo;
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
+    HiSysEventEventType type = HISYSEVENT_BEHAVIOR;
     EventReport::SendAtomicServiceEvent(eventName, type, eventInfo);
 
     eventName = EventName::CREATE_ATOMIC_SERVICE_PROCESS;
@@ -728,10 +728,10 @@ HWTEST_F(EventReportTest, SendReportDataPartitionUsageEvent_0100, TestSize.Level
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
     EventInfo eventInfo;
-    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HISYSEVENT_STATISTIC, eventInfo);
     eventName = EventName::USER_DATA_SIZE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "USER_DATA_SIZE");
-    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HISYSEVENT_STATISTIC, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

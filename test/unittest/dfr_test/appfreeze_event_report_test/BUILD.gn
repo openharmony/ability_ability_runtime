@@ -24,11 +24,14 @@ ohos_unittest("appfreeze_event_report_test") {
 
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [ "appfreeze_event_report_test.cpp" ]
 
-  deps = []
+  deps = [
+    "${ability_runtime_services_path}/common:hisysevent_report",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",

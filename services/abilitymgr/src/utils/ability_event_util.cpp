@@ -38,7 +38,7 @@ void AbilityEventUtil::SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t 
     eventInfo.errCode = errCode;
     eventInfo.errMsg = errMsg;
     ffrt::submit([name, eventInfo]() {
-        EventReport::SendAbilityEvent(name, HiSysEventType::FAULT, eventInfo);
+        EventReport::SendAbilityEvent(name, HISYSEVENT_FAULT, eventInfo);
         }, ffrt::task_attr().timeout(FFRT_TASK_TIMEOUT));
 }
 
@@ -48,7 +48,7 @@ void AbilityEventUtil::SendKillProcessWithReasonEvent(int32_t errCode, const std
     eventInfo.errCode = errCode;
     eventInfo.errMsg = errMsg;
     ffrt::submit([name, eventInfo]() {
-        EventReport::SendAbilityEvent(name, HiSysEventType::STATISTIC, eventInfo);
+        EventReport::SendAbilityEvent(name, HISYSEVENT_STATISTIC, eventInfo);
         }, ffrt::task_attr().timeout(FFRT_TASK_TIMEOUT));
 }
 } // namespace AAFwk

@@ -58,7 +58,7 @@
 #include "exit_resident_process_manager.h"
 #include "fault_data.h"
 #include "fd_guard.h"
-#include "hisysevent.h"
+#include "hisysevent_report.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
