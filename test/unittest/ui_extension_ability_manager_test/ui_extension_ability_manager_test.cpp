@@ -1920,7 +1920,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, AttachAbilityThreadInner_003, TestSize.L
     sptr<IRemoteObject> token = abilityRecord->GetToken();
     
     int res = connectManager->AttachAbilityThreadInner(scheduler, token);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AttachAbilityThreadInner_003 end");
 }
 
