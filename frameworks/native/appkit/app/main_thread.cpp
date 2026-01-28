@@ -2349,7 +2349,8 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
-void MainThread::DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos, const std::vector<std::string> &pluginModuleNames)
+void MainThread::DoUpdatePluginInfoInstalled(const std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+    const std::vector<std::string> &pluginModuleNames)
 {
     if (!applicationInfo_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
