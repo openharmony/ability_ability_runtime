@@ -582,6 +582,7 @@ ani_ref EtsServiceExtension::CallObjectMethod(bool withResult, const char *name,
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Ref_V(etsObj_->aniObj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
+            va_end(args);
             return nullptr;
         }
         va_end(args);
