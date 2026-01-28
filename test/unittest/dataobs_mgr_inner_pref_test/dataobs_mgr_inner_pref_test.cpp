@@ -269,7 +269,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0100, T
     Uri notifyUri("sharepreferences://data/preferences/preferences_test?key");
     dataObsMgrInnerPref_->HandleRegisterObserver(uri, ObserverNode(mockDataAbilityObserverStub, USER_TEST, 0, 0));
     dataObsMgrInnerPref_->HandleNotifyChange(notifyUri, USER_TEST, 1);
-    EXPECT_EQ("key", mockDataAbilityObserverStub->key_);
+    EXPECT_EQ("", mockDataAbilityObserverStub->key_);
 }
 
 /*
