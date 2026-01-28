@@ -101,6 +101,7 @@ void ETSAppForegroundStateObserver::CallEtsFunction(ani_env* env, ani_object ets
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(etsObserverObject, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "status: %{public}d", status);
+        va_end(args);
         return;
     }
     va_end(args);

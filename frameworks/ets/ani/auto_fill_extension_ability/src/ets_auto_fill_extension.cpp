@@ -639,6 +639,7 @@ bool EtsAutoFillExtension::CallObjectMethod(bool withResult, const char *name, c
     if ((status = env->Object_CallMethod_Void_V(etsObj_->aniObj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
+        va_end(args);
         return false;
     }
     va_end(args);
