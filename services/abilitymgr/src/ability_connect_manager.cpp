@@ -2737,7 +2737,7 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<BaseExtensionR
     if (!GetTimeoutMsgContent(msgId, msgContent, typeId)) {
         return;
     }
-    if (ability->GetWant() && ability->GetWant()->GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
+    if (ability->GetWant() && ability->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         msgContent += "\nabilityLoadType: PreloadUIExtension\n";
     }
 
