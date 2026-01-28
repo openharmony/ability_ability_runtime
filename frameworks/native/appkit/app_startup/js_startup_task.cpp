@@ -115,7 +115,7 @@ int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> ca
         eventInfo.errCode = NAPI_CREATE_OBJECT_FAILED;
         eventInfo.errReason = "LoadJsAsyncTaskExecutor failed";
         AAFwk::EventReport::SendLaunchFrameworkEvent(
-            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::STARTUP_TASK_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     LoadJsAsyncTaskCallback();

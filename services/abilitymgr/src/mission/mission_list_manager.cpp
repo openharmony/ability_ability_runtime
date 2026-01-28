@@ -610,7 +610,7 @@ bool MissionListManager::CreateOrReusedMissionInfo(const AbilityRequest &ability
             eventInfo.moduleName = abilityInfo.moduleName;
             // get ability number created previously and add new one.
             eventInfo.abilityNumber = getAbilityNumber + 1;
-            EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITIES, HiSysEventType::BEHAVIOR, eventInfo);
+            EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITIES, HISYSEVENT_BEHAVIOR, eventInfo);
         }
     }
 
@@ -4361,7 +4361,7 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     eventInfo.abilityName = abilityInfo.name;
     eventInfo.bundleName = abilityInfo.bundleName;
     eventInfo.moduleName = abilityInfo.moduleName;
-    EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 }
 
 void MissionListManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)

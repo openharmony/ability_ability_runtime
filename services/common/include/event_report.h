@@ -18,10 +18,7 @@
 
 #include <string>
 
-#include "hisysevent.h"
-
-using HiSysEventType = OHOS::HiviewDFX::HiSysEvent::EventType;
-using HiSysEvent = OHOS::HiviewDFX::HiSysEvent;
+#include "hisysevent_report.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -147,13 +144,14 @@ typedef enum {
 
 class EventReport {
 public:
-    static void SendAppEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendWantAgentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendTriggerEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendAtomicServiceEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendExtensionEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendKeyEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendAppEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendAbilityEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendWantAgentEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendTriggerEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendAtomicServiceEvent(
+        const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendExtensionEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendKeyEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
     static void SendAppLaunchEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendAppForegroundEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendAppBackgroundEvent(const EventName &eventName, const EventInfo &eventInfo);
@@ -166,29 +164,36 @@ public:
     static void SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
-    static void SendExecuteIntentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendLaunchFrameworkEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
-    static void SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventType type,
+    static void SendExecuteIntentEvent(
+        const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendLaunchFrameworkEvent(
+        const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventEventType type,
         const EventInfo &eventInfo);
-    static void SendAppStartupErrorEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendAppStartupErrorEvent(
+        const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
 
 private:
     static std::string ConvertEventName(const EventName &eventName);
-    static void LogErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogStartErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogStartAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogWantAgentNumberEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogTriggerFailedEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogTerminateAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
-    static void LogKillProcessWithReason(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogStartErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogStartAbilityEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogWantAgentNumberEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogTriggerFailedEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogTerminateAbilityEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogAbilityOnForegroundEvent(
+        const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogAbilityOnBackgroundEvent(
+        const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogStartStandardEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogStartAbilityByAppLinking(
+        const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogUIExtensionErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogUIServiceExtErrorEvent(
+        const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogSystemErrorEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void LogKillProcessWithReason(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

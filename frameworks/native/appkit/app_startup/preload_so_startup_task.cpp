@@ -132,7 +132,7 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
         eventInfo.errCode = ERR_NATIVE_MODULE_MANAGER_CONSTRUCTION;
         eventInfo.errReason = "moduleManager is null";
         AAFwk::EventReport::SendLaunchFrameworkEvent(
-            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::STARTUP_TASK_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
@@ -145,7 +145,7 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
         eventInfo.errCode = ERR_LOAD_NATIVE_MODULE;
         eventInfo.errReason = errInfo;
         AAFwk::EventReport::SendLaunchFrameworkEvent(
-            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::STARTUP_TASK_ERROR, HISYSEVENT_FAULT, eventInfo);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     OnCompletedCallback::OnCallback(std::move(callback), ERR_OK);

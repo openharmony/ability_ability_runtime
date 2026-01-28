@@ -129,7 +129,7 @@ void ETSStartupManager::NativeRun(ani_env *env, ani_int startupTaskManagerId, an
         eventInfo.appIndex = startupManager->GetAppIndex();
         eventInfo.userId = startupManager->GetUid() / AppExecFwk::Constants::BASE_USER_RANGE;
         AAFwk::EventReport::SendAppStartupErrorEvent(
-            AAFwk::EventName::APP_STARTUP_ERROR, HiSysEvent::FAULT, eventInfo);
+            AAFwk::EventName::APP_STARTUP_ERROR, HISYSEVENT_FAULT, eventInfo);
     };
     startupTaskManager->SetTimeoutCallback(timeoutCallback);
     result = startupTaskManager->Run(onCompletedCallback);

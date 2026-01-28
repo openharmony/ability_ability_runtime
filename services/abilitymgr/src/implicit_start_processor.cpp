@@ -57,7 +57,7 @@ const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.support.action_start_selector";
 
-void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+void SendAbilityEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     ffrt::submit([eventName, type, eventInfo]() {
         EventReport::SendAbilityEvent(eventName, type, eventInfo);
@@ -580,7 +580,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
             if (pos != std::string::npos) {
                 eventInfo.uri = eventInfo.uri.substr(0, pos);
             }
-            SendAbilityEvent(EventName::START_ABILITY_BY_APP_LINKING, HiSysEventType::BEHAVIOR, eventInfo);
+            SendAbilityEvent(EventName::START_ABILITY_BY_APP_LINKING, HISYSEVENT_BEHAVIOR, eventInfo);
         }
     }
 
@@ -823,7 +823,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     eventInfo.abilityName = want.GetElement().GetAbilityName();
 
     if (callType == AbilityCallType::INVALID_TYPE) {
-        SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+        SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s, bundle:%{public}s", eventInfo.abilityName.c_str(),
@@ -834,7 +834,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CallStartAbilityInner failed: %{public}d", ret);
         if (callType == AbilityCallType::INVALID_TYPE) {
             eventInfo.errCode = ERR_DO_CLOSURE_CALLBACK_FAILED;
-            SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+            SendAbilityEvent(EventName::START_ABILITY_ERROR, HISYSEVENT_FAULT, eventInfo);
         }
     }
     return ret;

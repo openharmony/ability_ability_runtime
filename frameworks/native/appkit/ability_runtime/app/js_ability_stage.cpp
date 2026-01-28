@@ -741,7 +741,7 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
         eventInfo.moduleName = moduleName;
         eventInfo.userId = startupManager->GetUid() / AppExecFwk::Constants::BASE_USER_RANGE;
         AAFwk::EventReport::SendAppStartupErrorEvent(
-            AAFwk::EventName::APP_STARTUP_ERROR, HiSysEventType::FAULT, eventInfo);
+            AAFwk::EventName::APP_STARTUP_ERROR, HISYSEVENT_FAULT, eventInfo);
     };
     startupTaskManager->SetTimeoutCallback(timeoutCallback);
     result = startupTaskManager->Run(runAutoStartupCallback);
