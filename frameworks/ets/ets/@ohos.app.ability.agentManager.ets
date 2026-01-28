@@ -19,7 +19,7 @@ export default namespace agentManager {
 
   export native function nativeGetAllAgentCards(): Array<AgentCard>;
   export native function nativeGetAgentCardsByBundleName(bundleName: string): Array<AgentCard>;
-  export native function nativeGetAgentCardByUrl(bundleName: string, url: string): AgentCard;
+  export native function nativeGetAgentCardByAgentId(bundleName: string, agentId: string): AgentCard;
 
   export function getAllAgentCards(): Promise<Array<AgentCard>> {
     let p: Promise<Array<AgentCard>> = new Promise<Array<AgentCard>>(
@@ -51,11 +51,11 @@ export default namespace agentManager {
     return p;
   }
 
-  export function getAgentCardByUrl(bundleName: string, url: string): Promise<AgentCard> {
+  export function getAgentCardByAgentId(bundleName: string, agentId: string): Promise<AgentCard> {
     let p: Promise<AgentCard> = new Promise<AgentCard>(
       (res: (data: AgentCard) => void, rej: (error: Error) => void): void => {
       taskpool.execute((): AgentCard => {
-        return agentManager.nativeGetAgentCardByUrl(bundleName, url);
+        return agentManager.nativeGetAgentCardByAgentId(bundleName, agentId);
       }).then((e: Any) => {
         let card: AgentCard = e as AgentCard;
         res(card);

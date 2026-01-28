@@ -40,6 +40,7 @@ AgentManagerClient &AgentManagerClient::GetInstance()
 
 int32_t AgentManagerClient::GetAllAgentCards(std::vector<AgentCard> &cards)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto agentMgr = GetAgentMgrProxy();
     if (agentMgr == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
@@ -56,6 +57,7 @@ int32_t AgentManagerClient::GetAllAgentCards(std::vector<AgentCard> &cards)
 
 int32_t AgentManagerClient::GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto agentMgr = GetAgentMgrProxy();
     if (agentMgr == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
@@ -67,6 +69,7 @@ int32_t AgentManagerClient::GetAgentCardsByBundleName(const std::string &bundleN
 int32_t AgentManagerClient::GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId,
     AgentCard &card)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto agentMgr = GetAgentMgrProxy();
     if (agentMgr == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
