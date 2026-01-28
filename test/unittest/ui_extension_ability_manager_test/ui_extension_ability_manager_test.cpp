@@ -1939,7 +1939,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, OnAbilityRequestDone_001, TestSize.Level
     EXPECT_NE(connectManager, nullptr);
 
     sptr<IRemoteObject> token = nullptr;
-    int32_t state = AppAbilityState::ABILITY_STATE_FOREGROUND;
+    int32_t state = static_cast<int32_t>(AppAbilityState::ABILITY_STATE_FOREGROUND);
     
     connectManager->OnAbilityRequestDone(token, state);
     TAG_LOGI(AAFwkTag::TEST, "OnAbilityRequestDone_001 end");
@@ -1967,7 +1967,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, OnAbilityRequestDone_002, TestSize.Level
     EXPECT_NE(abilityRecord, nullptr);
 
     sptr<IRemoteObject> token = abilityRecord->GetToken();
-    int32_t state = AppAbilityState::ABILITY_STATE_FOREGROUND;
+    int32_t state = static_cast<int32_t>(AppAbilityState::ABILITY_STATE_FOREGROUND);
     
     connectManager->OnAbilityRequestDone(token, state);
     TAG_LOGI(AAFwkTag::TEST, "OnAbilityRequestDone_002 end");
@@ -1996,7 +1996,7 @@ HWTEST_F(UIExtensionAbilityManagerTest, OnAbilityRequestDone_003, TestSize.Level
     abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
 
     sptr<IRemoteObject> token = abilityRecord->GetToken();
-    int32_t state = AppAbilityState::ABILITY_STATE_FOREGROUND;
+    int32_t state = static_cast<int32_t>(AppAbilityState::ABILITY_STATE_FOREGROUND);
     
     connectManager->OnAbilityRequestDone(token, state);
     TAG_LOGI(AAFwkTag::TEST, "OnAbilityRequestDone_003 end");
