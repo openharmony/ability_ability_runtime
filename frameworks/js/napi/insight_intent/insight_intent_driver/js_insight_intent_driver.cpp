@@ -171,6 +171,7 @@ private:
 
     napi_value HandleServiceMatch(napi_env env, NapiCallbackInfo& info, InsightIntentExecuteParam& param)
     {
+        HandleScope handleScope(env);
         napi_value napiIntentParam = nullptr;
         napi_get_named_property(env, info.argv[INDEX_ZERO], "insightIntentParam", &napiIntentParam);
         if (napiIntentParam == nullptr) {
@@ -196,7 +197,10 @@ private:
 
         if (param.insightIntentParam_ != nullptr) {
             if (param.insightIntentParam_->GetStringParam("startType") == "startAbilityByType") {
-                abilityContext->StartAbilityByType("navigation", *param.insightIntentParam_, callback);
+                auto type = param.insightIntentParam_->GetStringParam("type");
+                param.insightIntentParam_->Remove("startType");
+                param.insightIntentParam_->Remove("type");
+                abilityContext->StartAbilityByType(type, *param.insightIntentParam_, callback);
             }
         }
         return CreateJsUndefined(env);
@@ -206,15 +210,16 @@ private:
     {
         if (param.insightIntentParam_ != nullptr &&
             param.insightIntentParam_->GetStringParam("executeFlag") == "service_match") {
-                param.isServiceMatch_ = false;
-                ParseParam(param);
+            param.isServiceMatch_ = false;
+            ParseParam(param);
+            if (param.isServiceMatch_) {
                 return true;
             }
-
+        }
         return false;
     }
 
-    bool NeedStartByServiceMatch(const InsightIntentExecuteParam &param)
+    bool NeedStartByContext(const InsightIntentExecuteParam &param)
     {
         if (param.insightIntentParam_ != nullptr &&
             !param.insightIntentParam_->GetStringParam("startType").empty()) {
@@ -262,12 +267,7 @@ private:
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
-        if (IsServiceMatch(param)) {
-            if (!param.isServiceMatch_) {
-                ThrowInvalidParamError(env, "Parameter error: Service match failed.");
-                return CreateJsUndefined(env);
-            }
-            if (NeedStartByServiceMatch(param)) {
+        if (IsServiceMatch(param) && NeedStartByContext(param)) {
                 return HandleServiceMatch(env, info, param);
             }
         }
