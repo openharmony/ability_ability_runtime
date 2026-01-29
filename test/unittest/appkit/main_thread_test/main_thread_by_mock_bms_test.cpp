@@ -139,5 +139,53 @@ HWTEST_F(MainThreadByMockBmsTest, GetOverlayModuleInfos_0100, TestSize.Level1)
     EXPECT_TRUE(result == 0);
     EXPECT_TRUE(overlayModuleInfos.size() == 1);
 }
+
+/**
+ * @tc.name: DoUpdatePluginInfoInstalled_0100
+ * @tc.desc: test DoUpdatePluginInfoInstalled with null applicationInfo_.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MainThreadByMockBmsTest, DoUpdatePluginInfoInstalled_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    EXPECT_TRUE(mainThread_ != nullptr);
+
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    std::vector<std::string> pluginModuleNames;
+
+    // Set applicationInfo_ to null
+    mainThread_->applicationInfo_ = nullptr;
+    mainThread_->application_ = std::make_shared<OhosApplication>();
+
+    // Call DoUpdatePluginInfoInstalled (should return early)
+    mainThread_->DoUpdatePluginInfoInstalled(pluginBundleInfos, pluginModuleNames);
+    EXPECT_TRUE(mainThread_->applicationInfo_ == nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: DoUpdatePluginInfoInstalled_0200
+ * @tc.desc: test DoUpdatePluginInfoInstalled with null application_.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MainThreadByMockBmsTest, DoUpdatePluginInfoInstalled_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    EXPECT_TRUE(mainThread_ != nullptr);
+
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    std::vector<std::string> pluginModuleNames;
+
+    mainThread_->applicationInfo_ = std::make_shared<ApplicationInfo>();
+    mainThread_->application_ = nullptr;
+
+    mainThread_->DoUpdatePluginInfoInstalled(pluginBundleInfos, pluginModuleNames);
+    EXPECT_TRUE(mainThread_->application_ == nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
