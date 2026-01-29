@@ -34,11 +34,11 @@ OBSVerifyPermissionUtils& OBSVerifyPermissionUtils::GetInstance()
 bool OBSVerifyPermissionUtils::VerifyPermission(uint32_t listenerTokenId, int32_t userId,
     const Uri &uri, uint32_t tokenId)
 {
-    auto [isSA, listenerCallingName] = GetCallingInfo(listenerTokenId);
-    if (isSA) {
+    if (listenerTokenId == tokenId) {
         return true;
     }
-    if (listenerTokenId == tokenId) {
+    auto [isSA, listenerCallingName] = GetCallingInfo(listenerTokenId);
+    if (isSA) {
         return true;
     }
     Uri uriTemp = uri;
