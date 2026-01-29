@@ -541,10 +541,10 @@ bool PermissionVerification::VerifyPreStartAtomicServicePermission() const
 bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
 {
     if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Permission granted");
+        TAG_LOGD(AAFwkTag::APPMGR, "Permission verification succeeded.");
         return true;
     }
-    TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
+    TAG_LOGW(AAFwkTag::APPMGR, "Permission verification failed");
     return false;
 }
 
