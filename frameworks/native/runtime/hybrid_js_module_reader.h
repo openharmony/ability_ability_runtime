@@ -47,18 +47,19 @@ public:
     static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName);
 
 private:
-    std::string GetAppPath(const std::string& inputPath, const std::string& suffix) const;
-    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix) const;
-    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix) const;
+    std::string GetAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const;
+    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const;
+    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const;
     std::string GetModuleName(const std::string& inputPath) const;
     std::string GetPluginHspPath(const std::string& inputPath) const;
     std::shared_ptr<Extractor> GetExtractor(const std::string& inputPath, std::string& errorMsg) const;
     static std::string GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
-        const std::string& inputPath);
+        const std::string& inputPath, bool& needFindPluginHsp_);
+    static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName,
+        bool& needFindPluginHsp_);
 
     bool isSystemPath_ = false;
     bool isFormRender_ = false;
-    static bool needFindPluginHsp_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
