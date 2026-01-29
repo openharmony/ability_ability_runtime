@@ -836,6 +836,10 @@ int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateAbility:%{public}s", abilityInfo_.name.c_str());
+
+    // Notify all startAbilityByCall callers that this ability is terminating
+    NotifyCallersOnTerminate();
+
 #ifdef WITH_DLP
     HandleDlpClosed();
 #endif // WITH_DLP
@@ -2570,6 +2574,22 @@ bool AbilityRecord::IsNeedToCallRequest() const
     }
 
     return callContainer_->IsNeedToCallRequest();
+}
+
+void AbilityRecord::NotifyCallersOnTerminate()
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Notify callers on terminate: %{public}s",
+        abilityInfo_.name.c_str());
+
+    if (callContainer_ == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callContainer_ is null, no callers to notify");
+        return;
+    }
+
+    AppExecFwk::ElementName element(abilityInfo_.deviceId, abilityInfo_.bundleName,
+        abilityInfo_.name, abilityInfo_.moduleName);
+
+    callContainer_->NotifyAllCallDisconnect(element);
 }
 
 void AbilityRecord::ContinueAbility(const std::string& deviceId, uint32_t versionCode)

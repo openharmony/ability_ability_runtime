@@ -571,6 +571,10 @@ public:
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
     bool ReleaseCall(const sptr<IAbilityConnection> &connect);
     bool IsNeedToCallRequest() const;
+    /**
+     * @brief Notify all callers that this ability is terminating
+     */
+    void NotifyCallersOnTerminate();
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
     void CallRequest();

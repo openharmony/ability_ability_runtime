@@ -200,7 +200,7 @@ HWTEST_F(AbilityCallerTest, AaFwk_Ability_OnCallStubDied_0100, Function | Medium
     });
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(want.GetElement());
     localCallRecord->AddCaller(callback);
-    localCallRecord->OnCallStubDied(nullptr);
+    localCallRecord->OnCallStubDied();
     EXPECT_TRUE(isSetOnReleaseCalled);
 }
 
@@ -223,7 +223,7 @@ HWTEST_F(AbilityCallerTest, AaFwk_Ability_OnCallStubDied_0200, Function | Medium
 
     sptr<IRemoteObject> callRemoteObject =
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    localCallRecord.OnCallStubDied(callRemoteObject);
+    localCallRecord.OnCallStubDied();
     EXPECT_FALSE(isSetOnReleaseCalled);
 }
 } // namespace AppExecFwk

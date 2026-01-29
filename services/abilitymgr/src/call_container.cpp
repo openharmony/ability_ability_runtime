@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+constexpr int32_t REASON_CALLEE_TERMINATE = 1;
 CallContainer::CallContainer()
 {}
 
@@ -224,6 +225,34 @@ void CallContainer::RemoveConnectDeathRecipient(const sptr<IAbilityConnection> &
 bool CallContainer::IsExistConnection(const sptr<IAbilityConnection> &connect)
 {
     return FindCallRecordMap(connect->AsObject()) != nullptr;
+}
+
+void CallContainer::NotifyAllCallDisconnect(const AppExecFwk::ElementName &element)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Notify all callers that callee is terminating: %{public}s",
+        element.GetAbilityName().c_str());
+
+    std::lock_guard lock(callRecordMapLock_);
+    if (callRecordMap_.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "No call records to notify");
+        return;
+    }
+
+    for (const auto &[_, callRecord] : callRecordMap_) {
+        if (callRecord == nullptr || !callRecord->IsCallState(CallState::REQUESTED)) {
+            continue;
+        }
+        auto callback = callRecord->GetConCallBack();
+        if (callback) {
+            // Notify caller that callee is disconnecting
+            ffrt::submit([callback, element]() {
+                callback->OnAbilityDisconnectDone(element, REASON_CALLEE_TERMINATE);
+            });
+        }
+    }
+
+    // Clear all call records after notification
+    callRecordMap_.clear();
 }
 }  // namespace AAFwk
 }  // namesspace OHOS
