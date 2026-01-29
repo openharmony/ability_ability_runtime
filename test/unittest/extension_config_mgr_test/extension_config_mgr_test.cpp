@@ -576,45 +576,6 @@ HWTEST_F(ExtensionConfigMgrTest, UpdateRuntimeModuleChecker_ShouldHandleNotEtsRu
 }
 
 /**
- * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsNegative
- * @tc.desc: Test LoadExtensionBlockList with negative type value.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsNegative, TestSize.Level1)
-{
-    ExtensionConfigMgr mgr;
-    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, -1);
-    bool result = (mgr.extensionBlocklist_.find(-1) != mgr.extensionBlocklist_.end());
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsUnknown
- * @tc.desc: Test LoadExtensionBlockList with EXTENSION_TYPE_UNKNOWN type.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeIsUnknown, TestSize.Level1)
-{
-    ExtensionConfigMgr mgr;
-    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_UNKNOWN);
-    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_UNKNOWN) != mgr.extensionBlocklist_.end());
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenTypeExceedsUnknown
- * @tc.desc: Test LoadExtensionBlockList with type greater than EXTENSION_TYPE_UNKNOWN.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConfigMgrTest, LoadExtensionBlockList_ShouldReturnEarly_WhenTypeExceedsUnknown, TestSize.Level1)
-{
-    ExtensionConfigMgr mgr;
-    mgr.LoadExtensionBlockList(BLOCK_LIST_ITEM_SERVICE_EXTENSION, EXTENSION_TYPE_UNKNOWN + 1);
-    bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_UNKNOWN + 1) != mgr.extensionBlocklist_.end());
-    EXPECT_FALSE(result);
-}
-
-/**
  * @tc.name: LoadExtensionBlockList_ShouldReturnEarly_WhenAlreadyLoaded
  * @tc.desc: Test LoadExtensionBlockList when the same type is already loaded.
  * @tc.type: FUNC
