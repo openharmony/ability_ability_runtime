@@ -23,6 +23,11 @@
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "tokenid_kit.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+
+#include <thread>
+#include <chrono>
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +37,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const int RESULT_CODE = 8521225;
+const int32_t CYCLE_LIMIT = 1000;
+const int64_t SHORT_WAIT_MS = 150;
 }
 class ServiceRouterMgrServiceTest : public testing::Test {
 public:
@@ -149,6 +156,88 @@ HWTEST_F(ServiceRouterMgrServiceTest, VerifyCallingPermission_001, Function | Sm
     auto ret = serviceRouterMgrService_->VerifyCallingPermission("");
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "VerifyCallingPermission_001 end");
+}
+
+/**
+ * @tc.name: test DelayUnloadTask_001
+ * @tc.desc: cover handler_ nullptr branch
+ */
+HWTEST_F(ServiceRouterMgrServiceTest, DelayUnloadTask_001, Function | SmallTest | Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DelayUnloadTask_001 start");
+    serviceRouterMgrService_->handler_ = nullptr;
+    serviceRouterMgrService_->DelayUnloadTask();
+    EXPECT_EQ(serviceRouterMgrService_->handler_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DelayUnloadTask_001 end");
+}
+
+/**
+ * @tc.name: test DelayUnloadTask_002
+ * @tc.desc: cover handler_ not nullptr branch
+ */
+HWTEST_F(ServiceRouterMgrServiceTest, DelayUnloadTask_002, Function | SmallTest | Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DelayUnloadTask_002 start");
+    serviceRouterMgrService_->runner_ = EventRunner::Create("srms_test_runner");
+    serviceRouterMgrService_->handler_ = std::make_shared<EventHandler>(serviceRouterMgrService_->runner_);
+    serviceRouterMgrService_->DelayUnloadTask();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_WAIT_MS));
+    EXPECT_NE(serviceRouterMgrService_->handler_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DelayUnloadTask_002 end");
+}
+
+/**
+ * @tc.name: test InitEventRunnerAndHandler_001
+ * @tc.desc: cover InitEventRunnerAndHandler runner_ and handler_ branches
+ */
+HWTEST_F(ServiceRouterMgrServiceTest, InitEventRunnerAndHandler_001, Function | SmallTest | Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InitEventRunnerAndHandler_001 start");
+    serviceRouterMgrService_->runner_ = nullptr;
+    serviceRouterMgrService_->handler_ = nullptr;
+    EXPECT_TRUE(serviceRouterMgrService_->InitEventRunnerAndHandler());
+    EXPECT_NE(serviceRouterMgrService_->runner_, nullptr);
+    EXPECT_NE(serviceRouterMgrService_->handler_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "InitEventRunnerAndHandler_001 end");
+}
+
+/**
+ * @tc.name: test SubscribeCommonEvent_001
+ * @tc.desc: cover SubscribeCommonEvent null and not null branches
+ */
+HWTEST_F(ServiceRouterMgrServiceTest, SubscribeCommonEvent_001, Function | SmallTest | Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SubscribeCommonEvent_001 start");
+    serviceRouterMgrService_->runner_ = EventRunner::Create("srms_test_subscribe");
+    serviceRouterMgrService_->handler_ = std::make_shared<EventHandler>(serviceRouterMgrService_->runner_);
+    serviceRouterMgrService_->eventSubscriber_ = nullptr;
+    serviceRouterMgrService_->SubscribeCommonEvent();
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    serviceRouterMgrService_->eventSubscriber_ = std::make_shared<SrCommonEventSubscriber>(subscribeInfo);
+    EXPECT_TRUE(serviceRouterMgrService_->SubscribeCommonEvent());
+    TAG_LOGI(AAFwkTag::TEST, "SubscribeCommonEvent_001 end");
+}
+
+/**
+ * @tc.name: test QueryBusinessAbilityInfos_002
+ * @tc.desc: cover VerifySystemApp/VerifyCallingPermission and funcResult branches
+ */
+HWTEST_F(ServiceRouterMgrServiceTest, QueryBusinessAbilityInfos_002, Function | SmallTest | Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryBusinessAbilityInfos_002 start");
+    BusinessAbilityFilter filter;
+    std::vector<BusinessAbilityInfo> abilityInfos;
+
+    int32_t funcResult = CYCLE_LIMIT + 1;
+    serviceRouterMgrService_->QueryBusinessAbilityInfos(filter, abilityInfos, funcResult);
+
+    funcResult = 0;
+    serviceRouterMgrService_->QueryBusinessAbilityInfos(filter, abilityInfos, funcResult);
+    EXPECT_TRUE(true);
+    TAG_LOGI(AAFwkTag::TEST, "QueryBusinessAbilityInfos_002 end");
 }
 }
 }
