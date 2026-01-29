@@ -68,6 +68,8 @@ public:
     std::string GetEntryParams() const;
     ProcessType GetProcessType() const;
     bool IsNativeSpawnStarted() const;
+    void SetAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time);
+    std::chrono::system_clock::time_point GetAttachTimeoutStartTime() const;
 
 private:
     void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord, const std::string &customProcessName);
@@ -87,6 +89,7 @@ private:
     std::string processName_;
     std::string entryFunc_;
     std::string entryParams_;
+    std::chrono::system_clock::time_point attachTimeoutStartTime_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

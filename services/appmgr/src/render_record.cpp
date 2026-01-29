@@ -170,5 +170,15 @@ int32_t RenderRecord::GetState() const
 {
     return state_;
 }
+
+void RenderRecord::SetAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time)
+{
+    attachTimeoutStartTime_ = time;
+}
+
+std::chrono::system_clock::time_point RenderRecord::GetAttachTimeoutStartTime() const
+{
+    return attachTimeoutStartTime_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
