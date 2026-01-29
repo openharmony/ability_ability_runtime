@@ -29,7 +29,6 @@ using namespace OHOS::AbilityBase;
 
 namespace OHOS {
 namespace AbilityRuntime {
-bool HybridJsModuleReader::needFindPluginHsp_ = true;
 
 HybridJsModuleReader::HybridJsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
     : JsModuleSearcher(bundleName), isFormRender_(isFormRender)
@@ -44,7 +43,8 @@ HybridJsModuleReader::HybridJsModuleReader(const std::string& bundleName, const 
 std::shared_ptr<Extractor> HybridJsModuleReader::GetExtractor(
     const std::string& inputPath, std::string& errorMsg) const
 {
-    auto realHapPath = GetAppPath(inputPath, SHARED_FILE_SUFFIX);
+    bool needFindPluginHsp_ = true;
+    auto realHapPath = GetAppPath(inputPath, SHARED_FILE_SUFFIX, needFindPluginHsp_);
     if (realHapPath.empty()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
         return nullptr;
@@ -146,15 +146,15 @@ std::string HybridJsModuleReader::GetPluginHspPath(const std::string& inputPath)
     return presetAppHapPath;
 }
 
-std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath, const std::string& suffix) const
+std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const
 {
     if (isFormRender_) {
-        return GetFormAppPath(inputPath, suffix);
+        return GetFormAppPath(inputPath, suffix, needFindPluginHsp_);
     }
-    return GetCommonAppPath(inputPath, suffix);
+    return GetCommonAppPath(inputPath, suffix, needFindPluginHsp_);
 }
 
-std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath, const std::string& suffix) const
+std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const
 {
     std::string realHapPath;
     realHapPath.append("/data/bundles/")
@@ -169,6 +169,7 @@ std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath, c
         TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
+    needFindPluginHsp_ = false;
     return realHapPath;
 }
 
@@ -177,9 +178,9 @@ std::string HybridJsModuleReader::GetModuleName(const std::string& inputPath) co
     return inputPath.substr(inputPath.find_last_of("/") + 1);
 }
 
-std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath, const std::string& suffix) const
+std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp_) const
 {
-    std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_);
+    std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_, needFindPluginHsp_);
     if ((realHapPath.find(ABS_DATA_CODE_PATH) == 0) || (realHapPath == inputPath)) {
         realHapPath = std::string(ABS_CODE_PATH) + inputPath + suffix;
     }
@@ -195,7 +196,7 @@ std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath,
 }
 
 std::string HybridJsModuleReader::GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
-    const std::string& inputPath)
+    const std::string& inputPath, bool& needFindPluginHsp_)
 {
     std::string presetAppHapPath = inputPath;
 
@@ -236,7 +237,7 @@ std::string HybridJsModuleReader::GetOtherHspPath(const std::string& bundleName,
     return presetAppHapPath;
 }
 
-std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
+std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName, bool& needFindPluginHsp_)
 {
     std::string presetAppHapPath = inputPath;
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
@@ -265,7 +266,7 @@ std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPa
             }
         }
     } else {
-        presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath);
+        presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath, needFindPluginHsp_);
     }
     return presetAppHapPath;
 }
