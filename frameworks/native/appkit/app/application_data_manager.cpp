@@ -34,7 +34,7 @@ namespace {
 }
 
 std::atomic<bool> ApplicationDataManager::jsErrorHasReport_{false};
-std::atomic<bool> ApplicationDataManager::processKillHasReport_{false};
+std::atomic<napi_env> ApplicationDataManager::jsErrorEnv_{nullptr};
 ApplicationDataManager::ApplicationDataManager() {}
 
 ApplicationDataManager::~ApplicationDataManager() {}
