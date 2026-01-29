@@ -139,11 +139,11 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
                 continue;
             }
             if (!DataShare::DataSharePermission::VerifyPermission(uriTemp, token, readPermission, isSilentUri)) {
-                TAG_LOGE(AAFwkTag::DBOBSMGR, "readpermission denied, token %{public}d permission %{public}s uri %{public}s"
-                    " pid %{public}d", token, readPermission.c_str(), CommonUtils::Anonymous(uriStr).c_str(), obs.pid_);
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "Verify denied, token %{public}d permission %{public}s uri %{public}s "
+                    "pid %{public}d", token, readPermission.c_str(), CommonUtils::Anonymous(uriStr).c_str(), obs.pid_);
                 // just hisysevent now
                 std::string msg = __FUNCTION__;
-                DataSharePermission::ReportExtensionFault(DataShare::E_DATASHARE_PERMISSION_DENIED, token, uriStr, msg);
+                DataSharePermission::ReportExtensionFault(E_DATASHARE_PERMISSION_DENIED, token, uriStr, msg);
                 continue;
             }
         }

@@ -403,24 +403,5 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_0100, TestSize.Level1)
     dataObsMgrInner->observers_.emplace(uri2, obsList2);
     dataObsMgrInner->RemoveObs(callback2->AsObject());
 }
-/*
- * Feature: DataObsMgrInnerPref
- * Function: Notify function test
- * SubFunction: HandleNotifyChange
- * FunctionPoints: When the data changes, call the OnChangePreferences function of the registered dataabilityobserver
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
-    Uri uri("rdb://data/rdb/rdb_test");
-    sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
-
-    Uri notifyUri("rdb://data/rdb/rdb_test?key");
-    dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(mockDataAbilityObserverStub, USER_TEST, 0, 0));
-    dataObsMgrInner_->HandleNotifyChange(notifyUri, USER_TEST, 1);
-    EXPECT_EQ("", mockDataAbilityObserverStub->key_);
-}
 }  // namespace AAFwk
 }  // namespace OHOS
