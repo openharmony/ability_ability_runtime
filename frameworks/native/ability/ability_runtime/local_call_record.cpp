@@ -45,7 +45,10 @@ void LocalCallRecord::ClearData()
         callRecipient_ = nullptr;
     }
 
-    callers_.clear();
+    {
+        std::lock_guard lock(callersMutex_);
+        callers_.clear();
+    }
     remoteObject_ = nullptr;
 }
 
@@ -94,11 +97,15 @@ void LocalCallRecord::AddCaller(const std::shared_ptr<CallerCallBack>& callback)
     }
 
     callback->SetRecord(weak_from_this());
-    callers_.emplace_back(callback);
+    {
+        std::lock_guard lock(callersMutex_);
+        callers_.emplace_back(callback);
+    }
 }
 
 bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callback)
 {
+    std::lock_guard lock(callersMutex_);
     if (callers_.empty()) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "empty callers_");
         return false;
@@ -123,6 +130,7 @@ void LocalCallRecord::OnCallStubDied()
 
 void LocalCallRecord::NotifyCallersReleased(const std::string& releaseReason)
 {
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr) {
             TAG_LOGI(AAFwkTag::LOCAL_CALL, "Notify caller released: %{public}s", releaseReason.c_str());
@@ -138,6 +146,7 @@ void LocalCallRecord::InvokeCallBack() const
         return;
     }
 
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr && !callBack->IsCallBack()) {
             callBack->InvokeCallBack(remoteObject_);
@@ -158,6 +167,7 @@ void LocalCallRecord::NotifyRemoteStateChanged(int32_t abilityState)
         state = "background";
     }
 
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr && callBack->IsCallBack()) {
             TAG_LOGI(AAFwkTag::LOCAL_CALL, "not null callback and is callback ");
@@ -178,6 +188,7 @@ AppExecFwk::ElementName LocalCallRecord::GetElementName() const
 
 bool LocalCallRecord::IsExistCallBack() const
 {
+    std::lock_guard lock(callersMutex_);
     return !callers_.empty();
 }
 
@@ -188,6 +199,7 @@ int LocalCallRecord::GetRecordId() const
 
 std::vector<std::shared_ptr<CallerCallBack>> LocalCallRecord::GetCallers() const
 {
+    std::lock_guard lock(callersMutex_);
     return callers_;
 }
 

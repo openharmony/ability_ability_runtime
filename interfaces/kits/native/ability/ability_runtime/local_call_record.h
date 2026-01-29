@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_LOCAL_CALL_RECORD_H
 #define OHOS_ABILITY_RUNTIME_LOCAL_CALL_RECORD_H
 
+#include <mutex>
+
 #include "caller_callback.h"
 #include "element_name.h"
 #include "iremote_object.h"
@@ -63,6 +65,7 @@ private:
     sptr<IRemoteObject> remoteObject_ = nullptr;
     wptr<IRemoteObject> connection_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> callRecipient_ = nullptr;
+    mutable std::mutex callersMutex_;  // Protect callers_ from concurrent access
     std::vector<std::shared_ptr<CallerCallBack>> callers_;
     AppExecFwk::ElementName elementName_ = {};
     bool isSingleton_ = false;
