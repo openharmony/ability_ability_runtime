@@ -44,7 +44,6 @@ struct EventInfo {
     int64_t duration = 0;
     int32_t reason = -1;
     int32_t subReason = -1;
-    int32_t exitReason = -1;
     int32_t preloadMode = 0;
     int32_t appIndex = -1;
     int32_t persistentId = 0;
@@ -60,13 +59,14 @@ struct EventInfo {
     std::string callerBundleName;
     std::string callerVersionName;
     std::string uri;
+    int32_t exitReason = -1;
     std::string errReason;
     std::string lifeCycle;
     std::string intentName;
     std::string errMsg;
+    std::string exitMsg = "";
     std::string componentName;
     std::string partitionName;
-    std::string exitMsg = "";
     uint64_t remainPartitionSize;
     std::vector<std::string> fileOfFolderPath;
     std::vector<uint64_t> fileOfFolderSize;

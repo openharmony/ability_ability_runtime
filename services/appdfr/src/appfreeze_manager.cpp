@@ -419,7 +419,7 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     std::set<int> asyncPids;
     std::set<int> syncPids = GetBinderPeerPids(binderInfo, params, asyncPids, terminalBinder);
     if (syncPids.empty()) {
-        binderInfo +="PeerBinder pids is empty\n";
+        binderInfo += "PeerBinder pids is empty\n";
     }
     for (auto& pidTemp : syncPids) {
         TAG_LOGI(AAFwkTag::APPDFR, "PeerBinder pidTemp pids:%{public}d", pidTemp);
