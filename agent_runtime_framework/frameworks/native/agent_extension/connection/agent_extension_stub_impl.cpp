@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "ability_business_error.h"
 #include "agent_extension_stub_impl.h"
+
+#include "ability_business_error.h"
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -31,7 +32,7 @@ AgentExtensionStubImpl::~AgentExtensionStubImpl()
     TAG_LOGI(AAFwkTag::SER_ROUTER, "~");
 }
 
-int32_t AgentExtensionStubImpl::SendData(sptr<IRemoteObject> hostProxy, std::string &data)
+int32_t AgentExtensionStubImpl::SendData(const sptr<IRemoteObject> &hostProxy, const std::string &data)
 {
     auto sptr = extension_.lock();
     if (sptr) {
@@ -40,5 +41,13 @@ int32_t AgentExtensionStubImpl::SendData(sptr<IRemoteObject> hostProxy, std::str
     return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
 }
 
+int32_t AgentExtensionStubImpl::Authorize(const sptr<IRemoteObject> &hostProxy, const std::string &data)
+{
+    auto sptr = extension_.lock();
+    if (sptr) {
+        return sptr->OnAuthorize(hostProxy, data);
+    }
+    return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+}
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "agent_extension_connection_constants.h"
 #include "connection_state_manager.h"
 #include "freeze_util.h"
 #include "ui_service_extension_connection_constants.h"
@@ -98,47 +99,29 @@ int ConnectionRecord::DisconnectAbility()
         return INVALID_CONNECTION_STATE;
     }
 
-    /* set state to Disconnecting */
     SetConnectState(ConnectionState::DISCONNECTING);
     CHECK_POINTER_AND_RETURN(targetService_, ERR_INVALID_VALUE);
-    std::size_t connectNums = targetService_->GetConnectRecordList().size();
-    AppExecFwk::ExtensionAbilityType extAbilityType = targetService_->GetAbilityInfo().extensionAbilityType;
-    bool isAbilityUIServiceExt = (extAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (connectNums == 1 || isAbilityUIServiceExt) {
-        /* post timeout task to taskhandler */
-        auto disconnectTask = [thisWeakPtr = weak_from_this()]() {
-            auto connectionRecord = thisWeakPtr.lock();
-            if (connectionRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::CONNECTION, "null connectionRecord");
-                return;
-            }
-            TAG_LOGE(AAFwkTag::CONNECTION, "Disconnect timeout");
-            connectionRecord->DisconnectTimeout();
-        };
-        auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-        if (handler == nullptr) {
-            TAG_LOGE(AAFwkTag::CONNECTION, "null handler");
-        } else {
-            std::string taskName("DisconnectTimeout_");
-            taskName += std::to_string(recordId_);
-            int disconnectTimeout =
-                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * DISCONNECT_TIMEOUT_MULTIPLE;
-            handler->SubmitTask(disconnectTask, taskName, disconnectTimeout);
-        }
-        /* schedule disconnect to target ability */
-        if (isAbilityUIServiceExt) {
-            TAG_LOGI(AAFwkTag::CONNECTION, "Disconnect UIServiceExtension ability, set correct want");
+
+    const auto &abilityInfo = targetService_->GetAbilityInfo();
+    auto extAbilityType = abilityInfo.extensionAbilityType;
+    bool isPerConnectionType = (extAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE ||
+        extAbilityType == AppExecFwk::ExtensionAbilityType::AGENT);
+    size_t connectNums = targetService_->GetConnectRecordList().size();
+    if (connectNums == 1 || isPerConnectionType) {
+        ScheduleDisconnectTimeout();
+        if (isPerConnectionType) {
+            const char *extName = (extAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) ?
+                "UIServiceExtension" : "AgentExtension";
+            TAG_LOGI(AAFwkTag::CONNECTION, "Disconnect %{public}s ability, set correct want", extName);
             targetService_->DisconnectAbilityWithWant(GetConnectWant());
         } else {
-            TAG_LOGI(AAFwkTag::CONNECTION, "DisconnectAbility %{public}s called",
-                targetService_->GetAbilityInfo().name.c_str());
+            TAG_LOGI(AAFwkTag::CONNECTION, "DisconnectAbility %{public}s called", abilityInfo.name.c_str());
             targetService_->DisconnectAbility();
         }
     } else {
         TAG_LOGI(AAFwkTag::CONNECTION,
             "current connection count: %{public}zu, %{public}s:%{public}s no need disconnect, just remove",
-            connectNums, targetService_->GetAbilityInfo().bundleName.c_str(),
-            targetService_->GetAbilityInfo().name.c_str());
+            connectNums, abilityInfo.bundleName.c_str(), abilityInfo.name.c_str());
         targetService_->RemoveConnectRecordFromList(shared_from_this());
         SetConnectState(ConnectionState::DISCONNECTED);
     }
@@ -320,11 +303,18 @@ void ConnectionRecord::ScheduleConnectAbilityDone()
     if (connectWant_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
         hostproxy = connectWant_.GetRemoteObject(UISERVICEHOSTPROXY_KEY);
     }
+    sptr<IRemoteObject> connectorProxy = nullptr;
+    if (connectWant_.HasParameter(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY)) {
+        connectorProxy = connectWant_.GetRemoteObject(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY);
+    }
     auto element = connectWant_.GetElement();
     Want::ClearWant(&connectWant_);
     connectWant_.SetElement(element);
     if (hostproxy != nullptr) {
         connectWant_.SetParam(UISERVICEHOSTPROXY_KEY, hostproxy);
+    }
+    if (connectorProxy != nullptr) {
+        connectWant_.SetParam(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY, connectorProxy);
     }
 
     CancelConnectTimeoutTask();
@@ -351,6 +341,30 @@ void ConnectionRecord::DisconnectTimeout()
     /* force to disconnect */
     /* so scheduler target service disconnect done */
     DelayedSingleton<AbilityManagerService>::GetInstance()->ScheduleDisconnectAbilityDone(targetService_->GetToken());
+}
+
+void ConnectionRecord::ScheduleDisconnectTimeout()
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    if (handler == nullptr) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "null handler");
+        return;
+    }
+
+    auto disconnectTask = [weakPtr = weak_from_this()]() {
+        auto connectionRecord = weakPtr.lock();
+        if (connectionRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::CONNECTION, "null connectionRecord");
+            return;
+        }
+        TAG_LOGE(AAFwkTag::CONNECTION, "Disconnect timeout");
+        connectionRecord->DisconnectTimeout();
+    };
+
+    std::string taskName = "DisconnectTimeout_" + std::to_string(recordId_);
+    int disconnectTimeout =
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * DISCONNECT_TIMEOUT_MULTIPLE;
+    handler->SubmitTask(disconnectTask, taskName, disconnectTimeout);
 }
 
 std::string ConnectionRecord::ConvertConnectionState(const ConnectionState &state) const
