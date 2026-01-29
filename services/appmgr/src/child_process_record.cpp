@@ -239,5 +239,15 @@ std::string ChildProcessRecord::GetEntryParams() const
 {
     return entryParams_;
 }
+
+void ChildProcessRecord::SetAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time)
+{
+    attachTimeoutStartTime_ = time;
+}
+
+std::chrono::system_clock::time_point ChildProcessRecord::GetAttachTimeoutStartTime() const
+{
+    return attachTimeoutStartTime_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

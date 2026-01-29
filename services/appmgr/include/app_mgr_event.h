@@ -35,6 +35,7 @@ enum class ProcessStartFailedReason {
     GET_SPAWN_CLIENT_FAILED = 3,
     GENERATE_RENDER_UID_FAILED = 4,
     CHECK_CHILD_FDS_FAILED = 5,
+    ATTACH_TIMEOUT = 6,
 };
 
 class AppMgrEventSubscriber : public EventFwk::CommonEventSubscriber {

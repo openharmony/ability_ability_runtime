@@ -64,6 +64,8 @@ public:
     int32_t GetState() const;
     void SetProcessType(ProcessType type);
     void SetProcessName(const std::string &processName);
+    void SetAttachTimeoutStartTime(const std::chrono::system_clock::time_point &time);
+    std::chrono::system_clock::time_point GetAttachTimeoutStartTime() const;
 
 private:
     void SetHostUid(const int32_t hostUid);
@@ -84,6 +86,7 @@ private:
     std::string renderParam_;
     std::string hostBundleName_;
     std::string processName_;
+    std::chrono::system_clock::time_point attachTimeoutStartTime_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

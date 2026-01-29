@@ -143,6 +143,7 @@ public:
     std::string specifiedProcessFlag_;
     bool queryExtensionAbilityInfos_ = false;
     bool getBundleInfo_ = false;
+    pid_t appRecordGetPid_ = 0;
 private:
     MyStatus() = default;
 };
