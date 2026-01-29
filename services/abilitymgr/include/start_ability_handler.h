@@ -28,13 +28,13 @@ class IRemoteObject;
 namespace AAFwk {
 struct StartAbilityParams {
     StartAbilityParams(Want &reqWant) : want(reqWant) {}
-    bool isStartAsCaller = false;
-    int32_t userId = -1;
-    int requestCode = 0;
     sptr<IRemoteObject> callerToken;
     sptr<IRemoteObject> asCallerSourceToken;
     const StartOptions* startOptions = nullptr;
     Want &want;
+    int32_t userId = -1;
+    int requestCode = 0;
+    bool isStartAsCaller = false;
 
     int32_t GetValidUserId()
     {

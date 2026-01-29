@@ -823,10 +823,10 @@ public:
     }
 
 protected:
-    sptr<Token> token_ = {};                               // used to interact with kit and wms
-    std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
-    std::atomic<AbilityState> currentState_ = AbilityState::INITIAL;    // current life state
     Want want_ = {};                                       // want to start this ability
+    std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
+    sptr<Token> token_ = {};                               // used to interact with kit and wms
+    std::atomic<AbilityState> currentState_ = AbilityState::INITIAL;    // current life state
 
     /**
      * get the type of ability.
@@ -895,7 +895,14 @@ protected:
         const AppExecFwk::AppStartReason startReason = AppExecFwk::AppStartReason::NONE);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
 
+    struct UIAbilityProperty {
+        bool promotePriority = false;
+        int32_t byCallCallerSaUid = -1;
+        int32_t byCallCallerSaPid = -1;
+    };
     static std::atomic<int64_t> abilityRecordId;
+    std::atomic_bool isCallerSetProcess_ = false;       // new version
+    std::atomic_bool backgroundAbilityWindowDelayed_ = false;
     bool isReady_ = false;                            // is ability thread attached?
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
@@ -930,8 +937,6 @@ protected:
     bool isPluginAbility_ = false;
     bool isPrelaunch_ = false;
     bool isHook_ = false;
-    std::atomic_bool isCallerSetProcess_ = false;       // new version
-    std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     int32_t uid_ = 0;
@@ -951,85 +956,76 @@ protected:
     int startId_ = 0;  // service(ability) start id
 
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
-    int64_t startTime_ = 0;                           // records first time of ability start
-    int64_t restartTime_ = 0;                         // the time of last trying restart
-    sptr<IAbilityScheduler> scheduler_ = {};       // kit scheduler
-    sptr<IRemoteObject::DeathRecipient> schedulerDeathRecipient_ = {};  // scheduler binderDied Recipient
-
-    /**
-     * result_: ability starts with for-result mode will send result before being terminated.
-     * Its caller will receive results before active.
-     * Now we assume only one result generate when terminate.
-     */
-    std::shared_ptr<AbilityResult> result_ = {};
-
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
-    mutable ffrt::mutex callerListLock_;
-
+    std::map<uint64_t, AbilityWindowState> abilityWindowStateMap_;
     PacMap stateDatas_;             // ability saved ability state data
+    std::vector<std::string> dumpInfos_;
+    
+    sptr<IAbilityScheduler> scheduler_ = {};       // kit scheduler
+    sptr<IRemoteObject::DeathRecipient> schedulerDeathRecipient_ = {};  // scheduler binderDied Recipient
+    sptr<SessionInfo> sessionInfo_ = nullptr;
+
+    /**
+      * result_: ability starts with for-result mode will send result before being terminated.
+      * Its caller will receive results before active.
+      * Now we assume only one result generate when terminate.
+     */
+    std::shared_ptr<AbilityResult> result_ = {};
+    std::shared_ptr<CallContainer> callContainer_ = nullptr;       // new version
+    std::shared_ptr<Want> connectWant_ = nullptr;
+    std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
+    std::shared_ptr<Want> launchWant_ = nullptr;
+    std::shared_ptr<Want> lastWant_ = nullptr;
+    std::shared_ptr<UIAbilityProperty> uiAbilityProperty_ = nullptr;
+
+    LaunchDebugInfo launchDebugInfo_;
     WindowConfig windowConfig_;
+
+    int64_t startTime_ = 0;                           // records first time of ability start
+    int64_t restartTime_ = 0;                         // the time of last trying restart
+    std::atomic<AbilityState> pendingState_ = AbilityState::INITIAL;    // pending life state
+    std::atomic<AbilityVisibilityState> abilityVisibilityState_ = AbilityVisibilityState::INITIAL;
+    std::atomic_bool isPrepareTerminateAbilityCalled_ = false;
+    std::atomic_bool isPrepareTerminateAbilityDone_ = false;
+    std::atomic_bool isLastWantBackgroundDriven_ = false;
+    std::atomic<int32_t> scenarios_ = 0;
+    std::atomic<bool> isPreloaded_ = false;
+    std::atomic<bool> isFrozenByPreload_ = false;
+    std::atomic<bool> isAbilityConnectionReported_ = false;
+
     AppState appState_ = AppState::BEGIN;
 
-    std::shared_ptr<CallContainer> callContainer_ = nullptr;       // new version
     std::string customProcessFlag_ = "";        // new version
     std::string specifiedFlag_;
     std::string uri_;
+    std::string instanceKey_ = "";
+    std::string missionAffinity_ = "";
+    std::string killReason_ = "";
+    std::string firstCallerBundleName_ = "";
 
+    mutable ffrt::mutex callerListLock_;
     mutable ffrt::mutex dumpInfoLock_;
     mutable ffrt::mutex dumpLock_;
     mutable ffrt::mutex resultLock_;
     mutable ffrt::mutex wantLock_;
-    mutable ffrt::condition_variable dumpCondition_;
-    mutable bool isDumpTimeout_ = false;
-    std::vector<std::string> dumpInfos_;
-    std::atomic<AbilityState> pendingState_ = AbilityState::INITIAL;    // pending life state
-    std::atomic<AbilityVisibilityState> abilityVisibilityState_ = AbilityVisibilityState::INITIAL;
-
-    // scene session
-    sptr<SessionInfo> sessionInfo_ = nullptr;
     mutable ffrt::mutex sessionLock_;
-    std::map<uint64_t, AbilityWindowState> abilityWindowStateMap_;
+    mutable ffrt::condition_variable dumpCondition_;
+    ffrt::mutex lock_;
+    ffrt::mutex connectWantLock_;
+    std::mutex collaborateWantLock_;
+    std::mutex isPrepareTerminateAbilityMutex_;
+    std::condition_variable isPrepareTerminateAbilityCv_;
+
+    bool isKillForPermissionUpdate_ = false;
+    mutable bool isDumpTimeout_ = false;
+    bool isPrepareTerminate_ = false;
 
 #ifdef SUPPORT_SCREEN
     bool isStartingWindow_ = false;
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
 #endif
-    std::shared_ptr<Want> connectWant_ = nullptr;
-    std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
-    LaunchDebugInfo launchDebugInfo_;
-    
-    std::string instanceKey_ = "";
-    std::string missionAffinity_ = "";
-
-    ffrt::mutex lock_;
-    ffrt::mutex connectWantLock_;
-    std::mutex collaborateWantLock_;
-
-    bool isKillForPermissionUpdate_ = false;
-
-    std::mutex isPrepareTerminateAbilityMutex_;
-    std::condition_variable isPrepareTerminateAbilityCv_;
-    std::atomic_bool isPrepareTerminateAbilityCalled_ = false;
-    std::atomic_bool isPrepareTerminateAbilityDone_ = false;
-    bool isPrepareTerminate_ = false;
-
-    std::string killReason_ = "";
-    std::shared_ptr<Want> launchWant_ = nullptr;
-    std::shared_ptr<Want> lastWant_ = nullptr;
-    std::atomic_bool isLastWantBackgroundDriven_ = false;
-    std::atomic<int32_t> scenarios_ = 0;
-    std::atomic<bool> isPreloaded_ = false;
-    std::atomic<bool> isFrozenByPreload_ = false;
-    std::atomic<bool> isAbilityConnectionReported_ = false;
-    struct UIAbilityProperty {
-        bool promotePriority = false;
-        int32_t byCallCallerSaUid = -1;
-        int32_t byCallCallerSaPid = -1;
-    };
-    std::shared_ptr<UIAbilityProperty> uiAbilityProperty_ = nullptr;
-    std::string firstCallerBundleName_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

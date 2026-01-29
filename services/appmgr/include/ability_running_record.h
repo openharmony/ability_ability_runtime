@@ -154,20 +154,20 @@ public:
     void SetUIExtensionBindAbilityId(const int32_t uiExtensionBindAbilityId);
     int32_t GetUIExtensionBindAbilityId() const;
 private:
+    int32_t abilityRecordId_ = 0;
+    int32_t uiExtensionAbilityId_ = 0;
+    std::shared_ptr<AbilityInfo> info_;
+    sptr<IRemoteObject> token_;
+    sptr<IRemoteObject> preToken_;
+    std::shared_ptr<AAFwk::Want> want_ = nullptr;
+    int64_t eventId_ = 0;
+    int32_t ownerUserId_ = -1;
+    int32_t uiExtensionBindAbilityId_ = 0;
+    AbilityState state_ = AbilityState::ABILITY_STATE_CREATE;
     bool isTerminating_ = false;
     bool isFocused_ = false;
     bool isSingleUser_ = false;
     bool isUserRequestCleaning_ = false;
-    int32_t uiExtensionAbilityId_ = 0;
-    int32_t ownerUserId_ = -1;
-    int32_t abilityRecordId_ = 0;
-    AbilityState state_ = AbilityState::ABILITY_STATE_CREATE;
-    int64_t eventId_ = 0;
-    std::shared_ptr<AbilityInfo> info_;
-    std::shared_ptr<AAFwk::Want> want_ = nullptr;
-    sptr<IRemoteObject> token_;
-    sptr<IRemoteObject> preToken_;
-    int32_t uiExtensionBindAbilityId_ = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

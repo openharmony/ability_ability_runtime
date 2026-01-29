@@ -28,11 +28,11 @@ namespace EcologicalRuleMgrService {
 using Want = OHOS::AAFwk::Want;
 
 struct AbilityExperienceRule : public Parcelable {
-    int32_t resultCode = 10;
     std::string sceneCode = "";
     sptr<Want> replaceWant = nullptr;
-    bool isBackSkuExempt = false;
+    int32_t resultCode = 10;
     int32_t embedResultCode = 1;
+    bool isBackSkuExempt = false;
 
     bool Marshalling(Parcel &parcel) const override;
 
@@ -63,26 +63,27 @@ struct AbilityCallerInfo : public Parcelable {
     };
 
     std::string packageName;
+    std::string targetAppDistType = "";
+    std::string targetLinkFeature = "";
+    std::string callerAppProvisionType;
+    std::string targetAppProvisionType;
+    std::string targetBundleName;
+
     int32_t uid = 0L;
     int32_t pid = 0L;
-
     int32_t callerAppType = TYPE_INVALID;
     int32_t targetAppType = TYPE_INVALID;
     int32_t callerModelType = MODEL_STAGE;
-    std::string targetAppDistType = "";
-    std::string targetLinkFeature = "";
     int32_t targetLinkType = LINK_TYPE_INVALID;
-    AppExecFwk::AbilityType callerAbilityType = AppExecFwk::AbilityType::UNKNOWN;
     int32_t embedded = 0;
-    std::string callerAppProvisionType;
-    std::string targetAppProvisionType;
-    AppExecFwk::ExtensionAbilityType callerExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    AppExecFwk::AbilityType targetAbilityType = AppExecFwk::AbilityType::UNKNOWN;
-    AppExecFwk::ExtensionAbilityType targetExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     int32_t userId = 0;
     int32_t targetApplicationReservedFlag = 0;
+    AppExecFwk::AbilityType callerAbilityType = AppExecFwk::AbilityType::UNKNOWN;
+    AppExecFwk::AbilityType targetAbilityType = AppExecFwk::AbilityType::UNKNOWN;
+    AppExecFwk::ExtensionAbilityType callerExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    AppExecFwk::ExtensionAbilityType targetExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+
     bool isAsCaller = false;
-    std::string targetBundleName;
 
     bool ReadFromParcel(Parcel &parcel);
 

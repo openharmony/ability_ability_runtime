@@ -81,15 +81,15 @@ private:
     AppNativeSpawnManager();
 
     //native spawn use
-    int nrFd_ = -1;
-    int nwFd_ = -1;
-    std::mutex nativeChildCallbackLock_;
     std::map<int32_t, sptr<INativeChildNotify>> nativeChildCallbackMap_;
+    std::mutex nativeChildCallbackLock_;
 
     // child pid -> parent pid
-    std::mutex childRelationLock_;
     std::map<int32_t, int32_t> childRelationMap_;
+    std::mutex childRelationLock_;
     std::shared_ptr<AppRunningManager> appRunningManager_ = nullptr;
+    int nrFd_ = -1;
+    int nwFd_ = -1;
     DISALLOW_COPY_AND_MOVE(AppNativeSpawnManager);
 };
 }
