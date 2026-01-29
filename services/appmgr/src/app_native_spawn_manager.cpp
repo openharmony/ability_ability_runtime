@@ -211,8 +211,8 @@ void AppNativeSpawnManager::InitNativeSpawnMsgPipe(std::shared_ptr<AppRunningMan
     }
     nrFd_ = pipeFd[0];
     nwFd_ = pipeFd[1];
-    fdsan_exchange_owner_tag(nrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
-    fdsan_exchange_owner_tag(nwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(nrFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(nwFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     TAG_LOGI(AAFwkTag::APPMGR, "nrFd is: %{public}d, nwFd is: %{public}d", nrFd_, nwFd_);
     // send fd
     int ret = NativeSpawnListenFdSet(nwFd_);

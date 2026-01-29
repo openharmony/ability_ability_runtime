@@ -43,7 +43,7 @@ AppHybridSpawnManager &AppHybridSpawnManager::GetInstance()
 static void ProcessSignalData(void *token, uint32_t event)
 {
     int rFd = AppHybridSpawnManager::GetInstance().GetHRfd();
-    fdsan_exchange_owner_tag(rFd, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(rFd, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     if (rFd <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "rFd is invalid, %{public}d", rFd);
         return;
@@ -123,8 +123,8 @@ void AppHybridSpawnManager::InitHybridSpawnMsgPipe(std::weak_ptr<AppMgrServiceIn
     }
     hrFd_ = pipeFd[0];
     hwFd_ = pipeFd[1];
-    fdsan_exchange_owner_tag(hrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
-    fdsan_exchange_owner_tag(hwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(hrFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(hwFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     TAG_LOGI(AAFwkTag::APPMGR, "hrFd is: %{public}d, hwFd is: %{public}d", hrFd_, hwFd_);
 
     // send fd
