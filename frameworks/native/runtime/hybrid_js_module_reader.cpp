@@ -146,7 +146,8 @@ std::string HybridJsModuleReader::GetPluginHspPath(const std::string& inputPath)
     return presetAppHapPath;
 }
 
-std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const
+std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath,
+    const std::string& suffix, bool& needFindPluginHsp) const
 {
     if (isFormRender_) {
         return GetFormAppPath(inputPath, suffix, needFindPluginHsp);
@@ -154,7 +155,8 @@ std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath, const
     return GetCommonAppPath(inputPath, suffix, needFindPluginHsp);
 }
 
-std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const
+std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath,
+    const std::string& suffix, bool& needFindPluginHsp) const
 {
     std::string realHapPath;
     realHapPath.append("/data/bundles/")
@@ -178,7 +180,8 @@ std::string HybridJsModuleReader::GetModuleName(const std::string& inputPath) co
     return inputPath.substr(inputPath.find_last_of("/") + 1);
 }
 
-std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const
+std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath,
+    const std::string& suffix, bool& needFindPluginHsp) const
 {
     std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_, needFindPluginHsp);
     if ((realHapPath.find(ABS_DATA_CODE_PATH) == 0) || (realHapPath == inputPath)) {
@@ -237,7 +240,8 @@ std::string HybridJsModuleReader::GetOtherHspPath(const std::string& bundleName,
     return presetAppHapPath;
 }
 
-std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName, bool& needFindPluginHsp)
+std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPath,
+    const std::string& bundleName, bool& needFindPluginHsp)
 {
     std::string presetAppHapPath = inputPath;
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
