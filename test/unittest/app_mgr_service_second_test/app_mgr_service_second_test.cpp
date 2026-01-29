@@ -545,13 +545,15 @@ HWTEST_F(AppMgrServiceSecondTest, LockProcessCache_002, TestSize.Level1)
         std::make_shared<AMSEventHandler>(appMgrService->taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t pid = 1;
     bool isLock = false;
+    //无权限CheckSpecificSystemAbilityAccessPermission返回false
     AAFwk::MyFlag::flag_ = 0;
     auto ret = appMgrService->LockProcessCache(pid, isLock);
     EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
 
+    //有权限CheckSpecificSystemAbilityAccessPermission返回true
     AAFwk::MyFlag::flag_ = 1;
     ret = appMgrService->LockProcessCache(pid, isLock);
-    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
