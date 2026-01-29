@@ -65,7 +65,7 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call)
                 TAG_LOGE(AAFwkTag::LOCAL_CALL, "null record");
                 return;
             }
-            record->OnCallStubDied(remote);
+            record->OnCallStubDied();
         };
         callRecipient_ = sptr<CallRecipient>::MakeSptr(diedTask);
     }
@@ -115,13 +115,18 @@ bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callba
     return false;
 }
 
-void LocalCallRecord::OnCallStubDied(const wptr<IRemoteObject>& remote)
+void LocalCallRecord::OnCallStubDied()
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "call");
+    TAG_LOGI(AAFwkTag::LOCAL_CALL, "OnCallStubDied");
+    NotifyCallersReleased(ON_DIED);
+}
+
+void LocalCallRecord::NotifyCallersReleased(const std::string& releaseReason)
+{
     for (auto& callBack : callers_) {
         if (callBack != nullptr) {
-            TAG_LOGE(AAFwkTag::LOCAL_CALL, "callBack not null");
-            callBack->InvokeOnRelease(ON_DIED);
+            TAG_LOGI(AAFwkTag::LOCAL_CALL, "Notify caller released: %{public}s", releaseReason.c_str());
+            callBack->InvokeOnRelease(releaseReason);
         }
     }
 }

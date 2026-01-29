@@ -390,5 +390,121 @@ HWTEST_F(CallContainerTest, Call_Container_Is_Exist_Connection_001, TestSize.Lev
     sptr<IAbilityConnection> connect = new AbilityConnectCallback();
     EXPECT_FALSE(callContainer->IsExistConnection(connect));
 }
+
+/*
+ * Feature: CallContainer
+ * Function: NotifyAllCallDisconnect
+ * SubFunction: NA
+ * FunctionPoints: Notify all callers when callee ability is terminating
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyAllCallDisconnect notifies all registered callers
+ */
+HWTEST_F(CallContainerTest, Call_Container_Notify_All_Call_Disconnect_001, TestSize.Level1)
+{
+    std::shared_ptr<CallContainer> callContainer = get();
+
+    // Create multiple call records
+    AbilityRequest abilityRequest1;
+    abilityRequest1.callerUid = 1;
+    abilityRequest1.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    auto connect1 = sptr<AbilityConnectCallback>::MakeSptr();
+    std::shared_ptr<CallRecord> callRecord1 = CallRecord::CreateCallRecord(
+        abilityRequest1.callerUid, abilityRecord_->shared_from_this(),
+        connect1, abilityRequest1.callerToken);
+    callRecord1->SetCallState(CallState::REQUESTED);
+    callContainer->AddCallRecord(connect1, callRecord1);
+
+    AbilityRequest abilityRequest2;
+    abilityRequest2.callerUid = 2;
+    abilityRequest2.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    auto connect2 = sptr<AbilityConnectCallback>::MakeSptr();
+    std::shared_ptr<CallRecord> callRecord2 = CallRecord::CreateCallRecord(
+        abilityRequest2.callerUid, abilityRecord_->shared_from_this(),
+        connect2, abilityRequest2.callerToken);
+    callRecord2->SetCallState(CallState::REQUESTED);
+    callContainer->AddCallRecord(connect2, callRecord2);
+
+    // Verify records are added
+    EXPECT_EQ(callContainer->GetCallRecord(connect1), callRecord1);
+    EXPECT_EQ(callContainer->GetCallRecord(connect2), callRecord2);
+
+    // Create element name for callee
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = "com.test.callee";
+    abilityInfo.name = "CalleeAbility";
+    abilityInfo.moduleName = "entry";
+    AppExecFwk::ElementName element("deviceId", abilityInfo.bundleName,
+        abilityInfo.name, abilityInfo.moduleName);
+
+    // Notify all disconnect
+    callContainer->NotifyAllCallDisconnect(element);
+
+    // Verify all records are cleared
+    EXPECT_EQ(callContainer->GetCallRecord(connect1), nullptr);
+    EXPECT_EQ(callContainer->GetCallRecord(connect2), nullptr);
+}
+
+/*
+ * Feature: CallContainer
+ * Function: NotifyAllCallDisconnect
+ * SubFunction: NA
+ * FunctionPoints: Notify all callers when callee ability is terminating
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyAllCallDisconnect handles empty call records
+ */
+HWTEST_F(CallContainerTest, Call_Container_Notify_All_Call_Disconnect_002, TestSize.Level1)
+{
+    std::shared_ptr<CallContainer> callContainer = get();
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = "com.test.callee";
+    abilityInfo.name = "CalleeAbility";
+    abilityInfo.moduleName = "entry";
+    AppExecFwk::ElementName element("deviceId", abilityInfo.bundleName,
+        abilityInfo.name, abilityInfo.moduleName);
+
+    // Should not crash with empty records
+    callContainer->NotifyAllCallDisconnect(element);
+
+    // Verify no records exist
+    EXPECT_TRUE(callContainer->EmptyCallRecordMap());
+}
+
+/*
+ * Feature: CallContainer
+ * Function: NotifyAllCallDisconnect
+ * SubFunction: NA
+ * FunctionPoints: Notify all callers when callee ability is terminating
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyAllCallDisconnect only notifies REQUESTED state calls
+ */
+HWTEST_F(CallContainerTest, Call_Container_Notify_All_Call_Disconnect_003, TestSize.Level1)
+{
+    std::shared_ptr<CallContainer> callContainer = get();
+
+    // Add call record in REQUESTING state (should not be notified)
+    AbilityRequest abilityRequest;
+    abilityRequest.callerUid = 1;
+    abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    auto connect = sptr<AbilityConnectCallback>::MakeSptr();
+    std::shared_ptr<CallRecord> callRecord = CallRecord::CreateCallRecord(
+        abilityRequest.callerUid, abilityRecord_->shared_from_this(),
+        connect, abilityRequest.callerToken);
+    callRecord->SetCallState(CallState::REQUESTING);
+    callContainer->AddCallRecord(connect, callRecord);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = "com.test.callee";
+    abilityInfo.name = "CalleeAbility";
+    abilityInfo.moduleName = "entry";
+    AppExecFwk::ElementName element("deviceId", abilityInfo.bundleName,
+        abilityInfo.name, abilityInfo.moduleName);
+
+    // Notify all disconnect
+    callContainer->NotifyAllCallDisconnect(element);
+
+    // Verify records are cleared even if not in REQUESTED state
+    EXPECT_EQ(callContainer->GetCallRecord(connect), nullptr);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

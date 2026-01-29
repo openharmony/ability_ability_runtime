@@ -36,7 +36,12 @@ public:
     void SetRemoteObject(const sptr<IRemoteObject> &call, sptr<IRemoteObject::DeathRecipient> callRecipient);
     void AddCaller(const std::shared_ptr<CallerCallBack> &callback);
     bool RemoveCaller(const std::shared_ptr<CallerCallBack> &callback);
-    void OnCallStubDied(const wptr<IRemoteObject> &remote);
+    void OnCallStubDied();
+    /**
+     * @brief Notify all callers with specific release reason
+     * @param releaseReason The release reason (ON_DIED or ON_RELEASE)
+     */
+    void NotifyCallersReleased(const std::string& releaseReason);
     void NotifyRemoteStateChanged(int32_t abilityState);
     sptr<IRemoteObject> GetRemoteObject() const;
     void InvokeCallBack() const;

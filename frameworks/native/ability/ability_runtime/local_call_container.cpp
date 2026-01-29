@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+constexpr int32_t REASON_CALLEE_TERMINATE = 1;
 int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_ptr<CallerCallBack> callback,
     sptr<IRemoteObject> callerToken, int32_t accountId)
 {
@@ -282,7 +283,7 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
             }
             TAG_LOGD(AAFwkTag::LOCAL_CALL,
                 "singleton key[%{public}s]. notify died event", item.first.c_str());
-            (*iter)->OnCallStubDied(remote);
+            (*iter)->OnCallStubDied();
             item.second.erase(iter);
             if (item.second.empty()) {
                 TAG_LOGD(AAFwkTag::LOCAL_CALL,
@@ -303,7 +304,7 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
         }
         TAG_LOGD(AAFwkTag::LOCAL_CALL, "multiple key[%{public}s]. notify died event",
             item.first.c_str());
-        (*iterMultiple)->OnCallStubDied(remote);
+        (*iterMultiple)->OnCallStubDied();
         item.second.erase(iterMultiple);
         if (item.second.empty()) {
             TAG_LOGD(AAFwkTag::LOCAL_CALL,
@@ -312,6 +313,17 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
             break;
         }
     }
+}
+
+void LocalCallContainer::RemoveCallerConnection(const sptr<CallerConnection> &connection)
+{
+    if (connection == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connection");
+        return;
+    }
+
+    std::lock_guard lock(connectionsMutex_);
+    connections_.erase(connection);
 }
 
 void LocalCallContainer::SetCallLocalRecord(std::shared_ptr<LocalCallRecord> localCallRecord)
@@ -396,8 +408,45 @@ void CallerConnection::OnAbilityConnectDone(
     return;
 }
 
-void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code)
+void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t code)
 {
+    TAG_LOGI(AAFwkTag::LOCAL_CALL, "OnAbilityDisconnectDone: %{public}s, code: %{public}d",
+        element.GetAbilityName().c_str(), code);
+
+    if (localCallRecord_ == nullptr) {
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "local call record is nullptr");
+        return;
+    }
+
+    // Handle callee ability termination (code == 1)
+    // This is called when callee ability exits but process is still alive
+    if (code == REASON_CALLEE_TERMINATE) {
+        TAG_LOGI(AAFwkTag::LOCAL_CALL, "Callee ability terminated, notify all callers");
+
+        // Notify all callers that callee is terminating with proper release reason
+        localCallRecord_->NotifyCallersReleased(ON_RELEASE);
+
+        // Remove record from container
+        auto container = container_.lock();
+        if (container == nullptr) {
+            TAG_LOGE(AAFwkTag::LOCAL_CALL, "null container");
+            return;
+        }
+
+        // Remove the local call record from container
+        if (localCallRecord_->IsSingletonRemote()) {
+            container->RemoveSingletonCallLocalRecord(localCallRecord_);
+        } else {
+            container->RemoveMultipleCallLocalRecord(localCallRecord_);
+        }
+
+        // Remove this caller connection from container
+        container->RemoveCallerConnection(this);
+
+        // Clear local call record and connection
+        localCallRecord_->ClearData();
+        localCallRecord_.reset();
+    }
 }
 
 void CallerConnection::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)

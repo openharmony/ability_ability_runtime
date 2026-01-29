@@ -54,6 +54,12 @@ public:
     bool IsNeedToCallRequest() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
+    /**
+     * @brief Notify all callers that callee ability is terminating
+     * @param element Callee ability element name
+     */
+    void NotifyAllCallDisconnect(const AppExecFwk::ElementName &element);
+
 private:
     void RemoveConnectDeathRecipient(const sptr<IAbilityConnection> &connect);
     void AddConnectDeathRecipient(const sptr<IAbilityConnection> &connect);

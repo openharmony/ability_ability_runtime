@@ -171,7 +171,7 @@ HWTEST_F(LocalCallRecordTest, Local_Call_Record_OnCallStubDied_0100, Function | 
         EXPECT_TRUE(result == "died");
         });
     localCallRecord.callers_.emplace_back(callback);
-    localCallRecord.OnCallStubDied(nullptr);
+    localCallRecord.OnCallStubDied();
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(LocalCallRecordTest, Local_Call_Record_OnCallStubDied_0200, Function | 
         GTEST_LOG_(ERROR) << "OnRelease-----------" << result;
         EXPECT_TRUE(result != "died");
         });
-    localCallRecord.OnCallStubDied(nullptr);
+    localCallRecord.OnCallStubDied();
 }
 
 /**
@@ -206,7 +206,7 @@ HWTEST_F(LocalCallRecordTest, Local_Call_Record_OnCallStubDied_0300, Function | 
         EXPECT_TRUE(result != "died");
         });
     localCallRecord.callers_.emplace_back(nullptr);
-    localCallRecord.OnCallStubDied(nullptr);
+    localCallRecord.OnCallStubDied();
 }
 
 /**

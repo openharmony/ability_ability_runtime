@@ -871,5 +871,158 @@ HWTEST_F(
     localCallContainer->SetMultipleCallLocalRecord(localCallRecordSecond);
     EXPECT_EQ(ERR_OK, localCallContainer->RemoveMultipleCallLocalRecord(localCallRecord));
 }
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0300
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with REASON_CALLEE_TERMINATE when localCallRecord_ is nullptr.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0300, Function | MediumTest | Level1)
+{
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    constexpr int32_t code = 1; // REASON_CALLEE_TERMINATE
+    connect->container_ = localCallContainer;
+    connect->localCallRecord_ = nullptr;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    connect->OnAbilityDisconnectDone(elementName, code);
+    EXPECT_EQ(connect->localCallRecord_, nullptr);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0400
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with REASON_CALLEE_TERMINATE when container is nullptr.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0400, Function | MediumTest | Level1)
+{
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    constexpr int32_t code = 1; // REASON_CALLEE_TERMINATE
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    connect->localCallRecord_ = localCallRecord;
+
+    connect->OnAbilityDisconnectDone(elementName, code);
+    EXPECT_NE(connect->localCallRecord_, nullptr);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0500
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with REASON_CALLEE_TERMINATE notifies callers with ON_RELEASE.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0500, Function | MediumTest | Level1)
+{
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+
+    bool isOnReleaseCalled = false;
+    std::string receivedReason;
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetOnRelease([&isOnReleaseCalled, &receivedReason](const std::string& reason) {
+        isOnReleaseCalled = true;
+        receivedReason = reason;
+    });
+
+    localCallRecord->AddCaller(callback);
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    connect->SetRecordAndContainer(localCallRecord, localCallContainer);
+    localCallContainer->connections_.emplace(connect);
+
+    constexpr int32_t code = 1; // REASON_CALLEE_TERMINATE
+    connect->OnAbilityDisconnectDone(elementName, code);
+
+    EXPECT_TRUE(isOnReleaseCalled);
+    EXPECT_EQ(receivedReason, "release");
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0600
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with REASON_CALLEE_TERMINATE cleans up singleton record.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0600, Function | MediumTest | Level1)
+{
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetOnRelease([](const std::string&) {});
+    localCallRecord->AddCaller(callback);
+
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    connect->SetRecordAndContainer(localCallRecord, localCallContainer);
+    localCallContainer->connections_.emplace(connect);
+    localCallContainer->SetCallLocalRecord(localCallRecord);
+
+    constexpr int32_t code = 1; // REASON_CALLEE_TERMINATE
+    connect->OnAbilityDisconnectDone(elementName, code);
+
+    EXPECT_EQ(connect->localCallRecord_, nullptr);
+    EXPECT_EQ(localCallContainer->connections_.size(), 0u);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0700
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with REASON_CALLEE_TERMINATE cleans up multiple record.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0700, Function | MediumTest | Level1)
+{
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    localCallRecord->SetIsSingleton(false);
+
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetOnRelease([](const std::string&) {});
+    localCallRecord->AddCaller(callback);
+
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    connect->SetRecordAndContainer(localCallRecord, localCallContainer);
+    localCallContainer->connections_.emplace(connect);
+    localCallContainer->SetMultipleCallLocalRecord(localCallRecord);
+
+    constexpr int32_t code = 1; // REASON_CALLEE_TERMINATE
+    connect->OnAbilityDisconnectDone(elementName, code);
+
+    EXPECT_EQ(connect->localCallRecord_, nullptr);
+    EXPECT_EQ(localCallContainer->connections_.size(), 0u);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0800
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone with code != REASON_CALLEE_TERMINATE does nothing.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0800, Function | MediumTest | Level1)
+{
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+
+    bool isOnReleaseCalled = false;
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetOnRelease([&isOnReleaseCalled](const std::string&) {
+        isOnReleaseCalled = true;
+    });
+    localCallRecord->AddCaller(callback);
+
+    auto connect = sptr<CallerConnection>::MakeSptr();
+    connect->SetRecordAndContainer(localCallRecord, localCallContainer);
+    localCallContainer->connections_.emplace(connect);
+    localCallContainer->SetCallLocalRecord(localCallRecord);
+
+    // Test with code != REASON_CALLEE_TERMINATE
+    constexpr int32_t code = 0;
+    connect->OnAbilityDisconnectDone(elementName, code);
+
+    EXPECT_FALSE(isOnReleaseCalled);
+    EXPECT_NE(connect->localCallRecord_, nullptr);
+    EXPECT_EQ(localCallContainer->connections_.size(), 1u);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
