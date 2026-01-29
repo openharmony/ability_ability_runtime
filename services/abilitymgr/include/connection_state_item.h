@@ -33,11 +33,11 @@ namespace AAFwk {
  * DataAbilityCaller,This class is used to record data ability caller info.
  */
 struct DataAbilityCaller {
-    bool isNotHap = false;
     int32_t callerPid = 0;
     int32_t callerUid = 0;
     std::string callerName;
     sptr<IRemoteObject> callerToken = nullptr;
+    bool isNotHap = false;
 };
 
 /**

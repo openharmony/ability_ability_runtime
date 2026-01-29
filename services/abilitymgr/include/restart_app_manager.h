@@ -25,8 +25,8 @@
 namespace OHOS {
 namespace AAFwk {
 typedef struct RestartAppKey {
-    int32_t uid = 0;
     std::string instanceKey = "";
+    int32_t uid = 0;
 
     RestartAppKey(std::string callingInstanceKey, int32_t callingUid)
     {

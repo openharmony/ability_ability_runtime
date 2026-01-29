@@ -58,21 +58,21 @@ private:
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool CheckSupportState(const std::shared_ptr<AppRunningRecord> &appRecord);
-    bool warmStartProcesEnable_ = false;
-    bool shouldCheckApi = true;
-    // whether the feature should check setSupportedProcessCache value or not
-    bool shouldCheckSupport = true;
-    int32_t maxProcCacheNum_ = 0;
-    int32_t allowedCacheNum_ = 0;
-    std::weak_ptr<AppMgrServiceInner> appMgr_;
-    std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
-    ffrt::recursive_mutex cacheQueueMtx;
+    // stores records that has been checked service extension
+    std::unordered_set<std::shared_ptr<AppRunningRecord>> srvExtCheckedFlag;
     // bundleName->uid->record
     std::map<std::string, std::map<int32_t, std::set<std::shared_ptr<AppRunningRecord>>>> sameAppSet;
     // stores records that are servcie extension
     std::set<std::shared_ptr<AppRunningRecord>> srvExtRecords;
-    // stores records that has been checked service extension
-    std::unordered_set<std::shared_ptr<AppRunningRecord>> srvExtCheckedFlag;
+    std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
+    std::weak_ptr<AppMgrServiceInner> appMgr_;
+    ffrt::recursive_mutex cacheQueueMtx;
+    int32_t maxProcCacheNum_ = 0;
+    int32_t allowedCacheNum_ = 0;
+    bool warmStartProcesEnable_ = false;
+    bool shouldCheckApi = true;
+    // whether the feature should check setSupportedProcessCache value or not
+    bool shouldCheckSupport = true;
 };
 } // namespace OHOS
 } // namespace AppExecFwk

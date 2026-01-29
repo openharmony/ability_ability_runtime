@@ -59,14 +59,14 @@ private:
     void CheckAppInstanceKey(const std::string& bundleName, WantParams &wantParams);
 
 private:
-    bool canceled_ = false;
     int32_t uid_ = 0;
-    int32_t callerUid_ = 0;
     int32_t callerTokenId_ = 0;
     sptr<IRemoteObject> callerToken_ = {};
     std::weak_ptr<PendingWantManager> pendingWantManager_ = {};
     std::shared_ptr<PendingWantKey> key_ = {};
     std::list<sptr<IWantReceiver>> mCancelCallbacks_ = {};
+    int32_t callerUid_ = 0;
+    bool canceled_ = false;
     ffrt::mutex lock_ = {};
     std::mutex mCancelCallbacksMutex_;
 };

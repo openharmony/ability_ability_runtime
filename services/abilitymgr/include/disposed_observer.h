@@ -35,11 +35,11 @@ private:
     void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override;
     void OnPageShow(const AppExecFwk::PageStateData &pageStateData) override;
 private:
-    sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<DisposedRuleInterceptor> interceptor_ = nullptr;
     AppExecFwk::DisposedRule disposedRule_;
-    int32_t uid_ = 0;
+    sptr<IRemoteObject> token_ = nullptr;
     ffrt::mutex observerLock_;
+    int32_t uid_ = 0;
 };
 } // namespace AAFwk
 } // namespace OHOS

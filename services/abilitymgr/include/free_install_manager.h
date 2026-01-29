@@ -31,15 +31,6 @@
 namespace OHOS {
 namespace AAFwk {
 struct FreeInstallInfo {
-    bool isInstalled = false;
-    bool isPreStartMissionCalled = false;
-    bool isStartUIAbilityBySCBCalled = false;
-    bool isFreeInstallFinished = false;
-    bool isOpenAtomicServiceShortUrl = false;
-    uint32_t specifyTokenId = 0;
-    int32_t userId = -1;
-    int32_t requestCode = -1;
-    int resultCode = 0;
     std::shared_ptr<std::promise<int32_t>> promise;
     std::string identity;
     sptr<IRemoteObject> callerToken = nullptr;
@@ -47,15 +38,24 @@ struct FreeInstallInfo {
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
     Want want;
+    int32_t userId = -1;
+    int32_t requestCode = -1;
+    uint32_t specifyTokenId = 0;
+    int resultCode = 0;
+    bool isInstalled = false;
+    bool isPreStartMissionCalled = false;
+    bool isStartUIAbilityBySCBCalled = false;
+    bool isFreeInstallFinished = false;
+    bool isOpenAtomicServiceShortUrl = false;
     bool isFreeInstallFromService = false;
 };
 
 struct FreeInstallParams {
-    bool isAsync = false;
-    bool isOpenAtomicServiceShortUrl = false;
-    uint32_t specifyTokenId = 0;
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
+    uint32_t specifyTokenId = 0;
+    bool isAsync = false;
+    bool isOpenAtomicServiceShortUrl = false;
 };
 
 /**

@@ -26,8 +26,8 @@ namespace AbilityRuntime {
 using ExecuteMode = AppExecFwk::ExecuteMode;
 
 struct UIAbilityIntentInfo {
-    std::string abilityName;
     std::vector<ExecuteMode> supportExecuteMode {};
+    std::string abilityName;
 };
 
 struct UIExtensionIntentInfo {
@@ -44,24 +44,24 @@ struct FormIntentInfo {
 };
 
 struct InsightIntentInfo {
+    std::vector<std::string> inputParams;
+    std::vector<std::string> outputParams;
+    std::vector<std::string> keywords;
+    UIAbilityIntentInfo uiAbilityIntentInfo;
+    UIExtensionIntentInfo uiExtensionIntentInfo;
+    ServiceExtensionIntentInfo serviceExtensionIntentInfo;
+    FormIntentInfo formIntentInfo;
     std::string intentName;
     std::string intentDomain;
     std::string intentVersion;
     std::string srcEntry;
     std::string arkTSMode;
-    std::vector<std::string> inputParams;
-    std::vector<std::string> outputParams;
     std::string cfgEntities;
     std::string displayName;
     std::string icon;
     std::string displayDescription;
     std::string bundleName;
     std::string moduleName;
-    std::vector<std::string> keywords;
-    UIAbilityIntentInfo uiAbilityIntentInfo;
-    UIExtensionIntentInfo uiExtensionIntentInfo;
-    ServiceExtensionIntentInfo serviceExtensionIntentInfo;
-    FormIntentInfo formIntentInfo;
 };
 
 class InsightIntentProfile {

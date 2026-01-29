@@ -43,10 +43,10 @@ struct StartAbilityInfo {
         return abilityInfo.applicationInfo.bundleName;
     }
 
-    int32_t status = ERR_OK;
     AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     std::string customProcess;
+    int32_t status = ERR_OK;
+    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     bool isTargetPlugin = false;
 };
 
@@ -100,11 +100,11 @@ struct StartAbilityWrapParam {
     bool hideFailureTipDialog = false;
     bool isBySCB = false;
     bool isFreeInstallFromService = false;
-    uint64_t specifiedFullTokenId = 0;
     bool removeInsightIntentFlag = false;
-    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
     bool isFromOpenLink = false;
     bool isServiceMatch = false;
+    uint64_t specifiedFullTokenId = 0;
+    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
 };
 }
 }

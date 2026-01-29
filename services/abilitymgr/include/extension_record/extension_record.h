@@ -55,11 +55,11 @@ public:
 
     bool isHostSpecified_ = false;
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
+    int32_t requestCode_ = -1;
     uint32_t processMode_ = 0;
     pid_t hostPid_ = 0;
     std::shared_ptr<AAFwk::BaseExtensionRecord> abilityRecord_ = nullptr;
     std::string hostBundleName_;
-    int32_t requestCode_ = -1;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
     sptr<IRemoteObject> focusedCallerToken_ = nullptr;
