@@ -34,7 +34,7 @@ private:
     std::pair<bool, std::string> GetCallingInfo(uint32_t callingTokenid);
     std::vector<std::string> GetGroupInfosFromCache(const std::string &bundleName, int32_t userId,
         const std::string &uri);
-    static constexpr int32_t CACHE_SIZE_THRESHOLD = 20;
+    static constexpr int32_t CACHE_SIZE_THRESHOLD = 200;
     std::shared_mutex groupsIdMutex_;
     std::list<std::pair<std::string, std::vector<std::string>>> groupsIdCache_;
 };
