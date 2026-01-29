@@ -627,6 +627,70 @@ HWTEST_F(ConfigurationTest, InitDisplayConfig_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitDisplayConfig_0300
+ * @tc.desc: Init display config with invalid and valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, InitDisplayConfig_0300, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    auto ret = configUtils->GetDisplayConfig(displayId, originDensity, originDirection);
+    EXPECT_EQ(ret, true);
+
+    std::shared_ptr<Configuration> nullConfig;
+    std::shared_ptr<Global::Resource::ResourceManager> nullResourceManager;
+    EXPECT_EQ(nullConfig, nullptr);
+    EXPECT_EQ(nullResourceManager, nullptr);
+    configUtils->InitDisplayConfig(nullConfig, nullResourceManager, displayId, originDensity, 0);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    InitResourceManager(resourceManager);
+    std::unique_ptr<Global::Resource::ResConfig> baseResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(baseResConfig, nullptr);
+    resourceManager->GetResConfig(*baseResConfig);
+    auto baseColorMode = baseResConfig->GetColorMode();
+    auto baseInputDevice = baseResConfig->GetInputDevice();
+    auto baseDensity = baseResConfig->GetScreenDensity();
+    auto baseDirection = baseResConfig->GetDirection();
+
+    configUtils->InitDisplayConfig(nullConfig, resourceManager, displayId, originDensity, 0);
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig);
+    EXPECT_EQ(unchangedResConfig->GetColorMode(), baseColorMode);
+    EXPECT_EQ(unchangedResConfig->GetInputDevice(), baseInputDevice);
+    EXPECT_EQ(unchangedResConfig->GetScreenDensity(), baseDensity);
+    EXPECT_EQ(unchangedResConfig->GetDirection(), baseDirection);
+
+    AppExecFwk::Configuration originConfig;
+    auto configuration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(configuration, nullptr);
+    auto originItemSize = configuration->GetItemSize();
+    configUtils->InitDisplayConfig(configuration, nullptr, displayId, originDensity, 0);
+    EXPECT_EQ(configuration->GetItemSize(), originItemSize);
+
+    configUtils->InitDisplayConfig(configuration, resourceManager, displayId, originDensity, 0);
+    std::string displayIdStr = configuration->GetItem(ConfigurationInner::APPLICATION_DISPLAYID);
+    EXPECT_EQ(displayIdStr, std::to_string(displayId));
+    std::string densityStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
+    EXPECT_EQ(densityStr, GetDensityStr(originDensity));
+    std::string directionStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
+    EXPECT_EQ(directionStr, ConfigurationInner::DIRECTION_VERTICAL);
+
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resConfig, nullptr);
+    resourceManager->GetResConfig(*resConfig);
+    EXPECT_EQ(originDensity, resConfig->GetScreenDensity());
+    EXPECT_EQ(ConvertDirection(ConfigurationInner::DIRECTION_VERTICAL), resConfig->GetDirection());
+}
+
+/**
  * @tc.name: UpdateDisplayConfig_0100
  * @tc.desc: Update display config with changed config.
  * @tc.type: FUNC
@@ -785,6 +849,364 @@ HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0400, TestSize.Level1)
     bool configChanged = configUtils->UpdateDisplayConfig(
         configuration, resourceManager, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
     EXPECT_EQ(configChanged, false);
+}
+
+/**
+ * @tc.name: UpdateDisplayConfig_0500
+ * @tc.desc: Update display config with invalid and valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0500, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    auto ret = configUtils->GetDisplayConfig(displayId, originDensity, originDirection);
+    EXPECT_EQ(ret, true);
+
+    bool configChanged = configUtils->UpdateDisplayConfig(
+        nullptr, nullptr, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    InitResourceManager(resourceManager);
+    std::unique_ptr<Global::Resource::ResConfig> baseResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(baseResConfig, nullptr);
+    resourceManager->GetResConfig(*baseResConfig);
+    auto baseColorMode = baseResConfig->GetColorMode();
+    auto baseInputDevice = baseResConfig->GetInputDevice();
+
+    configChanged = configUtils->UpdateDisplayConfig(
+        nullptr, resourceManager, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig);
+    EXPECT_EQ(unchangedResConfig->GetColorMode(), baseColorMode);
+    EXPECT_EQ(unchangedResConfig->GetInputDevice(), baseInputDevice);
+}
+
+/**
+ * @tc.name: UpdateDisplayConfig_0600
+ * @tc.desc: Update display config with resource manager and configuration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0600, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    EXPECT_TRUE(configUtils->GetDisplayConfig(displayId, originDensity, originDirection));
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    InitResourceManager(resourceManager);
+    std::unique_ptr<Global::Resource::ResConfig> baseResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(baseResConfig, nullptr);
+    resourceManager->GetResConfig(*baseResConfig);
+    auto baseColorMode = baseResConfig->GetColorMode();
+    auto baseInputDevice = baseResConfig->GetInputDevice();
+    AppExecFwk::Configuration originConfig;
+    auto configuration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(configuration, nullptr);
+    auto originItemSize = configuration->GetItemSize();
+    bool configChanged = configUtils->UpdateDisplayConfig(configuration, nullptr, displayId, originDensity,
+        Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+    EXPECT_EQ(configuration->GetItemSize(), originItemSize);
+    configuration->AddItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI, GetDensityStr(originDensity));
+    configuration->AddItem(displayId, ConfigurationInner::APPLICATION_DIRECTION,
+        ConfigurationInner::DIRECTION_VERTICAL);
+    configChanged = configUtils->UpdateDisplayConfig(configuration, resourceManager, displayId, originDensity,
+        Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig);
+    EXPECT_EQ(unchangedResConfig->GetColorMode(), baseColorMode);
+    EXPECT_EQ(unchangedResConfig->GetInputDevice(), baseInputDevice);
+    auto newConfiguration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(newConfiguration, nullptr);
+    configChanged = configUtils->UpdateDisplayConfig(newConfiguration, resourceManager, displayId, originDensity,
+        Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, true);
+    std::string densityStr = newConfiguration->GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
+    EXPECT_EQ(densityStr, GetDensityStr(originDensity));
+    std::string directionStr = newConfiguration->GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
+    EXPECT_EQ(directionStr, ConfigurationInner::DIRECTION_VERTICAL);
+    std::unique_ptr<Global::Resource::ResConfig> updatedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(updatedResConfig, nullptr);
+    resourceManager->GetResConfig(*updatedResConfig);
+    EXPECT_EQ(originDensity, updatedResConfig->GetScreenDensity());
+    EXPECT_EQ(ConvertDirection(ConfigurationInner::DIRECTION_VERTICAL), updatedResConfig->GetDirection());
+}
+
+/**
+ * @tc.name: UpdateUpdateGlobalConfig_0100
+ * @tc.desc: Update display config with unchanged config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateUpdateGlobalConfig_0100, TestSize.Level1)
+{
+    AppExecFwk::Configuration configuration;
+    bool addItemRet;
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false");
+    EXPECT_EQ(addItemRet, true);
+
+    // init resource manager, "zh", "light", "true"
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resConfig, nullptr);
+
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag("zh", status);
+    EXPECT_EQ(status, U_ZERO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "language: %{public}s, script: %{public}s, region: %{public}s",
+             locale.getLanguage(), locale.getScript(), locale.getCountry());
+    resConfig->SetLocaleInfo(locale);
+    resConfig->SetColorMode(ConvertColorMode("light"));
+    resConfig->SetInputDevice(ConvertHasPointerDevice("true"));
+    Global::Resource::RState updateRet = resourceManager->UpdateResConfig(*resConfig);
+    EXPECT_EQ(updateRet, Global::Resource::RState::SUCCESS);
+
+    // update configuration to resource manager
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+    auto originItemSize = configuration.GetItemSize();
+
+    configUtils->UpdateGlobalConfig(configuration, nullptr, nullptr);
+    EXPECT_EQ(configuration.GetItemSize(), originItemSize);
+
+    configUtils->UpdateGlobalConfig(configuration, nullptr, resourceManager);
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig);
+    EXPECT_EQ(unchangedResConfig->GetColorMode(), ConvertColorMode("light"));
+    EXPECT_EQ(unchangedResConfig->GetInputDevice(), ConvertHasPointerDevice("true"));
+
+    std::shared_ptr<AppExecFwk::Configuration> nullResTargetConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    configUtils->UpdateGlobalConfig(configuration, nullResTargetConfig, nullptr);
+    EXPECT_EQ(nullResTargetConfig->GetItemSize(), 0);
+}
+
+/**
+ * @tc.name: UpdateUpdateGlobalConfig_0200
+ * @tc.desc: Update display config with target configs and resource manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateUpdateGlobalConfig_0200, TestSize.Level1)
+{
+    AppExecFwk::Configuration configuration;
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en"));
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark"));
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false"));
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    std::unique_ptr<Global::Resource::ResConfig> resetResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resetResConfig, nullptr);
+    {
+        UErrorCode resetStatus = U_ZERO_ERROR;
+        icu::Locale resetLocale = icu::Locale::forLanguageTag("zh", resetStatus);
+        EXPECT_EQ(resetStatus, U_ZERO_ERROR);
+        resetResConfig->SetLocaleInfo(resetLocale);
+    }
+    resetResConfig->SetColorMode(ConvertColorMode("light"));
+    resetResConfig->SetInputDevice(ConvertHasPointerDevice("true"));
+    Global::Resource::RState updateRet = resourceManager->UpdateResConfig(*resetResConfig);
+    EXPECT_EQ(updateRet, Global::Resource::RState::SUCCESS);
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+    std::shared_ptr<AppExecFwk::Configuration> sameTargetConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_TRUE(sameTargetConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en"));
+    EXPECT_TRUE(sameTargetConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark"));
+    EXPECT_TRUE(sameTargetConfig->AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false"));
+    configUtils->UpdateGlobalConfig(configuration, sameTargetConfig, resourceManager);
+    EXPECT_EQ(sameTargetConfig->GetItemSize(), configuration.GetItemSize());
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig2(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig2, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig2);
+    EXPECT_EQ(unchangedResConfig2->GetColorMode(), ConvertColorMode("light"));
+    EXPECT_EQ(unchangedResConfig2->GetInputDevice(), ConvertHasPointerDevice("true"));
+    std::shared_ptr<AppExecFwk::Configuration> diffTargetConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    configUtils->UpdateGlobalConfig(configuration, diffTargetConfig, resourceManager);
+    EXPECT_EQ(diffTargetConfig->GetItemSize(), configuration.GetItemSize());
+
+    // check resource manager has updated to "en", "dark", "false"
+    std::unique_ptr<Global::Resource::ResConfig> updatedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(updatedResConfig, nullptr);
+    resourceManager->GetResConfig(*updatedResConfig);
+    const icu::Locale *localeInfo = updatedResConfig->GetLocaleInfo();
+    ASSERT_NE(localeInfo, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "language: %{public}s, script: %{public}s, region: %{public}s",
+             localeInfo->getLanguage(), localeInfo->getScript(), localeInfo->getCountry());
+    EXPECT_EQ(strcmp(localeInfo->getLanguage(), "en"), 0);
+    EXPECT_EQ(updatedResConfig->GetColorMode(), ConvertColorMode("dark"));
+    EXPECT_EQ(updatedResConfig->GetInputDevice(), ConvertHasPointerDevice("false"));
+}
+
+/**
+ * @tc.name: UpdateUpdateGlobalConfig_0300
+ * @tc.desc: Update global config with context config and ability config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateUpdateGlobalConfig_0300, TestSize.Level1)
+{
+    AppExecFwk::Configuration configuration;
+    bool addItemRet;
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false");
+    EXPECT_EQ(addItemRet, true);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resConfig, nullptr);
+
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag("zh", status);
+    resConfig->SetLocaleInfo(locale);
+    resConfig->SetColorMode(ConvertColorMode("light"));
+    resConfig->SetInputDevice(ConvertHasPointerDevice("true"));
+    Global::Resource::RState updateRet = resourceManager->UpdateResConfig(*resConfig);
+    EXPECT_EQ(updateRet, Global::Resource::RState::SUCCESS);
+
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+    AppExecFwk::Configuration newConfig;
+
+    newConfig = configUtils->UpdateGlobalConfig(configuration, nullptr, nullptr, nullptr);
+    EXPECT_EQ(newConfig.GetItemSize(), 0);
+
+    newConfig = configUtils->UpdateGlobalConfig(configuration, nullptr, nullptr, resourceManager);
+    EXPECT_EQ(newConfig.GetItemSize(), 0);
+    std::unique_ptr<Global::Resource::ResConfig> unchangedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(unchangedResConfig, nullptr);
+    resourceManager->GetResConfig(*unchangedResConfig);
+    EXPECT_EQ(unchangedResConfig->GetColorMode(), ConvertColorMode("light"));
+    EXPECT_EQ(unchangedResConfig->GetInputDevice(), ConvertHasPointerDevice("true"));
+
+    std::shared_ptr<AppExecFwk::Configuration> nullResContextConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    newConfig = configUtils->UpdateGlobalConfig(configuration, nullResContextConfig, nullptr, nullptr);
+    EXPECT_EQ(newConfig.GetItemSize(), 0);
+    EXPECT_EQ(nullResContextConfig->GetItemSize(), 0);
+}
+
+/**
+ * @tc.name: UpdateUpdateGlobalConfig_0400
+ * @tc.desc: Update global config with context config and ability config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateUpdateGlobalConfig_0400, TestSize.Level1)
+{
+    AppExecFwk::Configuration configuration;
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en"));
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark"));
+    EXPECT_TRUE(configuration.AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false"));
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resConfig, nullptr);
+
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag("zh", status);
+    resConfig->SetLocaleInfo(locale);
+    resConfig->SetColorMode(ConvertColorMode("light"));
+    resConfig->SetInputDevice(ConvertHasPointerDevice("true"));
+    Global::Resource::RState updateRet = resourceManager->UpdateResConfig(*resConfig);
+    EXPECT_EQ(updateRet, Global::Resource::RState::SUCCESS);
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+    std::shared_ptr<AppExecFwk::Configuration> sameContextConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_TRUE(sameContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en"));
+    EXPECT_TRUE(sameContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark"));
+    EXPECT_TRUE(sameContextConfig->AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false"));
+    AppExecFwk::Configuration newConfig =
+        configUtils->UpdateGlobalConfig(configuration, sameContextConfig, nullptr, resourceManager);
+    EXPECT_EQ(newConfig.GetItemSize(), configuration.GetItemSize());
+    EXPECT_EQ(sameContextConfig->GetItemSize(), configuration.GetItemSize());
+    std::shared_ptr<AppExecFwk::Configuration> diffContextConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> abilityConfig =
+        std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_TRUE(abilityConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en"));
+    newConfig = configUtils->UpdateGlobalConfig(configuration, diffContextConfig, abilityConfig, resourceManager);
+    EXPECT_EQ(newConfig.GetItemSize(), configuration.GetItemSize() - 1);
+    EXPECT_EQ(diffContextConfig->GetItemSize(), configuration.GetItemSize());
+
+    std::unique_ptr<Global::Resource::ResConfig> updatedResConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*updatedResConfig);
+    const icu::Locale *localeInfo = updatedResConfig->GetLocaleInfo();
+    ASSERT_NE(localeInfo, nullptr);
+    EXPECT_EQ(strcmp(localeInfo->getLanguage(), "en"), 0);
+    EXPECT_EQ(updatedResConfig->GetColorMode(), ConvertColorMode("dark"));
+    EXPECT_EQ(updatedResConfig->GetInputDevice(), ConvertHasPointerDevice("false"));
+}
+
+/**
+ * @tc.name: UpdateAbilityConfig_0100
+ * @tc.desc: Update ability config with resource manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateAbilityConfig_0100, TestSize.Level1)
+{
+    AppExecFwk::Configuration configuration;
+    bool addItemRet;
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+    EXPECT_EQ(addItemRet, true);
+    addItemRet = configuration.AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false");
+    EXPECT_EQ(addItemRet, true);
+    auto originItemSize = configuration.GetItemSize();
+
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    configUtils->UpdateAbilityConfig(configuration, nullptr);
+    EXPECT_EQ(configuration.GetItemSize(), originItemSize);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(resConfig, nullptr);
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag("zh", status);
+    resConfig->SetLocaleInfo(locale);
+    resConfig->SetColorMode(ConvertColorMode("light"));
+    resConfig->SetInputDevice(ConvertHasPointerDevice("true"));
+    Global::Resource::RState updateRet = resourceManager->UpdateResConfig(*resConfig);
+    EXPECT_EQ(updateRet, Global::Resource::RState::SUCCESS);
+
+    configUtils->UpdateAbilityConfig(configuration, resourceManager);
+
+    std::unique_ptr<Global::Resource::ResConfig> updatedResConfig(Global::Resource::CreateResConfig());
+    ASSERT_NE(updatedResConfig, nullptr);
+    resourceManager->GetResConfig(*updatedResConfig);
+    const icu::Locale *localeInfo = updatedResConfig->GetLocaleInfo();
+    ASSERT_NE(localeInfo, nullptr);
+    EXPECT_EQ(strcmp(localeInfo->getLanguage(), "en"), 0);
+    EXPECT_EQ(updatedResConfig->GetColorMode(), ConvertColorMode("dark"));
+    EXPECT_EQ(updatedResConfig->GetInputDevice(), ConvertHasPointerDevice("false"));
 }
 } // namespace AAFwk
 } // namespace OHOS
