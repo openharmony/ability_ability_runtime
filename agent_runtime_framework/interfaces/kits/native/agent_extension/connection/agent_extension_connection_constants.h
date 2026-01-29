@@ -13,12 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AGENT_RUNTIME_AGENTEXTENSION_CONNECTION_CONSTANTS_H
-#define OHOS_AGENT_RUNTIME_AGENTEXTENSION_CONNECTION_CONSTANTS_H
+#ifndef OHOS_AGENT_RUNTIME_AGENT_EXTENSION_CONNECTION_CONSTANTS_H
+#define OHOS_AGENT_RUNTIME_AGENT_EXTENSION_CONNECTION_CONSTANTS_H
 
 namespace OHOS {
 namespace AgentRuntime {
-constexpr const char* AGENTEXTENSIONHOSTPROXY_KEY = "ohos.ability.params.AgentExtensionHostProxy";
-}  // namespace AgentRuntime
-}  // namespace OHOS
-#endif // OHOS_AGENT_RUNTIME_AGENTEXTENSION_CONNECTION_CONSTANTS_H
+/**
+ * Key for storing the agent extension host proxy in Want parameters.
+ * Used for bidirectional communication between host and agent extension.
+ */
+constexpr const char *AGENTEXTENSIONHOSTPROXY_KEY = "ohos.aafwk.params.AgentExtensionHostProxy";
+
+/**
+ * Key for storing the agent identifier in Want parameters.
+ * Used to identify the target agent extension.
+ */
+constexpr const char *AGENTID_KEY = "ohos.aafwk.params.AgentId";
+
+} // namespace AgentRuntime
+} // namespace OHOS
+
+#endif // OHOS_AGENT_RUNTIME_AGENT_EXTENSION_CONNECTION_CONSTANTS_H

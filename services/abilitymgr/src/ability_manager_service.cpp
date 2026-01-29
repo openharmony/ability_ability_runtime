@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "ability_connect_manager.h"
 #include "ability_errors_util.h"
 #include "ability_manager_radar.h"
+#include "agent_extension_connection_constants.h"
 #include "ability_manager_xcollie.h"
 #include "ability_start_by_call_helper.h"
 #include "ability_start_with_wait_observer_utils.h"
@@ -5267,6 +5268,11 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE && want.HasParameter(UISERVICEHOSTPROXY_KEY)) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to have UISERVICEHOSTPROXY_KEY");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    if (extensionType != AppExecFwk::ExtensionAbilityType::AGENT &&
+        want.HasParameter(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to have AGENTEXTENSIONHOSTPROXY_KEY");
         return ERR_WRONG_INTERFACE_CALL;
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && IsCrossUserCall(userId)) {

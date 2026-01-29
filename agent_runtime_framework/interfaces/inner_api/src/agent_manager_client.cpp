@@ -78,6 +78,27 @@ int32_t AgentManagerClient::GetAgentCardByAgentId(const std::string &bundleName,
     return agentMgr->GetAgentCardByAgentId(bundleName, agentId, card);
 }
 
+int32_t AgentManagerClient::ConnectAgentExtensionAbility(const AAFwk::Want &want,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    auto agentMgr = GetAgentMgrProxy();
+    if (agentMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
+        return ERR_NULL_AGENT_MGR_PROXY;
+    }
+    return agentMgr->ConnectAgentExtensionAbility(want, connection);
+}
+
+int32_t AgentManagerClient::DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    auto agentMgr = GetAgentMgrProxy();
+    if (agentMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentmgr");
+        return ERR_NULL_AGENT_MGR_PROXY;
+    }
+    return agentMgr->DisconnectAgentExtensionAbility(connection);
+}
+
 sptr<IAgentManager> AgentManagerClient::GetAgentMgrProxy()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

@@ -16,22 +16,21 @@
 #ifndef OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H
 #define OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H
 
-#include "agent_extension_stub.h"
+#include "agent_receiver_stub.h"
 #include "js_agent_extension.h"
 
 namespace OHOS {
 namespace AgentRuntime {
-
-class AgentExtensionStubImpl : public AgentExtensionStub {
+class AgentExtensionStubImpl : public AgentReceiverStub {
 public:
     explicit AgentExtensionStubImpl(std::weak_ptr<JsAgentExtension>& ext);
     virtual ~AgentExtensionStubImpl();
-    virtual int32_t SendData(sptr<IRemoteObject> hostProxy, std::string &data) override;
+    virtual int32_t SendData(const sptr<IRemoteObject> &hostProxy, const std::string &data) override;
+    virtual int32_t Authorize(const sptr<IRemoteObject> &hostProxy, const std::string &data) override;
 
 protected:
     std::weak_ptr<JsAgentExtension> extension_;
 };
-
 } // namespace AgentRuntime
 } // namespace OHOS
 #endif //OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H

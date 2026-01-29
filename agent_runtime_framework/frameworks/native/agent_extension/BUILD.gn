@@ -14,6 +14,96 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
+ohos_shared_library("agent_extension_connection") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+  defines = [ "AMS_LOG_TAG = \"AgentExtension\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
+  include_dirs = [
+    "${ability_runtime_services_path}/common/include",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+  ]
+
+  sources = [
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_connector_proxy.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_connector_stub.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_receiver_proxy.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_receiver_stub.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("js_agent_connection") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+  defines = [ "AMS_LOG_TAG = \"AgentExtension\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension",
+    "${ability_runtime_services_path}/common/include",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+  ]
+
+  sources = [
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_connector_proxy.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_connector_stub_impl.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_connection.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_receiver_proxy.cpp",
+  ]
+
+  deps = [
+    ":agent_extension_connection",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 config("ability_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -107,6 +197,7 @@ ohos_shared_library("agent_extension") {
 
   deps = [
     ":agent_extension_connection",
+    ":js_agent_connection",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:extensionkit_native",
@@ -135,56 +226,6 @@ ohos_shared_library("agent_extension") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "safwk:system_ability_fwk",
-  ]
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_shared_library("agent_extension_connection") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  defines = [ "AMS_LOG_TAG = \"Agent\"" ]
-  defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
-  include_dirs = [
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime/",
-  ]
-
-  sources = [
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_host_proxy.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_host_stub.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_host_stub_impl.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_proxy.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_stub.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/js_agent_extension_connection.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/js_agent_extension_host_proxy.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/js_agent_extension_proxy.cpp",
-  ]
-
-  deps = [
-    "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
-    "${ability_runtime_native_path}/ability/native:abilitykit_native",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "ipc:ipc_napi",
-    "napi:ace_napi",
   ]
 
   subsystem_name = "ability"
