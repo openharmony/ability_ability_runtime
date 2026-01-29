@@ -37,25 +37,28 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
     extensionType_ = type;
     {
         std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
-        if (extensionBlocklist_.find(extensionType_) != extensionBlocklist_.end()) {
+        auto iter = extensionBlocklist_.find(extensionType_);
+        if (iter != extensionBlocklist_.end()) {
+            TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d. is loaded", extensionType_);
             return;
         }
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::ifstream inFile(EXTENSION_BLOCKLIST_FILE_PATH);
+    std::ifstream inFile;
+    inFile.open(EXTENSION_BLOCKLIST_FILE_PATH, std::ios::in);
     if (!inFile.is_open()) {
-        TAG_LOGE(AAFwkTag::EXT, "Extension config file not found: %{public}s", EXTENSION_BLOCKLIST_FILE_PATH);
+        TAG_LOGE(AAFwkTag::EXT, "read extension config error");
         return;
     }
     nlohmann::json extensionConfig;
     inFile >> extensionConfig;
     if (extensionConfig.is_discarded()) {
-        TAG_LOGE(AAFwkTag::EXT, "Extension config JSON parse error");
+        TAG_LOGE(AAFwkTag::EXT, "extension config json discarded error");
         inFile.close();
         return;
     }
     if (!extensionConfig.contains(ExtensionConfigItem::ITEM_NAME_BLOCKLIST)) {
-        TAG_LOGW(AAFwkTag::EXT, "Extension config file has no blocklist node");
+        TAG_LOGE(AAFwkTag::EXT, "extension config file have no blocklist node");
         inFile.close();
         return;
     }
@@ -64,25 +67,21 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
     std::unordered_set<std::string> currentBlockList;
     bool found = false;
     for (const auto& item : blocklist.items()) {
-        if (item.key() == extensionName && blocklist[item.key()].is_array()) {
-            for (const auto& value : blocklist[item.key()]) {
-                if (value.is_string()) {
-                    currentBlockList.emplace(value.get<std::string>());
-                }
-            }
-            found = true;
-            break;
+        if (item.key() != extensionName) {
+            continue;
         }
+        if (!blackList[item.key()].is_array()) {
+            continue;
+        }
+        for (const auto& value : blackList[item.key()]) {
+            if (value.is_string()) {
+                currentBlockList.emplace(value.get<std::string>());
+            }
+        }
+        extensionBlocklist_.emplace(type, std::move(currentBlockList));
+        currentBlockList.clear();
     }
-    if (!found) {
-        TAG_LOGW(AAFwkTag::EXT, "Extension name: %{public}s not found in config", extensionName.c_str());
-        return;
-    }
-    std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
-    auto [iter, success] = extensionBlocklist_.emplace(type, std::move(currentBlockList));
-    if (success) {
-        TAG_LOGI(AAFwkTag::EXT, "Loaded type %{public}d, count: %{public}zu", type, iter->second.size());
-    }
+    inFile.close();
 }
 
 void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
