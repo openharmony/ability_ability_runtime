@@ -30,10 +30,6 @@ namespace {
 
 void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName, int32_t type)
 {
-    if (type < 0 || type >= EXTENSION_TYPE_UNKNOWN) {
-        TAG_LOGE(AAFwkTag::EXT, "Invalid extension type: %{public}d", type);
-        return;
-    }
     extensionType_ = type;
     {
         std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
