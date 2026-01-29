@@ -68,16 +68,18 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
         if (item.key() != extensionName) {
             continue;
         }
-        if (!blackList[item.key()].is_array()) {
+        if (!blocklist[item.key()].is_array()) {
             continue;
         }
-        for (const auto& value : blackList[item.key()]) {
+        for (const auto& value : blocklist[item.key()]) {
             if (value.is_string()) {
                 currentBlockList.emplace(value.get<std::string>());
             }
         }
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
         extensionBlocklist_.emplace(type, std::move(currentBlockList));
         currentBlockList.clear();
+        break;
     }
     inFile.close();
 }
