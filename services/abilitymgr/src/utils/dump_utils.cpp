@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,27 @@ std::pair<bool, DumpUtils::DumpsysKey> DumpUtils::DumpsysMap(std::string argStri
         result.second = KEY_DUMP_SYS_DATA;
     }
     return result;
+}
+
+void DumpUtils::ShowHelp(std::string& result)
+{
+    result.append("Usage:\n")
+        .append("-h                          ")
+        .append("help text for the tool\n")
+        .append("-a [-c | -u {UserId}]       ")
+        .append("dump all ability information in the system or all ability information of client/UserId\n")
+        .append("-l                          ")
+        .append("dump all mission list information in the system\n")
+        .append("-i {AbilityRecordId}        ")
+        .append("dump an ability information by ability record id\n")
+        .append("-e                          ")
+        .append("dump all extension information in the system(FA: ServiceAbilityRecords, Stage: ExtensionRecords)\n")
+        .append("-p [PendingWantRecordId]    ")
+        .append("dump all pendingwant record information in the system\n")
+        .append("-r                          ")
+        .append("dump all process in the system\n")
+        .append("-d                          ")
+        .append("dump all data ability information in the system");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

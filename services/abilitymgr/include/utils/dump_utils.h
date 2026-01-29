@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,13 @@ public:
      * @return The pair of the dump result and the dump key.
      */
     static std::pair<bool, DumpUtils::DumpsysKey> DumpsysMap(std::string argString);
+
+    /**
+     * ShowHelp, display help information for dump tool.
+     *
+     * @param result The result string to be filled with help information.
+     */
+    static void ShowHelp(std::string& result);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

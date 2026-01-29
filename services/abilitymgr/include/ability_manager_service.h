@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2567,8 +2567,6 @@ private:
     void DataDumpSysStateInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     ErrCode ProcessMultiParam(std::vector<std::string>& argsStr, std::string& result);
-    void ShowHelp(std::string& result);
-    void ShowIllegalInfomation(std::string& result);
     int Dump(const std::vector<std::u16string>& args, std::string& result);
 
     // multi user
