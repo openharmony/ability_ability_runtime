@@ -87,6 +87,17 @@ std::string AppfreezeUtil::RoundToTwoDecimals(float value)
     return ss.str();
 }
 
+std::string AppfreezeUtil::FreezePathToRealPath(const std::string& filePath)
+{
+    std::string realPath;
+    if (!OHOS::PathToRealPath(filePath, realPath)) {
+        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed, file:%{public}s, errno:%{public}d",
+            filePath.c_str(), errno);
+        return "";
+    }
+    return realPath;
+}
+
 int AppfreezeUtil::GetCpuCount()
 {
     std::string procStatPath = PROC_STAT_PATH;
@@ -117,17 +128,6 @@ int AppfreezeUtil::GetCpuCount()
     cpuCount -= CPU_COUNT_SUBTRACT;
     TAG_LOGD(AAFwkTag::APPDFR, "read: %{public}s to get cpu count:%{public}d.", procStatPath.c_str(), cpuCount);
     return cpuCount;
-}
-
-std::string AppfreezeUtil::FreezePathToRealPath(const std::string& filePath)
-{
-    std::string realPath;
-    if (!OHOS::PathToRealPath(filePath, realPath)) {
-        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed, file:%{public}s, errno:%{public}d",
-            filePath.c_str(), errno);
-        return "";
-    }
-    return realPath;
 }
 
 int32_t AppfreezeUtil::GetUidByPid(const int32_t pid)
