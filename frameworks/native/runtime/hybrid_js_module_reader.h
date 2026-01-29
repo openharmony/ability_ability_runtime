@@ -47,9 +47,12 @@ public:
     static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName);
 
 private:
-    std::string GetAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const;
-    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const;
-    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix, bool& needFindPluginHsp) const;
+    std::string GetAppPath(const std::string& inputPath, const std::string& suffix,
+        bool& needFindPluginHsp) const;
+    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix,
+        bool& needFindPluginHsp) const;
+    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix,
+        bool& needFindPluginHsp) const;
     std::string GetModuleName(const std::string& inputPath) const;
     std::string GetPluginHspPath(const std::string& inputPath) const;
     std::shared_ptr<Extractor> GetExtractor(const std::string& inputPath, std::string& errorMsg) const;
