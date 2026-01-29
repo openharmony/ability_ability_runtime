@@ -931,7 +931,8 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetRunningProcesses_001, TestSize.Level1
     TAG_LOGI(AAFwkTag::TEST, "GetRunningProcesses_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::string temp = "";
-    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, temp);
+    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(info1, 0, temp);
     std::shared_ptr<UserTestRecord> record = std::make_shared<UserTestRecord>();
     appRecord->SetUserTestInfo(record);
     AAFwk::MyStatus::GetInstance().getBoolParameter_ = true;

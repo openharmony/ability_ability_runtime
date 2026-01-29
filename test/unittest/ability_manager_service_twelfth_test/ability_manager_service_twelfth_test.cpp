@@ -811,6 +811,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, IsAppSelfCalled_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest IsAppSelfCalled_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
+    IPCSkeleton::SetCallingTokenID(ONE);
     AbilityRequest abilityRequest{};
     std::string deviceName = "device";
     std::string abilityName = "ServiceAbility";

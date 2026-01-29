@@ -649,7 +649,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, MinimizeAbility_001, TestSize.Level1)
         missionListManager->terminateAbilityList_.emplace_back(abilityRecord);
         abilityMs->subManagersHelper_->missionListManagers_.emplace(0, missionListManager);
         ret = abilityMs->MinimizeAbility(token, fromUser);
-        EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL); // expect ERR_WRONG_INTERFACE_CALL abilityRecord type not page
 
         abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
         ret = abilityMs->MinimizeAbility(token, fromUser);

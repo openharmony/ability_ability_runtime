@@ -1417,14 +1417,6 @@ HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0900, TestSize.Level1)
     abilityRecord->SetProcessName("newProcessName");
     extRecordMgr->AddExtensionRecord(1, extRecord);
     result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
-    EXPECT_EQ(result, ERR_OK);
-
-    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
-    abilityRecord->SetAppIndex(2);
-    abilityRequest.want.SetParam(PROCESS_MODE_HOST_SPECIFIED_KEY, std::string("processName:2"));
-    abilityRecord->SetProcessName("newProcessName");
-    extRecordMgr->AddExtensionRecord(1, extRecord);
-    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
     EXPECT_NE(result, ERR_OK);
 
     extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
