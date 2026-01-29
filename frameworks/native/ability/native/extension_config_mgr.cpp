@@ -62,10 +62,8 @@ void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName
         inFile.close();
         return;
     }
-    inFile.close();
     auto blocklist = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
     std::unordered_set<std::string> currentBlockList;
-    bool found = false;
     for (const auto& item : blocklist.items()) {
         if (item.key() != extensionName) {
             continue;
