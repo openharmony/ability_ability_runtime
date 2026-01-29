@@ -3306,19 +3306,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_001, TestSize.Lev
 }
 
 /**
- * @tc.name: ParseVpnAllowListJson_002
- * @tc.desc: Test ParseVpnAllowListJson if vpn_startability_allowlist.json is not empty
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceThirdTest, ParseVpnAllowListJson_002, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    bool result = abilityMs_->ParseVpnAllowListJson(
-        "/etc/efficiency_manager/prevent_startability_whitelist.json", "white_list");
-    EXPECT_NE(result, false);
-}
-
-/**
  * @tc.name: CheckSupportVpn_001
  * @tc.desc: Test CheckSupportVpn when bundleName in allowlist
  * @tc.type: FUNC

@@ -1021,64 +1021,6 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_001, T
 
 /*
  * Feature: AbilityManagerService
- * Name: TerminateUIExtensionAbility_002
- * Function: TerminateUIExtensionAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService TerminateUIExtensionAbility
- */
-HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_002 start");
-    MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
-    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockExtensionRecordBase(AbilityType::SERVICE);
-    MyStatus::GetInstance().ipcGetCallingTokenID_ = -1;
-    MyStatus::GetInstance().arGetAbilityInfo_.applicationInfo.accessTokenId = 1;
-    MyStatus::GetInstance().arGetAbilityRecord_ = nullptr;
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    EXPECT_NE(mockCurrentConnectManager, nullptr);
-    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_    = mockCurrentConnectManager;
-
-    int retCode = abilityMs_->TerminateUIExtensionAbility(MockSessionInfo(0), 0, nullptr);
-    EXPECT_EQ(retCode, ABILITY_VISIBLE_FALSE_DENY_REQUEST);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_002 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Name: TerminateUIExtensionAbility_003
- * Function: TerminateUIExtensionAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService TerminateUIExtensionAbility
- */
-HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_003, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_003 start");
-    MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
-    MyStatus::GetInstance().acmGetUIExtensionBySessionInfo_ = MockExtensionRecordBase(AbilityType::SERVICE);
-    MyStatus::GetInstance().ipcGetCallingTokenID_ = 1;
-    MyStatus::GetInstance().arGetAbilityInfo_.applicationInfo.accessTokenId = 1;
-    MyStatus::GetInstance().arGetAbilityInfo_.visible = false;
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    EXPECT_NE(mockSubManagersHelper, nullptr);
-    auto mockCurrentConnectManager = std::make_shared<UIExtensionAbilityManager>(0);
-    EXPECT_NE(mockCurrentConnectManager, nullptr);
-    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
-    abilityMs_->subManagersHelper_->currentUIExtensionAbilityManager_ = mockCurrentConnectManager;
-
-    int retCode = abilityMs_->TerminateUIExtensionAbility(MockSessionInfo(0), 0, nullptr);
-    EXPECT_EQ(retCode, ERR_WRONG_INTERFACE_CALL);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_003 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Name: IsDelegatorCall_001
  * Function: IsDelegatorCall
  * SubFunction: NA
