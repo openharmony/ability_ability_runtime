@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "hybrid_js_module_reader.h"
 #include "extractor.h"
 #undef private
