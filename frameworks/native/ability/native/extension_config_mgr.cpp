@@ -94,12 +94,10 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
         SetExtensionEtsCheckCallback(runtime);
     }
 
-    // Copy blocklist with lock protection to avoid holding lock during moduleChecker creation
     std::unordered_map<int32_t, std::unordered_set<std::string>> localBlocklist;
     {
         std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
         localBlocklist = extensionBlocklist_;
-        // Note: Don't clear here, let the cache remain for potential reuse
     }
 
     auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, localBlocklist);
