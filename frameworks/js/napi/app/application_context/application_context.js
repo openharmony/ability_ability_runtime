@@ -283,6 +283,14 @@ class ApplicationContext {
     return this.__context_impl__.setColorMode(colorMode);
   }
 
+  onSystemConfigurationUpdated(colorMode) {
+    return this.__context_impl__.onSystemConfigurationUpdated(colorMode);
+  }
+
+  offSystemConfigurationUpdated(colorMode) {
+    return this.__context_impl__.offSystemConfigurationUpdated(colorMode);
+  }
+
   setLanguage(language) {
     return this.__context_impl__.setLanguage(language);
   }
