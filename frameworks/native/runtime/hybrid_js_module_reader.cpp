@@ -63,7 +63,7 @@ std::shared_ptr<Extractor> HybridJsModuleReader::GetExtractor(
         return extractor;
     }
 
-    realHapPath = GetAppPath(inputPath, ABILITY_FILE_SUFFIX);
+    realHapPath = GetAppPath(inputPath, ABILITY_FILE_SUFFIX, needFindPluginHsp);
     if (realHapPath.empty()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
         return nullptr;
