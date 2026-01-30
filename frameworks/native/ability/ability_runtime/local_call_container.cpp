@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -315,7 +315,7 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
     }
 }
 
-void LocalCallContainer::RemoveCallerConnection(const sptr<CallerConnection> &connection)
+void LocalCallContainer::RemoveCallerConnection(sptr<CallerConnection> connection)
 {
     if (connection == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connection");

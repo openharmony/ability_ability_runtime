@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ public:
      * @brief Notify all callers with specific release reason
      * @param releaseReason The release reason (ON_DIED or ON_RELEASE)
      */
-    void NotifyCallersReleased(const std::string& releaseReason);
+    void NotifyCallersReleased(const std::string &releaseReason);
     void NotifyRemoteStateChanged(int32_t abilityState);
     sptr<IRemoteObject> GetRemoteObject() const;
     void InvokeCallBack() const;

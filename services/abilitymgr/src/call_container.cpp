@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,9 +229,6 @@ bool CallContainer::IsExistConnection(const sptr<IAbilityConnection> &connect)
 
 void CallContainer::NotifyAllCallDisconnect(const AppExecFwk::ElementName &element)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Notify all callers that callee is terminating: %{public}s",
-        element.GetAbilityName().c_str());
-
     std::lock_guard lock(callRecordMapLock_);
     if (callRecordMap_.empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No call records to notify");
