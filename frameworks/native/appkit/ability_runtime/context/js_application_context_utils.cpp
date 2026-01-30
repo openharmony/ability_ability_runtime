@@ -36,6 +36,7 @@
 #include "js_error_utils.h"
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
+#include "js_system_configuration_updated_callback.h"
 #include "napi_common_want.h"
 #include "tokenid_kit.h"
 #ifdef SUPPORT_SCREEN
@@ -1430,6 +1431,18 @@ napi_value JsApplicationContextUtils::Off(napi_env env, napi_callback_info info)
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnOff, APPLICATION_CONTEXT_NAME);
 }
 
+napi_value JsApplicationContextUtils::RegisterSystemConfigurationUpdated(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnSystemConfigurationUpdated,
+        APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::UnRegisterSystemConfigurationUpdated(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OffSystemConfigurationUpdated,
+        APPLICATION_CONTEXT_NAME);
+}
+
 napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -1473,6 +1486,78 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     }
     TAG_LOGE(AAFwkTag::APPKIT, "on function type not match");
     ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::OnSystemConfigurationUpdated(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "OnSystemConfigurationUpdated called");
+
+    if (info.argc != ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckTypeForNapiValue(env, info.argv[0], napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "param invalid");
+        ThrowInvalidParamError(env, "Parse param type failed, type must be object.");
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+
+    std::lock_guard<std::mutex> lock(systemConfigurationUpdatedCallbackLock_);
+    if (systemConfigurationUpdatedCallback_ != nullptr) {
+        systemConfigurationUpdatedCallback_->Register(info.argv[INDEX_ZERO]);
+        return CreateJsUndefined(env);
+    }
+
+    systemConfigurationUpdatedCallback_ = std::make_shared<JsSystemConfigurationUpdatedCallback>(env);
+    systemConfigurationUpdatedCallback_->Register(info.argv[INDEX_ZERO]);
+    applicationContext->RegisterSystemConfigurationUpdatedCallback(systemConfigurationUpdatedCallback_);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::OffSystemConfigurationUpdated(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+
+    if (info.argc != ARGC_ONE && info.argc != ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+
+    std::lock_guard<std::mutex> lock(systemConfigurationUpdatedCallbackLock_);
+    if (systemConfigurationUpdatedCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null systemConfigurationUpdatedCallback_");
+        return CreateJsUndefined(env);
+    }
+
+    if (info.argc == ARGC_ONE && !CheckTypeForNapiValue(env, info.argv[ARGC_ZERO], napi_object)) {
+        systemConfigurationUpdatedCallback_->UnRegister();
+    } else if (!systemConfigurationUpdatedCallback_->UnRegister(info.argv[ARGC_ZERO])) {
+        TAG_LOGE(AAFwkTag::APPKIT, "UnRegister failed");
+        ThrowInvalidParamError(env, "parameter invalid");
+        return CreateJsUndefined(env);
+    }
+
+    if (systemConfigurationUpdatedCallback_->IsEmpty()) {
+        systemConfigurationUpdatedCallback_.reset();
+    }
     return CreateJsUndefined(env);
 }
 
@@ -2007,6 +2092,10 @@ void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, na
         JsApplicationContextUtils::GetApplicationContext);
     BindNativeFunction(env, object, "killAllProcesses", MD_NAME, JsApplicationContextUtils::KillProcessBySelf);
     BindNativeFunction(env, object, "setColorMode", MD_NAME, JsApplicationContextUtils::SetColorMode);
+    BindNativeFunction(env, object, "onSystemConfigurationUpdated", MD_NAME,
+        JsApplicationContextUtils::RegisterSystemConfigurationUpdated);
+    BindNativeFunction(env, object, "offSystemConfigurationUpdated", MD_NAME,
+        JsApplicationContextUtils::UnRegisterSystemConfigurationUpdated);
     BindNativeFunction(env, object, "setLanguage", MD_NAME, JsApplicationContextUtils::SetLanguage);
     BindNativeFunction(env, object, "setFont", MD_NAME, JsApplicationContextUtils::SetFont);
     BindNativeFunction(env, object, "clearUpApplicationData", MD_NAME,

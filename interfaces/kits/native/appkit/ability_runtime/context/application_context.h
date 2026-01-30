@@ -25,6 +25,7 @@
 #include "context_impl.h"
 #include "environment_callback.h"
 #include "interop_ability_lifecycle_callback.h"
+#include "system_configuration_updated_callback.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -81,6 +82,8 @@ public:
     void DispatchMemoryLevel(const int level);
     void NotifyApplicationForeground();
     void NotifyApplicationBackground();
+    void NotifySystemConfigurationUpdated(const AppExecFwk::Configuration& configuration);
+    void RegisterSystemConfigurationUpdatedCallback(const std::weak_ptr<SystemConfigurationUpdatedCallback> &Callback);
     void DispatchOnWillNewWant(const AbilityLifecycleCallbackArgs &ability);
     void DispatchOnNewWant(const AbilityLifecycleCallbackArgs &ability);
     void DispatchOnAbilityWillCreate(const AbilityLifecycleCallbackArgs &ability);
@@ -218,6 +221,7 @@ private:
     static std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> interopCallbacks_;
     static std::vector<std::shared_ptr<EnvironmentCallback>> envCallbacks_;
     static std::vector<std::weak_ptr<ApplicationStateChangeCallback>> applicationStateCallback_;
+    static std::vector<std::weak_ptr<SystemConfigurationUpdatedCallback>> systemConfigurationUpdatedCallbacks_;
     std::recursive_mutex callbackLock_;
     std::mutex interopCallbackLock_;
     std::recursive_mutex envCallbacksLock_;
@@ -233,6 +237,7 @@ private:
     std::string instanceKey_;
     std::string dataDir_;
     std::mutex dataDirMutex_;
+    std::mutex systemConfigurationUpdatedCallbackLock_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
