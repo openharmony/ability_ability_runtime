@@ -32,7 +32,6 @@ using namespace OHOS::AbilityBase;
 namespace OHOS {
 namespace AbilityRuntime {
 using IBundleMgr = AppExecFwk::IBundleMgr;
-bool JsModuleReader::needFindPluginHsp_ = true;
 
 JsModuleReader::JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
     : JsModuleSearcher(bundleName), isFormRender_(isFormRender)
@@ -56,13 +55,14 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
         return false;
     }
 
-    auto realHapPath = GetAppHspPath(inputPath);
+    bool needFindPluginHsp = true;
+    auto realHapPath = GetAppHspPath(inputPath, needFindPluginHsp);
     if (realHapPath.empty()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
         return false;
     }
 
-    if (needFindPluginHsp_) {
+    if (needFindPluginHsp) {
         // find plugin
         realHapPath = GetPluginHspPath(inputPath);
         if (realHapPath.empty()) {
@@ -70,7 +70,6 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
             return false;
         }
     }
-    needFindPluginHsp_ = true;
 
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
@@ -133,15 +132,15 @@ std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
     return presetAppHapPath;
 }
 
-std::string JsModuleReader::GetAppHspPath(const std::string& inputPath) const
+std::string JsModuleReader::GetAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const
 {
     if (isFormRender_) {
-        return GetFormAppHspPath(inputPath);
+        return GetFormAppHspPath(inputPath, needFindPluginHsp);
     }
-    return GetCommonAppHspPath(inputPath);
+    return GetCommonAppHspPath(inputPath, needFindPluginHsp);
 }
 
-std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) const
+std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const
 {
     std::string realHapPath;
     std::string suffix = std::string(SHARED_FILE_SUFFIX);
@@ -157,7 +156,7 @@ std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) cons
         TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
-    needFindPluginHsp_ = false;
+    needFindPluginHsp = false;
     return realHapPath;
 }
 
@@ -166,10 +165,10 @@ std::string JsModuleReader::GetModuleName(const std::string& inputPath) const
     return inputPath.substr(inputPath.find_last_of("/") + 1);
 }
 
-std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) const
+std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const
 {
     std::string suffix = std::string(SHARED_FILE_SUFFIX);
-    std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_);
+    std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_, needFindPluginHsp);
     if ((realHapPath.find(ABS_DATA_CODE_PATH) == 0) || (realHapPath == inputPath)) {
         realHapPath = std::string(ABS_CODE_PATH) + inputPath + suffix;
     }
@@ -181,12 +180,11 @@ std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) co
         TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
-    needFindPluginHsp_ = false;
     return realHapPath;
 }
 
 std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
-    const std::string& inputPath)
+    const std::string& inputPath, bool& needFindPluginHsp)
 {
     std::string presetAppHapPath = inputPath;
 
@@ -206,7 +204,7 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     for (const auto &info : baseSharedBundleInfos) {
         if ((info.bundleName == sharedBundleName) && (info.moduleName == moduleName)) {
             presetAppHapPath = info.hapPath;
-            needFindPluginHsp_ = false;
+            needFindPluginHsp = false;
             break;
         }
     }
@@ -220,14 +218,15 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     for (const auto &info : bundleInfo.hapModuleInfos) {
         if (info.moduleName == moduleName) {
             presetAppHapPath = info.hapPath;
-            needFindPluginHsp_ = false;
+            needFindPluginHsp = false;
             break;
         }
     }
     return presetAppHapPath;
 }
 
-std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
+std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName,
+    bool& needFindPluginHsp)
 {
     std::string presetAppHapPath = inputPath;
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
@@ -251,12 +250,12 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.moduleName == moduleName) {
                 presetAppHapPath = hapModuleInfo.hapPath;
-                needFindPluginHsp_ = false;
+                needFindPluginHsp = false;
                 break;
             }
         }
     } else {
-        presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath);
+        presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath, needFindPluginHsp);
     }
     return presetAppHapPath;
 }
