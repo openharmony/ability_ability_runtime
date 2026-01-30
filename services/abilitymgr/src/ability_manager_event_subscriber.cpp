@@ -35,7 +35,7 @@ AbilityEventMapManager::~AbilityEventMapManager() {}
 void AbilityEventMapManager::AddEvent(int32_t userId, const std::string &event)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "AddEvent userId: %{public}d, event: %{public}s.", userId, event.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, AddEvent userId: %{public}d, event: %{public}s.", userId, event.c_str());
     auto iter = eventMap_.find(userId);
     if (iter != eventMap_.end()) {
         if (event == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
