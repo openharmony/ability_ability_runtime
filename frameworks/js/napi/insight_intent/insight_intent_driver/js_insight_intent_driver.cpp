@@ -268,8 +268,7 @@ private:
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
         uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
         if (IsServiceMatch(param) && NeedStartByContext(param)) {
-                return HandleServiceMatch(env, info, param);
-            }
+            return HandleServiceMatch(env, info, param);
         }
         auto err = AbilityManagerClient::GetInstance()->ExecuteIntent(key,
             InsightIntentHostClient::GetInstance(), param);
