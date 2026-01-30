@@ -17,6 +17,9 @@
 
 #include "hybrid_js_module_reader.h"
 #include "extractor.h"
+#undef private
+#undef protected
+
 
 using namespace testing;
 using namespace testing::ext;
