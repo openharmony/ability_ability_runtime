@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_EXTENSION_CONFIG_HANDLER_H
 #define OHOS_ABILITY_RUNTIME_EXTENSION_CONFIG_HANDLER_H
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -46,25 +47,7 @@ public:
      * @brief ExtensionConfigMgr initialization
      *
      */
-    void Init();
-
-    /**
-     * @brief Set the Process Extension Type object
-     *
-     * @param extensionType
-     */
-    void SetProcessExtensionType(int32_t extensionType)
-    {
-        extensionType_ = extensionType;
-    }
-
-    /**
-     * @brief Add extension blocklist item
-     *
-     * @param name Extension name
-     * @param type Extension type
-     */
-    void AddBlockListItem(const std::string &name, int32_t type);
+    void LoadExtensionBlockList(const std::string &extensionName, int32_t type);
 
     /**
      * @brief Update runtime module checker
@@ -102,9 +85,17 @@ private:
      * @param runtime the runtime pointer
      */
     void SetExtensionEtsCheckCallback(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
-    std::unordered_map<std::string, std::unordered_set<std::string>> blocklistConfig_;
+
+    /// Mutex to protect extensionBlocklist_ from concurrent access
+    std::mutex extensionBlockListMutex_;
+
+    /// Blocklist cache for loaded extensions, key is extensionType
     std::unordered_map<int32_t, std::unordered_set<std::string>> extensionBlocklist_;
+
+    /// ETS runtime blocklist cache
     std::unordered_set<std::string> extensionEtsBlocklist_;
+
+    /// Current process extension type
     int32_t extensionType_ = EXTENSION_TYPE_UNKNOWN;
 };
 } // namespace OHOS::AbilityRuntime

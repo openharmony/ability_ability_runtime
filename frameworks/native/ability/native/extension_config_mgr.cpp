@@ -28,16 +28,18 @@ namespace {
     constexpr char EXTENSION_BLOCKLIST_FILE_PATH[] = "/system/etc/extension_blocklist_config.json";
 }
 
-void ExtensionConfigMgr::Init()
+void ExtensionConfigMgr::LoadExtensionBlockList(const std::string &extensionName, int32_t type)
 {
+    extensionType_ = type;
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        auto iter = extensionBlocklist_.find(extensionType_);
+        if (iter != extensionBlocklist_.end()) {
+            TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d. is loaded", extensionType_);
+            return;
+        }
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "Init begin");
-    // clear cached data
-    blocklistConfig_.clear();
-    extensionBlocklist_.clear();
-    extensionEtsBlocklist_.clear();
-
-    // read blocklist from extension_blocklist_config.json
     std::ifstream inFile;
     inFile.open(EXTENSION_BLOCKLIST_FILE_PATH, std::ios::in);
     if (!inFile.is_open()) {
@@ -56,33 +58,26 @@ void ExtensionConfigMgr::Init()
         inFile.close();
         return;
     }
-    auto blackList = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
+    auto blocklist = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
     std::unordered_set<std::string> currentBlockList;
-    for (const auto& item : blackList.items()) {
-        if (!blackList[item.key()].is_array()) {
+    for (const auto& item : blocklist.items()) {
+        if (item.key() != extensionName) {
             continue;
         }
-        for (const auto& value : blackList[item.key()]) {
+        if (!blocklist[item.key()].is_array()) {
+            continue;
+        }
+        for (const auto& value : blocklist[item.key()]) {
             if (value.is_string()) {
                 currentBlockList.emplace(value.get<std::string>());
             }
         }
-        blocklistConfig_.emplace(item.key(), std::move(currentBlockList));
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        extensionBlocklist_.emplace(type, std::move(currentBlockList));
         currentBlockList.clear();
+        break;
     }
     inFile.close();
-    TAG_LOGD(AAFwkTag::EXT, "Init end");
-}
-
-void ExtensionConfigMgr::AddBlockListItem(const std::string& name, int32_t type)
-{
-    TAG_LOGD(AAFwkTag::EXT, "name: %{public}s, type: %{public}d", name.c_str(), type);
-    auto iter = blocklistConfig_.find(name);
-    if (iter == blocklistConfig_.end()) {
-        TAG_LOGD(AAFwkTag::EXT, "Extension name: %{public}s not exist", name.c_str());
-        return;
-    }
-    extensionBlocklist_.emplace(type, iter->second);
 }
 
 void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
@@ -92,15 +87,21 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
         return;
     }
     TAG_LOGD(AAFwkTag::EXT, "extensionType_: %{public}d", extensionType_);
+
     if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
         TAG_LOGD(AAFwkTag::EXT, "ets runtime");
         GenerateExtensionEtsBlocklists();
         SetExtensionEtsCheckCallback(runtime);
     }
 
-    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, extensionBlocklist_);
+    std::unordered_map<int32_t, std::unordered_set<std::string>> localBlocklist;
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        localBlocklist = extensionBlocklist_;
+    }
+
+    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, localBlocklist);
     runtime->SetModuleLoadChecker(moduleChecker);
-    extensionBlocklist_.clear();
 }
 
 void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
@@ -109,12 +110,20 @@ void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
         TAG_LOGD(AAFwkTag::EXT, "extension ets block list not empty.");
         return;
     }
-    auto iter = extensionBlocklist_.find(extensionType_);
-    if (iter == extensionBlocklist_.end()) {
-        TAG_LOGD(AAFwkTag::EXT, "null extension block, extensionType: %{public}d.", extensionType_);
-        return;
+
+    // Access extensionBlocklist_ with lock protection
+    std::unordered_set<std::string> targetBlocklist;
+    {
+        std::lock_guard<std::mutex> lock(extensionBlockListMutex_);
+        auto iter = extensionBlocklist_.find(extensionType_);
+        if (iter == extensionBlocklist_.end()) {
+            TAG_LOGW(AAFwkTag::EXT, "No blocklist found for extensionType: %{public}d", extensionType_);
+            return;
+        }
+        targetBlocklist = iter->second;
     }
-    for (const auto& module: iter->second) {
+
+    for (const auto& module: targetBlocklist) {
         extensionEtsBlocklist_.emplace(module);
     }
 }
