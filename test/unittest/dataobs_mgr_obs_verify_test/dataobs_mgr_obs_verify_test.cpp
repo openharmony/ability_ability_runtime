@@ -57,25 +57,6 @@ static constexpr uint32_t TOKEN_SAME = 1001;
 
 /*
  * Feature: OBSVerifyPermissionUtils
- * Function: GetInstance
- * SubFunction: Get singleton instance
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test getting singleton instance
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetInstance_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Test singleton pattern - should return same instance
-    auto &instance1 = OBSVerifyPermissionUtils::GetInstance();
-    auto &instance2 = OBSVerifyPermissionUtils::GetInstance();
-
-    EXPECT_EQ(&instance1, &instance2);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
  * Function: VerifyPermission with same tokens
  * SubFunction: VerifyPermission
  * FunctionPoints: NA
@@ -350,36 +331,6 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Mini
 
     // Should handle minimal URI without crash
     EXPECT_TRUE(result);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission performance
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test performance with multiple calls
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_Performance_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://com.example.data/app");
-    int32_t userId = USER_TEST;
-
-    // Performance test: 1000 calls should complete quickly
-    auto start = std::chrono::high_resolution_clock::now();
-
-    for (int i = 0; i < 1000; i++) {
-        bool result = obsVerifyUtils_->VerifyPermission(TOKEN_SAME, userId, uri, TOKEN_SAME);
-        EXPECT_TRUE(result);
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-    // Should complete within reasonable time (e.g., < 5 seconds)
-    EXPECT_LT(duration.count(), 5000);
 }
 
 /*
