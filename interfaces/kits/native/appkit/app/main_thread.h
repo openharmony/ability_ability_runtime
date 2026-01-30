@@ -662,20 +662,7 @@ private:
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
 
-    /**
-     * @brief Set current process extension type
-     *
-     * @param abilityRecord current running ability record
-     */
-    void SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
-
-    /**
-     * @brief Add Extension block item
-     *
-     * @param extensionName extension name
-     * @param type extension type
-     */
-    void AddExtensionBlockItem(const std::string &extensionName, int32_t type);
+    void LoadExtensionBlockList(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
 
     /**
      * @brief Update runtime module checker
