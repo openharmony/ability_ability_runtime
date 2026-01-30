@@ -43,6 +43,7 @@ AppHybridSpawnManager &AppHybridSpawnManager::GetInstance()
 static void ProcessSignalData(void *token, uint32_t event)
 {
     int rFd = AppHybridSpawnManager::GetInstance().GetHRfd();
+    fdsan_exchange_owner_tag(rFd, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     if (rFd <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "rFd is invalid, %{public}d", rFd);
         return;
@@ -55,7 +56,7 @@ static void ProcessSignalData(void *token, uint32_t event)
         TAG_LOGE(AAFwkTag::APPMGR, "read pipe failed");
     } else if (count == 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "write end closed");
-        close(rFd);
+        fdsan_close_with_tag(rFd, static_cast<uint32_t>(AAFwkTag::APPMGR));
     } else {
         int32_t pid = -1;
         int32_t signal = -1;
@@ -122,29 +123,31 @@ void AppHybridSpawnManager::InitHybridSpawnMsgPipe(std::weak_ptr<AppMgrServiceIn
     }
     hrFd_ = pipeFd[0];
     hwFd_ = pipeFd[1];
+    fdsan_exchange_owner_tag(hrFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(hwFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     TAG_LOGI(AAFwkTag::APPMGR, "hrFd is: %{public}d, hwFd is: %{public}d", hrFd_, hwFd_);
 
     // send fd
     int ret = HybridSpawnListenFdSet(hwFd_);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "send fd to hybridspawn failed, ret: %{public}d", ret);
-        close(hrFd_);
-        close(hwFd_);
+        fdsan_close_with_tag(hrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(hwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     ret = WatchParameter(HYBRIDSPAWN_EXIT, HybridSpawnExitCallback, nullptr);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "watch parameter ret: %{public}d", ret);
-        close(hrFd_);
-        close(hwFd_);
+        fdsan_close_with_tag(hrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(hwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     ffrt_qos_t taskQos = 0;
     ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, hrFd_, EPOLLIN, nullptr, ProcessSignalData);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "ffrt_epoll_ctl failed, ret: %{public}d", ret);
-        close(hrFd_);
-        close(hwFd_);
+        fdsan_close_with_tag(hrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(hwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "Listen signal msg ...");
