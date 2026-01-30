@@ -88,7 +88,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level2)
  */
 HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0100, TestSize.Level2)
 {
-JsModuleReader jsModuleReader("JsModuleReader", "");
+    JsModuleReader jsModuleReader("JsModuleReader", "");
     bool needFindPluginHsp = true;
     std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "", needFindPluginHsp);
     EXPECT_TRUE(hapPath.empty());
@@ -101,7 +101,7 @@ JsModuleReader jsModuleReader("JsModuleReader", "");
  */
 HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0200, TestSize.Level2)
 {
-JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
+    JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
     bool needFindPluginHsp = true;
     std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "", needFindPluginHsp);
     EXPECT_TRUE(hapPath.empty());
