@@ -154,7 +154,9 @@
           "//foundation/ability/ability_runtime/services/abilitymgr/etc:appfwk_etc",
           "//foundation/ability/ability_runtime/services/dialog_ui/ams_system_dialog:dialog_hap",
           "//foundation/ability/ability_runtime/service_router_framework:srms_target",
-          "//foundation/ability/ability_runtime/service_router_framework:jsapi_target"
+          "//foundation/ability/ability_runtime/service_router_framework:jsapi_target",
+          "//foundation/ability/ability_runtime/agent_runtime_framework/frameworks/js/napi:agent_runtime_napi_packages",
+          "//foundation/ability/ability_runtime/agent_runtime_framework/frameworks/native/agent_extension:agent_extension_module"
         ],
         "inner_api": [
           {
