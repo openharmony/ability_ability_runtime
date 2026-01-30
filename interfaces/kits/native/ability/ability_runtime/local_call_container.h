@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ public:
      * @brief Remove caller connection from container
      * @param connection The connection to remove
      */
-    void RemoveCallerConnection(const sptr<CallerConnection> &connection);
+    void RemoveCallerConnection(sptr<CallerConnection> connection);
 
 private:
     bool GetCallLocalRecord(const AppExecFwk::ElementName &elementName,
