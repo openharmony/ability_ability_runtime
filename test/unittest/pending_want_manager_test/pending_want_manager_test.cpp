@@ -44,9 +44,13 @@ using OHOS::AppExecFwk::ElementName;
 
 namespace OHOS {
 namespace AAFwk {
-#define SLEEP(milli) std::this_thread::sleep_for(std::chrono::seconds(milli))
 
-namespace {}  // namespace
+namespace {
+inline void Sleep(int64_t milli)
+{
+    std::this_thread::sleep_for(std::chrono::seconds(milli));
+}
+}  // namespace
 class PendingWantManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
