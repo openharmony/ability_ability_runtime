@@ -29,6 +29,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace {
 constexpr size_t STRING_MAX_LENGTH = 128;
+constexpr size_t U32_AT_SIZE = 4;
 }
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
@@ -51,12 +52,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    uint32_t versionCode = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     profileInfos.insightIntents.push_back(info);
     AbilityFuzzUtil::GetRandomExtractInsightIntentGenericInfo(fdp, genericInfo);
     AbilityFuzzUtil::GetRandomExtractInsightIntentInfo(fdp, intentInfo);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->InitInsightIntentCache(userId);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName, moduleName,
-        userId, profileInfos, configIntentInfos);
+        userId, versionCode, profileInfos, configIntentInfos);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(bundleName, moduleName,
         userId);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->DeleteInsightIntentByUserId(userId);

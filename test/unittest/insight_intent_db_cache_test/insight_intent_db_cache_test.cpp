@@ -74,14 +74,14 @@ HWTEST_F(InsightIntentDbCacheTest, InsightIntentDbCacheTest_001, TestSize.Level0
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->InitInsightIntentCache(userId);
     MockSaveData(false);
     auto result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, 100, profileInfos, configInfos);
+        moduleName, 100, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     MockSaveData(true);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_OK);
 
 
@@ -121,7 +121,7 @@ HWTEST_F(InsightIntentDbCacheTest, InsightIntentDbCacheTest_002, TestSize.Level0
     EXPECT_EQ(result, ERR_OK);
     moduleName = "qwe";
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(bundleName,
         moduleName, userId);
     EXPECT_EQ(result, ERR_OK);
@@ -156,14 +156,14 @@ HWTEST_F(InsightIntentDbCacheTest, InsightIntentDbCacheTest_003, TestSize.Level0
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->InitInsightIntentCache(userId);
     MockSaveData(false);
     auto result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, 100, profileInfos, configInfos);
+        moduleName, 100, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     MockSaveData(true);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_OK);
         std::vector<InsightIntentInfo> configInfos1;
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetConfigInsightIntentInfoByName(bundleName,
@@ -209,15 +209,15 @@ HWTEST_F(InsightIntentDbCacheTest, InsightIntentDbCacheTest_004, TestSize.Level0
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->InitInsightIntentCache(userId);
     MockSaveData(false);
     auto result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, 100, profileInfos, configInfos);
+        moduleName, 100, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     DelayedSingleton<InsightIntentDbCache>::GetInstance()->BackupRdb();
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     MockSaveData(true);
     result = DelayedSingleton<InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, profileInfos, configInfos);
+        moduleName, userId, 0, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_OK);
 
     std::vector<ExtractInsightIntentGenericInfo> genericInfos;
