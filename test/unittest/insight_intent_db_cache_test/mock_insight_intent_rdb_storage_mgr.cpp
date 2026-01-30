@@ -88,6 +88,7 @@ InsightRdbStorageMgr::~InsightRdbStorageMgr()
 }
 
 int32_t  InsightRdbStorageMgr::LoadInsightIntentInfos(const int32_t userId,
+    std::map<std::string, std::string> &bundleVersionMap,
     std::vector<ExtractInsightIntentInfo> &totalInfos, std::vector<InsightIntentInfo> &configInfos)
 {
     ExtractInsightIntentInfo totalInfo;
@@ -147,8 +148,8 @@ int32_t  InsightRdbStorageMgr::LoadInsightIntentInfo(const std::string &bundleNa
 }
 
 int32_t  InsightRdbStorageMgr::SaveStorageInsightIntentData(const std::string &bundleName,
-    const std::string &moduleName, const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos,
-    std::vector<InsightIntentInfo> &configInfos)
+    const std::string &moduleName, const int32_t userId, uint32_t versionCode,
+    ExtractInsightIntentProfileInfoVec &profileInfos, std::vector<InsightIntentInfo> &configInfos)
 {
     if (g_mockSaveStorageInsightIntentDataRet) {
         return ERR_OK;
