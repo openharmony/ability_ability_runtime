@@ -36,17 +36,21 @@ public:
 void DataObsMgrClientTest::SetUpTestCase(void)
 {}
 void DataObsMgrClientTest::TearDownTestCase(void)
-{
-    auto client = DataObsMgrClient::GetInstance();
-    if (client != nullptr) {
-        client->observers_.Clear();
-        client->observerExts_.Clear();
-    }
-}
+{}
 void DataObsMgrClientTest::SetUp()
 {}
 void DataObsMgrClientTest::TearDown()
-{}
+{
+    auto client = DataObsMgrClient::GetInstance();
+    if (client != nullptr) {
+        // Clear the maps to prevent state pollution between test cases
+        client->observers_.Clear();
+        client->observerExts_.Clear();
+        // Also reset dataObsManger_ to null so ReRegister() won't try to re-register
+        // when OnAddSystemAbility is triggered asynchronously during program exit
+        client->dataObsManger_ = nullptr;
+    }
+}
 
 /*
  * Feature: DataObsMgrClient.
