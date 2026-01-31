@@ -18,7 +18,7 @@
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
-#include "obs_verify_permission_utils.h"
+#include "obs_permission_verifier.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -131,8 +131,7 @@ int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId, uint
                 userId, obs.userId_, CommonUtils::Anonymous(uri.ToString()).c_str());
             continue;
         }
-        Uri uriTemp = uri;
-        if (!OBSVerifyPermissionUtils::GetInstance().VerifyPermission(obs.tokenId_, obs.userId_, uriTemp, tokenId)) {
+        if (!ObsPermissionVerifier::GetInstance().VerifyPermission(obs.tokenId_, obs.userId_, uri, tokenId)) {
             continue;
         }
         obs.observer_->OnChangePreferences(const_cast<Uri &>(uri).GetQuery());

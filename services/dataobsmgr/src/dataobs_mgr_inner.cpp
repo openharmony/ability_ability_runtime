@@ -20,7 +20,7 @@
 #include "datashare_errno.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
-#include "obs_verify_permission_utils.h"
+#include "obs_permission_verifier.h"
 #include <string>
 namespace OHOS {
 namespace AAFwk {
@@ -127,8 +127,8 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
             continue;
         }
         uint32_t token = obs.tokenId_;
-        if (uriTemp.GetScheme() == OBSVerifyPermissionUtils::RELATIONAL_STORE) {
-            if (!OBSVerifyPermissionUtils::GetInstance().VerifyPermission(token, userId, uriTemp, tokenId)) {
+        if (uriTemp.GetScheme() == ObsPermissionVerifier::RELATIONAL_STORE) {
+            if (!ObsPermissionVerifier::GetInstance().VerifyPermission(token, userId, uriTemp, tokenId)) {
                 continue;
             }
         } else {

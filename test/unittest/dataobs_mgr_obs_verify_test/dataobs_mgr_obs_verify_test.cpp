@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 // NOLINTNEXTLINE(g.nam.03-cpp): Redefining C++ keyword 'private' for unit testing
 #define private public
 
-#include "obs_verify_permission_utils.h"
+#include "obs_permission_verifier.h"
 #include "hilog_tag_wrapper.h"
 
 using namespace OHOS;
@@ -39,14 +39,14 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    OBSVerifyPermissionUtils *obsVerifyUtils_ = nullptr;
+    ObsPermissionVerifier *obsVerifyUtils_ = nullptr;
 };
 
 void DataObsMgrObsVerifyTest::SetUpTestCase(void) {}
 void DataObsMgrObsVerifyTest::TearDownTestCase(void) {}
 void DataObsMgrObsVerifyTest::SetUp()
 {
-    obsVerifyUtils_ = &OBSVerifyPermissionUtils::GetInstance();
+    obsVerifyUtils_ = &ObsPermissionVerifier::GetInstance();
 }
 void DataObsMgrObsVerifyTest::TearDown() {}
 
@@ -234,8 +234,8 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_CacheSizeThreshold_01
 {
     ASSERT_TRUE(obsVerifyUtils_ != nullptr);
 
-    // Cache size threshold should be 200 as defined in header
-    constexpr int32_t expectedThreshold = 200;
+    // Cache size threshold should be 50 as defined in header
+    constexpr int32_t expectedThreshold = 50;
     EXPECT_EQ(obsVerifyUtils_->CACHE_SIZE_THRESHOLD, expectedThreshold);
 }
 
@@ -344,7 +344,7 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Mini
 HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_RelationalStore_0100, TestSize.Level0)
 {
     // Test that RELATIONAL_STORE constant is correct
-    std::string_view rdb = OBSVerifyPermissionUtils::RELATIONAL_STORE;
+    std::string_view rdb = ObsPermissionVerifier::RELATIONAL_STORE;
     EXPECT_EQ(rdb, "rdb");
 }
 
