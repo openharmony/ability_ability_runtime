@@ -651,6 +651,10 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
     }
+    if (specifiedFullTokenId != 0 && IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "specifiedFullTokenId only support for DMS");
+        specifiedFullTokenId = 0;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS_IGNORE(__PRETTY_FUNCTION__, !want.GetElement().GetDeviceID().empty());
     bool isDebugApp = want.GetBoolParam(AbilityConfig::DEBUG_APP, false);
@@ -721,6 +725,10 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
 int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, int requestCode, uint64_t specifiedFullTokenId)
 {
+    if (specifiedFullTokenId != 0 && IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "specifiedFullTokenId only support for DMS");
+        specifiedFullTokenId = 0;
+    }
     StartAbilityWrapParam param = {
         .want = want,
         .callerToken = callerToken,
@@ -5245,6 +5253,10 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
+    }
+    if (specifiedFullTokenId != 0 && IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "specifiedFullTokenId only support for DMS");
+        specifiedFullTokenId = 0;
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS_IGNORE(__PRETTY_FUNCTION__, !want.GetElement().GetDeviceID().empty());
