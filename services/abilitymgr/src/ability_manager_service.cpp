@@ -534,6 +534,7 @@ void AbilityManagerService::InitInterceptor()
 void AbilityManagerService::InitInterceptorForScreenUnlock()
 {
     if (interceptorExecuter_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, begin");
         interceptorExecuter_->AddInterceptor("ScreenUnlock", std::make_shared<ScreenUnlockInterceptor>());
     }
 }
@@ -8990,6 +8991,7 @@ void AbilityManagerService::SubscribeUserUnlockedEvent()
     if (!subResult) {
         RetrySubscribeUnlockedEvent(RETRY_COUNT, userUnlockSubscriber_, true);
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, subscribe uu suc");
 }
 
 void AbilityManagerService::SubscribeScreenUnlockedEvent()
@@ -9012,6 +9014,7 @@ void AbilityManagerService::SubscribeScreenUnlockedEvent()
         RetrySubscribeUnlockedEvent(RETRY_COUNT, screenSubscriber_);
         return;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, subscribe su suc");
     isSubscribed_ = true;
 }
 
@@ -9097,6 +9100,7 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
             if (!isUserUnlock) {
                 obj->isSubscribed_ = true;
             }
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, subscribe suc:%{public}d", isUserUnlock);
             return;
         }
         if (retryCount > 0) {
@@ -9112,6 +9116,7 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
 void AbilityManagerService::RemoveScreenUnlockInterceptor()
 {
     if (interceptorExecuter_ != nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, end");
         interceptorExecuter_->RemoveInterceptor("ScreenUnlock");
     }
 }
