@@ -37,8 +37,6 @@ void DataObsMgrClientTest::SetUpTestCase(void)
 {}
 void DataObsMgrClientTest::TearDownTestCase(void)
 {
-    // Clean up observers in the singleton to prevent accessing destroyed mock objects
-    // during program exit when IPC threads may still be active
     auto client = DataObsMgrClient::GetInstance();
     if (client != nullptr) {
         client->observers_.Clear();
@@ -92,6 +90,7 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_Call_Service_0100, TestSize.Leve
     EXPECT_EQ(service->onChangeCall_, 7);
 
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack);
 }
 
 /*
@@ -128,6 +127,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0100, TestSiz
     client->ReRegister();
     EXPECT_EQ(service2->onChangeCall_, 2);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 /*
@@ -164,6 +165,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0200, TestSiz
     client->ReRegister();
     EXPECT_EQ(service2->onChangeCall_, 2);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 /*
@@ -200,6 +203,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0300, TestSiz
     client->OnRemoteDied();
     EXPECT_EQ(service2->onChangeCall_, 0);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 }  // namespace AAFwk
