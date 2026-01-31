@@ -29,6 +29,8 @@ public:
     static int retGetAgentCardsByBundleName;
     static int retGetAgentCardByAgentId;
     static int retToAgentCardVec;
+    static int retConnectAgentExtensionAbility;
+    static int retDisconnectAgentExtensionAbility;
     static std::vector<AgentCard> convertedCards;
     static bool nullSystemAbility;
     static int retLoadSystemAbility;
