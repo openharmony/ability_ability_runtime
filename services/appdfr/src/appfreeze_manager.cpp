@@ -846,6 +846,7 @@ int AppfreezeManager::GetReportTimes(const std::string& key)
     auto it = appfreezeInfo_.find(key);
     if (it != appfreezeInfo_.end()) {
         reportTimes += it->second.reportTimes;
+        appfreezeInfo_[key].reportTimes = reportTimes;
     }
     return reportTimes;
 }
@@ -897,13 +898,12 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(const std::string& key, const std
     if (state == AppFreezeState::APPFREEZE_STATE_FREEZE) {
         auto diff = GetFreezeCurrentTime() - GetLastOccurTime(key);
         int reportTimes = GetReportTimes(key);
-        if (diff >= FREEZE_TIME_LIMIT || reportTimes <= maxReportTimes) {
-            TAG_LOGW(AAFwkTag::APPDFR, "durationTime: %{public}" PRId64 " eventName: %{public}s "
-                "reportTimes: %{public}d key: %{public}s",
-                diff, eventName.c_str(), reportTimes, key.c_str());
-            return false;
+        TAG_LOGW(AAFwkTag::APPDFR, "durationTime: %{public}" PRId64 " eventName: %{public}s "
+            "reportTimes: %{public}d key: %{public}s",
+            diff, eventName.c_str(), reportTimes, key.c_str());
+        if (diff >= 0 && diff <= FREEZE_TIME_LIMIT) {
+            return reportTimes > maxReportTimes;
         }
-        return true;
     }
     SetFreezeState(key, AppFreezeState::APPFREEZE_STATE_FREEZE, eventName);
     TAG_LOGI(AAFwkTag::APPDFR, "Set freeze info, eventName: %{public}s key: %{public}s",
