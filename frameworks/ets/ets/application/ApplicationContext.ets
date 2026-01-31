@@ -25,6 +25,7 @@ import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import type ApplicationStateChangeCallback from '@ohos.app.ability.ApplicationStateChangeCallback';
 import { AbilityUtils } from '../utils/AbilityUtils';
+import systemConfiguration from '../@ohos.app.ability.systemConfiguration';
 
 class Cleaner {
   public ptr: long = 0;
@@ -87,6 +88,8 @@ export default class ApplicationContext extends Context {
   public native nativeOffEnvironmentSync(callbackId: int, callback: AsyncCallbackWrapper<void>): void;
   public native nativeOffEnvironmentCheck(): void;
   public native nativeOnApplicationStateChangeSync(callback: ApplicationStateChangeCallback): void;
+  public native nativeOnSystemConfigurationUpdatedSync(callback: systemConfiguration.UpdatedCallback): void;
+  public native nativeOffSystemConfigurationUpdatedSync(callback: systemConfiguration.UpdatedCallback): void;
   public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
   public native nativegetCurrentAppCloneIndex(): int;
   public native nativegetCurrentInstanceKey(): string;
@@ -318,6 +321,14 @@ export default class ApplicationContext extends Context {
 
   onApplicationStateChange(callback: ApplicationStateChangeCallback): void {
     this.nativeOnApplicationStateChangeSync(callback);
+  }
+
+  onSystemConfigurationUpdated(callback: systemConfiguration.UpdatedCallback): void {
+    this.nativeOnSystemConfigurationUpdatedSync(callback);
+  }
+
+  offSystemConfigurationUpdated(callback: systemConfiguration.UpdatedCallback): void {
+    this.nativeOffSystemConfigurationUpdatedSync(callback);
   }
 
   offApplicationStateChange(callback?: ApplicationStateChangeCallback): void {
