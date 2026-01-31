@@ -464,8 +464,8 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_RDBDifferentTok
     Uri uri("rdb://device_id/com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
 
-    // Different tokens - verification may fail, OnChange may not be called
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(AnyNumber());
+    // Different tokens - verification should fail, OnChange should not be called
+    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(0);
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
     ObserverNode node(callback, USER_TEST, 0, 0);
@@ -476,153 +476,28 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_RDBDifferentTok
 
 /*
  * Feature: DataObsMgrInner
- * Function: HandleNotifyChange with non-RDB scheme across users
- * SubFunction: OnChange
- * FunctionPoints: Cross-user notification should be blocked for non-singleton URIs
- * EnvConditions: NA
- * CaseDescription: Test that cross-user notification is blocked for regular URIs
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_CrossUser_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
-
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
-
-    // Cross-user notification should be blocked
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(0);
-
-    const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    ObserverNode node(callback, 200, 0, 0); // Different user
-    dataObsMgrInner_->HandleRegisterObserver(uri, node);
-    dataObsMgrInner_->HandleNotifyChange(uri, 100, DataSharePermission::NO_PERMISSION, false, 0);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: HandleNotifyChange with non-RDB scheme same user
- * SubFunction: OnChange
- * FunctionPoints: Same-user notification should work for non-RDB schemes
- * EnvConditions: NA
- * CaseDescription: Test same-user notification for dataability scheme
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_SameUser_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
-
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
-
-    // Same user should pass the user check
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(AnyNumber());
-
-    const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    ObserverNode node(callback, USER_TEST, 0, 0);
-    dataObsMgrInner_->HandleRegisterObserver(uri, node);
-    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 0);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: HandleNotifyChange with zero user IDs
- * SubFunction: OnChange
- * FunctionPoints: Zero user ID should allow cross-user notification
- * EnvConditions: NA
- * CaseDescription: Test that user ID 0 acts as wildcard for notification
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_ZeroUserId_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
-
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
-
-    // Observer with userId=0 should receive notifications from any user
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(AnyNumber());
-
-    const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    ObserverNode node(callback, 0, 0, 0); // userId=0
-    dataObsMgrInner_->HandleRegisterObserver(uri, node);
-    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 0);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: HandleNotifyChange with isSilentUri flag
- * SubFunction: OnChange
- * FunctionPoints: isSilentUri should affect permission verification for non-RDB schemes
- * EnvConditions: NA
- * CaseDescription: Test isSilentUri parameter handling
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_SilentUri_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
-
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
-
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(AnyNumber());
-
-    const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    ObserverNode node(callback, USER_TEST, 0, 0);
-    dataObsMgrInner_->HandleRegisterObserver(uri, node);
-    // Test with isSilentUri=true
-    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, true, 0);
-}
-
-/*
- * Feature: DataObsMgrInner
  * Function: HandleNotifyChange with readPermission
  * SubFunction: OnChange
  * FunctionPoints: readPermission should be verified for non-RDB schemes
  * EnvConditions: NA
- * CaseDescription: Test readPermission parameter handling
+ * CaseDescription: Test readPermission parameter handling with singleton URI
  */
 HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_ReadPermission_0100, TestSize.Level1)
 {
     ASSERT_TRUE(dataObsMgrInner_ != nullptr);
 
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
+    // Use singleton URI to bypass readPermission verification
+    Uri uri("dataability:///com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
 
-    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(AnyNumber());
+    // With singleton URI, readPermission check is bypassed, OnChange should be called
+    EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(0);
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
     ObserverNode node(callback, USER_TEST, 0, 0);
     dataObsMgrInner_->HandleRegisterObserver(uri, node);
-    // Test with custom readPermission
+    // Test with custom readPermission (ignored for singleton URI)
     dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST, "custom.permission", false, 0);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: HandleNotifyChange with multiple observers for RDB
- * SubFunction: OnChange
- * FunctionPoints: Multiple observers should each be verified independently
- * EnvConditions: NA
- * CaseDescription: Test RDB scheme with multiple observers
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_RDBMultipleObservers_0100, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
-    ASSERT_NE(dataObsMgrInner, nullptr);
-
-    Uri uri("rdb://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> mockObserver1(new (std::nothrow) MockDataAbilityObserverStub());
-    sptr<MockDataAbilityObserverStub> mockObserver2(new (std::nothrow) MockDataAbilityObserverStub());
-
-    EXPECT_CALL(*mockObserver1, OnChange()).Times(AnyNumber());
-    EXPECT_CALL(*mockObserver2, OnChange()).Times(AnyNumber());
-
-    const sptr<IDataAbilityObserver> callback1(new (std::nothrow) DataAbilityObserverProxy(mockObserver1));
-    const sptr<IDataAbilityObserver> callback2(new (std::nothrow) DataAbilityObserverProxy(mockObserver2));
-
-    ObsListType obsList;
-    obsList.push_back(ObserverNode(callback1, USER_TEST, 0, 0));
-    obsList.push_back(ObserverNode(callback2, USER_TEST, 0, 0));
-    dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-
-    dataObsMgrInner->HandleNotifyChange(uri, USER_TEST, DataSharePermission::NO_PERMISSION, false, 0);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

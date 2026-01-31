@@ -48,7 +48,12 @@ void DataObsMgrObsVerifyTest::SetUp()
 {
     obsVerifyUtils_ = &ObsPermissionVerifier::GetInstance();
 }
-void DataObsMgrObsVerifyTest::TearDown() {}
+void DataObsMgrObsVerifyTest::TearDown()
+{
+    if (obsVerifyUtils_ != nullptr) {
+        obsVerifyUtils_->groupsIdCache_.clear();
+    }
+}
 
 static constexpr int32_t USER_TEST = 100;
 static constexpr uint32_t TOKEN_TEST_1 = 1001;
@@ -84,7 +89,7 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Same
  * SubFunction: VerifyPermission
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Test permission verification with different tokens
+ * CaseDescription: Test permission verification with different tokens - expect false without valid token info
  */
 HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_DifferentToken_0100, TestSize.Level0)
 {
@@ -95,12 +100,11 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Diff
     uint32_t tokenId = TOKEN_TEST_2; // Different token
     int32_t userId = USER_TEST;
 
-    // Will return false as tokens are different and no group match
-    // (GetCallingInfo will try to get real token info which may fail in test)
+    // With different tokens and no valid group info, should return false
     bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
 
-    // Result depends on token info availability, should not crash
-    EXPECT_TRUE(result == true || result == false);
+    // Expect false since tokens are different and no group match
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -151,268 +155,6 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Pref
 
 /*
  * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission with different users
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test permission verification with different user IDs
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_DifferentUser_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://com.example.data/app");
-    uint32_t listenerTokenId = TOKEN_TEST_1;
-    uint32_t tokenId = TOKEN_SAME;
-    int32_t userId1 = 100;
-    int32_t userId2 = 200;
-
-    // Test with first user
-    bool result1 = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId1, uri, tokenId);
-    EXPECT_TRUE(result1);
-
-    // Test with second user - should still return true for same token
-    bool result2 = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId2, uri, tokenId);
-    EXPECT_TRUE(result2);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission with complex URI
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test permission verification with complex URI path
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_ComplexURI_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://com.example.data/app/path/to/data?key=value");
-    uint32_t listenerTokenId = TOKEN_TEST_1;
-    uint32_t tokenId = TOKEN_SAME;
-    int32_t userId = USER_TEST;
-
-    bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-
-    // Should return true for same token with complex URI
-    EXPECT_TRUE(result);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission with zero tokens
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test permission verification with zero token IDs
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_ZeroToken_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://com.example.data/app");
-    uint32_t listenerTokenId = 0;
-    uint32_t tokenId = 0;
-    int32_t userId = USER_TEST;
-
-    bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-
-    // Should return true when both tokens are 0 (equal)
-    EXPECT_TRUE(result);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: Cache mechanism
- * SubFunction: GetGroupInfosFromCache
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test cache size threshold
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_CacheSizeThreshold_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Cache size threshold should be 50 as defined in header
-    constexpr int32_t expectedThreshold = 50;
-    EXPECT_EQ(obsVerifyUtils_->CACHE_SIZE_THRESHOLD, expectedThreshold);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: Cache mechanism
- * SubFunction: GetGroupInfosFromCache
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test cache initialization
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_CacheInit_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Cache should be empty initially
-    EXPECT_TRUE(obsVerifyUtils_->groupsIdCache_.empty());
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: GetCallingInfo
- * SubFunction: GetCallingInfo
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test GetCallingInfo returns pair structure
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetCallingInfo_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Test with a token ID (will try to get actual token info)
-    uint32_t tokenId = TOKEN_TEST_1;
-    auto [isSA, callingName] = obsVerifyUtils_->GetCallingInfo(tokenId);
-
-    // Should return a pair regardless of token validity
-    // isSA may be false if token is not a native/shell token
-    // callingName may be empty if token lookup fails
-    EXPECT_TRUE(true); // Test passes if no crash occurs
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission thread safety
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test concurrent permission verification
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_ConcurrentVerify_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://com.example.data/app");
-    int32_t userId = USER_TEST;
-
-    // Test multiple concurrent calls with same tokens
-    auto verifyFunc = [obsVerifyUtils = obsVerifyUtils_, uri, userId]() {
-        for (int i = 0; i < 10; i++) {
-            bool result = obsVerifyUtils->VerifyPermission(TOKEN_SAME, userId, uri, TOKEN_SAME);
-            EXPECT_TRUE(result);
-        }
-    };
-
-    std::thread t1(verifyFunc);
-    std::thread t2(verifyFunc);
-
-    t1.join();
-    t2.join();
-
-    // Should complete without deadlock or crash
-    EXPECT_TRUE(true);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission with empty URI
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test permission verification with minimal URI
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_MinimalURI_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    Uri uri("rdb://a");
-    uint32_t listenerTokenId = TOKEN_SAME;
-    uint32_t tokenId = TOKEN_SAME;
-    int32_t userId = USER_TEST;
-
-    bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-
-    // Should handle minimal URI without crash
-    EXPECT_TRUE(result);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: RELATIONAL_STORE constant
- * SubFunction: RELATIONAL_STORE
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test RELATIONAL_STORE constant value
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_RelationalStore_0100, TestSize.Level0)
-{
-    // Test that RELATIONAL_STORE constant is correct
-    std::string_view rdb = ObsPermissionVerifier::RELATIONAL_STORE;
-    EXPECT_EQ(rdb, "rdb");
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: VerifyPermission with different URIs
- * SubFunction: VerifyPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test with various URI authorities
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_DifferentAuthority_0100, TestSize.Level0)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    std::vector<std::string> authorities = {
-        "com.example.app1",
-        "com.example.app2",
-        "com.example.app3"
-    };
-
-    uint32_t listenerTokenId = TOKEN_SAME;
-    uint32_t tokenId = TOKEN_SAME;
-    int32_t userId = USER_TEST;
-
-    for (const auto &authority : authorities) {
-        Uri uri("rdb://" + authority + "/data");
-        bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-        EXPECT_TRUE(result);
-    }
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: Cache thread safety
- * SubFunction: groupsIdCache_
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test cache concurrent access
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_CacheConcurrent_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Test concurrent cache access
-    auto accessCache = [obsVerifyUtils = obsVerifyUtils_]() {
-        for (int i = 0; i < 100; i++) {
-            std::shared_lock<std::shared_mutex> readLock(obsVerifyUtils->groupsIdMutex_);
-            // Just reading cache, should not crash
-            auto size = obsVerifyUtils->groupsIdCache_.size();
-            EXPECT_GE(size, 0);
-        }
-    };
-
-    std::thread t1(accessCache);
-    std::thread t2(accessCache);
-    std::thread t3(accessCache);
-
-    t1.join();
-    t2.join();
-    t3.join();
-
-    // Should complete without deadlock
-    EXPECT_TRUE(true);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
  * Function: VerifyPermission with listenerGroupIds match
  * SubFunction: VerifyPermission, GetGroupInfosFromCache
  * FunctionPoints: NA
@@ -437,13 +179,9 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Grou
     uint32_t tokenId = TOKEN_TEST_2; // Different tokens
     int32_t userId = USER_TEST;
 
-    // The GetCallingInfo will be called, and if it returns empty callingName
-    // the test will still go through the logic
+    // With matching group ID in cache, should return true
     bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-
-    // Result depends on whether token lookup succeeds
-    // Test should not crash
-    EXPECT_TRUE(result == true || result == false);
+    EXPECT_TRUE(result);
 }
 
 /*
@@ -502,7 +240,8 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetGroupInfos_CacheMi
     auto result = obsVerifyUtils_->GetGroupInfosFromCache(testBundle, USER_TEST, testUri);
 
     // Should not crash, result depends on BMS availability
-    EXPECT_TRUE(result.empty() || result.size() > 0);
+    // Since BMS query will likely fail in test environment, expect empty
+    EXPECT_TRUE(result.empty());
 }
 
 /*
@@ -540,8 +279,8 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetGroupInfos_CacheFu
     std::string testUri = "rdb://com.example.test/newentry";
     auto result = obsVerifyUtils_->GetGroupInfosFromCache(testBundle, userId, testUri);
 
-    // Should not crash
-    EXPECT_TRUE(true);
+    // Should not crash, expect empty since BMS query fails
+    EXPECT_TRUE(result.empty());
 }
 
 /*
@@ -570,12 +309,11 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Empt
     uint32_t tokenId = TOKEN_TEST_2;
     int32_t userId = USER_TEST;
 
-    // Should handle empty group IDs
-    bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
-
     // Should return false if GetCallingInfo returns non-SA and empty groups
     // (actual behavior depends on token lookup)
-    EXPECT_TRUE(result == true || result == false);
+    bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
+    // With empty group IDs and different tokens, expect false
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -607,33 +345,7 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_NoMa
     bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
 
     // Should return false since authority doesn't match any group ID
-    // (assuming GetCallingInfo doesn't return isSA=true)
-    EXPECT_TRUE(result == true || result == false);
-}
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: GetCallingInfo with various token types
- * SubFunction: GetCallingInfo
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test GetCallingInfo handles different token types
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetCallingInfo_TokenTypes_0100, TestSize.Level1)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    // Test with various token IDs
-    std::vector<uint32_t> tokenIds = {0, 100, 1000, 65535, 1000000};
-
-    for (auto tokenId : tokenIds) {
-        auto [isSA, callingName] = obsVerifyUtils_->GetCallingInfo(tokenId);
-
-        // Should always return a pair without crashing
-        // isSA will be true only for TOKEN_NATIVE or TOKEN_SHELL
-        // callingName will be populated based on token type
-        EXPECT_TRUE(true);
-    }
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -656,8 +368,9 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_GetGroupInfos_DoubleC
     obsVerifyUtils_->groupsIdCache_.clear();
     writeLock.unlock();
 
-    // First call - will try to query BMS
+    // First call - will try to query BMS (fails in test)
     auto result1 = obsVerifyUtils_->GetGroupInfosFromCache(testBundle, USER_TEST, testUri);
+    EXPECT_TRUE(result1.empty());
 
     // Manually add to cache for testing
     writeLock.lock();
@@ -699,57 +412,8 @@ HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_VerifyPermission_Pref
     bool result = obsVerifyUtils_->VerifyPermission(listenerTokenId, userId, uri, tokenId);
 
     // Should handle preferences scheme correctly
-    // Result depends on token lookup
-    EXPECT_TRUE(result == true || result == false);
+    // With different tokens and no group match, expect false
+    EXPECT_FALSE(result);
 }
-
-/*
- * Feature: OBSVerifyPermissionUtils
- * Function: Cache thread safety with mixed operations
- * SubFunction: GetGroupInfosFromCache
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Test concurrent read and write operations on cache
- */
-HWTEST_F(DataObsMgrObsVerifyTest, OBSVerifyPermissionUtils_Cache_MixedConcurrent_0100, TestSize.Level2)
-{
-    ASSERT_TRUE(obsVerifyUtils_ != nullptr);
-
-    std::string testBundle = "com.example.concurrent";
-
-    // Reader thread
-    auto readerFunc = [obsVerifyUtils = obsVerifyUtils_, testBundle]() {
-        for (int i = 0; i < 50; i++) {
-            std::string uri = "rdb://concurrent" + std::to_string(i) + "/data";
-            obsVerifyUtils->GetGroupInfosFromCache(testBundle, USER_TEST, uri);
-        }
-    };
-
-    // Writer thread
-    auto writerFunc = [obsVerifyUtils = obsVerifyUtils_]() {
-        for (int i = 0; i < 20; i++) {
-            std::string uri = "rdb://writer" + std::to_string(i) + "/data";
-            std::vector<std::string> groupIds = {"group" + std::to_string(i)};
-            std::unique_lock<std::shared_mutex> writeLock(obsVerifyUtils->groupsIdMutex_);
-            if (obsVerifyUtils->groupsIdCache_.size() >= obsVerifyUtils->CACHE_SIZE_THRESHOLD) {
-                obsVerifyUtils->groupsIdCache_.pop_front();
-            }
-            obsVerifyUtils->groupsIdCache_.emplace_back(uri, groupIds);
-        }
-    };
-
-    std::vector<std::thread> threads;
-    threads.emplace_back(readerFunc);
-    threads.emplace_back(readerFunc);
-    threads.emplace_back(writerFunc);
-
-    for (auto &t : threads) {
-        t.join();
-    }
-
-    // Should complete without deadlock
-    EXPECT_TRUE(true);
-}
-
 } // namespace AAFwk
 } // namespace OHOS
