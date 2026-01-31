@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2019,6 +2019,33 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_005, TestSize.Leve
         -1, false);
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: Test ConnectAbilityCommon when specifiedFullTokenId is not the default value
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_006 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->Init(AbilityRequest());
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    uint64_t specifiedFullTokenId = 1000;
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false, specifiedFullTokenId);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_006 end");
 }
 
 /*
