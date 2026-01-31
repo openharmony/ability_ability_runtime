@@ -17,7 +17,6 @@
 
 #include <unistd.h>
 
-#include "ability_connection.h"
 #include "ability_manager_errors.h"
 #include "agent_extension_connection_constants.h"
 #include "agent_manager_client.h"
