@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_AGENT_RUNTIME_MY_FLAG_H
-#define MOCK_AGENT_RUNTIME_MY_FLAG_H
-
-#include "iremote_object.h"
+#include "mock_my_flag.h"
+#include "permission_verification.h"
 
 namespace OHOS {
 namespace AgentRuntime {
-class MyFlag {
-public:
-    static bool retAddSystemAbilityListener;
-    static sptr<IRemoteObject> systemAbility;
-    static bool retPublish;
-    static bool retRegisterBundleEventCallback;
-    static bool isRegisterBundleEventCallbackCalled;
-    static bool isAddSystemAbilityListenerCalled;
-    static bool retVerifyCallingPermission;
-    static int32_t retConnectAbilityWithExtensionType;
-    static int32_t retDisconnectAbility;
-};
-}  // namespace AgentRuntime
+bool MyFlag::retVerifyCallingPermission = true;
+}
+
+namespace AAFwk {
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+    const uint32_t specifyTokenId) const
+{
+    return AgentRuntime::MyFlag::retVerifyCallingPermission;
+}
+}  // namespace AAFwk
 }  // namespace OHOS
-#endif // MOCK_AGENT_RUNTIME_MY_FLAG_H
