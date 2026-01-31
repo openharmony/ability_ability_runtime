@@ -36,7 +36,15 @@ public:
 void DataObsMgrClientTest::SetUpTestCase(void)
 {}
 void DataObsMgrClientTest::TearDownTestCase(void)
-{}
+{
+    // Clean up observers in the singleton to prevent accessing destroyed mock objects
+    // during program exit when IPC threads may still be active
+    auto client = DataObsMgrClient::GetInstance();
+    if (client != nullptr) {
+        client->observers_.Clear();
+        client->observerExts_.Clear();
+    }
+}
 void DataObsMgrClientTest::SetUp()
 {}
 void DataObsMgrClientTest::TearDown()
