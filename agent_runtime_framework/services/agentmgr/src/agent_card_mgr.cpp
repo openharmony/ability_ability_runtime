@@ -71,6 +71,9 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
             }
             for (auto cardStr : j["agent_cards"]) {
                 AgentCard card = AgentCard::FromJson(cardStr);
+                card.bundleName = bundleName;
+                card.moduleName = extensionInfo.moduleName;
+                card.abilityName = extensionInfo.name;
                 cards.push_back(card);
             }
         }
