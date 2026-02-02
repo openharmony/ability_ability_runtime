@@ -385,7 +385,7 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImplByPolicy(const 
     bool needCachePolicyPermissionInfo = !FUDUtils::IsFoundationCall();
     for (size_t i = 0; i < result.size(); i++) {
         if (result[i] != ERR_OK) {
-            ret = result[i];
+            ret = static_cast<int32_t>(result[i]);
             continue;
         }
         TAG_LOGD(AAFwkTag::URIPERMMGR, "Insert an uri policy info, path is %{private}s",
@@ -395,7 +395,7 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImplByPolicy(const 
         }
         successCount++;
     }
-    if (successCount != policyInfoVec.size()) {
+    if (static_cast<size_t>(successCount) != policyInfoVec.size()) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "SetPolicy failed:%{public}d, ret:%{public}d", successCount, ret);
     } else {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "Total %{public}d path policy added.", successCount);
