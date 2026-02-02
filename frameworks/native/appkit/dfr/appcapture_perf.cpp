@@ -79,15 +79,15 @@ int32_t AppCapturePerf::CapturePerf(const FaultData &faultData)
     int res = 0;
     auto &instance = Developtools::HiPerf::HiPerfLocal::Lperf::GetInstance();
     res = instance.StartProcessStackSampling(tids, FREQ, CAPTURE_DURATION, false);
-    std::vector<std::string> perf;
+    std::vector<char*> perf;
     for (uint32_t i = 0; i < tids.size(); i++) {
         std::string info;
         res = instance.CollectSampleStackByTid(tids[i], info);
         if (res != 0) {
-            perf.push_back("");
+            perf.emplace_back(strdup(""));
             continue;
         }
-        perf.push_back(info);
+        perf.emplace_back(const_cast<char *>(info.c_str()));
     }
     instance.FinishProcessStackSampling();
     auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
