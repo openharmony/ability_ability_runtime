@@ -43,7 +43,6 @@ AppHybridSpawnManager &AppHybridSpawnManager::GetInstance()
 static void ProcessSignalData(void *token, uint32_t event)
 {
     int rFd = AppHybridSpawnManager::GetInstance().GetHRfd();
-    fdsan_exchange_owner_tag(rFd, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     if (rFd <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "rFd is invalid, %{public}d", rFd);
         return;
