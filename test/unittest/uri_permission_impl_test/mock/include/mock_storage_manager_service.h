@@ -465,7 +465,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t UMountCryptoPathAgain(uint32_t userId, const std::string &bundleName) override
+    virtual int32_t ClearSecondMountPoint(uint32_t userId, const std::string &bundleName) override
     {
         return E_OK;
     }
