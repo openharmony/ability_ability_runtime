@@ -36,6 +36,7 @@ ohos_unittest("pending_want_manager_test") {
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "pending_want_manager_test.cpp",
+    "pending_want_manager_test_second.cpp",
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
