@@ -155,7 +155,7 @@ ohos_shared_library("agent_ui_extension_module") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-      "${agent_runtime_framework_path}/interfaces/kits/native/agent_ui_extension",
+      "${agent_runtime_framework_path}/interfaces/kits/agent_ui_extension",
   ]
   sources = [ "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/agent_ui_extension_module_loader.cpp" ]
 
