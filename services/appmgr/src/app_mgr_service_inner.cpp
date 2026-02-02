@@ -5617,7 +5617,7 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     StartResidentProcess(infos, appRecord->GetRestartResidentProcCount(), appRecord->IsEmptyKeepAliveApp());
 }
 
-int32_t AppMgrServiceInner::NotifyAppStatusByCommonEventName(const std::string &bundleName,
+bool AppMgrServiceInner::IsSubscriberControlledAndNotifyAppStatusByCommonEventName(const std::string &bundleName,
     const std::string &eventName, const Want &want)
 {
     EventFwk::CommonEventData commonData {want};
@@ -5629,7 +5629,7 @@ int32_t AppMgrServiceInner::NotifyAppStatusByCommonEventName(const std::string &
         TAG_LOGI(AAFwkTag::APPMGR, "bundle name: %{public}s, normal event: %{public}s",
             bundleName.c_str(), eventName.c_str());
         EventFwk::CommonEventManager::PublishCommonEvent(commonData);
-        return 0;
+        return false;
     }
     EventFwk::CommonEventPublishInfo eventPublishData;
     std::vector<std::string> permissions;
@@ -5639,7 +5639,7 @@ int32_t AppMgrServiceInner::NotifyAppStatusByCommonEventName(const std::string &
     eventPublishData.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
     eventPublishData.SetValidationRule(EventFwk::ValidationRule::OR);
     EventFwk::CommonEventManager::PublishCommonEvent(commonData, eventPublishData);
-    return 1;
+    return true;
 }
 
 void AppMgrServiceInner::NotifyAppStatus(const std::string &bundleName, int32_t appIndex, const std::string &eventData)
@@ -5653,7 +5653,7 @@ void AppMgrServiceInner::NotifyAppStatus(const std::string &bundleName, int32_t 
     want.SetElement(element);
     want.SetParam(Constants::USER_ID, 0);
     want.SetParam(Constants::APP_INDEX, appIndex);
-    NotifyAppStatusByCommonEventName(bundleName, eventData, want);
+    IsSubscriberControlledAndNotifyAppStatusByCommonEventName(bundleName, eventData, want);
 }
 
 void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId,
@@ -5672,7 +5672,7 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     want.SetParam(Constants::UID, callerUid);
     want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
     want.SetParam(TARGET_UID_KEY, targetUid);
-    NotifyAppStatusByCommonEventName(bundleName, eventData, want);
+    IsSubscriberControlledAndNotifyAppStatusByCommonEventName(bundleName, eventData, want);
 }
 
 int32_t AppMgrServiceInner::RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
