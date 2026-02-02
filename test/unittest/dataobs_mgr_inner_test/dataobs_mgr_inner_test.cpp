@@ -490,7 +490,6 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_ReadPermission_
     Uri uri("dataability:///com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
 
-    // With singleton URI, readPermission check is bypassed, OnChange should be called
     EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(0);
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));

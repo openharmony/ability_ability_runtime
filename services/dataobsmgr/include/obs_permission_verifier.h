@@ -31,7 +31,7 @@ public:
     bool VerifyPermission(uint32_t listenerTokenId, int32_t userId, const Uri &uri, uint32_t tokenId);
     static const constexpr char RELATIONAL_STORE[] = "rdb";
 private:
-    std::pair<bool, std::string> GetCallingInfo(uint32_t callingTokenid);
+    std::pair<bool, std::string> GetCallingInfo(uint32_t callingTokenId);
     std::vector<std::string> GetGroupInfosFromCache(const std::string &bundleName, int32_t userId,
         const std::string &uri);
     static constexpr int32_t CACHE_SIZE_THRESHOLD = 50;
