@@ -61,6 +61,7 @@ public:
 private:
     void SetParamName(HiSysEventParam& param, const char* name);
 
+    std::vector<std::string> paramString_;
     HiSysEventParam* params_;
     int32_t length_ = 0;
     int32_t pos_ = 0;
