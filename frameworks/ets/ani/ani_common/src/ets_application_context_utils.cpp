@@ -159,6 +159,68 @@ void EtsApplicationContextUtils::OnNativeOnApplicationStateChangeSync(ani_env *e
     applicationContext->RegisterApplicationStateChangeCallback(applicationStateCallback_);
 }
 
+void EtsApplicationContextUtils::OnNativeSystemConfigurationUpdatedSync(
+    ani_env *env, ani_object aniObj, ani_object callback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_boolean isUndefined = true;
+    env->Reference_IsUndefined(callback, &isUndefined);
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callback undefine");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    if (systemConfigurationUpdatedCallback_ != nullptr) {
+        systemConfigurationUpdatedCallback_->Register(callback);
+        return;
+    }
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get aniVM failed");
+        return;
+    }
+    systemConfigurationUpdatedCallback_ = std::make_shared<EtsSystemConfigurationUpdatedCallback>(aniVM);
+    systemConfigurationUpdatedCallback_->Register(callback);
+    applicationContext->RegisterSystemConfigurationUpdatedCallback(systemConfigurationUpdatedCallback_);
+}
+
+void EtsApplicationContextUtils::OffNativeSystemConfigurationUpdatedSync(
+    ani_env *env, ani_object aniObj, ani_object callback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    if (systemConfigurationUpdatedCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationStateCallback_");
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "invalid paramter.");
+        return;
+    }
+    ani_boolean isUndefined = true;
+    env->Reference_IsUndefined(callback, &isUndefined);
+    if (isUndefined) {
+        systemConfigurationUpdatedCallback_->UnRegister();
+    } else if (!systemConfigurationUpdatedCallback_->UnRegister(callback)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param call UnRegister failed, invalid paramter.");
+        return;
+    }
+    if (systemConfigurationUpdatedCallback_->IsEmpty()) {
+        systemConfigurationUpdatedCallback_.reset();
+    }
+}
+
 void EtsApplicationContextUtils::OnNativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj,
     ani_object callback)
 {
@@ -1012,6 +1074,30 @@ void EtsApplicationContextUtils::NativeOnApplicationStateChangeSync(ani_env *env
     etsContext->OnNativeOnApplicationStateChangeSync(env, aniObj, callback);
 }
 
+void EtsApplicationContextUtils::NativeOnSystemConfigurationUpdatedSync(
+    ani_env *env, ani_object aniObj, ani_object callback)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "wlh NativeOnSystemConfigurationUpdatedSync Call");
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsContext");
+        return;
+    }
+    etsContext->OnNativeSystemConfigurationUpdatedSync(env, aniObj, callback);
+}
+
+void EtsApplicationContextUtils::NativeOffSystemConfigurationUpdatedSync(
+    ani_env *env, ani_object aniObj, ani_object callback)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "wlh NativeOffSystemConfigurationUpdatedSync Call");
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsContext");
+        return;
+    }
+    etsContext->OffNativeSystemConfigurationUpdatedSync(env, aniObj, callback);
+}
+
 void EtsApplicationContextUtils::NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj,
     ani_object callback)
 {
@@ -1196,6 +1282,12 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env *aniEnv)
             ani_native_function {"nativeOffInteropLifecycleCallbackSync",
                 "C{@ohos.app.ability.InteropAbilityLifecycleCallback.InteropAbilityLifecycleCallback}:",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffInteropLifecycleCallbackSync)},
+            ani_native_function {"nativeOnSystemConfigurationUpdatedSync",
+                "C{@ohos.app.ability.systemConfiguration.systemConfiguration.UpdatedCallback}:",
+                reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOnSystemConfigurationUpdatedSync)},
+            ani_native_function {"nativeOffSystemConfigurationUpdatedSync",
+                "C{@ohos.app.ability.systemConfiguration.systemConfiguration.UpdatedCallback}:",
+                reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOffSystemConfigurationUpdatedSync)},
         };
         if ((status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
             applicationContextFunctions.size())) != ANI_OK) {

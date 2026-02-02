@@ -70,6 +70,7 @@ ohos_shared_library("ani_common") {
     "src/ets_free_install_observer.cpp",
     "src/ets_interop_ability_lifecycle_callback.cpp",
     "src/ets_interop_object.cpp",
+    "src/ets_system_configuration_updated_callback.cpp",
     "src/js_interop_ability_lifecycle_callback.cpp",
     "src/js_interop_object.cpp",
   ]
