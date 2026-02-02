@@ -20,10 +20,11 @@
 #include "datashare_errno.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
+#include "obs_permission_verifier.h"
 #include <string>
 namespace OHOS {
 namespace AAFwk {
-
+using namespace DataShare;
 DataObsMgrInner::DataObsMgrInner() {}
 
 DataObsMgrInner::~DataObsMgrInner() {}
@@ -104,7 +105,8 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, struct ObserverNod
     return NO_ERROR;
 }
 
-int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission, bool isSilentUri)
+int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission,
+    bool isSilentUri, uint32_t tokenId)
 {
     std::string uriStr = uri.ToString();
     std::list<struct ObserverNode> obsList;
@@ -112,42 +114,43 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
         std::lock_guard<ffrt::mutex> lock(innerMutex_);
         auto obsPair = observers_.find(uriStr);
         if (obsPair == observers_.end()) {
-            TAG_LOGD(AAFwkTag::DBOBSMGR, "uri no obs:%{public}s",
-                CommonUtils::Anonymous(uriStr).c_str());
+            TAG_LOGD(AAFwkTag::DBOBSMGR, "uri no obs:%{public}s", CommonUtils::Anonymous(uriStr).c_str());
             return NO_OBS_FOR_URI;
         }
         obsList = obsPair->second;
     }
 
     std::string obsStr = "";
-    bool logFlag = false;
+    Uri uriTemp(uriStr);
     for (auto &obs : obsList) {
         if (obs.observer_ == nullptr) {
             continue;
         }
-        if (!DataShare::DataSharePermission::IsSingletonTrustUri(uri) &&
-            obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
-            TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
-                userId, obs.userId_, CommonUtils::Anonymous(uriStr).c_str());
-            continue;
-        }
         uint32_t token = obs.tokenId_;
-        Uri uriTemp(uriStr);
-        if (!DataShare::DataSharePermission::VerifyPermission(uriTemp, token, readPermission, isSilentUri)) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "HandleNotifyChange readpermission denied, token %{public}d permission "
-                "%{public}s uri %{public}s pid %{public}d", token, readPermission.c_str(),
-                CommonUtils::Anonymous(uriStr).c_str(), obs.pid_);
-            // just hisysevent now
-            std::string msg = __FUNCTION__;
-            DataShare::DataSharePermission::ReportExtensionFault(DataShare::E_DATASHARE_PERMISSION_DENIED, token,
-                uriStr, msg);
-            continue;
+        if (uriTemp.GetScheme() == ObsPermissionVerifier::RELATIONAL_STORE) {
+            if (!ObsPermissionVerifier::GetInstance().VerifyPermission(token, userId, uriTemp, tokenId)) {
+                continue;
+            }
+        } else {
+            if (!DataSharePermission::IsSingletonTrustUri(uri) &&
+                obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
+                TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
+                    userId, obs.userId_, CommonUtils::Anonymous(uriStr).c_str());
+                continue;
+            }
+            if (!DataShare::DataSharePermission::VerifyPermission(uriTemp, token, readPermission, isSilentUri)) {
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "Verify denied, token %{public}d permission %{public}s uri %{public}s "
+                    "pid %{public}d", token, readPermission.c_str(), CommonUtils::Anonymous(uriStr).c_str(), obs.pid_);
+                // just hisysevent now
+                std::string msg = __FUNCTION__;
+                DataSharePermission::ReportExtensionFault(E_DATASHARE_PERMISSION_DENIED, token, uriStr, msg);
+                continue;
+            }
         }
         obs.observer_->OnChange();
         obsStr += "p:" + std::to_string(obs.pid_) + "Id:" + std::to_string(obs.nodeId_) + ",";
-        logFlag = true;
     }
-    if (logFlag) {
+    if (!obsStr.empty()) {
         TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s obsList:%{public}s",
             CommonUtils::Anonymous(uri.ToString()).c_str(), obsStr.c_str());
     }
