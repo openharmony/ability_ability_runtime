@@ -1251,11 +1251,12 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         if (appRecord == nullptr) {
             continue;
         }
-        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0
-            || appRecord->GetUid() / BASE_USER_RANGE == userId);
+        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0 ||
+                           appRecord->GetUid() / BASE_USER_RANGE == userId);
         if (!userIdFlag) {
             continue;
         }
+
         if (info.bandleName == appRecord->GetBundleName() && info.appIndex == appRecord->GetAppIndex() && item.second
             && appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
             if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE, reason)) {

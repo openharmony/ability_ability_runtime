@@ -454,12 +454,12 @@ bool AppfreezeCpuFreqManager::IsContainHalfData(const std::string &key, CpuDataP
     std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
     auto it = cpuInfoMap_.find(key);
     if (it == cpuInfoMap_.end()) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Not find warning fault, pid: %{public}d", pid);
+        TAG_LOGI(AAFwkTag::APPDFR, "Not find warning fault, pid:%{public}d", pid);
         return false;
     }
     int warningPid = it->second.GetPid();
     if (warningPid != pid) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Not find current pid:%{public}d, warning pid:%{public}d", pid, warningPid);
+        TAG_LOGI(AAFwkTag::APPDFR, "Not find current pid:%{public}d, warning pid:%{public}d.", pid, warningPid);
         return false;
     }
     cpuData = it->second;

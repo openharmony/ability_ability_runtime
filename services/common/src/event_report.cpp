@@ -67,14 +67,14 @@ constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
 constexpr const char *EVENT_KEY_INTENT_NAME = "INTENT_NAME";
 constexpr const char *EVENT_KEY_ERROR_MESSAGE = "ERROR_MESSAGE";
+constexpr const char *EVENT_KEY_CALLER_PID = "CALLER_PID";
+constexpr const char *EVENT_KEY_EXIT_MESSAGE = "EXIT_MESSAGE";
+constexpr const char *EVENT_KEY_SHOULD_KILL_FOREGROUND = "SHOULD_KILL_FOREGROUND";
 constexpr const char *EVENT_FILE_OR_FOLDER_PATH = "FILE_OR_FOLDER_PATH";
 constexpr const char *EVENT_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
 constexpr const char *EVENT_COMPONENT_NAME_KEY = "COMPONENT_NAME";
 constexpr const char *EVENT_PARTITION_NAME_KEY = "PARTITION_NAME";
 constexpr const char *EVENT_REMAIN_PARTITION_SIZE_KEY = "REMAIN_PARTITION_SIZE";
-constexpr const char *EVENT_KEY_CALLER_PID = "CALLER_PID";
-constexpr const char *EVENT_KEY_EXIT_MESSAGE = "EXIT_MESSAGE";
-constexpr const char *EVENT_KEY_SHOULD_KILL_FOREGROUND = "SHOULD_KILL_FOREGROUND";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
