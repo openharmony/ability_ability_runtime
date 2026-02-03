@@ -79,21 +79,25 @@ int32_t AppCapturePerf::CapturePerf(const FaultData &faultData)
     int res = 0;
     auto &instance = Developtools::HiPerf::HiPerfLocal::Lperf::GetInstance();
     res = instance.StartProcessStackSampling(tids, FREQ, CAPTURE_DURATION, false);
-    std::vector<char*> perf;
+    std::vector<std::string> perf;
     for (uint32_t i = 0; i < tids.size(); i++) {
         std::string info;
         res = instance.CollectSampleStackByTid(tids[i], info);
         if (res != 0) {
-            perf.emplace_back(strdup(""));
+            perf.push_back("");
             continue;
         }
-        perf.emplace_back(const_cast<char *>(info.c_str()));
+        perf.push_back(info);
     }
     instance.FinishProcessStackSampling();
     auto hisyseventReport = std::make_shared<AAFwk::HisyseventReport>(4);
     hisyseventReport->InsertParam("APP_NAME", faultData.errorObject.name);
     hisyseventReport->InsertParam("TIDS", tids);
-    hisyseventReport->InsertParam("PERF", perf);
+    std::vector<char*> list;
+    for (auto s : perf) {
+        list.emplace_back(const_cast<char *>(s.c_str()));
+    }
+    hisyseventReport->InsertParam("PERF", list);
     hisyseventReport->InsertParam("PERFID", perfId);
     hisyseventReport->Report("AAFWK", "CPU_LOAD_CAPTURE_STACK", HISYSEVENT_STATISTIC);
     return NO_ERROR;
