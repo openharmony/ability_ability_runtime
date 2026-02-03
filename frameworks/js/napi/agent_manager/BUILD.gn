@@ -21,7 +21,11 @@ ohos_shared_library("agentmanager") {
     debug = false
   }
 
-  include_dirs = []
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+  ]
 
   sources = [
     "agent_manager_module.cpp",
@@ -39,11 +43,18 @@ ohos_shared_library("agentmanager") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension:agent_extension_connection",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension:js_agent_connection",
+    "${agent_runtime_framework_path}/interfaces/inner_api:agent_connection_manager",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_manager",
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:session_info",
+    "ability_base:want",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ets_runtime:libark_jsruntime",

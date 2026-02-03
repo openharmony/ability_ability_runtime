@@ -107,7 +107,15 @@ public:
      * @param hostProxy the proxy used to send data back to client
      * @param data The data to send.
      */
-    int32_t OnSendData(sptr<IRemoteObject> hostProxy, std::string &data);
+    int32_t OnSendData(const sptr<IRemoteObject> &hostProxy, const std::string &data);
+
+    /**
+     * @brief Called when client authorizes to extension.
+     *
+     * @param hostProxy the proxy used to authorizes back to client
+     * @param data The data to send.
+     */
+    int32_t OnAuthorize(const sptr<IRemoteObject> &hostProxy, const std::string &data);
 
 private:
     napi_value CallObjectMethod(const char* name, napi_value const *argv = nullptr, size_t argc = 0);
@@ -119,6 +127,8 @@ private:
     napi_value WrapWant(napi_env env, const AAFwk::Want &want);
 
     void HandleSendData(sptr<IRemoteObject> hostProxy, const std::string &data);
+
+    void HandleAuthorize(sptr<IRemoteObject> hostProxy, const std::string &data);
 
     sptr<IRemoteObject> GetHostProxyFromWant(const AAFwk::Want &want);
 

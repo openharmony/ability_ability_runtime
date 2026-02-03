@@ -38,9 +38,9 @@ public:
      *
      * @param env The N-API environment.
      * @param connectorProxy The remote object of the connector proxy for callbacks.
-     * @return Returns the N-API value of the created proxy object.
+     * @return Returns the N-API reference of the created proxy object.
      */
-    static napi_value CreateJsAgentConnectorProxy(napi_env env, const sptr<IRemoteObject> &connectorProxy);
+    static napi_ref CreateJsAgentConnectorProxy(napi_env env, const sptr<IRemoteObject> &connectorProxy);
 
     /**
      * Finalizer for the connector proxy object.

@@ -167,15 +167,16 @@ uint32_t BaseExtensionRecord::GetInProgressRecordCount()
 void BaseExtensionRecord::DisconnectAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    const auto &abilityInfo = GetAbilityInfo();
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "DisconnectAbility, bundle:%{public}s, ability:%{public}s.",
-        GetAbilityInfo().applicationInfo.bundleName.c_str(), GetAbilityInfo().name.c_str());
+        abilityInfo.applicationInfo.bundleName.c_str(), abilityInfo.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
+
     lifecycleDeal_->DisconnectAbility(GetWant());
-    if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        if (GetInProgressRecordCount() == 0) {
-            isConnected = false;
-        }
-    } else {
+
+    bool isPerConnectionType = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE ||
+        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT);
+    if (!isPerConnectionType || GetInProgressRecordCount() == 0) {
         isConnected = false;
     }
 }

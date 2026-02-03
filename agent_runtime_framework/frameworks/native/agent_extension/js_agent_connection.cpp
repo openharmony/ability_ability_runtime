@@ -34,7 +34,7 @@ static int64_t g_agentSerialNumber = 0;
 namespace AgentConnectionUtils {
 void RemoveAgentConnection(int64_t connectId)
 {
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "RemoveAgentConnection, connectId: %{public}ld", connectId);
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "RemoveAgentConnection, connectId: %{public}s", std::to_string(connectId).c_str());
     std::lock_guard<std::recursive_mutex> lock(g_agentConnectsLock_);
     auto item = std::find_if(g_agentConnects.begin(), g_agentConnects.end(),
         [&connectId](const auto &obj) {
@@ -71,13 +71,13 @@ int64_t InsertAgentConnection(sptr<JSAgentConnection> connection,
     } else {
         g_agentSerialNumber = 0;
     }
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "Connection inserted, id: %{public}ld", connectId);
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "Connection inserted, id: %{public}s", std::to_string(connectId).c_str());
     return connectId;
 }
 
 void FindAgentConnection(int64_t connectId, sptr<JSAgentConnection> &connection)
 {
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "FindAgentConnection by id: %{public}ld", connectId);
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "FindAgentConnection by id: %{public}s", std::to_string(connectId).c_str());
     std::lock_guard<std::recursive_mutex> lock(g_agentConnectsLock_);
     auto item = std::find_if(g_agentConnects.begin(), g_agentConnects.end(),
         [&connectId](const auto &obj) {
