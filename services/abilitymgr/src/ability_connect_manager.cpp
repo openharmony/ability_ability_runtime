@@ -255,12 +255,7 @@ int AbilityConnectManager::StopServiceAbilityLocked(const AbilityRequest &abilit
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::EXT, "call");
-    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
-        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
-    std::string serviceKey = element.GetURI();
-    if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
-        serviceKey = serviceKey + std::to_string(abilityRequest.want.GetIntParam(FRS_APP_INDEX, 0));
-    }
+    std::string serviceKey = GetServiceKey(abilityRequest);
     auto abilityRecord = GetServiceRecordByElementName(serviceKey);
     if (abilityRecord == nullptr) {
         abilityRecord = AbilityCacheManager::GetInstance().Get(abilityRequest);
@@ -864,11 +859,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
 void AbilityConnectManager::ProcessEliminateAbilityRecord(std::shared_ptr<BaseExtensionRecord> eliminateRecord)
 {
     CHECK_POINTER(eliminateRecord);
-    std::string eliminateKey = eliminateRecord->GetURI();
-    if (FRS_BUNDLE_NAME == eliminateRecord->GetAbilityInfo().bundleName) {
-        eliminateKey = eliminateKey +
-            std::to_string(eliminateRecord->GetWant().GetIntParam(FRS_APP_INDEX, 0));
-    }
+    std::string eliminateKey = GetServiceKey(eliminateRecord);
     AddToServiceMap(eliminateKey, eliminateRecord);
     TerminateRecord(eliminateRecord);
 }
@@ -879,16 +870,9 @@ void AbilityConnectManager::TerminateOrCacheAbility(std::shared_ptr<BaseExtensio
         return;
     }
     if (IsCacheExtensionAbility(abilityRecord)) {
-        std::string serviceKey = abilityRecord->GetURI();
-        auto abilityInfo = abilityRecord->GetAbilityInfo();
+        std::string serviceKey = GetServiceKey(abilityRecord);
         TAG_LOGD(AAFwkTag::EXT, "Cache the ability, service:%{public}s, extension type %{public}d",
-            serviceKey.c_str(), abilityInfo.extensionAbilityType);
-        if (FRS_BUNDLE_NAME == abilityInfo.bundleName) {
-            AppExecFwk::ElementName elementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name,
-                abilityInfo.moduleName);
-            serviceKey = elementName.GetURI() +
-                std::to_string(abilityRecord->GetWant().GetIntParam(FRS_APP_INDEX, 0));
-        }
+            serviceKey.c_str(), abilityRecord->GetAbilityInfo().extensionAbilityType);
         RemoveServiceFromMapSafe(serviceKey);
         auto eliminateRecord = AbilityCacheManager::GetInstance().Put(abilityRecord);
         if (eliminateRecord != nullptr) {
@@ -2451,6 +2435,21 @@ std::string AbilityConnectManager::GetServiceKey(const std::shared_ptr<BaseExten
     std::string serviceKey = service->GetURI();
     if (FRS_BUNDLE_NAME == service->GetAbilityInfo().bundleName) {
         serviceKey = serviceKey + std::to_string(service->GetWant().GetIntParam(FRS_APP_INDEX, 0));
+    } else if (service->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+        serviceKey = serviceKey + service->GetWant().GetStringParam(AgentRuntime::AGENTID_KEY);
+    }
+    return serviceKey;
+}
+
+std::string AbilityConnectManager::GetServiceKey(const AbilityRequest &abilityRequest)
+{
+    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    std::string serviceKey = element.GetURI();
+    if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
+        serviceKey = serviceKey + std::to_string(abilityRequest.want.GetIntParam(FRS_APP_INDEX, 0));
+    } else if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+        serviceKey = serviceKey + abilityRequest.want.GetStringParam(AgentRuntime::AGENTID_KEY);
     }
     return serviceKey;
 }
@@ -2829,12 +2828,7 @@ void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<BaseExten
     auto& abilityInfo = abilityRecord->GetAbilityInfo();
     std::lock_guard lock(serviceMapMutex_);
     terminatingExtensionList_.push_back(abilityRecord);
-    std::string serviceKey = abilityRecord->GetURI();
-    if (FRS_BUNDLE_NAME == abilityInfo.bundleName) {
-        AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name,
-            abilityInfo.moduleName);
-        serviceKey = element.GetURI() + std::to_string(abilityRecord->GetWant().GetIntParam(FRS_APP_INDEX, 0));
-    }
+    std::string serviceKey = GetServiceKey(abilityRecord);
     if (serviceMap_.erase(serviceKey) == 0) {
         TAG_LOGW(AAFwkTag::EXT, "Unknown: %{public}s/%{public}s",
             abilityRecord->GetElementName().GetBundleName().c_str(),
@@ -3044,7 +3038,7 @@ EventInfo AbilityConnectManager::BuildEventInfo(const std::shared_ptr<BaseExtens
     return eventInfo;
 }
 
-std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abilityRequest) const
+std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abilityRequest)
 {
     auto bundleName = abilityRequest.abilityInfo.bundleName;
     if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
@@ -3180,12 +3174,7 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     bool noReuse = UIExtensionWrapper::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
-    std::string serviceKey = element.GetURI();
-    if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
-        serviceKey = element.GetURI() + std::to_string(abilityRequest.want.GetIntParam(FRS_APP_INDEX, 0));
-    } else if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
-        serviceKey = element.GetURI() + abilityRequest.want.GetStringParam(AgentRuntime::AGENTID_KEY);
-    }
+    std::string serviceKey = GetServiceKey(abilityRequest);
     {
         std::lock_guard lock(serviceMapMutex_);
         auto serviceMapIter = serviceMap_.find(serviceKey);

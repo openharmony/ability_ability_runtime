@@ -18,9 +18,9 @@
 
 static napi_module _module = {
     .nm_version = 0,
-    .nm_filename = "app/ability/agentmanager_napi.so/agent_manager.js",
+    .nm_filename = "app/agent/agentmanager_napi.so/agent_manager.js",
     .nm_register_func = OHOS::AgentRuntime::JsAgentManagerInit,
-    .nm_modname = "app.ability.agentManager",
+    .nm_modname = "app.agent.agentManager",
 };
 
 extern "C" __attribute__((constructor)) void NAPI_app_ability_AgentManager_AutoRegister(void)
