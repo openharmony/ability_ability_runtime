@@ -9002,6 +9002,7 @@ void AbilityManagerService::SubscribeUserUnlockedEvent()
     bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(userUnlockSubscriber_);
     if (!subResult) {
         RetrySubscribeUnlockedEvent(RETRY_COUNT, userUnlockSubscriber_, true);
+        return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, subscribe uu suc");
 }
@@ -9117,6 +9118,10 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
         }
         if (retryCount > 0) {
             obj->RetrySubscribeUnlockedEvent(retryCount - 1, unlockedEventSubscriber, isUserUnlock);
+            return;
+        }
+        if (!retryCount) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "SU life, subscribe err:%{public}d", isUserUnlock);
         }
     };
     constexpr int32_t delaytime = 200 * 1000; // us
