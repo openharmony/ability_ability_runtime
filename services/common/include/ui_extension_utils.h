@@ -33,6 +33,7 @@ inline std::unordered_set<AppExecFwk::ExtensionAbilityType> GetUiExtensionSet()
     return std::unordered_set<AppExecFwk::ExtensionAbilityType> {
         AppExecFwk::ExtensionAbilityType::SHARE,
         AppExecFwk::ExtensionAbilityType::ACTION,
+        AppExecFwk::ExtensionAbilityType::AGENT_UI,
         AppExecFwk::ExtensionAbilityType::EMBEDDED_UI,
         AppExecFwk::ExtensionAbilityType::INSIGHT_INTENT_UI,
         AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD,

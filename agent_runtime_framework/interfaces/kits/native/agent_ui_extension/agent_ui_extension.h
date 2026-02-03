@@ -16,37 +16,33 @@
 #ifndef OHOS_AGENT_RUNTIME_AGENT_UI_EXTENSION_H
 #define OHOS_AGENT_RUNTIME_AGENT_UI_EXTENSION_H
 
-#include <memory>
-
 #include "ui_extension_base.h"
 
-namespace OHOS {
-namespace AbilityRuntime {
+namespace OHOS::AbilityRuntime {
+class UIExtensionContext;
 class Runtime;
-} // namespace AbilityRuntime
+}
 
+namespace OHOS {
 namespace AgentRuntime {
+
 /**
- * @brief Agent UI Extension base class.
- *
- * This class provides the base functionality for Agent UI Extension abilities.
- * It extends UIExtensionBase and provides factory methods for creating
- * language-specific implementations.
+ * @brief Action extension components.
  */
-class AgentUIExtension : public AbilityRuntime::UIExtensionBase<> {
+class AgentUIExtension : public AbilityRuntime::UIExtensionBase<AbilityRuntime::UIExtensionContext>,
+                        public std::enable_shared_from_this<AgentUIExtension> {
 public:
     AgentUIExtension() = default;
     virtual ~AgentUIExtension() = default;
 
     /**
-     * @brief Create an AgentUIExtension instance based on the runtime language.
+     * @brief Create action extension.
      *
-     * @param runtime The runtime instance used to determine the language implementation.
-     * @return Returns a pointer to the created AgentUIExtension instance.
+     * @param runtime The runtime.
+     * @return The action extension instance.
      */
     static AgentUIExtension *Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 };
-
 } // namespace AgentRuntime
 } // namespace OHOS
 #endif // OHOS_AGENT_RUNTIME_AGENT_UI_EXTENSION_H
