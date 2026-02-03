@@ -22,6 +22,8 @@ namespace AgentRuntime {
 int MyFlag::retGetAllAgentCards = 0;
 int MyFlag::retGetAgentCardsByBundleName = 0;
 int MyFlag::retGetAgentCardByAgentId = 0;
+int MyFlag::retConnectAgentExtensionAbility = 0;
+int MyFlag::retDisconnectAgentExtensionAbility = 0;
 
 MockAgentManagerService::MockAgentManagerService()
 {}
@@ -44,6 +46,17 @@ int32_t MockAgentManagerService::GetAgentCardByAgentId(const std::string &bundle
     AgentCard &card)
 {
     return MyFlag::retGetAgentCardByAgentId;
+}
+
+int32_t MockAgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &want,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    return MyFlag::retConnectAgentExtensionAbility;
+}
+
+int32_t MockAgentManagerService::DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    return MyFlag::retDisconnectAgentExtensionAbility;
 }
 }  // namespace AgentRuntime
 }  // namespace OHOS

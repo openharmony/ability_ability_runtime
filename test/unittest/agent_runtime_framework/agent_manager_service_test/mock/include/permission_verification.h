@@ -13,25 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_AGENT_RUNTIME_MY_FLAG_H
-#define MOCK_AGENT_RUNTIME_MY_FLAG_H
+#ifndef OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+#define OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
 
-#include "iremote_object.h"
+#include <string>
+
+#include "singleton.h"
 
 namespace OHOS {
-namespace AgentRuntime {
-class MyFlag {
+namespace AAFwk {
+class PermissionVerification : public DelayedSingleton<PermissionVerification> {
 public:
-    static bool retAddSystemAbilityListener;
-    static sptr<IRemoteObject> systemAbility;
-    static bool retPublish;
-    static bool retRegisterBundleEventCallback;
-    static bool isRegisterBundleEventCallbackCalled;
-    static bool isAddSystemAbilityListenerCalled;
-    static bool retVerifyCallingPermission;
-    static int32_t retConnectAbilityWithExtensionType;
-    static int32_t retDisconnectAbility;
+    PermissionVerification() = default;
+    ~PermissionVerification() override = default;
+
+    bool VerifyCallingPermission(const std::string &permissionName, const uint32_t specifyTokenId = 0) const;
 };
-}  // namespace AgentRuntime
+}  // namespace AAFwk
 }  // namespace OHOS
-#endif // MOCK_AGENT_RUNTIME_MY_FLAG_H
+#endif  // OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
