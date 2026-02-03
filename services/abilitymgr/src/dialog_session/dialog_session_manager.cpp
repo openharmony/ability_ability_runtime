@@ -482,7 +482,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
             return ERR_INVALID_VALUE;
         }
         ret = static_cast<int32_t>(IN_PROCESS_CALL(sceneSessionManager->IsFocusWindowParent(callerToken, isParent)));
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "isParent = %{pubilc}d, ret = %{pubilc}d", isParent, ret);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "isParent = %{public}d, ret = %{public}d", isParent, ret);
     } else {
         auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
         if (!abilityMgr) {
