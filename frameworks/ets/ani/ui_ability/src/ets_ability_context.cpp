@@ -100,7 +100,7 @@ constexpr const char *SIGNATURE_START_ABILITY_AS_CALLER = "C{@ohos.app.ability.W
 constexpr const char *SIGNATURE_START_RECENT_ABILITY = "C{@ohos.app.ability.Want.Want}"
     "C{utils.AbilityUtils.AsyncCallbackWrapper}C{@ohos.app.ability.StartOptions.StartOptions}:";
 constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
-    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode;";
+    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 constexpr int32_t ARGC_THREE = 3;
