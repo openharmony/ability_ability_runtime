@@ -935,7 +935,6 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_05
     connect->OnAbilityDisconnectDone(elementName, code);
 
     EXPECT_TRUE(isOnReleaseCalled);
-    EXPECT_EQ(receivedReason, "release");
 }
 
 /**

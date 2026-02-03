@@ -424,7 +424,7 @@ void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &el
         TAG_LOGI(AAFwkTag::LOCAL_CALL, "Callee ability terminated, notify all callers");
 
         // Notify all callers that callee is terminating with proper release reason
-        localCallRecord_->NotifyCallersReleased(ON_RELEASE);
+        localCallRecord_->OnCallStubDied();
 
         // Remove record from container
         auto container = container_.lock();

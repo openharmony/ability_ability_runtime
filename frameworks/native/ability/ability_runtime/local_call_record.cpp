@@ -125,16 +125,11 @@ bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callba
 void LocalCallRecord::OnCallStubDied()
 {
     TAG_LOGI(AAFwkTag::LOCAL_CALL, "OnCallStubDied");
-    NotifyCallersReleased(ON_DIED);
-}
-
-void LocalCallRecord::NotifyCallersReleased(const std::string &releaseReason)
-{
     std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr) {
-            TAG_LOGI(AAFwkTag::LOCAL_CALL, "Notify caller released: %{public}s", releaseReason.c_str());
-            callBack->InvokeOnRelease(releaseReason);
+            TAG_LOGI(AAFwkTag::LOCAL_CALL, "Notify caller released");
+            callBack->InvokeOnRelease(ON_DIED);
         }
     }
 }
