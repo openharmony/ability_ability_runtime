@@ -39,6 +39,7 @@ constexpr static char CUSTOM_EXTENSION[] = "ExtensionAbility";
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
 constexpr static char ACTION_EXTENSION[] = "ActionExtensionAbility";
 constexpr static char SHARE_EXTENSION[] = "ShareExtensionAbility";
+constexpr static char AGENT_UI_EXTENSION[] = "AgentUIExtensionAbility";
 #ifdef SUPPORT_AUTO_FILL
 constexpr static char AUTO_FILL_EXTENSION[] = "AutoFillExtensionAbility";
 #endif  // SUPPORT_AUTO_FILL
@@ -68,6 +69,7 @@ const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_
 #ifdef SUPPORT_GRAPHICS
     { AppExecFwk::ExtensionAbilityType::SHARE, SHARE_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::ACTION, ACTION_EXTENSION },
+    { AppExecFwk::ExtensionAbilityType::AGENT_UI, AGENT_UI_EXTENSION },
 #ifdef SUPPORT_AUTO_FILL
     { AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD, AUTO_FILL_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART, AUTO_FILL_EXTENSION },
