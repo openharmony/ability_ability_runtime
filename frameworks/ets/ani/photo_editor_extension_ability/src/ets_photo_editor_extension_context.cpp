@@ -245,7 +245,7 @@ void EtsPhotoEditorExtensionContext::SaveWithImageCheck(ani_env* aniEnv, ani_obj
     }
 
     if (format == "") {
-        TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
+        TAG_LOGE(AAFwkTag::UI_EXT, "format is empty");
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(aniEnv, ERR_MSG_PARAMS_ERROR);
         return;
     }
