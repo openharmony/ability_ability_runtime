@@ -60,7 +60,7 @@ bool ChildProcessRecord::IsNativeSpawnStarted() const
 std::shared_ptr<ChildProcessRecord> ChildProcessRecord::CreateChildProcessRecord(pid_t hostPid,
     const ChildProcessRequest &request, const std::shared_ptr<AppRunningRecord> hostRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d, srcEntry: %{priavte}s,", hostPid, request.srcEntry.c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d, srcEntry: %{private}s,", hostPid, request.srcEntry.c_str());
     if (hostPid <= 0 || request.srcEntry.empty() || !hostRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid parameter");
         return nullptr;
