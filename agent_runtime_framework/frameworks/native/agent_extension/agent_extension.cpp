@@ -14,6 +14,7 @@
  */
 
 #include "agent_extension.h"
+
 #include "agent_extension_context.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"

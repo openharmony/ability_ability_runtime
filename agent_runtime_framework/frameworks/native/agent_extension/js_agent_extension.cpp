@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "js_agent_extension.h"
+
 #include "ability_business_error.h"
 #include "agent_extension.h"
 #include "agent_extension_context.h"
@@ -21,9 +23,8 @@
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
-#include "js_agent_extension.h"
+#include "js_agent_connector_proxy.h"
 #include "js_agent_extension_context.h"
-#include "js_agent_extension_host_proxy.h"
 #include "js_extension_common.h"
 #include "js_extension_context.h"
 #include "js_runtime_utils.h"
@@ -213,7 +214,7 @@ sptr<IRemoteObject> JsAgentExtension::OnConnect(const AAFwk::Want &want,
         TAG_LOGI(AAFwkTag::SER_ROUTER, "hostProxy exist");
         return stubObject;
     }
-    napi_ref hostProxyNref = JsAgentExtensionHostProxy::CreateJsAgentExtensionHostProxy(env, hostProxy);
+    napi_ref hostProxyNref = JsAgentConnectorProxy::CreateJsAgentConnectorProxy(env, hostProxy);
     if (hostProxyNref == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null hostProxyNref");
         return nullptr;
@@ -259,7 +260,7 @@ void JsAgentExtension::OnDisconnect(const AAFwk::Want &want,
     hostProxyMap_.erase(iter);
 }
 
-int32_t JsAgentExtension::OnSendData(sptr<IRemoteObject> hostProxy, std::string &data)
+int32_t JsAgentExtension::OnSendData(const sptr<IRemoteObject> &hostProxy, const std::string &data)
 {
     napi_env env = jsRuntime_.GetNapiEnv();
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
@@ -280,6 +281,31 @@ int32_t JsAgentExtension::OnSendData(sptr<IRemoteObject> hostProxy, std::string 
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsAgentExtension::SendData",
+        env, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    return static_cast<int32_t>(AbilityErrorCode::ERROR_OK);
+}
+
+int32_t JsAgentExtension::OnAuthorize(const sptr<IRemoteObject> &hostProxy, const std::string &data)
+{
+    napi_env env = jsRuntime_.GetNapiEnv();
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
+        ([weak = weak_from_this(), hostProxy, dataParam = data](napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto extensionSptr = weak.lock();
+            if (!extensionSptr) {
+                TAG_LOGE(AAFwkTag::SER_ROUTER, "null extensionSptr");
+                return;
+            }
+            auto sptrThis = std::static_pointer_cast<JsAgentExtension>(extensionSptr);
+            if (!sptrThis) {
+                TAG_LOGE(AAFwkTag::SER_ROUTER, "null sptrThis");
+                return;
+            }
+            sptrThis->HandleAuthorize(hostProxy, dataParam);
+        });
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsAgentExtension::Authorize",
         env, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
     return static_cast<int32_t>(AbilityErrorCode::ERROR_OK);
 }
@@ -306,6 +332,30 @@ void JsAgentExtension::HandleSendData(sptr<IRemoteObject> hostProxy, const std::
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value argv[] = {jsHostProxy, AbilityRuntime::CreateJsValue(env, data)};
     CallObjectMethod("onData", argv, ARGC_TWO);
+}
+
+void JsAgentExtension::HandleAuthorize(sptr<IRemoteObject> hostProxy, const std::string &data)
+{
+    if (hostProxy == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null hostProxy");
+        return;
+    }
+    napi_value jsHostProxy = nullptr;
+    auto iter = hostProxyMap_.find(hostProxy);
+    if (iter != hostProxyMap_.end()) {
+        auto &hostProxyNref = iter->second;
+        if (hostProxyNref != nullptr) {
+            jsHostProxy = hostProxyNref->GetNapiValue();
+        }
+    }
+    if (jsHostProxy == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null jsHostProxy");
+        return;
+    }
+
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value argv[] = {jsHostProxy, AbilityRuntime::CreateJsValue(env, data)};
+    CallObjectMethod("onAuth", argv, ARGC_TWO);
 }
 
 napi_value JsAgentExtension::CallObjectMethod(const char* name, napi_value const* argv, size_t argc)

@@ -19,7 +19,9 @@
 #include <vector>
 
 #include "agent_card.h"
+#include "iability_connection.h"
 #include "iremote_broker.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -38,6 +40,17 @@ public:
     }
 
     virtual int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card)
+    {
+        return 0;
+    }
+
+    virtual int32_t ConnectAgentExtensionAbility(
+        const AAFwk::Want &want, const sptr<AAFwk::IAbilityConnection> &connection)
+    {
+        return 0;
+    }
+
+    virtual int32_t DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection)
     {
         return 0;
     }

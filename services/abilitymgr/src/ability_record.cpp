@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
+#include "agent_extension_connection_constants.h"
 #include "app_exit_reason_data_manager.h"
 #include "appfreeze_manager.h"
 #include "app_utils.h"
@@ -2048,6 +2049,9 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (want_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
         want_.RemoveParam(UISERVICEHOSTPROXY_KEY);
+    }
+    if (want_.HasParameter(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY)) {
+        want_.RemoveParam(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY);
     }
 }
 
