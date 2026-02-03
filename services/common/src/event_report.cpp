@@ -126,7 +126,6 @@ void EventReport::LogErrorEvent(const std::string &name, HiSysEventEventType typ
 {
     auto hisyseventReport = std::make_shared<HisyseventReport>(8);
     hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
-    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
     hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
     hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
@@ -200,7 +199,6 @@ void EventReport::LogTerminateAbilityEvent(
     const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     auto hisyseventReport = std::make_shared<HisyseventReport>(3);
-    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
     hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
     hisyseventReport->Report("AAFWK", name.c_str(), type);
@@ -210,7 +208,6 @@ void EventReport::LogAbilityOnForegroundEvent(
     const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     auto hisyseventReport = std::make_shared<HisyseventReport>(7);
-    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
     hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
     hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
@@ -223,7 +220,6 @@ void EventReport::LogAbilityOnBackgroundEvent(
     const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
     auto hisyseventReport = std::make_shared<HisyseventReport>(6);
-    hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
     hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
     hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
@@ -264,7 +260,7 @@ void EventReport::LogStartAbilityByAppLinking(
         eventInfo.bundleName.c_str(), eventInfo.callerBundleName.c_str(), eventInfo.uri.c_str());
     auto hisyseventReport = std::make_shared<HisyseventReport>(3);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
-    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.moduleName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
     hisyseventReport->InsertParam(EVENT_KEY_URI, eventInfo.uri);
     auto ret = hisyseventReport->Report("AAFWK", name.c_str(), type);
     if (ret != 0) {
@@ -825,7 +821,11 @@ void EventReport::SendReportDataPartitionUsageEvent(const EventName &eventName, 
     hisyseventReport->InsertParam(EVENT_COMPONENT_NAME_KEY, eventInfo.componentName);
     hisyseventReport->InsertParam(EVENT_PARTITION_NAME_KEY, eventInfo.partitionName);
     hisyseventReport->InsertParam(EVENT_REMAIN_PARTITION_SIZE_KEY, eventInfo.remainPartitionSize);
-    hisyseventReport->InsertParam(EVENT_FILE_OR_FOLDER_PATH, eventInfo.fileOfFolderPath);
+    std::vector<char*> list = {};
+    for (auto s : eventInfo.fileOfFolderPath) {
+        list.emplace_back(const_cast<char *>(s.c_str()));
+    }
+    hisyseventReport->InsertParam(EVENT_FILE_OR_FOLDER_PATH, list);
     hisyseventReport->InsertParam(EVENT_FILE_OR_FOLDER_SIZE, eventInfo.fileOfFolderSize);
 #ifdef USE_EXTENSION_DATA
     hisyseventReport->Report("FILEMANAGEMENT", name.c_str(), type);
