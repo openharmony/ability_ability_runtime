@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H
-#define OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H
+#ifndef OHOS_AGENT_RUNTIME_JS_AGENT_EXTENSION_STUB_IMPL_H
+#define OHOS_AGENT_RUNTIME_JS_AGENT_EXTENSION_STUB_IMPL_H
 
 #include "agent_receiver_stub.h"
 #include "js_agent_extension.h"
 
 namespace OHOS {
 namespace AgentRuntime {
-class AgentExtensionStubImpl : public AgentReceiverStub {
+class JsAgentExtensionStubImpl : public AgentReceiverStub {
 public:
-    explicit AgentExtensionStubImpl(std::weak_ptr<JsAgentExtension>& ext);
-    virtual ~AgentExtensionStubImpl();
+    explicit JsAgentExtensionStubImpl(std::weak_ptr<JsAgentExtension>& ext);
+    virtual ~JsAgentExtensionStubImpl();
     virtual int32_t SendData(const sptr<IRemoteObject> &hostProxy, const std::string &data) override;
     virtual int32_t Authorize(const sptr<IRemoteObject> &hostProxy, const std::string &data) override;
 
@@ -33,4 +33,4 @@ protected:
 };
 } // namespace AgentRuntime
 } // namespace OHOS
-#endif //OHOS_AGENT_RUNTIME_AGENT_EXTENSION_STUB_IMPL_H
+#endif //OHOS_AGENT_RUNTIME_JS_AGENT_EXTENSION_STUB_IMPL_H

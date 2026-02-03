@@ -218,11 +218,6 @@ public:
     void HandleOnAuthorize(const std::string &data);
 
     /**
-     * Call the onDisconnect method on the JavaScript callback object.
-     */
-    void CallJsOnDisconnect();
-
-    /**
      * Set the JS connection object.
      *
      * @param jsConnectionObject The JS connection object to set.
@@ -291,13 +286,10 @@ public:
         std::unique_ptr<NativeReference> &callback, napi_value value);
 
 private:
-    /**
-     * Convert element name to JavaScript object.
-     *
-     * @param element The element name to convert.
-     * @return Returns the JavaScript object.
-     */
-    napi_value ConvertElement(const AppExecFwk::ElementName &element);
+    void HandleOnAbilityConnectDone(const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject, int resultCode);
+
+    void HandleOnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode);
 
 protected:
     napi_env env_;

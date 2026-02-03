@@ -29,7 +29,7 @@ using namespace OHOS::AbilityRuntime;
 class AgentExtension;
 class AgentExtensionContext;
 class JsAgentExtension;
-class AgentExtensionStubImpl;
+class JsAgentExtensionStubImpl;
 
 /**
  * @brief Basic service components.
@@ -137,7 +137,7 @@ private:
     std::shared_ptr<AbilityContext> aContext_ = nullptr;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
-    sptr<AgentExtensionStubImpl> extensionStub_;
+    sptr<JsAgentExtensionStubImpl> extensionStub_;
     std::map<sptr<IRemoteObject>, std::unique_ptr<NativeReference>> hostProxyMap_;
 };
 }  // namespace AgentRuntime

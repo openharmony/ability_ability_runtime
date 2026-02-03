@@ -335,8 +335,7 @@ sptr<JSAgentConnection> JsAgentManager::CreateAgentConnection(napi_env env,
     connection->SetNapiAsyncTask(asyncTaskShared);
 
     // Insert into registry
-    int64_t connectionId = AgentConnectionUtils::InsertAgentConnection(
-        connection, want);
+    int64_t connectionId = AgentConnectionUtils::InsertAgentConnection(connection, want);
     TAG_LOGD(AAFwkTag::SER_ROUTER, "Connection inserted, id: %{public}s", std::to_string(connectionId).c_str());
 
     return connection;
