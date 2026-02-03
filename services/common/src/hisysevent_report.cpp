@@ -194,12 +194,13 @@ void HisyseventReport::InsertParam(const char* name, char* value)
         return;
     }
     std::string copiedValue = value;
+    paramString_.emplace_back(copiedValue);
+    std::string& strInVector = paramString_.back();
     HiSysEventParam param = {
         .t = HISYSEVENT_STRING,
-        .v = { .s = copiedValue.data()},
+        .v = { .s = const_cast<char*>(strInVector.data())},
         .arraySize = 0,
     };
-    paramString_.emplace_back(copiedValue);
     SetParamName(param, name);
     params_[pos_++] = param;
 }
