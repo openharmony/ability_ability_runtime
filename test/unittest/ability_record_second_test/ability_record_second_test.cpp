@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -949,6 +949,215 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetDebugUIExtension_002, TestSiz
     EXPECT_TRUE(abilityRecord->want_.HasParameter(DEBUG_APP));
     EXPECT_TRUE(abilityRecord->launchDebugInfo_.isDebugAppSet);
     EXPECT_TRUE(abilityRecord->launchDebugInfo_.debugApp);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant when isLaunching is true for PAGE ability
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
+    abilityRecord->isLaunching_ = true;
+    abilityRecord->want_.SetParam("testParam", std::string("testValue"));
+
+    Want want;
+    want.SetParam("newParam", std::string("newValue"));
+    abilityRecord->SetWant(want);
+
+    // Want should not change when launching PAGE ability (early return)
+    EXPECT_TRUE(abilityRecord->want_.HasParameter("testParam"));
+    EXPECT_FALSE(abilityRecord->want_.HasParameter("newParam"));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant sets DEBUG_APP when isDebugAppSet is true
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->launchDebugInfo_.isDebugAppSet = true;
+    abilityRecord->launchDebugInfo_.debugApp = true;
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_TRUE(abilityRecord->want_.HasParameter(DEBUG_APP));
+    EXPECT_TRUE(abilityRecord->want_.GetBoolParam(DEBUG_APP, false));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant removes DEBUG_APP when isDebugAppSet is false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_006, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->launchDebugInfo_.isDebugAppSet = false;
+    abilityRecord->want_.SetParam(DEBUG_APP, true);
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter(DEBUG_APP));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant removes NATIVE_DEBUG when isNativeDebugSet is false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_007, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->launchDebugInfo_.isNativeDebugSet = false;
+    abilityRecord->want_.SetParam(TEST_NATIVE_DEBUG, true);
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter(TEST_NATIVE_DEBUG));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant removes PERF_CMD when isPerfCmdSet is false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_008, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->launchDebugInfo_.isPerfCmdSet = false;
+    abilityRecord->want_.SetParam(TEST_PERF_CMD, std::string("testCmd"));
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter(TEST_PERF_CMD));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant removes AGENTEXTENSIONHOSTPROXY_KEY
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_009, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    Want want;
+    want.SetParam("ohos.aafwk.params.AgentExtensionHostProxy", true);
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter("ohos.aafwk.params.AgentExtensionHostProxy"));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant does not set multiThread when it was false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_010, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->want_.SetParam(TEST_MULTI_THREAD, false);
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.GetBoolParam(TEST_MULTI_THREAD, false));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant does not set errorInfoEnhance when it was false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_011, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->want_.SetParam(TEST_ERROR_INFO_ENHANCE, false);
+
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_TRUE(abilityRecord->want_.GetBoolParam(TEST_ERROR_INFO_ENHANCE, true));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant works for non-PAGE ability type
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_012, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::SERVICE;
+    abilityRecord->isLaunching_ = true;
+    abilityRecord->want_.SetParam("oldParam", std::string("oldValue"));
+
+    Want want;
+    want.SetParam("newParam", std::string("newValue"));
+    abilityRecord->SetWant(want);
+
+    // Want should be updated for non-PAGE ability even when isLaunching is true
+    EXPECT_FALSE(abilityRecord->want_.HasParameter("oldParam"));
+    EXPECT_TRUE(abilityRecord->want_.HasParameter("newParam"));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant updates want when PAGE ability but isLaunching is false
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_013, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->want_.SetParam("oldParam", std::string("oldValue"));
+
+    Want want;
+    want.SetParam("newParam", std::string("newValue"));
+    abilityRecord->SetWant(want);
+
+    // Want should be updated for PAGE ability when isLaunching is false
+    EXPECT_FALSE(abilityRecord->want_.HasParameter("oldParam"));
+    EXPECT_TRUE(abilityRecord->want_.HasParameter("newParam"));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

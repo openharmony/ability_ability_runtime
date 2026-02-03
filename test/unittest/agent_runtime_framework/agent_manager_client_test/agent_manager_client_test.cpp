@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ability_connect_callback_interface.h"
 #include "agent_card.h"
 #define private public
 #include "ability_manager_errors.h"
@@ -23,8 +24,10 @@
 #include "agent_load_callback.h"
 #include "hilog_tag_wrapper.h"
 #undef private
+#include "iremote_object.h"
 #include "mock_agent_manager_service.h"
 #include "mock_my_flag.h"
+#include "want.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -500,7 +503,7 @@ HWTEST_F(AgentManagerClientTest, OnRemoteDied_002, TestSize.Level1)
     auto proxy = [&proxyCalled](const wptr<IRemoteObject> &) {
         proxyCalled = true;
     };
-    
+
     // Arrange
     auto deathRecipient = sptr<AgentManagerClient::AgentManagerServiceDeathRecipient>::MakeSptr(proxy);
     wptr<IRemoteObject> remoteObject = nullptr;
@@ -511,6 +514,133 @@ HWTEST_F(AgentManagerClientTest, OnRemoteDied_002, TestSize.Level1)
 
     // Assert
     EXPECT_FALSE(proxyCalled);
+}
+
+namespace {
+class MockAbilityConnection : public IRemoteStub<AAFwk::IAbilityConnection> {
+public:
+    MockAbilityConnection() = default;
+    ~MockAbilityConnection() override = default;
+
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        return 0;
+    }
+
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject,
+        int32_t resultCode) override
+    {}
+
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override
+    {}
+};
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_001
+* @tc.number: ConnectAgentExtensionAbility_001
+* @tc.desc  : Test ConnectAgentExtensionAbility returns ERR_NULL_AGENT_MGR_PROXY when proxy is null
+*/
+HWTEST_F(AgentManagerClientTest, ConnectAgentExtensionAbility_001, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = true;
+
+    AAFwk::Want want;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.ConnectAgentExtensionAbility(want, connection);
+    EXPECT_EQ(result, ERR_NULL_AGENT_MGR_PROXY);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_002
+* @tc.number: ConnectAgentExtensionAbility_002
+* @tc.desc  : Test ConnectAgentExtensionAbility returns error when agent mgr call fails
+*/
+HWTEST_F(AgentManagerClientTest, ConnectAgentExtensionAbility_002, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retConnectAgentExtensionAbility = -1;
+
+    AAFwk::Want want;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.ConnectAgentExtensionAbility(want, connection);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_003
+* @tc.number: ConnectAgentExtensionAbility_003
+* @tc.desc  : Test ConnectAgentExtensionAbility returns ERR_OK when all operations succeed
+*/
+HWTEST_F(AgentManagerClientTest, ConnectAgentExtensionAbility_003, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retConnectAgentExtensionAbility = ERR_OK;
+
+    AAFwk::Want want;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.ConnectAgentExtensionAbility(want, connection);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_001
+* @tc.number: DisconnectAgentExtensionAbility_001
+* @tc.desc  : Test DisconnectAgentExtensionAbility returns ERR_NULL_AGENT_MGR_PROXY when proxy is null
+*/
+HWTEST_F(AgentManagerClientTest, DisconnectAgentExtensionAbility_001, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = true;
+
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.DisconnectAgentExtensionAbility(connection);
+    EXPECT_EQ(result, ERR_NULL_AGENT_MGR_PROXY);
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_002
+* @tc.number: DisconnectAgentExtensionAbility_002
+* @tc.desc  : Test DisconnectAgentExtensionAbility returns error when agent mgr call fails
+*/
+HWTEST_F(AgentManagerClientTest, DisconnectAgentExtensionAbility_002, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retDisconnectAgentExtensionAbility = -1;
+
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.DisconnectAgentExtensionAbility(connection);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_003
+* @tc.number: DisconnectAgentExtensionAbility_003
+* @tc.desc  : Test DisconnectAgentExtensionAbility returns ERR_OK when all operations succeed
+*/
+HWTEST_F(AgentManagerClientTest, DisconnectAgentExtensionAbility_003, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retDisconnectAgentExtensionAbility = ERR_OK;
+
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    int32_t result = client.DisconnectAgentExtensionAbility(connection);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AgentRuntime
 } // namespace OHOS
