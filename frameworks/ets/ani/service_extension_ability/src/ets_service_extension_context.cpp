@@ -52,7 +52,7 @@ constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.Ability
 constexpr const char* SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
     "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
 constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
-    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode;";
+    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
