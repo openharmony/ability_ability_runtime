@@ -180,7 +180,7 @@ namespace {
 
 constexpr const char* ARGS_USER_ID = "-u";
 constexpr const char* ARGS_CLIENT = "-c";
-constexpr const char* ILLEGAL_INFOMATION = "The arguments are illegal and you can enter '-h' for help.";
+constexpr const char* ILLEGAL_INFORMATION = "The arguments are illegal and you can enter '-h' for help.";
 
 constexpr int32_t NEW_RULE_VALUE_SIZE = 6;
 constexpr int32_t APP_ALIVE_TIME_MS = 1000;  // Allow background startup within 1 second after application startup
@@ -11196,7 +11196,7 @@ int AbilityManagerService::Dump(const std::vector<std::u16string>& args, std::st
     ErrCode errCode = ERR_OK;
     auto size = args.size();
     if (size == 0) {
-        ShowHelp(result);
+        DumpUtils::ShowHelp(result);
         return errCode;
     }
 
@@ -11206,11 +11206,11 @@ int AbilityManagerService::Dump(const std::vector<std::u16string>& args, std::st
     }
 
     if (argsStr[0] == "-h") {
-        ShowHelp(result);
+        DumpUtils::ShowHelp(result);
     } else {
         errCode = ProcessMultiParam(argsStr, result);
         if (errCode == ERR_AAFWK_HIDUMP_INVALID_ARGS) {
-            ShowIllegalInfomation(result);
+            result.append(ILLEGAL_INFORMATION);
         }
     }
     return errCode;
@@ -11262,32 +11262,6 @@ ErrCode AbilityManagerService::ProcessMultiParam(std::vector<std::string>& argsS
         result += it + "\n";
     }
     return ERR_OK;
-}
-
-void AbilityManagerService::ShowHelp(std::string& result)
-{
-    result.append("Usage:\n")
-        .append("-h                          ")
-        .append("help text for the tool\n")
-        .append("-a [-c | -u {UserId}]       ")
-        .append("dump all ability infomation in the system or all ability infomation of client/UserId\n")
-        .append("-l                          ")
-        .append("dump all mission list information in the system\n")
-        .append("-i {AbilityRecordId}        ")
-        .append("dump an ability infomation by ability record id\n")
-        .append("-e                          ")
-        .append("dump all extension infomation in the system(FA: ServiceAbilityRecords, Stage: ExtensionRecords)\n")
-        .append("-p [PendingWantRecordId]    ")
-        .append("dump all pendingwant record infomation in the system\n")
-        .append("-r                          ")
-        .append("dump all process in the system\n")
-        .append("-d                          ")
-        .append("dump all data ability infomation in the system");
-}
-
-void AbilityManagerService::ShowIllegalInfomation(std::string& result)
-{
-    result.append(ILLEGAL_INFOMATION);
 }
 
 int AbilityManagerService::DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken)
