@@ -294,8 +294,9 @@ void UIExtension::RegisterUiExtensionDelayResultCallback(uint64_t intentId, cons
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto res = uiWindowMap_.find(componentId);
     if (res != uiWindowMap_.end() && res->second != nullptr) {
-        auto callback = [res](AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
-            return ProcessInsightIntentResult(res->second, result);
+        auto window = res->second;
+        auto callback = [window](AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
+            return ProcessInsightIntentResult(window, result);
         };
         InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(intentId, {callback, isDecorator});
     }
