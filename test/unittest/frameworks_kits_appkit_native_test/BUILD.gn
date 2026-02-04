@@ -1175,7 +1175,9 @@ ohos_unittest("startup_manager_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task_result.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_utils.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_native_module_manager.cpp",
     "app_startup_task_matcher_test.cpp",
+    "preload_system_so_startup_task_test.cpp",
     "startup_manager_test.cpp",
     "startup_task_result_test.cpp",
   ]

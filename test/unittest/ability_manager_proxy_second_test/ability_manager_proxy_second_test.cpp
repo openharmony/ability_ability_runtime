@@ -33,6 +33,7 @@
 #include "mission_snapshot.h"
 #include "want_sender_info.h"
 #include "pending_want_record.h"
+#include "../want_receiver_proxy_test/want_receiver_stub_mock.h"
 
 
 using namespace testing::ext;
@@ -828,6 +829,149 @@ HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_KillProcessWithPrepa
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
     EXPECT_EQ(proxy_->KillProcessWithPrepareTerminate(pids, false), NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_KillProcessWithPrepareTerminate_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_CloseAbility_0100
+ * @tc.desc: CloseAbility wraps TerminateAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_CloseAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_CloseAbility_0100 start");
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "data.client.bundle";
+    abilityRequest.abilityInfo.name = "ClientAbility";
+    abilityRequest.abilityInfo.type = AbilityType::DATA;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(proxy_->CloseAbility(abilityRecord->GetToken(), 0, nullptr), INVALID_PARAMETERS_ERR);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    EXPECT_EQ(proxy_->CloseAbility(abilityRecord->GetToken(), 0, nullptr), NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_CloseAbility_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_SendLocalWantSender_0100
+ * @tc.desc: SendLocalWantSender
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_SendLocalWantSender_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SendLocalWantSender_0100 start");
+    SenderInfo senderInf;
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(proxy_->SendLocalWantSender(senderInf), INVALID_PARAMETERS_ERR);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    EXPECT_EQ(proxy_->SendLocalWantSender(senderInf), NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SendLocalWantSender_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_CancelWantSender_0100
+ * @tc.desc: CancelWantSender
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_CancelWantSender_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_CancelWantSender_0100 start");
+    sptr<IWantSender> target(new (std::nothrow) PendingWantRecord());
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    proxy_->CancelWantSender(target);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    proxy_->CancelWantSender(target);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_CancelWantSender_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_RegisterCancelListener_0100
+ * @tc.desc: Register/Unregister Cancel Listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_RegisterCancelListener_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RegisterCancelListener_0100 start");
+    sptr<IWantSender> sender(new (std::nothrow) PendingWantRecord());
+    sptr<IWantReceiver> receiver = new WantReceiverStubMock();
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    proxy_->RegisterCancelListener(sender, receiver);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    proxy_->RegisterCancelListener(sender, receiver);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    proxy_->UnregisterCancelListener(sender, receiver);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    proxy_->UnregisterCancelListener(sender, receiver);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RegisterCancelListener_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_SubmitSaveRecoveryInfo_0100
+ * @tc.desc: SubmitSaveRecoveryInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_SubmitSaveRecoveryInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SubmitSaveRecoveryInfo_0100 start");
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "data.client.bundle";
+    abilityRequest.abilityInfo.name = "ClientAbility";
+    abilityRequest.abilityInfo.type = AbilityType::DATA;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    proxy_->SubmitSaveRecoveryInfo(abilityRecord->GetToken());
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    proxy_->SubmitSaveRecoveryInfo(abilityRecord->GetToken());
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SubmitSaveRecoveryInfo_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_RevokeDelegator_0100
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_RevokeDelegator_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RevokeDelegator_0100 start");
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "data.client.bundle";
+    abilityRequest.abilityInfo.name = "ClientAbility";
+    abilityRequest.abilityInfo.type = AbilityType::DATA;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(proxy_->RevokeDelegator(abilityRecord->GetToken()), INVALID_PARAMETERS_ERR);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    EXPECT_EQ(proxy_->RevokeDelegator(abilityRecord->GetToken()), NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RevokeDelegator_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_SetLockedState_0100
+ * @tc.desc: SetLockedState
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_SetLockedState_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SetLockedState_0100 start");
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    proxy_->SetLockedState(1, true);
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    proxy_->SetLockedState(1, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_SetLockedState_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_IsRestartAppLimit_0100
+ * @tc.desc: IsRestartAppLimit
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_IsRestartAppLimit_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_IsRestartAppLimit_0100 start");
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_FALSE(proxy_->IsRestartAppLimit());
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    EXPECT_FALSE(proxy_->IsRestartAppLimit());
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_IsRestartAppLimit_0100 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
