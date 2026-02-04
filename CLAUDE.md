@@ -148,29 +148,107 @@ run -t UT -ts AbilityAppDebugInfoFuzzTest
 
 ```
 ability_runtime/
-├── frameworks/           # 框架实现
-│   ├── native/          # C++ 原生框架（ability context，extensions）
-│   ├── js/napi/         # JavaScript NAPI 绑定
-│   ├── ets/             # ETS/ArkTS 绑定（ani - arkts native interface）
-│   ├── cj/              # CJ (C-based JSON) FFI 绑定
-│   └── c/               # ability_runtime 的 C API
-├── interfaces/          # 公共接口
-│   ├── inner_api/       # 内部组件接口（IPC、客户端）
-│   └── kits/            # 公共 SDK 接口（native、C）
-├── services/            # 系统服务
-│   ├── abilitymgr/      # AbilityManagerService
-│   ├── appmgr/          # AppManagerService
-│   ├── dataobsmgr/      # DataObserverManager
-│   ├── uripermmgr/      # UriPermissionManager
-│   ├── quickfixmgr/     # QuickFix 管理器
-│   └── dialog_ui/       # 系统对话框 HAP
-├── agent_runtime_framework/  # Agent 组件框架
+├── frameworks/               # 框架实现层
+│   ├── native/              # C++ 原生框架
+│   │   ├── ability/         # Ability 组件框架
+│   │   │   ├── native/      # UIAbility、Extension 组件实现
+│   │   │   │   ├── action_extension_ability/         # Action 扩展
+│   │   │   │   ├── agent_extension_ability/          # Agent 扩展
+│   │   │   │   ├── auto_fill_extension_ability/      # 自动填充扩展
+│   │   │   │   ├── photo_editor_extension_ability/   # 照片编辑器扩展
+│   │   │   │   ├── share_extension_ability/          # 分享扩展
+│   │   │   │   ├── ui_extension_ability/             # UI 扩展
+│   │   │   │   ├── ui_service_extension_ability/     # UI 服务扩展
+│   │   │   │   ├── embedded_ui_extension_ability/    # 嵌入式 UI 扩展
+│   │   │   │   ├── form_runtime/                     # Form 卡片运行时
+│   │   │   │   ├── continuation/                     # 组件迁移
+│   │   │   │   ├── recovery/                         # 组件恢复
+│   │   │   │   ├── insight_intent_executor/          # 意图执行器
+│   │   │   │   ├── child_process_manager/            # 子进程管理
+│   │   │   │   └── auto_startup_callback/            # 自动启动回调
+│   │   │   └── ability_runtime/ # Ability 运行时核心
+│   │   ├── appkit/          # 应用工具包
+│   │   │   ├── ability_runtime/ # 应用运行时
+│   │   │   │   ├── app/      # Application 实现
+│   │   │   │   └── context/  # 应用上下文环境
+│   │   │   ├── app/          # 应用模型
+│   │   │   ├── app_startup/  # 应用启动
+│   │   │   ├── dfr/          # 应用动态帧率（DFR）
+│   │   │   ├── ability_delegator/ # 测试委托器
+│   │   │   └── ability_bundle_manager_helper/ # Bundle 管理助手
+│   │   ├── child_process/    # 子进程框架
+│   │   ├── insight_intent/   # 意图框架
+│   │   │   └── insight_intent_context/ # 意图上下文
+│   │   ├── runtime/          # 运行时核心
+│   │   └── simulator/        # 模拟器支持
+│   ├── js/napi/             # JavaScript NAPI 绑定
+│   ├── ets/                 # ETS/ArkTS 绑定
+│   ├── cj/                  # CJ FFI 绑定
+│   └── c/                   # ability_runtime 的 C API
+├── interfaces/              # 接口层
+│   ├── inner_api/           # 内部组件接口（IPC 客户端）
+│   │   ├── ability_manager/      # Ability 管理接口
+│   │   ├── extension_manager/    # Extension 管理接口
+│   │   ├── app_manager/          # 应用管理接口
+│   │   ├── auto_fill_manager/    # 自动填充管理接口
+│   │   ├── uri_permission/       # URI 权限接口
+│   │   ├── insight_intent/       # 意图接口
+│   │   ├── mission_manager/      # 任务管理接口
+│   │   ├── dataobs_manager/      # 数据观察接口
+│   │   ├── child_process_manager/# 子进程管理接口
+│   │   ├── quick_fix/            # 快速修复接口
+│   │   ├── wantagent/            # WantAgent 接口
+│   │   ├── foreground_app_obs_manager/ # 前台应用观察
+│   │   ├── connectionobs_manager/# 连接观察
+│   │   ├── session_handler/      # 会话处理
+│   │   ├── ani_base_context/     # ANI 基础上下文
+│   │   ├── napi_base_context/    # NAPI 基础上下文
+│   │   ├── native_extension/     # 原生扩展接口
+│   │   ├── runtime/              # 运行时接口
+│   │   ├── connect_server_manager/# 连接服务器管理
+│   │   ├── page_config_manager/  # 页面配置管理
+│   │   ├── deps_wrapper/         # 依赖包装
+│   │   └── error_utils/          # 错误工具
+│   └── kits/                # 公共 SDK 接口
+│       ├── native/          # Native SDK
+│       └── c/               # C SDK
+├── services/                # 系统服务层
+│   ├── abilitymgr/          # 组件管理服务（AbilityManagerService）
+│   ├── appmgr/              # 应用管理服务（AppManagerService）
+│   ├── uripermmgr/          # URI 权限管理服务
+│   ├── dataobsmgr/          # 数据观察管理服务
+│   ├── quickfixmgr/         # 快速修复管理服务
+│   ├── appdfr/              # 应用动态帧率服务
+│   ├── dialog_ui/           # 系统对话框 UI
+│   ├── common/              # 服务通用模块
+│   └── sa_profile/          # 系统能力配置
+├── agent_runtime_framework/ # Agent 组件框架
 ├── service_router_framework/ # 服务路由框架
-├── js_environment/      # JS 运行时环境
-├── ets_environment/     # ETS 运行时环境
-├── cj_environment/      # CJ 运行时环境
-├── tools/aa/            # "aa" 命令行工具
-└── test/                # 测试（unittest、moduletest、fuzztest）
+├── js_environment/          # JavaScript 运行时环境
+├── ets_environment/         # ETS/ArkTS 运行时环境
+├── cj_environment/          # CJ 运行时环境
+├── utils/                   # 工具库
+│   ├── global/              # 全局工具
+│   └── server/              # 服务端工具
+├── tools/                   # 工具
+│   ├── aa/                  # "aa" 命令行工具
+│   └── test/                # 测试工具
+├── test/                    # 测试
+│   ├── unittest/            # 单元测试
+│   ├── moduletest/          # 模块测试
+│   ├── fuzztest/            # Fuzz 测试
+│   ├── new_test/            # 新测试
+│   ├── mock/                # Mock 对象
+│   ├── sample/              # 测试示例
+│   └── resource/            # 测试资源
+├── docs/                    # 文档
+├── figures/                 # 图片资源
+├── ability_runtime.gni      # 构建配置
+├── bundle.json              # 组件描述
+├── BUILD.gn                 # GN 构建入口
+├── hisysevent.yaml          # 系统事件定义
+├── OAT.xml                  # 开源合规性
+└── CODEOWNERS               # 代码所有者
 ```
 
 ### 核心组件
@@ -200,12 +278,55 @@ ability_runtime/
 - 进程状态上报、子进程管理、进程预加载
 - 应用恢复和重启
 
+#### UriPermissionManager
+位于 `services/uripermmgr/`，负责：
+- 跨应用 URI 访问权限管理
+- URI 权限授予和撤销
+- 安全的跨进程数据访问
+
+#### DataObserverManager
+位于 `services/dataobsmgr/`，负责：
+- 数据变化观察
+- 跨应用数据同步
+
+#### QuickFixManager
+位于 `services/quickfixmgr/`，负责：
+- 应用热修复能力
+- 补丁管理和应用
+- 无需重启的修复机制
+
+#### AppDFRManager
+位于 `services/appdfr/`，负责：
+- 应用动态帧率管理
+- 性能优化和功耗控制
+
 #### 框架层
 
 **Native 框架** (`frameworks/native/`)：
-- `ability/native/`：Ability、AbilityContext、extensions 实现
-- `appkit/`：Application、AbilityStage、TestRunner
-- `child_process/`：子进程管理
+- **UIAbility 组件**：`ability/native/` - Ability、AbilityContext 实现
+- **Extension 扩展组件**：`ability/native/`
+  - `action_extension_ability/` - Action 扩展
+  - `agent_extension_ability/` - Agent 扩展
+  - `auto_fill_extension_ability/` - 自动填充扩展
+  - `photo_editor_extension_ability/` - 照片编辑器扩展
+  - `share_extension_ability/` - 分享扩展
+  - `ui_extension_ability/` - UI 扩展
+  - `ui_service_extension_ability/` - UI 服务扩展
+  - `embedded_ui_extension_ability/` - 嵌入式 UI 扩展
+  - `form_runtime/` - Form 卡片运行时
+  - `continuation/` - 组件迁移
+  - `recovery/` - 组件恢复
+- **意图框架**：`insight_intent/` - InsightIntent 意图框架实现
+  - `insight_intent_context/` - 意图上下文
+  - `ability/native/insight_intent_executor/` - 意图执行器
+- **应用上下文环境**：`appkit/ability_runtime/context/` - Context 实现
+- **应用启动**：`appkit/app_startup/` - 应用启动流程
+- **子进程**：`child_process/` - 子进程框架
+  - `ability/native/child_process_manager/` - 子进程管理器
+- **应用模型**：`appkit/` - Application、AbilityStage、TestRunner
+- **其他**：
+  - `runtime/` - 运行时核心
+  - `simulator/` - 模拟器支持
 
 **NAPI 层** (`frameworks/js/napi/`)：
 - JavaScript/TypeScript 应用的绑定
@@ -266,13 +387,26 @@ ability_runtime/
 
 ### 日志记录
 
-使用 HiLog 进行日志记录：
-```cpp
-#include "hilog/log.h"
+使用 `hilog_tag_wrapper.h` 进行日志记录：
 
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "MyTag"};
-HILOG_INFO(LABEL, "Message: %{public}d", value);
+```cpp
+#include "hilog_tag_wrapper.h"
+
+// 使用预定义的日志标签枚举
+TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability started: %{public}s", abilityName.c_str());
+TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to start ability, error: %{public}d", errorCode);
+TAG_LOGW(AAFwkTag::ABILITYMGR, "Warning: %{public}s", message.c_str());
+TAG_LOGD(AAFwkTag::ABILITYMGR, "Debug info: %{public}s", debugInfo.c_str());
+TAG_LOGF(AAFwkTag::ABILITYMGR, "Fatal error: %{public}s", errorStr.c_str());
+
+// 可用的日志标签（AAFwkLogTag 枚举）：
+// DEFAULT, ABILITY, TEST, AA_TOOL, ABILITY_SIM,
+// APPDFR, APPMGR, DBOBSMGR, DIALOG, QUICKFIX, URIPERMMGR, BUNDLEMGRHELPER, APPKIT,
+// JSENV, JSRUNTIME, FA, INTENT, JSNAPI, CJRUNTIME, ETSRUNTIME, ANI,
+// DELEGATOR, CONTEXT, UIABILITY, WANT, MISSION, CONNECTION, ABILITYMGR, ...
 ```
+
+日志标签定义位于 `services/common/include/hilog_tag_wrapper.h`。
 
 ### aa 命令
 
