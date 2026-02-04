@@ -1379,6 +1379,16 @@ public:
     virtual int32_t ManualStartAutoStartupApps(int32_t userId) override;
 
     /**
+     * @brief Query the caller's Token ID for anco.
+     * @param userId Indicates the user ID.
+     * @param asCallerForAncoSessionId Indicates the anco session Id of cached information.
+     * @param callerTokenId Indicates the output caller Token ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode QueryCallerTokenIdForAnco(int32_t userId, const std::string &asCallerForAncoSessionId,
+        uint32_t &callerTokenId) override;
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.

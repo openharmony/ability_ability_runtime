@@ -52,6 +52,7 @@
 #include "param.h"
 #include "permission_constants.h"
 #include "process_options.h"
+#include "session_info.h"
 #include "uri_utils.h"
 #include "user_controller/user_controller.h"
 #include "utils/state_utils.h"
@@ -450,6 +451,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
         bool isNotifyCollaborator = !options.targetGrantBundleName.empty();
         if (isNotifyCollaborator) {
             targetBundleName = options.targetGrantBundleName;
+        }
+        if (options.callerTypeForAnco == static_cast<int32_t>(CallerTypeForAnco::QUERY)) {
+            tokenId = options.realCallerTokenId;
         }
         GrantUriPermission(want_, targetBundleName, false, tokenId, isNotifyCollaborator);
     }

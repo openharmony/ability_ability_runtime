@@ -5294,6 +5294,38 @@ int32_t AbilityManagerProxy::ManualStartAutoStartupApps(int32_t userId)
     return reply.ReadInt32();
 }
 
+ErrCode AbilityManagerProxy::QueryCallerTokenIdForAnco(int32_t userId, const std::string &asCallerForAncoSessionId,
+    uint32_t &callerTokenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId fail");
+        return ERR_WRITE_INT32_FAILED;
+    }
+    if (!data.WriteString(asCallerForAncoSessionId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write asCallerForAncoSessionId fail");
+        return ERR_WRITE_STRING_FAILED;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::QUERY_CALLER_TOKEN_ID_FOR_ANCO, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
+        return ret;
+    }
+    auto resultCode = reply.ReadInt32();
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply error:%{public}d", resultCode);
+        return resultCode;
+    }
+    callerTokenId = reply.ReadUint32();
+    return NO_ERROR;
+}
+
 int AbilityManagerProxy::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate)
 {
     MessageParcel data;
