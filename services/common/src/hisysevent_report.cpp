@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <memory>
 #include "securec.h"
 #include "hilog_tag_wrapper.h"
 
@@ -189,20 +190,27 @@ void HisyseventReport::InsertParam(const char* name, double value)
 
 void HisyseventReport::InsertParam(const char* name, char* value)
 {
-    if (length_ <= pos_) {
+    if (!name || !value || length_ <= pos_) {
         TAG_LOGE(AAFwkTag::DEFAULT, "param is full");
         return;
     }
-    std::string copiedValue = value;
-    paramString_.emplace_back(copiedValue);
-    std::string& strInVector = paramString_.back();
+    int32_t len = std::strlen(value) + 1;
+    auto buffer = std::make_unique<char[]>(len);
+    int32_t ret = strcpy_s(buffer.get(), len, value);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "InsertParam err %{public}d", ret);
+        return;
+    }
+
     HiSysEventParam param = {
         .t = HISYSEVENT_STRING,
-        .v = { .s = const_cast<char*>(strInVector.data())},
+        .v = { .s = buffer.get()},
         .arraySize = 0,
     };
     SetParamName(param, name);
     params_[pos_++] = param;
+
+    paramBuffers_.emplace_back(std::move(buffer));
 }
 
 void HisyseventReport::InsertParam(const char* name, std::vector<int32_t> value)
