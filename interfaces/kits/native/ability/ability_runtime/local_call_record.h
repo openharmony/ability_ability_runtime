@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #ifndef OHOS_ABILITY_RUNTIME_LOCAL_CALL_RECORD_H
 #define OHOS_ABILITY_RUNTIME_LOCAL_CALL_RECORD_H
+
+#include <mutex>
 
 #include "caller_callback.h"
 #include "element_name.h"
@@ -36,7 +38,7 @@ public:
     void SetRemoteObject(const sptr<IRemoteObject> &call, sptr<IRemoteObject::DeathRecipient> callRecipient);
     void AddCaller(const std::shared_ptr<CallerCallBack> &callback);
     bool RemoveCaller(const std::shared_ptr<CallerCallBack> &callback);
-    void OnCallStubDied(const wptr<IRemoteObject> &remote);
+    void OnCallStubDied();
     void NotifyRemoteStateChanged(int32_t abilityState);
     sptr<IRemoteObject> GetRemoteObject() const;
     void InvokeCallBack() const;
@@ -58,6 +60,7 @@ private:
     sptr<IRemoteObject> remoteObject_ = nullptr;
     wptr<IRemoteObject> connection_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> callRecipient_ = nullptr;
+    mutable std::mutex callersMutex_;  // Protect callers_ from concurrent access
     std::vector<std::shared_ptr<CallerCallBack>> callers_;
     AppExecFwk::ElementName elementName_ = {};
     bool isSingleton_ = false;
