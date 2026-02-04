@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,12 +48,20 @@ public:
 
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
 
+    // Methods to remove call records, made public for CallerConnection
+    int32_t RemoveSingletonCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
+    int32_t RemoveMultipleCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
+
+    /**
+     * @brief Remove caller connection from container
+     * @param connection The connection to remove
+     */
+    void RemoveCallerConnection(sptr<CallerConnection> connection);
+
 private:
     bool GetCallLocalRecord(const AppExecFwk::ElementName &elementName,
         std::shared_ptr<LocalCallRecord> &localCallRecord, int32_t accountId);
     void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
-    int32_t RemoveSingletonCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
-    int32_t RemoveMultipleCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
     int32_t GetCurrentUserId();
     int32_t GetValidUserId(int32_t accountId);
     bool IsCallBackCalled(const std::vector<std::shared_ptr<CallerCallBack>> &callers) const;
