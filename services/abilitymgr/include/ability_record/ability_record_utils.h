@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,8 @@ struct ForegroundOptions {
     pid_t selfPid = -1;
     int32_t requestCode = -1;
     uint64_t loadAbilityCallbackId = 0;
+    int32_t callerTypeForAnco = 0;
+    uint32_t realCallerTokenId = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
