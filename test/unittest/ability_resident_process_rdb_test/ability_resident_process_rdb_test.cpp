@@ -57,6 +57,17 @@ HWTEST_F(AbilityResidentProcessRdbTest, Init_001, TestSize.Level1) {
 
 /*
  * Feature: AbilityResidentProcessRdb
+ * Function: Init
+ * SubFunction: NA
+ * FunctionPoints: AbilityResidentProcessRdb Init
+ */
+HWTEST_F(AbilityResidentProcessRdbTest, Init_002, TestSize.Level1) {
+    EXPECT_EQ(AmsResidentProcessRdb::GetInstance().Init(), Rdb_OK);
+    EXPECT_EQ(AmsResidentProcessRdb::GetInstance().Init(), Rdb_OK);
+}
+
+/*
+ * Feature: AbilityResidentProcessRdb
  * Function: VerifyConfigurationPermissions
  * SubFunction: NA
  * FunctionPoints: AbilityResidentProcessRdb VerifyConfigurationPermissions
@@ -64,6 +75,12 @@ HWTEST_F(AbilityResidentProcessRdbTest, Init_001, TestSize.Level1) {
 HWTEST_F(AbilityResidentProcessRdbTest, VerifyConfigurationPermissions_001, TestSize.Level1) {
     EXPECT_EQ(AmsResidentProcessRdb::GetInstance().VerifyConfigurationPermissions(
         "test.com", "test.com"), Rdb_OK);
+    EXPECT_EQ(AmsResidentProcessRdb::GetInstance().VerifyConfigurationPermissions(
+        "", "test.com"), Rdb_Parameter_Err);
+    EXPECT_EQ(AmsResidentProcessRdb::GetInstance().VerifyConfigurationPermissions(
+        "", ""), Rdb_Parameter_Err);
+    EXPECT_EQ(AmsResidentProcessRdb::GetInstance().VerifyConfigurationPermissions(
+        "com.target.bundle", "com.caller.bundle"), Rdb_Search_Record_Err);
 }
 
 /*

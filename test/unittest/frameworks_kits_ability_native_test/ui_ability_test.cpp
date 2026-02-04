@@ -24,6 +24,7 @@
 #include "ability_delegator_infos.h"
 #include "ability_handler.h"
 #include "ability_recovery.h"
+#include "context_deal.h"
 #include "fa_ability_thread.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_lifecycle_observer.h"
@@ -1908,5 +1909,234 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_GetWindowStage_0400, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 #endif
+
+/**
+ * @tc.number: UIAbility_BindHybridContext_0100
+ * @tc.name: BindHybridContext
+ * @tc.desc: Cover null parameter branches.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_BindHybridContext_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
+    auto application = std::make_shared<OHOSApplication>();
+    ASSERT_NE(abilityToken, nullptr);
+    ASSERT_NE(abilityInfo, nullptr);
+    ASSERT_NE(record, nullptr);
+    ASSERT_NE(application, nullptr);
+
+    ability_->BindHybridContext(nullptr, nullptr);
+    ability_->BindHybridContext(nullptr, record);
+    ability_->BindHybridContext(application, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_BindHybridContext_0200
+ * @tc.name: BindHybridContext
+ * @tc.desc: Cover appInfo branches and non-hybrid branch.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_BindHybridContext_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
+    auto application = std::make_shared<OHOSApplication>();
+    ASSERT_NE(abilityToken, nullptr);
+    ASSERT_NE(abilityInfo, nullptr);
+    ASSERT_NE(record, nullptr);
+    ASSERT_NE(application, nullptr);
+
+    ability_->BindHybridContext(application, record);
+
+    auto baseContext = std::make_shared<ContextDeal>();
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(baseContext, nullptr);
+    ASSERT_NE(appInfo, nullptr);
+    appInfo->arkTSMode = "dynamic";
+    baseContext->SetApplicationInfo(appInfo);
+    application->AttachBaseContext(baseContext);
+    ability_->BindHybridContext(application, record);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_BindHybridContext_0300
+ * @tc.name: BindHybridContext
+ * @tc.desc: Cover abilityInfo and arkTSMode branches.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_BindHybridContext_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto application = std::make_shared<OHOSApplication>();
+    auto baseContext = std::make_shared<ContextDeal>();
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(application, nullptr);
+    ASSERT_NE(baseContext, nullptr);
+    ASSERT_NE(appInfo, nullptr);
+    appInfo->arkTSMode = "hybrid";
+    baseContext->SetApplicationInfo(appInfo);
+    application->AttachBaseContext(baseContext);
+
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    auto nullRecord = std::make_shared<AbilityLocalRecord>(nullptr, abilityToken, nullptr, 0);
+    ASSERT_NE(abilityToken, nullptr);
+    ASSERT_NE(nullRecord, nullptr);
+    ability_->BindHybridContext(application, nullRecord);
+
+    auto dynamicInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(dynamicInfo, nullptr);
+    dynamicInfo->arkTSMode = "dynamic";
+    auto dynamicRecord = std::make_shared<AbilityLocalRecord>(dynamicInfo, abilityToken, nullptr, 0);
+    ability_->BindHybridContext(application, dynamicRecord);
+
+    auto staticInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(staticInfo, nullptr);
+    staticInfo->arkTSMode = "static";
+    auto staticRecord = std::make_shared<AbilityLocalRecord>(staticInfo, abilityToken, nullptr, 0);
+    ability_->BindHybridContext(application, staticRecord);
+
+    auto otherInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(otherInfo, nullptr);
+    otherInfo->arkTSMode = "unknown";
+    auto otherRecord = std::make_shared<AbilityLocalRecord>(otherInfo, abilityToken, nullptr, 0);
+    ability_->BindHybridContext(application, otherRecord);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_BindEtsContext_0100
+ * @tc.name: BindEtsContext
+ * @tc.desc: Cover abilityContext and bindingObject branches.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_BindEtsContext_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto application = std::make_shared<OHOSApplication>();
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
+    ASSERT_NE(application, nullptr);
+    ASSERT_NE(abilityToken, nullptr);
+    ASSERT_NE(abilityInfo, nullptr);
+    ASSERT_NE(record, nullptr);
+
+    ability_->BindEtsContext(application, record);
+
+    auto contextWithNullBinding = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(contextWithNullBinding, nullptr);
+    ability_->AttachAbilityContext(contextWithNullBinding);
+    EXPECT_EQ(ability_->GetAbilityContext(), contextWithNullBinding);
+    contextWithNullBinding->object_.reset();
+    ability_->BindEtsContext(application, record);
+
+    auto contextWithBinding = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(contextWithBinding, nullptr);
+    ability_->AttachAbilityContext(contextWithBinding);
+    EXPECT_EQ(ability_->GetAbilityContext(), contextWithBinding);
+    ability_->BindEtsContext(application, record);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_BindJsContext_0100
+ * @tc.name: BindJsContext
+ * @tc.desc: Cover abilityContext and bindingObject branches.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_BindJsContext_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto application = std::make_shared<OHOSApplication>();
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
+    ASSERT_NE(application, nullptr);
+    ASSERT_NE(abilityToken, nullptr);
+    ASSERT_NE(abilityInfo, nullptr);
+    ASSERT_NE(record, nullptr);
+
+    ability_->BindJsContext(application, record);
+
+    auto contextWithNullBinding = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(contextWithNullBinding, nullptr);
+    ability_->AttachAbilityContext(contextWithNullBinding);
+    EXPECT_EQ(ability_->GetAbilityContext(), contextWithNullBinding);
+    contextWithNullBinding->object_.reset();
+    ability_->BindJsContext(application, record);
+
+    auto contextWithBinding = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(contextWithBinding, nullptr);
+    ability_->AttachAbilityContext(contextWithBinding);
+    EXPECT_EQ(ability_->GetAbilityContext(), contextWithBinding);
+    ability_->BindJsContext(application, record);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_OnConfigurationUpdatedNotify_0200
+ * @tc.name: OnConfigurationUpdatedNotify
+ * @tc.desc: Verify branch when abilityConfig is nullptr.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    Configuration configuration;
+    configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    auto context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ability_->AttachAbilityContext(context);
+    ability_->OnConfigurationUpdatedNotify(configuration);
+    EXPECT_NE(ability_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_OnConfigurationUpdatedNotify_0300
+ * @tc.name: OnConfigurationUpdatedNotify
+ * @tc.desc: Verify branch when newConfig size is 0.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    Configuration configuration;
+    configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    auto context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    context->SetAbilityConfiguration(configuration);
+    ability_->AttachAbilityContext(context);
+    ability_->OnConfigurationUpdatedNotify(configuration);
+    EXPECT_NE(ability_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_OnConfigurationUpdatedNotify_0400
+ * @tc.name: OnConfigurationUpdatedNotify
+ * @tc.desc: Verify branches when windowScene is true/false and newConfig size is not 0.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    Configuration configuration;
+    configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+    configuration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+
+    Configuration abilityConfiguration;
+    abilityConfiguration.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "en");
+
+    auto context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    context->SetAbilityConfiguration(abilityConfiguration);
+    ability_->AttachAbilityContext(context);
+
+    ability_->scene_ = nullptr;
+    ability_->OnConfigurationUpdatedNotify(configuration);
+
+    ability_->scene_ = std::make_shared<Rosen::WindowScene>();
+    ability_->OnConfigurationUpdatedNotify(configuration);
+
+    EXPECT_NE(ability_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
