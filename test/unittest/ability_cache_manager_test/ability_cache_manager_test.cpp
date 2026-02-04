@@ -1164,5 +1164,340 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartProcess_001, Tes
     abilityRecMgr.SignRestartProcess(pid);
     EXPECT_TRUE(abilityRecord->GetRestartAppFlag());
 }
+/**
+ * @tc.name: AbilityCacheManagerTest_RemoveAbilityRecInDevList_001
+ * @tc.desc: Test RemoveAbilityRecInDevList with nullptr input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, RemoveAbilityRecInDevList_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.RemoveAbilityRecInDevList(nullptr);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "NonExistModule";
+    abilityInfo.bundleName = "NonExistBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.accessTokenId = 9999;
+    Want want;
+    auto nonExistRec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    nonExistRec->Init(AbilityRequest());
+
+    cacheMgr.RemoveAbilityRecInDevList(nonExistRec);
+    EXPECT_EQ(appInfo.accessTokenId, 9999);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_RemoveAbilityRecInProcList_001
+ * @tc.desc: Test RemoveAbilityRecInProcList with nullptr input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, RemoveAbilityRecInProcList_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.RemoveAbilityRecInProcList(nullptr);
+    
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "TestBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.accessTokenId = 8888;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+
+    cacheMgr.RemoveAbilityRecInProcList(rec);
+    EXPECT_EQ(appInfo.accessTokenId, 8888);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_IsRecInfoSame_001
+ * @tc.desc: Test IsRecInfoSame with nullptr abilityRecord
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, IsRecInfoSame_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AbilityRequest abilityRequest;
+    bool result = cacheMgr.IsRecInfoSame(abilityRequest, nullptr);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_IsRecInfoSame_002
+ * @tc.desc: Test IsRecInfoSame with mismatched fields
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, IsRecInfoSame_002, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.moduleName = "TestModule";
+    ElementName element("", "", "TestAbility", "");
+    abilityRequest.want.SetElement(element);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "MismatchModule";
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    ElementName elementMismatch("", "", "MismatchAbility", "");
+    want.SetElement(elementMismatch);
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+
+    bool result = cacheMgr.IsRecInfoSame(abilityRequest, rec);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_GetAbilityRecInProcList_001
+ * @tc.desc: Test GetAbilityRecInProcList with non-existent accessTokenId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, GetAbilityRecInProcList_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = 7777;
+    auto result = cacheMgr.GetAbilityRecInProcList(abilityRequest);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordByToken_001
+ * @tc.desc: Test FindRecordByToken with nullptr token
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordByToken_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    auto result = cacheMgr.FindRecordByToken(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordByToken_002
+ * @tc.desc: Test FindRecordByToken with nullptr element in devRecLru_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordByToken_002, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.devRecLru_.push_back(nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "TestBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    sptr<IRemoteObject> token = rec->GetToken();
+
+    auto result = cacheMgr.FindRecordByToken(token);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordBySessionId_001
+ * @tc.desc: Test FindRecordBySessionId with nullptr element in devRecLru_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordBySessionId_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.devRecLru_.push_back(nullptr);
+    std::string sessionId = "TestSessionId";
+
+    auto result = cacheMgr.FindRecordBySessionId(sessionId);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordBySessionId_002
+ * @tc.desc: Test FindRecordBySessionId with non-existent sessionId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordBySessionId_002, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "TestBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    cacheMgr.Put(rec);
+
+    auto result = cacheMgr.FindRecordBySessionId("NonExistSessionId");
+    EXPECT_EQ(result, nullptr);
+    cacheMgr.Remove(rec);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordByServiceKey_001
+ * @tc.desc: Test FindRecordByServiceKey with nullptr element in devRecLru_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordByServiceKey_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.devRecLru_.push_back(nullptr);
+    std::string serviceKey = "TestServiceKey";
+
+    auto result = cacheMgr.FindRecordByServiceKey(serviceKey);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordByServiceKey_002
+ * @tc.desc: Test FindRecordByServiceKey with FRS_BUNDLE_NAME and FRS_APP_INDEX
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordByServiceKey_002, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = "com.ohos.formrenderservice";
+    abilityInfo.moduleName = "TestModule";
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    want.SetParam("ohos.extra.param.key.frs_index", 100); // 设置FRS_APP_INDEX
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    cacheMgr.Put(rec);
+
+    std::string serviceKey = rec->GetURI() + std::to_string(100);
+    auto result = cacheMgr.FindRecordByServiceKey(serviceKey);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetAbilityInfo().bundleName, "com.ohos.formrenderservice");
+    cacheMgr.Remove(rec);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_FindRecordByServiceKey_003
+ * @tc.desc: Test FindRecordByServiceKey with non-existent serviceKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, FindRecordByServiceKey_003, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "TestBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    cacheMgr.Put(rec);
+
+    auto result = cacheMgr.FindRecordByServiceKey("NonExistServiceKey");
+    EXPECT_EQ(result, nullptr);
+    cacheMgr.Remove(rec);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_RemoveLauncherDeathRecipient_001
+ * @tc.desc: Test RemoveLauncherDeathRecipient with LAUNCHER ability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, RemoveLauncherDeathRecipient_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::EXTENSION;
+    abilityInfo.name = AbilityConfig::LAUNCHER_ABILITY_NAME;
+    abilityInfo.bundleName = AbilityConfig::LAUNCHER_BUNDLE_NAME;
+    AppExecFwk::ApplicationInfo appInfo;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    cacheMgr.Put(rec);
+    cacheMgr.RemoveLauncherDeathRecipient();
+    EXPECT_EQ(abilityInfo.type, AbilityType::EXTENSION);
+    cacheMgr.Remove(rec);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_SignRestartAppFlag_001
+ * @tc.desc: Test SignRestartAppFlag with matched uid and instanceKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, SignRestartAppFlag_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "TestBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.uid = 1000;
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    rec->uid_ = 1000;
+    rec->SetInstanceKey("TestInstanceKey");
+    cacheMgr.Put(rec);
+
+    cacheMgr.SignRestartAppFlag(1000, "TestInstanceKey");
+    EXPECT_EQ(rec->GetRestartAppFlag(), true);
+    cacheMgr.Remove(rec);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_DeleteInvalidServiceRecord_001
+ * @tc.desc: Test DeleteInvalidServiceRecord with nullptr element in devRecLru_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, DeleteInvalidServiceRecord_001, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    cacheMgr.devRecLru_.push_back(nullptr);
+    cacheMgr.DeleteInvalidServiceRecord("TestBundle");
+    EXPECT_NE(cacheMgr.devRecLru_.size(), 0);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerTest_DeleteInvalidServiceRecord_002
+ * @tc.desc: Test DeleteInvalidServiceRecord with non-matched bundleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, DeleteInvalidServiceRecord_002, TestSize.Level2)
+{
+    AbilityCacheManager cacheMgr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModule";
+    abilityInfo.bundleName = "MismatchBundle";
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.bundleName = "MismatchBundle";
+    Want want;
+    auto rec = std::make_shared<BaseExtensionRecord>(want, abilityInfo, appInfo);
+    rec->Init(AbilityRequest());
+    cacheMgr.Put(rec);
+
+    cacheMgr.DeleteInvalidServiceRecord("TestBundle");
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = appInfo;
+    auto result = cacheMgr.Get(abilityRequest);
+    EXPECT_NE(result, nullptr);
+    cacheMgr.Remove(rec);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

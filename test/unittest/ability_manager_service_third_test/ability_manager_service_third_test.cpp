@@ -391,6 +391,51 @@ HWTEST_F(AbilityManagerServiceThirdTest, ReleaseRemoteAbility_001, TestSize.Leve
 }
 
 /*
+ * Feature: StartUIAbilityBySCBDefaultCommon_NoUiManager
+ * Function: StartUIAbilityBySCBDefaultCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilityBySCBDefaultCommon
+ * EnvConditions: no sub-managers
+ * CaseDescription: Expect ERR_INVALID_VALUE when StartUIAbilityBySCBDefaultCommon is called without a UI manager
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityBySCBDefaultCommon_NoUiManager, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUIAbilityBySCBDefaultCommon_NoUiManager start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = AbilityConfig::SYSTEM_UI_BUNDLE_NAME;
+    abilityRequest.abilityInfo.name = AbilityConfig::SYSTEM_DIALOG_NAME;
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->want.SetElementName(abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name);
+    AbilityRuntime::StartParamsBySCB params;
+    bool isColdStart = false;
+    int ret = abilityMs_->StartUIAbilityBySCBDefaultCommon(abilityRequest, sessionInfo, params, isColdStart);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUIAbilityBySCBDefaultCommon_NoUiManager end");
+}
+
+/*
+ * Feature: NotifySCBToRecoveryAfterInterception_NoUiManager
+ * Function: NotifySCBToRecoveryAfterInterception
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifySCBToRecoveryAfterInterception
+ * EnvConditions: no sub-managers
+ * CaseDescription: Expect ERR_INVALID_VALUE when recovery notification is invoked without a manager helper
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, NotifySCBToRecoveryAfterInterception_NoUiManager, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySCBToRecoveryAfterInterception_NoUiManager start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    AbilityRequest abilityRequest;
+    int ret = abilityMs_->NotifySCBToRecoveryAfterInterception(abilityRequest);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySCBToRecoveryAfterInterception_NoUiManager end");
+}
+
+/*
  * Feature: AbilityManagerService
  * Function: JudgeAbilityVisibleControl
  * SubFunction: NA

@@ -143,6 +143,61 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateParam_0400, TestSi
 }
 
 /**
+ * @tc.name: CheckAndUpdateParam_0500
+ * @tc.desc: Test CheckAndUpdateParam with ignoreAbilityName true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateParam_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = ""; // 空abilityName，但ignoreAbilityName为true
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.isServiceMatch_ = true; // 跳过权限和callerToken检查
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    sptr<IRemoteObject> callerToken = nullptr; // 空callerToken但isServiceMatch_为true
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+    
+    // 调用带ignoreAbilityName参数的重载版本
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    auto ret = manager->CheckAndUpdateParam(key, callerToken, paramPtr, callerBundleName, true);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateParam_0600
+ * @tc.desc: Test CheckAndUpdateParam with permission denied but service match
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateParam_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.isServiceMatch_ = true; // 即使权限检查失败也能通过
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+    
+    auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(
+        key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
  * @tc.name: CheckAndUpdateWant_0100
  * @tc.desc: CheckAndUpdateWant_0100
  * @tc.type: FUNC
@@ -565,6 +620,36 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0600, TestSize.Leve
     Want want;
     int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
     EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GenerateWant_0700
+ * @tc.desc: Test GenerateWant with displayId
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "test.IntentName";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.displayId_ = 10; // 有效displayId
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    param.isServiceMatch_ = true;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
+    Want want;
+    int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
+    EXPECT_EQ(result, ERR_OK);
+    
+    // 验证displayId参数是否正确设置
+    int32_t displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, -1);
+    EXPECT_EQ(displayId, 10);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
 
@@ -1171,6 +1256,105 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, OnInsightAppDied_001, TestSize.L
     manager->OnInsightAppDied(bundleName);
     EXPECT_EQ(manager->records_.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_001 end");
+}
+
+/**
+ * @tc.name: OnInsightAppDied_002
+ * @tc.desc: Test OnInsightAppDied with multiple records
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, OnInsightAppDied_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_002 start");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    
+    // 添加多条不同bundle的记录
+    uint64_t key1 = 1;
+    uint64_t key2 = 2;
+    uint64_t key3 = 3;
+    sptr<IRemoteObject> callToken = new AppExecFwk::MockAbilityToken();
+    EXPECT_NE(callToken, nullptr);
+    
+    manager->AddRecord(key1, callToken, "test.bundle1", key1, "caller1");
+    manager->AddRecord(key2, callToken, "test.bundle2", key2, "caller2");
+    manager->AddRecord(key3, callToken, "test.bundle1", key3, "caller3");
+    
+    EXPECT_EQ(manager->records_.size(), 3);
+    
+    // 触发bundle1的死亡回调
+    manager->OnInsightAppDied("test.bundle1");
+    
+    // 验证只有bundle1的记录被移除
+    EXPECT_EQ(manager->records_.size(), 1);
+    auto findResult = manager->records_.find(key2);
+    EXPECT_NE(findResult, manager->records_.end());
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentExecuteManagerSecondTest OnInsightAppDied_002 end");
+}
+
+/**
+ * @tc.name: IsValidCall_0100
+ * @tc.desc: Test IsValidCall with empty name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, IsValidCall_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    auto ret = manager->IsValidCall(want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: RemoveExecuteIntent_0100
+ * @tc.desc: Test RemoveExecuteIntent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, RemoveExecuteIntent_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    uint64_t intentId = 999;
+    auto record = std::make_shared<InsightIntentExecuteRecord>();
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    manager->records_[intentId] = record;
+
+    auto ret = manager->RemoveExecuteIntent(intentId);
+    EXPECT_EQ(ret, ERR_OK);
+
+    auto findResult = manager->records_.find(intentId);
+    EXPECT_EQ(findResult, manager->records_.end());
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateDecoratorParams_0100
+ * @tc.desc: Test CheckAndUpdateDecoratorParams with different decorator types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateDecoratorParams_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "test.IntentName";
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
+    decoratorInfo.decoratorType = AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
+    Want want;
+    
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    auto ret = manager->CheckAndUpdateDecoratorParams(
+        paramPtr, decoratorInfo, want);
+    EXPECT_EQ(ret, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS
