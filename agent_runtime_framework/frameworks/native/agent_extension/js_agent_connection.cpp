@@ -15,6 +15,7 @@
 
 #include "js_agent_connection.h"
 
+#include "agent_extension_connection_constants.h"
 #include "hilog_tag_wrapper.h"
 #include "js_agent_connector_stub_impl.h"
 #include "js_agent_receiver_proxy.h"
@@ -98,7 +99,10 @@ void FindAgentConnection(napi_env env, AAFwk::Want &want, napi_value callback,
     std::lock_guard<std::recursive_mutex> lock(g_agentConnectsLock_);
     auto item = std::find_if(g_agentConnects.begin(), g_agentConnects.end(),
         [&want, env, callback](const auto &obj) {
-        bool wantEquals = (obj.first.want.GetElement() == want.GetElement());
+        std::string exstingId = obj.first.want.GetStringParam(AGENTID_KEY);
+        std::string agentId = want.GetStringParam(AGENTID_KEY);
+        bool wantEquals = obj.first.want.GetElement() == want.GetElement() &&
+            !exstingId.empty() && !agentId.empty() && exstingId == agentId;
         std::unique_ptr<NativeReference> &tempCallbackPtr = obj.second->GetJsConnectionObject();
         bool callbackObjectEquals =
             JSAgentConnection::IsJsCallbackObjectEquals(env, tempCallbackPtr, callback);

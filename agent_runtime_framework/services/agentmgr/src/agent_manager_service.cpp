@@ -19,6 +19,7 @@
 #include "agent_bundle_event_callback.h"
 #include "agent_card_mgr.h"
 #include "agent_config.h"
+#include "agent_extension_connection_constants.h"
 #include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -135,6 +136,18 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
         AAFwk::PermissionConstants::PERMISSION_CONNECT_AGENT)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
         return ERR_PERMISSION_DENIED;
+    }
+
+    std::string agentId = want.GetStringParam(AGENTID_KEY);
+    if (agentId.empty()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "empty agentId");
+        return ERR_INVALID_VALUE;
+    }
+
+    AgentCard card;
+    if (GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK || agentId != card.agentId) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
+        return ERR_INVALID_VALUE;
     }
 
     // Validate connection object
