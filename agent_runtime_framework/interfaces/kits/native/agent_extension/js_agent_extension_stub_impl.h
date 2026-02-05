@@ -17,10 +17,11 @@
 #define OHOS_AGENT_RUNTIME_JS_AGENT_EXTENSION_STUB_IMPL_H
 
 #include "agent_receiver_stub.h"
-#include "js_agent_extension.h"
 
 namespace OHOS {
 namespace AgentRuntime {
+class JsAgentExtension;
+
 class JsAgentExtensionStubImpl : public AgentReceiverStub {
 public:
     explicit JsAgentExtensionStubImpl(std::weak_ptr<JsAgentExtension>& ext);

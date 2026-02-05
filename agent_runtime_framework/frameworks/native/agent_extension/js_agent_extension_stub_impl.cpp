@@ -16,11 +16,12 @@
 #include "js_agent_extension_stub_impl.h"
 
 #include "ability_business_error.h"
+#include "hilog_tag_wrapper.h"
+#include "js_agent_extension.h"
 
 namespace OHOS {
 namespace AgentRuntime {
 using namespace OHOS::AbilityRuntime;
-using namespace OHOS::AppExecFwk;
 
 JsAgentExtensionStubImpl::JsAgentExtensionStubImpl(std::weak_ptr<JsAgentExtension>& ext)
     :extension_(ext)
