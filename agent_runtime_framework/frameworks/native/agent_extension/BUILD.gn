@@ -97,6 +97,7 @@ ohos_shared_library("js_agent_connection") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 
@@ -190,9 +191,9 @@ ohos_shared_library("agent_extension") {
   sources = [
     "${agent_runtime_framework_path}/frameworks/native/agent_extension/agent_extension.cpp",
     "${agent_runtime_framework_path}/frameworks/native/appkit/ability_runtime/agent_extension_context.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_extension_stub_impl.cpp",
     "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_extension.cpp",
     "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_extension_context.cpp",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_extension_stub_impl.cpp",
   ]
 
   deps = [

@@ -26,11 +26,11 @@ namespace OHOS {
 namespace AgentManagerEts {
 namespace {
 constexpr const char *CLASSNAME_ARRAY = "std.core.Array";
-constexpr const char *PROVIDER_IMPL_CLASS_NAME = "@ohos.app.ability.AgentCard.ProviderImpl";
-constexpr const char *CAPABILITIES_IMPL_CLASS_NAME = "@ohos.app.ability.AgentCard.CapabilitiesImpl";
-constexpr const char *AUTHENTICATION_IMPL_CLASS_NAME = "@ohos.app.ability.AgentCard.AuthenticationImpl";
-constexpr const char *SKILL_IMPL_CLASS_NAME = "@ohos.app.ability.AgentCard.SkillImpl";
-constexpr const char *AGENT_CARD_IMPL_CLASS_NAME = "@ohos.app.ability.AgentCard.AgentCardImpl";
+constexpr const char *PROVIDER_IMPL_CLASS_NAME = "@ohos.app.agent.AgentCard.ProviderImpl";
+constexpr const char *CAPABILITIES_IMPL_CLASS_NAME = "@ohos.app.agent.AgentCard.CapabilitiesImpl";
+constexpr const char *AUTHENTICATION_IMPL_CLASS_NAME = "@ohos.app.agent.AgentCard.AuthenticationImpl";
+constexpr const char *SKILL_IMPL_CLASS_NAME = "@ohos.app.agent.AgentCard.SkillImpl";
+constexpr const char *AGENT_CARD_IMPL_CLASS_NAME = "@ohos.app.agent.AgentCard.AgentCardImpl";
 }  // namespace
 
 ani_object CreateEtsProvider(ani_env *env, const Provider &provider)

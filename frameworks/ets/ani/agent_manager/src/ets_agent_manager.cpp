@@ -29,7 +29,7 @@ namespace OHOS {
 namespace AgentManagerEts {
 namespace {
 constexpr int32_t INVALID_PARAM = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-constexpr const char* AGENT_MANAGER_SPACE_NAME = "@ohos.app.ability.agentManager.agentManager";
+constexpr const char* AGENT_MANAGER_SPACE_NAME = "@ohos.app.agent.agentManager.agentManager";
 } // namespace
 
 class EtsAgentManager final {
@@ -136,7 +136,7 @@ void EtsAgentManagerRegistryInit(ani_env *env)
         ani_native_function{ "nativeGetAgentCardsByBundleName", "C{std.core.String}:C{std.core.Array}",
             reinterpret_cast<void *>(EtsAgentManager::GetAgentCardsByBundleName) },
         ani_native_function{ "nativeGetAgentCardByAgentId",
-            "C{std.core.String}C{std.core.String}:C{@ohos.app.ability.AgentCard.AgentCard}",
+            "C{std.core.String}C{std.core.String}:C{@ohos.app.agent.AgentCard.AgentCard}",
             reinterpret_cast<void *>(EtsAgentManager::GetAgentCardByAgentId) },
 	};
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
