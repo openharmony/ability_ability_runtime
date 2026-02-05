@@ -59,6 +59,7 @@ enum class ExtensionAbilityType {
     FENCE = 24,
     DISTRIBUTED = 28,
     CRYPTO = 35,
+    PARTNER_AGENT = 36,
     UNSPECIFIED = 255,
     UI = 256,
     HMS_ACCOUNT = 257,
