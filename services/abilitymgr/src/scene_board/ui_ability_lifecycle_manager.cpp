@@ -61,7 +61,7 @@ constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr const char* DMS_PROCESS_NAME = "distributedsched";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
-constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
+constexpr const char* SPECIFIED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
 constexpr const char* BACKGROUND_DELAY_TIME = "persist.sys.abilityms.backgroundDelayTime";
 constexpr int32_t DEFAULT_BACKGROUND_DELAY_TIME = 6 * 1000 * 1000;
 #ifdef SUPPORT_ASAN
@@ -2607,11 +2607,11 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::strin
     auto &abilityRequest = request->abilityRequest;
     abilityRequest.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
-        abilityRequest.want.RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
-        abilityRequest.want.SetParam(SPECIFED_PROCESS_CALLER_PROCESS, callerProcessName);
+        abilityRequest.want.RemoveParam(SPECIFIED_PROCESS_CALLER_PROCESS);
+        abilityRequest.want.SetParam(SPECIFIED_PROCESS_CALLER_PROCESS, callerProcessName);
         request->specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
         StartSpecifiedRequest(*request);
-        abilityRequest.want.RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
+        abilityRequest.want.RemoveParam(SPECIFIED_PROCESS_CALLER_PROCESS);
         return;
     }
     DelayedSingleton<AppScheduler>::GetInstance()->SetSpecifiedProcessRequestId(recordId, -1);
@@ -2692,7 +2692,7 @@ int32_t UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityReq
         std::string instanceKey;
         Rosen::WMError ret = sceneSessionManager->CreateNewInstanceKey(abilityRequest.want.GetBundle(), instanceKey);
         if (ret != Rosen::WMError::WM_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "create new isntance error:%{public}d", ret);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "create new instance error:%{public}d", ret);
             return ERR_CREATE_INSTANCE_KEY_FAILED;
         }
         const_cast<AbilityRequest &>(abilityRequest).want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
@@ -4434,13 +4434,13 @@ ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const Want &want,
             it->second->GetAbilityInfo().name == abilityName &&
             (moduleName.empty() || it->second->GetAbilityInfo().moduleName == moduleName) &&
             it->second->GetAppIndex() == appIndex && it->second->GetInstanceKey() == instanceKey) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag is already exist");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag already exists");
             return ERROR_UIABILITY_IS_ALREADY_EXIST;
         }
         if (launchMode != AppExecFwk::LaunchMode::SPECIFIED && it->second->GetAbilityInfo().name == abilityName &&
             (moduleName.empty() || it->second->GetAbilityInfo().moduleName == moduleName) &&
             it->second->GetInstanceKey() == instanceKey && it->second->GetAppIndex() == appIndex) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "UIAbility is already exist");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "UIAbility already exists");
             return ERROR_UIABILITY_IS_ALREADY_EXIST;
         }
     }
