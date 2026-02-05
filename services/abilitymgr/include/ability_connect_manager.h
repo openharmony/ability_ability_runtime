@@ -355,7 +355,7 @@ protected:
     * @param abilityRequest The ability request.
     * @return Returns generated bundle name.
     */
-    std::string GenerateBundleName(const AbilityRequest &abilityRequest) const;
+    static std::string GenerateBundleName(const AbilityRequest &abilityRequest);
 
     /**
     * Call EnqueueStartServiceReq internally.
@@ -809,6 +809,7 @@ private:
     void KeepAbilityAlive(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
     void ProcessEliminateAbilityRecord(std::shared_ptr<BaseExtensionRecord> eliminateRecord);
     static std::string GetServiceKey(const std::shared_ptr<BaseExtensionRecord> &service);
+    static std::string GetServiceKey(const AbilityRequest &abilityRequest);
 
     void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam,
         std::shared_ptr<BaseExtensionRecord> abilityRecord);

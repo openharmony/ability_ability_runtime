@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AgentCard } from './@ohos.app.ability.AgentCard';
+import { AgentCard } from './@ohos.app.agent.AgentCard';
 
 export default namespace agentManager {
-  loadLibraryWithPermissionCheck("agent_manager_ani.z", "@ohos.app.ability.agentManager")
+  loadLibraryWithPermissionCheck("agent_manager_ani.z", "@ohos.app.agent.agentManager")
 
   export native function nativeGetAllAgentCards(): Array<AgentCard>;
   export native function nativeGetAgentCardsByBundleName(bundleName: string): Array<AgentCard>;

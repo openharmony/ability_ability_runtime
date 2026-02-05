@@ -19,7 +19,7 @@
 #include "agent_extension.h"
 #include "agent_extension_context.h"
 #include "agent_extension_connection_constants.h"
-#include "agent_extension_stub_impl.h"
+#include "js_agent_extension_stub_impl.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
@@ -202,9 +202,8 @@ sptr<IRemoteObject> JsAgentExtension::OnConnect(const AAFwk::Want &want,
         return nullptr;
     }
     if (extensionStub_ == nullptr) {
-        std::weak_ptr<JsAgentExtension> weakThis =
-            std::static_pointer_cast<JsAgentExtension>(shared_from_this());
-        extensionStub_ = sptr<AgentExtensionStubImpl>::MakeSptr(weakThis);
+        std::weak_ptr<JsAgentExtension> weakThis = std::static_pointer_cast<JsAgentExtension>(shared_from_this());
+        extensionStub_ = sptr<JsAgentExtensionStubImpl>::MakeSptr(weakThis);
     }
     sptr<IRemoteObject> stubObject = nullptr;
     if (extensionStub_ != nullptr) {
