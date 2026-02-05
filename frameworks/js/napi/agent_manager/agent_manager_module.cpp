@@ -23,7 +23,7 @@ static napi_module _module = {
     .nm_modname = "app.agent.agentManager",
 };
 
-extern "C" __attribute__((constructor)) void NAPI_app_ability_AgentManager_AutoRegister(void)
+extern "C" __attribute__((constructor)) void NAPI_app_agent_AgentManager_AutoRegister(void)
 {
     napi_module_register(&_module);
 }
