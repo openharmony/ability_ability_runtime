@@ -87,6 +87,7 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
 {
     HandleAndLogIfNotJsError(obj);
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
+    AppendExtraInfo(errorMsg);
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
     std::string summary = "Error name:" + errorName + "\n";
@@ -156,6 +157,17 @@ void NapiUncaughtExceptionCallback::AppendAsyncStack(const napi_value& obj, std:
         oss << "    " << line << "\n";
     }
     summary += oss.str();
+}
+
+void NapiUncaughtExceptionCallback::AppendExtraInfo(std::string& errorMsg)
+{
+    NativeEngine *engine = reinterpret_cast<NativeEngine*>(env_);
+    std::string jsonInfo;
+    uint32_t position = 0;
+    engine->GetJsonExtraInfoForCrash(env_, jsonInfo, position);
+    if (!jsonInfo.empty()) {
+        errorMsg.append(" at position ").append(std::to_string(position)).append(", ").append(jsonInfo);
+    }
 }
 
 void NapiUncaughtExceptionCallback::HandleAndLogIfNotJsError(napi_value obj)
