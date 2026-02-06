@@ -56,7 +56,7 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
     }
     std::vector<AgentCard> cards;
     for (auto const &extensionInfo : bundleInfo.extensionInfos) {
-        if (extensionInfo.type != ExtensionAbilityType::BACKUP) {
+        if (extensionInfo.type != ExtensionAbilityType::AGENT) {
             continue;
         }
         std::vector<std::string> profileInfos{};
@@ -66,10 +66,10 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
                 return -1;
             }
             json j = json::parse(profileInfo);
-            if (!j.contains("agent_cards")) {
+            if (!j.contains("agentCards")) {
                 return -1;
             }
-            for (auto cardStr : j["agent_cards"]) {
+            for (auto cardStr : j["agentCards"]) {
                 AgentCard card = AgentCard::FromJson(cardStr);
                 card.bundleName = bundleName;
                 card.moduleName = extensionInfo.moduleName;

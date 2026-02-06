@@ -21,7 +21,7 @@ let TAG = 'AGENT';
 class AgentExtensionContext extends ExtensionContext {
   constructor(obj) {
     super(obj);
-    this.agentUrl = obj.agentUrl;
+    this.agentId = obj.agentId;
   }
 
   getBasicPathInfo(want) {

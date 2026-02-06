@@ -57,7 +57,7 @@ ohos_shared_library("agentextensionability") {
 
   defines = [ "ENABLE_ERRCODE" ]
 
-  relative_install_dir = "module/app/ability"
+  relative_install_dir = "module/app/agent"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
