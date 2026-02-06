@@ -337,6 +337,7 @@ std::string DataObsMgrService::GetCallingName(uint32_t callingTokenid)
 {
     std::string callingName;
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenid);
+
     int result = -1;
     if (tokenType == Security::AccessToken::TOKEN_HAP) {
         Security::AccessToken::HapTokenInfo tokenInfo;
@@ -388,6 +389,7 @@ std::vector<std::string> DataObsMgrService::GetGroupInfosFromCache(const std::st
         return {};
     }
     bool res = bmsHelper->QueryDataGroupInfos(bundleName, userId, infos);
+
     if (!res) {
         LOG_WARN("query group infos failed for bundle:%{public}s, user:%{public}d", bundleName.c_str(), userId);
         return {};
@@ -403,6 +405,7 @@ std::vector<std::string> DataObsMgrService::GetGroupInfosFromCache(const std::st
         return it->second;
     }
     if (groupsIdCache_.size() >= CACHE_SIZE_THRESHOLD) {
+
         LOG_INFO("groups id cache is full:%{public}zu", groupsIdCache_.size());
         groupsIdCache_.pop_front();
     }
@@ -418,7 +421,7 @@ bool DataObsMgrService::VerifyUriPermission(Uri &uri, const uint32_t tokenId,
     std::string errMsg = schemeType + method;
     auto invalidUri = (schemeType == RELATIONAL_STORE) ? DATAOBS_RDB_INVALID_URI : DATAOBS_PREFERENCE_INVALID_URI;
     if (callingName.empty()) {
-        errMsg += "callingNmae is empty";
+        errMsg += "callingName is empty";
         DataShare::DataSharePermission::ReportExtensionFault(invalidUri, tokenId, callingName, errMsg);
         return true;
     }
