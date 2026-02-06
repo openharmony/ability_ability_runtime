@@ -27,7 +27,7 @@ ohos_shared_library("agentmgr") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/common/include",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
   ]
   sources = [
     "src/agent_bundle_event_callback.cpp",

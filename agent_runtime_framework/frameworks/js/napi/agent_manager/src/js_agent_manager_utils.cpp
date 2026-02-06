@@ -120,12 +120,12 @@ napi_value CreateJsAgentCard(napi_env env, const AgentCard &card)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null obj");
         return nullptr;
     }
+    napi_set_named_property(env, object, "agentId", CreateJsValue(env, card.agentId));
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, card.bundleName));
     napi_set_named_property(env, object, "moduleName", CreateJsValue(env, card.moduleName));
     napi_set_named_property(env, object, "abilityName", CreateJsValue(env, card.abilityName));
     napi_set_named_property(env, object, "name", CreateJsValue(env, card.name));
     napi_set_named_property(env, object, "description", CreateJsValue(env, card.description));
-    napi_set_named_property(env, object, "agentId", CreateJsValue(env, card.agentId));
     napi_set_named_property(env, object, "url", CreateJsValue(env, card.url));
     napi_set_named_property(env, object, "version", CreateJsValue(env, card.version));
     napi_set_named_property(env, object, "documentationUrl", CreateJsValue(env, card.documentationUrl));
