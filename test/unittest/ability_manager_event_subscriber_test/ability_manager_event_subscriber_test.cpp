@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -170,7 +170,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, userUnlock_OnReceiveEvent_0001, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest userUnlock_OnReceiveEvent_0001 start");
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto subscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(subscribeInfo, callback, callback2);
@@ -193,7 +193,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, userUnlock_OnReceiveEvent_0002, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest userUnlock_OnReceiveEvent_0002 start");
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto subscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(subscribeInfo, callback, callback2);
@@ -219,7 +219,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, userUnlock_OnReceiveEvent_0003, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest userUnlock_OnReceiveEvent_0003 start");
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto subscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(subscribeInfo, callback, callback2);
@@ -244,7 +244,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, userUnlock_OnReceiveEvent_0004, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest userUnlock_OnReceiveEvent_0004 start");
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto subscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(subscribeInfo, callback, callback2);
@@ -269,7 +269,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, userUnlock_OnReceiveEvent_0005, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest userUnlock_OnReceiveEvent_0005 start");
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto subscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(subscribeInfo, callback, callback2);
@@ -303,7 +303,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, AbilityEventSubscriber_OnReceiveEven
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest AbilityEventSubscriber_OnReceiveEvent_0001 start");
     EventFwk::CommonEventSubscribeInfo userSubscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     auto userSubscriber = std::make_shared<AbilityUserUnlockEventSubscriber>(userSubscribeInfo, callback, callback2);
@@ -347,7 +347,7 @@ HWTEST_F(AbilityManagerEventSubscriberTest, AbilityEventSubscriber_OnReceiveEven
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerEventSubscriberTest AbilityEventSubscriber_OnReceiveEvent_0002 start");
     EventFwk::CommonEventSubscribeInfo screenSubscribeInfo;
     std::function<void(int32_t)> callback = [](int32_t) {};
-    std::function<void()> callback2 = []() {};
+    std::function<void(int32_t)> callback2 = [](int32_t) {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(callback2, nullptr);
     int32_t userId = 1;

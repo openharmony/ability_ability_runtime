@@ -1964,6 +1964,16 @@ public:
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
 
+    /**
+     * @brief Get list of applications launched before the first unlock.
+     * @param userId The User Id.
+     * @param userLockedBundleList List of applications launched before the first unlock.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetUserLockedBundleList(int32_t userId,
+        std::unordered_set<std::string> &userLockedBundleList) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

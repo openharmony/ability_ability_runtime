@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ namespace AAFwk {
 namespace {
 constexpr uint32_t RETURN_NUMBER_ONE = 1053;
 constexpr uint32_t RETURN_NUMBER_TWO = 6132;
+constexpr int32_t VALID_USER_ID = 100;
 } // namespace
 
 class AbilityManagerProxyTest : public testing::Test {
@@ -1560,5 +1561,50 @@ HWTEST_F(AbilityManagerProxyTest, ClearPreloadedUIExtensionAbilities_0200, TestS
     GTEST_LOG_(INFO) << "ClearPreloadedUIExtensionAbilities_0200 end";
 }
 #endif
+
+/**
+ * @tc.name: GetUserLockedBundleList_0100
+ * @tc.desc: GetUserLockedBundleList with SendRequest error
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, GetUserLockedBundleList_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetUserLockedBundleList_0100 start";
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+
+    auto userId = VALID_USER_ID;
+    std::unordered_set<std::string> userLockedBundleList;
+    int32_t result = proxy_->GetUserLockedBundleList(userId, userLockedBundleList);
+
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST),
+        mock_->code_);
+    EXPECT_NE(result, NO_ERROR);
+
+    GTEST_LOG_(INFO) << "GetUserLockedBundleList_0100 end";
+}
+
+/**
+ * @tc.name: GetUserLockedBundleList_0200
+ * @tc.desc: GetUserLockedBundleList with valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, GetUserLockedBundleList_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetUserLockedBundleList_0200 start";
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    auto userId = VALID_USER_ID;
+    std::unordered_set<std::string> userLockedBundleList;
+    int32_t result = proxy_->GetUserLockedBundleList(userId, userLockedBundleList);
+
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST),
+        mock_->code_);
+    EXPECT_EQ(result, NO_ERROR);
+    GTEST_LOG_(INFO) << "GetUserLockedBundleList_0200 end";
+}
 } // namespace AAFwk
 } // namespace OHOS

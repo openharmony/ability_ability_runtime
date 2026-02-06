@@ -2444,6 +2444,16 @@ protected:
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
 
+    /**
+     * @brief Get list of applications launched before the first unlock.
+     * @param userId The User Id.
+     * @param userLockedBundleList List of applications launched before the first unlock.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetUserLockedBundleList(int32_t userId,
+        std::unordered_set<std::string> &userLockedBundleList) override;
+
 private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2642,7 +2652,7 @@ private:
     void SubscribeUserUnlockedEvent();
     void SubscribeScreenUnlockedEvent();
     std::function<void(int32_t)> GetScreenUnlockCallback();
-    std::function<void()> GetUserScreenUnlockCallback();
+    std::function<void(int32_t)> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber,
         bool isUserUnlockSubscriber = false);
