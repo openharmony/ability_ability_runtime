@@ -2549,9 +2549,10 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     int32_t accountId = data.ReadInt32();
     bool isSilent = data.ReadBool();
     bool promotePriority = data.ReadBool();
+    bool isVisible = data.ReadBool();
     std::string errMsg = "";
     int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent,
-        promotePriority);
+        promotePriority, isVisible);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteString(errMsg);
