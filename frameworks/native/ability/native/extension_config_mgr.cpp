@@ -102,6 +102,7 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
 
     auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, localBlocklist);
     runtime->SetModuleLoadChecker(moduleChecker);
+    extensionBlocklist_.clear();
 }
 
 void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
