@@ -1151,36 +1151,41 @@ ErrCode AbilityManagerClient::GetMissionIdByToken(sptr<IRemoteObject> token, int
     return ERR_OK;
 }
 
-ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent)
+ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent,
+    bool isVisible)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, isSilent:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), isSilent);
-    return abms->StartAbilityByCall(want, connect, nullptr, DEFAULT_INVAL_VALUE, isSilent);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, isSilent:%{public}d, isVisible:%{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), isSilent, isVisible);
+    return abms->StartAbilityByCall(want, connect, nullptr, DEFAULT_INVAL_VALUE, isSilent, isVisible);
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent, bool promotePriority)
+    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent, bool promotePriority, bool isVisible)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId, isSilent);
-    return abms->StartAbilityByCall(want, connect, callToken, accountId, isSilent, promotePriority);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d, "
+        "isVisible:%{public}d", want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        accountId, isSilent, isVisible);
+    return abms->StartAbilityByCall(want, connect, callToken, accountId, isSilent, promotePriority, isVisible);
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent, bool promotePriority)
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent, bool promotePriority,
+    bool isVisible)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId, isSilent);
-    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent, promotePriority);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s/%{public}s, userId:%{public}d, isSilent:%{public}d, "
+        "isVisible:%{public}d", want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        accountId, isSilent, isVisible);
+    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent, promotePriority,
+        isVisible);
 }
 
 ErrCode AbilityManagerClient::StartAbilityForPrelaunch(const Want &want, const int32_t frameNum)
