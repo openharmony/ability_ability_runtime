@@ -76,10 +76,10 @@ public:
     void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
         bool isFromWindowFocusChanged = false, bool isByCall = false);
     void OnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
-                                         const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
+        const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord, const bool isPreload);
+    void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord, const bool isPreload);
 #ifdef SUPPORT_CHILD_PROCESS
     void OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
 #endif // SUPPORT_CHILD_PROCESS
@@ -106,7 +106,7 @@ private:
     void HandleStateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
         bool isFromWindowFocusChanged, BundleType bundleType = BundleType::APP);
     void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
-    void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord, const bool isPreload);
+    void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord, const bool isPreload);
 #ifdef SUPPORT_CHILD_PROCESS
     void HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
 #endif // SUPPORT_CHILD_PROCESS

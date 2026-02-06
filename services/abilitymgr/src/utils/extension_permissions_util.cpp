@@ -16,6 +16,7 @@
 #include "utils/extension_permissions_util.h"
 
 #include "hilog_tag_wrapper.h"
+#include "hilog_wrapper.h"
 #include "permission_verification.h"
 
 namespace OHOS {
