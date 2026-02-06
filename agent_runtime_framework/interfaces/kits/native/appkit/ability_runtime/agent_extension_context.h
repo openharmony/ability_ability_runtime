@@ -31,7 +31,7 @@ public:
     virtual ~AgentExtensionContext() = default;
 
 private:
-    std::string agentUrl;
+    std::string agentId;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
