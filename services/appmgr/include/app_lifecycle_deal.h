@@ -211,6 +211,7 @@ public:
      * UpdateConfiguration, ANotify application update system environment changes.
      *
      * @param config, System environment change parameters.
+     * @param reason, Identify config change scene.
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t UpdateConfiguration(const Configuration &config,

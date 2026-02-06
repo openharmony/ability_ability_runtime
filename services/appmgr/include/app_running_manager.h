@@ -446,7 +446,6 @@ public:
     
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
-
     void HandleChildRelation(
         std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord);
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordForUIExtension(
