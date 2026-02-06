@@ -54,7 +54,7 @@ ohos_shared_library("agentuiextensionability") {
 
   external_deps = [ "napi:ace_napi" ]
 
-  relative_install_dir = "module/app/ability"
+  relative_install_dir = "module/app/agent"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

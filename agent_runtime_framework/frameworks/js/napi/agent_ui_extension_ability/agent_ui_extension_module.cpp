@@ -22,15 +22,15 @@ extern const char _binary_agent_ui_extension_ability_abc_end[];
 
 static napi_module _module = {
     .nm_version = 0,
-    .nm_filename = "app/ability/libagentuiextensionability.so/agent_ui_extension_ability.js",
-    .nm_modname = "app.ability.AgentUIExtensionAbility",
+    .nm_filename = "app/agent/libagentuiextensionability.so/agent_ui_extension_ability.js",
+    .nm_modname = "app.agent.AgentUIExtensionAbility",
 };
-extern "C" __attribute__((constructor)) void NAPI_app_ability_AgentUIExtensionAbility_AutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_app_agent_AgentUIExtensionAbility_AutoRegister()
 {
     napi_module_register(&_module);
 }
 
-extern "C" __attribute__((visibility("default"))) void NAPI_app_ability_AgentUIExtensionAbility_GetJSCode(
+extern "C" __attribute__((visibility("default"))) void NAPI_app_agent_AgentUIExtensionAbility_GetJSCode(
     const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
@@ -42,7 +42,7 @@ extern "C" __attribute__((visibility("default"))) void NAPI_app_ability_AgentUIE
     }
 }
 
-extern "C" __attribute__((visibility("default"))) void NAPI_app_ability_AgentUIExtensionAbility_GetABCCode(
+extern "C" __attribute__((visibility("default"))) void NAPI_app_agent_AgentUIExtensionAbility_GetABCCode(
     const char **buf, int *buflen)
 {
     if (buf != nullptr) {
