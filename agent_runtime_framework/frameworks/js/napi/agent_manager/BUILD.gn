@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("agentmanager") {
+ohos_shared_library("agentmanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -22,15 +22,18 @@ ohos_shared_library("agentmanager") {
   }
 
   include_dirs = [
+    "include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_ability/include",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_ability/include/connection",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/include",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
   ]
 
   sources = [
-    "agent_manager_module.cpp",
-    "js_agent_manager.cpp",
-    "js_agent_manager_utils.cpp",
+    "src/agent_manager_module.cpp",
+    "src/js_agent_manager.cpp",
+    "src/js_agent_manager_utils.cpp",
   ]
 
   configs = [
@@ -44,11 +47,11 @@ ohos_shared_library("agentmanager") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension:agent_extension_connection",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension:js_agent_connection",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_connection_manager",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_manager",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_ability:js_agent_connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection:agent_extension_connection",
   ]
 
   external_deps = [

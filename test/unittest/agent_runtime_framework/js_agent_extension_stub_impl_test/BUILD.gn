@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/ability_runtime/js_agent_extension_stub_impl_test"
+module_output_path = "ability_runtime/agent_runtime/js_agent_extension_stub_impl_test"
 
 ohos_unittest("js_agent_extension_stub_impl_test") {
   module_out_path = module_output_path
@@ -29,7 +29,7 @@ ohos_unittest("js_agent_extension_stub_impl_test") {
 
   sources = [
     "js_agent_extension_stub_impl_test.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/js_agent_extension_stub_impl.cpp",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_ability/src/js_agent_extension_stub_impl.cpp",
   ]
 
   include_dirs = [
@@ -38,12 +38,13 @@ ohos_unittest("js_agent_extension_stub_impl_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_services_path}/common/include",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_ability/include",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension/include",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
   ]
 
   deps = [
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension:agent_extension_connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection:agent_extension_connection",
   ]
 
   external_deps = [

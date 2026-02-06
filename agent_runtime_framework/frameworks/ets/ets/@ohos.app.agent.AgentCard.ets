@@ -66,6 +66,7 @@ class SkillImpl implements Skill {
 }
 
 export interface AgentCard {
+  agentId: string;
   bundleName: string;
   moduleName: string;
   abilityName: string;
@@ -84,6 +85,7 @@ export interface AgentCard {
 }
 
 class AgentCardImpl implements AgentCard {
+  public agentId: string = '';
   public bundleName: string = '';
   public moduleName: string = '';
   public abilityName: string = '';

@@ -14,33 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("agentextensioncontext_napi") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  sources = [ "js_agent_extension_context_module.cpp" ]
-
-  deps = [
-    "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_context:agent_extension_context_abc",
-    "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_context:agent_extension_context_js",
-  ]
-
-  external_deps = [ "napi:ace_napi" ]
-
-  relative_install_dir = "module/application"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_shared_library("js_agent_extension_context") {
+ohos_shared_library("agent_extension_context") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -56,37 +30,32 @@ ohos_shared_library("js_agent_extension_context") {
   defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
   include_dirs = [
     "include",
-    "${ability_runtime_path}/services/common/include",
-    "${ability_runtime_innerkits_path}/ability_manager/include",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/include",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension_context/include",
   ]
 
   sources = [
-    "src/js_agent_extension_context.cpp",
+    "src/agent_extension_context.cpp",
   ]
 
   deps = [
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:extensionkit_native",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
   ]
 
   external_deps = [
-    "ability_base:base",
-    "ability_base:configuration",
-    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "napi:ace_napi",
   ]
 
   subsystem_name = "ability"

@@ -15,24 +15,24 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//build/test.gni")
 
-module_output_path = "ability_runtime/ability_runtime/agent_connector_stub_test"
+module_output_path = "ability_runtime/agent_runtime/agent_connector_stub_test"
 
 ohos_unittest("agent_connector_stub_test") {
   module_out_path = module_output_path
 
   sources = [
     "agent_connector_stub_test.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_connector_stub.cpp",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/src/agent_connector_stub.cpp",
   ]
 
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
   ]
 
   deps = [
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension:agent_extension_connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection:agent_extension_connection",
   ]
 
   external_deps = [
