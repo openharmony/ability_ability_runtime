@@ -64,6 +64,9 @@ bool RunningProcessInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, extensionType);
     extensionType_ = static_cast<ExtensionAbilityType>(extensionType);
     appCloneIndex = parcel.ReadInt32();
+    int32_t preloadMode;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, preloadMode);
+    preloadMode_ = static_cast<PreloadMode>(preloadMode);
     instanceKey = Str16ToStr8(parcel.ReadString16());
     int32_t appModeType;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appModeType);
@@ -112,6 +115,7 @@ bool RunningProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(processType_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(extensionType_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appCloneIndex);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(preloadMode_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(instanceKey));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(appMode));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(rssValue));
