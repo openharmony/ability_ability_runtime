@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +32,11 @@ public:
 
     AbilityRecordType GetAbilityRecordType() override;
 
-    void SetExitReasonLoaded()
+    inline void SetExitReasonLoaded()
     {
         exitReasonLoaded_ = true;
     }
-    bool IsExitReasonLoaded() const
+    inline bool IsExitReasonLoaded() const
     {
         return exitReasonLoaded_;
     }
@@ -50,18 +50,18 @@ public:
         return isKillPrecedeStart_.load();
     }
 
-    bool GetPrelaunchFlag() const
+    inline bool GetPrelaunchFlag() const
     {
         return isPrelaunch_;
     }
-    void SetPrelaunchFlag(bool isPrelaunch)
+    inline void SetPrelaunchFlag(bool isPrelaunch)
     {
         isPrelaunch_ = isPrelaunch;
     }
 
     void ScheduleCollaborate(const Want &want);
 
-    bool IsHook () const
+    inline bool IsHook () const
     {
         return isHook_;
     }
@@ -70,7 +70,7 @@ public:
         isHook_ = isHook;
     }
 
-    bool GetHookOff () const
+    inline bool GetHookOff () const
     {
         return hookOff_;
     }
