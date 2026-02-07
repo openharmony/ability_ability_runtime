@@ -15,21 +15,21 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//build/test.gni")
 
-module_output_path = "ability_runtime/ability_runtime/agent_receiver_proxy_test"
+module_output_path = "ability_runtime/agent_runtime/agent_receiver_proxy_test"
 
 ohos_unittest("agent_receiver_proxy_test") {
   module_out_path = module_output_path
 
   sources = [
     "agent_receiver_proxy_test.cpp",
-    "${agent_runtime_framework_path}/frameworks/native/agent_extension/connection/agent_receiver_proxy.cpp",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/src/agent_receiver_proxy.cpp",
   ]
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_services_path}/common/include",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
   ]
 
   deps = []

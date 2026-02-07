@@ -38,6 +38,7 @@ config("common_config") {
     "${ability_runtime_services_path}/uripermmgr/*",
     "${ability_runtime_test_path}/*",
     "${ability_runtime_utils_path}/global/common/*",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager/*",
     "${hiebpf_path}/*",
     "${power_manager_path}/utils/*",
     "${request_path}/common/*",

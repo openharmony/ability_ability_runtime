@@ -17,7 +17,7 @@
 #define OHOS_AGENT_RUNTIME_JS_AGENT_EXTENSION_CONTEXT_H
 
 #include "agent_extension_context.h"
-#include "event_handler.h"
+
 #include "native_engine/native_engine.h"
 
 namespace OHOS {

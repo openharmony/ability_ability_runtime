@@ -19,17 +19,23 @@
 #include "agent_extension.h"
 #include "agent_extension_context.h"
 #include "agent_extension_connection_constants.h"
-#include "js_agent_extension_stub_impl.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "js_agent_connector_proxy.h"
 #include "js_agent_extension_context.h"
+#include "js_agent_extension_stub_impl.h"
 #include "js_extension_common.h"
 #include "js_extension_context.h"
 #include "js_runtime_utils.h"
 #include "napi_common_want.h"
 #include "runtime.h"
+
+#ifdef WINDOWS_PLATFORM
+#define JS_EXPORT __declspec(dllexport)
+#else
+#define JS_EXPORT __attribute__((visibility("default")))
+#endif
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -94,11 +100,6 @@ JsAgentExtension::~JsAgentExtension()
             jsRuntime_.FreeNativeReference(std::move(jsProxyObject));
         }
     }
-}
-
-JsAgentExtension* JsAgentExtension::Create(const std::unique_ptr<Runtime>& runtime)
-{
-    return new JsAgentExtension(static_cast<JsRuntime&>(*runtime));
 }
 
 void JsAgentExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -459,6 +460,11 @@ void JsAgentExtension::GetSrcPath(std::string &srcPath)
         srcPath.erase(srcPath.rfind('.'));
         srcPath.append(".abc");
     }
+}
+
+extern "C" JS_EXPORT AgentExtension* OHOS_CreateJsAgentExtension(const std::unique_ptr<Runtime> &runtime)
+{
+    return new JsAgentExtension(static_cast<JsRuntime&>(*runtime));
 }
 } // namespace AgentRuntime
 } // namespace OHOS
