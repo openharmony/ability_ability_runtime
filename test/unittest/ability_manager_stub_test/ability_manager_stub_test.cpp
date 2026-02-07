@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4761,6 +4761,37 @@ HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0200, TestSize.
 
     EXPECT_EQ(result, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 end");
+}
+
+/**
+ * @tc.name: GetUserLockedBundleListInner_0100
+ * @tc.desc: Test normal call of GetUserLockedBundleListInner with empty bundle list
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AbilityManagerStubTest, GetUserLockedBundleListInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetUserLockedBundleListInner_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+
+    int32_t testUserId = USER_ID;
+    ASSERT_TRUE(data.WriteInt32(testUserId));
+
+    auto result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST), data, reply, option);
+
+    int32_t businessRet = reply.ReadInt32();
+    EXPECT_EQ(businessRet, ERR_OK);
+
+    int32_t listSize = reply.ReadInt32();
+    EXPECT_NE(listSize, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetUserLockedBundleListInner_0100 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

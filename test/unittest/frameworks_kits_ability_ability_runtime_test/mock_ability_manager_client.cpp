@@ -1103,5 +1103,10 @@ ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
 {
     return ERR_OK;
 }
+
+ErrCode GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList)
+{
+    return ERR_OK;
+}
 } // namespace AAFwk
 } // namespace OHOS

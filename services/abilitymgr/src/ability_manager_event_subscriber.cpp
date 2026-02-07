@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@ void AbilityScreenUnlockEventSubscriber::OnReceiveEvent(const EventFwk::CommonEv
 
 AbilityUserUnlockEventSubscriber::AbilityUserUnlockEventSubscriber(
     const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void(int32_t)> &screenUnlockCallback,
-    const std::function<void()> &userScreenUnlockCallback)
+    const std::function<void(int32_t)> &userScreenUnlockCallback)
     : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback),
     userScreenUnlockCallback_(userScreenUnlockCallback)
 {}
@@ -124,7 +124,7 @@ void AbilityUserUnlockEventSubscriber::OnReceiveEvent(const EventFwk::CommonEven
         AbilityEventMapManager::GetInstance().RemoveUser(userId);
         return;
     }
-    userScreenUnlockCallback_();
+    userScreenUnlockCallback_(userId);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ public:
     explicit AbilityUserUnlockEventSubscriber(
         const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
         const std::function<void(int32_t)> &screenUnlockCallback,
-        const std::function<void()> &userScreenUnlockCallback);
+        const std::function<void(int32_t)> &userScreenUnlockCallback);
 
     ~AbilityUserUnlockEventSubscriber() override = default;
 
@@ -73,7 +73,7 @@ public:
 
 private:
     std::function<void(int32_t)> screenUnlockCallback_;
-    std::function<void()> userScreenUnlockCallback_;
+    std::function<void(int32_t)> userScreenUnlockCallback_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
