@@ -53,6 +53,7 @@
 #include "permission_constants.h"
 #include "process_options.h"
 #include "uri_utils.h"
+#include "user_controller/user_controller.h"
 #include "utils/state_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
@@ -329,6 +330,9 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     want_.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName)) {
         SetAttachDebug(true);
+    }
+    if (result == ERR_OK) {
+        AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(abilityInfo_.bundleName, userId);
     }
     return result;
 }

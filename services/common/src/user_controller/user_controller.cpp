@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t U1_USER_ID = 1;
 constexpr int32_t USER_ID_DEFAULT = 100;
@@ -175,6 +176,94 @@ int32_t UserController::CheckUserParam(int32_t userId) const
         return AAFwk::INVALID_USERID_VALUE;
     }
     return ERR_OK;
+}
+
+UserController::UserLockStatus UserController::GetUserLockStatus(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> guard(userLock_);
+    auto iter = userLockStatusMap_.find(userId);
+    if (iter != userLockStatusMap_.end()) {
+        return iter->second;
+    }
+    return UserLockStatus::USER_LOCK_STATUS_BUTT;
+}
+
+void UserController::SetUserLockStatus(int32_t userId, UserController::UserLockStatus status)
+{
+    std::lock_guard<ffrt::mutex> guard(userLock_);
+    if (status == UserLockStatus::USER_LOCKED &&
+        userLockStatusMap_.find(userId) != userLockStatusMap_.end()) {
+        TAG_LOGD(AAFwkTag::USER_CONTROLLER, "userId:%{public}d already exist", userId);
+        return;
+    }
+    userLockStatusMap_[userId] = status;
+    TAG_LOGD(AAFwkTag::USER_CONTROLLER, "SetUserLockStatus successful, userId:%{public}d, status:%{public}d",
+        userId, static_cast<int32_t>(status));
+}
+
+void UserController::DeleteUserLockStatus(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> guard(userLock_);
+    userLockStatusMap_.erase(userId);
+    TAG_LOGD(AAFwkTag::USER_CONTROLLER, "DeleteUserLockStatus successful, userId:%{public}d", userId);
+}
+
+int32_t UserController::GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList)
+{
+    TAG_LOGD(AAFwkTag::USER_CONTROLLER, "GetUserLockedBundleList called");
+    {
+        std::lock_guard<ffrt::mutex> guard(userLockedBundleMapMutex_);
+        auto it = userLockedBundleMap_.find(userId);
+        if (it != userLockedBundleMap_.end()) {
+            userLockedBundleList = std::move(it->second);
+            userLockedBundleMap_.erase(it);
+            return ERR_OK;
+        }
+    }
+    TAG_LOGE(AAFwkTag::USER_CONTROLLER, "GetUserLockedBundleList, no bundle list for userId: %{public}d", userId);
+    return ERR_INVALID_VALUE;
+}
+
+void UserController::DeleteUserLockedBundleListByUserId(int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::USER_CONTROLLER, "DeleteUserLockedBundleListByUserId called");
+    std::lock_guard<ffrt::mutex> guard(userLockedBundleMapMutex_);
+    auto it = userLockedBundleMap_.find(userId);
+    if (it != userLockedBundleMap_.end()) {
+        userLockedBundleMap_.erase(it);
+    }
+}
+
+void UserController::AddToUserLockedBundleList(const std::string &bundleName, int32_t userId)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::USER_CONTROLLER, "empty bundleName");
+        return;
+    }
+
+    if (userId == DEFAULT_INVAL_VALUE) {
+        TAG_LOGE(AAFwkTag::USER_CONTROLLER, "invalid userId: %{public}d", userId);
+        return;
+    }
+
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
+        TAG_LOGE(AAFwkTag::USER_CONTROLLER, "invalid userId: %{public}d", userId);
+        return;
+    }
+
+    auto userLockStatus = AbilityRuntime::UserController::GetInstance().GetUserLockStatus(userId);
+    if (userLockStatus != AbilityRuntime::UserController::UserLockStatus::USER_LOCKED) {
+        TAG_LOGW(AAFwkTag::USER_CONTROLLER, "invalid user lock status: %{public}d",
+            static_cast<int32_t>(userLockStatus));
+        return;
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> guard(userLockedBundleMapMutex_);
+        userLockedBundleMap_[userId].insert(bundleName);
+    }
+    TAG_LOGD(AAFwkTag::USER_CONTROLLER, "AddToUserLockedBundleList success, userId: %{public}d, bundleName: %{public}s",
+        userId, bundleName.c_str());
 }
 }
 }

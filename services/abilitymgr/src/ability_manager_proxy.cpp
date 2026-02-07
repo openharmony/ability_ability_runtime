@@ -7539,5 +7539,42 @@ int32_t AbilityManagerProxy::UnRegisterPreloadUIExtensionHostClient(int32_t call
     int32_t result = reply.ReadInt32();
     return result;
 }
+
+int32_t AbilityManagerProxy::GetUserLockedBundleList(int32_t userId,
+    std::unordered_set<std::string> &userLockedBundleList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId fail");
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SendRequest(
+        AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    auto errCode = reply.ReadInt32();
+    if (errCode != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetUserLockedBundleList failed, errCode: %{public}d", errCode);
+        return errCode;
+    }
+    int32_t bundleListSize = reply.ReadInt32();
+    if (bundleListSize > MAX_DUMP_STATE_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundle list size error");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t i = 0; i < bundleListSize; ++i) {
+        std::string bundle = Str16ToStr8(reply.ReadString16());
+        userLockedBundleList.insert(bundle);
+    }
+    return NO_ERROR;
+}
 } // namespace AAFwk
 } // namespace OHOS

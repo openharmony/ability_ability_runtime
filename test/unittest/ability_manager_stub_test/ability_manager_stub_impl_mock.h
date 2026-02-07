@@ -475,6 +475,13 @@ public:
     MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
         int32_t userId));
     MOCK_METHOD1(GetAutoStartupStatusForSelf, int32_t(bool &isAutoStartEnabled));
+
+int32_t GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList) override
+{
+    userLockedBundleList.clear();
+    userLockedBundleList.insert("com.ohos.test");
+    return ERR_OK;
+}
 };
 }  // namespace AAFwk
 }  // namespace OHOS
