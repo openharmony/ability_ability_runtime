@@ -13,26 +13,14 @@
  * limitations under the License.
  */
 
-
-#include <chrono>
-#include <cstdint>
-#include "ability_manager_client.h"
-#include "hilog_tag_wrapper.h"
-#include "hitrace_meter.h"
 #include "js_agent_extension_context.h"
-#include "js_extension_context.h"
+
+#include "hilog_tag_wrapper.h"
 #include "js_error_utils.h"
-#include "js_data_struct_converter.h"
+#include "js_extension_context.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
-#include "napi_common_ability.h"
-#include "napi_common_want.h"
-#include "napi_common_util.h"
-#include "napi_remote_object.h"
-#include "napi_common_start_options.h"
-#include "start_options.h"
-#include "uri.h"
 
 namespace OHOS {
 namespace AgentRuntime {

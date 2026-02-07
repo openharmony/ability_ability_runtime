@@ -40,14 +40,6 @@ public:
     virtual ~JsAgentExtension() override;
 
     /**
-     * @brief Create JsAgentExtension.
-     *
-     * @param runtime The runtime.
-     * @return The JsAgentExtension instance.
-     */
-    static JsAgentExtension* Create(const std::unique_ptr<Runtime>& runtime);
-
-    /**
      * @brief Init the extension.
      *
      * @param record the extension record.

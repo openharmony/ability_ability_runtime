@@ -18,13 +18,11 @@
 
 #include "extension_module_loader.h"
 
-
 namespace OHOS {
-
 namespace AbilityRuntime {
-    class ExtensionModuleLoader;
-    class Extension;
-    class Runtime;
+class ExtensionModuleLoader;
+class Extension;
+class Runtime;
 }
 
 namespace AgentRuntime {

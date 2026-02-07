@@ -71,6 +71,24 @@ public:
      * @return The agent extension instance.
      */
     static AgentExtension* Create(const std::unique_ptr<Runtime>& runtime);
+
+private:
+    
+    /**
+     * @brief Create js agent extension.
+     *
+     * @param runtime The runtime.
+     * @return The agent extension instance.
+     */
+    static AgentExtension* CreateJsAgentExtension(const std::unique_ptr<Runtime>& runtime);
+    
+    /**
+     * @brief Create ets agent extension.
+     *
+     * @param runtime The runtime.
+     * @return The agent extension instance.
+     */
+    static AgentExtension* CreateEtsAgentExtension(const std::unique_ptr<Runtime>& runtime);
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
