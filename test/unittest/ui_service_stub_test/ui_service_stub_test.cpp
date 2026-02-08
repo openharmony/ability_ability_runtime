@@ -94,12 +94,12 @@ HWTEST_F(UIServiceStubTest, OnRemoteRequest_0200, TestSize.Level1)
 
     data.WriteInterfaceToken(UIServiceStub::GetDescriptor());
 
-    AAFwk::Want want;
+    AAFwk::WantParams wantParams;
     const std::string name = "name";
     const std::string dataStr = "data";
     sptr<AppExecFwk::MockAbilityToken> token = new (std::nothrow) AppExecFwk::MockAbilityToken();
     data.WriteRemoteObject(token);
-    data.WriteParcelable(&want);
+    data.WriteParcelable(&wantParams);
     if (!data.WriteString(name)) {
         return;
     }
