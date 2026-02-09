@@ -50,7 +50,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityKeepAliveDataManager::GetInstance().RestoreKvStore(status);
     status = DistributedKv::Status::SUCCESS;
     AbilityKeepAliveDataManager::GetInstance().RestoreKvStore(status);
-    AbilityKeepAliveDataManager::GetInstance().GetKvStore();
+    auto kvStore = AbilityKeepAliveDataManager::GetInstance().GetKvStore();
+    if (!kvStore) {
+        return false;
+    }
     AbilityKeepAliveDataManager::GetInstance().CheckKvStore();
     info.appType = KeepAliveAppType::UNSPECIFIED;
     AbilityKeepAliveDataManager::GetInstance().InsertKeepAliveData(info);
