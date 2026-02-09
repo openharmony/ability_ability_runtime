@@ -1901,7 +1901,7 @@ int32_t AppMgrStub::HandleLockProcessCache(MessageParcel &data, MessageParcel &r
     TAG_LOGD(AAFwkTag::APPMGR, "HandleLockProcessCache called");
     int32_t pid = data.ReadInt32();
     bool isLock = data.ReadBool();
-    auto ret = SetProcessCacheEnable(pid, isLock);
+    auto ret = LockProcessCache(pid, isLock);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
