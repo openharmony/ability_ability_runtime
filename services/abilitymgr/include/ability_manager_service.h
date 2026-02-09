@@ -3079,8 +3079,6 @@ private:
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
-    std::list<std::string> vpnAllowList_;
-
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
     void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
@@ -3095,10 +3093,6 @@ private:
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
-
-    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo);
-
-    bool ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
@@ -3171,7 +3165,6 @@ private:
     ffrt::mutex shouldBlockAllAppStartMutex_;
     mutable ffrt::mutex timeoutMapLock_;
     std::mutex whiteListMutex_;
-    std::mutex allowListMutex_;
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
