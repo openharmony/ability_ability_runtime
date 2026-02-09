@@ -78,9 +78,7 @@ export default class PhotoEditorExtensionContext extends ExtensionContext {
       });
       taskpool.execute((): void => {
         this.nativeSaveEditedContentWithUri(uri, myCall);
-      }).catch((err: Error): void => {
-        reject(err as BusinessError);
-      });
+      })
     });
       return p;
   }
@@ -99,9 +97,7 @@ export default class PhotoEditorExtensionContext extends ExtensionContext {
       });
       taskpool.execute((): void => {
         this.nativeSaveEditedContentWithImage(image, options, myCall);
-      }).catch((err: Error): void => {
-        reject(err as BusinessError);
-      });
+      })
     });
     return p;
   }
