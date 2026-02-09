@@ -835,5 +835,54 @@ HWTEST_F(AbilityConnectManagerFourthTest, HandleConnectionCountIncrementTest_001
     connectManager->HandleConnectionCountIncrement(pid, bundleName, abilityName);
     EXPECT_EQ(connectManager->callerPidConnectionCountMap_[pid], 2);
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ReportConnectEventToRss
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, ReportConnectEventToRss_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_001 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(100);
+    auto ret = connectManager->ReportConnectEventToRss(LoadingStage::CONNECT_BEGIN, nullptr, nullptr, 10000);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ReportConnectEventToRss
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, ReportConnectEventToRss_002, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_002 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(100);
+    auto abilityRecord = InitAbilityRecord();
+    auto ret = connectManager->ReportConnectEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord, nullptr, 10000);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_002 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ReportConnectEventToRss
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, ReportConnectEventToRss_003, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_003 start");
+    auto connectManager = std::make_shared<AbilityConnectManager>(100);
+    auto abilityRecord = InitAbilityRecord();
+    ASSERT_NE(abilityRecord, nullptr);
+
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
+    std::shared_ptr<ConnectionRecord> connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord,
+        callback, nullptr);
+
+    auto ret = connectManager->ReportConnectEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord, connectRecord,
+        10000);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "ReportConnectEventToRss_003 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
