@@ -1705,6 +1705,9 @@ HWTEST_F(AbilityManagerServiceFourthTest, AddToUserLockedBundleList_001, TestSiz
         AbilityRuntime::UserController::UserLockStatus::USER_LOCKED);
     AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
     EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+    AbilityRuntime::UserController::GetInstance().SetUserLockStatus(userId,
+        AbilityRuntime::UserController::UserLockStatus::USER_LOCKED);
+    AbilityRuntime::UserController::GetInstance().DeleteUserLockedBundleListByUserId(userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest AddToUserLockedBundleList_001 end");
 }
 } // namespace AAFwk
