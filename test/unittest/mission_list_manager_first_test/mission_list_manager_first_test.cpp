@@ -1168,7 +1168,7 @@ HWTEST_F(MissionListManagerFirstTest, MoveMissionToFrontInner_001, TestSize.Leve
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->Init();
 
-    int ret = missionListManager->MoveMissionToFrontInner(999, false, false, nullptr, nullptr);
+    int ret = missionListManager->MoveMissionToFrontInner(999, false, false, nullptr, nullptr, false);
     EXPECT_EQ(ret, MOVE_MISSION_FAILED);
     missionListManager.reset();
     GTEST_LOG_(INFO) << "MoveMissionToFrontInner_001 end";
@@ -1191,7 +1191,7 @@ HWTEST_F(MissionListManagerFirstTest, MoveMissionToFrontInner_002, TestSize.Leve
 
     int missionId = 999; // Non-existent mission ID
 
-    int ret = missionListManager->MoveMissionToFrontInner(missionId, false, false, nullptr, nullptr);
+    int ret = missionListManager->MoveMissionToFrontInner(missionId, false, false, nullptr, nullptr, false);
     EXPECT_EQ(ret, MOVE_MISSION_FAILED);
     missionListManager.reset();
     GTEST_LOG_(INFO) << "MoveMissionToFrontInner_002 end";
