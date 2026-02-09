@@ -20,6 +20,8 @@
 #include "application_anr_listener.h"
 #undef private
 
+#include "xcollie/watchdog.h"
+
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS;
@@ -53,6 +55,7 @@ void AppfreezeInnerTest::SetUp(void)
 
 void AppfreezeInnerTest::TearDown(void)
 {
+    OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
     AppfreezeInner::DestroyInstance();
 }
 
@@ -127,10 +130,6 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsNeedIgnoreFreezeEvent_001, TestSiz
     appfreezeInner->isAppDebug_ = false;
     appfreezeInner->ThreadBlock(isSixSecondEvent);
     EXPECT_TRUE(isSixSecondEvent);
-    int32_t pid = static_cast<int32_t>(getprocpid());
-    std::shared_ptr<AAFwk::ApplicationAnrListener> listener =
-        std::make_shared<AAFwk::ApplicationAnrListener>();
-    listener->OnAnr(pid, 0);
 }
 
 /**
