@@ -139,7 +139,7 @@ ErrCode DataObsMgrClient::RegisterObserverFromExtension(const Uri &uri, sptr<IDa
         ObserverInfo info(uri, userId);
         info.isExtension = true;
         info.firstCallerTokenID = firstCallerTokenID;
-        value.emplace_back(uri, userId);
+        value.emplace_back(info);
         return true;
     });
     return status;
