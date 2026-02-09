@@ -183,7 +183,7 @@ private:
         Uri uri;
         int32_t userId;
         bool isExtension = false;
-        uint32_t firstCallerTokenID;
+        uint32_t firstCallerTokenID = 0;
         ObserverInfo(Uri uri, int32_t userId) : uri(uri), userId(userId) {};
     };
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<struct ObserverInfo>> observers_;
