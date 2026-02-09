@@ -50,7 +50,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityKeepAliveDataManager::GetInstance().RestoreKvStore(status);
     status = DistributedKv::Status::SUCCESS;
     AbilityKeepAliveDataManager::GetInstance().RestoreKvStore(status);
-    AbilityKeepAliveDataManager::GetInstance().GetKvStore();
+    auto kvStore = AbilityKeepAliveDataManager::GetInstance().GetKvStore();
+    if (!kvStore) {
+        return false;
+    }
     AbilityKeepAliveDataManager::GetInstance().CheckKvStore();
     info.appType = KeepAliveAppType::UNSPECIFIED;
     AbilityKeepAliveDataManager::GetInstance().InsertKeepAliveData(info);
@@ -59,10 +62,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
     AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveDataWithSetterId(info);
     AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusToValue(info);
+    AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveDataToKey(info);
     DistributedKv::Value value;
     AbilityFuzzUtil::GetRandomKeepAliveStatus(fdp, aliveStatus);
     AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusFromValue(value, aliveStatus);
     DistributedKv::Key key;
+    AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveInfoFromKey(key);
     AbilityKeepAliveDataManager::GetInstance().IsEqualSetterId(key, info);
     AbilityKeepAliveDataManager::GetInstance().IsEqual(key, info);
     return true;
