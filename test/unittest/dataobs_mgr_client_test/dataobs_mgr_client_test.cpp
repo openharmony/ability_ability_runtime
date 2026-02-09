@@ -204,7 +204,6 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0300, TestSiz
     client->dataObsManger_ = service2;
     EXPECT_TRUE(client->dataObsManger_ != nullptr);
 
-    client->OnRemoteDied();
     EXPECT_EQ(service2->onChangeCall_, 0);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
     testing::Mock::AllowLeak(callBack1);

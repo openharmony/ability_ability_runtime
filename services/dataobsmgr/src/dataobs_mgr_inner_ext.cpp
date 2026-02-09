@@ -52,7 +52,7 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
         RemoveObsDeathRecipient(dataObserver->AsObject());
         return DATAOBS_SERVICE_OBS_LIMMIT;
     }
-    TAG_LOGE(AAFwkTag::DBOBSMGR, "subscribers:%{public}s p:%{public}d Id:%{public}" PRId64,
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "subscribers:%{public}s p:%{public}d Id:%{public}" PRId64,
         CommonUtils::Anonymous(uri.ToString()).c_str(), entry.pid, entry.entryId);
     return SUCCESS;
 }
@@ -231,7 +231,7 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
             logFlag = nodeLogPair.second;
         }
         if (logFlag) {
-            TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s entrys_:%{public}s",
+            TAG_LOGI(AAFwkTag::DBOBSMGR, "uri:%{public}s entrys_:%{public}s",
                 CommonUtils::Anonymous(info.uri.ToString()).c_str(), obsStr.c_str());
         }
         return;
@@ -253,7 +253,7 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
         }
     }
     if (logFlag) {
-        TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s entrys_:%{public}s",
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "uri:%{public}s entrys_:%{public}s",
             CommonUtils::Anonymous(info.uri.ToString()).c_str(), obsStr.c_str());
     }
 
@@ -291,7 +291,7 @@ bool DataObsMgrInnerExt::Node::AddObserver(const std::vector<std::string> &path,
         }
         entry.deathRecipientRef->ref++;
         entrys_.emplace_back(entry);
-        TAG_LOGI(AAFwkTag::DBOBSMGR, "RemoveObserver p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
         return true;
     }
     auto it = childrens_.try_emplace(path[index], std::make_shared<Node>(path[index])).first;
@@ -307,7 +307,7 @@ bool DataObsMgrInnerExt::Node::RemoveObserver(const std::vector<std::string> &pa
                 return false;
             }
             entry.deathRecipientRef->ref--;
-            TAG_LOGI(AAFwkTag::DBOBSMGR, "RemoveObserver p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
+            TAG_LOGI(AAFwkTag::DBOBSMGR, "p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
             return true;
         });
         return entrys_.empty() && childrens_.empty();
@@ -334,7 +334,7 @@ bool DataObsMgrInnerExt::Node::RemoveObserver(sptr<IRemoteObject> dataObserver)
             return false;
         }
         entry.deathRecipientRef->ref--;
-        TAG_LOGI(AAFwkTag::DBOBSMGR, "RemoveObserver p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "p:%{public}d Id:%{public}" PRId64, entry.pid, entry.entryId);
         return true;
     });
     return entrys_.empty() && childrens_.empty();
