@@ -1544,6 +1544,7 @@ napi_value JsApplicationContextUtils::OffSystemConfigurationUpdated(napi_env env
     std::lock_guard<std::mutex> lock(systemConfigurationUpdatedCallbackLock_);
     if (systemConfigurationUpdatedCallback_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null systemConfigurationUpdatedCallback_");
+        ThrowInvalidParamError(env, "parameter invalid.");
         return CreateJsUndefined(env);
     }
 
