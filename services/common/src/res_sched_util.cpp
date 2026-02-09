@@ -259,6 +259,13 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid, const std::string& b
 void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
     int64_t timeDuration, int64_t abilityRecordId)
 {
+    ReportLoadingEventToRss(stage, pid, uid, timeDuration, abilityRecordId, {});
+}
+
+void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+    int64_t timeDuration, int64_t abilityRecordId,
+    const std::unordered_map<std::string, std::string> &extraParams)
+{
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
     std::unordered_map<std::string, std::string> eventParams {
@@ -272,6 +279,7 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
     if (abilityRecordId > 0) {
         eventParams.emplace("abilityRecordId", std::to_string(abilityRecordId));
     }
+    eventParams.insert(extraParams.begin(), extraParams.end());
 
     int64_t type = static_cast<int64_t>(stage);
     TAG_LOGD(AAFwkTag::DEFAULT, "call");

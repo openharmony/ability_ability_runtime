@@ -2380,6 +2380,27 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
+void MainThread::DoUpdatePluginInfoInstalled(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+    const std::vector<std::string> &pluginModuleNames)
+{
+    if (!applicationInfo_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
+        return;
+    }
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+    applicationInfo_->hasPlugin = true;
+    application_->UpdateApplicationInfoInstalled(*applicationInfo_);
+    AppLibPathMap appLibPaths {};
+    GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, applicationInfo_->isSystemApp);
+    if (IsPluginNamespaceInherited()) {
+        AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+    }
+}
+
 void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -2429,8 +2450,8 @@ void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAp
             }
         }
     }
-    if (IsPluginNamespaceInherited() && !pluginModuleNames.empty()) {
-        AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+    if (!pluginModuleNames.empty()) {
+        DoUpdatePluginInfoInstalled(pluginBundleInfos, pluginModuleNames);
     }
 }
 
@@ -2530,7 +2551,6 @@ void MainThread::LoadAllExtensions()
     std::map<int32_t, std::string> extensionTypeMap;
     for (auto& item : extensionPlugins) {
         extensionTypeMap.insert(std::pair<int32_t, std::string>(item.extensionType, item.extensionName));
-        AddExtensionBlockItem(item.extensionName, item.extensionType);
 
         std::string file = item.extensionLibFile;
         std::weak_ptr<OHOSApplication> wApp = application_;
@@ -2654,7 +2674,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
         TAG_LOGE(AAFwkTag::APPKIT, "record invalid");
         return;
     }
-
+    LoadExtensionBlockList(abilityRecord);
     mainThreadState_ = MainThreadState::RUNNING;
     wptr<MainThread> weak = this;
     auto callback = [weak, abilityRecord](const std::shared_ptr<AbilityRuntime::Context> &stageContext) {
@@ -2663,7 +2683,6 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        appThread->SetProcessExtensionType(abilityRecord);
         auto application = appThread->GetApplication();
         if (application == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null application");
@@ -2695,7 +2714,6 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     if (isAsyncCallback) {
         return;
     }
-    SetProcessExtensionType(abilityRecord);
     auto &runtime = application_->GetRuntime();
     UpdateRuntimeModuleChecker(runtime);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
@@ -2993,7 +3011,6 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
 
     watchdog_->Init(mainHandler_);
     AppExecFwk::AppfreezeInner::GetInstance()->SetMainHandler(mainHandler_);
-    extensionConfigMgr_->Init();
 }
 
 void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context)
@@ -3659,7 +3676,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
         TAG_LOGE(AAFwkTag::APPKIT, "Get bundle info of %{public}s failed", bundleName.c_str());
         return false;
     }
-    
+
     for (auto hapInfo : bundleInfo.hapModuleInfos) {
         if (hapInfo.hqfInfo.hqfFilePath.empty()) {
             continue;
@@ -3760,7 +3777,7 @@ void MainThread::NotifyAppFault(const FaultData &faultData)
     }
 }
 
-void MainThread::SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
+void MainThread::LoadExtensionBlockList(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
     if (!extensionConfigMgr_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null extensionConfigMgr_");
@@ -3774,19 +3791,15 @@ void MainThread::SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecor
         TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "type = %{public}d",
-        static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType));
-    extensionConfigMgr_->SetProcessExtensionType(
-        static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType));
-}
-
-void MainThread::AddExtensionBlockItem(const std::string &extensionName, int32_t type)
-{
-    if (!extensionConfigMgr_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null extensionConfigMgr_");
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-    extensionConfigMgr_->AddBlockListItem(extensionName, type);
+    int32_t extensionType = static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType);
+    TAG_LOGD(AAFwkTag::APPKIT, "type = %{public}d", extensionType);
+    std::string extensionName;
+    application_->GetExtensionNameByType(extensionType, extensionName);
+    extensionConfigMgr_->LoadExtensionBlockList(extensionName, extensionType);
 }
 
 void MainThread::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)

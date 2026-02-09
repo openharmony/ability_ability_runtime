@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,13 @@ class IUserCallback;
 }
 namespace AbilityRuntime {
 class UserController final {
+public:
+    enum class UserLockStatus {
+        USER_LOCKED = 0,
+        USER_UNLOCKED = 1,
+        USER_LOCK_STATUS_BUTT
+    };
+
 public:
     UserController& operator=(const UserController&) = delete;
     UserController(const UserController&) = delete;
@@ -57,6 +64,13 @@ public:
     int32_t CheckStopUserParam(int32_t userId) const;
     int32_t CheckUserParam(int32_t userId) const;
 
+    UserLockStatus GetUserLockStatus(int32_t userId);
+    void SetUserLockStatus(int32_t userId, UserLockStatus status);
+    void DeleteUserLockStatus(int32_t userId);
+    void AddToUserLockedBundleList(const std::string &bundleName, int32_t userId);
+    int32_t GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList);
+    void DeleteUserLockedBundleListByUserId(int32_t userId);
+
 private:
     UserController() = default;
 
@@ -65,6 +79,9 @@ private:
     ffrt::mutex logoutUserIdLock_;
     std::unordered_set<int32_t> logoutUserIdSet_;
     int32_t freezingNewUserId_ = -1;
+    std::unordered_map<int32_t, UserLockStatus> userLockStatusMap_;
+    ffrt::mutex userLockedBundleMapMutex_;
+    std::unordered_map<int32_t, std::unordered_set<std::string>> userLockedBundleMap_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

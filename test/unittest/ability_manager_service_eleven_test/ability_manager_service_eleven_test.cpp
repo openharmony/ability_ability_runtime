@@ -35,6 +35,7 @@
 #include "mock_permission_verification.h"
 #include "mock_scene_board_judgement.h"
 #include "mock_ability_connect_callback.h"
+#include "sender_info.h"
 #include "session/host/include/session.h"
 #include "ui_ability_lifecycle_manager.h"
 
@@ -234,6 +235,33 @@ HWTEST_F(AbilityManagerServiceElevenTest, RegisterOffListener_0001, TestSize.Lev
 }
 
 /*
+ * Feature: RegisterOnListener_0001
+ * Function: RegisterOnListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterOnListener
+ * EnvConditions: permission flag toggled
+ * CaseDescription: Expect CHECK_PERMISSION_FAILED without SACall flag yet success otherwise
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, RegisterOnListener_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterOnListener_0001 start";
+
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    sptr<MockIRemoteOnListener> listener = new (std::nothrow) MockIRemoteOnListener();
+    ASSERT_NE(listener, nullptr);
+    MyFlag::flag_ = 0;
+    auto result = abilityMs->RegisterOnListener("test", listener);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    MyFlag::flag_ = 1;
+    result = abilityMs->RegisterOnListener("test", listener);
+    EXPECT_NE(result, CHECK_PERMISSION_FAILED);
+    MyFlag::flag_ = 0;
+
+    GTEST_LOG_(INFO) << "RegisterOnListener_0001 end";
+}
+
+/*
  * Feature: GetWantSender_0002
  * Function: GetWantSender
  * SubFunction: NA
@@ -397,6 +425,32 @@ HWTEST_F(AbilityManagerServiceElevenTest, GetWantSenderByUserId_0002, TestSize.L
     auto result = abilityMs->GetWantSenderByUserId(wantSenderInfo, nullptr, callerUid, callerUid, callerUserId);
     EXPECT_EQ(result, nullptr);
     GTEST_LOG_(INFO) << "GetWantSenderByUserId_0002 end";
+}
+
+/*
+ * Feature: SendLocalWantSender_0001
+ * Function: SendLocalWantSender
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SendLocalWantSender
+ * EnvConditions: caller lacks local wantagent permission
+ * CaseDescription: Expect CHECK_PERMISSION_FAILED when triggering SendLocalWantSender without required permission
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, SendLocalWantSender_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SendLocalWantSender_0001 start";
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    ASSERT_NE(abilityMs->subManagersHelper_, nullptr);
+    abilityMs->subManagersHelper_->currentPendingWantManager_ = std::make_shared<PendingWantManager>(nullptr);
+    ASSERT_NE(abilityMs->subManagersHelper_->currentPendingWantManager_, nullptr);
+
+    SenderInfo senderInfo;
+    senderInfo.tokenId = 1;
+    MyFlag::flag_ = 0;
+    auto result = abilityMs->SendLocalWantSender(senderInfo);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    GTEST_LOG_(INFO) << "SendLocalWantSender_0001 end";
 }
 
 /*

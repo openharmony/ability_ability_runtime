@@ -33,6 +33,7 @@
 #include "mock_ability_connect_callback.h"
 #include "mock_sa_call.h"
 #include "mock_task_handler_wrap.h"
+#include "param.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
 #include <thread>
@@ -116,6 +117,19 @@ private:
     std::shared_ptr<AbilityConnectManager> connectManager_;
     std::shared_ptr<CommonExtensionManager> commonExtensionManager_;
     std::shared_ptr<EventHandlerWrap> eventHandler_;
+};
+
+class TestAbilityConnectManager : public AbilityConnectManager {
+public:
+    explicit TestAbilityConnectManager(int userId) : AbilityConnectManager(userId) {}
+
+    int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid) override
+    {
+        lastUnregisterPid_ = callerPid;
+        return ERR_OK;
+    }
+
+    int32_t lastUnregisterPid_ = -1;
 };
 
 AbilityRequest AbilityConnectManagerTest::GenerateAbilityRequest(const std::string& deviceName,
@@ -1674,6 +1688,137 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_AbilityTransitionDone_001, T
     connectManager->MoveToTerminatingMap(abilityRecord);
     int res2 = connectManager->AbilityTransitionDone(token, state);
     EXPECT_EQ(res2, ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleCommandDestroy
+ * SubFunction: HandleCommandDestroy
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleCommandDestroy removes session mapping.
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_HandleCommandDestroy_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    sptr<IRemoteObject> token = serviceRecord_->GetToken();
+    sessionInfo->sessionToken = token;
+
+    sptr<SessionInfo> storedInfo = new (std::nothrow) SessionInfo();
+    ASSERT_NE(storedInfo, nullptr);
+    storedInfo->callerToken = token;
+
+    connectManager->windowExtensionMap_.emplace(token, AbilityConnectManager::WindowExtMapValType(0, storedInfo));
+    EXPECT_EQ(connectManager->windowExtensionMap_.size(), 1u);
+
+    connectManager->HandleCommandDestroy(sessionInfo);
+    EXPECT_EQ(connectManager->windowExtensionMap_.size(), 0u);
+
+    connectManager->HandleCommandDestroy(nullptr);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: OnStartSpecifiedProcessResponse
+ * SubFunction: OnStartSpecifiedProcessResponse
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify OnStartSpecifiedProcessResponse pops queue and sets flag.
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_OnStartSpecifiedProcessResponse_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityConnectManager::LoadAbilityContext context;
+    context.loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    context.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    context.appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    context.want = std::make_shared<Want>();
+
+    const int32_t requestId = 1;
+    connectManager->loadAbilityQueue_.push_back({ { requestId, context } });
+    connectManager->OnStartSpecifiedProcessResponse("flag", requestId);
+
+    EXPECT_TRUE(connectManager->loadAbilityQueue_.empty());
+    EXPECT_EQ(context.want->GetStringParam("ohoSpecifiedProcessFlag"), "flag");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: OnStartSpecifiedProcessTimeoutResponse
+ * SubFunction: OnStartSpecifiedProcessTimeoutResponse
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify OnStartSpecifiedProcessTimeoutResponse pops queue.
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_OnStartSpecifiedProcessTimeoutResponse_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityConnectManager::LoadAbilityContext context;
+    context.loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    context.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    context.appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    context.want = std::make_shared<Want>();
+
+    const int32_t requestId = 2;
+    connectManager->loadAbilityQueue_.push_back({ { requestId, context } });
+    connectManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
+
+    EXPECT_TRUE(connectManager->loadAbilityQueue_.empty());
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleNotifyAssertFaultDialogDied
+ * SubFunction: HandleNotifyAssertFaultDialogDied
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleNotifyAssertFaultDialogDied invalid branches.
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_HandleNotifyAssertFaultDialogDied_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    auto abilityRecord = serviceRecord_;
+
+    abilityRecord->abilityInfo_.bundleName = "other.bundle";
+    abilityRecord->abilityInfo_.name = "other.name";
+    connectManager->HandleNotifyAssertFaultDialogDied(abilityRecord);
+
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.amsdialog";
+    abilityRecord->abilityInfo_.name = "AssertFaultDialog";
+    Want want;
+    want.SetParam(Want::PARAM_ASSERT_FAULT_SESSION_ID, std::string("not_number"));
+    abilityRecord->SetWant(want);
+    connectManager->HandleNotifyAssertFaultDialogDied(abilityRecord);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: TerminateOrCacheAbility
+ * SubFunction: TerminateOrCacheAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify TerminateOrCacheAbility early return for scene board ability.
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_TerminateOrCacheAbility_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    auto abilityRecord = serviceRecord_;
+    abilityRecord->abilityInfo_.bundleName = AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+    abilityRecord->abilityInfo_.name = AbilityConfig::SCENEBOARD_ABILITY_NAME;
+
+    connectManager->serviceMap_.emplace("sceneBoard", abilityRecord);
+    connectManager->TerminateOrCacheAbility(abilityRecord);
+    EXPECT_EQ(connectManager->serviceMap_.count("sceneBoard"), 1u);
 }
 
 /*

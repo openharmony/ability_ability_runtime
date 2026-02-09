@@ -121,7 +121,7 @@ void MissionDataStorage::DeleteMissionInfo(int missionId)
 void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
 #ifdef SUPPORT_SCREEN
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "save snapshot from cache, missionId = %{public}d", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: save snapshot from cache, missionId = %{public}d", missionId);
     SaveCachedSnapshot(missionId, missionSnapshot);
     SaveSnapshotFile(missionId, missionSnapshot);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "delete snapshot from cache, missionId = %{public}d", missionId);

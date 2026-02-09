@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("agent_bundle_event_callback_test") {
-  module_out_path = "ability_runtime/ability_runtime/agent_bundle_event_callback_test"
+  module_out_path = "ability_runtime/agent_runtime/agent_bundle_event_callback_test"
 
   sanitize = {
     cfi = true

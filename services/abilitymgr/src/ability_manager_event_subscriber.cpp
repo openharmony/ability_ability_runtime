@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-    constexpr int32_t INVALID_USERID = -1;
+constexpr int32_t INVALID_USERID = -1;
 }
 AbilityEventMapManager &AbilityEventMapManager::GetInstance()
 {
@@ -35,7 +35,7 @@ AbilityEventMapManager::~AbilityEventMapManager() {}
 void AbilityEventMapManager::AddEvent(int32_t userId, const std::string &event)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "AddEvent userId: %{public}d, event: %{public}s.", userId, event.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, AddEvent userId: %{public}d, event: %{public}s.", userId, event.c_str());
     auto iter = eventMap_.find(userId);
     if (iter != eventMap_.end()) {
         if (event == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
@@ -69,13 +69,6 @@ bool AbilityEventMapManager::CheckAllUnlocked(int32_t userId)
     return false;
 }
 
-void AbilityEventMapManager::ClearAllEvents()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ClearAllEvents");
-    std::lock_guard<std::mutex> lock(mutex_);
-    eventMap_.clear();
-}
-
 AbilityScreenUnlockEventSubscriber::AbilityScreenUnlockEventSubscriber(
     const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void(int32_t)> &screenUnlockCallback)
     : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback)
@@ -107,7 +100,7 @@ void AbilityScreenUnlockEventSubscriber::OnReceiveEvent(const EventFwk::CommonEv
 
 AbilityUserUnlockEventSubscriber::AbilityUserUnlockEventSubscriber(
     const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void(int32_t)> &screenUnlockCallback,
-    const std::function<void()> &userScreenUnlockCallback)
+    const std::function<void(int32_t)> &userScreenUnlockCallback)
     : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback),
     userScreenUnlockCallback_(userScreenUnlockCallback)
 {}
@@ -131,7 +124,7 @@ void AbilityUserUnlockEventSubscriber::OnReceiveEvent(const EventFwk::CommonEven
         AbilityEventMapManager::GetInstance().RemoveUser(userId);
         return;
     }
-    userScreenUnlockCallback_();
+    userScreenUnlockCallback_(userId);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "ability_manager_service.h"
 #include "insight_intent_execute_manager.h"
 #include "modal_system_dialog/modal_system_dialog_ui_extension.h"
+#include "user_controller/user_controller.h"
 #include "utils/modal_system_dialog_util.h"
 #undef private
 #undef protected
@@ -48,6 +49,7 @@ constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 
 constexpr int32_t FOUNDATION_UID = 5523;
+constexpr int32_t TEST_VALID_USER_ID = 100;
 
 namespace OHOS {
 namespace AAFwk {
@@ -1640,6 +1642,73 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartUIExtensionAbilityTset_001, TestS
     EXPECT_EQ(abilityManagerService->StartUIExtensionAbility(extensionSessionInfoTest, 1), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartUIExtensionAbilityTset_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetUserLockedBundleList
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetUserLockedBundleList
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, GetUserLockedBundleList_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest GetUserLockedBundleList_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.clear();
+    IPCSkeleton::SetCallingUid(FOUNDATION_UID);
+    auto userId = TEST_VALID_USER_ID;
+    std::unordered_set<std::string> userLockedBundleList;
+    auto result = abilityMs->GetUserLockedBundleList(userId, userLockedBundleList);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    AbilityRuntime::UserController::GetInstance().userLockedBundleMap_[TEST_VALID_USER_ID].insert("com.ohos.test");
+    result = abilityMs->GetUserLockedBundleList(userId, userLockedBundleList);
+    EXPECT_EQ(result, ERR_OK);
+    IPCSkeleton::SetCallingUid(0);
+    result = abilityMs->GetUserLockedBundleList(userId, userLockedBundleList);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest GetUserLockedBundleList_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AddToUserLockedBundleList
+ * SubFunction: NA
+ * FunctionPoints: UserController AddToUserLockedBundleList
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, AddToUserLockedBundleList_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest AddToUserLockedBundleList_001 start");
+    std::string bundleName = "";
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.clear();
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+
+    bundleName = "com.ohos.test";
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+
+    userId = U0_USER_ID;
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+
+    userId = U1_USER_ID;
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+
+    userId = TEST_VALID_USER_ID;
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+
+    AbilityRuntime::UserController::GetInstance().SetUserLockStatus(userId,
+        AbilityRuntime::UserController::UserLockStatus::USER_LOCKED);
+    AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(bundleName, userId);
+    EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().userLockedBundleMap_.empty());
+    AbilityRuntime::UserController::GetInstance().SetUserLockStatus(userId,
+        AbilityRuntime::UserController::UserLockStatus::USER_LOCKED);
+    AbilityRuntime::UserController::GetInstance().DeleteUserLockedBundleListByUserId(userId);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest AddToUserLockedBundleList_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

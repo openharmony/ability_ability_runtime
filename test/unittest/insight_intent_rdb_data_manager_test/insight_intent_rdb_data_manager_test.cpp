@@ -15,6 +15,7 @@
 #define private public
 
 #include <gtest/gtest.h>
+#include <vector>
 
 #define private public
 #include "insight_intent_rdb_data_mgr.h"
@@ -132,5 +133,70 @@ HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0200, Func
     std::string data = "testKey";
     result = rdbDataCallBack->onCorruption(data);
     EXPECT_EQ(result, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.number: InsightIntentRdbDataManager_0300
+ * @tc.desc: Cover BackupRdb when the RdbStore has been initialized.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0300, Function | SmallTest | Level1)
+{
+    auto rdbMgr = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance();
+    EXPECT_TRUE(rdbMgr->IsIntentRdbLoaded());
+    EXPECT_NE(rdbMgr->rdbStore_, nullptr);
+    rdbMgr->BackupRdb();
+}
+
+/**
+ * @tc.number: InsightIntentRdbDataManager_0400
+ * @tc.desc: Validate the retry predicate for transient Rdb errors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0400, Function | SmallTest | Level1)
+{
+    auto rdbMgr = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance();
+    const std::vector<int32_t> retryErrCodes = {
+        NativeRdb::E_DATABASE_BUSY,
+        NativeRdb::E_SQLITE_BUSY,
+        NativeRdb::E_SQLITE_LOCKED,
+        NativeRdb::E_SQLITE_NOMEM,
+        NativeRdb::E_SQLITE_IOERR,
+    };
+    for (auto errCode : retryErrCodes) {
+        EXPECT_TRUE(rdbMgr->IsRetryErrCode(errCode));
+    }
+    EXPECT_FALSE(rdbMgr->IsRetryErrCode(NativeRdb::E_OK));
+}
+
+/**
+ * @tc.number: InsightIntentRdbDataManager_0500
+ * @tc.desc: Force table creation to fail so IsIntentRdbLoaded can cover the error path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0500, Function | SmallTest | Level1)
+{
+    static constexpr const char* INVALID_TABLE_NAME = "1 invalid table";
+    auto rdbMgr = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance();
+    std::string originalTable = rdbMgr->intentRdbConfig_.tableName;
+    rdbMgr->intentRdbConfig_.tableName = INVALID_TABLE_NAME;
+    EXPECT_FALSE(rdbMgr->IsIntentRdbLoaded());
+    rdbMgr->intentRdbConfig_.tableName = originalTable;
+}
+
+/**
+ * @tc.number: InsightIntentRdbDataManager_0600
+ * @tc.desc: Ensure BackupRdb exits early when loading the store fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0600, Function | SmallTest | Level1)
+{
+    static constexpr const char* INVALID_TABLE_NAME = "1 invalid table";
+    auto rdbMgr = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance();
+    std::string originalTable = rdbMgr->intentRdbConfig_.tableName;
+    rdbMgr->intentRdbConfig_.tableName = INVALID_TABLE_NAME;
+    EXPECT_FALSE(rdbMgr->IsIntentRdbLoaded());
+    rdbMgr->BackupRdb();
+    rdbMgr->intentRdbConfig_.tableName = originalTable;
 }
 }  // namespace

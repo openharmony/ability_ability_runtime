@@ -211,28 +211,30 @@ void AppNativeSpawnManager::InitNativeSpawnMsgPipe(std::shared_ptr<AppRunningMan
     }
     nrFd_ = pipeFd[0];
     nwFd_ = pipeFd[1];
+    fdsan_exchange_owner_tag(nrFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
+    fdsan_exchange_owner_tag(nwFd_, 0, static_cast<uint32_t>(AAFwkTag::APPMGR));
     TAG_LOGI(AAFwkTag::APPMGR, "nrFd is: %{public}d, nwFd is: %{public}d", nrFd_, nwFd_);
     // send fd
     int ret = NativeSpawnListenFdSet(nwFd_);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "send fd to native spawn failed, ret: %{public}d", ret);
-        close(nwFd_);
-        close(nrFd_);
+        fdsan_close_with_tag(nrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(nwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     ret = WatchParameter(NATIVESPAWN_EXIT, AppNativeSpawnStartCallback, nullptr);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "watch native parameter, ret :%{public}d", ret);
-        close(nwFd_);
-        close(nrFd_);
+        fdsan_close_with_tag(nrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(nwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     ffrt_qos_t taskQos = 0;
     ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, nrFd_, EPOLLIN, nullptr, ProcessSignalData);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "ffrt_epoll_ctl failed, ret :%{public}d", ret);
-        close(nwFd_);
-        close(nrFd_);
+        fdsan_close_with_tag(nrFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
+        fdsan_close_with_tag(nwFd_, static_cast<uint32_t>(AAFwkTag::APPMGR));
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "Listen native signal msg ...");

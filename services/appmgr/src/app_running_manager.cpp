@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,10 +167,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
                 customProcessFlag.c_str());
             auto isExist = [&appName, &uid, &appRecord](const std::shared_ptr<ApplicationInfo> &appInfo) {
                 TAG_LOGD(AAFwkTag::APPMGR, "appInfo->name: %{public}s", appInfo->name.c_str());
-                if (appInfo->bundleType == BundleType::APP_PLUGIN) {
-                    return appRecord->GetUid() == uid;
-                }
-                return appInfo->name == appName && appInfo->uid == uid;
+                return (appInfo->name == appName && appInfo->uid == uid) ||
+                    (appInfo->bundleType == BundleType::APP_PLUGIN && appRecord->GetUid() == uid);
             };
             auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
             if (appInfoIter == appInfoList.end()) {
@@ -1251,11 +1249,12 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         if (appRecord == nullptr) {
             continue;
         }
-        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0
-            || appRecord->GetUid() / BASE_USER_RANGE == userId);
+        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0 ||
+                           appRecord->GetUid() / BASE_USER_RANGE == userId);
         if (!userIdFlag) {
             continue;
         }
+
         if (info.bandleName == appRecord->GetBundleName() && info.appIndex == appRecord->GetAppIndex() && item.second
             && appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
             if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE, reason)) {

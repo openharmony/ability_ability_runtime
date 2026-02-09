@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -511,6 +511,411 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_021, TestSize.Level1)
         data, reply, option);
 
     EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_ABILITY_MANAGER_COLLABORATOR
+ * CaseDescription: Verify that getting the collaborator returns the expected error when none is installed
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetAbilityManagerCollaborator_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ABILITY_MANAGER_COLLABORATOR),
+        data, reply, option);
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_ALL_INSIGHT_INTENT_INFO
+ * CaseDescription: Verify that requesting insight intent infos succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetAllInsightIntentInfo_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    data.WriteInt32(USER_ID);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ALL_INSIGHT_INTENT_INFO),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_INSIGHT_INTENT_INFO_BY_BUNDLE_NAME
+ * CaseDescription: Verify that requesting insight intent info by bundle name succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetInsightIntentInfoByBundleName_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    std::string bundleName = "com.ohos.test";
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    data.WriteString(bundleName);
+    data.WriteInt32(USER_ID);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_BUNDLE_NAME),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME
+ * CaseDescription: Verify that requesting insight intent info by intent name succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetInsightIntentInfoByIntentName_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    std::string bundleName = "com.ohos.test";
+    std::string moduleName = "module";
+    std::string intentName = "intent";
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(intentName);
+    data.WriteInt32(USER_ID);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is REGISTER_SA_INTERCEPTOR
+ * CaseDescription: Verify that registering an SA interceptor handles null and valid interceptors
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RegisterSAInterceptor_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR),
+        data, reply, option);
+    EXPECT_EQ(res, ERR_NULL_SA_INTERCEPTOR_EXECUTER);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    WriteInterfaceToken(data2);
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new AbilityRuntime::MockSAInterceptorStub(0);
+    EXPECT_TRUE(data2.WriteRemoteObject(interceptor->AsObject()));
+    res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR),
+        data2, reply2, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is SEND_LOCAL_PENDING_WANT_SENDER
+ * CaseDescription: Verify that sending a local want sender succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_SendLocalPendingWantSender_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteParcelable(nullptr);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER),
+        data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_SELF_UI_ABILITY_IN_CURRENT_PROCESS
+ * CaseDescription: Verify that starting a self UI ability in the current process succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartSelfUIAbilityInCurrentProcess_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    Want want;
+    data.WriteParcelable(&want);
+    std::string specifiedFlag = "flag";
+    data.WriteString(specifiedFlag);
+    StartOptions startOptions;
+    data.WriteParcelable(&startOptions);
+    data.WriteBool(true);
+    data.WriteBool(false);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_IN_CURRENT_PROCESS),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_ABILITY_RUNNING_INFO
+ * CaseDescription: Verify ability running info request succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetAbilityRunningInfo_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ABILITY_RUNNING_INFO),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_EXTENSION_RUNNING_INFO
+ * CaseDescription: Verify extension running info request succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetExtensionRunningInfo_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_EXTENSION_RUNNING_INFO),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_PROCESS_RUNNING_INFO
+ * CaseDescription: Verify process running info request succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetProcessRunningInfo_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_PROCESS_RUNNING_INFO),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is GET_INTENT_EXEMPTION_INFO
+ * CaseDescription: Verify intent exemption info request succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetIntentExemptionInfo_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_INTENT_EXEMPTION_INFO),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_UI_EXTENSION_ABILITY
+ * CaseDescription: Verify that starting a UI extension ability succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIExtensionAbility_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteBool(false);
+    data.WriteInt32(USER_ID);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_UI_EXTENSION_ABILITY_EMBEDDED
+ * CaseDescription: Verify that starting an embedded UI extension ability succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIExtensionAbilityEmbedded_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteBool(false);
+    data.WriteInt32(USER_ID);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(
+        AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY_EMBEDDED), data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_UI_EXTENSION_CONSTRAINED_EMBEDDED
+ * CaseDescription: Verify that starting a constrained embedded UI extension ability succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIExtensionAbility0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteBool(false);
+    data.WriteInt32(USER_ID);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(
+        AbilityManagerInterfaceCode::START_UI_EXTENSION_CONSTRAINED_EMBEDDED), data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_UI_EXTENSION_PRE_VIEW_EMBEDDED
+ * CaseDescription: Verify that starting a preview embedded UI extension ability succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIExtensionPreViewEmbedded_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteBool(false);
+    data.WriteInt32(USER_ID);
+
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_EXTENSION_PRE_VIEW_EMBEDDED), data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is PRELOAD_APPLICATION
+ * CaseDescription: Verify that preloading an application succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_PreloadApplication_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteString("com.ohos.test");
+    data.WriteInt32(USER_ID);
+    data.WriteInt32(0);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::PRELOAD_APPLICATION),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_SELF_UI_ABILITY_WITH_PID_RESULT
+ * CaseDescription: Verify that starting a self UI ability with PID result succeeds
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartSelfUIAbilityWithPidResult_OnRemote_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    Want want;
+    StartOptions startOptions;
+    data.WriteParcelable(&want);
+    data.WriteParcelable(&startOptions);
+    data.WriteUint64(0);
+
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT), data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
@@ -4356,6 +4761,37 @@ HWTEST_F(AbilityManagerStubTest, ManualStartAutoStartupAppsInner_0200, TestSize.
 
     EXPECT_EQ(result, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupAppsInner_0200 end");
+}
+
+/**
+ * @tc.name: GetUserLockedBundleListInner_0100
+ * @tc.desc: Test normal call of GetUserLockedBundleListInner with empty bundle list
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AbilityManagerStubTest, GetUserLockedBundleListInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetUserLockedBundleListInner_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+
+    int32_t testUserId = USER_ID;
+    ASSERT_TRUE(data.WriteInt32(testUserId));
+
+    auto result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST), data, reply, option);
+
+    int32_t businessRet = reply.ReadInt32();
+    EXPECT_EQ(businessRet, ERR_OK);
+
+    int32_t listSize = reply.ReadInt32();
+    EXPECT_NE(listSize, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetUserLockedBundleListInner_0100 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

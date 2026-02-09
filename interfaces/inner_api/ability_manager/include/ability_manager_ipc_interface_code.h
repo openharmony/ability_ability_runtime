@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -703,6 +703,9 @@ enum class AbilityManagerInterfaceCode {
 
     // unregister preload UIExtension host client
     UNREGISTER_PRELOAD_UI_EXTENSION_HOST_CLIENT = 6158,
+
+    // get user locked bundle list
+    GET_USER_LOCKED_BUNDLE_LIST = 6159,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

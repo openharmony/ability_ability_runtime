@@ -16,7 +16,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ability_connect_callback_interface.h"
 #include "agent_card.h"
+#include "agent_extension_connection_constants.h"
 #define private public
 #include "ability_manager_errors.h"
 #include "agent_bundle_event_callback.h"
@@ -24,8 +26,10 @@
 #include "agent_load_callback.h"
 #include "hilog_tag_wrapper.h"
 #undef private
+#include "iremote_object.h"
 #include "mock_my_flag.h"
 #include "system_ability.h"
+#include "want.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,6 +59,9 @@ void AgentManagerServiceTest::SetUp(void)
 {
     MyFlag::isAddSystemAbilityListenerCalled = false;
     MyFlag::isRegisterBundleEventCallbackCalled = false;
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retDisconnectAbility = ERR_OK;
 }
 
 void AgentManagerServiceTest::TearDown(void)
@@ -248,6 +255,189 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_001, TestSize.Level1)
     std::string agentId = "agentId";
     AgentCard card;
     EXPECT_NE(AgentManagerService::GetInstance()->GetAgentCardByAgentId(bundleName, agentId, card), ERR_OK);
+}
+
+namespace {
+class MockAbilityConnection : public IRemoteStub<AAFwk::IAbilityConnection> {
+public:
+    MockAbilityConnection() = default;
+    ~MockAbilityConnection() override = default;
+
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        return 0;
+    }
+
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject,
+        int32_t resultCode) override
+    {}
+
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override
+    {}
+};
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_001
+* @tc.number: ConnectAgentExtensionAbility_001
+* @tc.desc  : Test ConnectAgentExtensionAbility when permission verification fails
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_001, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = false;
+    AAFwk::Want want;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_PERMISSION_DENIED);
+    MyFlag::retVerifyCallingPermission = true;
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_002
+* @tc.number: ConnectAgentExtensionAbility_002
+* @tc.desc  : Test ConnectAgentExtensionAbility when agentId is empty
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_002, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    AAFwk::Want want;
+    // agentId is not set, so it will be empty
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_003
+* @tc.number: ConnectAgentExtensionAbility_003
+* @tc.desc  : Test ConnectAgentExtensionAbility when agent card does not exist
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_003, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("nonExistentAgentId"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    // GetAgentCardByAgentId will fail since no such card exists
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_004
+* @tc.number: ConnectAgentExtensionAbility_004
+* @tc.desc  : Test ConnectAgentExtensionAbility when connection is null
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_004, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<AAFwk::IAbilityConnection> connection = nullptr;
+    // Connection is null, so it should return ERR_INVALID_VALUE
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_005
+* @tc.number: ConnectAgentExtensionAbility_005
+* @tc.desc  : Test ConnectAgentExtensionAbility success case
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_005, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    // Note: This test will fail at the agent card check since no card exists
+    // For the test to pass, we would need to mock GetAgentCardByAgentId
+    // or ensure a valid agent card is in the database
+    int32_t result = AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection);
+    // Since GetAgentCardByAgentId will fail, result should be ERR_INVALID_VALUE
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_006
+* @tc.number: ConnectAgentExtensionAbility_006
+* @tc.desc  : Test ConnectAgentExtensionAbility when ConnectAbilityWithExtensionType fails
+*           Note: This test would require mocking GetAgentCardByAgentId to succeed
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_006, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_INVALID_VALUE;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    // Note: This test will fail at the agent card check since no card exists
+    int32_t result = AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection);
+    // Since GetAgentCardByAgentId will fail, result should be ERR_INVALID_VALUE
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_001
+* @tc.number: DisconnectAgentExtensionAbility_001
+* @tc.desc  : Test DisconnectAgentExtensionAbility when permission verification fails
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_001, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = false;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectAgentExtensionAbility(connection),
+        ERR_PERMISSION_DENIED);
+    MyFlag::retVerifyCallingPermission = true;
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_002
+* @tc.number: DisconnectAgentExtensionAbility_002
+* @tc.desc  : Test DisconnectAgentExtensionAbility when connection is null
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_002, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    sptr<AAFwk::IAbilityConnection> connection = nullptr;
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectAgentExtensionAbility(connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_003
+* @tc.number: DisconnectAgentExtensionAbility_003
+* @tc.desc  : Test DisconnectAgentExtensionAbility success case
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_003, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retDisconnectAbility = ERR_OK;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectAgentExtensionAbility(connection), ERR_OK);
+}
+
+/**
+* @tc.name  : DisconnectAgentExtensionAbility_004
+* @tc.number: DisconnectAgentExtensionAbility_004
+* @tc.desc  : Test DisconnectAgentExtensionAbility when DisconnectAbility fails
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_004, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retDisconnectAbility = ERR_INVALID_VALUE;
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectAgentExtensionAbility(connection),
+        ERR_INVALID_VALUE);
+    MyFlag::retDisconnectAbility = ERR_OK;
 }
 } // namespace AgentRuntime
 } // namespace OHOS

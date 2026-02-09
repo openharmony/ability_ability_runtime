@@ -96,6 +96,18 @@ public:
     }
 };
 
+class TestPreloadUIExtensionExecuteCallbackProxy : public PreloadUIExtensionExecuteCallbackProxy {
+public:
+    explicit TestPreloadUIExtensionExecuteCallbackProxy(const sptr<IRemoteObject> &impl)
+        : PreloadUIExtensionExecuteCallbackProxy(impl)
+    {}
+
+    sptr<IRemoteObject> GetRemoteObject()
+    {
+        return Remote();
+    }
+};
+
 class PreloadUIExtensionExecuteCallbackStubTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
@@ -237,6 +249,213 @@ HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, HandleOnPreloadSuccess_0100,
     
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "HandleOnPreloadSuccess_0100 end");
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnLoadedDone_0100
+ * @tc.name: PreloadUIExtProxy_OnLoadedDone
+ * @tc.desc: Test OnLoadedDone with SendRequest success.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnLoadedDone_0100,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_LOADED_DONE,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t extensionAbilityId = -1;
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_EQ(extensionAbilityId, 101);
+            return ERR_OK;
+        }));
+
+    proxy.OnLoadedDone(101);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnLoadedDone_0200
+ * @tc.name: PreloadUIExtProxy_OnLoadedDone
+ * @tc.desc: Test OnLoadedDone with SendRequest error.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnLoadedDone_0200,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_LOADED_DONE,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t extensionAbilityId = -1;
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_EQ(extensionAbilityId, 202);
+            return ERR_INVALID_STATE;
+        }));
+
+    proxy.OnLoadedDone(202);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnDestroyDone_0300
+ * @tc.name: PreloadUIExtProxy_OnDestroyDone
+ * @tc.desc: Test OnDestroyDone with SendRequest success.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnDestroyDone_0300,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_DESTROY_DONE,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t extensionAbilityId = -1;
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_EQ(extensionAbilityId, 303);
+            return ERR_OK;
+        }));
+
+    proxy.OnDestroyDone(303);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnDestroyDone_0400
+ * @tc.name: PreloadUIExtProxy_OnDestroyDone
+ * @tc.desc: Test OnDestroyDone with SendRequest error.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnDestroyDone_0400,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_DESTROY_DONE,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t extensionAbilityId = -1;
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_EQ(extensionAbilityId, 404);
+            return ERR_INVALID_STATE;
+        }));
+
+    proxy.OnDestroyDone(404);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnPreloadSuccess_0500
+ * @tc.name: PreloadUIExtProxy_OnPreloadSuccess
+ * @tc.desc: Test OnPreloadSuccess with SendRequest success.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnPreloadSuccess_0500,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_SUCCESS,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t requestCode = -1;
+            int32_t extensionAbilityId = -1;
+            int32_t innerErrCode = -1;
+            EXPECT_TRUE(data.ReadInt32(requestCode));
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_TRUE(data.ReadInt32(innerErrCode));
+            EXPECT_EQ(requestCode, 1);
+            EXPECT_EQ(extensionAbilityId, 2);
+            EXPECT_EQ(innerErrCode, 3);
+            return ERR_OK;
+        }));
+
+    proxy.OnPreloadSuccess(1, 2, 3);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_OnPreloadSuccess_0600
+ * @tc.name: PreloadUIExtProxy_OnPreloadSuccess
+ * @tc.desc: Test OnPreloadSuccess with SendRequest error.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_OnPreloadSuccess_0600,
+    Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> remote = new (std::nothrow) MockRemoteObject();
+    ASSERT_NE(remote, nullptr);
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(remote);
+
+    EXPECT_CALL(*remote, SendRequest(IPreloadUIExtensionExecuteCallback::ON_PRELOAD_UI_EXTENSION_ABILITY_SUCCESS,
+        _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel &data, MessageParcel &, MessageOption &) {
+            auto token = data.ReadInterfaceToken();
+            EXPECT_EQ(token, IPreloadUIExtensionExecuteCallback::GetDescriptor());
+            int32_t requestCode = -1;
+            int32_t extensionAbilityId = -1;
+            int32_t innerErrCode = -1;
+            EXPECT_TRUE(data.ReadInt32(requestCode));
+            EXPECT_TRUE(data.ReadInt32(extensionAbilityId));
+            EXPECT_TRUE(data.ReadInt32(innerErrCode));
+            EXPECT_EQ(requestCode, 10);
+            EXPECT_EQ(extensionAbilityId, 20);
+            EXPECT_EQ(innerErrCode, 30);
+            return ERR_INVALID_STATE;
+        }));
+
+    proxy.OnPreloadSuccess(10, 20, 30);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_NullRemote_0700
+ * @tc.name: PreloadUIExtProxy_NullRemote
+ * @tc.desc: Test OnLoadedDone with null remote.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_NullRemote_0700,
+    Function | MediumTest | Level1)
+{
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(nullptr);
+    EXPECT_EQ(proxy.GetRemoteObject(), nullptr);
+    proxy.OnLoadedDone(1);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_NullRemote_0800
+ * @tc.name: PreloadUIExtProxy_NullRemote
+ * @tc.desc: Test OnDestroyDone with null remote.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_NullRemote_0800,
+    Function | MediumTest | Level1)
+{
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(nullptr);
+    EXPECT_EQ(proxy.GetRemoteObject(), nullptr);
+    proxy.OnDestroyDone(1);
+}
+
+/**
+ * @tc.number: PreloadUIExtProxy_NullRemote_0900
+ * @tc.name: PreloadUIExtProxy_NullRemote
+ * @tc.desc: Test OnPreloadSuccess with null remote.
+ */
+HWTEST_F(PreloadUIExtensionExecuteCallbackStubTest, PreloadUIExtProxy_NullRemote_0900,
+    Function | MediumTest | Level1)
+{
+    TestPreloadUIExtensionExecuteCallbackProxy proxy(nullptr);
+    EXPECT_EQ(proxy.GetRemoteObject(), nullptr);
+    proxy.OnPreloadSuccess(1, 2, 3);
 }
 } // namespace AAFwk
 } // namespace OHOS

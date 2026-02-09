@@ -23,24 +23,54 @@
 namespace OHOS {
 class Uri : public RefBase {
 public:
-    explicit Uri(const std::string& uriString) {}
-    Uri() {}
-    std::string GetScheme()
+    explicit Uri(const std::string& uriString) : uriString_(uriString)
     {
-        return "";
+        Parse();
+    }
+    Uri() {}
+    virtual ~Uri() = default;
+
+    std::string GetScheme() const
+    {
+        return scheme_;
+    }
+
+    std::string GetAuthority() const
+    {
+        return authority_;
     }
 
     void GetPathSegments(std::vector<std::string>& segments) {}
 
     std::string ToString() const
     {
-        return "";
+        return uriString_;
     }
 
     bool operator==(const Uri& other) const
     {
-        return false;
+        return uriString_ == other.uriString_;
     }
+
+private:
+    void Parse()
+    {
+        size_t schemeEnd = uriString_.find("://");
+        if (schemeEnd != std::string::npos) {
+            scheme_ = uriString_.substr(0, schemeEnd);
+            size_t authorityStart = schemeEnd + 3;
+            size_t authorityEnd = uriString_.find("/", authorityStart);
+            if (authorityEnd != std::string::npos) {
+                authority_ = uriString_.substr(authorityStart, authorityEnd - authorityStart);
+            } else {
+                authority_ = uriString_.substr(authorityStart);
+            }
+        }
+    }
+
+    std::string uriString_;
+    std::string scheme_;
+    std::string authority_;
 };
 } // namespace OHOS
 #endif

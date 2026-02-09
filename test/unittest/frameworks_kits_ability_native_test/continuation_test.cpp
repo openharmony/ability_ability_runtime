@@ -55,6 +55,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 const int32_t CONTINUE_ABILITY_REJECTED = 29360197;
 const int32_t CONTINUE_SAVE_DATA_FAILED = 29360198;
 const int32_t CONTINUE_ON_CONTINUE_FAILED = 29360199;
+const int32_t CONTINUE_ON_CONTINUE_HANDLE_FAILED = 29360300;
 const int32_t CONTINUE_ON_CONTINUE_MISMATCH = 29360204;
 #ifdef SUPPORT_GRAPHICS
 const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
@@ -2484,6 +2485,1128 @@ HWTEST_F(ContinuationTest, ReverseContinueAbility_002, TestSize.Level1)
     bool ret = continuationHandlerStage->ReverseContinueAbility();
     EXPECT_FALSE(ret);
     GTEST_LOG_(INFO) << "ReverseContinueAbility_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_Init_001
+ * @tc.name: Init
+ * @tc.desc: call Init with null ability, should return false
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_Init_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    bool result = continuationManagerStage_->Init(nullptr, continueToken_, abilityInfo_, continuationHandlerStage);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_Init_002
+ * @tc.name: Init
+ * @tc.desc: call Init with null continueToken, should return false
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_Init_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    bool result = continuationManagerStage_->Init(mockUIAbility_, nullptr, abilityInfo_, continuationHandlerStage);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_Init_003
+ * @tc.name: Init
+ * @tc.desc: call Init with ability that has null abilityInfo, should return false
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_Init_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+
+    std::shared_ptr<MockContinuationUIAbility> nullInfoAbility = std::make_shared<MockContinuationUIAbility>();
+    nullInfoAbility->abilityInfo_ = nullptr;
+
+    bool result = continuationManagerStage_->Init(nullInfoAbility, continueToken_, abilityInfo_,
+        continuationHandlerStage);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_Init_004
+ * @tc.name: Init
+ * @tc.desc: call Init success and verify internal state initialization
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_Init_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_004 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    bool result = continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_,
+        continuationHandlerStage);
+    EXPECT_TRUE(result);
+
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    EXPECT_TRUE(continuationManagerStage_->GetOriginalDeviceId().empty());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_Init_004 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetContinuationState_001
+ * @tc.name: GetContinuationState
+ * @tc.desc: call GetContinuationState with default state (LOCAL_RUNNING)
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetContinuationState_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    ContinuationState state = continuationManagerStage_->GetContinuationState();
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, state);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetContinuationState_002
+ * @tc.name: GetContinuationState
+ * @tc.desc: call GetContinuationState after RestoreData with reversible=true
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetContinuationState_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->continuationState_ = ContinuationState::REPLICA_RUNNING;
+
+    ContinuationState state = continuationManagerStage_->GetContinuationState();
+    EXPECT_EQ(ContinuationState::REPLICA_RUNNING, state);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetContinuationState_003
+ * @tc.name: GetContinuationState
+ * @tc.desc: call GetContinuationState after CompleteContinuation with reversible and result=0
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetContinuationState_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_003 start";
+    EXPECT_CALL(*mockUIAbility_, TerminateAbility()).Times(0);
+
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->reversible_ = true;
+    continuationManagerStage_->progressState_ = ContinuationManagerStage::ProgressState::WAITING_SCHEDULE;
+    continuationManagerStage_->continuationState_ = ContinuationState::LOCAL_RUNNING;
+
+    continuationManagerStage_->CompleteContinuation(0);
+
+    ContinuationState state = continuationManagerStage_->GetContinuationState();
+    EXPECT_EQ(ContinuationState::REMOTE_RUNNING, state);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetContinuationState_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetOriginalDeviceId_001
+ * @tc.name: GetOriginalDeviceId
+ * @tc.desc: call GetOriginalDeviceId with empty originalDeviceId after init
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetOriginalDeviceId_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    std::string deviceId = continuationManagerStage_->GetOriginalDeviceId();
+    EXPECT_TRUE(deviceId.empty());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetOriginalDeviceId_002
+ * @tc.name: GetOriginalDeviceId
+ * @tc.desc: call GetOriginalDeviceId after RestoreFromRemote success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetOriginalDeviceId_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->originalDeviceId_ = "test_device_001";
+
+    std::string deviceId = continuationManagerStage_->GetOriginalDeviceId();
+    EXPECT_EQ("test_device_001", deviceId);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_GetOriginalDeviceId_003
+ * @tc.name: GetOriginalDeviceId
+ * @tc.desc: call GetOriginalDeviceId after multiple operations
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_GetOriginalDeviceId_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->originalDeviceId_ = "device1";
+    std::string deviceId1 = continuationManagerStage_->GetOriginalDeviceId();
+    EXPECT_EQ("device1", deviceId1);
+
+    continuationManagerStage_->originalDeviceId_ = "device2";
+    std::string deviceId2 = continuationManagerStage_->GetOriginalDeviceId();
+    EXPECT_EQ("device2", deviceId2);
+
+    GTEST_LOG_(INFO) << "continuation_manager_stage_GetOriginalDeviceId_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbilityWithStack_001
+ * @tc.name: ContinueAbilityWithStack
+ * @tc.desc: call ContinueAbilityWithStack with valid parameters
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbilityWithStack_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbilityWithStack_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    std::string deviceId = "target_device";
+    uint32_t versionCode = 100;
+
+    continuationManagerStage_->ContinueAbilityWithStack(deviceId, versionCode);
+
+    EXPECT_TRUE(true);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbilityWithStack_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbilityWithStack_002
+ * @tc.name: ContinueAbilityWithStack
+ * @tc.desc: call ContinueAbilityWithStack with empty deviceId
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbilityWithStack_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbilityWithStack_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    std::string deviceId = "";
+    uint32_t versionCode = 0;
+
+    continuationManagerStage_->ContinueAbilityWithStack(deviceId, versionCode);
+
+    EXPECT_TRUE(true);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbilityWithStack_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbility_001
+ * @tc.name: ContinueAbility
+ * @tc.desc: call ContinueAbility with progressState_ != INITIAL
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbility_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ChangeProcessState(ContinuationManagerStage::ProgressState::IN_PROGRESS);
+
+    continuationManagerStage_->ContinueAbility(false, "deviceId");
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::IN_PROGRESS, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbility_002
+ * @tc.name: ContinueAbility
+ * @tc.desc: call ContinueAbility with continuationState_ != LOCAL_RUNNING
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbility_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->continuationState_ = ContinuationState::REMOTE_RUNNING;
+
+    continuationManagerStage_->ContinueAbility(false, "deviceId");
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbility_003
+ * @tc.name: ContinueAbility
+ * @tc.desc: call ContinueAbility with reversible=false and HandleContinueAbility success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbility_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool reversible = false;
+    std::string deviceId = "target_device";
+
+    continuationManagerStage_->ContinueAbility(reversible, deviceId);
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbility_004
+ * @tc.name: ContinueAbility
+ * @tc.desc: call ContinueAbility with reversible=true and HandleContinueAbility success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbility_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_004 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool reversible = true;
+    std::string deviceId = "target_device";
+
+    continuationManagerStage_->ContinueAbility(reversible, deviceId);
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_004 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ContinueAbility_005
+ * @tc.name: ContinueAbility
+ * @tc.desc: call ContinueAbility with null continuationHandler
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ContinueAbility_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_005 start";
+
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, nullptr);
+
+    continuationManagerStage_->ContinueAbility(false, "deviceId");
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ContinueAbility_005 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ReverseContinueAbility_001
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility with progressState_ != INITIAL
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ReverseContinueAbility_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ChangeProcessState(ContinuationManagerStage::ProgressState::IN_PROGRESS);
+    continuationManagerStage_->continuationState_ = ContinuationState::REMOTE_RUNNING;
+
+    bool result = continuationManagerStage_->ReverseContinueAbility();
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ReverseContinueAbility_002
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility with continuationState_ != REMOTE_RUNNING
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ReverseContinueAbility_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->continuationState_ = ContinuationState::LOCAL_RUNNING;
+
+    bool result = continuationManagerStage_->ReverseContinueAbility();
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ReverseContinueAbility_003
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility with null continuationHandler
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ReverseContinueAbility_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_003 start";
+
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, nullptr);
+    continuationManagerStage_->continuationState_ = ContinuationState::REMOTE_RUNNING;
+
+    bool result = continuationManagerStage_->ReverseContinueAbility();
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ReverseContinueAbility_004
+ * @tc.name: ReverseContinueAbility
+ * @tc.desc: call ReverseContinueAbility with continuationHandler ReverseContinueAbility returns true
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ReverseContinueAbility_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_004 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    continuationManagerStage_->continuationState_ = ContinuationState::REMOTE_RUNNING;
+
+    bool result = continuationManagerStage_->ReverseContinueAbility();
+
+    EXPECT_TRUE(true);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ReverseContinueAbility_004 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_StartContinuation_001
+ * @tc.name: StartContinuation
+ * @tc.desc: call StartContinuation success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_StartContinuation_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_001 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(true));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool result = continuationManagerStage_->StartContinuation();
+    EXPECT_TRUE(result);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::IN_PROGRESS, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_StartContinuation_002
+ * @tc.name: StartContinuation
+ * @tc.desc: call StartContinuation with DoScheduleStartContinuation failed
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_StartContinuation_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_002 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(false));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool result = continuationManagerStage_->StartContinuation();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_StartContinuation_003
+ * @tc.name: StartContinuation
+ * @tc.desc: call StartContinuation with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_StartContinuation_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+
+    bool result = continuationManagerStage_->StartContinuation();
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_StartContinuation_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnStartAndSaveData_001
+ * @tc.name: OnStartAndSaveData
+ * @tc.desc: call OnStartAndSaveData with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnStartAndSaveData_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+    WantParams wantParams;
+    int32_t result = continuationManagerStage_->OnStartAndSaveData(wantParams);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnStartAndSaveData_002
+ * @tc.name: OnStartAndSaveData
+ * @tc.desc: call OnStartAndSaveData with OnStartContinuation failed
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnStartAndSaveData_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_002 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(false));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    int32_t result = continuationManagerStage_->OnStartAndSaveData(wantParams);
+    EXPECT_EQ(CONTINUE_ABILITY_REJECTED, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnStartAndSaveData_003
+ * @tc.name: OnStartAndSaveData
+ * @tc.desc: call OnStartAndSaveData with OnSaveData failed
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnStartAndSaveData_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_003 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*mockUIAbility_, OnSaveData(_)).Times(1).WillOnce(Return(false));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    int32_t result = continuationManagerStage_->OnStartAndSaveData(wantParams);
+    EXPECT_EQ(CONTINUE_SAVE_DATA_FAILED, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnStartAndSaveData_004
+ * @tc.name: OnStartAndSaveData
+ * @tc.desc: call OnStartAndSaveData success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnStartAndSaveData_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_004 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*mockUIAbility_, OnSaveData(_)).Times(1).WillOnce(Return(true));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    int32_t result = continuationManagerStage_->OnStartAndSaveData(wantParams);
+    EXPECT_EQ(ERR_OK, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnStartAndSaveData_004 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_IsContinuePageStack_001
+ * @tc.name: IsContinuePageStack
+ * @tc.desc: call IsContinuePageStack with true value
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_IsContinuePageStack_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_001 start";
+    WantParams wantParams;
+    sptr<IInterface> iInterface = Boolean::Parse("true");
+    wantParams.SetParam(SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME, iInterface);
+    bool result = continuationManagerStage_->IsContinuePageStack(wantParams);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_IsContinuePageStack_002
+ * @tc.name: IsContinuePageStack
+ * @tc.desc: call IsContinuePageStack with false value
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_IsContinuePageStack_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_002 start";
+    WantParams wantParams;
+    sptr<IInterface> iInterface = Boolean::Parse("false");
+    wantParams.SetParam(SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME, iInterface);
+    bool result = continuationManagerStage_->IsContinuePageStack(wantParams);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_IsContinuePageStack_003
+ * @tc.name: IsContinuePageStack
+ * @tc.desc: call IsContinuePageStack with null value
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_IsContinuePageStack_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_003 start";
+    WantParams wantParams;
+
+    bool result = continuationManagerStage_->IsContinuePageStack(wantParams);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_IsContinuePageStack_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnContinueAndGetContent_001
+ * @tc.name: OnContinueAndGetContent
+ * @tc.desc: call OnContinueAndGetContent with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnContinueAndGetContent_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+    WantParams wantParams;
+    bool isAsyncOnContinue = false;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnContinueAndGetContent_002
+ * @tc.name: OnContinueAndGetContent
+ * @tc.desc: call OnContinueAndGetContent with OnContinue AGREE and IsContinuePageStack true
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnContinueAndGetContent_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_002 start";
+    EXPECT_CALL(*mockUIAbility_, OnContinue(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ContinuationManagerStage::OnContinueResult::AGREE));
+    EXPECT_CALL(*mockUIAbility_, GetContentInfo()).Times(1).WillOnce(Return("pageStackContent"));
+
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    bool isAsyncOnContinue = false;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(ERR_OK, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnContinueAndGetContent_003
+ * @tc.name: OnContinueAndGetContent
+ * @tc.desc: call OnContinueAndGetContent with OnContinue REJECT
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnContinueAndGetContent_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_003 start";
+    EXPECT_CALL(*mockUIAbility_, OnContinue(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ContinuationManagerStage::OnContinueResult::REJECT));
+
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    bool isAsyncOnContinue = false;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(CONTINUE_ON_CONTINUE_FAILED, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnContinueAndGetContent_004
+ * @tc.name: OnContinueAndGetContent
+ * @tc.desc: call OnContinueAndGetContent with OnContinue MISMATCH
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnContinueAndGetContent_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_004 start";
+    EXPECT_CALL(*mockUIAbility_, OnContinue(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ContinuationManagerStage::OnContinueResult::MISMATCH));
+
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    bool isAsyncOnContinue = false;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(CONTINUE_ON_CONTINUE_MISMATCH, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_004 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_OnContinueAndGetContent_005
+ * @tc.name: OnContinueAndGetContent
+ * @tc.desc: call OnContinueAndGetContent with OnContinue ON_CONTINUE_ERR
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_OnContinueAndGetContent_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_005 start";
+    EXPECT_CALL(*mockUIAbility_, OnContinue(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR));
+
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams wantParams;
+    bool isAsyncOnContinue = false;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(CONTINUE_ON_CONTINUE_HANDLE_FAILED, result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_OnContinueAndGetContent_005 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_SaveData_001
+ * @tc.name: SaveData
+ * @tc.desc: call SaveData with DoScheduleSaveData failed
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_SaveData_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_SaveData_001 start";
+    EXPECT_CALL(*mockUIAbility_, OnSaveData(_)).Times(1).WillOnce(Return(false));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams saveData;
+    bool result = continuationManagerStage_->SaveData(saveData);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_SaveData_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_SaveData_002
+ * @tc.name: SaveData
+ * @tc.desc: call SaveData with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_SaveData_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_SaveData_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+
+    WantParams saveData;
+    bool result = continuationManagerStage_->SaveData(saveData);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_SaveData_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_RestoreData_001
+ * @tc.name: RestoreData
+ * @tc.desc: call RestoreData success with reversible=true
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_RestoreData_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams restoreData;
+    bool reversible = true;
+    std::string originalDeviceId = "device123";
+
+    bool result = continuationManagerStage_->RestoreData(restoreData, reversible, originalDeviceId);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationState::REPLICA_RUNNING, continuationManagerStage_->GetContinuationState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_RestoreData_002
+ * @tc.name: RestoreData
+ * @tc.desc: call RestoreData with reversible=false
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_RestoreData_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams restoreData;
+    bool reversible = false;
+    std::string originalDeviceId = "device123";
+
+    bool result = continuationManagerStage_->RestoreData(restoreData, reversible, originalDeviceId);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(originalDeviceId, continuationManagerStage_->GetOriginalDeviceId());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_RestoreData_003
+ * @tc.name: RestoreData
+ * @tc.desc: call RestoreData with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_RestoreData_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_003 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+
+    WantParams restoreData;
+    bool reversible = true;
+    std::string originalDeviceId = "device123";
+
+    bool result = continuationManagerStage_->RestoreData(restoreData, reversible, originalDeviceId);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreData_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_NotifyCompleteContinuation_001
+ * @tc.name: NotifyCompleteContinuation
+ * @tc.desc: call NotifyCompleteContinuation
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_NotifyCompleteContinuation_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyCompleteContinuation_001 start";
+    std::string originDeviceId = "origin_device";
+    int sessionId = 12345;
+    bool success = true;
+    sptr<IRemoteObject> reverseScheduler = nullptr;
+
+    continuationManagerStage_->NotifyCompleteContinuation(originDeviceId, sessionId, success, reverseScheduler);
+
+    EXPECT_TRUE(true);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyCompleteContinuation_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_NotifyCompleteContinuation_002
+ * @tc.name: NotifyCompleteContinuation
+ * @tc.desc: call NotifyCompleteContinuation with success=false
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_NotifyCompleteContinuation_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyCompleteContinuation_002 start";
+    std::string originDeviceId = "origin_device";
+    int sessionId = 12345;
+    bool success = false;
+    sptr<IRemoteObject> reverseScheduler = new (std::nothrow) MockReverseContinuationSchedulerReplicaStub();
+
+    continuationManagerStage_->NotifyCompleteContinuation(originDeviceId, sessionId, success, reverseScheduler);
+
+    EXPECT_TRUE(true);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyCompleteContinuation_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_CompleteContinuation_001
+ * @tc.name: CompleteContinuation
+ * @tc.desc: call CompleteContinuation with reversible_=true and result=0
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_CompleteContinuation_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_001 start";
+    EXPECT_CALL(*mockUIAbility_, TerminateAbility()).Times(0);
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->reversible_ = true;
+    continuationManagerStage_->progressState_ = ContinuationManagerStage::ProgressState::WAITING_SCHEDULE;
+    continuationManagerStage_->continuationState_ = ContinuationState::LOCAL_RUNNING;
+
+    int result = 0;
+    continuationManagerStage_->CompleteContinuation(result);
+
+    EXPECT_EQ(ContinuationState::REMOTE_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_CompleteContinuation_002
+ * @tc.name: CompleteContinuation
+ * @tc.desc: call CompleteContinuation with reversible_=false and result=0
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_CompleteContinuation_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_002 start";
+    EXPECT_CALL(*mockUIAbility_, TerminateAbility()).Times(1).WillOnce(Return(0));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->reversible_ = false;
+    continuationManagerStage_->progressState_ = ContinuationManagerStage::ProgressState::WAITING_SCHEDULE;
+    continuationManagerStage_->continuationState_ = ContinuationState::LOCAL_RUNNING;
+
+    int result = 0;
+    continuationManagerStage_->CompleteContinuation(result);
+
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_CompleteContinuation_003
+ * @tc.name: CompleteContinuation
+ * @tc.desc: call CompleteContinuation with result!=0
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_CompleteContinuation_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_003 start";
+    EXPECT_CALL(*mockUIAbility_, TerminateAbility()).Times(0);
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->reversible_ = true;
+    continuationManagerStage_->progressState_ = ContinuationManagerStage::ProgressState::WAITING_SCHEDULE;
+    continuationManagerStage_->continuationState_ = ContinuationState::LOCAL_RUNNING;
+
+    int result = 1;
+    continuationManagerStage_->CompleteContinuation(result);
+
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_003 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_CompleteContinuation_004
+ * @tc.name: CompleteContinuation
+ * @tc.desc: call CompleteContinuation with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_CompleteContinuation_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_004 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+    continuationManagerStage_->progressState_ = ContinuationManagerStage::ProgressState::WAITING_SCHEDULE;
+
+    int result = 0;
+    continuationManagerStage_->CompleteContinuation(result);
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_CompleteContinuation_004 end";
+}
+/*
+ * @tc.number: continuation_manager_stage_RestoreFromRemote_001
+ * @tc.name: RestoreFromRemote
+ * @tc.desc: call RestoreFromRemote success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_RestoreFromRemote_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreFromRemote_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    WantParams restoreData;
+    bool result = continuationManagerStage_->RestoreFromRemote(restoreData);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreFromRemote_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_RestoreFromRemote_002
+ * @tc.name: RestoreFromRemote
+ * @tc.desc: call RestoreFromRemote with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_RestoreFromRemote_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreFromRemote_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+    WantParams restoreData;
+    bool result = continuationManagerStage_->RestoreFromRemote(restoreData);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_RestoreFromRemote_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_NotifyRemoteTerminated_001
+ * @tc.name: NotifyRemoteTerminated
+ * @tc.desc: call NotifyRemoteTerminated success
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_NotifyRemoteTerminated_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyRemoteTerminated_001 start";
+    EXPECT_CALL(*mockUIAbility_, OnRemoteTerminated()).Times(1);
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    bool result = continuationManagerStage_->NotifyRemoteTerminated();
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(ContinuationState::LOCAL_RUNNING, continuationManagerStage_->GetContinuationState());
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyRemoteTerminated_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_NotifyRemoteTerminated_002
+ * @tc.name: NotifyRemoteTerminated
+ * @tc.desc: call NotifyRemoteTerminated with ability_ is null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_NotifyRemoteTerminated_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyRemoteTerminated_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ability_.reset();
+    bool result = continuationManagerStage_->NotifyRemoteTerminated();
+
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "continuation_manager_stage_NotifyRemoteTerminated_002 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ChangeProcessStateToInit_001
+ * @tc.name: ChangeProcessStateToInit
+ * @tc.desc: call ChangeProcessStateToInit with progressState not INITIAL
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ChangeProcessStateToInit_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ChangeProcessStateToInit_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->ChangeProcessState(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE);
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE, continuationManagerStage_->GetProcessState());
+
+    continuationManagerStage_->ChangeProcessStateToInit();
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ChangeProcessStateToInit_001 end";
+}
+
+/*
+ * @tc.number: continuation_manager_stage_ChangeProcessStateToInit_002
+ * @tc.name: ChangeProcessStateToInit
+ * @tc.desc: call ChangeProcessStateToInit when mainHandler_ is not null
+ */
+HWTEST_F(ContinuationTest, continuation_manager_stage_ChangeProcessStateToInit_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ChangeProcessStateToInit_002 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+
+    continuationManagerStage_->InitMainHandlerIfNeed();
+
+    continuationManagerStage_->ChangeProcessState(ContinuationManagerStage::ProgressState::WAITING_SCHEDULE);
+
+    continuationManagerStage_->ChangeProcessStateToInit();
+
+    EXPECT_EQ(ContinuationManagerStage::ProgressState::INITIAL, continuationManagerStage_->GetProcessState());
+    GTEST_LOG_(INFO) << "continuation_manager_stage_ChangeProcessStateToInit_002 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

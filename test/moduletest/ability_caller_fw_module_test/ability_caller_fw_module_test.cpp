@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,7 @@ HWTEST_F(AbilityCallerTest, AaFwk_Ability_OnCallStubDied_0100, Function | Medium
     });
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(want.GetElement());
     localCallRecord->AddCaller(callback);
-    localCallRecord->OnCallStubDied(nullptr);
+    localCallRecord->OnCallStubDied();
     EXPECT_TRUE(isSetOnReleaseCalled);
 }
 
@@ -223,7 +223,7 @@ HWTEST_F(AbilityCallerTest, AaFwk_Ability_OnCallStubDied_0200, Function | Medium
 
     sptr<IRemoteObject> callRemoteObject =
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    localCallRecord.OnCallStubDied(callRemoteObject);
+    localCallRecord.OnCallStubDied();
     EXPECT_FALSE(isSetOnReleaseCalled);
 }
 } // namespace AppExecFwk

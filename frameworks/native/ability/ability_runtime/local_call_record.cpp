@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,10 @@ void LocalCallRecord::ClearData()
         callRecipient_ = nullptr;
     }
 
-    callers_.clear();
+    {
+        std::lock_guard lock(callersMutex_);
+        callers_.clear();
+    }
     remoteObject_ = nullptr;
 }
 
@@ -65,7 +68,7 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call)
                 TAG_LOGE(AAFwkTag::LOCAL_CALL, "null record");
                 return;
             }
-            record->OnCallStubDied(remote);
+            record->OnCallStubDied();
         };
         callRecipient_ = sptr<CallRecipient>::MakeSptr(diedTask);
     }
@@ -94,11 +97,15 @@ void LocalCallRecord::AddCaller(const std::shared_ptr<CallerCallBack>& callback)
     }
 
     callback->SetRecord(weak_from_this());
-    callers_.emplace_back(callback);
+    {
+        std::lock_guard lock(callersMutex_);
+        callers_.emplace_back(callback);
+    }
 }
 
 bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callback)
 {
+    std::lock_guard lock(callersMutex_);
     if (callers_.empty()) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "empty callers_");
         return false;
@@ -115,12 +122,13 @@ bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callba
     return false;
 }
 
-void LocalCallRecord::OnCallStubDied(const wptr<IRemoteObject>& remote)
+void LocalCallRecord::OnCallStubDied()
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "call");
+    TAG_LOGI(AAFwkTag::LOCAL_CALL, "OnCallStubDied");
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr) {
-            TAG_LOGE(AAFwkTag::LOCAL_CALL, "callBack not null");
+            TAG_LOGI(AAFwkTag::LOCAL_CALL, "Notify caller released");
             callBack->InvokeOnRelease(ON_DIED);
         }
     }
@@ -133,6 +141,7 @@ void LocalCallRecord::InvokeCallBack() const
         return;
     }
 
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr && !callBack->IsCallBack()) {
             callBack->InvokeCallBack(remoteObject_);
@@ -153,6 +162,7 @@ void LocalCallRecord::NotifyRemoteStateChanged(int32_t abilityState)
         state = "background";
     }
 
+    std::lock_guard lock(callersMutex_);
     for (auto& callBack : callers_) {
         if (callBack != nullptr && callBack->IsCallBack()) {
             TAG_LOGI(AAFwkTag::LOCAL_CALL, "not null callback and is callback ");
@@ -173,6 +183,7 @@ AppExecFwk::ElementName LocalCallRecord::GetElementName() const
 
 bool LocalCallRecord::IsExistCallBack() const
 {
+    std::lock_guard lock(callersMutex_);
     return !callers_.empty();
 }
 
@@ -183,6 +194,7 @@ int LocalCallRecord::GetRecordId() const
 
 std::vector<std::shared_ptr<CallerCallBack>> LocalCallRecord::GetCallers() const
 {
+    std::lock_guard lock(callersMutex_);
     return callers_;
 }
 

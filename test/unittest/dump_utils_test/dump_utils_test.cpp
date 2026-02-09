@@ -311,5 +311,56 @@ HWTEST_F(DumpUtilsTest, DumpMap_003, TestSize.Level1)
     EXPECT_FALSE(result.first);
     TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_003 end");
 }
+
+/*
+ * Feature: DumpUtils
+ * Function: ShowHelp
+ * SubFunction: NA
+ * FunctionPoints: DumpUtils ShowHelp
+ */
+HWTEST_F(DumpUtilsTest, ShowHelp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest ShowHelp_001 start");
+    std::string result;
+    DumpUtils::ShowHelp(result);
+
+    // Check that help text contains expected content
+    EXPECT_FALSE(result.empty());
+    EXPECT_NE(result.find("Usage:"), std::string::npos);
+    EXPECT_NE(result.find("-h"), std::string::npos);
+    EXPECT_NE(result.find("help text for the tool"), std::string::npos);
+    EXPECT_NE(result.find("-a"), std::string::npos);
+    EXPECT_NE(result.find("-l"), std::string::npos);
+    EXPECT_NE(result.find("-i"), std::string::npos);
+    EXPECT_NE(result.find("-e"), std::string::npos);
+    EXPECT_NE(result.find("-p"), std::string::npos);
+    EXPECT_NE(result.find("-r"), std::string::npos);
+    EXPECT_NE(result.find("-d"), std::string::npos);
+
+    // Verify that "information" is spelled correctly (not "infomation")
+    EXPECT_EQ(result.find("infomation"), std::string::npos);
+    EXPECT_NE(result.find("information"), std::string::npos);
+
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest ShowHelp_001 end");
+}
+
+/*
+ * Feature: DumpUtils
+ * Function: ShowHelp
+ * SubFunction: NA
+ * FunctionPoints: DumpUtils ShowHelp
+ */
+HWTEST_F(DumpUtilsTest, ShowHelp_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest ShowHelp_002 start");
+    std::string result = "Initial content\n";
+    DumpUtils::ShowHelp(result);
+
+    // Check that help text is appended to existing content
+    EXPECT_NE(result.find("Initial content"), std::string::npos);
+    EXPECT_NE(result.find("Usage:"), std::string::npos);
+
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest ShowHelp_002 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

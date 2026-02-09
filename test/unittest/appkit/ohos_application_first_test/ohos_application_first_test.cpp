@@ -19,6 +19,7 @@
 #include "ability_local_record.h"
 #include "ability_record_mgr.h"
 #include "ability_stage.h"
+#include "application_configuration_manager.h"
 #include "application_context.h"
 #include "application_impl.h"
 #include "application_info.h"
@@ -547,6 +548,103 @@ HWTEST_F(OHOSApplicationFirstTest, OnConfigurationUpdated_0600, TestSize.Level1)
     ohosApplication_->OnConfigurationUpdated(config);
     EXPECT_TRUE(config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE) == "zh");
     TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0600 end");
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0100
+ * @tc.name: SetColorModeSetLevel
+ * @tc.desc: Verify auto color mode does not override and application flag is set.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0100, Function | MediumTest | Level1)
+{
+    auto &mgr = AbilityRuntime::ApplicationConfigurationManager::GetInstance();
+    mgr.SetColorModeSetLevel(AbilityRuntime::SetLevel::System,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+    mgr.SetColorModeSetLevel(AbilityRuntime::SetLevel::SA,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
+    mgr.SetColorModeSetLevel(AbilityRuntime::SetLevel::Application,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
+    auto mode = mgr.GetColorMode();
+    EXPECT_EQ(mode, AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+    EXPECT_EQ(mgr.GetColorModeSetLevel(), AbilityRuntime::SetLevel::System);
+    EXPECT_TRUE(mgr.ColorModeHasSetByApplication());
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0200
+ * @tc.name: SetColorModeSetLevel
+ * @tc.desc: Verify higher non-auto level is selected.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0200, Function | MediumTest | Level1)
+{
+    auto &mgr = AbilityRuntime::ApplicationConfigurationManager::GetInstance();
+    mgr.SetColorModeSetLevel(AbilityRuntime::SetLevel::Application,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
+    auto mode = mgr.SetColorModeSetLevel(AbilityRuntime::SetLevel::SA,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    EXPECT_EQ(mode, AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    EXPECT_EQ(mgr.GetColorModeSetLevel(), AbilityRuntime::SetLevel::SA);
+    EXPECT_EQ(mgr.GetColorMode(), AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0300
+ * @tc.name: SetLanguageSetLevel
+ * @tc.desc: Verify language and font levels can be set and retrieved.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0300, Function | MediumTest | Level1)
+{
+    auto &mgr = AbilityRuntime::ApplicationConfigurationManager::GetInstance();
+    mgr.SetLanguageSetLevel(AbilityRuntime::SetLevel::Application);
+    mgr.SetfontSetLevel(AbilityRuntime::SetLevel::SA);
+    EXPECT_EQ(mgr.GetLanguageSetLevel(), AbilityRuntime::SetLevel::Application);
+    EXPECT_EQ(mgr.GetFontSetLevel(), AbilityRuntime::SetLevel::SA);
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0400
+ * @tc.name: IgnoreContext
+ * @tc.desc: Verify ignore context add and delete behavior.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0400, Function | MediumTest | Level1)
+{
+    auto &mgr = AbilityRuntime::ApplicationConfigurationManager::GetInstance();
+    std::shared_ptr<AbilityRuntime::Context> ctx;
+    std::shared_ptr<Global::Resource::ResourceManager> rm;
+    mgr.AddIgnoreContext(ctx, rm);
+    auto contexts = mgr.GetIgnoreContext();
+    auto resources = mgr.GetIgnoreResource();
+    ASSERT_EQ(contexts.size(), 1u);
+    ASSERT_EQ(resources.size(), 1u);
+    EXPECT_EQ(contexts[0], ctx);
+    EXPECT_EQ(resources[0], rm);
+    mgr.DeleteIgnoreContext(ctx);
+    EXPECT_TRUE(mgr.GetIgnoreContext().empty());
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0500
+ * @tc.name: GetUpdatedLocale
+ * @tc.desc: Verify empty or invalid inputs return empty.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0500, Function | MediumTest | Level1)
+{
+    EXPECT_TRUE(AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale("", "en").empty());
+    EXPECT_TRUE(AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale("en-US", "").empty());
+    EXPECT_TRUE(AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale("invalid_tag", "en").empty());
+}
+
+/**
+ * @tc.number: ApplicationConfigurationManager_0600
+ * @tc.name: GetUpdatedLocale
+ * @tc.desc: Verify locale composition with script, region and extension.
+ */
+HWTEST_F(OHOSApplicationFirstTest, ApplicationConfigurationManager_0600, Function | MediumTest | Level1)
+{
+    std::string locale = "en-US-u-ca-buddhist";
+    std::string language = "zh-Hans";
+    auto updated = AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale(locale, language);
+    EXPECT_EQ(updated, "zh-Hans-US-u-ca-buddhist");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

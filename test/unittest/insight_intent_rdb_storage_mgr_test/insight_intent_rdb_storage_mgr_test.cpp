@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "errors.h"
 #include "insight_intent_rdb_storage_mgr.h"
 
 using namespace testing::ext;
@@ -215,6 +216,189 @@ HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_009, Tes
     MockQueryData(true);
     result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfo(bundleName,
         moduleName, intentName, userId, infos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_010
+ * @tc.desc: Test DeleteStorageInsightIntentData with non-empty moduleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_010, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+
+    MockDeleteDataBeginWithKey(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->DeleteStorageInsightIntentData(
+        bundleName, moduleName, userId);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    
+    MockDeleteDataBeginWithKey(true);
+    result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->DeleteStorageInsightIntentData(
+        bundleName, moduleName, userId);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_011
+ * @tc.desc: Test SaveStorageInsightIntentData with ToJson failed (profileInfo)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_011, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    ExtractInsightIntentProfileInfoVec profileInfos;
+    std::vector<InsightIntentInfo> configInfos;
+    
+    ExtractInsightIntentProfileInfo profileInfo;
+    profileInfo.intentName = "testIntent";
+    profileInfos.insightIntents.push_back(profileInfo);
+
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(
+        bundleName, moduleName, userId, profileInfos, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_012
+ * @tc.desc: Test SaveStorageInsightIntentData with ToJson failed (configInfo)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_012, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    ExtractInsightIntentProfileInfoVec profileInfos;
+    std::vector<InsightIntentInfo> configInfos;
+
+    InsightIntentInfo configInfo;
+    configInfo.intentName = "testIntent";
+    configInfos.push_back(configInfo);
+
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(
+        bundleName, moduleName, userId, profileInfos, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_013
+ * @tc.desc: Test LoadInsightIntentInfo with TransformTo failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_013, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    std::string intentName = "testIntent";
+    ExtractInsightIntentInfo totalInfo;
+
+    MockQueryData(true);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfo(
+        bundleName, moduleName, intentName, userId, totalInfo);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_014
+ * @tc.desc: Test LoadConfigInsightIntentInfo with TransformTo failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_014, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    std::string intentName = "testIntent";
+    InsightIntentInfo totalInfo;
+
+    MockQueryData(true);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfo(
+        bundleName, moduleName, intentName, userId, totalInfo);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_015
+ * @tc.desc: Test TransformConfigIntent with invalid value (trigger DeleteData)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_015, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::vector<InsightIntentInfo> configInfos;
+
+    MockQueryDataBeginWithKey(true);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadConfigInsightIntentInfos(
+        userId, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_016
+ * @tc.desc: Test Transform with invalid value (trigger DeleteData)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_016, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::vector<ExtractInsightIntentInfo> totalInfos;
+    std::vector<InsightIntentInfo> configInfos;
+
+    MockQueryDataBeginWithKey(true);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(
+        userId, totalInfos, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_018
+ * @tc.desc: Test SaveStorageInsightIntentData with InsertData failed (profileInfo)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_018, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    ExtractInsightIntentProfileInfoVec profileInfos;
+    std::vector<InsightIntentInfo> configInfos;
+
+    ExtractInsightIntentProfileInfo profileInfo;
+    profileInfo.intentName = "testIntent";
+    profileInfos.insightIntents.push_back(profileInfo);
+    
+    MockInsertData(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(
+        bundleName, moduleName, userId, profileInfos, configInfos);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: InsightIntentRdbStorageMgrTest_019
+ * @tc.desc: Test SaveStorageInsightIntentData with InsertData failed (configInfo)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentRdbStorageMgrTest, InsightIntentRdbStorageMgrTest_019, TestSize.Level0)
+{
+    int32_t userId = 0;
+    std::string bundleName = "testBundle";
+    std::string moduleName = "testModule";
+    ExtractInsightIntentProfileInfoVec profileInfos;
+    std::vector<InsightIntentInfo> configInfos;
+
+    InsightIntentInfo configInfo;
+    configInfo.intentName = "testIntent";
+    configInfos.push_back(configInfo);
+    
+    MockInsertData(false);
+    auto result = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->SaveStorageInsightIntentData(
+        bundleName, moduleName, userId, profileInfos, configInfos);
     EXPECT_EQ(result, ERR_OK);
 }
 }
