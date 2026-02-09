@@ -99,11 +99,12 @@ ohos_shared_library("agent_ui_extension") {
       "${ability_runtime_services_path}/common:optimize_config",
   ]
 
-  include_dirs = [ "${agent_runtime_framework_path}/interfaces/kits/native/agent_ui_extension", ]
+  include_dirs = [
+    "incldue",
+  ]
 
   sources = [
-      "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/agent_ui_extension.cpp",
-      "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/js_agent_ui_extension.cpp",
+      "src/agent_ui_extension.cpp",
   ]
 
   deps = [
@@ -131,7 +132,6 @@ ohos_shared_library("agent_ui_extension") {
       "napi:ace_napi",
   ]
 
-
   if (ability_runtime_graphics) {
       external_deps += [ "window_manager:libwm" ]
   }
@@ -154,9 +154,9 @@ ohos_shared_library("agent_ui_extension_module") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-      "${agent_runtime_framework_path}/interfaces/kits/native/agent_ui_extension",
+      "incldue",
   ]
-  sources = [ "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/agent_ui_extension_module_loader.cpp" ]
+  sources = [ "src/agent_ui_extension_module_loader.cpp" ]
 
   configs = [
       ":ability_config",

@@ -14,26 +14,6 @@
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 
-es2abc_gen_abc("gen_agent_ui_extension_ability_abc") {
-  src_js = rebase_path("agent_ui_extension_ability.js")
-  dst_file = rebase_path(target_out_dir + "/agent_ui_extension_ability.abc")
-  in_puts = [ "agent_ui_extension_ability.js" ]
-  out_puts = [ target_out_dir + "/agent_ui_extension_ability.abc" ]
-  extra_args = [ "--module" ]
-}
-
-gen_js_obj("agent_ui_extension_ability_js") {
-  input = "agent_ui_extension_ability.js"
-  output = target_out_dir + "/agent_ui_extension_ability.o"
-}
-
-gen_js_obj("agent_ui_extension_ability_abc") {
-  input = get_label_info(":gen_agent_ui_extension_ability_abc",
-                          "target_out_dir") + "/agent_ui_extension_ability.abc"
-  output = target_out_dir + "/agent_ui_extension_ability_abc.o"
-  dep = ":gen_agent_ui_extension_ability_abc"
-}
-
 ohos_shared_library("agentuiextensionability") {
   sanitize = {
       integer_overflow = true
@@ -45,16 +25,88 @@ ohos_shared_library("agentuiextensionability") {
       debug = false
   }
   branch_protector_ret = "pac_ret"
-  sources = [ "agent_ui_extension_module.cpp" ]
+  sources = [ "js_agent_ui_extension_module.cpp" ]
 
   deps = [
-      ":agent_ui_extension_ability_abc",
-      ":agent_ui_extension_ability_js",
+      "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_ability:agent_ui_extension_ability_abc",
+      "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_ability:agent_ui_extension_ability_js",
   ]
 
   external_deps = [ "napi:ace_napi" ]
 
   relative_install_dir = "module/app/agent"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+config("agent_ui_extension_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+      "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+      "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
+      "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+      "${ability_runtime_path}/interfaces/kits/native/ability/native",
+      "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+      "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+  ]
+}
+
+ohos_shared_library("js_agent_ui_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  defines = [ "AMS_LOG_TAG = \"Agent\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
+
+  configs = [
+    ":agent_ui_extension_config",
+    "${ability_runtime_services_path}/common:optimize_config",
+  ]
+
+  include_dirs = [
+    "include",
+  ]
+
+  sources = [
+    "src/js_agent_extension.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+      "${ability_runtime_native_path}/ability/native:extensionkit_native",
+      "${ability_runtime_native_path}/ability/native:ui_extension",
+      "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+      "${ability_runtime_innerkits_path}/runtime:runtime",
+      "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+      "${ability_runtime_native_path}/ability:ability_context_native",
+      "${ability_runtime_native_path}/ability/native:ability_business_error",
+      "${ability_runtime_native_path}/appkit:app_context",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_napi",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+  ]
+
+  if (ability_runtime_graphics) {
+      external_deps += [ "window_manager:libwm" ]
+  }
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
