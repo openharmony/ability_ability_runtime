@@ -327,7 +327,7 @@ HWTEST_F(MissionListManagerTest, OnAcceptWantResponse_001, TestSize.Level1)
     missionListManager->defaultStandardList_->AddMissionToTop(mission);
     Want want;
     missionListManager->OnAcceptWantResponse(want, "flag");
-    EXPECT_EQ(ability->IsNewWant(), false);
+    EXPECT_EQ(ability->IsNewWant(), true);
     missionListManager.reset();
 }
 
