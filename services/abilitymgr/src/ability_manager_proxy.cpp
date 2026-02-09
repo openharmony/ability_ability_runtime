@@ -6803,7 +6803,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
 
     if (!data.WriteString(moduleName)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "write moduleName fail");
-        return ERR_INVALID_VALUE;
+        return INNER_ERR;
     }
 
     if (!data.WriteInt32(hostPid)) {
