@@ -39,6 +39,7 @@ ohos_unittest("ability_manager_service_first_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
     "${ability_runtime_test_path}/unittest/app_debug_listener_stub_test",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
     "mock/include",
   ]
 

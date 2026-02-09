@@ -1,0 +1,83 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+module_output_path = "ability_runtime/ability_runtime/uripermmgr"
+
+copy("batch_uri_copy") {
+  sources = [
+    "${ability_runtime_path}/services/uripermmgr/src/batch_uri.cpp",
+  ]
+  outputs = [ "${target_gen_dir}/services/uripermmgr/batch_uri/{{source_file_part}}" ]
+}
+
+ohos_unittest("batch_uri_unit_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "../../mock_utils",
+    "../../mock/hilog_tag_wrapper",
+    "../../mock/upms/uri_permission_mgr/include",
+    "../../mock/uri",
+    "${ability_runtime_path}/services/uripermmgr/include",
+    "${ability_runtime_path}/services/common/include",
+  ]
+
+  sources = [
+    "${target_gen_dir}/services/uripermmgr/batch_uri/batch_uri.cpp",
+    "mock_file_permission_manager.cpp",
+  ]
+
+  sources += [
+    "batch_uri_unit_test.cpp",
+  ]
+
+  deps = [
+    ":batch_uri_copy",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "ipc:ipc_core",
+    "json:nlohmann_json_static",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [
+    "SUPPORT_GRAPHICS",
+    "SUPPORT_SCREEN",
+    "BGTASKMGR_CONTINUOUS_TASK_ENABLE",
+    "WITH_DLP",
+    "SUPPORT_AUTO_FILL",
+    "SUPPORT_UPMS",
+    "ABILITY_COMMAND_FOR_TEST",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":batch_uri_unit_test" ]
+}

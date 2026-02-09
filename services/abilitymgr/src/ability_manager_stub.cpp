@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -949,6 +949,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     }
     if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
         return ManualStartAutoStartupAppsInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST) {
+        return GetUserLockedBundleListInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -2549,9 +2552,10 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     int32_t accountId = data.ReadInt32();
     bool isSilent = data.ReadBool();
     bool promotePriority = data.ReadBool();
+    bool isVisible = data.ReadBool();
     std::string errMsg = "";
     int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent,
-        promotePriority);
+        promotePriority, isVisible);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteString(errMsg);
@@ -5218,6 +5222,30 @@ int32_t AbilityManagerStub::UnRegisterPreloadUIExtensionHostClientInner(MessageP
     int32_t result = UnRegisterPreloadUIExtensionHostClient(callerPid);
     reply.WriteInt32(result);
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::GetUserLockedBundleListInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    std::unordered_set<std::string> bundleList;
+    int32_t result = GetUserLockedBundleList(userId, bundleList);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    if (result == ERR_OK) {
+        if (!reply.WriteInt32(bundleList.size())) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write bundleList size fail");
+            return ERR_INVALID_VALUE;
+        }
+        for (const auto &bundle : bundleList) {
+            if (!reply.WriteString16(Str8ToStr16(bundle))) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write bundle fail");
+                return ERR_INVALID_VALUE;
+            }
+        }
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -33,6 +33,7 @@ std::vector<std::shared_ptr<AbilityLifecycleCallback>> ApplicationContext::callb
 std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> ApplicationContext::interopCallbacks_;
 std::vector<std::shared_ptr<EnvironmentCallback>> ApplicationContext::envCallbacks_;
 std::vector<std::weak_ptr<ApplicationStateChangeCallback>> ApplicationContext::applicationStateCallback_;
+std::vector<std::weak_ptr<SystemConfigurationUpdatedCallback>> ApplicationContext::systemConfigurationUpdatedCallbacks_;
 
 std::shared_ptr<ApplicationContext> ApplicationContext::GetInstance()
 {
@@ -139,6 +140,13 @@ void ApplicationContext::RegisterApplicationStateChangeCallback(
 {
     std::lock_guard<std::recursive_mutex> lock(applicationStateCallbackLock_);
     applicationStateCallback_.push_back(applicationStateChangeCallback);
+}
+
+void ApplicationContext::RegisterSystemConfigurationUpdatedCallback(
+    const std::weak_ptr<SystemConfigurationUpdatedCallback> &callback)
+{
+    std::lock_guard lock(systemConfigurationUpdatedCallbackLock_);
+    systemConfigurationUpdatedCallbacks_.push_back(callback);
 }
 
 void ApplicationContext::DispatchOnAbilityCreate(const AbilityLifecycleCallbackArgs &ability)
@@ -531,6 +539,17 @@ void ApplicationContext::DispatchMemoryLevel(const int level)
     for (auto envCallback : envCallbacks_) {
         if (envCallback != nullptr) {
             envCallback->OnMemoryLevel(level);
+        }
+    }
+}
+
+void ApplicationContext::NotifySystemConfigurationUpdated(const AppExecFwk::Configuration& configuration)
+{
+    std::lock_guard lock(systemConfigurationUpdatedCallbackLock_);
+    for (auto callback : systemConfigurationUpdatedCallbacks_) {
+        auto callbackSptr = callback.lock();
+        if (callbackSptr != nullptr) {
+            callbackSptr->NotifySystemConfigurationUpdated(configuration);
         }
     }
 }

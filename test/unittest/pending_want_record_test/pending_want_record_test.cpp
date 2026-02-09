@@ -25,6 +25,7 @@
 #undef private
 #undef protected
 #include "if_system_ability_manager.h"
+#include "int_wrapper.h"
 #include "iservice_registry.h"
 #define private public
 #define protected public
@@ -50,6 +51,7 @@ namespace {
 #define SLEEP(milli) std::this_thread::sleep_for(std::chrono::seconds(milli))
 const int32_t SEND_COUNT = 100;
 const int32_t PERFORM_RECEIVE_COUNT = 100;
+const int32_t INVALID_UID = -1;
 }  // namespace
 class PendingWantRecordTest : public testing::Test {
 public:
@@ -814,6 +816,449 @@ HWTEST_F(PendingWantRecordTest, ExecuteOperation_0200, TestSize.Level1)
         std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
     auto params = pendingWantRecord->ExecuteOperation(pendingManager_, info, want);
     EXPECT_EQ(params, NO_ERROR);
+    TAG_LOGD(AAFwkTag::TEST, "ExecuteOperation_0200 end.");
 }
+
+/*
+ * @tc.number    : Send_0100
+ * @tc.name      : Send
+ * @tc.desc      : 1.Send, normal call scenario
+ */
+HWTEST_F(PendingWantRecordTest, Send_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Send_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::CONSTANT_FLAG, 0,
+        (int32_t)OperationType::START_ABILITY);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    pendingWantRecord->Send(info);
+    EXPECT_TRUE(info.resolvedType == key->GetRequestResolvedType());
+
+    TAG_LOGI(AAFwkTag::TEST, "Send_0100 end");
+}
+
+/*
+ * @tc.number    : Send_0200
+ * @tc.name      : Send
+ * @tc.desc      : 1.Send, canceled scenario
+ */
+HWTEST_F(PendingWantRecordTest, Send_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Send_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    pendingWantRecord->SetCanceled();
+    SenderInfo info;
+    info.finishedReceiver = new CancelReceiver();
+    auto result = pendingWantRecord->SenderInner(info);
+    EXPECT_EQ(result, ERR_WANTAGENT_CANCELED);
+
+    TAG_LOGI(AAFwkTag::TEST, "Send_0200 end");
+}
+
+/*
+ * @tc.number    : SetCallerUid_0100
+ * @tc.name      : SetCallerUid
+ * @tc.desc      : 1.SetCallerUid, normal call scenario
+ */
+HWTEST_F(PendingWantRecordTest, SetCallerUid_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetCallerUid_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    EXPECT_EQ(pendingWantRecord->callerUid_, 0);
+    int32_t testUid = 1001;
+    pendingWantRecord->SetCallerUid(testUid);
+    EXPECT_EQ(pendingWantRecord->callerUid_, testUid);
+
+    TAG_LOGI(AAFwkTag::TEST, "SetCallerUid_0100 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_MergeParams_0100
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, verify parameter merging logic
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_MergeParams_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_MergeParams_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam("existing_key", std::string("existing_value"));
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    info.want.SetParam("new_key", std::string("new_value"));
+    info.want.SetParam("existing_key", std::string("should_not_override"));
+
+    pendingWantRecord->BuildSendWant(info, senderWant);
+
+    EXPECT_EQ(senderWant.GetParams().GetStringParam("existing_key"), "existing_value");
+    EXPECT_EQ(senderWant.GetParams().GetStringParam("new_key"), "new_value");
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_MergeParams_0100 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_ConstantFlag_0100
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, verify CONSTANT_FLAG behavior
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_ConstantFlag_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_ConstantFlag_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::CONSTANT_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+
+    EXPECT_TRUE(info.resolvedType == key->GetRequestResolvedType());
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_ConstantFlag_0100 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_AllowCancelFlag_0100
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, verify ALLOW_CANCEL_FLAG behavior
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_AllowCancelFlag_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AllowCancelFlag_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ALLOW_CANCEL_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+
+    EXPECT_TRUE(info.resolvedType == key->GetRequestResolvedType());
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AllowCancelFlag_0100 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_EmptyAllWantsInfos_0200
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, empty allWantsInfos scenario
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_EmptyAllWantsInfos_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_EmptyAllWantsInfos_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->GetAllWantsInfos().clear();
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_EmptyAllWantsInfos_0200 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_AppIndex_0200
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, verify appIndex parameter is set correctly
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_AppIndex_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AppIndex_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetAppIndex(2);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, INVALID_UID + 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+
+    auto appIndexParam = senderWant.GetParams().GetParam(Want::PARAM_APP_CLONE_INDEX_KEY);
+    EXPECT_NE(appIndexParam, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AppIndex_0200 end");
+}
+
+/*
+ * @tc.number    : OneTimeFlag_AutoCancel_0100
+ * @tc.name      : SenderInner
+ * @tc.desc      : 1.SenderInner, verify ONE_TIME_FLAG triggers auto cancel
+ */
+HWTEST_F(PendingWantRecordTest, OneTimeFlag_AutoCancel_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OneTimeFlag_AutoCancel_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0,
+        (int32_t)OperationType::START_ABILITY);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    EXPECT_EQ(pendingWantRecord->GetCanceled(), false);
+    SenderInfo info;
+    pendingWantRecord->SenderInner(info);
+
+    TAG_LOGI(AAFwkTag::TEST, "OneTimeFlag_AutoCancel_0100 end");
+}
+
+/*
+ * @tc.number    : GetAppIndexbyUid_InvalidUid_0200
+ * @tc.name      : GetAppIndexbyUid
+ * @tc.desc      : 1.GetAppIndexbyUid, invalid UID scenario
+ */
+HWTEST_F(PendingWantRecordTest, GetAppIndexbyUid_InvalidUid_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAppIndexbyUid_InvalidUid_0200 start");
+
+    Want want;
+    std::string bundleName = "com.ix.hiMusic";
+    ElementName element("device", bundleName, "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, INVALID_UID, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    int32_t appIndex;
+    int32_t ret = pendingWantRecord->GetAppIndexbyUid(pendingWantRecord->GetUid(), bundleName, appIndex);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetAppIndexbyUid_InvalidUid_0200 end");
+}
+
+/*
+ * @tc.number    : CheckAppInstanceKey_NullKey_0200
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.CheckAppInstanceKey, null key scenario
+ */
+HWTEST_F(PendingWantRecordTest, CheckAppInstanceKey_NullKey_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_NullKey_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = nullptr;
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    std::string bundleName = "com.ix.hiMusic";
+    auto params = want.GetParams();
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_NullKey_0200 end");
+}
+
+/*
+ * @tc.number    : CheckAppInstanceKey_EmptyAppKey_0200
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.CheckAppInstanceKey, empty app instance key scenario
+ */
+HWTEST_F(PendingWantRecordTest, CheckAppInstanceKey_EmptyAppKey_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_EmptyAppKey_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetType(static_cast<int32_t>(OperationType::START_ABILITY));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    std::string bundleName = "com.ix.hiMusic";
+    WantParams params;
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_EmptyAppKey_0200 end");
+}
+
+/*
+ * @tc.number    : CheckAppInstanceKey_NullManager_0200
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.CheckAppInstanceKey, null PendingWantManager scenario
+ */
+HWTEST_F(PendingWantRecordTest, CheckAppInstanceKey_NullManager_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_NullManager_0200 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_1"));
+
+    std::shared_ptr<PendingWantManager> nullManager = nullptr;
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetType(static_cast<int32_t>(OperationType::START_ABILITY));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(nullManager, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    std::string bundleName = "com.ix.hiMusic";
+    auto params = want.GetParams();
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppInstanceKey_NullManager_0200 end");
+}
+
+/*
+ * @tc.number    : SenderInner_FinishedReceiver_0100
+ * @tc.name      : SenderInner
+ * @tc.desc      : 1.SenderInner, verify finishedReceiver callback is invoked
+ */
+HWTEST_F(PendingWantRecordTest, SenderInner_FinishedReceiver_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SenderInner_FinishedReceiver_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::CONSTANT_FLAG, 0,
+        (int32_t)OperationType::START_ABILITY);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "SenderInner_FinishedReceiver_0100 end");
+}
+
+/*
+ * @tc.number    : BuildSendWant_AppInstanceKey_0300
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant, verify APP_MULTI_INSTANCE key is preserved
+ */
+HWTEST_F(PendingWantRecordTest, BuildSendWant_AppInstanceKey_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AppInstanceKey_0300 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    int appIndex = 5;
+    want.SetParam(std::string(Want::PARAM_APP_CLONE_INDEX_KEY), appIndex);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+    auto intValue = senderWant.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    EXPECT_EQ(intValue, 5);
+
+    TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AppInstanceKey_0300 end");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

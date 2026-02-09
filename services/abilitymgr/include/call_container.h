@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,12 @@ public:
     void Dump(std::vector<std::string> &info) const;
     bool IsNeedToCallRequest() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
+
+    /**
+     * @brief Notify all callers that callee ability is terminating
+     * @param element Callee ability element name
+     */
+    void NotifyAllCallDisconnect(const AppExecFwk::ElementName &element);
 
 private:
     void RemoveConnectDeathRecipient(const sptr<IAbilityConnection> &connect);

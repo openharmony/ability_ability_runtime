@@ -42,6 +42,7 @@ ohos_unittest("ability_manager_service_third_test") {
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
     "${ability_runtime_services_path}/abilitymgr/include/mission",
+    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
     "mock/include",
   ]
 

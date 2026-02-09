@@ -47,17 +47,18 @@ public:
     static void GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList);
 
 private:
-    std::string GetAppHspPath(const std::string& inputPath) const;
-    std::string GetCommonAppHspPath(const std::string& inputPath) const;
-    std::string GetFormAppHspPath(const std::string& inputPath) const;
+    std::string GetAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const;
+    std::string GetCommonAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const;
+    std::string GetFormAppHspPath(const std::string& inputPath, bool& needFindPluginHsp) const;
     std::string GetModuleName(const std::string& inputPath) const;
     std::string GetPluginHspPath(const std::string& inputPath) const;
     static std::string GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
-        const std::string& inputPath);
+        const std::string& inputPath, bool& needFindPluginHsp);
+    static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName,
+        bool& needFindPluginHsp);
 
     bool isSystemPath_ = false;
     bool isFormRender_ = false;
-    static bool needFindPluginHsp_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

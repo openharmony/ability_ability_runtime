@@ -16,6 +16,7 @@
 
 #include "cj_utils_ffi.h"
 
+#include <charconv>
 #include "securec.h"
 #include "hilog_tag_wrapper.h"
 #include "cj_macro.h"
@@ -106,12 +107,51 @@ int32_t ConvertDensity(std::string density)
     return resolution;
 }
 
+int32_t ConvertInteger(const std::string& str)
+{
+    int32_t number = -1;
+    auto res = std::from_chars(str.c_str(), str.c_str() + str.size(), number);
+    if (res.ec != std::errc() && res.ptr != str.c_str() + str.size()) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "number stoi(%{public}s) failed", str.c_str());
+    }
+    return number;
+}
+
 int32_t ConvertDisplayId(std::string displayId)
 {
     if (displayId == OHOS::AppExecFwk::ConfigurationInner::EMPTY_STRING) {
         return -1;
     }
-    return std::stoi(displayId);
+    return ConvertInteger(displayId);
+}
+
+bool IsValidValue(const char* end, const std::string& str)
+{
+    if (!end) {
+        return false;
+    }
+
+    if (end == str.c_str() || errno == ERANGE || *end != '\0') {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertToDouble(const std::string& str, double& outValue)
+{
+    if (str.empty()) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "ConvertToDouble failed str is null");
+        return false;
+    }
+    char* end = nullptr;
+    errno = 0;
+    double value = std::strtod(str.c_str(), &end);
+    if (!IsValidValue(end, str)) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "ConvertToDouble failed for: %{public}s", str.c_str());
+        return false;
+    }
+    outValue = value;
+    return true;
 }
 
 namespace OHOS {
@@ -132,10 +172,14 @@ CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &confi
     std::string hasPointerDevice = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     cfg.hasPointerDevice = hasPointerDevice == "true" ? true : false;
     std::string fontSizeScale = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    cfg.fontSizeScale = fontSizeScale == "" ? 1.0 : std::stod(fontSizeScale);
+    double fontSizeScaleValue = 1.0;
+    ConvertToDouble(fontSizeScale, fontSizeScaleValue);
+    cfg.fontSizeScale = fontSizeScaleValue;
     std::string fontWeightScale = configuration.GetItem(
         OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    cfg.fontWeightScale = fontWeightScale == "" ? 1.0 : std::stod(fontWeightScale);
+    double fontWeightScaleValue = 1.0;
+    ConvertToDouble(fontWeightScale, fontWeightScaleValue);
+    cfg.fontWeightScale = fontWeightScaleValue;
     cfg.mcc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     cfg.mnc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     return cfg;

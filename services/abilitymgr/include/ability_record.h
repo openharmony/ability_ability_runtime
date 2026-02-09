@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -532,10 +532,7 @@ public:
     {
         return keepAliveBundle_;
     }
-    void SetIsKeepAliveDied(bool value)
-    {
-        isKeepAliveDied_ = value;
-    }
+    bool IsAbilityDiedHandled();
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -571,6 +568,10 @@ public:
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
     bool ReleaseCall(const sptr<IAbilityConnection> &connect);
     bool IsNeedToCallRequest() const;
+    /**
+     * @brief Notify all callers that this ability is terminating
+     */
+    void NotifyCallersOnTerminate();
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
     void CallRequest();
@@ -640,7 +641,7 @@ public:
     void SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId);
     int32_t GetUIExtensionAbilityId() const;
 
-    void OnProcessDied();
+    void OnProcessDied(bool isKeepAliveDied = false);
 
     void SetProcessName(const std::string &process);
 
@@ -918,7 +919,7 @@ protected:
     bool minimizeReason_ = false;           // new version
     bool clearMissionFlag_ = false;
     bool keepAliveBundle_ = false;
-    bool isKeepAliveDied_ = false;
+    bool handledAbilityDied_ = false;
     bool lockedState_ = false;
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;

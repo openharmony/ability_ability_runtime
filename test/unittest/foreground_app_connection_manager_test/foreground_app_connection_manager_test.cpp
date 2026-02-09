@@ -321,6 +321,24 @@ HWTEST_F(ForegroundAppConnectionManagerTest, AbilityAddPidConnection_006, TestSi
 
 /*
  * Feature: ForegroundAppConnectionManager
+ * Function: AbilityAddPidConnection
+ * FunctionPoints: AbilityAddPidConnection trigger OnConnected
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityAddPidConnection call OnConnected success
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, AbilityAddPidConnection_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityAddPidConnection_007 Start");
+    auto manager = std::make_shared<ForegroundAppConnectionManager>();
+    ForegroundAppConnectionInfo info(100, 200, 100, 200, "caller", "target");
+
+    manager->AbilityAddPidConnection(info, 0);
+    EXPECT_EQ(manager->pidMap_.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityAddPidConnection_007 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
  * Function: AbilityRemovePidConnection_001
  * FunctionPoints: pidConnection not exists
  */
@@ -454,6 +472,26 @@ HWTEST_F(ForegroundAppConnectionManagerTest, ProcessRemovePidConnection_004, Tes
     foregroundAppConnectionManager->ProcessRemovePidConnection(diedPid);
     EXPECT_EQ(foregroundAppConnectionManager->pidMap_.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "ProcessRemovePidConnection_004 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: ProcessRemovePidConnection
+ * SubFunction: NA
+ * FunctionPoints: ProcessRemovePidConnection with invalid diedPid
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessRemovePidConnection ignore invalid pid
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, ProcessRemovePidConnection_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ProcessRemovePidConnection_005 Start");
+    auto manager = std::make_shared<ForegroundAppConnectionManager>();
+    ForegroundAppConnectionInfo info(100, 200, 100, 200, "caller", "target");
+    manager->AbilityAddPidConnection(info, 0);
+
+    manager->ProcessRemovePidConnection(-1);
+    EXPECT_EQ(manager->pidMap_.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "ProcessRemovePidConnection_005 End");
 }
 
 /*
@@ -743,6 +781,88 @@ HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_011, Test
     bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(abilityInfo, callerAbilityRecord);
     EXPECT_EQ(result, false);
     TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_011 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: IsForegroundAppConnection
+ * FunctionPoints: target is UIExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify IsForegroundAppConnection return true when target is UIExtension
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, IsForegroundAppConnection_012, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_012 Start");
+    AppExecFwk::AbilityInfo targetInfo;
+    targetInfo.type = AppExecFwk::AbilityType::SERVICE;
+    targetInfo.applicationInfo.isSystemApp = false;
+    targetInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+
+    AbilityRequest callerReq;
+    callerReq.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    auto callerRecord = AbilityRecord::CreateAbilityRecord(callerReq);
+
+    bool result = ForegroundAppConnectionManager::IsForegroundAppConnection(targetInfo, callerRecord);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "IsForegroundAppConnection_012 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionInfo
+ * Function: AddAbilityRecordId
+ * SubFunction: NA
+ * FunctionPoints: AddAbilityRecordId with duplicate id
+ * EnvConditions: NA
+ * CaseDescription: Verify AddAbilityRecordId ignore duplicate id
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, AddAbilityRecordId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AddAbilityRecordId_001 Start");
+    ForegroundAppConnectionInfo info(100, 200, 100, 200, "caller", "target");
+    info.abilityRecordIds_.emplace_back(1); // 先添加id=1
+
+    info.AddAbilityRecordId(1); // 重复添加
+    EXPECT_EQ(info.abilityRecordIds_.size(), 1); // 数量不变
+    TAG_LOGI(AAFwkTag::TEST, "AddAbilityRecordId_001 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionInfo
+ * Function: RemoveAbilityRecordId
+ * SubFunction: NA
+ * FunctionPoints: RemoveAbilityRecordId with non-exist id
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveAbilityRecordId ignore non-exist id
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, RemoveAbilityRecordId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RemoveAbilityRecordId_001 Start");
+    ForegroundAppConnectionInfo info(100, 200, 100, 200, "caller", "target");
+    info.abilityRecordIds_.emplace_back(1);
+
+    info.RemoveAbilityRecordId(2); // 移除不存在的id
+    EXPECT_EQ(info.abilityRecordIds_.size(), 1); // 数量不变
+    TAG_LOGI(AAFwkTag::TEST, "RemoveAbilityRecordId_001 End");
+}
+
+/*
+ * Feature: ForegroundAppConnectionManager
+ * Function: ConnectionDeathRecipient
+ * FunctionPoints: OnRemoteDied call death handler
+ * EnvConditions: NA
+ * CaseDescription: Verify ConnectionDeathRecipient trigger handler success
+ */
+HWTEST_F(ForegroundAppConnectionManagerTest, ConnectionDeathRecipient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionDeathRecipient_001 Start");
+    bool isCalled = false;
+    auto handler = [&isCalled](const wptr<IRemoteObject>&) { isCalled = true; };
+    
+    ForegroundAppConnectionManager::ConnectionDeathRecipient recipient(handler);
+    recipient.OnRemoteDied(nullptr);
+    
+    EXPECT_EQ(isCalled, true);
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionDeathRecipient_001 End");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

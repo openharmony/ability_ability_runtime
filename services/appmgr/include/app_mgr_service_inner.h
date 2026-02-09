@@ -1013,10 +1013,10 @@ public:
      * @param eventName Indicates the event defined by CommonEventSupport
      * @param want Want contains information of the event wish to notify.
      *
-     * @return Returns 0 if the event is normal, 1 if the event needs to be managed.
+     * @return Returns false if the event is normal, true if the event needs to be managed.
      */
-    int32_t NotifyAppStatusByCommonEventName(const std::string &bundleName, const std::string &eventName,
-        const Want &want);
+    bool IsSubscriberControlledAndNotifyAppStatusByCommonEventName(const std::string &bundleName,
+        const std::string &eventName, const Want &want);
 
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation",
         bool isKillPrecedeStart = false);
@@ -1353,7 +1353,7 @@ public:
     /**
      * Elevate the current process to be a candidate master process.
      *
-     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @param isInsertToHead Whether insert current process to the head of candidate master process list.
      * @return Return ERR_OK if success, others fail.
      */
     int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead);
@@ -1630,6 +1630,7 @@ public:
 
     int32_t KillChildProcessByPid(int32_t pid);
 
+    void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
     /**
      * Preload extension process.
      *
@@ -1639,8 +1640,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
-
-    void RecordAppExitSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -2152,7 +2151,7 @@ private:
         sptr<IRemoteObject> token);
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
     void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-        int32_t diedPid = INVALID_DIED_PID);
+        pid_t diedPid = INVALID_DIED_PID);
     void RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
     bool IsSceneBoardCall();
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -2195,6 +2194,7 @@ private:
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(std::shared_ptr<ApplicationInfo> appInfo,
         const std::string &processName, const BundleInfo &bundleInfo);
+
     void AddUIExtensionBindItem(
         std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
     void RemoveUIExtensionBindItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
@@ -2238,7 +2238,6 @@ private:
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
     std::vector<ConfigurationObserverWithUserId> configurationObservers_;
-
 #ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;

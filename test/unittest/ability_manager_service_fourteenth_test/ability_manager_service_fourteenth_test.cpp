@@ -16,11 +16,13 @@
 #include "mock_my_status.h"
 
 #include "ability_manager_service.h"
+#include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "rate_limiter.h"
 #include "sub_managers_helper.h"
 #include "mission_list_manager.h"
 #include "scene_board_judgement.h"
+#include "call_record.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1526,6 +1528,108 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, JudgeSystemParamsForPicker_003, Te
     MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_ = true;
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_003 end");
+}
+
+/*
+ * Feature: HandleShareDataTimeOut_001
+ * Function: HandleShareDataTimeOut
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService HandleShareDataTimeOut
+ * EnvConditions: no share data callbacks registered
+ * CaseDescription: Expect ERR_INVALID_VALUE when share-data timeout cleanup is invoked without registered callbacks
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, HandleShareDataTimeOut_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest HandleShareDataTimeOut_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->HandleShareDataTimeOut(100);
+    WantParams wantParams;
+    int retCode = abilityMs->GetShareDataPairAndReturnData(nullptr, ERR_TIMED_OUT, 100, wantParams);
+    EXPECT_EQ(retCode, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest HandleShareDataTimeOut_001 end");
+}
+
+/*
+ * Feature: OnAbilityDied_001
+ * Function: OnAbilityDied
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityDied
+ * EnvConditions: basic ability record creation
+ * CaseDescription: Trigger OnAbilityDied to ensure the death path handles a valid ability record
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, OnAbilityDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest OnAbilityDied_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityMs->OnAbilityDied(abilityRecord);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest OnAbilityDied_001 end");
+}
+
+/*
+ * Feature: OnCallConnectDied_001
+ * Function: OnCallConnectDied
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnCallConnectDied
+ * EnvConditions: call record creation with null callback
+ * CaseDescription: Verify the call-record death handler schedules OnCallConnectDied without crashing
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, OnCallConnectDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest OnCallConnectDied_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto abilityRecord = MockAbilityRecord(AbilityType::SERVICE);
+    ASSERT_NE(abilityRecord, nullptr);
+    auto callRecord = CallRecord::CreateCallRecord(0, abilityRecord, nullptr, nullptr);
+    ASSERT_NE(callRecord, nullptr);
+    abilityMs->OnCallConnectDied(callRecord);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest OnCallConnectDied_001 end");
+}
+
+/*
+ * Feature: GetConnectManagerByToken_001
+ * Function: GetConnectManagerByToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetConnectManagerByToken
+ * EnvConditions: null token and helper
+ * CaseDescription: Expect nullptr when retrieving a connect manager without a helper or sub-managers
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, GetConnectManagerByToken_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest GetConnectManagerByToken_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    EXPECT_EQ(abilityMs->GetConnectManagerByToken(nullptr, ExtensionAbilityType::APP_SERVICE), nullptr);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    ASSERT_NE(abilityMs->subManagersHelper_, nullptr);
+    EXPECT_EQ(abilityMs->GetConnectManagerByToken(nullptr, ExtensionAbilityType::EMBEDDED_UI), nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest GetConnectManagerByToken_001 end");
+}
+
+/*
+ * Feature: GetUIExtensionAbilityManagers_001
+ * Function: GetUIExtensionAbilityManagers
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetUIExtensionAbilityManagers
+ * EnvConditions: helper not initialized
+ * CaseDescription: Ensure GetUIExtensionAbilityManagers returns an empty map
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, GetUIExtensionAbilityManagers_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest GetUIExtensionAbilityManagers_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto managers = abilityMs->GetUIExtensionAbilityManagers();
+    EXPECT_TRUE(managers.empty());
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    ASSERT_NE(abilityMs->subManagersHelper_, nullptr);
+    auto managersWithHelper = abilityMs->GetUIExtensionAbilityManagers();
+    EXPECT_TRUE(managersWithHelper.empty());
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest GetUIExtensionAbilityManagers_001 end");
 }
 
 /*

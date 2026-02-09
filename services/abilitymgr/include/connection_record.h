@@ -173,6 +173,8 @@ public:
     void SetConnectWant(const Want &want);
     Want GetConnectWant() const;
 private:
+    void ScheduleDisconnectTimeout();
+
     static int64_t connectRecordId;
     int32_t callerUid_ = 0;                             // caller uid
     int32_t callerPid_ = 0;                             // caller pid

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
+#include "agent_extension_connection_constants.h"
 #include "app_exit_reason_data_manager.h"
 #include "appfreeze_manager.h"
 #include "app_utils.h"
@@ -52,6 +53,7 @@
 #include "permission_constants.h"
 #include "process_options.h"
 #include "uri_utils.h"
+#include "user_controller/user_controller.h"
 #include "utils/state_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
@@ -328,6 +330,9 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     want_.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName)) {
         SetAttachDebug(true);
+    }
+    if (result == ERR_OK) {
+        AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(abilityInfo_.bundleName, userId);
     }
     return result;
 }
@@ -836,6 +841,10 @@ int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateAbility:%{public}s", abilityInfo_.name.c_str());
+
+    // Notify all startAbilityByCall callers that this ability is terminating
+    NotifyCallersOnTerminate();
+
 #ifdef WITH_DLP
     HandleDlpClosed();
 #endif // WITH_DLP
@@ -1846,8 +1855,11 @@ void AbilityRecord::RemoveAbilityDeathRecipient() const
 
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "OnSchedulerDied called");
     std::lock_guard<ffrt::mutex> guard(lock_);
+    if (IsAbilityDiedHandled()) {
+        return;
+    }
     CHECK_POINTER(scheduler_);
 
     auto object = remote.promote();
@@ -1895,13 +1907,35 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
 }
 
-void AbilityRecord::OnProcessDied()
+bool AbilityRecord::IsAbilityDiedHandled()
+{
+    if (handledAbilityDied_) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "abilityDied already handled");
+        return handledAbilityDied_;
+    }
+    handledAbilityDied_ = true;
+    return false;
+}
+
+void AbilityRecord::OnProcessDied(bool isKeepAliveDied)
 {
     CancelPrepareTerminate();
     std::lock_guard<ffrt::mutex> guard(lock_);
-    if (!IsSceneBoard() && scheduler_ != nullptr && !isKeepAliveDied_) {
+    if (!IsSceneBoard() && scheduler_ != nullptr && !isKeepAliveDied) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnProcessDied: '%{public}s', attached.", abilityInfo_.name.c_str());
         return;
+    }
+    if (IsAbilityDiedHandled()) {
+        return;
+    }
+    if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
+        auto schedulerObject = scheduler_->AsObject();
+        if (schedulerObject != nullptr) {
+            schedulerObject->RemoveDeathRecipient(schedulerDeathRecipient_);
+        }
+    }
+    if (lifecycleDeal_ != nullptr) {
+        lifecycleDeal_->SetScheduler(nullptr);
     }
     isWindowAttached_ = false;
 
@@ -2048,6 +2082,9 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (want_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
         want_.RemoveParam(UISERVICEHOSTPROXY_KEY);
+    }
+    if (want_.HasParameter(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY)) {
+        want_.RemoveParam(AgentRuntime::AGENTEXTENSIONHOSTPROXY_KEY);
     }
 }
 
@@ -2570,6 +2607,22 @@ bool AbilityRecord::IsNeedToCallRequest() const
     }
 
     return callContainer_->IsNeedToCallRequest();
+}
+
+void AbilityRecord::NotifyCallersOnTerminate()
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Notify callers on terminate: %{public}s",
+        abilityInfo_.name.c_str());
+
+    if (callContainer_ == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callContainer_ is null, no callers to notify");
+        return;
+    }
+
+    AppExecFwk::ElementName element(abilityInfo_.deviceId, abilityInfo_.bundleName,
+        abilityInfo_.name, abilityInfo_.moduleName);
+
+    callContainer_->NotifyAllCallDisconnect(element);
 }
 
 void AbilityRecord::ContinueAbility(const std::string& deviceId, uint32_t versionCode)

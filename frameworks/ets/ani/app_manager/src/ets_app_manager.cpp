@@ -566,7 +566,9 @@ bool EtsAppManager::CheckOnOnApplicationStateWithAppStateFilterParam(ani_env *en
     }
     if (!isUndefined && !UnWrapAppStateFilter(env, etsAppStateFilter, appStateFilter)) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetAppStateFilter failed");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse appStateFilter failed, value must be a "
+            "combination of values selected from enum FilterBundleType, FilterAppStateType, FilterProcessStateType "
+            "FilterAbilityStateType and FilterCallback.");
         return false;
     }
     return true;

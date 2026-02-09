@@ -28,6 +28,9 @@ public:
     static bool retRegisterBundleEventCallback;
     static bool isRegisterBundleEventCallbackCalled;
     static bool isAddSystemAbilityListenerCalled;
+    static bool retVerifyCallingPermission;
+    static int32_t retConnectAbilityWithExtensionType;
+    static int32_t retDisconnectAbility;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

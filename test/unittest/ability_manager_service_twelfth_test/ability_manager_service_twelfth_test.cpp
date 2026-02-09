@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t RESOURCE_SCHEDULE_UID = 1096;
 constexpr int32_t UPDATE_CONFIG_FLAG_COVER = 1;
 constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
+constexpr int32_t TEST_USER_ID = 100;
 
 namespace OHOS {
 namespace AAFwk {
@@ -419,11 +420,13 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetUserScreenUnlockCallback_001, Test
     std::string testText = "AbilityManagerServiceTwelfthTest";
     want.SetParam(Want::PARM_LAUNCH_REASON_MESSAGE, testText);
     abilityMs_->RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerTokenId);
+    abilityMs_->Init();
     auto ret = abilityMs_->GetUserScreenUnlockCallback();
+    int32_t userId = TEST_USER_ID;
     if (ret) {
-        ret();
+        ret(userId);
         abilityMs_.reset();
-        ret();
+        ret(userId);
     }
     EXPECT_EQ(static_cast<bool>(ret), true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest GetUserScreenUnlockCallback_001 end");

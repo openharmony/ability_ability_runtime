@@ -318,7 +318,7 @@ int AbilitySchedulerStub::OpenFileInner(MessageParcel &data, MessageParcel &repl
     }
     int fd = OpenFile(*uri, mode);
     if (fd < 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "openFile fail, fd: %{pubilc}d", fd);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "openFile fail, fd: %{public}d", fd);
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteFileDescriptor(fd)) {

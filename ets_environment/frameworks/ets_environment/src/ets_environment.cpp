@@ -259,6 +259,7 @@ bool ETSEnvironment::Initialize(const std::shared_ptr<AppExecFwk::EventRunner> e
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
     options.push_back(ani_option { "--ext:taskpool-support-interop=true", nullptr });
+    options.push_back(ani_option { "--ext:--verification-mode=disabled", nullptr });
     std::string interpreerMode = "--ext:--interpreter-type=cpp";
     std::string debugEnalbeMode = "--ext:--debugger-enable=true";
     std::string debugLibraryPathMode = "--ext:--debugger-library-path=/system/lib64/libarkinspector.so";

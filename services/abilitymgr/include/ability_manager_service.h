@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1103,13 +1103,14 @@ public:
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
-     * @param isSilent, whether show window when start fail.
+     * @param isSilent, whether show window when start fail by interceptorExecuter.
      * @param promotePriority, whether to promote priority for sa.
+     * @param isVisible, whether show window when start fail by afterCheckExecuter.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
-        bool isSilent = false, bool promotePriority = false) override;
+        bool isSilent = false, bool promotePriority = false, bool isVisible = false) override;
 
     /**
      * Start Ability, connect session with common ability.
@@ -1119,13 +1120,14 @@ public:
      * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param errMsg Out parameter, indicates the failed reason.
-     * @param isSilent, whether show window when start fail.
+     * @param isSilent, whether show window when start fail by interceptorExecuter.
      * @param promotePriority, whether to promote priority for sa.
+     * @param isVisible, whether show window when start fail by afterCheckExecuter.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg,
-        bool isSilent = false, bool promotePriority = false) override;
+        bool isSilent = false, bool promotePriority = false, bool isVisible = false) override;
 
     /**
      * Start Ability for prelauch.
@@ -2343,7 +2345,7 @@ protected:
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-        int32_t diedPid = AppExecFwk::INVALID_DIED_PID) override;
+        pid_t diedPid = AppExecFwk::INVALID_DIED_PID) override;
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -2441,6 +2443,16 @@ protected:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
+
+    /**
+     * @brief Get list of applications launched before the first unlock.
+     * @param userId The User Id.
+     * @param userLockedBundleList List of applications launched before the first unlock.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetUserLockedBundleList(int32_t userId,
+        std::unordered_set<std::string> &userLockedBundleList) override;
 
 private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
@@ -2567,8 +2579,6 @@ private:
     void DataDumpSysStateInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     ErrCode ProcessMultiParam(std::vector<std::string>& argsStr, std::string& result);
-    void ShowHelp(std::string& result);
-    void ShowIllegalInfomation(std::string& result);
     int Dump(const std::vector<std::u16string>& args, std::string& result);
 
     // multi user
@@ -2642,7 +2652,7 @@ private:
     void SubscribeUserUnlockedEvent();
     void SubscribeScreenUnlockedEvent();
     std::function<void(int32_t)> GetScreenUnlockCallback();
-    std::function<void()> GetUserScreenUnlockCallback();
+    std::function<void(int32_t)> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeUnlockedEvent(int32_t retryCount, std::shared_ptr<EventFwk::CommonEventSubscriber> subscriber,
         bool isUserUnlockSubscriber = false);
@@ -3003,7 +3013,7 @@ private:
 
     bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 
-    void TimeSequenceKeepAliveRestart(int32_t userId, int32_t pid,
+    void TimeSequenceKeepAliveRestart(int32_t userId, pid_t pid,
         std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> &bundleInfosMap,
         std::vector<AppExecFwk::BundleInfo> &bundleInfosForU1);
 
@@ -3069,8 +3079,6 @@ private:
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
-    std::list<std::string> vpnAllowList_;
-
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
     void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
@@ -3085,10 +3093,6 @@ private:
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
-
-    bool CheckSupportVpn(AppExecFwk::AbilityInfo abilityInfo);
-
-    bool ParseVpnAllowListJson(const std::string &relativePath, const std::string &jsonItemStr);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
@@ -3161,7 +3165,6 @@ private:
     ffrt::mutex shouldBlockAllAppStartMutex_;
     mutable ffrt::mutex timeoutMapLock_;
     std::mutex whiteListMutex_;
-    std::mutex allowListMutex_;
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;

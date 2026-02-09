@@ -40,7 +40,17 @@ void DataObsMgrClientTest::TearDownTestCase(void)
 void DataObsMgrClientTest::SetUp()
 {}
 void DataObsMgrClientTest::TearDown()
-{}
+{
+    auto client = DataObsMgrClient::GetInstance();
+    if (client != nullptr) {
+        // Clear the maps to prevent state pollution between test cases
+        client->observers_.Clear();
+        client->observerExts_.Clear();
+        // Also reset dataObsManger_ to null so ReRegister() won't try to re-register
+        // when OnAddSystemAbility is triggered asynchronously during program exit
+        client->dataObsManger_ = nullptr;
+    }
+}
 
 /*
  * Feature: DataObsMgrClient.
@@ -84,6 +94,7 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_Call_Service_0100, TestSize.Leve
     EXPECT_EQ(service->onChangeCall_, 7);
 
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack);
 }
 
 /*
@@ -120,6 +131,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0100, TestSiz
     client->ReRegister();
     EXPECT_EQ(service2->onChangeCall_, 2);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 /*
@@ -156,6 +169,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0200, TestSiz
     client->ReRegister();
     EXPECT_EQ(service2->onChangeCall_, 2);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 /*
@@ -192,6 +207,8 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_ReregisterObserver_0300, TestSiz
     client->OnRemoteDied();
     EXPECT_EQ(service2->onChangeCall_, 0);
     testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
+    testing::Mock::AllowLeak(callBack1);
+    testing::Mock::AllowLeak(callBack2);
 }
 
 }  // namespace AAFwk

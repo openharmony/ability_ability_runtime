@@ -75,6 +75,8 @@ private:
     void AppendStackTrace(const std::string& errorStack, std::string& summary);
 
     void AppendAsyncStack(const napi_value& obj, std::string& summary);
+
+    void AppendExtraInfo(std::string& errorMsg);
 };
 } // namespace JsEnv
 } // namespace OHOS

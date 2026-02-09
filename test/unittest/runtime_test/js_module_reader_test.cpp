@@ -88,9 +88,10 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level2)
  */
 HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0100, TestSize.Level2)
 {
-JsModuleReader jsModuleReader("JsModuleReader", "");
-std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "");
-EXPECT_TRUE(hapPath.empty());
+    JsModuleReader jsModuleReader("JsModuleReader", "");
+    bool needFindPluginHsp = true;
+    std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "", needFindPluginHsp);
+    EXPECT_TRUE(hapPath.empty());
 }
 
 /**
@@ -100,9 +101,10 @@ EXPECT_TRUE(hapPath.empty());
  */
 HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0200, TestSize.Level2)
 {
-JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
-std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "");
-EXPECT_TRUE(hapPath.empty());
+    JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
+    bool needFindPluginHsp = true;
+    std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "", needFindPluginHsp);
+    EXPECT_TRUE(hapPath.empty());
 }
 
 /**
@@ -113,7 +115,8 @@ EXPECT_TRUE(hapPath.empty());
 HWTEST_F(JsModuleReaderTest, GetFormAppHspPathTest_0100, TestSize.Level2)
 {
     JsModuleReader jsModuleReader("JsModuleReader", "");
-    auto realHapPath = jsModuleReader.GetFormAppHspPath("inputPath");
+    bool needPlugin = false;
+    auto realHapPath = jsModuleReader.GetFormAppHspPath("inputPath", needPlugin);
     EXPECT_EQ(realHapPath, "/data/bundles/JsModuleReader/inputPath.hsp");
 }
 
@@ -127,7 +130,8 @@ HWTEST_F(JsModuleReaderTest, GetPresetAppHapPath_0100, TestSize.Level2)
     JsModuleReader jsModuleReader("JsModuleReader", "");
     std::string inputPath = "inputPath/inputPath2";
     std::string bundleName = "bundleName";
-    auto realHapPath = jsModuleReader.GetPresetAppHapPath(inputPath, bundleName);
+    bool needFindPluginHsp = true;
+    auto realHapPath = jsModuleReader.GetPresetAppHapPath(inputPath, bundleName, needFindPluginHsp);
     EXPECT_EQ(realHapPath, "inputPath/inputPath2");
 }
 }  // namespace AAFwk

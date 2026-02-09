@@ -273,6 +273,10 @@ void OHOSApplication::OnConfigurationUpdated(
         TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ or abilityRuntimeContext_ is null");
         return;
     }
+
+    if (level == AbilityRuntime::SetLevel::System) {
+        abilityRuntimeContext_->NotifySystemConfigurationUpdated(config);
+    }
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
     bool isUpdateAppFontSize = isUpdateFontSize(config, level);
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);

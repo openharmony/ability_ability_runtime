@@ -69,7 +69,7 @@ constexpr const char *SIGNATURE_OPEN_LINK = "C{std.core.String}C{utils.AbilityUt
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
-    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode;";
+    "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode";
 constexpr const char* JSON_KEY_ERR_MSG = "errMsg";
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 
