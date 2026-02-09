@@ -21,11 +21,6 @@
 
 namespace OHOS {
 namespace AgentRuntime {
-JsAgentUIExtension *JsAgentUIExtension::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
-{
-    return new JsAgentUIExtension(runtime);
-}
-
 JsAgentUIExtension::JsAgentUIExtension(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
     std::shared_ptr<AbilityRuntime::UIExtensionBaseImpl> uiExtensionBaseImpl =
@@ -36,6 +31,11 @@ JsAgentUIExtension::JsAgentUIExtension(const std::unique_ptr<AbilityRuntime::Run
 JsAgentUIExtension::~JsAgentUIExtension()
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "destructor");
+}
+
+extern "C" JS_EXPORT AgentUIExtension* OHOS_CreateJsAgentUIExtension(const std::unique_ptr<Runtime> &runtime)
+{
+    return new JsAgentUIExtension(static_cast<JsRuntime&>(*runtime));
 }
 } // namespace AgentRuntime
 } // namespace OHOS

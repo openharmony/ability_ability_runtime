@@ -35,14 +35,6 @@ class JsAgentUIExtension : public AgentUIExtension, public std::enable_shared_fr
 public:
     explicit JsAgentUIExtension(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     virtual ~JsAgentUIExtension() override;
-
-    /**
-     * @brief Create JsAgentUIExtension.
-     *
-     * @param runtime The runtime.
-     * @return The JsAgentUIExtension instance.
-     */
-    static JsAgentUIExtension *Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 };
 } // namespace AgentRuntime
 } // namespace OHOS

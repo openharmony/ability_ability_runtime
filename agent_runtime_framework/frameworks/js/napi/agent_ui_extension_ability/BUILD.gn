@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("agentuiextensionability") {
   sanitize = {
@@ -28,8 +28,8 @@ ohos_shared_library("agentuiextensionability") {
   sources = [ "js_agent_ui_extension_module.cpp" ]
 
   deps = [
-      "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_ability:agent_ui_extension_ability_abc",
-      "${agent_runtime_framework_path}/frameworks/js/js/agent_extension_ability:agent_ui_extension_ability_js",
+      "${agent_runtime_framework_path}/frameworks/js/js/agent_ui_extension_ability:agent_ui_extension_ability_abc",
+      "${agent_runtime_framework_path}/frameworks/js/js/agent_ui_extension_ability:agent_ui_extension_ability_js",
   ]
 
   external_deps = [ "napi:ace_napi" ]
