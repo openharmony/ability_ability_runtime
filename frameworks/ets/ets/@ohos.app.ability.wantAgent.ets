@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,8 +87,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeGetBundleName(agent, call);
-      } catch (err: BusinessError) {
-        callback(err, "");
+      } catch (err) {
+        callback(err as BusinessError, "");
       }
     });
   }
@@ -107,8 +107,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeTriggerAsync(agent, triggerInfo, context, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -133,8 +133,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeGetBundleName(agent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -148,8 +148,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeGetUid(agent, call);
-      } catch (err: BusinessError) {
-        callback(err, -1);
+      } catch (err) {
+        callback(err as BusinessError, -1);
       }
     });
   }
@@ -169,8 +169,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeGetUid(agent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -184,8 +184,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeGetWant(agent, call);
-      } catch (err: BusinessError) {
-        callback(err, {} as Want);
+      } catch (err) {
+        callback(err as BusinessError, {} as Want);
       }
     });
   }
@@ -205,8 +205,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeGetWant(agent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -220,8 +220,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeCancel(agent, call);
-      } catch (err: BusinessError) {
-        callback(err, undefined);
+      } catch (err) {
+        callback(err as BusinessError, undefined);
       }
     });
   }
@@ -241,8 +241,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeCancel(agent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -257,8 +257,8 @@ namespace wantAgent {
         let call = new AsyncCallbackWrapper<CompleteData>(callback);
         try {
           nativeTrigger(agent, triggerInfo, call);
-        } catch (err: BusinessError) {
-          callback(err, {info: new Object(), want: new Want(), finalCode: 0, finalData: 'undefined'} as CompleteData);
+        } catch (err) {
+          callback(err as BusinessError, {info: new Object(), want: new Want(), finalCode: 0, finalData: 'undefined'} as CompleteData);
         }
       }
     });
@@ -275,8 +275,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeEqual(agent, otherAgent, call);
-      } catch (err: BusinessError) {
-        callback(err, false);
+      } catch (err) {
+        callback(err as BusinessError, false);
       }
     });
   }
@@ -300,8 +300,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeEqual(agent, otherAgent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -312,8 +312,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeGetWantAgent(info, call);
-      } catch (err: BusinessError) {
-        callback(err, {} as WantAgent);
+      } catch (err) {
+        callback(err as BusinessError, {} as WantAgent);
       }
     });
   }
@@ -331,8 +331,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeGetWantAgent(info, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
@@ -346,8 +346,8 @@ namespace wantAgent {
     taskpool.execute((): void => {
       try {
         nativeGetOperationType(agent, call);
-      } catch (err: BusinessError) {
-        callback(err, -1);
+      } catch (err) {
+        callback(err as BusinessError, -1);
       }
     });
   }
@@ -367,8 +367,8 @@ namespace wantAgent {
       taskpool.execute((): void => {
         try {
           nativeGetOperationType(agent, call);
-        } catch (err: BusinessError) {
-          reject(err);
+        } catch (err) {
+          reject(err as BusinessError);
         }
       });
     });
