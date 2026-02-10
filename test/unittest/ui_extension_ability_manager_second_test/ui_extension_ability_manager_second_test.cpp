@@ -155,7 +155,7 @@ void UIExtensionAbilityManagerSecondTest::TearDownTestCase(void)
 
 void UIExtensionAbilityManagerSecondTest::SetUp(void)
 {
-    connectManager_ = std::make_shared<UIExtensionAbilityManager>(0);
+    connectManager_ = std::make_unique<UIExtensionAbilityManager>(0);
     taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("UIExtensionAbilityManagerSecondTest");
     eventHandler_ = std::make_shared<EventHandlerWrap>(taskHandler_);
     // generate ability request
