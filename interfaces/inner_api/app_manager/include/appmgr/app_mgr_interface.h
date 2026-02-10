@@ -941,7 +941,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t CreateNativeChildProcess(const std::string &libName,
-        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request) = 0;
+        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request)
+    {
+        return 0;
+    }
+    
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+ 
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback, const std::string &customProcessName)
+    {
+        return 0;
+    };
 #endif // SUPPORT_CHILD_PROCESS
 
      /**
