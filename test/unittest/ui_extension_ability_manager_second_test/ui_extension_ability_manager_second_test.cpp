@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -231,7 +231,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, IsCallerValid_005, TestSize.Level1
     auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
     EXPECT_NE(abilityRecord, nullptr);
 
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
     sessionInfo->sessionToken = nullptr;
     abilityRecord->sessionInfo_ = sessionInfo;
 
@@ -262,8 +262,8 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, IsCallerValid_006, TestSize.Level1
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     abilityRecord->sessionInfo_ = sessionInfo;
 
     bool result = connectManager->IsCallerValid(abilityRecord);
@@ -329,8 +329,8 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, UpdateUIExtensionBindInfo_007, Tes
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     sessionInfo->uiExtensionUsage = AAFwk::UIExtensionUsage::MODAL;
     abilityRecord->sessionInfo_ = sessionInfo;
 
@@ -388,9 +388,9 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, CompleteForegroundInner_001, TestS
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
     sessionInfo->persistentId = 1;
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     abilityRecord->sessionInfo_ = sessionInfo;
     abilityRecord->SetPendingState(AbilityState::FOREGROUND);
 
@@ -667,9 +667,9 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, CompleteForegroundInner_002, TestS
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
     sessionInfo->persistentId = 1;
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     abilityRecord->sessionInfo_ = sessionInfo;
     abilityRecord->SetPendingState(AbilityState::BACKGROUND);
     abilityRecord->DoBackgroundAbilityWindowDelayed(false);
@@ -702,9 +702,9 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, CompleteForegroundInner_003, TestS
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
     sessionInfo->persistentId = 1;
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     abilityRecord->sessionInfo_ = sessionInfo;
     abilityRecord->SetPendingState(AbilityState::INITIAL);
     abilityRecord->DoBackgroundAbilityWindowDelayed(true);
@@ -805,7 +805,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, AttachAbilityThreadInner_004, Test
 
     // Note: terminatingMap_ does not exist in UIExtensionAbilityManager
     // This test verifies AttachAbilityThreadInner with a valid abilityRecord
-    sptr<IAbilityScheduler> scheduler = new AbilityScheduler();
+    sptr<IAbilityScheduler> scheduler = sptr<IAbilityScheduler>(new AbilityScheduler());
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     int res = connectManager->AttachAbilityThreadInner(scheduler, token);
@@ -844,7 +844,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, AttachAbilityThreadInner_005, Test
     std::string serviceKey = element.GetURI();
     connectManager->serviceMap_[serviceKey] = abilityRecord;
 
-    sptr<IAbilityScheduler> scheduler = new AbilityScheduler();
+    sptr<IAbilityScheduler> scheduler = sptr<IAbilityScheduler>(new AbilityScheduler());
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     int res = connectManager->AttachAbilityThreadInner(scheduler, token);
@@ -875,16 +875,16 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, GetUIExtensionBySessionInfo_007, T
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
 
     // Add to uiExtensionMap_ with different sessionToken
-    sptr<Rosen::Session> savedSessionToken = new Rosen::Session(info);
+    sptr<Rosen::Session> savedSessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
     connectManager->uiExtensionMap_[savedSessionToken] =
         std::pair<std::weak_ptr<BaseExtensionRecord>, sptr<SessionInfo>>(abilityRecord, sessionInfo);
 
     // Query with different sessionToken
-    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
 
     auto result = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
     // Should return nullptr when sessionToken is inconsistent
@@ -914,18 +914,18 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, GetUIExtensionBySessionInfo_008, T
     EXPECT_NE(abilityRecord, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
-    sessionInfo->sessionToken = new Rosen::Session(info);
-    sessionInfo->callerToken = new AbilityScheduler();
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    sessionInfo->callerToken = sptr<IRemoteObject>(new AbilityScheduler());
 
     // Add to uiExtensionMap_
     connectManager->uiExtensionMap_[sessionInfo->sessionToken] =
         std::pair<std::weak_ptr<BaseExtensionRecord>, sptr<SessionInfo>>(abilityRecord, sessionInfo);
 
     // Query with different callerToken
-    sptr<SessionInfo> querySessionInfo = new SessionInfo();
+    sptr<SessionInfo> querySessionInfo = sptr<SessionInfo>(new SessionInfo());
     querySessionInfo->sessionToken = sessionInfo->sessionToken;
-    querySessionInfo->callerToken = new AbilityScheduler(); // Different callerToken
+    querySessionInfo->callerToken = sptr<IRemoteObject>(new AbilityScheduler()); // Different callerToken
 
     auto result = connectManager->GetUIExtensionBySessionInfo(querySessionInfo);
     // Should return nullptr when callerToken is inconsistent
@@ -1061,7 +1061,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, RemoveUIExtWindowDeathRecipient_00
     EXPECT_NE(connectManager, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<IRemoteObject> session = new Rosen::Session(info);
+    sptr<IRemoteObject> session = sptr<IRemoteObject>(new Rosen::Session(info));
 
     connectManager->RemoveUIExtWindowDeathRecipient(session);
     // When session not in map, function returns early without modifying map
@@ -1085,7 +1085,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, AddUIExtWindowDeathRecipient_002, 
     EXPECT_NE(connectManager, nullptr);
 
     Rosen::SessionInfo info;
-    sptr<IRemoteObject> session = new Rosen::Session(info);
+    sptr<IRemoteObject> session = sptr<IRemoteObject>(new Rosen::Session(info));
 
     // Add first time
     connectManager->AddUIExtWindowDeathRecipient(session);
@@ -1223,7 +1223,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, OnUIExtWindowDied_001, TestSize.Le
     connectManager->taskHandler_ = nullptr;
 
     Rosen::SessionInfo info;
-    wptr<IRemoteObject> remote = new Rosen::Session(info);
+    wptr<IRemoteObject> remote = sptr<IRemoteObject>(new Rosen::Session(info));
 
     connectManager->OnUIExtWindowDied(remote);
     // When taskHandler_ is null, function returns early without submitting task
