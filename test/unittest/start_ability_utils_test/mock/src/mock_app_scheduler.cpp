@@ -18,11 +18,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-AppScheduler::AppScheduler()
-{}
-
-AppScheduler::~AppScheduler()
-{}
 
 void AppScheduler::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
