@@ -63,7 +63,7 @@ int32_t ETSStartupManager::NativeCreateStartupTaskManager(ani_env *env, ani_obje
     if (result != ERR_OK || startupTaskManager == nullptr) {
         EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
         TAG_LOGE(AAFwkTag::STARTUP, "GetStartupTaskManager failed");
-        return ERR_FAILURE;
+        return result;
     }
     startupTaskManagerId = startupTaskManager->GetStartupTaskManagerId();
     return static_cast<int32_t>(startupTaskManagerId);
@@ -129,7 +129,7 @@ void ETSStartupManager::NativeRun(ani_env *env, ani_int startupTaskManagerId, an
         eventInfo.appIndex = startupManager->GetAppIndex();
         eventInfo.userId = startupManager->GetUid() / AppExecFwk::Constants::BASE_USER_RANGE;
         AAFwk::EventReport::SendAppStartupErrorEvent(
-            AAFwk::EventName::APP_STARTUP_ERROR, HISYSEVENT_FAULT, eventInfo);
+            AAFwk::EventName::APP_STARTUP_ERROR, HiSysEvent::FAULT, eventInfo);
     };
     startupTaskManager->SetTimeoutCallback(timeoutCallback);
     result = startupTaskManager->Run(onCompletedCallback);
