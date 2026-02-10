@@ -56,21 +56,6 @@ napi_value CreateJsCapabilities(napi_env env, const Capabilities &capabilities)
     return object;
 }
 
-napi_value CreateJsAuthentication(napi_env env, const Authentication &authentication)
-{
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "create authentication");
-    napi_value object = nullptr;
-    napi_status status = napi_create_object(env, &object);
-    if (status != napi_ok || object == nullptr) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "null obj");
-        return nullptr;
-    }
-    napi_set_named_property(env, object, "schemes", CreateNativeArray(env, authentication.schemes));
-    napi_set_named_property(env, object, "credentials", CreateJsValue(env, authentication.credentials));
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "end");
-    return object;
-}
-
 napi_value CreateJsSkill(napi_env env, const Skill &skill)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "create skill");
@@ -87,6 +72,7 @@ napi_value CreateJsSkill(napi_env env, const Skill &skill)
     napi_set_named_property(env, object, "examples", CreateNativeArray(env, skill.examples));
     napi_set_named_property(env, object, "inputModes", CreateNativeArray(env, skill.inputModes));
     napi_set_named_property(env, object, "outputModes", CreateNativeArray(env, skill.outputModes));
+    napi_set_named_property(env, object, "extension", CreateJsValue(env, skill.extension));
     TAG_LOGD(AAFwkTag::SER_ROUTER, "end");
     return object;
 }
@@ -126,7 +112,6 @@ napi_value CreateJsAgentCard(napi_env env, const AgentCard &card)
     napi_set_named_property(env, object, "abilityName", CreateJsValue(env, card.abilityName));
     napi_set_named_property(env, object, "name", CreateJsValue(env, card.name));
     napi_set_named_property(env, object, "description", CreateJsValue(env, card.description));
-    napi_set_named_property(env, object, "url", CreateJsValue(env, card.url));
     napi_set_named_property(env, object, "version", CreateJsValue(env, card.version));
     napi_set_named_property(env, object, "documentationUrl", CreateJsValue(env, card.documentationUrl));
     napi_set_named_property(env, object, "defaultInputModes", CreateNativeArray(env, card.defaultInputModes));
@@ -137,10 +122,16 @@ napi_value CreateJsAgentCard(napi_env env, const AgentCard &card)
     if (card.capabilities) {
         napi_set_named_property(env, object, "capabilities", CreateJsCapabilities(env, *(card.capabilities)));
     }
-    if (card.authentication) {
-        napi_set_named_property(env, object, "authentication", CreateJsAuthentication(env, *(card.authentication)));
-    }
     napi_set_named_property(env, object, "skills", CreateJsSkillArray(env, card.skills));
+    if (!card.extension.empty()) {
+        napi_set_named_property(env, object, "extension", CreateJsValue(env, card.extension));
+    }
+    if (!card.category.empty()) {
+        napi_set_named_property(env, object, "category", CreateJsValue(env, card.category));
+    }
+    if (!card.iconUrl.empty()) {
+        napi_set_named_property(env, object, "iconUrl", CreateJsValue(env, card.iconUrl));
+    }
     TAG_LOGD(AAFwkTag::SER_ROUTER, "end");
     return object;
 }
