@@ -19,6 +19,12 @@
 #include "hitrace_meter.h"
 #include "js_ui_extension_base.h"
 
+#ifdef WINDOWS_PLATFORM
+#define JS_EXPORT __declspec(dllexport)
+#else
+#define JS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AgentRuntime {
 JsAgentUIExtension::JsAgentUIExtension(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
@@ -33,9 +39,10 @@ JsAgentUIExtension::~JsAgentUIExtension()
     TAG_LOGD(AAFwkTag::SER_ROUTER, "destructor");
 }
 
-extern "C" JS_EXPORT AgentUIExtension* OHOS_CreateJsAgentUIExtension(const std::unique_ptr<Runtime> &runtime)
+extern "C" JS_EXPORT AgentUIExtension* OHOS_CreateJsAgentUIExtension(
+    const std::unique_ptr<Runtime> &runtime)
 {
-    return new JsAgentUIExtension(static_cast<JsRuntime&>(*runtime));
+    return new JsAgentUIExtension(runtime);
 }
 } // namespace AgentRuntime
 } // namespace OHOS

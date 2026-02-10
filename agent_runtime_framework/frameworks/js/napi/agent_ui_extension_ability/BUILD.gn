@@ -73,10 +73,11 @@ ohos_shared_library("js_agent_ui_extension") {
 
   include_dirs = [
     "include",
+    "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/include",
   ]
 
   sources = [
-    "src/js_agent_extension.cpp",
+    "src/js_agent_ui_extension.cpp",
   ]
 
   deps = [

@@ -93,8 +93,7 @@ ohos_shared_library("agent_ui_extension") {
       debug = false
   }
   branch_protector_ret = "pac_ret"
-  defines = [ "AMS_LOG_TAG = \"Agent\"" ]
-  defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
+
   configs = [
       ":agent_ui_extension_config",
       "${ability_runtime_services_path}/common:optimize_config",
@@ -102,7 +101,7 @@ ohos_shared_library("agent_ui_extension") {
 
   include_dirs = [
     "include",
-    "${agent_runtime_framework_path}/frameworks/js/napi/agent_ui_extension_ability/include",
+    "${agent_runtime_framework_path}/frameworks/native/agent_ui_extension_ability/include",
   ]
 
   sources = [
