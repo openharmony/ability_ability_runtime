@@ -75,16 +75,16 @@ private:
     void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord, const std::string &customProcessName);
 
     bool isStartWithDebug_;
-    pid_t pid_ = 0;
     pid_t hostPid_ = 0;
-    int32_t uid_ = 0;
     int32_t childProcessCount_ = 0;
     int32_t childProcessType_ = CHILD_PROCESS_TYPE_JS;
-    ProcessType processType_ = ProcessType::CHILD;
     std::weak_ptr<AppRunningRecord> hostRecord_;
     sptr<IChildScheduler> scheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject> mainProcessCb_ = nullptr;
+    int32_t uid_ = 0;
+    ProcessType processType_ = ProcessType::CHILD;
+    pid_t pid_ = 0;
     std::string srcEntry_;
     std::string processName_;
     std::string entryFunc_;

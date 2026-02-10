@@ -44,25 +44,25 @@ enum class SpecifiedProcessState: u_int8_t {
 };
 
 struct SpecifiedRequest {
-    bool preCreateProcessName = false;
-    bool isCold = false;
-    SpecifiedProcessState specifiedProcessState = SpecifiedProcessState::STATE_NONE;
     int32_t requestId = 0;
+    AbilityRequest abilityRequest;
     int32_t persistentId = 0;
     int32_t requestListId = -1;
     uint32_t sceneFlag = 0;
     uint32_t callingTokenId = 0;
-    AbilityRequest abilityRequest;
+    SpecifiedProcessState specifiedProcessState = SpecifiedProcessState::STATE_NONE;
+    bool isCold = false;
+    bool preCreateProcessName = false;
 
     SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
 };
 
 struct AbilitiesRequest {
-    int32_t requestListId = -1;
     std::string requestKey;
     std::vector<std::pair<int32_t, sptr<SessionInfo>>> sessionInfoList;
-    uint32_t doneCount = 0;
     sptr<IRemoteObject> callerToken;
+    int32_t requestListId = -1;
+    uint32_t doneCount = 0;
 };
 
 class UIAbilityLifecycleManager : public std::enable_shared_from_this<UIAbilityLifecycleManager> {

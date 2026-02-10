@@ -24,11 +24,11 @@ namespace OHOS {
 namespace AAFwk {
 
 struct RecoveryInfo {
-    uint32_t tokenId = 0;
-    int64_t time = 0;
     std::string bundleName = "";
     std::string moduleName = "";
     std::string abilityName = "";
+    int64_t time = 0;
+    uint32_t tokenId = 0;
 };
 
 class RecoveryInfoTimer {

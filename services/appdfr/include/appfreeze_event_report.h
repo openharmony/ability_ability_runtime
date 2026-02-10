@@ -23,10 +23,6 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct AppfreezeEventInfo {
-    int tid = 0;
-    int pid = 0;
-    int uid = 0;
-    int eventId = -1;
     std::string bundleName;
     std::string processName;
     std::string binderInfo;
@@ -37,14 +33,18 @@ struct AppfreezeEventInfo {
     std::string errorMessage;
     std::string freezeInfoFile;
     std::string hitraceInfo;
-    bool foregroundState;
-    bool enableFreeze;
     std::string applicationHeapInfo;
     std::string processLifeTime;
     std::string mainStack;
     int32_t markedId = 0;
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
+    int tid = 0;
+    int pid = 0;
+    int uid = 0;
+    int eventId = -1;
+    bool foregroundState;
+    bool enableFreeze;
 };
 
 class AppfreezeEventReport {

@@ -52,6 +52,48 @@ enum CollaboratorType {
 };
 
 struct AbilityRequest {
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo appInfo;
+    StartOptions startOptions;
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    std::string specifiedFlag;
+    std::string customProcess;
+    std::string moduleProcess;
+    std::string reservedBundleName;
+    std::string appId;
+    std::string startTime;
+    std::string hostBundleName;
+
+    sptr<IRemoteObject> callerToken = nullptr;          // call ability
+    sptr<IRemoteObject> asCallerSourceToken = nullptr;          // call ability
+    sptr<IAbilityConnection> connect = nullptr;
+    sptr<IRemoteObject> abilityInfoCallback = nullptr;
+    sptr<SessionInfo> sessionInfo;
+    std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
+    std::shared_ptr<ProcessOptions> processOptions = nullptr;
+    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
+    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
+    sptr<UIExtensionAbilityConnectInfo> uiExtensionAbilityConnectInfo = nullptr;
+
+    int64_t restartTime = 0;
+    uint64_t specifiedFullTokenId = 0;
+
+    int32_t primaryWindowId = -1;
+    int32_t restartCount = -1;
+    int32_t uid = 0;
+    int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
+    int32_t callerTokenRecordId = -1;
+    int32_t userId = -1;
+    int32_t loadExtensionTimeout = 0; // only for connectAbility
+    uint32_t callerAccessTokenId = 0;
+    uint32_t specifyTokenId = 0;
+    int callerUid = -1;         // call ability
+    int requestCode = -1;
+    AbilityCallType callType = AbilityCallType::INVALID_TYPE;           // call ability
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
+
     bool isStartInSplitMode = false;
     bool restart = false;
     bool startRecent = false;
@@ -64,48 +106,10 @@ struct AbilityRequest {
     bool isEmbeddedAllowed = false;
     bool callSpecifiedFlagTimeout = false;
     bool hideStartWindow = false;
-    int32_t primaryWindowId = -1;
-    int32_t restartCount = -1;
-    int32_t uid = 0;
-    int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
-    int32_t callerTokenRecordId = -1;
-    int32_t userId = -1;
-    uint32_t callerAccessTokenId = 0;
-    uint32_t specifyTokenId = 0;
-    int callerUid = -1;         // call ability
-    int requestCode = -1;
-    AbilityCallType callType = AbilityCallType::INVALID_TYPE;           // call ability
-    int64_t restartTime = 0;
-    sptr<IRemoteObject> callerToken = nullptr;          // call ability
-    sptr<IRemoteObject> asCallerSourceToken = nullptr;          // call ability
-    sptr<IAbilityConnection> connect = nullptr;
-    sptr<IRemoteObject> abilityInfoCallback = nullptr;
-    sptr<SessionInfo> sessionInfo;
-    std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
-    std::shared_ptr<ProcessOptions> processOptions = nullptr;
-    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
-    std::string specifiedFlag;
-    std::string customProcess;
-    std::string moduleProcess;
-    std::string reservedBundleName;
-    std::string appId;
-    std::string startTime;
-    std::string hostBundleName;
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo appInfo;
-    StartOptions startOptions;
     bool hideFailureTipDialog = false;
     bool promotePriority = false;
-    uint64_t specifiedFullTokenId = 0;
-    std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
     bool isFromOpenLink = false;
-    sptr<UIExtensionAbilityConnectInfo> uiExtensionAbilityConnectInfo = nullptr;
     std::pair<bool, LaunchReason> IsContinuation() const;
-    int32_t loadExtensionTimeout = 0; // only for connectAbility
 
     bool IsAcquireShareData() const
     {

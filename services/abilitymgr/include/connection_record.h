@@ -176,20 +176,18 @@ private:
     void ScheduleDisconnectTimeout();
 
     static int64_t connectRecordId;
-    int32_t callerUid_ = 0;                             // caller uid
-    int32_t callerPid_ = 0;                             // caller pid
-    uint32_t callerTokenId_ = 0;                        // caller pid
-    std::atomic<int32_t> recordId_ = 0;                                  // record id
-    ConnectionState state_;                         // service connection state
-    sptr<IRemoteObject> callerToken_ = nullptr;               // from:caller token
-    std::shared_ptr<BaseExtensionRecord> targetService_ = nullptr;  // target:service need to be connected
-
-    mutable std::mutex callbackMutex_;
-    sptr<IAbilityConnection> connCallback_ = nullptr;         // service connect callback
-    std::string callerName_;                        // caller bundleName or processName
-
     Want connectWant_;
+    ConnectionState state_;                            // service connection state
+    sptr<IRemoteObject> callerToken_ = nullptr;              // from:caller token
+    std::shared_ptr<BaseExtensionRecord> targetService_ = nullptr; // target:service need to be connected
+    mutable std::mutex callbackMutex_;
+    sptr<IAbilityConnection> connCallback_ = nullptr;        // service connect callback
     std::weak_ptr<AbilityConnectManager> abilityConnectManager_;
+    std::string callerName_;                           // caller bundleName or processName
+    std::atomic<int32_t> recordId_ = 0;                // record id
+    int32_t callerUid_ = 0;                            // caller uid
+    int32_t callerPid_ = 0;                            // caller pid
+    uint32_t callerTokenId_ = 0;                       // caller token id
 
     DISALLOW_COPY_AND_MOVE(ConnectionRecord);
 };
