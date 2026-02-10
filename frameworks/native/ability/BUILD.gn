@@ -41,9 +41,6 @@ config("ability_context_public_config") {
       "SUPPORT_SCREEN",
     ]
   }
-  if (hichecker_enabled) {
-    defines += [ "SUPPORT_HICHECKER" ]
-  }
 }
 
 ohos_shared_library("ability_context_native") {
