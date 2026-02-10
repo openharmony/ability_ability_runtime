@@ -116,11 +116,11 @@ AbilityRequest UIExtensionAbilityManagerSecondTest::GenerateAbilityRequest(const
     ApplicationInfo appinfo;
     appinfo.name = appName;
     abilityInfo.applicationInfo = appinfo;
+    abilityInfo.process = bundleName;
     AbilityRequest abilityRequest;
     abilityRequest.want = want;
     abilityRequest.abilityInfo = abilityInfo;
     abilityRequest.appInfo = appinfo;
-    abilityInfo.process = bundleName;
 
     return abilityRequest;
 }
@@ -155,7 +155,7 @@ void UIExtensionAbilityManagerSecondTest::TearDownTestCase(void)
 
 void UIExtensionAbilityManagerSecondTest::SetUp(void)
 {
-    connectManager_ = std::make_unique<UIExtensionAbilityManager>(0);
+    connectManager_ = std::make_shared<UIExtensionAbilityManager>(0);
     taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("UIExtensionAbilityManagerSecondTest");
     eventHandler_ = std::make_shared<EventHandlerWrap>(taskHandler_);
     // generate ability request
@@ -174,6 +174,7 @@ void UIExtensionAbilityManagerSecondTest::SetUp(void)
     std::string moduleName1 = "entry";
     abilityRequest1_ = GenerateAbilityRequest(deviceName1, abilityName1, appName1, bundleName1, moduleName1);
     serviceRecord1_ = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest1_);
+    serviceToken1_ = serviceRecord1_->GetToken();
     std::string deviceName2 = "device";
     std::string abilityName2 = "residentServiceAbility";
     std::string appName2 = "residentservcie";
@@ -181,8 +182,7 @@ void UIExtensionAbilityManagerSecondTest::SetUp(void)
     std::string moduleName2 = "entry";
     abilityRequest2_ = GenerateAbilityRequest(deviceName2, abilityName2, appName2, bundleName2, moduleName2);
     serviceRecord2_ = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest2_);
-    serviceToken2_ = serviceRecord_->GetToken();
-    serviceToken1_ = serviceRecord_->GetToken();
+    serviceToken2_ = serviceRecord2_->GetToken();
     callbackA_ = new AbilityConnectCallback();
     callbackB_ = new AbilityConnectCallback();
 }
@@ -193,6 +193,9 @@ void UIExtensionAbilityManagerSecondTest::TearDown(void)
     AbilityConnectCallback::onAbilityConnectDoneCount = 0;
     AbilityConnectCallback::onAbilityDisconnectDoneCount = 0;
     serviceRecord_ = nullptr;
+    serviceRecord1_ = nullptr;
+    serviceRecord2_ = nullptr;
+    uiExtensionAbilityRecord1_ = nullptr;
 }
 
 UIExtensionAbilityManager* UIExtensionAbilityManagerSecondTest::GetUIExtensionAbilityManager() const
