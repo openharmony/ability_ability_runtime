@@ -1317,7 +1317,7 @@ void AppMgrServiceInner::HandleExistingAppRecordAfterFound(std::shared_ptr<AppRu
     if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
         appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
     }
-    if (appRecord->IsPreloaded()) {
+    if (appRecord->IsPreloaded() || appRecord->IsPreloading()) {
         appRecord->SetPreloadState(PreloadState::NONE);
         appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
     }
