@@ -941,7 +941,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t CreateNativeChildProcess(const std::string &libName,
-        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request) = 0;
+        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request)
+    {
+        return 0;
+    }
+    
+    virtual int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback, const std::string &customProcessName)
+    {
+        return 0;
+    };
 #endif // SUPPORT_CHILD_PROCESS
 
      /**
