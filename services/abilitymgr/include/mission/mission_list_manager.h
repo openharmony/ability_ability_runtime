@@ -1249,7 +1249,8 @@ private:
      * @return An integer indicating the result of the operation (e.g., success or error code).
      */
     int MoveMissionToFrontInner(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
-        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
+        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr,
+        bool isNewWant = false);
 
     /**
      * push waiting ability to queue.
