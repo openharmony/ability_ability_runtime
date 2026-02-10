@@ -20,14 +20,15 @@
 
 #include "agent_ui_extension.h"
 
-namespace OHOS::AbilityRuntime {
-class Runtime;
-class JsUIExtensionBase;
+namespace OHOS {
+namespace AbilityRuntime {
+    class Runtime;
 }
 
-namespace OHOS {
 namespace AgentRuntime {
+using namespace OHOS::AbilityRuntime;
 class AgentUIExtension;
+
 /**
  * @brief Basic action extension components.
  */
