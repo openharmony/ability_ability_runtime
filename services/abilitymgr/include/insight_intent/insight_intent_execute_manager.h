@@ -36,12 +36,12 @@ enum class InsightIntentExecuteState {
 };
 
 struct InsightIntentExecuteRecord {
-    InsightIntentExecuteState state = InsightIntentExecuteState::UNKNOWN;
-    uint64_t key = 0;
     sptr<IRemoteObject> callerToken = nullptr;
     sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
+    uint64_t key = 0;
     std::string bundleName;
     std::string callerBundleName;
+    InsightIntentExecuteState state = InsightIntentExecuteState::UNKNOWN;
 };
 
 class InsightIntentExecuteConnection : public AbilityConnectionStub {

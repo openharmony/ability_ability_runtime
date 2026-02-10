@@ -28,15 +28,15 @@
 namespace OHOS {
 namespace AAFwk {
 struct GrantUriPermissionInfo {
-    uint32_t callerTokenId = 0;
-    bool isSandboxApp = false;
     std::string targetBundleName;
+    std::string targetAbilityName = "";
+    uint32_t callerTokenId = 0;
+    uint32_t flag = 0;
     int32_t appIndex = 0;
     int32_t userId = -1;
-    uint32_t flag = 0;
     int32_t collaboratorType = 0;
+    bool isSandboxApp = false;
     bool isNotifyCollaborator = false;
-    std::string targetAbilityName = "";
 };
 
 class UriUtils {

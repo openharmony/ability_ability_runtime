@@ -44,35 +44,10 @@ const int32_t MAX_PROC_NAME_LEN = 256;
 const int64_t START_FLAG_BASE = 1;
 const int32_t MAX_COST_TIME = 500;
 struct AppSpawnStartMsg {
-    uint8_t setAllowInternet;
-    uint8_t allowInternet; // hap socket allowed
-    uint8_t reserved1;
-    uint8_t reserved2;
-    bool atomicServiceFlag = false;
-    bool isolatedExtension = false; // whether is isolatedExtension
-    bool strictMode = false; // whether is strict mode
-    bool isolationMode = false;
-    bool isolatedNetworkFlag = false;
-    bool isolatedSELinuxFlag = false;
-    bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
-    bool isScreenLockDataProtect = false;
-    bool isCustomSandboxFlag = false;
-    int32_t uid;
-    int32_t gid;
-    int32_t pid;
-    int32_t code = 0; // 0: default, MSG_APP_SPAWN; 1: MSG_SPAWN_NATIVE_PROCESS; 2: MSG_GET_RENDER_TERMINATION_STATUS
-    int32_t bundleIndex;   // when dlp launch another app used, default is 0
-    int32_t maxChildProcess = 0;
-#ifdef SUPPORT_CHILD_PROCESS
-    int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
-#endif // SUPPORT_CHILD_PROCESS
-    int32_t hostProcessUid = 0; // host process uid, only use for nwebspawn.
-    uint32_t accessTokenId;
-    uint64_t flags;
-    uint32_t hapFlags = 0; // whether is pre installed hap
-    uint32_t mountPermissionFlags;
-    uint32_t apiTargetVersion = 0;
     uint64_t accessTokenIdEx;
+    uint64_t flags;
+    uint32_t accessTokenId;
+    uint32_t hapFlags = 0; // whether is pre installed hap
     std::vector<int32_t> gids;
     std::string procName;
     std::string soPath;
@@ -86,13 +61,38 @@ struct AppSpawnStartMsg {
     std::string extensionSandboxPath;
     std::string processType = "";
     std::string extensionTypeName;
+    std::string appSignType;
     HspList hspList; // list of harmony shared package
     std::set<std::string> permissions;
     std::map<std::string, std::string> appEnv; // environment variable to be set to the process
     std::map<std::string, int32_t> fds;
     DataGroupInfoList dataGroupInfoList; // list of harmony shared package
     JITPermissionsMap jitPermissionsMap; // map of JIT permissions
-    std::string appSignType;
+    uint32_t mountPermissionFlags;
+    uint32_t apiTargetVersion = 0;
+    int32_t uid;
+    int32_t gid;
+    int32_t pid;
+    int32_t code = 0; // 0: default, MSG_APP_SPAWN; 1: MSG_SPAWN_NATIVE_PROCESS; 2: MSG_GET_RENDER_TERMINATION_STATUS
+    int32_t bundleIndex;   // when dlp launch another app used, default is 0
+    int32_t maxChildProcess = 0;
+#ifdef SUPPORT_CHILD_PROCESS
+    int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
+#endif // SUPPORT_CHILD_PROCESS
+    int32_t hostProcessUid = 0; // host process uid, only use for nwebspawn.
+    uint8_t setAllowInternet;
+    uint8_t allowInternet; // hap socket allowed
+    uint8_t reserved1;
+    uint8_t reserved2;
+    bool atomicServiceFlag = false;
+    bool isolatedExtension = false; // whether is isolatedExtension
+    bool strictMode = false; // whether is strict mode
+    bool isolationMode = false;
+    bool isolatedNetworkFlag = false;
+    bool isolatedSELinuxFlag = false;
+    bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
+    bool isScreenLockDataProtect = false;
+    bool isCustomSandboxFlag = false;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -119,19 +119,19 @@ struct StartFlags {
 };
 
 struct CreateStartMsgParam {
-    bool strictMode = false;
-    bool networkEnableFlags = true;
-    bool saEnableFlags = true;
-    ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
-    uint64_t startFlags = 0;
-    int32_t uid = -1;
-    int32_t bundleIndex = 0;
     std::shared_ptr<AAFwk::Want> want = nullptr;
+    BundleInfo bundleInfo;
     std::string moduleName;
     std::string abilityName;
     std::string processName;
-    BundleInfo bundleInfo;
+    uint64_t startFlags = 0;
+    int32_t uid = -1;
+    int32_t bundleIndex = 0;
+    ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
     BundleType bundleType = BundleType::APP;
+    bool strictMode = false;
+    bool networkEnableFlags = true;
+    bool saEnableFlags = true;
 };
 
 union AppSpawnPidMsg {

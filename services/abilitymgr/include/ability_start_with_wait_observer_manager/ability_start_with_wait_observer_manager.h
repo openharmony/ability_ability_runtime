@@ -29,13 +29,13 @@ namespace OHOS {
 namespace AAFwk {
 using TerminateReason = AbilityStartWithWaitObserverUtil::TerminateReason;
 struct AbilityForegroundInfo {
-    bool coldStart = false;
-    int32_t observerId = 0;
+    std::string bundleName;
+    std::string abilityName;
     sptr<AbilityStartWithWaitObserverRecipient> deathRecipient = nullptr;
     int64_t startTime = 0;
     int64_t foregroundTime = 0; // ability foreground time
-    std::string bundleName;
-    std::string abilityName;
+    int32_t observerId = 0;
+    bool coldStart = false;
 };
 
 class AbilityStartWithWaitObserverManager {

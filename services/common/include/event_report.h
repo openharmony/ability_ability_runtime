@@ -23,8 +23,31 @@
 namespace OHOS {
 namespace AAFwk {
 struct EventInfo {
-    bool isPreload = false;
-    bool shouldKillForeground = true;
+    uint64_t remainPartitionSize;
+    int64_t duration = 0;
+    int64_t time = 0;
+    uint32_t versionCode = 0;
+    uint32_t callerVersionCode = -1;
+
+    std::vector<std::string> fileOfFolderPath;
+    std::vector<uint64_t> fileOfFolderSize;
+    std::string versionName;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    std::string processName;
+    std::string callerProcessName;
+    std::string callerBundleName;
+    std::string callerVersionName;
+    std::string uri;
+    std::string errReason;
+    std::string lifeCycle;
+    std::string intentName;
+    std::string errMsg;
+    std::string exitMsg = "";
+    std::string componentName;
+    std::string partitionName;
+
     int32_t pid = -1;
     int32_t userId = -1;
     int32_t extensionType = -1;
@@ -41,35 +64,14 @@ struct EventInfo {
     int32_t callerState = -1;
     int32_t processType = -1;
     int32_t callerPid = -1;
-    int64_t duration = 0;
     int32_t reason = -1;
     int32_t subReason = -1;
+    int32_t exitReason = -1;
     int32_t preloadMode = 0;
     int32_t appIndex = -1;
     int32_t persistentId = 0;
-    uint32_t versionCode = 0;
-    uint32_t callerVersionCode = -1;
-    int64_t time = 0;
-    std::string versionName;
-    std::string bundleName;
-    std::string moduleName;
-    std::string abilityName;
-    std::string processName;
-    std::string callerProcessName;
-    std::string callerBundleName;
-    std::string callerVersionName;
-    std::string uri;
-    int32_t exitReason = -1;
-    std::string errReason;
-    std::string lifeCycle;
-    std::string intentName;
-    std::string errMsg;
-    std::string exitMsg = "";
-    std::string componentName;
-    std::string partitionName;
-    uint64_t remainPartitionSize;
-    std::vector<std::string> fileOfFolderPath;
-    std::vector<uint64_t> fileOfFolderSize;
+    bool isPreload = false;
+    bool shouldKillForeground = true;
 };
 
 enum class EventName {

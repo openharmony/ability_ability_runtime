@@ -83,13 +83,13 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     wptr<QuickFixManagerService> quickFixMgrService_ = nullptr;
     std::string bundleName_;
+    std::vector<std::string> moduleNames_;
+    AppExecFwk::QuickFixType type_ = AppExecFwk::QuickFixType::UNKNOWN;
+    TaskType taskType_ = TaskType::QUICK_FIX_APPLY;
     int bundleVersionCode_ = 0;
     int patchVersionCode_ = 0;
     bool isRunning_ = false;
     bool isSoContained_ = false;
-    AppExecFwk::QuickFixType type_ = AppExecFwk::QuickFixType::UNKNOWN;
-    std::vector<std::string> moduleNames_;
-    TaskType taskType_ = TaskType::QUICK_FIX_APPLY;
 };
 } // namespace AAFwk
 } // namespace OHOS

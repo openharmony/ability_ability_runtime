@@ -36,11 +36,11 @@ struct TotalTime {
 };
 
 struct CpuConsumeTime {
-    double optimalCpuTime;
     uint64_t cpuFaultTime;
     uint64_t processCpuTime;
     uint64_t deviceRunTime;
     uint64_t cpuTime;
+    double optimalCpuTime;
 };
 
 class CpuDataProcessor {
