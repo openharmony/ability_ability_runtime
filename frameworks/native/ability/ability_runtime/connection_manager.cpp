@@ -18,9 +18,7 @@
 #include "ability_context.h"
 #include "ability_manager_client.h"
 #include "dfx_dump_catcher.h"
-#ifdef SUPPORT_HICHECKER
 #include "hichecker.h"
-#endif
 #include "hilog_tag_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
 
@@ -322,7 +320,6 @@ bool ConnectionManager::DisconnectNonexistentService(
 void ConnectionManager::ReportConnectionLeakEvent(const int pid, const int tid)
 {
     TAG_LOGD(AAFwkTag::CONNECTION, "pid:%{public}d, tid:%{public}d", pid, tid);
-#ifdef SUPPORT_HICHECKER
     if (HiChecker::Contains(HiviewDFX::Rule::RULE_CHECK_ABILITY_CONNECTION_LEAK)) {
         DfxDumpCatcher dumpLog;
         std::string stackTrace;
@@ -338,7 +335,6 @@ void ConnectionManager::ReportConnectionLeakEvent(const int pid, const int tid)
             TAG_LOGE(AAFwkTag::CONNECTION, "dumpCatch stackTrace failed");
         }
     }
-#endif
 }
 
 bool ConnectionManager::IsConnectCallerEqual(const sptr<IRemoteObject>& connectCaller,
