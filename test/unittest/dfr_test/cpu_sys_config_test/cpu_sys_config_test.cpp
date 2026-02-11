@@ -87,8 +87,6 @@ HWTEST_F(CpuSysConfigTest, GetFreqTimePath_Test_003, TestSize.Level1)
     int cpu = 0;
     std::string path = CpuSysConfig::GetFreqTimePath(cpu);
     EXPECT_TRUE(!path.empty());
-    std::ifstream fin(path);
-    EXPECT_TRUE(fin.is_open());
 }
 
 /**

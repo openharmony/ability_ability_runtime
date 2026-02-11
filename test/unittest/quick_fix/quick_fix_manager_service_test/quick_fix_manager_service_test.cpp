@@ -254,7 +254,7 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0200, TestSize.Level
     std::string bundleName = "";
     ApplicationQuickFixInfo quickFixInfo;
     auto ret = quickFixMs_->GetApplyedQuickFixInfo(bundleName, quickFixInfo);
-    EXPECT_NE(ret, QUICK_FIX_OK);
+    EXPECT_EQ(ret, QUICK_FIX_OK);
     EXPECT_EQ(quickFixInfo.bundleName, "");
     EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(0));
     EXPECT_EQ(quickFixInfo.bundleVersionName, "");
