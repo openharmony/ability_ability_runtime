@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("agentuiextensionability") {
+ohos_shared_library("agentuiextensionability_napi") {
   sanitize = {
       integer_overflow = true
       ubsan = true
@@ -42,10 +42,10 @@ ohos_shared_library("agentuiextensionability") {
 config("agent_ui_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [
-      "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-      "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
       "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
       "${ability_runtime_path}/interfaces/kits/native/ability/native",
+      "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+      "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
       "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
       "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
   ]

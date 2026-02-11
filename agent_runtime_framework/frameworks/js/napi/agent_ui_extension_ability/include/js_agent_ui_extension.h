@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-    class Runtime;
+class Runtime;
 }
 
 namespace AgentRuntime {
