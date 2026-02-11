@@ -19,6 +19,12 @@
 #include "extension_module_loader.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+class ExtensionModuleLoader;
+class Extension;
+class Runtime;
+}
+
 namespace AgentRuntime {
 class AgentUIExtensionModuleLoader :
     public AbilityRuntime::ExtensionModuleLoader, public Singleton<AgentUIExtensionModuleLoader> {
