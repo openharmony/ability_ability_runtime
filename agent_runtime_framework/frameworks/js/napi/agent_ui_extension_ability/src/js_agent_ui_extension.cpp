@@ -40,7 +40,7 @@ JsAgentUIExtension::~JsAgentUIExtension()
 }
 
 extern "C" JS_EXPORT AgentUIExtension* OHOS_CreateJsAgentUIExtension(
-    const std::unique_ptr<Runtime> &runtime)
+    const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
     return new JsAgentUIExtension(runtime);
 }

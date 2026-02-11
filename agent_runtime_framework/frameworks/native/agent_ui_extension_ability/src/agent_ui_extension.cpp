@@ -15,6 +15,9 @@
 
 #include "agent_ui_extension.h"
 
+#include <dlfcn.h>
+#include <mutex>
+
 #include "hilog_tag_wrapper.h"
 #include "js_agent_ui_extension.h"
 #include "runtime.h"
