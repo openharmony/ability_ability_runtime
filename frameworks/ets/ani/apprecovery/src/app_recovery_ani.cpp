@@ -49,7 +49,7 @@ bool CheckParamsValid(const uint16_t params[])
 {
     uint16_t restartFlag = params[0];
     constexpr uint16_t restartMaxVal = 0x0003;
-    if ((restartFlag < 0 || restartFlag > restartMaxVal) && (restartFlag != RestartFlag::NO_RESTART)) {
+    if (restartFlag > restartMaxVal && restartFlag != RestartFlag::NO_RESTART) {
         TAG_LOGE(AAFwkTag::RECOVERY, "invalid restartFlag: %{public}d", restartFlag);
         return false;
     }
@@ -108,7 +108,7 @@ static ani_object EnableAppRecovery(ani_env *env, ani_enum_item restart, ani_enu
     return resultsObj;
 }
 
-static ani_boolean SaveAppStateWithParam(ani_env *env, ani_object context)
+static ani_boolean SaveAppState(ani_env *env, ani_object context)
 {
     ani_boolean boolValue = ANI_FALSE;
 
@@ -172,8 +172,7 @@ static void EtsAppRecoveryInit(ani_env *env)
     std::array kitFunctions = {
         ani_native_function {"enableAppRecovery", nullptr, reinterpret_cast<void *>(EnableAppRecovery)},
         ani_native_function {"restartApp", nullptr, reinterpret_cast<void *>(RestartApp)},
-        ani_native_function {"saveAppState", "C{application.UIAbilityContext.UIAbilityContext}:z",
-            reinterpret_cast<void *>(SaveAppStateWithParam)},
+        ani_native_function {"saveAppState", nullptr, reinterpret_cast<void *>(SaveAppState)},
         ani_native_function {"setRestartWant", nullptr, reinterpret_cast<void *>(SetRestartWant)},
     };
 

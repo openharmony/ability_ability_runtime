@@ -40,12 +40,6 @@ ohos_unittest("appfreeze_cpu_freq_manager_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
-
-  defines = []
-  if (ability_runtime_hitrace_enable) {
-    external_deps += [ "hitrace:libhitracechain" ]
-    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
-  }
 }
 
 ###############################################################################

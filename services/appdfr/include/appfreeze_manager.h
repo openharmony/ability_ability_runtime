@@ -170,6 +170,8 @@ private:
     AppFaultDataBySA GenerateFaultDataBySA(const ParamInfo& info, const FreezeUtil::LifecycleFlow& flow);
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
+    bool GetHitraceId(std::string& hiTraceIdInfo);
+    std::string CatchASyncByPid(const std::set<int> &asyncPids, const std::set<int> &syncPids, int pid);
     bool CheckThreadKilled(int32_t pid, int32_t uid, const std::string& bundleName);
     std::string GetCatcherStack(const std::string& fileName, const std::string& catcherStack);
     bool IsNeedIgnoreFreezeEvent(const std::string& key, const std::string& eventName,
