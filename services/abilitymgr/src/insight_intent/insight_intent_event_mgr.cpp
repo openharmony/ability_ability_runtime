@@ -73,7 +73,12 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
             TAG_LOGE(AAFwkTag::INTENT, "get bundleMgrHelper instance failed");
             return;
         }
-
+        AppExecFwk::BundleInfo bundleInfo;
+        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT), bundleInfo, userId))) {
+            TAG_LOGE(AAFwkTag::INTENT, "get bundle info failed");
+            return;
+        }
         OHOS::SplitStr(moduleName, ",", moduleNameVec);
         for (std::string moduleNameLocal : moduleNameVec) { // Get json profile firstly
             ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE,
@@ -97,7 +102,7 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
 
             // save database
             DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
-                bundleName, moduleNameLocal, userId, infos, configIntentInfos);
+                bundleName, moduleNameLocal, userId, bundleInfo.versionCode, infos, configIntentInfos);
         }
         DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->BackupRdb();
     });

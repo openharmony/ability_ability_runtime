@@ -613,6 +613,20 @@ ErrCode BundleMgrHelper::GetBundleInfoV9(
     return bundleMgr->GetBundleInfoV9(bundleName, flags, bundleInfo, userId);
 }
 
+ErrCode BundleMgrHelper::GetBundleInfosV9(int32_t flags,
+    std::vector<BundleInfo> &bundleInfos, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetBundleInfos(flags, bundleInfos, userId);
+}
+
 bool BundleMgrHelper::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo &appInfo)
 {

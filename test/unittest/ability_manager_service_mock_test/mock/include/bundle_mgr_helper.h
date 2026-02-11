@@ -44,6 +44,9 @@ public:
     bool GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId, ApplicationInfo &appInfo);
     ErrCode GetNameForUid(const int32_t uid, std::string &name);
     bool QueryAppGalleryBundleName(std::string &bundleName);
+    ErrCode GetBundleInfoV9(
+        const std::string &bundleName, int32_t flags, BundleInfo &bundleInfo, int32_t userId);
+    ErrCode GetBundleInfosV9(int32_t flags, std::vector<BundleInfo> &bundleInfos, int32_t userId);
 
 private:
     DECLARE_DELAYED_SINGLETON(BundleMgrHelper)

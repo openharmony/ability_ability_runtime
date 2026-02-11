@@ -203,6 +203,12 @@ ErrCode BundleMgrHelper::GetBundleInfoV9(const std::string& bundleName,
     return ERR_OK;
 }
 
+ErrCode BundleMgrHelper::GetBundleInfosV9(int32_t flags,
+    std::vector<BundleInfo> &bundleInfos, int32_t userId)
+{
+    return ERR_OK;
+}
+
 bool BundleMgrHelper::GetApplicationInfo(
     const std::string& appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo& appInfo)
 {
