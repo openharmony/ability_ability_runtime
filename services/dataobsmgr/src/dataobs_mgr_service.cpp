@@ -182,6 +182,29 @@ bool DataObsMgrService::IsDataMgrService(uint32_t tokenId, int32_t uid)
     return true;
 }
 
+// Collect non-system app calling data for dfx perpose
+void DataObsMgrService::ReportSystemPermissionCheckResult(uint32_t callerTokenId, uint64_t fullTokenId,
+    std::string callingFunc, const Uri &uri, bool isExtension)
+{
+    Security::AccessToken::ATokenTypeEnum tokenType =
+        Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
+    // Do not report system ability
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        return;
+    }
+
+    // Do not report system hap
+    if (IsSystemApp(callerTokenId, fullTokenId)) {
+        return;
+    }
+    std::string uriStr = uri.ToString();
+    std::string appendix = callingFunc + "isExtension:" + std::to_string(isExtension);
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "normal app calling uri:%{public}s,"
+        "fullToken %{public}" PRId64, CommonUtils::Anonymous(uri.ToString()).c_str(), fullTokenId);
+    DataShare::DataSharePermission::ReportExtensionFault(E_NOT_SYSTEM_APP, callerTokenId, uriStr, appendix);
+}
+
 bool DataObsMgrService::IsCallingPermissionValid(DataObsOption &opt)
 {
     if (opt.IsSystem()) {
@@ -373,6 +396,7 @@ int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbili
     info.pid = pid;
     Uri uriInner = uri;
     bool isDataShareUri = DataSharePermission::IsDataShareUri(uriInner);
+    // If callling through DataShare, then uri must be datashare-style valid.
     if (opt.IsDataShare() && !isDataShareUri) {
         LOG_ERROR("uri invalid, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_INVALID_URI;
@@ -380,6 +404,10 @@ int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbili
     int status;
     if (opt.IsDataShare() || isDataShareUri) {
         status = VerifyDataSharePermission(uriInner, true, info);
+        // when calling from provider, check origininal caller's token not provider's token
+        auto firstFullTokenId = isExtension ? opt.FirstCallerFullTokenID() : fullTokenId;
+        // check for fault report purpose
+        ReportSystemPermissionCheckResult(token, firstFullTokenId, __FUNCTION__, uri, isExtension);
         if (status != 0) {
             return status;
         }
@@ -531,6 +559,11 @@ int32_t DataObsMgrService::NotifyChangeInner(Uri &uri, int32_t userId, DataObsOp
     Uri uriStr = uri;
     std::string readPermission = DataSharePermission::NO_PERMISSION;
     if (checkPermission) {
+        // when calling from provider, check origininal caller's token not provider's token
+        auto firstTokenID = isExtension ? opt.FirstCallerTokenID() : tokenId;
+        auto firstFullTokenId = isExtension ? opt.FirstCallerFullTokenID() : fullTokenId;
+        // check for fault report purpose
+        ReportSystemPermissionCheckResult(firstTokenID, firstFullTokenId, __FUNCTION__, uri, isExtension);
         std::tie(ret, readPermission) = GetUriPermission(uri, true, info);
         if (ret != 0) {
             return DATAOBS_INVALID_URI;
@@ -569,10 +602,16 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
         return DATAOBS_INVALID_USERID;
     }
     Uri uriInner = uri;
-    if (opt.IsDataShare() && !DataSharePermission::IsDataShareUri(uriInner)) {
+    bool isDataShareUri = DataSharePermission::IsDataShareUri(uriInner);
+    if (opt.IsDataShare() && !isDataShareUri) {
         LOG_ERROR("uri invalid, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_INVALID_URI;
     }
+    if (opt.IsDataShare() || isDataShareUri) {
+        // check for fault report purpose
+        ReportSystemPermissionCheckResult(tokenId, IPCSkeleton::GetCallingFullTokenID(), __FUNCTION__, uri, false);
+    }
+
     ObserverInfo info(tokenId, 0, 0, userId, false);
     info.errMsg = __FUNCTION__;
     info.pid = IPCSkeleton::GetCallingPid();
@@ -663,6 +702,8 @@ std::pair<Status, std::vector<NotifyInfo>> DataObsMgrService::MakeNotifyInfos(Ch
             notifyInfo.push_back(NotifyInfo(DataSharePermission::NO_PERMISSION, false));
             return false;
         }
+        // check for fault report purpose
+        ReportSystemPermissionCheckResult(tokenId, IPCSkeleton::GetCallingFullTokenID(), __FUNCTION__, uri, false);
         ObserverInfo info(tokenId, 0, tokenId, userId, false);
         info.errMsg = "NotifyChangeExt";
         info.pid = IPCSkeleton::GetCallingPid();
