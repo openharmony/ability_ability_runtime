@@ -31,7 +31,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t PERMISSION_GRANTED = 1;
 constexpr int32_t PERMISSION_DENIED = 2;
-constexpr const char* URI_CHECK_SO_NAME = "libcollaborator_uri_permission_checker.z.so";
+constexpr const char* URI_CHECK_SO_NAME = "libams_broker_ext.z.so";
 constexpr const char* URI_CHECK_FUNC_NAME = "CheckCollaboratorUriPermission";
 }
 const std::string FILE_MANAGER_AUTHORITY = "docs";

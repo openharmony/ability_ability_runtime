@@ -1097,5 +1097,56 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_ManualStartAutoStartu
     auto res = proxy_->ManualStartAutoStartupApps(userId);
     EXPECT_EQ(res, -1);
 }
+
+/**
+ * @tc.name: AbilityManagerProxy_QueryCallerTokenIdForAnco_001
+ * @tc.desc: QueryCallerTokenIdForAnco with valid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryCallerTokenIdForAnco_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    int32_t userId = 101;
+    std::string asCallerForAncoSessionId = "520";
+    uint32_t callerTokenId = 0;
+    auto res = proxy_->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId, callerTokenId);
+    EXPECT_EQ(res, -1);
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_QueryCallerTokenIdForAnco_002
+ * @tc.desc: QueryCallerTokenIdForAnco with successful request
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryCallerTokenIdForAnco_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t userId = 101;
+    std::string asCallerForAncoSessionId = "520";
+    uint32_t callerTokenId = 0;
+    auto res = proxy_->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId, callerTokenId);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_QueryCallerTokenIdForAnco_003
+ * @tc.desc: QueryCallerTokenIdForAnco with invalid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryCallerTokenIdForAnco_003, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t userId = -1;
+    std::string asCallerForAncoSessionId = "-1";
+    uint32_t callerTokenId = 0;
+    auto res = proxy_->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId, callerTokenId);
+    EXPECT_EQ(res, 0);
+}
 } // namespace AAFwk
 } // namespace OHOS

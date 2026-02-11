@@ -41,6 +41,7 @@ constexpr int32_t DMS_UID = 5522;
 constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 constexpr int32_t PENG_LAI_UID = 7655;
+constexpr int32_t BROKER_UID = 5557;
 
 namespace OHOS {
 namespace AAFwk {
@@ -3214,6 +3215,44 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, ManualStartAutoStartupApps_002, Te
     auto result = abilityManagerService->ManualStartAutoStartupApps(userId);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest ManualStartAutoStartupApps_002 end");
+}
+
+/*
+ * Feature: QueryCallerTokenIdForAnco_001
+ * Function: QueryCallerTokenIdForAnco
+ * SubFunction: NA
+ * FunctionPoints: uiAbilityManager is null
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, QueryCallerTokenIdForAnco_001, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest QueryCallerTokenIdForAnco_001 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().ipcGetCallingUid_ = FOUNDATION_UID;
+    int32_t userId = 101;
+    std::string asCallerForAncoSessionId = "520";
+    uint32_t callerTokenId = 0;
+    auto result = abilityManagerService->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId, callerTokenId);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest QueryCallerTokenIdForAnco_001 end");
+}
+
+/*
+ * Feature: QueryCallerTokenIdForAnco_002
+ * Function: QueryCallerTokenIdForAnco
+ * SubFunction: NA
+ * FunctionPoints: negative dialogSessionId
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, QueryCallerTokenIdForAnco_002, TestSize.Level1) {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest QueryCallerTokenIdForAnco_002 start");
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().ipcGetCallingUid_ = BROKER_UID;
+    int32_t userId = -1;
+    std::string asCallerForAncoSessionId = "5201314";
+    uint32_t callerTokenId = 0;
+    auto result = abilityManagerService->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId, callerTokenId);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest QueryCallerTokenIdForAnco_002 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

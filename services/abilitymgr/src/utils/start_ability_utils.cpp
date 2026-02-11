@@ -15,6 +15,7 @@
 
 #include "start_ability_utils.h"
 
+#include <random>
 #include "ability_record.h"
 #include "ability_util.h"
 #include "app_scheduler.h"
@@ -456,6 +457,18 @@ int32_t StartAbilityUtils::HandleSelfRedirection(bool isFromOpenLink,
         return ERR_OK;
     }
     return ERR_SELF_REDIRECTION_DISALLOWED;
+}
+
+std::string StartAbilityUtils::GenerateAsCallerForAncoSessionId()
+{
+    auto timestamp = std::chrono::system_clock::now().time_since_epoch();
+    auto time = std::chrono::duration_cast<std::chrono::seconds>(timestamp).count();
+    std::random_device seed;
+    std::mt19937 rng(seed());
+    std::uniform_int_distribution<int> uni(0, INT_MAX);
+    int randomDigit = uni(rng);
+    std::string asCallerForAncoSessionId = std::to_string(time) + "_" + std::to_string(randomDigit);
+    return asCallerForAncoSessionId;
 }
 }
 }

@@ -4721,6 +4721,71 @@ HWTEST_F(AbilityManagerStubTest, ClearAllPreloadUIExtensionAbilityInner_0100, Te
 }
 
 /**
+ * @tc.name: QueryCallerTokenIdForAncoInner_0100
+ * @tc.desc: QueryCallerTokenIdForAncoInner with valid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, QueryCallerTokenIdForAncoInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t userId = 101;
+    std::string asCallerForAncoSessionId = "520";
+    ASSERT_TRUE(data.WriteInt32(userId));
+    ASSERT_TRUE(data.WriteString(asCallerForAncoSessionId));
+    auto result = stub_->QueryCallerTokenIdForAncoInner(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0100 end");
+}
+
+/**
+ * @tc.name: QueryCallerTokenIdForAncoInner_0200
+ * @tc.desc: QueryCallerTokenIdForAncoInner with invalid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, QueryCallerTokenIdForAncoInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0200 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t userId = -1;
+    std::string asCallerForAncoSessionId = "-1";
+    ASSERT_TRUE(data.WriteInt32(userId));
+    ASSERT_TRUE(data.WriteString(asCallerForAncoSessionId));
+    auto result = stub_->QueryCallerTokenIdForAncoInner(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0200 end");
+}
+
+/**
+ * @tc.name: QueryCallerTokenIdForAncoInner_0300
+ * @tc.desc: QueryCallerTokenIdForAncoInner with OnRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, QueryCallerTokenIdForAncoInner_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0300 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    int32_t userId = 100;
+    std::string asCallerForAncoSessionId = "100";
+    ASSERT_TRUE(data.WriteInt32(userId));
+    ASSERT_TRUE(data.WriteString(asCallerForAncoSessionId));
+
+    auto result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_CALLER_TOKEN_ID_FOR_ANCO), data, reply, option);
+
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAncoInner_0300 end");
+}
+
+/**
  * @tc.name: ManualStartAutoStartupAppsInner_0100
  * @tc.desc: ManualStartAutoStartupAppsInner
  * @tc.type: FUNC
