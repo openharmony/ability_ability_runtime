@@ -441,7 +441,7 @@ public:
     virtual bool IsMemorySizeSufficient() = 0;
 
     /**
-     * whether or not requier a big memory
+     * whether or not require a big memory
      * @return Returens true is no big memory, others return false.
      */
     virtual bool IsNoRequireBigMemory() { return true; }
@@ -582,6 +582,7 @@ public:
         SET_KEEP_ALIVE_APP_SERVICE,
         KILL_PROCESSES_IN_BATCH,
         PREPARE_TERMINATE_APP,
+        KILL_PROCESSES_BY_USERID_WITH_CALLBACK,
         IS_NO_REQUIRE_BIG_MEMORY,
         NOTIFY_UNINSTALL_OR_UPGRADE_APP,
         NOTIFY_UNINSTALL_OR_UPGRADE_APP_END,
