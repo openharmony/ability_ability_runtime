@@ -252,7 +252,7 @@ bool BundleMgrService::GetBundleInfo(
     }
     if (bundleName == "com.ohos.quickfix") {
         TAG_LOGI(AAFwkTag::TEST, "GetBundleInfo of [com.ohos.quickfix].");
-        ConstructHqfInfo(bundleInfo);
+        return false;
     }
     return true;
 }
