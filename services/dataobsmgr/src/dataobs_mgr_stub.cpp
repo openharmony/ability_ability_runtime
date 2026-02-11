@@ -53,10 +53,12 @@ DataObsOption ReadObsOpt(MessageParcel &data)
     uint32_t token = data.ReadUint32();
     int32_t pid = data.ReadInt32();
     bool isDataShare = data.ReadBool();
+    uint64_t fullToken = data.ReadUint64();
     DataObsOption opt(isSystem);
     opt.SetFirstCallerTokenID(token);
     opt.SetFirstCallerPid(pid);
     opt.SetDataShare(isDataShare);
+    opt.SetFirstCallerFullTokenID(fullToken);
     return opt;
 }
 
