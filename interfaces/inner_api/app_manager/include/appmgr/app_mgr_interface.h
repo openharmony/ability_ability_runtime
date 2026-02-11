@@ -920,7 +920,10 @@ public:
 
     virtual int32_t SetProcessCacheEnable(int32_t pid, bool enable) = 0;
 
-    virtual int32_t LockProcessCache(int32_t pid, bool isLock) = 0;
+    virtual int32_t LockProcessCache(int32_t pid, bool isLock)
+    {
+        return 0;
+    }
 
     /**
      * Set application assertion pause state.
