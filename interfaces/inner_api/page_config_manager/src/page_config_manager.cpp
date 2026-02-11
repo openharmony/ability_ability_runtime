@@ -59,7 +59,7 @@ int32_t PageConfigManager::Initialize(const std::string& configJson, const wptr<
         return ERR_NO_INIT;
     }
     g_initializeFunc = reinterpret_cast<InitializeFunc>(symbol);
-    int result = g_initializeFunc(configJson, window);
+    auto result = g_initializeFunc(configJson, window);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "Initialize failed");
         return ERR_NO_INIT;
@@ -106,7 +106,7 @@ int32_t PageConfigManager::NotifyPageChanged(const char* targetPageName,
         return AAFwk::INNER_ERR;
     }
     g_notifyPageChangedFunc = reinterpret_cast<NotifyPageChangedFunc>(symbol);
-    int result = g_notifyPageChangedFunc(targetPageName, targetPageNameLength, windowId);
+    auto result = g_notifyPageChangedFunc(targetPageName, targetPageNameLength, windowId);
     TAG_LOGD(AAFwkTag::ABILITY, "NotifyPageChanged completed with result: %{public}d", result);
     return result;
 }

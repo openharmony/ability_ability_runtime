@@ -407,7 +407,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLogFileDir(
  * @param targetPageNameLength The target page name length.
  * @param windowId The window identifier associated with the target page.
  *
- * @return Returns {@link ABILITY_RUNTIME_ERROR_CODE_OK} if the operation is successful.
+ * @return Returns {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if targetPageName is null or windowId is invalid.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs. such as connect system service failed.
  * @since 23
