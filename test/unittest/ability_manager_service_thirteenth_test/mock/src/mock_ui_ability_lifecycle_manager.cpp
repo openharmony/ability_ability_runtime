@@ -775,5 +775,11 @@ void UIAbilityLifecycleManager::HandleUIAbilityDiedByPid(pid_t pid)
 {
     return;
 }
+
+ErrCode UIAbilityLifecycleManager::QueryCallerTokenIdForAnco(const std::string &asCallerForAncoSessionId,
+    uint32_t &callerTokenId)
+{
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

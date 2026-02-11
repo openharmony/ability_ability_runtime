@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -648,6 +648,40 @@ HWTEST_F(AbilityManagerClientTest, ManualStartAutoStartupApps_0100, TestSize.Lev
     auto result = AbilityManagerClient::GetInstance()->ManualStartAutoStartupApps(userId);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "ManualStartAutoStartupApps_0100 end");
+}
+
+/**
+ * @tc.name: QueryCallerTokenIdForAnco_0100
+ * @tc.desc: QueryCallerTokenIdForAnco with valid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, QueryCallerTokenIdForAnco_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAnco_0100 start");
+    int32_t userId = 101;
+    std::string asCallerForAncoSessionId = "520";
+    uint32_t callerTokenId = 0;
+    auto result = AbilityManagerClient::GetInstance()->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId,
+        callerTokenId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAnco_0100 end");
+}
+
+/**
+ * @tc.name: QueryCallerTokenIdForAnco_0200
+ * @tc.desc: QueryCallerTokenIdForAnco with invalid dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, QueryCallerTokenIdForAnco_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAnco_0200 start");
+    int32_t userId = -1;
+    std::string asCallerForAncoSessionId = "-1";
+    uint32_t callerTokenId = 0;
+    auto result = AbilityManagerClient::GetInstance()->QueryCallerTokenIdForAnco(userId, asCallerForAncoSessionId,
+        callerTokenId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAnco_0200 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
