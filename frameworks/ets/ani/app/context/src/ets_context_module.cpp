@@ -411,6 +411,7 @@ void EtsContextModule::SaveStaticBindingObject(ani_env *aniEnv, ani_object input
     ani_status status = ANI_ERROR;
     if ((status = aniEnv->GlobalReference_Create(input, contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        delete contextGlobalRef;
         return;
     }
     context->Bind<ani_ref>(contextGlobalRef);

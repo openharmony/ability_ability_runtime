@@ -63,7 +63,7 @@ int32_t ETSStartupManager::NativeCreateStartupTaskManager(ani_env *env, ani_obje
     if (result != ERR_OK || startupTaskManager == nullptr) {
         EtsErrorUtil::ThrowError(env, result, StartupUtils::GetErrorMessage(result));
         TAG_LOGE(AAFwkTag::STARTUP, "GetStartupTaskManager failed");
-        return ERR_FAILURE;
+        return result;
     }
     startupTaskManagerId = startupTaskManager->GetStartupTaskManagerId();
     return static_cast<int32_t>(startupTaskManagerId);
