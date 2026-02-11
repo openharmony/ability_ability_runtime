@@ -654,7 +654,7 @@ bool ExtractInsightIntentProfile::TransformTo(const std::string &profileStr,
         }
     }
 
-    TAG_LOGI(AAFwkTag::INTENT, "transform success, size: %{public}zu", intentInfos.insightIntents.size());
+    TAG_LOGD(AAFwkTag::INTENT, "transform success, size: %{public}zu", intentInfos.insightIntents.size());
     return true;
 }
 

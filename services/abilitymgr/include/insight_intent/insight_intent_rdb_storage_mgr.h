@@ -28,7 +28,7 @@ namespace AbilityRuntime {
 class InsightRdbStorageMgr : public std::enable_shared_from_this<InsightRdbStorageMgr> {
     DECLARE_DELAYED_SINGLETON(InsightRdbStorageMgr)
 public:
-    int32_t LoadInsightIntentInfos(const int32_t userId,
+    int32_t LoadInsightIntentInfos(const int32_t userId, std::map<std::string, std::string> &bundleVersionMap,
         std::vector<ExtractInsightIntentInfo> &totalInfos, std::vector<InsightIntentInfo> &configInfos);
     int32_t LoadConfigInsightIntentInfos(
         const int32_t userId, std::vector<InsightIntentInfo> &configInfos);
@@ -41,7 +41,7 @@ public:
     int32_t LoadConfigInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
         const std::string &intentName, const int32_t userId, InsightIntentInfo &totalInfo);
     int32_t SaveStorageInsightIntentData(const std::string &bundleName, const std::string &moduleName,
-        const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos,
+        const int32_t userId, uint32_t versionCode, ExtractInsightIntentProfileInfoVec &profileInfos,
         std::vector<InsightIntentInfo> &configInfos);
     int32_t DeleteStorageInsightIntentData(const std::string &bundleName,
         const std::string &moduleName, const int32_t userId);

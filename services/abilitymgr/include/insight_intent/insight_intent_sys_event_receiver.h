@@ -31,7 +31,8 @@ public:
 
     void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
 private:
-    void SaveInsightIntentInfos(const std::string &bundleName, const std::string &moduleName, int32_t userId);
+    void SaveInsightIntentInfos(const std::string &bundleName, const std::string &moduleName,
+        uint32_t versionCode, int32_t userId);
     void LoadInsightIntentInfos(int32_t userId = -1);
     void DeleteInsightIntentInfoByUserId(int32_t userId);
     void HandleBundleScanFinished();

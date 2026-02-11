@@ -40,6 +40,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     int32_t userId = 100;
     int32_t userId2 = 101;
     int32_t userId3 = 102;
+    uint32_t versionCode = 0;
        
     ExtractInsightIntentProfileInfo profileInfo;
     ExtractInsightIntentProfileInfoVec profileInfos;
@@ -72,8 +73,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     insightIntentDbCache->InitInsightIntentCache(userId);
     insightIntentDbCache->InitInsightIntentCache(userId2);
 
-    insightIntentDbCache->SaveInsightIntentTotalInfo(bundleName, moduleName, userId2, profileInfos, configIntentInfos);
-    insightIntentDbCache->SaveInsightIntentTotalInfo(bundleName, moduleName, userId, profileInfos, configIntentInfos);
+    insightIntentDbCache->SaveInsightIntentTotalInfo(bundleName, moduleName, userId2,
+        versionCode, profileInfos, configIntentInfos);
+    insightIntentDbCache->SaveInsightIntentTotalInfo(bundleName, moduleName, userId,
+        versionCode, profileInfos, configIntentInfos);
 
     insightIntentDbCache->DeleteInsightIntentTotalInfo(bundleName, moduleName, userId2);
     insightIntentDbCache->DeleteInsightIntentTotalInfo(bundleName, emptyModuleName, userId2);
