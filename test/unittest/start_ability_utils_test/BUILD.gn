@@ -20,6 +20,7 @@ ohos_unittest("start_ability_utils_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "mock/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime/",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -29,7 +30,6 @@ ohos_unittest("start_ability_utils_test") {
     "${ability_runtime_test_path}/mock/prepare_terminate_callback",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "mock/include",
   ]
 
   sources = [
