@@ -290,7 +290,7 @@ int MissionListManager::MoveMissionToFront(int32_t missionId, bool isCallerFromL
 }
 
 int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
-    std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions)
+    std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions, bool isNewWant)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d", missionId);
     std::shared_ptr<Mission> mission;
@@ -313,7 +313,7 @@ int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCaller
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get target ability record fail, missionId: %{public}d", missionId);
         return MOVE_MISSION_FAILED;
     }
-    targetAbilityRecord->SetIsNewWant(false);
+    targetAbilityRecord->SetIsNewWant(isNewWant);
     targetAbilityRecord->RemoveWindowMode();
     if (startOptions != nullptr) {
         targetAbilityRecord->SetWindowMode(startOptions->GetWindowMode());
@@ -3634,7 +3634,7 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
                 callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
             }
             auto isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
-            MoveMissionToFrontInner(mission->GetMissionId(), isCallerFromLauncher, false, callerAbility);
+            MoveMissionToFrontInner(mission->GetMissionId(), isCallerFromLauncher, false, callerAbility, nullptr, true);
             NotifyRestartSpecifiedAbility(abilityRequest, ability->GetToken());
             return;
         }
