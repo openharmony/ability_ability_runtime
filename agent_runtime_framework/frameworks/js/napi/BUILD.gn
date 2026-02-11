@@ -21,6 +21,7 @@ group("agent_runtime_napi_packages") {
     "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_context:agentextensioncontext_napi",
     "${agent_runtime_framework_path}/frameworks/js/napi/agent_extension_context:js_agent_extension_context",
     "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager:agentmanager_napi",
-    "${agent_runtime_framework_path}/frameworks/js/napi/agent_ui_extension_ability:agentuiextensionability",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_ui_extension_ability:agentuiextensionability_napi",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_ui_extension_ability:js_agent_ui_extension",
   ]
 }

@@ -31,6 +31,8 @@ constexpr const char *EMBEDDEDUI = "embeddedUI";
 const std::string IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
 constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 constexpr size_t HOST_PID_INDEX = 3;
+constexpr const char* AGENT_EXTENSION_TYPE = "agent";
+
 int32_t GetAppIndexByRecord(std::shared_ptr<AAFwk::AbilityRecord> abilityRecord,
     std::shared_ptr<AAFwk::AbilityRecord> callerRecord, const AAFwk::AbilityRequest &abilityRequest)
 {
@@ -293,6 +295,13 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
         }
     };
     switch (record->processMode_) {
+        case PROCESS_MODE_AGENT_UI: {
+            std::string process = abilityRequest.abilityInfo.bundleName
+                    + SEPARATOR + AGENT_EXTENSION_TYPE;
+            abilityRecord->SetProcessName(process);
+            break;
+        }
+
         case PROCESS_MODE_PLUGIN: {
             std::string process = record->hostBundleName_ + SEPARATOR + abilityRequest.abilityInfo.bundleName
                 + SEPARATOR + EMBEDDEDUI + SEPARATOR + std::to_string(abilityRequest.abilityInfo.appIndex);

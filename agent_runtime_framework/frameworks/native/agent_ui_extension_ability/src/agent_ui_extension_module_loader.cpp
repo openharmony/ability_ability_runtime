@@ -27,7 +27,7 @@ AbilityRuntime::Extension *AgentUIExtensionModuleLoader::Create(
     const std::unique_ptr<AbilityRuntime::Runtime> &runtime) const
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "called");
-return AgentUIExtension::Create(runtime);
+    return AgentUIExtension::Create(runtime);
 }
 
 std::map<std::string, std::string> AgentUIExtensionModuleLoader::GetParams()
