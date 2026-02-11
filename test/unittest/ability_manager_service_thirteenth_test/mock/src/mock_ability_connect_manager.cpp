@@ -611,7 +611,7 @@ void AbilityConnectManager::GetExtensionRunningInfo(
 std::shared_ptr<BaseExtensionRecord> AbilityConnectManager::GetUIExtensionBySessionFromServiceMap(
     const sptr<SessionInfo> &sessionInfo)
 {
-    return nullptr;
+    return MyStatus::GetInstance().acmGetUIExtensionBySessionFromServiceMap_;
 }
 
 void AbilityConnectManager::HandleLoadAbilityOrStartSpecifiedProcess(

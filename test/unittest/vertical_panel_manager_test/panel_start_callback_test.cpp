@@ -140,10 +140,12 @@ HWTEST_F(PanelStartCallbackTest, OnRelease_002, TestSize.Level1)
 HWTEST_F(PanelStartCallbackTest, SetJsCallbackObject_002, TestSize.Level1)
 {
     // 测试传入空对象
-    jsPanelStartCallback->SetJsCallbackObject(nullptr);
+    auto testCallback = std::make_shared<JsPanelStartCallback>(nullptr);
+    napi_value callbackValue = {};
+    testCallback->SetJsCallbackObject(callbackValue);
 
     // 验证回调对象为空
-    EXPECT_EQ(jsPanelStartCallback->jsCallbackObject_, nullptr);
+    EXPECT_EQ(testCallback->jsCallbackObject_, nullptr);
 }
 
 /*
