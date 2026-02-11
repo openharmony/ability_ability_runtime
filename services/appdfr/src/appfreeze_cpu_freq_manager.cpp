@@ -214,13 +214,13 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(const std::vector<TotalTi
     size_t warnCpuSize = warnCpuDetailInfo.size();
     if (warnTotalSize == 0 || warnTotalSize != warnCpuSize ||
         warnTotalSize != blockTotalTimeList.size() || warnCpuSize != blockCpuDetailInfo.size()) {
-        TAG_LOGE(AAFwkTag::APPDFR, "warning total size:%{public}zu, warning cpi size:%{public}zu",
+        TAG_LOGE(AAFwkTag::APPDFR, "warning total size:%{public}zu, warning cpu size:%{public}zu",
             warnTotalSize, warnCpuSize);
         return "";
     }
     std::stringstream ss;
     ss << "start time:" << AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() << std::endl;
-    for (size_t i = 0; i < warnCpuDetailInfo.size(); ++i) {
+    for (size_t i = 0; i < warnCpuSize; ++i) {
         auto warnningData = warnCpuDetailInfo[i];
         auto blockData = blockCpuDetailInfo[i];
         if (warnningData.size() != blockData.size()) {
