@@ -159,7 +159,7 @@ public:
      */
     virtual int32_t GrantUriPermission(const std::vector<std::string> &uriVec, uint32_t flag, uint32_t targetTokenId,
         const std::string &targetBundleName) override;
-    
+
     /**
      * @brief revoke uri permission
      * @param tokenId the tokenId of target application.
@@ -196,17 +196,17 @@ public:
     virtual int32_t NotifyKillProcesses(const std::string &bundleName, int32_t userId) override;
 
     /**
-     * @brief Notify collaborator start grantUriPermission.
+     * @brief Notify collaborator grant uri permission started.
      * @param uris The uri list to grant permission.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param userId The user id of target application.
+     * @param userId the user id of target application.
      * @return 0 when on success or else failed.
      */
     virtual int32_t NotifyGrantUriPermissionStart(const std::vector<std::string> &uris, uint32_t flag,
         int32_t userId) override;
 
     /**
-     * @brief Notify collaborator start grantUriPermission.
+     * @brief Notify collaborator grant uri Permission finished.
      * @param uris The uri list to grant permission.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param userId The user id of target application.
