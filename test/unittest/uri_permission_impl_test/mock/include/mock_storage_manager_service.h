@@ -114,6 +114,11 @@ public:
         return E_OK;
     }
 
+    virtual int32_t GetSystemDataSize(int64_t &otherUidSizeSum) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t GetUserStorageStats(StorageStats &storageStats) override
     {
         return E_OK;
