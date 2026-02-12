@@ -259,17 +259,23 @@ private:
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo) override;
     void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
-    void UpdateAgentUILaunchRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord, const std::string &callerBundleName,
-        int64_t callerRecordId);
+    void UpdateAgentUILaunchRecord(int32_t callerRecordId, const std::string &bundleName,
+        int32_t extensionAbilityId, bool isRemove);
 
     /**
      * @brief Check if the caller can launch the AGENT_UI extension.
      * @param callerRecordId The caller's record ID.
      * @param bundleName The target bundle name.
-     * @param extensionAbilityId The extension ability ID to launch.
      * @return Returns ERR_OK if allowed, ERR_OVERFLOW if limit exceeded (max 5 per caller per bundle).
      */
-    int CheckAgentUILaunchLimit(int64_t callerRecordId, const std::string &bundleName, int64_t extensionAbilityId);
+    int32_t CheckAgentUILaunchLimit(int32_t callerRecordId, const std::string &bundleName, int32_t extensionAbilityId);
+
+    /**
+     * @brief Check if the ability is AGENT_UI type.
+     * @param abilityInfo The ability info to check.
+     * @return Returns true if AGENT_UI type, false otherwise.
+     */
+    static bool IsAgentUIType(const AppExecFwk::AbilityInfo &abilityInfo);
 
     class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
