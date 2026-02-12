@@ -21,7 +21,8 @@
         "SystemCapability.Ability.AbilityTools.AbilityAssistant",
         "SystemCapability.Ability.AppStartup",
         "SystemCapability.Ability.AppExtension.PhotoEditorExtension",
-        "SystemCapability.Ability.AppExtension.VerticalPanel"
+        "SystemCapability.Ability.AppExtension.VerticalPanel",
+        "SystemCapability.Ability.AgentRuntime.Core"
       ],
       "features": [
         "ability_runtime_auto_fill_ability",
