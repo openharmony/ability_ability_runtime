@@ -254,8 +254,9 @@ void AppfreezeManager::RecordAppFreezeBehavior(FaultData& faultData, uint64_t du
 int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo)
 {
     TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFaultTask called, eventName:%{public}s, bundleName:%{public}s, "
-        "name_:%{public}s, currentTime:%{public}s", faultData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
-        name_.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
+        "name_:%{public}s, currentTime:%{public}s, isInForeground:%{public}d",
+        faultData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
+        name_.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(), faultData.isInForeground);
     if (!IsHandleAppfreeze(appInfo.bundleName)) {
         return -1;
     }
