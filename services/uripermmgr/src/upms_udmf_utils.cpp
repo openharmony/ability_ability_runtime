@@ -47,13 +47,13 @@ int32_t UDMFUtils::GetBatchData(const std::string &key, std::vector<std::string>
         std::vector<std::shared_ptr<UDMF::UnifiedRecord>> records = unifiedDataset[i].GetRecords();
         for (const auto &record : records) {
             auto fileEntry = record->GetEntry(UDMF_FILE_URI_ENTRY);
-            std::shared_ptr<UDMF::Object> fileEntryObj = std::get<std::shared_ptr<UDMF::Object>>(fileEntry);
-            if (fileEntryObj == nullptr) {
+            auto fileEntryObjPtr = std::get_if<std::shared_ptr<UDMF::Object>>(&fileEntry);
+            if (fileEntryObjPtr == nullptr || *fileEntryObjPtr == nullptr) {
                 TAG_LOGE(AAFwkTag::URIPERMMGR, "file entry obj null");
                 return ERR_UPMS_GET_ORI_URI_FAILED;
             }
             std::string oriUri;
-            fileEntryObj->GetValue(UDMF_ORI_URI, oriUri);
+            (*fileEntryObjPtr)->GetValue(UDMF_ORI_URI, oriUri);
             if (oriUri.empty()) {
                 TAG_LOGE(AAFwkTag::URIPERMMGR, "get oriUri failed");
                 return ERR_UPMS_GET_ORI_URI_FAILED;
