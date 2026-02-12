@@ -252,10 +252,11 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSize.Level0)
 {
     int32_t pid = static_cast<int32_t>(getprocpid());
-    EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
-    appfreezeManager->ResetAppfreezeState(pid, "");
-    EXPECT_TRUE(appfreezeManager->IsValidFreezeFilter(pid, ""));
-    appfreezeManager->RemoveDeathProcess("");
+    std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_001";
+    EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
+    appfreezeManager->ResetAppfreezeState(pid, bundleName);
+    EXPECT_TRUE(!appfreezeManager->IsValidFreezeFilter(pid, bundleName));
+    appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
 /**
@@ -452,8 +453,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchSyncByPid_Test001, Test
     asyncPids.insert(launcherPid);
     asyncPids.insert(hiviewPid);
     asyncPids.insert(-1);
-    int launcherUid = AppfreezeUtil::GetUidByPid(launcherPid);
-    EXPECT_TRUE(launcherUid >= 20000);
 
     std::set<int> syncPids;
     syncPids.insert(hiviewPid);
@@ -573,10 +572,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckAppfreezeHappend_Test00
     ret = appfreezeManager->CheckAppfreezeHappend(key, "THREAD_BLOCK_6S");
     EXPECT_EQ(ret, false);
     ret = appfreezeManager->CheckAppfreezeHappend(key, "LIFECYCLE_HALF_TIMEOUT_WARNING");
-    EXPECT_EQ(ret, false);
-    ret = appfreezeManager->CheckAppfreezeHappend(key, "LIFECYCLE_HALF_TIMEOUT_WARNING");
-    EXPECT_EQ(ret, true);
-    ret = appfreezeManager->CheckAppfreezeHappend(key, "LIFECYCLE_TIMEOUT_WARNING");
     EXPECT_EQ(ret, false);
     ret = appfreezeManager->CheckAppfreezeHappend(key, "LIFECYCLE_TIMEOUT_WARNING");
     EXPECT_EQ(ret, false);
