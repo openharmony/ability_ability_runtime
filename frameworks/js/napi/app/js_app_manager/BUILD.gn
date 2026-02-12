@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("appmanager") {
-  include_dirs = []
+  include_dirs = ["${ability_runtime_utils_path}/global/common/include"]
 
   if (ability_runtime_graphics) {
     include_dirs += [ "./" ]
@@ -47,6 +47,7 @@ ohos_shared_library("appmanager") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_utils_path}/global/common:runtime_utils",
   ]
 
   external_deps = [
