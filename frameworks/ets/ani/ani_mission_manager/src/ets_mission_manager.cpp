@@ -375,7 +375,7 @@ private:
             }
             int32_t missionId = 0;
             status = env->Object_CallMethodByName_Int(
-                reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
+                reinterpret_cast<ani_object>(ref), "toInt", nullptr, &missionId);
             if (status != ANI_OK) {
                 TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
                 AsyncCallback(env, callback,
@@ -426,7 +426,7 @@ private:
             }
             int32_t missionId = 0;
             status = env->Object_CallMethodByName_Int(
-                reinterpret_cast<ani_object>(ref), "intValue", nullptr, &missionId);
+                reinterpret_cast<ani_object>(ref), "toInt", nullptr, &missionId);
             if (status != ANI_OK) {
                 TAG_LOGE(AAFwkTag::MISSION, "ConvertAniInt failed at index %{public}zu", i);
                 AsyncCallback(env, callback,

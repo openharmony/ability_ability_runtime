@@ -210,7 +210,7 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
         return;
     }
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Int(aniAppIndex, "intValue", nullptr, &appIndex)) != ANI_OK) {
+        if ((status = env->Object_CallMethodByName_Int(aniAppIndex, "toInt", nullptr, &appIndex)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
