@@ -15,6 +15,7 @@
 
 #include "ui_extension_ability_manager.h"
 
+#include <algorithm>
 #include "ability_manager_service.h"
 #include "ability_manager_constants.h"
 #include "ability_permission_util.h"
@@ -56,6 +57,7 @@ const std::string UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProce
 const std::string IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
 const std::string SEPARATOR = ":";
 const int DEFAULT_INVAL_VALUE = -1;
+const int MAX_AGENT_UI_LIMIT = 5;
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 #ifdef SUPPORT_ASAN
 const int LOAD_TIMEOUT_MULTIPLE = 150;
@@ -817,10 +819,13 @@ void UIExtensionAbilityManager::RemoveUIExtensionAbilityRecord(
     if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         ClearPreloadUIExtensionRecord(abilityRecord);
     }
+    if (IsAgentUIType(abilityRecord->GetAbilityInfo())) {
+        // Remove AgentUI extension record from local map (only for AGENT_UI type)
+        UpdateAgentUILaunchRecord(abilityRecord->GetCallerRecord()->GetRecordId(),
+            abilityRecord->GetAbilityInfo().bundleName,
+            abilityRecord->GetUIExtensionAbilityId(), true);
+    }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
-
-    // Remove AgentUI extension record from local map (only for AGENT_UI type)
-    UpdateAgentUILaunchRecord(abilityRecord, true);
 }
 
 void UIExtensionAbilityManager::AddUIExtensionAbilityRecordToTerminatedList(
@@ -1460,12 +1465,8 @@ void UIExtensionAbilityManager::CompleteBackground(const std::shared_ptr<BaseExt
 }
 
 void UIExtensionAbilityManager::UpdateAgentUILaunchRecord(
-    int64_t callerRecordId, const std::string& bundleName, int64_t extensionAbilityId, bool isRemove)
+    int32_t callerRecordId, const std::string &bundleName, int32_t extensionAbilityId, bool isRemove)
 {
-    if (extensionAbilityType != AppExecFwk::ExtensionAbilityType::AGENT_UI) {
-        return;
-    }
-
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
     auto& bundleMap = agentUIExtensionRecords_[callerRecordId];
     auto bundleIt = bundleMap.find(bundleName);
@@ -1504,8 +1505,8 @@ void UIExtensionAbilityManager::UpdateAgentUILaunchRecord(
     }
 }
 
-int UIExtensionAbilityManager::CheckAgentUILaunchLimit(int64_t callerRecordId, const std::string &bundleName,
-    int64_t extensionAbilityId)
+int UIExtensionAbilityManager::CheckAgentUILaunchLimit(int32_t callerRecordId, const std::string &bundleName,
+    int32_t extensionAbilityId)
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
     auto& bundleMap = agentUIExtensionRecords_[callerRecordId];
@@ -1523,9 +1524,13 @@ int UIExtensionAbilityManager::CheckAgentUILaunchLimit(int64_t callerRecordId, c
         return ERR_OVERFLOW;
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "agentUI launch allowed, callerId:%{public}ld, bundle:%{public}s, id:%{public}ld",
-        callerRecordId, bundleName.c_str(), extensionAbilityId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "agentUI launch allowed, current count:%{public}zu", recordIds.size());
     return ERR_OK;
+}
+
+bool UIExtensionAbilityManager::IsAgentUIType(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    return abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT_UI;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
