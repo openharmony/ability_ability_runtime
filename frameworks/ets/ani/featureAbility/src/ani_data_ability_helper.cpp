@@ -27,7 +27,7 @@ constexpr const char* CLASSNAME_ARRAY = "std.core.Array";
 void PutDouble(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keyStr, ani_object aniValue)
 {
     ani_double value = 0;
-    ani_status status = env->Object_CallMethodByName_Double(aniValue, "doubleValue", nullptr, &value);
+    ani_status status = env->Object_CallMethodByName_Double(aniValue, "toDouble", nullptr, &value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FA, "Object_CallMethodByName_Double status: %{public}d", status);
         return;
