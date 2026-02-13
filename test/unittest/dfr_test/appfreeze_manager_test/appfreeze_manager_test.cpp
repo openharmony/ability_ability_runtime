@@ -122,6 +122,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_002, TestSize.Level1)
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
     ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
     EXPECT_EQ(ret, 0);
+    faultData.isInForeground = false;
+    ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
