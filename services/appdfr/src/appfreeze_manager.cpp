@@ -855,6 +855,7 @@ int AppfreezeManager::GetReportTimes(const std::string& key)
     auto it = appfreezeInfo_.find(key);
     if (it != appfreezeInfo_.end()) {
         reportTimes += it->second.reportTimes;
+        appfreezeInfo_[key].reportTimes = reportTimes;
     }
     return reportTimes;
 }
