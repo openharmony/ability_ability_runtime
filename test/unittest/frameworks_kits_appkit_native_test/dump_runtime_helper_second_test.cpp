@@ -109,7 +109,8 @@ HWTEST_F(DumpRuntimeHelperTestSecond, DumpJsHeap_0400, TestSize.Level1)
 {
     std::shared_ptr<OHOSApplication> application = std::shared_ptr<OHOSApplication>(
         ApplicationLoader::GetInstance().GetApplicationByName());
-    auto helper = std::make_shared<DumpRuntimeHelper>(application);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto helper = std::make_shared<DumpRuntimeHelper>(application, appInfo);
     OHOS::AppExecFwk::JsHeapDumpInfo info;
     info.tid = 1;
     helper->DumpJsHeap(info);
