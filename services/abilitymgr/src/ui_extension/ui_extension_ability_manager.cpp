@@ -803,10 +803,10 @@ void UIExtensionAbilityManager::RemoveUIExtensionAbilityRecord(
         ClearPreloadUIExtensionRecord(abilityRecord);
     }
     if (UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        uiExtensionAbilityRecordMgr_->UpdateAgentUILaunchRecord(
+        uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
             IPCSkeleton::GetCallingUid(),
             abilityRecord->GetAbilityInfo().bundleName,
-            abilityRecord->GetUIExtensionAbilityId(), true);
+            abilityRecord->GetUIExtensionAbilityId());
     }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
 }

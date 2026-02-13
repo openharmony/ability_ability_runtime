@@ -152,8 +152,8 @@ public:
 
     // AgentUI extension launch limit management
     int32_t CheckAgentUILaunchLimit(int32_t callerUid, const std::string &bundleName);
-    void UpdateAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName,
-        int32_t extensionAbilityId, bool isRemove);
+    void AddAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName, int32_t extensionAbilityId);
+    void RemoveAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName, int32_t extensionAbilityId);
 
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
