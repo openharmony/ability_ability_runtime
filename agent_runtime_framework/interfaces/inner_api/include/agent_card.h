@@ -33,7 +33,7 @@ struct Provider : public Parcelable {
     virtual bool Marshalling(Parcel &parcel) const override;
     static Provider *Unmarshalling(Parcel &parcel);
     nlohmann::json ToJson();
-    static Provider FromJson(const nlohmann::json &jsonObject);
+    static bool FromJson(const nlohmann::json &jsonObject, Provider &provider);
 };
 
 struct Capabilities : public Parcelable {
@@ -51,18 +51,6 @@ struct Capabilities : public Parcelable {
     static Capabilities FromJson(const nlohmann::json &jsonObject);
 };
 
-struct Authentication : public Parcelable {
-    std::vector<std::string> schemes;
-    // optional param
-    std::string credentials;
-
-    bool ReadFromParcel(Parcel &parcel);
-    virtual bool Marshalling(Parcel &parcel) const override;
-    static Authentication *Unmarshalling(Parcel &parcel);
-    nlohmann::json ToJson();
-    static Authentication FromJson(const nlohmann::json &jsonObject);
-};
-
 struct Skill : public Parcelable {
     std::string id;
     std::string name;
@@ -74,12 +62,14 @@ struct Skill : public Parcelable {
     std::vector<std::string> inputModes;
     // optional param
     std::vector<std::string> outputModes;
+    // optional param
+    std::string extension;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static Skill *Unmarshalling(Parcel &parcel);
     nlohmann::json ToJson();
-    static Skill FromJson(const nlohmann::json &jsonObject);
+    static bool FromJson(const nlohmann::json &jsonObject, Skill &skill);
 };
 
 struct AgentCard : public Parcelable {
@@ -89,22 +79,26 @@ struct AgentCard : public Parcelable {
     std::string agentId;
     std::string name;
     std::string description;
-    std::string url;
     // optional param
     std::shared_ptr<Provider> provider = nullptr;
     std::string version;
     // optional param
     std::string documentationUrl;
     std::shared_ptr<Capabilities> capabilities = nullptr;
-    std::shared_ptr<Authentication> authentication = nullptr;
     std::vector<std::string> defaultInputModes;
     std::vector<std::string> defaultOutputModes;
     std::vector<std::shared_ptr<Skill>> skills;
+    // optional param
+    std::string iconUrl;
+    // optional param
+    std::string extension;
+    // required param
+    std::string category;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     nlohmann::json ToJson() const;
-    static AgentCard FromJson(nlohmann::json jsonObject);
+    static bool FromJson(nlohmann::json jsonObject, AgentCard &agentCard);
     static AgentCard *Unmarshalling(Parcel &parcel);
 };
 

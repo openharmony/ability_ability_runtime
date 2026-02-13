@@ -226,79 +226,6 @@ HWTEST_F(AgentCardTest, CapabilitiesUnmarshalling_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AuthenticationMarshalling_001
- * @tc.desc: AuthenticationMarshalling_001
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationMarshalling_001, TestSize.Level1)
-{
-    Authentication authentication;
-    std::vector<std::string> schemes;
-    schemes.push_back("test");
-    authentication.schemes = schemes;
-    authentication.credentials = "test1";
-
-    Parcel parcelMock;
-    bool result = authentication.Marshalling(parcelMock);
-
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: AuthenticationMarshalling_002
- * @tc.desc: AuthenticationMarshalling_002
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationMarshalling_002, TestSize.Level1)
-{
-    Authentication authentication;
-    std::vector<std::string> schemes;
-    authentication.schemes = schemes;
-    authentication.credentials = "test1";
-
-    Parcel parcelMock;
-    bool result = authentication.Marshalling(parcelMock);
-
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: AuthenticationMarshalling_003
- * @tc.desc: AuthenticationMarshalling_003
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationMarshalling_003, TestSize.Level1)
-{
-    Authentication authentication;
-    std::vector<std::string> schemes;
-    schemes.push_back("test");
-    authentication.schemes = schemes;
-    authentication.credentials = "test";
-
-    Parcel parcelMock;
-    bool result = authentication.Marshalling(parcelMock);
-
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: AuthenticationUnmarshalling_001
- * @tc.desc: AuthenticationUnmarshalling_001
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationUnmarshalling_001, TestSize.Level1)
-{
-    Parcel parcelMock;
-    Authentication *authentication = Authentication::Unmarshalling(parcelMock);
-
-    EXPECT_TRUE(authentication == nullptr);
-}
-
-/**
  * @tc.name: SkillMarshalling_001
  * @tc.desc: SkillMarshalling_001
  * @tc.type: FUNC
@@ -632,15 +559,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_001, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -672,15 +596,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_002, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -712,15 +633,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_003, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -752,15 +670,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_004, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -792,15 +707,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_005, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = nullptr;
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -832,15 +744,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_006, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -872,15 +781,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_007, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -912,15 +818,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_008, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = nullptr;
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -952,15 +855,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_009, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = nullptr;
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -992,15 +892,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_010, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     agentCard.defaultInputModes = defaultInputModes;
     std::vector<std::string> defaultOutputModes;
@@ -1031,15 +928,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_011, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -1070,15 +964,12 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_012, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "test1";
     agentCard.description = "test1";
-    agentCard.url = "test1";
     std::shared_ptr<Provider> provider = std::make_shared<Provider>();
     agentCard.provider = provider;
     agentCard.version = "test1";
     agentCard.documentationUrl = "test1";
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::string> defaultInputModes;
     defaultInputModes.push_back("test");
     agentCard.defaultInputModes = defaultInputModes;
@@ -1121,8 +1012,6 @@ HWTEST_F(AgentCardTest, AgentCardToJson_001, TestSize.Level1)
     agentCard.provider = provider;
     std::shared_ptr<Capabilities> capabilities = std::make_shared<Capabilities>();
     agentCard.capabilities = capabilities;
-    std::shared_ptr<Authentication> authentication = std::make_shared<Authentication>();
-    agentCard.authentication = authentication;
     std::vector<std::shared_ptr<Skill>> skills;
     skills.push_back(std::make_shared<Skill>());
     agentCard.skills = skills;
@@ -1136,10 +1025,6 @@ HWTEST_F(AgentCardTest, AgentCardToJson_001, TestSize.Level1)
     agentCard.capabilities = nullptr;
     jsonObject = agentCard.ToJson();
     EXPECT_FALSE(jsonObject.contains("capabilities"));
-
-    agentCard.authentication = nullptr;
-    jsonObject = agentCard.ToJson();
-    EXPECT_FALSE(jsonObject.contains("authentication"));
 
     std::vector<std::shared_ptr<Skill>> skills1;
     agentCard.skills = skills1;
@@ -1157,7 +1042,6 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
 {
     Provider provider;
     Capabilities capabilities;
-    Authentication authentication;
     std::vector<std::string> defaultInputModes;
     std::vector<std::string> defaultOutputModes;
     Skill skill;
@@ -1169,23 +1053,26 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
         { "agentId", "1" },
         { "name", "test" },
         { "description", "test" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com/docs" },
         { "url", "test" },
         { "provider", provider.ToJson() },
-        { "version", "test" },
-        { "documentationUrl", "test" },
         { "capabilities", capabilities.ToJson() },
-        { "authentication", authentication.ToJson() },
         { "defaultInputModes", defaultInputModes },
         { "defaultOutputModes", defaultOutputModes },
         { "skills", jsonArray },
     };
-    AgentCard agentCard = AgentCard::FromJson(jsonObject);
+    AgentCard agentCard;
+    ASSERT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
 
     EXPECT_TRUE(agentCard.bundleName == "test");
     EXPECT_TRUE(agentCard.moduleName == "test");
     EXPECT_TRUE(agentCard.abilityName == "test");
     EXPECT_TRUE(agentCard.agentId == "1");
     EXPECT_TRUE(agentCard.name == "test");
+    EXPECT_TRUE(agentCard.description == "test");
+    EXPECT_TRUE(agentCard.version == "1.0");
+    EXPECT_TRUE(agentCard.documentationUrl == "http://example.com/docs");
 }
 
 /**
@@ -1205,7 +1092,7 @@ HWTEST_F(AgentCardTest, ProviderToJson_001, TestSize.Level1)
 
 /**
  * @tc.name: ProviderFromJson_001
- * @tc.desc: ProviderFromJson_001
+ * @tc.desc: ProviderFromJson_001 - valid input
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -1215,20 +1102,158 @@ HWTEST_F(AgentCardTest, ProviderFromJson_001, TestSize.Level1)
         { "organization", "test" },
         { "url", "test" },
     };
-    Provider provider = Provider::FromJson(jsonObject);
+    Provider provider;
+    EXPECT_TRUE(Provider::FromJson(jsonObject, provider));
     EXPECT_TRUE(jsonObject["organization"] == provider.organization);
+    EXPECT_TRUE(provider.url == "test");
+}
 
-    nlohmann::json jsonObject1 = nlohmann::json {
-        { "organization", "test" },
-    };
-    Provider provider1 = Provider::FromJson(jsonObject1);
-    EXPECT_TRUE(jsonObject1["organization"] == provider1.organization);
-
-    nlohmann::json jsonObject2 = nlohmann::json {
+/**
+ * @tc.name: ProviderFromJson_002
+ * @tc.desc: Test FromJson returns false when organization is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_002, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
         { "url", "test" },
     };
-    Provider provider2 = Provider::FromJson(jsonObject2);
-    EXPECT_TRUE(provider2.url == "test");
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_003
+ * @tc.desc: Test FromJson returns false when organization is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_003, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", 123 },
+        { "url", "test" },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_004
+ * @tc.desc: Test FromJson returns false when organization length exceeds 128
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_004, TestSize.Level1)
+{
+    std::string longOrg(129, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", longOrg },
+        { "url", "test" },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_005
+ * @tc.desc: Test FromJson returns false when organization is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_005, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "" },
+        { "url", "test" },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_006
+ * @tc.desc: Test FromJson returns false when url is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_006, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "test" },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_007
+ * @tc.desc: Test FromJson returns false when url is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_007, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "test" },
+        { "url", 456 },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_008
+ * @tc.desc: Test FromJson returns false when url length exceeds 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_008, TestSize.Level1)
+{
+    std::string longUrl(513, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "test" },
+        { "url", longUrl },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_009
+ * @tc.desc: Test FromJson returns false when url is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_009, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", "test" },
+        { "url", "" },
+    };
+    Provider provider;
+    EXPECT_FALSE(Provider::FromJson(jsonObject, provider));
+}
+
+/**
+ * @tc.name: ProviderFromJson_010
+ * @tc.desc: Test FromJson returns true with valid boundary values
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, ProviderFromJson_010, TestSize.Level1)
+{
+    std::string validOrg(128, 'a');
+    std::string validUrl(512, 'b');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "organization", validOrg },
+        { "url", validUrl },
+    };
+    Provider provider;
+    EXPECT_TRUE(Provider::FromJson(jsonObject, provider));
+    EXPECT_EQ(provider.organization.length(), 128);
+    EXPECT_EQ(provider.url.length(), 512);
 }
 
 /**
@@ -1268,42 +1293,6 @@ HWTEST_F(AgentCardTest, CapabilitiesFromJson_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AuthenticationToJson_001
- * @tc.desc: AuthenticationToJson_001
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationToJson_001, TestSize.Level1)
-{
-    Authentication authentication;
-    std::vector<std::string> schemes;
-    authentication.schemes = schemes;
-    nlohmann::json jsonObject = authentication.ToJson();
-
-    EXPECT_TRUE(jsonObject["schemes"].size() == 0);
-}
-
-/**
- * @tc.name: AuthenticationFromJson_001
- * @tc.desc: AuthenticationFromJson_001
- * @tc.type: FUNC
- * @tc.require: AR000H1N32
- */
-HWTEST_F(AgentCardTest, AuthenticationFromJson_001, TestSize.Level1)
-{
-    nlohmann::json jsonObject = nlohmann::json {
-        { "schemes", nlohmann::json::array({ "test", "test" }) },
-        { "credentials", "test" },
-    };
-    Authentication authentication = Authentication::FromJson(jsonObject);
-    EXPECT_TRUE(authentication.credentials == "test");
-
-    jsonObject = nlohmann::json {};
-    authentication = Authentication::FromJson(jsonObject);
-    EXPECT_TRUE(authentication.schemes.size() == 0);
-}
-
-/**
  * @tc.name: SkillToJson_001
  * @tc.desc: SkillToJson_001
  * @tc.type: FUNC
@@ -1320,7 +1309,7 @@ HWTEST_F(AgentCardTest, SkillToJson_001, TestSize.Level1)
 
 /**
  * @tc.name: SkillFromJson_001
- * @tc.desc: SkillFromJson_001
+ * @tc.desc: SkillFromJson_001 - valid input
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -1335,12 +1324,622 @@ HWTEST_F(AgentCardTest, SkillFromJson_001, TestSize.Level1)
         { "inputModes", nlohmann::json::array({ "test", "test" }) },
         { "outputModes", nlohmann::json::array({ "test", "test" }) },
     };
-    Skill skill = Skill::FromJson(jsonObject);
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
     EXPECT_TRUE(skill.id == "test");
+    EXPECT_EQ(skill.tags.size(), 2);
+}
 
-    jsonObject = nlohmann::json {};
-    skill = Skill::FromJson(jsonObject);
-    EXPECT_TRUE(skill.id.empty());
+/**
+ * @tc.name: SkillFromJson_002
+ * @tc.desc: Test FromJson returns false when id is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_002, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_003
+ * @tc.desc: Test FromJson returns false when id is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_003, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", 123 },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_004
+ * @tc.desc: Test FromJson returns false when id length exceeds 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_004, TestSize.Level1)
+{
+    std::string longId(65, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", longId },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_005
+ * @tc.desc: Test FromJson returns false when id is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_005, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_006
+ * @tc.desc: Test FromJson returns false when name is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_006, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_007
+ * @tc.desc: Test FromJson returns false when name is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_007, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", 456 },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_008
+ * @tc.desc: Test FromJson returns false when name length exceeds 128
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_008, TestSize.Level1)
+{
+    std::string longName(129, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", longName },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_009
+ * @tc.desc: Test FromJson returns false when name is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_009, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_010
+ * @tc.desc: Test FromJson returns false when description is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_010, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_011
+ * @tc.desc: Test FromJson returns false when description is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_011, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", 789 },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_012
+ * @tc.desc: Test FromJson returns false when description length exceeds 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_012, TestSize.Level1)
+{
+    std::string longDescription(513, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", longDescription },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_013
+ * @tc.desc: Test FromJson returns false when description is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_013, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_014
+ * @tc.desc: Test FromJson returns false when tags is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_014, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_015
+ * @tc.desc: Test FromJson returns false when tags is not an array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_015, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", "not an array" },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_016
+ * @tc.desc: Test FromJson returns false when tags size exceeds 100
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_016, TestSize.Level1)
+{
+    nlohmann::json tagsArray = nlohmann::json::array();
+    for (int i = 0; i < 101; i++) {
+        tagsArray.push_back("tag" + std::to_string(i));
+    }
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", tagsArray },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_017
+ * @tc.desc: Test FromJson returns false when all tags are invalid (too long), resulting in empty tags
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_017, TestSize.Level1)
+{
+    std::string longTag(33, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ longTag }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_019
+ * @tc.desc: Test FromJson returns true with valid boundary values
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_019, TestSize.Level1)
+{
+    std::string validId(64, 'a');
+    std::string validName(128, 'b');
+    std::string validDescription(512, 'c');
+    std::string validTag(32, 'd');
+
+    nlohmann::json tagsArray = nlohmann::json::array();
+    for (int i = 0; i < 100; i++) {
+        tagsArray.push_back(validTag);
+    }
+
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", validId },
+        { "name", validName },
+        { "description", validDescription },
+        { "tags", tagsArray },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.id.length(), 64);
+    EXPECT_EQ(skill.name.length(), 128);
+    EXPECT_EQ(skill.description.length(), 512);
+    EXPECT_EQ(skill.tags.size(), 100);
+}
+
+/**
+ * @tc.name: SkillFromJson_020
+ * @tc.desc: Test FromJson skips non-string elements in examples array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_020, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "examples", nlohmann::json::array({ "example1", 123, true, "example2", nullptr }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.examples.size(), 2);
+    EXPECT_EQ(skill.examples[0], "example1");
+    EXPECT_EQ(skill.examples[1], "example2");
+}
+
+/**
+ * @tc.name: SkillFromJson_021
+ * @tc.desc: Test FromJson skips non-string elements in inputModes array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_021, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "inputModes", nlohmann::json::array({ "mode1", 456, false, "mode2", nullptr }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.inputModes.size(), 2);
+    EXPECT_EQ(skill.inputModes[0], "mode1");
+    EXPECT_EQ(skill.inputModes[1], "mode2");
+}
+
+/**
+ * @tc.name: SkillFromJson_022
+ * @tc.desc: Test FromJson skips non-string elements in outputModes array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_022, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "outputModes", nlohmann::json::array({ "output1", 789, true, "output2", nullptr }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.outputModes.size(), 2);
+    EXPECT_EQ(skill.outputModes[0], "output1");
+    EXPECT_EQ(skill.outputModes[1], "output2");
+}
+
+/**
+ * @tc.name: SkillFromJson_023
+ * @tc.desc: Test FromJson skips non-string elements in tags array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_023, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "tag1", 123, true, "tag2", nullptr }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.tags.size(), 2);
+    EXPECT_EQ(skill.tags[0], "tag1");
+    EXPECT_EQ(skill.tags[1], "tag2");
+}
+
+/**
+ * @tc.name: SkillFromJson_024
+ * @tc.desc: Test FromJson skips empty string tags
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_024, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "", "validTag1", "", "validTag2", "" }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.tags.size(), 2);
+    EXPECT_EQ(skill.tags[0], "validTag1");
+    EXPECT_EQ(skill.tags[1], "validTag2");
+}
+
+/**
+ * @tc.name: SkillFromJson_025
+ * @tc.desc: Test FromJson returns false when tags array is empty
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_025, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array() },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_026
+ * @tc.desc: Test FromJson returns false when all tags are invalid (empty strings or too long)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_026, TestSize.Level1)
+{
+    std::string longTag(33, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "", longTag, 123, nullptr, "" }) },
+    };
+    Skill skill;
+    EXPECT_FALSE(Skill::FromJson(jsonObject, skill));
+}
+
+/**
+ * @tc.name: SkillFromJson_027
+ * @tc.desc: Test FromJson skips tags longer than 32 chars but keeps valid ones
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_027, TestSize.Level1)
+{
+    std::string longTag(33, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "valid1", longTag, "valid2" }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.tags.size(), 2);
+    EXPECT_EQ(skill.tags[0], "valid1");
+    EXPECT_EQ(skill.tags[1], "valid2");
+}
+
+/**
+ * @tc.name: SkillFromJson_028
+ * @tc.desc: Test FromJson succeeds with valid extension field (length 1-1280)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_028, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "extension", "valid extension data" },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension, "valid extension data");
+}
+
+/**
+ * @tc.name: SkillFromJson_029
+ * @tc.desc: Test FromJson succeeds when extension length is exactly 1280
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_029, TestSize.Level1)
+{
+    std::string validExtension(1280, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "extension", validExtension },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension.length(), 1280);
+}
+
+/**
+ * @tc.name: SkillFromJson_030
+ * @tc.desc: Test FromJson sets extension to empty when length exceeds 1280
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_030, TestSize.Level1)
+{
+    std::string longExtension(1281, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "extension", longExtension },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension, "");
+}
+
+/**
+ * @tc.name: SkillFromJson_031
+ * @tc.desc: Test FromJson sets extension to empty when extension is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_031, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "extension", "" },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension, "");
+}
+
+/**
+ * @tc.name: SkillFromJson_032
+ * @tc.desc: Test FromJson succeeds when extension field is missing (optional)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_032, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension, "");
+}
+
+/**
+ * @tc.name: SkillFromJson_033
+ * @tc.desc: Test FromJson ignores extension when it's not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, SkillFromJson_033, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "id", "test" },
+        { "name", "test" },
+        { "description", "test" },
+        { "tags", nlohmann::json::array({ "test" }) },
+        { "extension", 12345 },
+    };
+    Skill skill;
+    EXPECT_TRUE(Skill::FromJson(jsonObject, skill));
+    EXPECT_EQ(skill.extension, "");
 }
 
 /**
@@ -1358,12 +1957,10 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_001, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
     agentCard->capabilities = std::make_shared<Capabilities>();
-    agentCard->authentication = std::make_shared<Authentication>();
     agentCard->defaultInputModes = {"input1", "input2"};
     agentCard->defaultOutputModes = {"output1", "output2"};
     agentCard->skills = {std::make_shared<Skill>()};
@@ -1485,7 +2082,6 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_008, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "test";
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
 }
@@ -1505,7 +2101,6 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_009, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
 }
@@ -1525,7 +2120,6 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_010, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "test";
 
@@ -1547,7 +2141,6 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_011, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "test";
@@ -1570,34 +2163,9 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_012, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
-
-    EXPECT_FALSE(agentCard->Marshalling(parcelMock));
-}
-
-/**
-* @tc.name  : Marshalling_ShouldReturnFalse_WhenWriteAuthenticationFails
-* @tc.number: AgentCard_Marshalling_013
-* @tc.desc  : Test that Marshalling returns false when writing authentication fails.
-*/
-HWTEST_F(AgentCardTest, AgentCard_Marshalling_013, TestSize.Level1)
-{
-    Parcel parcelMock;
-    auto agentCard = std::make_shared<AgentCard>();
-    agentCard->bundleName = "com.example.bundle";
-    agentCard->moduleName = "ExampleModule";
-    agentCard->abilityName = "ExampleAbility";
-    agentCard->agentId = "1";
-    agentCard->name = "ExampleName";
-    agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
-    agentCard->provider = std::make_shared<Provider>();
-    agentCard->version = "1.0.0";
-    agentCard->documentationUrl = "http://docs.example.com";
-    agentCard->capabilities = std::make_shared<Capabilities>();
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
 }
@@ -1617,12 +2185,10 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_014, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
     agentCard->capabilities = std::make_shared<Capabilities>();
-    agentCard->authentication = std::make_shared<Authentication>();
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
 }
@@ -1642,12 +2208,10 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_015, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
     agentCard->capabilities = std::make_shared<Capabilities>();
-    agentCard->authentication = std::make_shared<Authentication>();
     agentCard->defaultInputModes = {"input1", "input2"};
 
     EXPECT_FALSE(agentCard->Marshalling(parcelMock));
@@ -1668,12 +2232,10 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_016, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
     agentCard->capabilities = std::make_shared<Capabilities>();
-    agentCard->authentication = std::make_shared<Authentication>();
     agentCard->defaultInputModes = {"input1", "input2"};
     agentCard->defaultOutputModes = {"output1", "output2"};
 
@@ -1695,12 +2257,10 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_017, TestSize.Level1)
     agentCard->agentId = "1";
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
-    agentCard->url = "http://example.com";
     agentCard->provider = std::make_shared<Provider>();
     agentCard->version = "1.0.0";
     agentCard->documentationUrl = "http://docs.example.com";
     agentCard->capabilities = std::make_shared<Capabilities>();
-    agentCard->authentication = std::make_shared<Authentication>();
     agentCard->defaultInputModes = {"input1", "input2"};
     agentCard->defaultOutputModes = {"output1", "output2"};
     agentCard->skills = { nullptr };
@@ -1861,12 +2421,10 @@ HWTEST_F(AgentCardTest, ToAgentCardVec_004, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "ExampleName";
     agentCard.description = "ExampleDescription";
-    agentCard.url = "http://example.com";
     agentCard.provider = std::make_shared<Provider>();
     agentCard.version = "1.0.0";
     agentCard.documentationUrl = "http://docs.example.com";
     agentCard.capabilities = std::make_shared<Capabilities>();
-    agentCard.authentication = std::make_shared<Authentication>();
     agentCard.defaultInputModes = {"input1", "input2"};
     agentCard.defaultOutputModes = {"output1", "output2"};
     agentCard.skills = {std::make_shared<Skill>()};
@@ -1897,12 +2455,10 @@ HWTEST_F(AgentCardTest, FromAgentCardVec_001, TestSize.Level1)
     agentCard.agentId = "1";
     agentCard.name = "ExampleName";
     agentCard.description = "ExampleDescription";
-    agentCard.url = "http://example.com";
     agentCard.provider = std::make_shared<Provider>();
     agentCard.version = "1.0.0";
     agentCard.documentationUrl = "http://docs.example.com";
     agentCard.capabilities = std::make_shared<Capabilities>();
-    agentCard.authentication = std::make_shared<Authentication>();
     agentCard.defaultInputModes = {"input1", "input2"};
     agentCard.defaultOutputModes = {"output1", "output2"};
     agentCard.skills = {std::make_shared<Skill>()};
@@ -1912,6 +2468,927 @@ HWTEST_F(AgentCardTest, FromAgentCardVec_001, TestSize.Level1)
     AgentCardsRawData::FromAgentCardVec(vec, rawData);
     EXPECT_NE(rawData.data, nullptr);
     EXPECT_TRUE(rawData.size > 0);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_002
+ * @tc.desc: Test FromJson returns false when agentId is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_002, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        // agentId is missing
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_003
+ * @tc.desc: Test FromJson returns false when agentId is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_003, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", 123 }, // agentId is a number, not a string
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_004
+ * @tc.desc: Test FromJson returns false when agentId length exceeds 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_004, TestSize.Level1)
+{
+    std::string longAgentId(65, 'a'); // 65 characters, exceeds LENGTH_64
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", longAgentId },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_005
+ * @tc.desc: Test FromJson returns false when agentId is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_005, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "" }, // empty string
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_006
+ * @tc.desc: Test FromJson returns true when agentId length is exactly 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_006, TestSize.Level1)
+{
+    std::string validAgentId(64, 'a'); // exactly 64 characters
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", validAgentId },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.agentId, validAgentId);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_007
+ * @tc.desc: Test FromJson returns false when name is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_007, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        // name is missing
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_008
+ * @tc.desc: Test FromJson returns false when name is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_008, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", 123 }, // name is a number, not a string
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_009
+ * @tc.desc: Test FromJson returns false when name length exceeds 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_009, TestSize.Level1)
+{
+    std::string longName(65, 'a'); // 65 characters, exceeds LENGTH_64
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", longName },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_010
+ * @tc.desc: Test FromJson returns false when name is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_010, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "" }, // empty string
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_011
+ * @tc.desc: Test FromJson returns false when description is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_011, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        // description is missing
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_012
+ * @tc.desc: Test FromJson returns false when description is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_012, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", 456 }, // description is a number, not a string
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_013
+ * @tc.desc: Test FromJson returns false when description length exceeds 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_013, TestSize.Level1)
+{
+    std::string longDescription(513, 'a'); // 513 characters, exceeds LENGTH_512
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", longDescription },
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_014
+ * @tc.desc: Test FromJson returns false when description is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_014, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "" }, // empty string
+        { "version", "1.0" },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_015
+ * @tc.desc: Test FromJson returns false when version is missing
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_015, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        // version is missing
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_016
+ * @tc.desc: Test FromJson returns false when version is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_016, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", 789 }, // version is a number, not a string
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_017
+ * @tc.desc: Test FromJson returns false when version length exceeds 32
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_017, TestSize.Level1)
+{
+    std::string longVersion(33, 'a'); // 33 characters, exceeds LENGTH_32
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", longVersion },
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_018
+ * @tc.desc: Test FromJson returns false when version is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_018, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "" }, // empty string
+        { "documentationUrl", "http://example.com" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_019
+ * @tc.desc: Test FromJson returns true when documentationUrl is missing (optional field)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_019, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        // documentationUrl is missing (optional)
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_TRUE(agentCard.documentationUrl.empty());
+}
+
+/**
+ * @tc.name: AgentCardFromJson_020
+ * @tc.desc: Test FromJson sets documentationUrl to empty when length exceeds 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_020, TestSize.Level1)
+{
+    std::string longUrl(513, 'a'); // 513 characters, exceeds LENGTH_512
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", longUrl },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_TRUE(agentCard.documentationUrl.empty());
+}
+
+/**
+ * @tc.name: AgentCardFromJson_021
+ * @tc.desc: Test FromJson returns true with empty documentationUrl (optional field)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_021, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "documentationUrl", "" }, // empty string is allowed
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_022
+ * @tc.desc: Test FromJson returns true with valid boundary values
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_022, TestSize.Level1)
+{
+    std::string validName(64, 'a'); // exactly 64 characters
+    std::string validDescription(512, 'b'); // exactly 512 characters
+    std::string validVersion(32, 'c'); // exactly 32 characters
+    std::string validDocUrl(512, 'd'); // exactly 512 characters
+
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", validName },
+        { "description", validDescription },
+        { "version", validVersion },
+        { "documentationUrl", validDocUrl },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.name.length(), 64);
+    EXPECT_EQ(agentCard.description.length(), 512);
+    EXPECT_EQ(agentCard.version.length(), 32);
+    EXPECT_EQ(agentCard.documentationUrl.length(), 512);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_023
+ * @tc.desc: Test FromJson skips non-string elements in defaultInputModes array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_023, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "defaultInputModes", nlohmann::json::array({ "input1", 123, true, "input2", nullptr }) },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.defaultInputModes.size(), 2);
+    EXPECT_EQ(agentCard.defaultInputModes[0], "input1");
+    EXPECT_EQ(agentCard.defaultInputModes[1], "input2");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_024
+ * @tc.desc: Test FromJson skips non-string elements in defaultOutputModes array
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_024, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "defaultOutputModes", nlohmann::json::array({ "output1", 456, false, "output2", nullptr }) },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.defaultOutputModes.size(), 2);
+    EXPECT_EQ(agentCard.defaultOutputModes[0], "output1");
+    EXPECT_EQ(agentCard.defaultOutputModes[1], "output2");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_025
+ * @tc.desc: Test FromJson succeeds with valid extension field (length 1-51200)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_025, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "extension", "valid extension data" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension, "valid extension data");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_026
+ * @tc.desc: Test FromJson succeeds when extension length is exactly 51200
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_026, TestSize.Level1)
+{
+    std::string validExtension(51200, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "extension", validExtension },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension.length(), 51200);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_027
+ * @tc.desc: Test FromJson sets extension to empty when length exceeds 51200
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_027, TestSize.Level1)
+{
+    std::string longExtension(51201, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "extension", longExtension },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_028
+ * @tc.desc: Test FromJson sets extension to empty when extension is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_028, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "extension", "" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_029
+ * @tc.desc: Test FromJson succeeds when extension field is missing (optional)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_029, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_030
+ * @tc.desc: Test FromJson ignores extension when it's not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_030, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "extension", 12345 },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.extension, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_041
+ * @tc.desc: Test FromJson succeeds with valid iconUrl field (length 1-512)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_041, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "iconUrl", "http://example.com/icon.png" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.iconUrl, "http://example.com/icon.png");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_031
+ * @tc.desc: Test FromJson succeeds when iconUrl length is exactly 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_031, TestSize.Level1)
+{
+    std::string validIconUrl(512, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "iconUrl", validIconUrl },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.iconUrl.length(), 512);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_032
+ * @tc.desc: Test FromJson sets iconUrl to empty when length exceeds 512
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_032, TestSize.Level1)
+{
+    std::string longIconUrl(513, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "iconUrl", longIconUrl },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.iconUrl, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_033
+ * @tc.desc: Test FromJson sets iconUrl to empty when iconUrl is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_033, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "iconUrl", "" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.iconUrl, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_034
+ * @tc.desc: Test FromJson ignores iconUrl when it's not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_034, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "iconUrl", 12345 },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.iconUrl, "");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_035
+ * @tc.desc: Test FromJson succeeds when category is provided with valid length (1-64)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_035, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.category, "productivity");
+}
+
+/**
+ * @tc.name: AgentCardFromJson_036
+ * @tc.desc: Test FromJson fails when category is missing (required field)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_036, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_037
+ * @tc.desc: Test FromJson fails when category length exceeds 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_037, TestSize.Level1)
+{
+    std::string longCategory(65, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", longCategory },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_038
+ * @tc.desc: Test FromJson fails when category is empty string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_038, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "" },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_039
+ * @tc.desc: Test FromJson succeeds when category length is exactly 64
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_039, TestSize.Level1)
+{
+    std::string validCategory(64, 'a');
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", validCategory },
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.category.length(), 64);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_040
+ * @tc.desc: Test FromJson fails when category is not a string
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_040, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "bundleName", "test" },
+        { "moduleName", "test" },
+        { "abilityName", "test" },
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", 12345 },
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
 }
 } // namespace AgentRuntime
 } // namespace OHOS

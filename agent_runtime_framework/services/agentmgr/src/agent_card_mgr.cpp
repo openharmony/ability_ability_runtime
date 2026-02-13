@@ -70,7 +70,11 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
                 return -1;
             }
             for (auto cardStr : j["agentCards"]) {
-                AgentCard card = AgentCard::FromJson(cardStr);
+                AgentCard card;
+                if (!AgentCard::FromJson(cardStr, card)) {
+                    TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed");
+                    continue;
+                }
                 card.bundleName = bundleName;
                 card.moduleName = extensionInfo.moduleName;
                 card.abilityName = extensionInfo.name;

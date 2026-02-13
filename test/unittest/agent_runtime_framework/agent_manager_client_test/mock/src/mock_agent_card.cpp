@@ -54,22 +54,6 @@ Capabilities *Capabilities::Unmarshalling(Parcel &parcel)
     return capabilities;
 }
 
-bool Authentication::ReadFromParcel(Parcel &parcel)
-{
-    return true;
-}
-
-bool Authentication::Marshalling(Parcel &parcel) const
-{
-    return true;
-}
-
-Authentication *Authentication::Unmarshalling(Parcel &parcel)
-{
-    Authentication *authentication = new (std::nothrow) Authentication();
-    return authentication;
-}
-
 bool Skill::ReadFromParcel(Parcel &parcel)
 {
     return true;
@@ -108,10 +92,9 @@ nlohmann::json AgentCard::ToJson() const
     return jsonObject;
 }
 
-AgentCard AgentCard::FromJson(nlohmann::json jsonObject)
+bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
 {
-    AgentCard agentCard;
-    return agentCard;
+    return true;
 }
 
 int32_t AgentCardsRawData::RawDataCpy(const void *readdata)
