@@ -186,13 +186,9 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecord(const AAFwk::AbilityR
 
     // Check AGENT_UI launch limit before creating new record
     bool isAgentUI = AAFwk::UIExtensionWrapper::IsAgentUIExtension(abilityRequest.abilityInfo.extensionAbilityType);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
     if (isAgentUI) {
-        auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-        if (callerRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerRecord for AGENT_UI");
-            return ERR_NULL_OBJECT;
-        }
-        auto ret = CheckAgentUILaunchLimit(callerRecord->GetRecordId(), abilityRequest.abilityInfo.bundleName);
+        auto ret = CheckAgentUILaunchLimit(callerUid, abilityRequest.abilityInfo.bundleName);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "agentUI launch limit check failed, ret:%{public}d", ret);
             return ret;
@@ -218,11 +214,8 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecord(const AAFwk::AbilityR
         }
         // Update AGENT_UI launch record after new record created
         if (isAgentUI && extensionRecord != nullptr && !isLoaded) {
-            auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-            if (callerRecord != nullptr) {
-                UpdateAgentUILaunchRecord(callerRecord->GetRecordId(), abilityRequest.abilityInfo.bundleName,
-                    extensionRecord->extensionRecordId_, false);
-            }
+            UpdateAgentUILaunchRecord(callerUid, abilityRequest.abilityInfo.bundleName,
+                extensionRecord->extensionRecordId_, false);
         }
     }
     if (extensionRecord != nullptr) {
@@ -1151,28 +1144,30 @@ void ExtensionRecordManager::UnRegisterPreloadUIExtensionHostClient(
     }
 }
 
-int32_t ExtensionRecordManager::CheckAgentUILaunchLimit(int32_t callerRecordId, const std::string &bundleName)
+int32_t ExtensionRecordManager::CheckAgentUILaunchLimit(int32_t callerUid, const std::string &bundleName)
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
-    auto& bundleMap = agentUIExtensionRecords_[callerRecordId];
+    auto& bundleMap = agentUIExtensionRecords_[callerUid];
     auto& extensionSet = bundleMap[bundleName];
 
     if (extensionSet.size() >= AGENT_UI_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "agentUI reach limit, callerId:%{public}d, bundle:%{public}s, count:%{public}zu",
-            callerRecordId, bundleName.c_str(), extensionSet.size());
-        return AAFwk::ERR_OVERFLOW;
+        TAG_LOGE(AAFwkTag::ABILITYMGR,
+            "agentUI reach limit, callerUid:%{public}d, bundle:%{public}s, count:%{public}zu",
+            callerUid, bundleName.c_str(), extensionSet.size());
+        return ERR_OVERFLOW;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "agentUI launch allowed, callerId:%{public}d, bundle:%{public}s, count:%{public}zu",
-        callerRecordId, bundleName.c_str(), extensionSet.size());
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "agentUI launch allowed, callerUid:%{public}d, bundle:%{public}s, count:%{public}zu",
+        callerUid, bundleName.c_str(), extensionSet.size());
     return ERR_OK;
 }
 
-void ExtensionRecordManager::UpdateAgentUILaunchRecord(int32_t callerRecordId, const std::string &bundleName,
+void ExtensionRecordManager::UpdateAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName,
     int32_t extensionAbilityId, bool isRemove)
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
-    auto& bundleMap = agentUIExtensionRecords_[callerRecordId];
+    auto& bundleMap = agentUIExtensionRecords_[callerUid];
 
     if (isRemove) {
         auto bundleIt = bundleMap.find(bundleName);
@@ -1183,23 +1178,23 @@ void ExtensionRecordManager::UpdateAgentUILaunchRecord(int32_t callerRecordId, c
         auto extIt = extensionSet.find(extensionAbilityId);
         if (extIt != extensionSet.end()) {
             extensionSet.erase(extIt);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "agentUI removed, callerId:%{public}d, bundle:%{public}s, "
-                "id:%{public}d, count:%{public}zu",
-                callerRecordId, bundleName.c_str(), extensionAbilityId, extensionSet.size());
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
+                "agentUI removed, callerUid:%{public}d, bundle:%{public}s, id:%{public}d, count:%{public}zu",
+                callerUid, bundleName.c_str(), extensionAbilityId, extensionSet.size());
         }
         if (extensionSet.empty()) {
             bundleMap.erase(bundleIt);
         }
         if (bundleMap.empty()) {
-            agentUIExtensionRecords_.erase(callerRecordId);
+            agentUIExtensionRecords_.erase(callerUid);
         }
     } else {
         auto& extensionSet = bundleMap[bundleName];
         if (extensionSet.find(extensionAbilityId) == extensionSet.end()) {
             extensionSet.insert(extensionAbilityId);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "agentUI launched, callerId:%{public}d, bundle:%{public}s, "
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "agentUI launched, callerUid:%{public}d, bundle:%{public}s, "
                 "id:%{public}d, count:%{public}zu",
-                callerRecordId, bundleName.c_str(), extensionAbilityId, extensionSet.size());
+                callerUid, bundleName.c_str(), extensionAbilityId, extensionSet.size());
         }
     }
 }

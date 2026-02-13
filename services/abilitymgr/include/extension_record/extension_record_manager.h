@@ -151,8 +151,8 @@ public:
         int32_t key, const sptr<IRemoteObject::DeathRecipient> &deathRecipient);
 
     // AgentUI extension launch limit management
-    int32_t CheckAgentUILaunchLimit(int32_t callerRecordId, const std::string &bundleName);
-    void UpdateAgentUILaunchRecord(int32_t callerRecordId, const std::string &bundleName,
+    int32_t CheckAgentUILaunchLimit(int32_t callerUid, const std::string &bundleName);
+    void UpdateAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName,
         int32_t extensionAbilityId, bool isRemove);
 
 private:
@@ -171,7 +171,7 @@ private:
     std::map<int32_t, sptr<IRemoteObject>> preloadUIExtensionHostClientCallerTokens_;
 
     // AgentUI extension launch record management
-    // Structure: callerRecordId -> { bundleName -> [extensionAbilityId1, extensionAbilityId2, ...] }
+    // Structure: callerUid -> { bundleName -> [extensionAbilityId1, extensionAbilityId2, ...] }
     std::map<int32_t, std::map<std::string, std::set<int32_t>>> agentUIExtensionRecords_;
     std::mutex agentUIExtensionMutex_;
 
