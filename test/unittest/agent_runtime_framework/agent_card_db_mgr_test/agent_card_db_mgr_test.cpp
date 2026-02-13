@@ -147,7 +147,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_001, TestSize.Level1)
     card1.agentId = "agent_001";
     card1.name = "Test Agent 1";
     card1.description = "Test agent 1 description";
-    card1.url = "https://test1.com";
     card1.version = "1.0.0";
     insertCards.push_back(card1);
 
@@ -202,7 +201,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
     card1.abilityName = "AgentAbility";
     card1.agentId = "agent_multi_001";
     card1.name = "Multi Test Agent 1";
-    card1.url = "https://multi1.com";
     card1.version = "1.0.0";
     cards1.push_back(card1);
 
@@ -213,7 +211,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
     card2.abilityName = "AgentAbility";
     card2.agentId = "agent_multi_002";
     card2.name = "Multi Test Agent 2";
-    card2.url = "https://multi2.com";
     card2.version = "1.0.0";
     cards2.push_back(card2);
 
@@ -224,7 +221,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
     card3.abilityName = "AgentAbility";
     card3.agentId = "agent_multi_003";
     card3.name = "Multi Test Agent 3";
-    card3.url = "https://multi3.com";
     card3.version = "1.0.0";
     cards3.push_back(card3);
 
@@ -262,7 +258,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
     card1.abilityName = "AgentAbility";
     card1.agentId = "agent_single_001";
     card1.name = "Single Bundle Agent 1";
-    card1.url = "https://single1.com";
     card1.version = "1.0.0";
     insertCards.push_back(card1);
 
@@ -272,7 +267,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
     card2.abilityName = "AgentAbility";
     card2.agentId = "agent_single_002";
     card2.name = "Single Bundle Agent 2";
-    card2.url = "https://single2.com";
     card2.version = "1.0.0";
     insertCards.push_back(card2);
 
@@ -282,7 +276,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
     card3.abilityName = "AgentAbility";
     card3.agentId = "agent_single_003";
     card3.name = "Single Bundle Agent 3";
-    card3.url = "https://single3.com";
     card3.version = "1.0.0";
     insertCards.push_back(card3);
 
@@ -317,7 +310,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
     card.agentId = "agent_verify_001";
     card.name = "Verify Test Agent";
     card.description = "This is a verification test";
-    card.url = "https://verify.com";
     card.version = "2.0.0";
 
     std::vector<std::string> inputModes = {"text", "voice"};
@@ -341,7 +333,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
         if (queryCard.agentId == "agent_verify_001") {
             EXPECT_TRUE(queryCard.bundleName == "com.test.verify");
             EXPECT_TRUE(queryCard.name == "Verify Test Agent");
-            EXPECT_TRUE(queryCard.url == "https://verify.com");
             EXPECT_TRUE(queryCard.version == "2.0.0");
             found = true;
             break;
@@ -366,7 +357,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_006, TestSize.Level1)
     card.abilityName = "AgentAbility";
     card.agentId = "agent_delete_001";
     card.name = "Delete Test Agent";
-    card.url = "https://delete.com";
     card.version = "1.0.0";
     insertCards.push_back(card);
 
@@ -422,7 +412,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_007, TestSize.Level1)
     card.abilityName = "AgentAbility";
     card.agentId = "agent_emptyvec_001";
     card.name = "Empty Vector Test";
-    card.url = "https://emptyvec.com";
     card.version = "1.0.0";
     insertCards.push_back(card);
 

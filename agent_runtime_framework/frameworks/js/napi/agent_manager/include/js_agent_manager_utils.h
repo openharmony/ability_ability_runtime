@@ -23,7 +23,6 @@ namespace OHOS {
 namespace AgentRuntime {
 napi_value CreateJsProvider(napi_env env, const Provider &provider);
 napi_value CreateJsCapabilities(napi_env env, const Capabilities &capabilities);
-napi_value CreateJsAuthentication(napi_env env, const Authentication &authentication);
 napi_value CreateJsSkill(napi_env env, const Skill &skill);
 napi_value CreateJsSkillArray(napi_env env, const std::vector<std::shared_ptr<Skill>> &skills);
 napi_value CreateJsAgentCard(napi_env env, const AgentCard &card);

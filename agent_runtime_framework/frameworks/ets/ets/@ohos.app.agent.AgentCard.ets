@@ -35,16 +35,6 @@ class CapabilitiesImpl implements Capabilities {
   public stateTransitionHistory?: boolean;
 }
 
-export interface Authentication {
-  schemes: Array<string>;
-  credentials?: string;
-}
-
-class AuthenticationImpl implements Authentication {
-  public schemes: Array<string> = {};
-  public credentials?: string;
-}
-
 export interface Skill {
   id: string;
   name: string;
@@ -53,6 +43,7 @@ export interface Skill {
   examples?: Array<string>;
   inputModes?: Array<string>;
   outputModes?: Array<string>;
+  extension?: string;
 }
 
 class SkillImpl implements Skill {
@@ -63,6 +54,7 @@ class SkillImpl implements Skill {
   public examples?: Array<string>;
   public inputModes?: Array<string>;
   public outputModes?: Array<string>;
+  public extension?: string;
 }
 
 export interface AgentCard {
@@ -73,15 +65,16 @@ export interface AgentCard {
   appIndex: int;
   name: string;
   description: string;
-  url: string;
   provider?: Provider;
   version: string;
   documentationUrl?: string;
   capabilities: Capabilities;
-  authentication?: Authentication;
   defaultInputModes?: Array<string>;
   defaultOutputModes?: Array<string>;
   skills?: Array<Skill>;
+  extension?: string;
+  category?: string;
+  iconUrl?: string;
 }
 
 class AgentCardImpl implements AgentCard {
@@ -92,13 +85,14 @@ class AgentCardImpl implements AgentCard {
   public appIndex: int;
   public name: string = '';
   public description: string = '';
-  public url: string = '';
   public provider?: Provider;
   public version: string = '';
   public documentationUrl?: string;
   public capabilities: Capabilities = new CapabilitiesImpl() as Capabilities;
-  public authentication?: Authentication;
   public defaultInputModes?: Array<string>;
   public defaultOutputModes?: Array<string>;
   public skills?: Array<Skill>;
+  public extension?: string;
+  public category?: string;
+  public iconUrl?: string;
 }
