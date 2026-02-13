@@ -259,24 +259,6 @@ private:
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo) override;
     void CompleteBackground(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
-    void UpdateAgentUILaunchRecord(int32_t callerRecordId, const std::string &bundleName,
-        int32_t extensionAbilityId, bool isRemove);
-
-    /**
-     * @brief Check if the caller can launch the AGENT_UI extension.
-     * @param callerRecordId The caller's record ID.
-     * @param bundleName The target bundle name.
-     * @return Returns ERR_OK if allowed, ERR_OVERFLOW if limit exceeded (max 5 per caller per bundle).
-     */
-    int32_t CheckAgentUILaunchLimit(int32_t callerRecordId, const std::string &bundleName, int32_t extensionAbilityId);
-
-    /**
-     * @brief Check if the ability is AGENT_UI type.
-     * @param abilityInfo The ability info to check.
-     * @return Returns true if AGENT_UI type, false otherwise.
-     */
-    static bool IsAgentUIType(const AppExecFwk::AbilityInfo &abilityInfo);
-
     class PreloadUIExtensionHostClientDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         using PreloadUIExtensionHostClientDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
@@ -295,11 +277,6 @@ private:
     std::mutex uiExtensionMapMutex_;
     std::mutex preloadUIExtRecipientMapMutex_;
     std::map<int32_t, sptr<IRemoteObject::DeathRecipient>> preloadUIExtensionHostClientDeathRecipients_;
-
-    // AgentUI extension launch record management
-    // Structure: "callerRecordID" -> { "bundleName" -> [extensionAbilityId1, extensionAbilityId2, ...] }
-    std::map<int64_t, std::map<std::string, std::set<int64_t>>> agentUIExtensionRecords_;
-    std::mutex agentUIExtensionMutex_;
 
     DISALLOW_COPY_AND_MOVE(UIExtensionAbilityManager);
 };
