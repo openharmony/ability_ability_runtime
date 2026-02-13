@@ -1560,5 +1560,28 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_ShouldSkipTimeout_0400, TestSize
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_ShouldSkipTimeout_0400 end.");
 }
+
+/**
+ * @tc.name: AppRunningRecord_SetKillAppReason_0100
+ * @tc.desc: Test SetKillAppReason works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetKillAppReason_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->SetKillId(1);
+    EXPECT_EQ(appRunningRecord->GetKillId(), 1);
+    std::string reason = "TestReason";
+    appRunningRecord->SetKillMsg(reason);
+    EXPECT_EQ(appRunningRecord->GetKillMsg(), reason);
+    appRunningRecord->SetInnerMsg(reason);
+    EXPECT_EQ(appRunningRecord->GetInnerMsg(), reason);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
