@@ -30,9 +30,6 @@ namespace AppExecFwk {
 namespace {
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 constexpr int RESET_RATIO = 2;
-#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
-constexpr int32_t CHARACTER_WIDTH = 2;
-#endif
 
 constexpr int32_t BACKGROUND_REPORT_COUNT_MAX = 5;
 constexpr int32_t WATCHDOG_REPORT_COUNT_MAX = 5;
@@ -133,7 +130,7 @@ void Watchdog::SetHiTraceChainId()
     }
     OHOS::HiviewDFX::HiTraceChain::SetId(hitraceId);
     std::stringstream ss;
-    ss << std::hex << std::setfill('0') << std::setw(CHARACTER_WIDTH) << hitraceId.GetChainId();
+    ss << std::hex << hitraceId.GetChainId();
     TAG_LOGI(AAFwkTag::APPDFR, "Main thread blocked, %{public}s", ss.str().c_str());
 }
 #endif
@@ -253,11 +250,11 @@ void Watchdog::Timer()
     }
     int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
-#ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
-    if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (WEARABLE_CHECK_INTERVAL_TIME / RESET_RATIO)) {
-#else
-    if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
-#endif
+    #ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
+        if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (WEARABLE_CHECK_INTERVAL_TIME / RESET_RATIO)) {
+    #else
+        if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
+    #endif
         lastWatchTime_ = now;
     }
 }
@@ -270,13 +267,13 @@ void Watchdog::ReportEvent()
     }
     int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
-#ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
-    if ((now - lastWatchTime_) > (RESET_RATIO * WEARABLE_CHECK_INTERVAL_TIME) ||
+    #ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
+        if ((now - lastWatchTime_) > (RESET_RATIO * WEARABLE_CHECK_INTERVAL_TIME) ||
         (now - lastWatchTime_) < (WEARABLE_CHECK_INTERVAL_TIME / RESET_RATIO)) {
-#else
-    if ((now - lastWatchTime_) > (RESET_RATIO * CHECK_INTERVAL_TIME) ||
+    #else
+        if ((now - lastWatchTime_) > (RESET_RATIO * CHECK_INTERVAL_TIME) ||
         (now - lastWatchTime_) < (CHECK_INTERVAL_TIME / RESET_RATIO)) {
-#endif
+    #endif
         TAG_LOGI(AAFwkTag::APPDFR,
             "Thread may be blocked, not report time. currTime: %{public}llu, lastTime: %{public}llu",
             static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
