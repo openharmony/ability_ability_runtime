@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "ets_runtime.h"
 #include "singleton.h"
 #include "dfx_jsnapi.h"
 #include "parameters.h"
@@ -75,6 +76,11 @@ enum {
 
 DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application)
     : application_(application)
+{}
+
+DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application,
+    const std::shared_ptr<ApplicationInfo> &appInfo)
+    : application_(application), appInfo_(appInfo)
 {}
 
 bool DumpRuntimeHelper::Check2DOOMDumpOpt()
@@ -228,22 +234,54 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
-    if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::JS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not JS");
+    auto language = runtime->GetLanguage();
+    if (language != OHOS::AbilityRuntime::Runtime::Language::JS &&
+        language != OHOS::AbilityRuntime::Runtime::Language::ETS) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not JS or ETS");
         return;
     }
-    if (info.needLeakobj) {
+    if (info.needLeakobj && language == OHOS::AbilityRuntime::Runtime::Language::JS) {
         std::string checkList = "";
         GetCheckList(runtime, checkList);
         WriteCheckList(checkList);
     }
 
-    if (info.needSnapshot == true) {
+    if (info.needSnapshot && language == OHOS::AbilityRuntime::Runtime::Language::JS) {
         runtime->DumpHeapSnapshot(info.tid, info.needGc, info.needBinary, info.needClearNodeIdCache);
-    } else {
-        if (info.needGc == true) {
-            runtime->ForceFullGC(info.tid);
+        return;
+    }
+    if (info.needGc) {
+        DumpJsHeapGc(runtime, info);
+    }
+}
+
+void DumpRuntimeHelper::DumpJsHeapGc(const std::unique_ptr<AbilityRuntime::Runtime> &runtime,
+    const OHOS::AppExecFwk::JsHeapDumpInfo &info)
+{
+    if (appInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null appInfo");
+        return;
+    }
+    if (appInfo_->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
+        runtime->ForceFullGC(info.tid);
+        TAG_LOGI(AAFwkTag::APPKIT, "force full gc for arkts 1.0");
+        return;
+    }
+    auto &etsRuntime = static_cast<OHOS::AbilityRuntime::ETSRuntime&>(*runtime);
+    etsRuntime.XGC();
+    if (appInfo_->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+        runtime->ForceFullGC(info.tid);
+        TAG_LOGI(AAFwkTag::APPKIT, "force full gc for arkts 1.2");
+        return;
+    }
+    if (appInfo_->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        auto& jsRuntimePtr = etsRuntime.GetJsRuntime();
+        auto jsRuntime = static_cast<OHOS::AbilityRuntime::JsRuntime*>(jsRuntimePtr.get());
+        if (jsRuntime != nullptr) {
+            jsRuntime->ForceFullGC(info.tid);
         }
+        runtime->ForceFullGC(info.tid);
+        TAG_LOGI(AAFwkTag::APPKIT, "force full gc for arkts hybrid");
     }
 }
 
