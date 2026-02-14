@@ -53,6 +53,7 @@ int32_t AppExitReasonHelper::RecordAppWithReason(int32_t pid, int32_t uid, const
     }
     GetRunningProcessInfo(pid, userId, bundleName, processInfo);
     ExitReason tmpReason(exitReason.reason, exitReason.subReason, exitReason.exitMsg);
+    tmpReason.killId = exitReason.killId;
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, tmpReason, processInfo, false);
     if (resultCode != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
@@ -514,6 +515,7 @@ int32_t AppExitReasonHelper::AddProcessExitReason(const RecordExitReasonParams &
         TAG_LOGW(AAFwkTag::ABILITYMGR, "notify failed:%{public}d", ret);
     }
     ExitReason tmpReason(exitReason.reason, exitReason.subReason, exitReason.exitMsg);
+    tmpReason.killId = exitReason.killId;
     return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
         params.bundleName, params.accessTokenId, abilityLists, tmpReason, params.processInfo,
         params.fromKillWithReason);

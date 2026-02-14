@@ -51,6 +51,7 @@ const std::string JSON_KEY_PSS_VALUE = "pss_value";
 const std::string JSON_KEY_RSS_VALUE = "rss_value";
 const std::string JSON_KEY_PROSESS_STATE = "process_state";
 constexpr const char* PUT_TASK_NAME = "kvStorePtr_->Put";
+const std::string JSON_KEY_KILL_ID = "kill_id";
 } // namespace
 AppExitReasonDataManager::AppExitReasonDataManager() {}
 
@@ -223,9 +224,9 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
                 UpdateAppExitReason(accessTokenId, abilityList, exitReason, processInfo, withKillMsg);
             }
             TAG_LOGD(AAFwkTag::ABILITYMGR, "current bundle name: %{public}s, tokenId:%{private}u, reason: %{public}d,"
-                "  exitMsg: %{public}s, abilityName:%{public}s isSetReason:%{public}d",
+                "  exitMsg: %{public}s, abilityName:%{public}s, isSetReason:%{public}d, killId:%{public}d",
                 bundleName.c_str(), accessTokenId, exitReason.reason, exitReason.exitMsg.c_str(),
-                abilityName.c_str(), isSetReason);
+                abilityName.c_str(), isSetReason, exitReason.killId);
             if (abilityList.empty()) {
                 InnerDeleteAppExitReason(accessTokenIdStr);
             }
@@ -327,6 +328,7 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
         { JSON_KEY_TIME_STAMP, nowMs.count() },
         { JSON_KEY_ABILITY_LIST, abilityList },
         { JSON_KEY_PROSESS_STATE, processInfo.state_ },
+        { JSON_KEY_KILL_ID, exitReason.killId }
     };
     DistributedKv::Value value(jsonObject.dump());
     return value;
@@ -386,6 +388,9 @@ void AppExitReasonDataManager::ConvertReasonFromValue(const nlohmann::json &json
     }
     if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()) {
         exitReason.exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
+    }
+    if (jsonObject.contains(JSON_KEY_KILL_ID) && jsonObject[JSON_KEY_KILL_ID].is_number_integer()) {
+        exitReason.killId = jsonObject.at(JSON_KEY_KILL_ID).get<int32_t>();
     }
     if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()) {
         auto killMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
