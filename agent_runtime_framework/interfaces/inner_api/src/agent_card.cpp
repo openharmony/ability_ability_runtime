@@ -35,14 +35,14 @@ constexpr uint32_t LENGTH_512 = 512;
 constexpr uint32_t LENGTH_1280 = 1280;
 constexpr uint32_t LENGTH_51200 = 51200;
 
-bool Provider::ReadFromParcel(Parcel &parcel)
+bool AgentProvider::ReadFromParcel(Parcel &parcel)
 {
     organization = parcel.ReadString();
     url = parcel.ReadString();
     return true;
 }
 
-bool Provider::Marshalling(Parcel &parcel) const
+bool AgentProvider::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(organization)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write organization failed");
@@ -55,9 +55,9 @@ bool Provider::Marshalling(Parcel &parcel) const
     return true;
 }
 
-Provider *Provider::Unmarshalling(Parcel &parcel)
+AgentProvider *AgentProvider::Unmarshalling(Parcel &parcel)
 {
-    Provider *provider = new (std::nothrow) Provider();
+    AgentProvider *provider = new (std::nothrow) AgentProvider();
     if (provider && !provider->ReadFromParcel(parcel)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "provider unmarshalling failed");
         delete provider;
@@ -66,7 +66,7 @@ Provider *Provider::Unmarshalling(Parcel &parcel)
     return provider;
 }
 
-nlohmann::json Provider::ToJson()
+nlohmann::json AgentProvider::ToJson()
 {
     return nlohmann::json {
         { "organization", organization },
@@ -74,7 +74,7 @@ nlohmann::json Provider::ToJson()
     };
 }
 
-bool Provider::FromJson(const nlohmann::json &jsonObject, Provider &provider)
+bool AgentProvider::FromJson(const nlohmann::json &jsonObject, AgentProvider &provider)
 {
     if (!jsonObject.contains("organization") || !jsonObject["organization"].is_string()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed, organization not exist");
@@ -97,15 +97,17 @@ bool Provider::FromJson(const nlohmann::json &jsonObject, Provider &provider)
     return true;
 }
 
-bool Capabilities::ReadFromParcel(Parcel &parcel)
+bool AgentCapabilities::ReadFromParcel(Parcel &parcel)
 {
     streaming = parcel.ReadBool();
     pushNotifications = parcel.ReadBool();
     stateTransitionHistory = parcel.ReadBool();
+    extension = parcel.ReadString();
+    extendedAgentCard = parcel.ReadBool();
     return true;
 }
 
-bool Capabilities::Marshalling(Parcel &parcel) const
+bool AgentCapabilities::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteBool(streaming)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write streaming failed");
@@ -119,12 +121,20 @@ bool Capabilities::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write stateTransitionHistory failed");
         return false;
     }
+    if (!parcel.WriteString(extension)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write extension failed");
+        return false;
+    }
+    if (!parcel.WriteBool(extendedAgentCard)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write extendedAgentCard failed");
+        return false;
+    }
     return true;
 }
 
-Capabilities *Capabilities::Unmarshalling(Parcel &parcel)
+AgentCapabilities *AgentCapabilities::Unmarshalling(Parcel &parcel)
 {
-    Capabilities *capabilities = new (std::nothrow) Capabilities();
+    AgentCapabilities *capabilities = new (std::nothrow) AgentCapabilities();
     if (capabilities && !capabilities->ReadFromParcel(parcel)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "capabilities unmarshalling failed");
         delete capabilities;
@@ -133,18 +143,20 @@ Capabilities *Capabilities::Unmarshalling(Parcel &parcel)
     return capabilities;
 }
 
-nlohmann::json Capabilities::ToJson()
+nlohmann::json AgentCapabilities::ToJson()
 {
-    return nlohmann::json {
-        { "streaming", streaming },
-        { "pushNotifications", pushNotifications },
-        { "stateTransitionHistory", stateTransitionHistory },
-    };
+    nlohmann::json jsonObject;
+    jsonObject["streaming"] = streaming;
+    jsonObject["pushNotifications"] = pushNotifications;
+    jsonObject["stateTransitionHistory"] = stateTransitionHistory;
+    jsonObject["extension"] = extension;
+    jsonObject["extendedAgentCard"] = extendedAgentCard;
+    return jsonObject;
 }
 
-Capabilities Capabilities::FromJson(const nlohmann::json &jsonObject)
+AgentCapabilities AgentCapabilities::FromJson(const nlohmann::json &jsonObject)
 {
-    Capabilities capabilities;
+    AgentCapabilities capabilities;
     if (jsonObject.contains("streaming") && jsonObject["streaming"].is_boolean()) {
         capabilities.streaming = jsonObject.at("streaming");
     }
@@ -154,10 +166,20 @@ Capabilities Capabilities::FromJson(const nlohmann::json &jsonObject)
     if (jsonObject.contains("stateTransitionHistory") && jsonObject["stateTransitionHistory"].is_boolean()) {
         capabilities.stateTransitionHistory = jsonObject.at("stateTransitionHistory");
     }
+    if (jsonObject.contains("extension") && jsonObject["extension"].is_string()) {
+        capabilities.extension = jsonObject["extension"];
+        if (capabilities.extension.length() < 1 || capabilities.extension.length() > LENGTH_1280) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "extension length is invalid");
+            capabilities.extension = "";
+        }
+    }
+    if (jsonObject.contains("extendedAgentCard") && jsonObject["extendedAgentCard"].is_boolean()) {
+        capabilities.extendedAgentCard = jsonObject.at("extendedAgentCard");
+    }
     return capabilities;
 }
 
-bool Skill::ReadFromParcel(Parcel &parcel)
+bool AgentSkill::ReadFromParcel(Parcel &parcel)
 {
     id = parcel.ReadString();
     name = parcel.ReadString();
@@ -178,7 +200,7 @@ bool Skill::ReadFromParcel(Parcel &parcel)
     return true;
 }
 
-bool Skill::Marshalling(Parcel &parcel) const
+bool AgentSkill::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(id)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write id failed");
@@ -215,9 +237,9 @@ bool Skill::Marshalling(Parcel &parcel) const
     return true;
 }
 
-Skill *Skill::Unmarshalling(Parcel &parcel)
+AgentSkill *AgentSkill::Unmarshalling(Parcel &parcel)
 {
-    Skill *skill = new (std::nothrow) Skill();
+    AgentSkill *skill = new (std::nothrow) AgentSkill();
     if (skill && !skill->ReadFromParcel(parcel)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "skill unmarshalling failed");
         delete skill;
@@ -226,7 +248,7 @@ Skill *Skill::Unmarshalling(Parcel &parcel)
     return skill;
 }
 
-nlohmann::json Skill::ToJson()
+nlohmann::json AgentSkill::ToJson()
 {
     return nlohmann::json {
         { "id", id },
@@ -240,7 +262,7 @@ nlohmann::json Skill::ToJson()
     };
 }
 
-bool Skill::FromJson(const nlohmann::json &jsonObject, Skill &skill)
+bool AgentSkill::FromJson(const nlohmann::json &jsonObject, AgentSkill &skill)
 {
     if (!jsonObject.contains("id") || !jsonObject["id"].is_string()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed, id not exist");
@@ -316,19 +338,103 @@ bool Skill::FromJson(const nlohmann::json &jsonObject, Skill &skill)
     return true;
 }
 
-bool AgentCard::ReadFromParcel(Parcel &parcel)
+bool AgentAppInfo::ReadFromParcel(Parcel &parcel)
 {
     bundleName = parcel.ReadString();
     moduleName = parcel.ReadString();
     abilityName = parcel.ReadString();
+    deviceTypes = parcel.ReadString();
+    minAppVersion = parcel.ReadString();
+    return true;
+}
+
+bool AgentAppInfo::Marshalling(Parcel &parcel) const
+{
+    if (!parcel.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write bundleName failed");
+        return false;
+    }
+    if (!parcel.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write moduleName failed");
+        return false;
+    }
+    if (!parcel.WriteString(abilityName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write abilityName failed");
+        return false;
+    }
+    if (!parcel.WriteString(deviceTypes)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write deviceTypes failed");
+        return false;
+    }
+    if (!parcel.WriteString(minAppVersion)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write minAppVersion failed");
+        return false;
+    }
+    return true;
+}
+
+AgentAppInfo *AgentAppInfo::Unmarshalling(Parcel &parcel)
+{
+    AgentAppInfo *appInfo = new (std::nothrow) AgentAppInfo();
+    if (appInfo && !appInfo->ReadFromParcel(parcel)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "appInfo unmarshalling failed");
+        delete appInfo;
+        appInfo = nullptr;
+    }
+    return appInfo;
+}
+
+nlohmann::json AgentAppInfo::ToJson()
+{
+    return nlohmann::json {
+        { "bundleName", bundleName },
+        { "moduleName", moduleName },
+        { "abilityName", abilityName },
+        { "deviceTypes", deviceTypes },
+        { "minAppVersion", minAppVersion },
+    };
+}
+
+bool AgentAppInfo::FromJson(const nlohmann::json &jsonObject, AgentAppInfo &appInfo)
+{
+    if (jsonObject.contains("bundleName") && jsonObject["bundleName"].is_string()) {
+        appInfo.bundleName = jsonObject["bundleName"];
+    }
+    if (jsonObject.contains("moduleName") && jsonObject["moduleName"].is_string()) {
+        appInfo.moduleName = jsonObject["moduleName"];
+    }
+    if (jsonObject.contains("abilityName") && jsonObject["abilityName"].is_string()) {
+        appInfo.abilityName = jsonObject["abilityName"];
+    }
+    if (jsonObject.contains("deviceTypes") && jsonObject["deviceTypes"].is_string()) {
+        appInfo.deviceTypes = jsonObject["deviceTypes"];
+        if (appInfo.deviceTypes.length() < 1 || appInfo.deviceTypes.length() > LENGTH_128) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "deviceTypes length is invalid");
+            appInfo.deviceTypes = "";
+            return false;
+        }
+    }
+    if (jsonObject.contains("minAppVersion") && jsonObject["minAppVersion"].is_string()) {
+        appInfo.minAppVersion = jsonObject["minAppVersion"];
+        if (appInfo.minAppVersion.length() < 1 || appInfo.minAppVersion.length() > LENGTH_32) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "minAppVersion length is invalid");
+            appInfo.minAppVersion = "";
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AgentCard::ReadFromParcel(Parcel &parcel)
+{
     agentId = parcel.ReadString();
     name = parcel.ReadString();
     description = parcel.ReadString();
-    provider.reset(parcel.ReadParcelable<Provider>());
+    provider.reset(parcel.ReadParcelable<AgentProvider>());
     version = parcel.ReadString();
     documentationUrl = parcel.ReadString();
     category = parcel.ReadString();
-    capabilities.reset(parcel.ReadParcelable<Capabilities>());
+    capabilities.reset(parcel.ReadParcelable<AgentCapabilities>());
     if (!parcel.ReadStringVector(&defaultInputModes)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "read defaultInputModes failed");
         return false;
@@ -343,28 +449,17 @@ bool AgentCard::ReadFromParcel(Parcel &parcel)
         return false;
     }
     for (uint32_t i = 0; i < skillSize; i++) {
-        std::shared_ptr<Skill> skill(parcel.ReadParcelable<Skill>());
+        std::shared_ptr<AgentSkill> skill(parcel.ReadParcelable<AgentSkill>());
         skills.push_back(skill);
     }
     extension = parcel.ReadString();
     iconUrl = parcel.ReadString();
+    appInfo.reset(parcel.ReadParcelable<AgentAppInfo>());
     return true;
 }
 
 bool AgentCard::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "write bundleName failed");
-        return false;
-    }
-    if (!parcel.WriteString(moduleName)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "write moduleName failed");
-        return false;
-    }
-    if (!parcel.WriteString(abilityName)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "write abilityName failed");
-        return false;
-    }
     if (!parcel.WriteString(agentId)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write agentId failed");
         return false;
@@ -423,6 +518,10 @@ bool AgentCard::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::SER_ROUTER, "write category failed");
         return false;
     }
+    if (!parcel.WriteParcelable(appInfo.get())) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "write appInfo failed");
+        return false;
+    }
     return true;
 }
 
@@ -440,9 +539,6 @@ AgentCard *AgentCard::Unmarshalling(Parcel &parcel)
 nlohmann::json AgentCard::ToJson() const
 {
     nlohmann::json jsonObject = nlohmann::json {
-        { "bundleName", bundleName },
-        { "moduleName", moduleName },
-        { "abilityName", abilityName },
         { "agentId", agentId },
         { "name", name },
         { "description", description },
@@ -484,21 +580,17 @@ nlohmann::json AgentCard::ToJson() const
         jsonObject["category"] = category;
     }
 
+    // Optional appInfo field
+    if (appInfo != nullptr) {
+        jsonObject["appInfo"] = appInfo->ToJson();
+    }
+
     return jsonObject;
 }
 
 bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
 {
     // Required fields
-    if (jsonObject.contains("bundleName") && jsonObject["bundleName"].is_string()) {
-        agentCard.bundleName = jsonObject["bundleName"];
-    }
-    if (jsonObject.contains("moduleName") && jsonObject["moduleName"].is_string()) {
-        agentCard.moduleName = jsonObject["moduleName"];
-    }
-    if (jsonObject.contains("abilityName") && jsonObject["abilityName"].is_string()) {
-        agentCard.abilityName = jsonObject["abilityName"];
-    }
     if (!jsonObject.contains("agentId") || !jsonObject["agentId"].is_string()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed, agentId not exist");
         return false;
@@ -526,6 +618,14 @@ bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
     if (agentCard.category.length() < 1 || agentCard.category.length() > LENGTH_64) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "category is invalid");
         return false;
+    }
+    if (jsonObject.contains("appInfo") && jsonObject["appInfo"].is_object()) {
+        agentCard.appInfo = std::make_shared<AgentAppInfo>();
+        if (!AgentAppInfo::FromJson(jsonObject["appInfo"], *agentCard.appInfo)) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "appInfo FromJson failed");
+            agentCard.appInfo = nullptr;
+            return false;
+        }
     }
     if (!jsonObject.contains("description") || !jsonObject["description"].is_string()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed, description not exist");
@@ -569,15 +669,15 @@ bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
 
     // Optional objects
     if (jsonObject.contains("provider") && jsonObject["provider"].is_object()) {
-        auto provider = std::make_shared<Provider>();
-        if (Provider::FromJson(jsonObject["provider"], *provider)) {
+        auto provider = std::make_shared<AgentProvider>();
+        if (AgentProvider::FromJson(jsonObject["provider"], *provider)) {
             agentCard.provider = provider;
         }
     }
 
     if (jsonObject.contains("capabilities") && jsonObject["capabilities"].is_object()) {
-        auto capabilities = std::make_shared<Capabilities>();
-        *capabilities = Capabilities::FromJson(jsonObject["capabilities"]);
+        auto capabilities = std::make_shared<AgentCapabilities>();
+        *capabilities = AgentCapabilities::FromJson(jsonObject["capabilities"]);
         agentCard.capabilities = capabilities;
     }
 
@@ -585,8 +685,8 @@ bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
     if (jsonObject.contains("skills") && jsonObject["skills"].is_array()) {
         for (const auto& skillJson : jsonObject["skills"]) {
             if (skillJson.is_object()) {
-                auto skill = std::make_shared<Skill>();
-                if (Skill::FromJson(skillJson, *skill)) {
+                auto skill = std::make_shared<AgentSkill>();
+                if (AgentSkill::FromJson(skillJson, *skill)) {
                     agentCard.skills.push_back(skill);
                 }
             }

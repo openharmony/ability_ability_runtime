@@ -141,9 +141,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_001, TestSize.Level1)
     // Arrange: Prepare test data
     std::vector<AgentCard> insertCards;
     AgentCard card1;
-    card1.bundleName = "com.test.agent1";
-    card1.moduleName = "entry";
-    card1.abilityName = "AgentAbility";
     card1.agentId = "agent_001";
     card1.name = "Test Agent 1";
     card1.description = "Test agent 1 description";
@@ -196,9 +193,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
 
     std::vector<AgentCard> cards1;
     AgentCard card1;
-    card1.bundleName = "com.test.multiple1";
-    card1.moduleName = "entry";
-    card1.abilityName = "AgentAbility";
     card1.agentId = "agent_multi_001";
     card1.name = "Multi Test Agent 1";
     card1.version = "1.0.0";
@@ -206,9 +200,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
 
     std::vector<AgentCard> cards2;
     AgentCard card2;
-    card2.bundleName = "com.test.multiple2";
-    card2.moduleName = "entry";
-    card2.abilityName = "AgentAbility";
     card2.agentId = "agent_multi_002";
     card2.name = "Multi Test Agent 2";
     card2.version = "1.0.0";
@@ -216,9 +207,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
 
     std::vector<AgentCard> cards3;
     AgentCard card3;
-    card3.bundleName = "com.test.multiple3";
-    card3.moduleName = "entry";
-    card3.abilityName = "AgentAbility";
     card3.agentId = "agent_multi_003";
     card3.name = "Multi Test Agent 3";
     card3.version = "1.0.0";
@@ -253,27 +241,18 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
     // Arrange: Insert multiple cards for the same bundle
     std::vector<AgentCard> insertCards;
     AgentCard card1;
-    card1.bundleName = "com.test.singlebundle";
-    card1.moduleName = "entry";
-    card1.abilityName = "AgentAbility";
     card1.agentId = "agent_single_001";
     card1.name = "Single Bundle Agent 1";
     card1.version = "1.0.0";
     insertCards.push_back(card1);
 
     AgentCard card2;
-    card2.bundleName = "com.test.singlebundle";
-    card2.moduleName = "entry";
-    card2.abilityName = "AgentAbility";
     card2.agentId = "agent_single_002";
     card2.name = "Single Bundle Agent 2";
     card2.version = "1.0.0";
     insertCards.push_back(card2);
 
     AgentCard card3;
-    card3.bundleName = "com.test.singlebundle";
-    card3.moduleName = "entry";
-    card3.abilityName = "AgentAbility";
     card3.agentId = "agent_single_003";
     card3.name = "Single Bundle Agent 3";
     card3.version = "1.0.0";
@@ -304,9 +283,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
     // Arrange: Insert a card with specific data
     std::vector<AgentCard> insertCards;
     AgentCard card;
-    card.bundleName = "com.test.verify";
-    card.moduleName = "entry";
-    card.abilityName = "AgentAbility";
     card.agentId = "agent_verify_001";
     card.name = "Verify Test Agent";
     card.description = "This is a verification test";
@@ -331,7 +307,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
     bool found = false;
     for (const auto &queryCard : queryCards) {
         if (queryCard.agentId == "agent_verify_001") {
-            EXPECT_TRUE(queryCard.bundleName == "com.test.verify");
             EXPECT_TRUE(queryCard.name == "Verify Test Agent");
             EXPECT_TRUE(queryCard.version == "2.0.0");
             found = true;
@@ -352,9 +327,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_006, TestSize.Level1)
     // Arrange: Insert data then delete it
     std::vector<AgentCard> insertCards;
     AgentCard card;
-    card.bundleName = "com.test.todelete";
-    card.moduleName = "entry";
-    card.abilityName = "AgentAbility";
     card.agentId = "agent_delete_001";
     card.name = "Delete Test Agent";
     card.version = "1.0.0";
@@ -407,9 +379,6 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_007, TestSize.Level1)
     // Arrange: Prepare a fresh empty vector
     std::vector<AgentCard> insertCards;
     AgentCard card;
-    card.bundleName = "com.test.emptyvec";
-    card.moduleName = "entry";
-    card.abilityName = "AgentAbility";
     card.agentId = "agent_emptyvec_001";
     card.name = "Empty Vector Test";
     card.version = "1.0.0";
