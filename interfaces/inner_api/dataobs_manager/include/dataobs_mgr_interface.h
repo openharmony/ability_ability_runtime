@@ -36,6 +36,8 @@ private:
     uint32_t firstCallerTokenID = 0;
     int32_t firstCallerPid = 0;
     bool isDataShare = false;
+    // fullTokenID's high 32 bits for system permission check purpose
+    uint64_t firstCallerFullTokenID_ = 0;
 public:
     DataObsOption() {}
     DataObsOption(bool isSystem):isSystem(isSystem) {}
@@ -67,6 +69,14 @@ public:
     void SetDataShare(bool flag)
     {
         isDataShare = flag;
+    }
+    void SetFirstCallerFullTokenID(uint64_t fulltoken)
+    {
+        firstCallerFullTokenID_ = fulltoken;
+    }
+    uint64_t FirstCallerFullTokenID()
+    {
+        return firstCallerFullTokenID_;
     }
 };
 
