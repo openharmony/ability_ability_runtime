@@ -62,7 +62,7 @@ public:
     }
 
     virtual int32_t NotifyMtpMounted(const std::string &id, const std::string &path,
-    const std::string &desc, const std::string &uuid) override
+ 	    const std::string &desc, const std::string &uuid, const std::string &fstype) override
     {
         return E_OK;
     }
