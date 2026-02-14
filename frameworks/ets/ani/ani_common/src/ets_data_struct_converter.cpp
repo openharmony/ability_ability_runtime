@@ -107,12 +107,14 @@ ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
     env->Object_SetPropertyByName_Int(object, "rss", lastExitDetailInfo.rss);
     env->Object_SetPropertyByName_Int(object, "pss", lastExitDetailInfo.pss);
     env->Object_SetPropertyByName_Long(object, "timestamp", lastExitDetailInfo.timestamp);
+    if (!lastExitDetailInfo.killReason.empty()) {
+        env->Object_SetPropertyByName_Ref(object, "killReason", GetAniString(env, lastExitDetailInfo.killReason));
+    }
 
     ani_enum_item stateItem {};
     auto etsProcessState = ConvertToEtsAppProcessState(
         static_cast<AppExecFwk::AppProcessState>(lastExitDetailInfo.processState), false);
-    AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env, ENUMNAME_PROCESS,
-        etsProcessState, stateItem);
+    AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env, ENUMNAME_PROCESS, etsProcessState, stateItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "processState", stateItem)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "processState failed status:%{public}d", status);
         return nullptr;
