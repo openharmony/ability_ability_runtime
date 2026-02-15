@@ -334,7 +334,6 @@ constexpr const char* SCENEBOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 constexpr const char* SPECIFY_TOKEN_ID = "specifyTokenId";
 constexpr const char* PROCESS_SUFFIX = "embeddable";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
-constexpr int32_t DEFAULT_REQUEST_CODE = -1;
 constexpr const char* PARAM_PREVENT_STARTABILITY = "persist.sys.abilityms.prevent_startability";
 constexpr const char* SUSPEND_SERVICE_CONFIG_FILE = "/etc/efficiency_manager/prevent_startability_whitelist.json";
 constexpr int32_t MAX_BUFFER = 2048;
@@ -9148,12 +9147,12 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
     auto retrySubscribeScreenUnlockedEventTask = [aams = weak_from_this(), unlockedEventSubscriber = subscriber,
                                                      retryCount, isUserUnlock = isUserUnlockSubscriber]() {
         CHECK_POINTER_LOG(unlockedEventSubscriber, "unlockedEventSubscriber nullptr");
-        bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(unlockedEventSubscriber);
         auto obj = aams.lock();
         if (obj == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "retry subscribe screen unlocked event, obj null");
             return;
         }
+        bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(unlockedEventSubscriber);
         if (subResult) {
             if (!isUserUnlock) {
                 obj->isSubscribed_ = true;
@@ -9165,9 +9164,7 @@ void AbilityManagerService::RetrySubscribeUnlockedEvent(int32_t retryCount,
             obj->RetrySubscribeUnlockedEvent(retryCount - 1, unlockedEventSubscriber, isUserUnlock);
             return;
         }
-        if (!retryCount) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "SU life, subscribe err:%{public}d", isUserUnlock);
-        }
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SU life, subscribe err:%{public}d", isUserUnlock);
     };
     constexpr int32_t delaytime = 200 * 1000; // us
     ffrt::submit(std::move(retrySubscribeScreenUnlockedEventTask),
