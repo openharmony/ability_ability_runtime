@@ -48,9 +48,7 @@ public:
     MockIUserCallback() = default;
     virtual ~MockIUserCallback() = default;
 
-    void OnStopUserDone(int userId, int errcode) override {}
-    void OnStartUserDone(int userId, int errcode) override {}
-    void OnLogoutUserDone(int userId, int errcode)  override {}
+    void OnUserCmdDone(int userId, int errcode) override {}
 
     sptr<IRemoteObject> AsObject() override
     {

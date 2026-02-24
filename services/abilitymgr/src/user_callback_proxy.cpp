@@ -19,19 +19,9 @@
 
 namespace OHOS {
 namespace AAFwk {
-void UserCallbackProxy::OnStopUserDone(int userId, int errcode)
+void UserCallbackProxy::OnUserCmdDone(int userId, int errcode)
 {
-    SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_STOP_USER_DONE);
-}
-
-void UserCallbackProxy::OnStartUserDone(int userId, int errcode)
-{
-    SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_START_USER_DONE);
-}
-
-void UserCallbackProxy::OnLogoutUserDone(int userId, int errcode)
-{
-    SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_LOGOUT_USER_DONE);
+    SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_USER_CMD_DONE);
 }
 
 void UserCallbackProxy::SendRequestCommon(int userId, int errcode, IUserCallback::UserCallbackCmd cmd)
