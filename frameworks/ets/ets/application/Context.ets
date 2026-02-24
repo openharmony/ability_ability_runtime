@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
 
-class Cleaner {
+export class Cleaner {
   public ptr: long = 0;
   public nativePtr: long = 0;
   constructor(ptr: long, nativePtr: long) {
