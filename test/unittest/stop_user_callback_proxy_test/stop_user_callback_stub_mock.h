@@ -45,9 +45,7 @@ public:
 
     int code_ = 0;
 
-    virtual void OnStopUserDone(int userId, int errcode) {};
-    virtual void OnStartUserDone(int userId, int errcode) {}
-    virtual void OnLogoutUserDone(int userId, int errcode) {}
+    virtual void OnUserCmdDone(int userId, int errcode) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

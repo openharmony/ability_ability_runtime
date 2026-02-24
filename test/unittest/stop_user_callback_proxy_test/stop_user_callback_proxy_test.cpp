@@ -50,40 +50,40 @@ void StopUserCallbackProxyTest::SetUp()
 
 /*
  * Feature: UserCallbackProxy
- * Function: OnStopUserDone
+ * Function: OnUserCmdDone
  * SubFunction: NA
- * FunctionPoints: UserCallbackProxy OnStopUserDone
+ * FunctionPoints: UserCallbackProxy OnUserCmdDone
  * EnvConditions: NA
- * CaseDescription: Verify OnStopUserDone
+ * CaseDescription: Verify OnUserCmdDone
  */
-HWTEST_F(StopUserCallbackProxyTest, OnStopUserDone_001, TestSize.Level1)
+HWTEST_F(StopUserCallbackProxyTest, OnUserCmdDone_001, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &StopUserCallbackStubMock::InvokeSendRequest));
     int userId = 0;
     int errcode = 0;
-    proxy_->OnStopUserDone(userId, errcode);
-    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_STOP_USER_DONE, mock_->code_);
+    proxy_->OnUserCmdDone(userId, errcode);
+    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_USER_CMD_DONE, mock_->code_);
 }
 
 /*
  * Feature: UserCallbackProxy
- * Function: OnStopUserDone
+ * Function: OnUserCmdDone
  * SubFunction: NA
- * FunctionPoints: UserCallbackProxy OnStopUserDone
+ * FunctionPoints: UserCallbackProxy OnUserCmdDone
  * EnvConditions: NA
- * CaseDescription: Verify OnStopUserDone
+ * CaseDescription: Verify OnUserCmdDone
  */
-HWTEST_F(StopUserCallbackProxyTest, OnStopUserDone_002, TestSize.Level1)
+HWTEST_F(StopUserCallbackProxyTest, OnUserCmdDone_002, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &StopUserCallbackStubMock::InvokeErrorSendRequest));
     int userId = 0;
     int errcode = 0;
-    proxy_->OnStopUserDone(userId, errcode);
-    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_STOP_USER_DONE, mock_->code_);
+    proxy_->OnUserCmdDone(userId, errcode);
+    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_USER_CMD_DONE, mock_->code_);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

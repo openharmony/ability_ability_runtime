@@ -23,9 +23,7 @@ class MockIUserCallback : public OHOS::AAFwk::IUserCallback {
 public:
     MockIUserCallback() = default;
     virtual ~MockIUserCallback() = default;
-    virtual void OnStopUserDone(int userId, int errcode) override {}
-    virtual void OnStartUserDone(int userId, int errcode) override {}
-    virtual void OnLogoutUserDone(int userId, int errcode) override {}
+    virtual void OnUserCmdDone(int userId, int errcode) override {}
     virtual OHOS::sptr<IRemoteObject> AsObject()
     {
         return nullptr;
