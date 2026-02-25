@@ -37,6 +37,7 @@
 #include "mock_my_status.h"
 #include "mock_sa_call.h"
 #include "unlock_screen_manager.h"
+#include "view_data.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,6 +49,7 @@ namespace AAFwk {
 namespace {
 const int32_t USER_ID_U100 = 100;
 const int32_t APP_MEMORY_SIZE = 512;
+constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
 }  // namespace
 class AbilityManagerServiceSecondTest : public testing::Test {
 public:
@@ -2008,7 +2010,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
     abilityRequest_.appInfo.isSystemApp = true;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_WRONG_INTERFACE_CALL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_002 end.");
 }
 
