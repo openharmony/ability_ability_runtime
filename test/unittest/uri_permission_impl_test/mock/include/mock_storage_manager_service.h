@@ -469,6 +469,21 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t Encrypt(const std::string &volumeId, const std::string &password) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetCryptProgressById(const std::string &volumeId, int32_t &progress) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t NotifyEncryptVolumeStateChanged(const VolumeInfoStr &volumeInfoStr) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
