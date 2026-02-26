@@ -69,7 +69,7 @@ public:
         return result;
     }
 
-    int32_t ClearPermissionTokenByMap(uint32_t tokenId)
+    int32_t ClearPermissionTokenByMap(uint32_t tokenId, uint64_t timeNow)
     {
         return 0;
     }
