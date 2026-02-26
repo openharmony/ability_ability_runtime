@@ -57,6 +57,11 @@ public:
 
     bool Initialize() override;
 
+    /**
+     * Notifies test is about to be destroyed.
+     */
+    void Stop() override;
+
 private:
     JsTestRunner(JsRuntime &jsRuntime,
         const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo, bool isFaJsModel);
