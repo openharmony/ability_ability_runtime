@@ -83,6 +83,7 @@ ohos_shared_library("libappms") {
   defines += [ "AMS_LOG_DOMAIN = 0xD001303" ]
   defines += [ "OHOS_ACCOUNT_ENABLED" ]
   defines += [ "INCLUDE_ZURI" ]
+  defines += [ "APP_MGR_KILL_REASON_TAG" ]
 
   if (product_name != "ohcore") {
     defines += [ "APP_MGR_SERVICE_APPMS" ]

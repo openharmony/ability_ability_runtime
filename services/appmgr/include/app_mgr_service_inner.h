@@ -2150,6 +2150,9 @@ private:
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
         bool isNeedExit = false);
+#ifdef APP_MGR_KILL_REASON_TAG
+    void RecordAppfreezeKillReason(int32_t pid, const FaultData &faultData);
+#endif
     void AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord,
         sptr<IRemoteObject> token);
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
