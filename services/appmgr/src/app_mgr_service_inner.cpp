@@ -118,7 +118,11 @@
 #ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
-#include "xcollie/process_kill_reason.h"
+#endif
+#ifdef APP_MGR_KILL_REASON_TAG
+#include "ability_manager_client.h"
+#include "ability_state.h"
+#include "exit_reason.h"
 #endif
 
 namespace OHOS {
@@ -3292,7 +3296,7 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
         return;
     }
-    std::string appRunningUniqueId = std::to_string(appRecord->GetAppStartTime());
+    std::string appRunningUniqueId = std::to_string(appRecord->GetAppRunningUniqueId());
     AAFwk::EventInfo eventInfo;
     SetKilledEventInfo(appRecord, eventInfo);
     std::string newReason = appRecord->GetKillReason().empty() ? defaultReason : appRecord->GetKillReason();
@@ -5126,7 +5130,7 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
     }
     bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
         appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
-    std::string appRunningUniqueId = std::to_string(appRecord->GetAppStartTime());
+    std::string appRunningUniqueId = std::to_string(appRecord->GetAppRunningUniqueId());
     AAFwk::EventInfo eventInfo;
     SetKilledEventInfo(appRecord, eventInfo);
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HISYSEVENT_BEHAVIOR, eventInfo);
@@ -7731,9 +7735,9 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
                 TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception faultData: %{public}s,pid: %{public}d "
                     "will exit because"" %{public}s", bundleName.c_str(), pid,
                     innerService->FaultTypeToString(faultData.faultType).c_str());
-                std::string reason = AppExecFwk::AppfreezeManager::GetInstance()->CheckInBackGround(faultData) ?
-                    AppFreezeType::BG_FREEZE_WARNING : faultData.errorObject.name;
-                innerService->KillProcessByPid(pid, reason);
+#ifdef APP_MGR_KILL_REASON_TAG
+                innerService->RecordAppfreezeKillReason(pid, faultData);
+#endif
                 return;
             }
         };
@@ -7879,6 +7883,20 @@ bool AppMgrServiceInner::CheckAppFault(const std::shared_ptr<AppRunningRecord> &
     return false;
 }
 
+#ifdef APP_MGR_KILL_REASON_TAG
+void AppMgrServiceInner::RecordAppfreezeKillReason(int32_t pid, const FaultData &faultData)
+{
+    bool isInBackGround = AppExecFwk::AppfreezeManager::GetInstance()->CheckInBackGround(faultData);
+    std::string reason = isInBackGround ? AppFreezeType::BG_FREEZE_WARNING : faultData.errorObject.name;
+    AAFwk::ExitReasonCompability exitReason = { REASON_APP_FREEZE, "Reason:" + reason };
+    exitReason.killId =
+        AppExecFwk::AppfreezeManager::GetInstance()->GetFreezeExitReason(faultData.errorObject.name);
+    exitReason.killMsg = reason;
+    exitReason.innerMsg = reason;
+    AbilityManagerClient::GetInstance()->KillAppWithReason(pid, exitReason);
+}
+#endif
+
 int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
     bool isNeedExit)
 {
@@ -7891,14 +7909,9 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
             uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
             AppExecFwk::AppfreezeManager::GetInstance()->RegisterAppKillTime(pid, now);
-            bool isInBackGround = AppExecFwk::AppfreezeManager::GetInstance()->CheckInBackGround(faultData);
-            std::string reason = isInBackGround ? AppFreezeType::BG_FREEZE_WARNING : faultData.errorObject.name;
-            int killId = -1;
-#ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
-            killId = HiviewDFX::ProcessKillReason::REASON_APP_FREEZE;
+#ifdef APP_MGR_KILL_REASON_TAG
+            innerService->RecordAppfreezeKillReason(pid, faultData);
 #endif
-            innerService->NotifyAppMgrRecordExitReasonCompability(pid, killId, reason, reason);
-            innerService->KillProcessByPid(pid, reason);
             return;
         };
         int32_t waitTime = AppExecFwk::AppfreezeManager::GetInstance()->IsBetaVersion() ?
