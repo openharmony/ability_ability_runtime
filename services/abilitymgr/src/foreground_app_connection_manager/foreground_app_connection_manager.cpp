@@ -35,18 +35,21 @@ bool ForegroundAppConnectionManager::IsForegroundAppConnection(
         TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityRecord is null");
         return false;
     }
-    bool targetUIAbilityQualified = targetAbilityInfo.type == AppExecFwk::AbilityType::PAGE &&
+    bool targetIsSystemUIAbility = targetAbilityInfo.type == AppExecFwk::AbilityType::PAGE &&
         targetAbilityInfo.applicationInfo.isSystemApp;
-    if (!targetUIAbilityQualified && !(UIExtensionWrapper::IsUIExtension(targetAbilityInfo.extensionAbilityType))) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "target not systemApp_UIAbility or UIExtension");
-        return false;
+    bool targetIsUIExtension = UIExtensionWrapper::IsUIExtension(targetAbilityInfo.extensionAbilityType);
+    bool callerIsUIAbility = callerAbilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
+    bool callerIsUIExtension = UIExtensionWrapper::IsUIExtension(
+        callerAbilityRecord->GetAbilityInfo().extensionAbilityType);
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "targetIsSystemUIAbility: %{public}d, targetIsUIExtension: %{public}d, "
+        "callerIsUIAbility: %{public}d, callerIsUIExtension: %{public}d",
+        targetIsSystemUIAbility, targetIsUIExtension, callerIsUIAbility, callerIsUIExtension);
+    if ((targetIsSystemUIAbility || targetIsUIExtension) &&
+        (callerIsUIAbility || callerIsUIExtension)) {
+        return true;
     }
-    if (callerAbilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE &&
-        !(UIExtensionWrapper::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType))) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "caller not UIAbility or UIExtension");
-        return false;
-    }
-    return true;
+    return false;
 }
 
 int32_t ForegroundAppConnectionManager::RegisterObserver(sptr<AbilityRuntime::IForegroundAppConnection> observer)

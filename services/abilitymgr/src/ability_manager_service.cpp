@@ -530,9 +530,14 @@ void AbilityManagerService::InitInterceptor()
      TAG_LOGI(AAFwkTag::ABILITYMGR, "Listen signal msg ...");
  }
 
-void AbilityManagerService::InitInterceptorForScreenUnlock()
+void AbilityManagerService::InitInterceptorForScreenUnlock(int32_t userId)
 {
     if (interceptorExecuter_) {
+        if (userId != DEFAULT_INVAL_VALUE &&
+            AbilityRuntime::AbilityEventMapManager::GetInstance().CheckUserUnlocked(userId)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, user already unlocked, skip interceptor registration");
+            return;
+        }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "SU life, begin");
         interceptorExecuter_->AddInterceptor("ScreenUnlock", std::make_shared<ScreenUnlockInterceptor>());
     }
@@ -9670,7 +9675,7 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
     // Lister screen unlock for auto startup apps.
     if (AppUtils::GetInstance().IsProductAppbootSettingEnabled() && abilityAutoStartupService_ &&
         !abilityAutoStartupService_->FindHandledAutoStartupUsers(userId)) {
-        InitInterceptorForScreenUnlock();
+        InitInterceptorForScreenUnlock(userId);
         SubscribeScreenUnlockedEvent();
     }
 
