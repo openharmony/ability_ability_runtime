@@ -121,7 +121,7 @@ bool AppRunningManager::CheckAppProcessNameIsSame(const std::shared_ptr<AppRunni
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
     const std::string &specifiedProcessFlag, bool *isProCache, const std::string &instanceKey,
-    const std::string &customProcessFlag, const bool notReuseCachedPorcess, bool isPreload)
+    const std::string &customProcessFlag, const bool notReuseCachedPorcess, bool isFromPreload)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -133,13 +133,13 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     auto jointUserId = bundleInfo.jointUserId;
     TAG_LOGD(AAFwkTag::APPMGR, "jointUserId : %{public}s", jointUserId.c_str());
     ClipStringContent(rule, bundleInfo.appId, signCode);
-    auto findSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag, isPreload]
+    auto findSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag, isFromPreload]
         (const auto &pair) {
             return (pair.second != nullptr) &&
             (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (pair.second->GetCustomProcessFlag() == customProcessFlag) &&
             (pair.second->GetSignCode() == signCode) &&
-            AppRunningManager::CheckAppProcessNameIsSame(pair.second, processName, isPreload) &&
+            AppRunningManager::CheckAppProcessNameIsSame(pair.second, processName, isFromPreload) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag()) &&
             !(pair.second->IsKillPrecedeStart());
@@ -151,7 +151,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     }
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord && CheckAppProcessNameIsSame(appRecord, processName, isPreload) &&
+        if (appRecord && CheckAppProcessNameIsSame(appRecord, processName, isFromPreload) &&
             appRecord->GetInstanceKey() == instanceKey &&
             (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
