@@ -27,6 +27,7 @@ public:
     virtual ~AppMgrClient();
 
     int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
+    int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
