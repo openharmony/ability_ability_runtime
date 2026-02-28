@@ -43,6 +43,7 @@ public:
     static AppExecFwk::ExtensionAbilityType extensionAbilityType;
     static int32_t retGetProcessRunningInfoByPid;
     static AppExecFwk::AppProcessState processState;
+    static int32_t retGetBundleNameByPid;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

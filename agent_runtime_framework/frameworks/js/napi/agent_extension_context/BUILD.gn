@@ -60,6 +60,8 @@ ohos_shared_library("js_agent_extension_context") {
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${agent_runtime_framework_path}/frameworks/native/agent_extension/include",
     "${agent_runtime_framework_path}/frameworks/native/agent_extension_context/include",
+    "${agent_runtime_framework_path}/interfaces/inner_api/include",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager/include",
   ]
 
   sources = [
@@ -75,6 +77,10 @@ ohos_shared_library("js_agent_extension_context") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager:agentmanager_napi",
+    "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
+    "${agent_runtime_framework_path}/interfaces/inner_api:agent_manager",
+    "${agent_runtime_framework_path}/frameworks/native/agent_extension_context:agent_extension_context",
   ]
 
   external_deps = [

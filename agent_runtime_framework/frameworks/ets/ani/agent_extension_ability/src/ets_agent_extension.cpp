@@ -19,6 +19,7 @@
 #include "agent_extension.h"
 #include "agent_extension_connection_constants.h"
 #include "agent_extension_context.h"
+#include "agent_manager_client.h"
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "configuration_utils.h"
@@ -112,7 +113,11 @@ void EtsAgentExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::SER_ROUTER, "get aniVM failed");
         return;
     }
-    BindContext(env);
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (record != nullptr) {
+        want = record->GetWant();
+    }
+    BindContext(env, want);
     SetExtensionCommon(EtsExtensionCommon::Create(
         etsRuntime_, static_cast<AppExecFwk::ETSNativeReference &>(*etsObj_), shellContextRef_));
 }
@@ -376,7 +381,7 @@ sptr<IRemoteObject> EtsAgentExtension::GetHostProxyFromWant(const AAFwk::Want &w
     return want.GetRemoteObject(AGENTEXTENSIONHOSTPROXY_KEY);
 }
 
-void EtsAgentExtension::BindContext(ani_env *env)
+void EtsAgentExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "BindContext");
     if (env == nullptr) {
@@ -388,6 +393,19 @@ void EtsAgentExtension::BindContext(ani_env *env)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Failed to get context");
         return;
     }
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null want");
+        return;
+    }
+    std::string agentId = want->GetStringParam(AGENTID_KEY);
+    std::shared_ptr<AgentCard> agentCard = std::make_shared<AgentCard>();
+    auto innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByAgentId(
+        want->GetElement().GetBundleName(), agentId, *agentCard);
+    if (innerErrorCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetAgentCardByAgentId error: %{public}d", innerErrorCode);
+        return;
+    }
+    context->SetAgentCard(agentCard);
     ani_object contextObj = CreateETSContext(env, context);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null contextObj");

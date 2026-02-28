@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
-let ExtensionContext = requireNapi('application.ExtensionContext');
-let hilog = requireNapi('hilog');
-let domainID = 0xD001353;
-let TAG = 'AGENT';
+import ExtensionContext from 'application.ExtensionContext';
+import {AgentCard} from 'application.AgentCard';
+import {AgentCardImpl} from './AgentCard';
 
-class AgentExtensionContext extends ExtensionContext {
-  constructor(obj) {
-    super(obj);
-    this.agentCard = obj.agentCard;
-  }
+export default class AgentExtensionContext extends ExtensionContext {
+    public agentCard: AgentCard = new AgentCardImpl() as AgentCard;
 }
-
-export default AgentExtensionContext;
