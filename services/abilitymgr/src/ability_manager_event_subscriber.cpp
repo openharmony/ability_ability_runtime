@@ -69,6 +69,16 @@ bool AbilityEventMapManager::CheckAllUnlocked(int32_t userId)
     return false;
 }
 
+bool AbilityEventMapManager::CheckUserUnlocked(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = eventMap_.find(userId);
+    if (iter != eventMap_.end()) {
+        return iter->second.userUnlock_;
+    }
+    return false;
+}
+
 AbilityScreenUnlockEventSubscriber::AbilityScreenUnlockEventSubscriber(
     const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void(int32_t)> &screenUnlockCallback)
     : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback)
