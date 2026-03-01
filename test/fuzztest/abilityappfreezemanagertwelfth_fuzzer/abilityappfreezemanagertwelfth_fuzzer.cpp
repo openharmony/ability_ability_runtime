@@ -47,7 +47,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     pid = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     faultType = fdp.ConsumeRandomLengthString();
     stack = fdp.ConsumeRandomLengthString();
-    freeze->CatchJsonStacktrace(pid, faultType, stack);
+    freeze->CatchJsonStacktrace(pid, faultType);
     return true;
 }
 }

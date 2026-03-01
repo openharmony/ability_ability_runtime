@@ -153,9 +153,8 @@ private:
     std::set<int> GetBinderPeerPids(std::string& stack, AppfreezeManager::ParseBinderParam params,
         std::set<int>& asyncPids, AppfreezeManager::TerminalBinder& terminalBinder) const;
     void FindStackByPid(std::string& msg, int pid) const;
-    std::pair<std::string, std::string> CatchJsonStacktrace(
-        int pid, const std::string& faultType, const std::string& stack) const;
-    std::string CatcherStacktrace(int pid, const std::string& stack) const;
+    std::pair<std::string, std::string> CatchJsonStacktrace(int pid, const std::string& faultType) const;
+    std::string CatcherStacktrace(int pid) const;
     FaultData GetFaultNotifyData(const FaultData& faultData, int pid);
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
     std::string GetAppfreezeInfoPath(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
