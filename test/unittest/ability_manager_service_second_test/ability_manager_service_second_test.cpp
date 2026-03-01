@@ -2010,7 +2010,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
     abilityRequest_.appInfo.isSystemApp = true;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_WRONG_INTERFACE_CALL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallAutoFillExtensionPermission_002 end.");
 }
 
