@@ -45,7 +45,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     pid = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     stack = fdp.ConsumeRandomLengthString();
-    freeze->CatcherStacktrace(pid, stack);
+    freeze->CatcherStacktrace(pid);
     return true;
 }
 }
