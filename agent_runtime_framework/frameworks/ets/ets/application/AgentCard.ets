@@ -27,7 +27,7 @@ export interface AgentAppInfo {
   bundleName?: string;
   moduleName?: string;
   abilityName?: string;
-  deviceTypes?: string;
+  deviceTypes?: Array<string>;
   minAppVersion?: string;
 }
 
@@ -35,12 +35,12 @@ class AgentAppInfoImpl implements AgentAppInfo {
   public bundleName?: string;
   public moduleName?: string;
   public abilityName?: string;
-  public deviceTypes?: string;
+  public deviceTypes?: Array<string>;
   public minAppVersion?: string;
 }
 
 export interface AgentCapabilities {
-  streaming: boolean;
+  streaming?: boolean;
   pushNotifications?: boolean;
   stateTransitionHistory?: boolean;
   extension?: string;
@@ -48,7 +48,7 @@ export interface AgentCapabilities {
 }
 
 class AgentCapabilitiesImpl implements AgentCapabilities {
-  public streaming: boolean;
+  public streaming?: boolean;
   public pushNotifications?: boolean;
   public stateTransitionHistory?: boolean;
   public extension?: string;
@@ -79,7 +79,6 @@ class AgentSkillImpl implements AgentSkill {
 
 export interface AgentCard {
   agentId: string;
-  appIndex: int;
   name: string;
   description: string;
   provider?: AgentProvider;
@@ -97,7 +96,6 @@ export interface AgentCard {
 
 class AgentCardImpl implements AgentCard {
   public agentId: string = '';
-  public appIndex: int;
   public name: string = '';
   public description: string = '';
   public provider?: AgentProvider;

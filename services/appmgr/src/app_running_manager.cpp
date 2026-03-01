@@ -761,9 +761,6 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             if (appMgrServiceInner != nullptr) {
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
-            if (appMgrServiceInner != nullptr && !appRecord->GetKillReason().empty()) {
-                appMgrServiceInner->SendProcessKillEvent(appRecord, "OnRemoteDied");
-            }
             AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
         }
     }
@@ -1348,7 +1345,7 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
     return ERR_OK;
 }
 
-int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
+int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap, bool isShellCall)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -1368,7 +1365,7 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
             TAG_LOGW(AAFwkTag::APPMGR, "pid%{public}d not found", pid);
         } else {
             TAG_LOGD(AAFwkTag::APPMGR, "pid%{public}d memory level = %{public}d", pid, it->second);
-            appRecord->ScheduleMemoryLevel(it->second);
+            appRecord->ScheduleMemoryLevel(it->second, isShellCall);
         }
     }
     return ERR_OK;
@@ -1955,7 +1952,7 @@ int32_t AppRunningManager::GetAppRunningUniqueIdByPid(pid_t pid, std::string &ap
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return ERR_INVALID_VALUE;
     }
-    appRunningUniqueId = std::to_string(appRecord->GetAppStartTime());
+    appRunningUniqueId = std::to_string(appRecord->GetAppRunningUniqueId());
     TAG_LOGD(AAFwkTag::APPMGR, "appRunningUniqueId = %{public}s.", appRunningUniqueId.c_str());
     return ERR_OK;
 }
