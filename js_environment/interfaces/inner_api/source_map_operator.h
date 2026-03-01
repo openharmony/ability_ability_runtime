@@ -87,10 +87,6 @@ public:
         return sourceMapObj_;
     }
 
-    bool GetHasFile() const
-    {
-        return hasFile_;
-    }
 private:
     const std::string bundleName_;
     bool hasFile_ = false;
