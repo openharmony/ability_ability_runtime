@@ -15,6 +15,7 @@
 
 #include "agent_card_mgr.h"
 
+#include <algorithm>
 #include <unistd.h>
 
 #include "agent_card.h"
@@ -54,11 +55,21 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Get Bundle Info fail");
         return -1;
     }
-    std::vector<AgentCard> cards;
+    std::map<std::string, AgentCard> cards;
     for (auto const &extensionInfo : bundleInfo.extensionInfos) {
         if (extensionInfo.type != ExtensionAbilityType::AGENT) {
             continue;
         }
+
+        // Find hapModuleInfo's deviceTypes for this extension once
+        std::vector<std::string> hapDeviceTypes;
+        for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (hapModuleInfo.moduleName == extensionInfo.moduleName) {
+                hapDeviceTypes = hapModuleInfo.deviceTypes;
+                break;
+            }
+        }
+
         std::vector<std::string> profileInfos{};
         bundleMgrClient_.GetResConfigFile(extensionInfo, AGENT_CONFIG, profileInfos);
         for (const std::string &profileInfo : profileInfos) {
@@ -81,11 +92,32 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
                 card.appInfo->bundleName = bundleName;
                 card.appInfo->moduleName = extensionInfo.moduleName;
                 card.appInfo->abilityName = extensionInfo.name;
-                cards.push_back(card);
+
+                if (!card.appInfo->deviceTypes.empty()) {
+                    // Take intersection: only keep deviceTypes that exist in hapModuleInfo
+                    std::vector<std::string> filteredDeviceTypes;
+                    for (const auto& deviceType : card.appInfo->deviceTypes) {
+                        if (std::find(hapDeviceTypes.begin(), hapDeviceTypes.end(),
+                            deviceType) != hapDeviceTypes.end()) {
+                            filteredDeviceTypes.push_back(deviceType);
+                        }
+                    }
+                    card.appInfo->deviceTypes = filteredDeviceTypes;
+                }
+                if (card.appInfo->deviceTypes.empty()) {
+                    // If deviceTypes is empty, use hapModuleInfo's deviceTypes
+                    card.appInfo->deviceTypes = hapDeviceTypes;
+                }
+
+                cards[card.agentId] = card;
             }
         }
     }
-    return AgentCardDbMgr::GetInstance().InsertData(bundleName, userId, cards);
+    std::vector<AgentCard> cardVec;
+    for (const auto& [key, value] : cards) {
+        cardVec.push_back(value);
+    }
+    return AgentCardDbMgr::GetInstance().InsertData(bundleName, userId, cardVec);
 }
 
 int32_t AgentCardMgr::HandleBundleUpdate(const std::string &bundleName, int32_t userId)
@@ -120,10 +152,21 @@ int32_t AgentCardMgr::GetAgentCardByAgentId(const std::string &bundleName, const
 {
     std::vector<AgentCard> cards;
     int32_t resultCode = GetAgentCardsByBundleName(bundleName, cards);
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "failed: %{public}d", resultCode);
+        return resultCode;
+    }
+    bool found = false;
     for (const AgentCard &agentCard : cards) {
         if (agentCard.agentId == agentId) {
             card = agentCard;
+            found = true;
+            break;
         }
+    }
+    if (!found) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "not found");
+        return ERR_NAME_NOT_FOUND;
     }
     return resultCode;
 }
