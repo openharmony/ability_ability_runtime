@@ -131,10 +131,8 @@ void JsEnvironment::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator
         return;
     }
 
-    if (sourceMapOperator_ != nullptr && sourceMapOperator_->GetHasFile()) {
+    if (sourceMapOperator_ != nullptr) {
         sourceMapOperator_->InitSourceMap();
-    } else {
-        sourceMapOperator_->SetInitStatus(InitStatus::EXECUTED_SUCCESSFULLY);
     }
 
     auto translateBySourceMapFunc = [&](const std::string& rawStack) -> std::string {
