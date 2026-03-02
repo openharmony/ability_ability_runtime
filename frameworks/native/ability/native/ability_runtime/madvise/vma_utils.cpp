@@ -194,7 +194,7 @@ std::vector<VMARegion> GetFileVmas(const char* filename)
         TAG_LOGE(AAFwkTag::ABILITY, "Invalid filename: null or empty");
         return {};
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "GetFileVmas: searching for %{public}s", filename);
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetFileVmas: searching for %{public}s", filename);
     std::vector<VMARegion> vmaList;
     auto collectCallback = [](const VMARegion* region, void* userdata) -> int {
         std::vector<VMARegion>* list = static_cast<std::vector<VMARegion>*>(userdata);
@@ -202,7 +202,7 @@ std::vector<VMARegion> GetFileVmas(const char* filename)
         return 0;
     };
     IterateMapsInternal(filename, collectCallback, &vmaList);
-    TAG_LOGI(AAFwkTag::UIABILITY, "GetFileVmas: found %{public}zu VMAs for %{public}s", vmaList.size(), filename);
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetFileVmas: found %{public}zu VMAs for %{public}s", vmaList.size(), filename);
     return vmaList;
 }
 
@@ -217,7 +217,7 @@ std::vector<VMARegion> GetFileVmas(const std::vector<std::string>& filenames)
         TAG_LOGE(AAFwkTag::ABILITY, "Filename list is empty");
         return {};
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "GetFileVmas: searching for %{public}zu files", filenames.size());
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetFileVmas: searching for %{public}zu files", filenames.size());
     std::unordered_set<std::string> targetSet(filenames.begin(), filenames.end());
     std::vector<VMARegion> vmaList;
     auto multiFileCallback = [](const VMARegion* region, void* userdata) -> int {
@@ -235,7 +235,7 @@ std::vector<VMARegion> GetFileVmas(const std::vector<std::string>& filenames)
     };
     MultiFileCallbackData callbackData = {targetSet, &vmaList};
     IterateMapsInternal("", multiFileCallback, &callbackData);
-    TAG_LOGI(AAFwkTag::UIABILITY, "GetFileVmas: found %{public}zu VMAs for %{public}zu files",
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetFileVmas: found %{public}zu VMAs for %{public}zu files",
         vmaList.size(), filenames.size());
     return vmaList;
 }
