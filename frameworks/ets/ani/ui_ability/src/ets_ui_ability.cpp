@@ -1373,6 +1373,17 @@ void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     const WantParams &wantParams = want.GetParams();
     std::string arkTSMode = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_ARKTS_MODE);
     InsightIntentExecutorInfo executeInfo;
+    auto delayResultCallback = [intentId = executeParam->insightIntentId_, token = token_]
+        (AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
+        TAG_LOGD(AAFwkTag::UIABILITY, "UiAbility delayResultCallback");
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "ExecuteInsightIntentDone ret : %{public}d", ret);
+        }
+        return ret;
+    };
+    InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
+    bool isDecorator = executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
     if (arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
         auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo, arkTSMode);
         if (!ret) {
@@ -1381,11 +1392,15 @@ void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
                 std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
             return;
         }
+        InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(executeParam->insightIntentId_,
+            {delayResultCallback, isDecorator});
         ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
             etsRuntime_, executeInfo, std::move(callback));
         if (!ret) {
             // callback has removed, release in insight intent executor.
             TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+            InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+                executeParam->insightIntentId_);
         }
     } else {
         auto jsAppWindowStage = CreateJsAppWindowStage();
@@ -1410,11 +1425,15 @@ void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
                 std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
             return;
         }
+        InsightIntentDelayResultCallbackMgr::GetInstance().AddDelayResultCallback(executeParam->insightIntentId_,
+            {delayResultCallback, isDecorator});
         ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
             *jsRuntime, executeInfo, std::move(callback));
         if (!ret) {
             // callback has removed, release in insight intent executor.
             TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+            InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
+                executeParam->insightIntentId_);
         }
     }
 }
