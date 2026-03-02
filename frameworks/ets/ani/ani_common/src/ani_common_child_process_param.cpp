@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
+#include <string>
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -156,15 +157,15 @@ bool UnwrapChildProcessFds(ani_env* env, ani_object object, std::map<std::string
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed to get key value status: %{public}d", status);
             return false;
         }
-        ani_ref aniKey;
-        status = env->TupleValue_GetItem_Ref(static_cast<ani_tuple_value>(keyValue), 0, &aniKey);
+        ani_ref aniKey = nullptr;
+        status = env->Object_GetFieldByName_Ref(static_cast<ani_object>(keyValue), "$0", &aniKey);
         if (ANI_OK != status) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed to get key Item status: %{public}d", status);
             errorMsg = "The type of args.fds must be Record<string, int>.";
             return false;
         }
-        ani_ref aniVal;
-        status = env->TupleValue_GetItem_Ref(static_cast<ani_tuple_value>(keyValue), 1, &aniVal);
+        ani_ref aniVal = nullptr;
+        status = env->Object_GetFieldByName_Ref(static_cast<ani_object>(keyValue), "$1", &aniVal);
         if (ANI_OK != status) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed to get key Item status: %{public}d", status);
             errorMsg = "The type of args.fds must be Record<string, int>.";
