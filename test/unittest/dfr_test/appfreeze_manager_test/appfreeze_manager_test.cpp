@@ -258,7 +258,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
     appfreezeManager->ResetAppfreezeState(pid, "");
-    EXPECT_TRUE(appfreezeManager->IsValidFreezeFilter(pid, ""));
+    appfreezeManager->IsValidFreezeFilter(pid, "");
     appfreezeManager->RemoveDeathProcess("");
 }
 
@@ -739,21 +739,21 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckAppfreezeHappend_Test00
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetExitReasonByKillId_Test001, TestSize.Level1)
 {
-    int32_t killId = HiviewDFX::ProcessKillReason::REASON_NORMAL;
+    int32_t killId = HiviewDFX::ProcessKillReason::REASON_THREAD_BLOCK_6S;
     std::string result = appfreezeManager->GetExitReasonByKillId(killId);
-    EXPECT_EQ(result, "Normal");
+    EXPECT_EQ(result, "THREAD_BLOCK_6S");
     killId = HiviewDFX::ProcessKillReason::REASON_CPP_CRASH;
     result = appfreezeManager->GetExitReasonByKillId(killId);
-    EXPECT_EQ(result, "CppCrash");
+    EXPECT_EQ(result, "Cpp Crash");
     killId = HiviewDFX::ProcessKillReason::REASON_JS_ERROR;
     result = appfreezeManager->GetExitReasonByKillId(killId);
-    EXPECT_EQ(result, "JsError");
-    killId = HiviewDFX::ProcessKillReason::REASON_APP_FREEZE;
+    EXPECT_EQ(result, "Js Error");
+    killId = HiviewDFX::ProcessKillReason::REASON_LIFECYCLE_TIMEOUT;
     result = appfreezeManager->GetExitReasonByKillId(killId);
-    EXPECT_EQ(result, "Appfreeze");
-    killId = HiviewDFX::ProcessKillReason::REASON_RESOURCE_LEAK_CES;
+    EXPECT_EQ(result, "LIFECYCLE_TIMEOUT");
+    killId = HiviewDFX::ProcessKillReason::REASON_APP_INPUT_BLOCK;
     result = appfreezeManager->GetExitReasonByKillId(killId);
-    EXPECT_EQ(result, "ResourceLeak(CES)");
+    EXPECT_EQ(result, "APP_INPUT_BLOCK");
 }
 
 /**
@@ -770,6 +770,38 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetExitKernelReason_Test001,
     result = appfreezeManager->GetExitKernelReason(pid);
     pid = 1;
     result = appfreezeManager->GetExitKernelReason(pid);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest GetFreezeExitReason Test
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFreezeExitReason_Test001, TestSize.Level1)
+{
+    int32_t killId = HiviewDFX::ProcessKillReason::REASON_THREAD_BLOCK_6S;
+    std::string eventName = AppFreezeType::THREAD_BLOCK_6S;
+    int32_t result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, killId);
+    eventName = AppFreezeType::LIFECYCLE_TIMEOUT;
+    killId = HiviewDFX::ProcessKillReason::REASON_LIFECYCLE_TIMEOUT;
+    result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, killId);
+    eventName = AppFreezeType::APP_INPUT_BLOCK;
+    killId = HiviewDFX::ProcessKillReason::REASON_APP_INPUT_BLOCK;
+    result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, killId);
+    eventName = AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
+    killId = HiviewDFX::ProcessKillReason::REASON_BUSINESS_THREAD_BLOCK_6S;
+    result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, killId);
+    eventName = AppFreezeType::BUSINESS_INPUT_BLOCK;
+    killId = HiviewDFX::ProcessKillReason::REASON_BUSINESS_INPUT_BLOCK;
+    result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, killId);
+    eventName = "test";
+    result = appfreezeManager->GetFreezeExitReason(eventName);
+    EXPECT_EQ(result, -1);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

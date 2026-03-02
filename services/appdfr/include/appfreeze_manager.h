@@ -111,6 +111,7 @@ public:
         const std::string& eventName);
     std::string GetExitReasonByKillId(int32_t killId);
     std::string GetExitKernelReason(int32_t pid);
+    int GetFreezeExitReason(const std::string& eventName);
 
 private:
     struct PeerBinderInfo {
