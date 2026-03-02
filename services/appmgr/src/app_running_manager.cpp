@@ -109,12 +109,12 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 }
 
 bool AppRunningManager::CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const std::string &processName, bool isPreload)
+    const std::string &processName, bool isFromPreload)
 {
     if (appRecord == nullptr) {
         return false;
     }
-    return (appRecord->GetProcessName() == processName) && (isPreload
+    return (appRecord->GetProcessName() == processName) && (isFromPreload
         || appRecord->GetPreloadMode() == PreloadMode::PRELOAD_MODULE || !(appRecord->GetExtensionSandBoxFlag()));
 }
 

@@ -136,7 +136,7 @@ public:
      * @return, Return true if matches.
      */
     static bool CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const std::string &processName, bool isPreload = false);
+        const std::string &processName, bool isFromPreload = false);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
