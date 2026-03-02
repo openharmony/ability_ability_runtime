@@ -85,7 +85,8 @@ public:
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
         const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "",
-        const std::string &customProcessFlag = "", const bool notReuseCachedPorcess = false, bool isPreload = false);
+        const std::string &customProcessFlag = "", const bool notReuseCachedPorcess = false,
+        bool isFromPreload = false);
 
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordForSpecifiedProcess(
         int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag);
@@ -135,7 +136,7 @@ public:
      * @return, Return true if matches.
      */
     static bool CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const std::string &processName, bool isPreload);
+        const std::string &processName, bool isFromPreload = false);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
