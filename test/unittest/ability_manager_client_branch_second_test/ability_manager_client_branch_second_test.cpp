@@ -253,5 +253,19 @@ HWTEST_F(AbilityManagerClientBranchSecondTest, AbilityManagerClient_RevokeDelega
     EXPECT_EQ(client_->RevokeDelegator(nullptr), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RevokeDelegator_0100 end");
 }
+
+/**
+ * @tc.number: AbilityManagerClient_GetUserLockedBundleList_0100
+ * @tc.name: GetUserLockedBundleList
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchSecondTest, AbilityManagerClient_GetUserLockedBundleList_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetUserLockedBundleList_0100 start");
+    auto userId = USER_ID;
+    std::unordered_set<std::string> userLockedBundleList;
+    EXPECT_EQ(client_->GetUserLockedBundleList(userId, userLockedBundleList), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetUserLockedBundleList_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
