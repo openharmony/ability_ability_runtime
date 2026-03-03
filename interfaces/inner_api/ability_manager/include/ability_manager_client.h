@@ -1200,7 +1200,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ManualStartAutoStartupApps(int32_t userId);
-    
+
     /**
      * @brief Query the caller's Token ID for anco.
      * @param userId Indicates the user ID.
