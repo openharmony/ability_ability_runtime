@@ -31,6 +31,7 @@
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
 #include "app_mgr_interface.h"
+#include "app_utils.h"
 #include "application_context.h"
 #include "ets_ability_foreground_state_observer.h"
 #include "ets_ability_manager_utils.h"
@@ -126,6 +127,7 @@ public:
     static void CheckSystemApp(ani_env *env);
     static void GetTopAbilityCheck(ani_env *env);
     static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
+    static ani_boolean IsEmbeddedUIExtensionSupported(ani_env *env);
     static void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAppId, ani_object callbackObj);
     static void IsEmbeddedOpenAllowedCheck(ani_env *env, ani_object contextObj);
     static void NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver);
@@ -360,6 +362,17 @@ void EtsAbilityManager::IsEmbeddedOpenAllowedCheck(ani_env *env, ani_object cont
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null UIAbilityContext");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param context failed, must be UIAbilityContext.");
     }
+}
+
+ani_boolean EtsAbilityManager::IsEmbeddedUIExtensionSupported(ani_env *env)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "IsEmbeddedUIExtensionSupported");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return ANI_FALSE;
+    }
+    bool result = AAFwk::AppUtils::GetInstance().IsMultiProcessModel();
+    return result ? ANI_TRUE : ANI_FALSE;
 }
 
 void EtsAbilityManager::IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj,
@@ -1119,6 +1132,8 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAbilityManager::GetAbilityRunningInfos) },
         ani_native_function { "nativeGetExtensionRunningInfos", "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityManager::GetExtensionRunningInfos) },
+        ani_native_function { "nativeIsEmbeddedUIExtensionSupported", ":z",
+            reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedUIExtensionSupported) },
         ani_native_function { "nativeIsEmbeddedOpenAllowed",
             "C{application.Context.Context}C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedOpenAllowed) },

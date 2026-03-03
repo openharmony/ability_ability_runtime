@@ -39,6 +39,7 @@ export default namespace abilityManager {
   export native function nativeCheckPreloadUIExtensionAbilityPermission() : void;
   export native function nativeGetTopAbilityCheck() : void;
   export native function nativeGetAbilityRunningInfos(callback:AsyncCallbackWrapper<Array<AbilityRunningInfo>>) : void;
+  export native function nativeIsEmbeddedUIExtensionSupported() : boolean;
   export native function nativeIsEmbeddedOpenAllowed(context: Context, appId: string, callback:AsyncCallbackWrapper<boolean>) : void;
   export native function nativeIsEmbeddedOpenAllowedCheck(context: Context): void;
   export native function nativeOn(type:string, observer: AbilityForegroundStateObserver): void;
@@ -132,6 +133,10 @@ export default namespace abilityManager {
     taskpool.execute((): void => {
       abilityManager.nativeGetAbilityRunningInfos(syncCall);
     });
+  }
+
+  function isEmbeddedUIExtensionSupported(): boolean {
+    return abilityManager.nativeIsEmbeddedUIExtensionSupported();
   }
 
   function isEmbeddedOpenAllowed(context: Context, appId: string): Promise<boolean> {

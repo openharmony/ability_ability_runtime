@@ -21,6 +21,7 @@
 #include <future>
 
 #include "ability_business_error.h"
+#include "app_utils.h"
 #include "ability_manager_client.h"
 #include "accesstoken_kit.h"
 #include "acquire_share_data_callback_stub.h"
@@ -123,6 +124,11 @@ public:
     static napi_value Off(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAbilityManager, OnOff);
+    }
+
+    static napi_value IsEmbeddedUIExtensionSupported(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsAbilityManager, OnIsEmbeddedUIExtensionSupported);
     }
 
     static napi_value IsEmbeddedOpenAllowed(napi_env env, napi_callback_info info)
@@ -696,6 +702,15 @@ private:
         return handleEscape.Escape(result);
     }
 
+    napi_value OnIsEmbeddedUIExtensionSupported(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+        HandleEscape handleEscape(env);
+        bool isSupported = AAFwk::AppUtils::GetInstance().IsMultiProcessModel();
+        napi_value result = CreateJsValue(env, isSupported);
+        return handleEscape.Escape(result);
+    }
+
     napi_value OnIsEmbeddedOpenAllowed(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -1197,6 +1212,8 @@ napi_value JsAbilityManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsAbilityManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsAbilityManager::Off);
     BindNativeFunction(env, exportObj, "isEmbeddedOpenAllowed", moduleName, JsAbilityManager::IsEmbeddedOpenAllowed);
+    BindNativeFunction(
+        env, exportObj, "isEmbeddedUIExtensionSupported", moduleName, JsAbilityManager::IsEmbeddedUIExtensionSupported);
     BindNativeFunction(
         env, exportObj, "restartSelfAtomicService", moduleName, JsAbilityManager::RestartSelfAtomicService);
     BindNativeFunction(
