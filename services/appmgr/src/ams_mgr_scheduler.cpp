@@ -255,7 +255,6 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSp
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
-
     std::function<void()> killProcessesByUserIdFunc = [amsMgrServiceInner = amsMgrServiceInner_, userId,
                                                           isNeedSendAppSpawnMsg, callback]() {
         amsMgrServiceInner->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);

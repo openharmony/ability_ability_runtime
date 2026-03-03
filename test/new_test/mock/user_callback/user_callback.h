@@ -24,16 +24,10 @@ class IUserCallback : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.UserCallback");
 
-    virtual void OnStopUserDone(int userId, int errcode) {}
-
-    virtual void OnStartUserDone(int userId, int errcode) {}
-
-    virtual void OnLogoutUserDone(int userId, int errcode) {}
+    virtual void OnUserCmdDone(int userId, int errcode) {}
 
     enum UserCallbackCmd {
-        ON_STOP_USER_DONE = 0,
-        ON_START_USER_DONE = 1,
-        ON_LOGOUT_USER_DONE = 2,
+        ON_USER_CMD_DONE = 0,
         CMD_MAX
     };
 };

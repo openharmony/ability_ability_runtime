@@ -31,29 +31,7 @@ public:
     {}
     ~UserCallbackProxy() = default;
 
-    /**
-     * @brief OnStopUserDone.
-     *
-     * @param userId userId.
-     * @param errcode errcode.
-     */
-    virtual void OnStopUserDone(int userId, int errcode) override;
-
-    /**
-     * @brief OnStartUserDone.
-     *
-     * @param userId userId.
-     * @param errcode errcode.
-     */
-    virtual void OnStartUserDone(int userId, int errcode) override;
-
-    /**
-     * @brief OnLogoutUserDone.
-     *
-     * @param userId userId.
-     * @param errcode errcode.
-     */
-    virtual void OnLogoutUserDone(int userId, int errcode) override;
+    virtual void OnUserCmdDone(int userId, int errcode) override;
 private:
     void SendRequestCommon(int userId, int errcode, IUserCallback::UserCallbackCmd cmd);
 

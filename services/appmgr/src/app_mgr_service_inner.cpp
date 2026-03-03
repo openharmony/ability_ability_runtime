@@ -2237,25 +2237,25 @@ bool AppMgrServiceInner::DoAllProcessExitCallback(std::list<SimpleProcessInfo> &
         }
         if (appMgrInner == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "appMgrInner nullptr");
-            callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_APP_MANAGER_NULL);
+            callback->OnUserCmdDone(userId, AAFwk::ERR_LOGOUT_USER_APP_MANAGER_NULL);
             return;
         }
         if (ProcessUtil::IsAllProcessKilled(processInfos)) {
             TAG_LOGI(AAFwkTag::APPMGR, "all process exit");
-            callback->OnLogoutUserDone(userId, ERR_OK);
+            callback->OnUserCmdDone(userId, ERR_OK);
             return;
         }
         int64_t currentTime = appMgrInner->SystemTimeMillisecond();
         if (currentTime - startTime > LOGOUT_USER_TIMEOUT_MILLISION_SECONDS) {
             TAG_LOGE(AAFwkTag::APPMGR, "kill process timeout");
-            callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_KILL_PROCESS_TIMEOUT);
+            callback->OnUserCmdDone(userId, AAFwk::ERR_LOGOUT_USER_KILL_PROCESS_TIMEOUT);
             return;
         }
         appMgrInner->DoAllProcessExitCallback(processInfos, userId, callback, startTime);
     };
     if (taskHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ nullptr");
-        callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_TASK_HANDLE_NULL);
+        callback->OnUserCmdDone(userId, AAFwk::ERR_LOGOUT_USER_TASK_HANDLE_NULL);
         return false;
     }
     taskHandler_->SubmitTaskJust(checkProcessExistCallback, "DelayCheckProcessExit",
@@ -2271,7 +2271,7 @@ int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<SimpleProcessInfo
     if (WaitForRemoteProcessExit(processInfos, startTime)) {
         TAG_LOGI(AAFwkTag::APPMGR, "remote process exited successs");
         if (callback) {
-            callback->OnLogoutUserDone(userId, ERR_OK);
+            callback->OnUserCmdDone(userId, ERR_OK);
         }
         return result;
     }
@@ -3773,7 +3773,7 @@ void AppMgrServiceInner::KillProcessesByUserId(int32_t userId, bool isNeedSendAp
         std::list<SimpleProcessInfo> processInfos;
         if (!appRunningManager_->GetProcessInfosByUserId(userId, processInfos)) {
             TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
-            callback->OnLogoutUserDone(userId, ERR_OK);
+            callback->OnUserCmdDone(userId, ERR_OK);
             if (isNeedSendAppSpawnMsg) {
                 TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
                 SendAppSpawnUninstallDebugHapMsg(userId);

@@ -45,11 +45,8 @@ public:
     UserCallbackStubFuzzTest() = default;
     virtual ~UserCallbackStubFuzzTest()
     {}
-    void OnStopUserDone(int userId, int errcode) override
+    void OnUserCmdDone(int userId, int errcode) override
     {}
-    void OnStartUserDone(int userId, int errcode) override {}
-
-    void OnLogoutUserDone(int userId, int errcode) override {}
 };
 const std::u16string APPMGR_INTERFACE_TOKEN = u"ohos.aafwk.AppManager";
 uint32_t GetU32Data(const char* ptr)
@@ -70,9 +67,6 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     MessageParcel reply;
     MessageOption option;
     backStub->OnRemoteRequest(code, dataParcel, reply, option);
-    backStub->OnStopUserDoneInner(dataParcel, reply);
-    backStub->OnStartUserDoneInner(dataParcel, reply);
-    backStub->OnLogoutUserDoneInner(dataParcel, reply);
 
     return true;
 }

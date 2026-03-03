@@ -9645,24 +9645,24 @@ int AbilityManagerService::StartUser(int userId, uint64_t displayId, sptr<IUserC
     CHECK_POINTER_AND_RETURN_LOG(callback, INVALID_PARAMETERS_ERR, "startUser callback is nullptr");
     auto checkRet = AbilityRuntime::UserController::GetInstance().CheckUserParam(userId);
     if (checkRet != ERR_OK) {
-        callback->OnStartUserDone(userId, checkRet);
+        callback->OnUserCmdDone(userId, checkRet);
         return checkRet;
     }
 
     if (userId == U1_USER_ID) {
         UserStarted(userId);
-        callback->OnStartUserDone(userId, ERR_OK);
+        callback->OnUserCmdDone(userId, ERR_OK);
         return ERR_OK;
     }
     if (AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId, displayId)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "StartUser current:%{public}d", userId);
-        callback->OnStartUserDone(userId, ERR_OK);
+        callback->OnUserCmdDone(userId, ERR_OK);
         return ERR_OK;
     }
 
     if (ShouldBlockAllAppStart() && callback != nullptr) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "low-mem mode, disallow");
-        callback->OnStartUserDone(userId, ERR_ALL_APP_START_BLOCKED);
+        callback->OnUserCmdDone(userId, ERR_ALL_APP_START_BLOCKED);
         return ERR_ALL_APP_START_BLOCKED;
     }
     // Lister screen unlock for auto startup apps.
@@ -9721,7 +9721,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
 
     auto checkRet = AbilityRuntime::UserController::GetInstance().CheckStopUserParam(userId);
     if (checkRet != ERR_OK) {
-        callback->OnStopUserDone(userId, checkRet);
+        callback->OnUserCmdDone(userId, checkRet);
         return checkRet;
     }
 
@@ -9733,16 +9733,18 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
 
     if (AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "user current:%{public}d", userId);
-        callback->OnStopUserDone(userId, ERR_OK);
+        callback->OnUserCmdDone(userId, ERR_OK);
         return ERR_OK;
     }
-    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId);
+    DelayedSingleton<AppScheduler>::GetInstance()->SetEnableStartProcessFlagByUserId(userId, false);
+    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId,
+        system::GetBoolParameter(DEVELOPER_MODE_STATE, false), callback);
 
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto missionListWrap = GetMissionListWrap();
         if (!missionListWrap) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListWrap null");
-            callback->OnStopUserDone(userId, -1);
+            callback->OnUserCmdDone(userId, -1);
             return -1;
         }
         missionListWrap->RemoveUserDir(userId);
@@ -9750,7 +9752,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
     ClearUserData(userId);
     AbilityRuntime::UserController::GetInstance().DeleteUserLockStatus(userId);
     AbilityRuntime::UserController::GetInstance().ClearUserId(userId);
-    callback->OnStopUserDone(userId, ERR_OK);
+    callback->OnUserCmdDone(userId, ERR_OK);
     UpdateApplicationKeepAlive(userId);
     return ERR_OK;
 }
@@ -9788,7 +9790,7 @@ int AbilityManagerService::LogoutUser(int32_t userId, sptr<IUserCallback> callba
     }
     auto checkRet = AbilityRuntime::UserController::GetInstance().CheckUserParam(userId);
     if (checkRet != ERR_OK) {
-        callback->OnLogoutUserDone(userId, checkRet);
+        callback->OnUserCmdDone(userId, checkRet);
         return checkRet;
     }
     // clear userInfo for autoStartup
@@ -10441,7 +10443,7 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, uint6
     }
 #endif
     if (callback) {
-        callback->OnStartUserDone(userId, ret);
+        callback->OnUserCmdDone(userId, ret);
     }
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
