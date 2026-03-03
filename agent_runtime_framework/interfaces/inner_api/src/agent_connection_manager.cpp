@@ -336,14 +336,26 @@ ErrCode AgentConnectionManager::ConnectAbilityInner(const AAFwk::Want &want,
 {
     if (connectCallback == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null connectCallback");
-        return AAFwk::ERR_INVALID_CALLER;
+        return AAFwk::INVALID_PARAMETERS_ERR;
     }
 
     // Extract agentId from Want
     std::string agentId = want.GetStringParam(AGENTID_KEY);
     if (agentId.empty()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "empty agentId");
-        return ERR_INVALID_VALUE;
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+
+    // Check bundle name
+    if (want.GetElement().GetBundleName().empty()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "empty bundleName");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+
+    // Check ability name
+    if (want.GetElement().GetAbilityName().empty()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "empty abilityName");
+        return AAFwk::INVALID_PARAMETERS_ERR;
     }
 
     TAG_LOGD(AAFwkTag::SER_ROUTER, "agentId: %{public}s, element: %{public}s/%{public}s/%{public}s",

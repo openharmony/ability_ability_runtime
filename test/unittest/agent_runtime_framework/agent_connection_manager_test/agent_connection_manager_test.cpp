@@ -101,27 +101,57 @@ HWTEST_F(AgentConnectionManagerTest, GetInstance_001, TestSize.Level1)
 /**
 * @tc.name  : ConnectAgentExtensionAbility_ShouldReturnError_WhenCallbackIsNull
 * @tc.number: ConnectAgentExtensionAbility_001
-* @tc.desc  : Test ConnectAgentExtensionAbility returns ERR_INVALID_CALLER when callback is null
+* @tc.desc  : Test ConnectAgentExtensionAbility returns INVALID_PARAMETERS_ERR when callback is null
 */
 HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_001, TestSize.Level1)
 {
     Want want;
     sptr<AbilityConnectCallback> callback = nullptr;
     auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
-    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    EXPECT_EQ(result, AAFwk::INVALID_PARAMETERS_ERR);
 }
 
 /**
 * @tc.name  : ConnectAgentExtensionAbility_ShouldReturnError_WhenAgentIdIsEmpty
 * @tc.number: ConnectAgentExtensionAbility_002
-* @tc.desc  : Test ConnectAgentExtensionAbility returns ERR_INVALID_VALUE when agentId is empty
+* @tc.desc  : Test ConnectAgentExtensionAbility returns INVALID_PARAMETERS_ERR when agentId is empty
 */
 HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_002, TestSize.Level1)
 {
     Want want;
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
     auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, AAFwk::INVALID_PARAMETERS_ERR);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_ShouldReturnError_WhenBundleNameIsEmpty
+* @tc.number: ConnectAgentExtensionAbility_005
+* @tc.desc  : Test ConnectAgentExtensionAbility returns INVALID_PARAMETERS_ERR when bundleName is empty
+*/
+HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_005, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "", "test.ability", "test.module");
+    sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
+    auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
+    EXPECT_EQ(result, AAFwk::INVALID_PARAMETERS_ERR);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_ShouldReturnError_WhenAbilityNameIsEmpty
+* @tc.number: ConnectAgentExtensionAbility_006
+* @tc.desc  : Test ConnectAgentExtensionAbility returns INVALID_PARAMETERS_ERR when abilityName is empty
+*/
+HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_006, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "", "test.module");
+    sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
+    auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
+    EXPECT_EQ(result, AAFwk::INVALID_PARAMETERS_ERR);
 }
 
 /**
@@ -133,6 +163,7 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_003, TestSize.
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_INVALID_VALUE;
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
     auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
@@ -148,6 +179,7 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_004, TestSize.
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
     auto result = AgentConnectionManager::GetInstance().ConnectAgentExtensionAbility(want, callback);
@@ -187,6 +219,7 @@ HWTEST_F(AgentConnectionManagerTest, DisconnectAgentExtensionAbility_003, TestSi
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -206,6 +239,7 @@ HWTEST_F(AgentConnectionManagerTest, DisconnectAgentExtensionAbility_004, TestSi
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -225,6 +259,7 @@ HWTEST_F(AgentConnectionManagerTest, DisconnectAgentExtensionAbility_005, TestSi
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback1 = new MockAbilityConnectCallback();
@@ -273,7 +308,7 @@ HWTEST_F(AgentConnectionManagerTest, DisconnectNonexistentService_002, TestSize.
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -484,7 +519,7 @@ HWTEST_F(AgentConnectionManagerTest, AgentConnection_OnAbilityConnectDone_004, T
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback1 = new MockAbilityConnectCallback();
@@ -560,7 +595,7 @@ HWTEST_F(AgentConnectionManagerTest, AgentConnection_OnAbilityDisconnectDone_003
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -588,7 +623,7 @@ HWTEST_F(AgentConnectionManagerTest, AgentConnection_OnAbilityDisconnectDone_004
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -617,7 +652,7 @@ HWTEST_F(AgentConnectionManagerTest, RemoveConnection_002, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -643,7 +678,7 @@ HWTEST_F(AgentConnectionManagerTest, RemoveConnection_003, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -754,11 +789,11 @@ HWTEST_F(AgentConnectionManagerTest, MatchConnection_001, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("agent1"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
 
     Want want2;
     want2.SetParam(AGENTID_KEY, std::string("agent2"));
-    want2.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want2.SetElementName("", "test.bundle", "test.ability", "test.module");
 
     // Create a connection
     want2.SetParam(AGENTID_KEY, std::string("agent2"));
@@ -780,13 +815,13 @@ HWTEST_F(AgentConnectionManagerTest, MatchConnection_002, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     sptr<IRemoteObject> remoteObj1 = sptr<MockIRemoteObject>::MakeSptr();
     want.SetParam(AGENTEXTENSIONHOSTPROXY_KEY, remoteObj1);
 
     Want want2;
     want2.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want2.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want2.SetElementName("", "test.bundle", "test.ability", "test.module");
     sptr<IRemoteObject> remoteObj2 = sptr<MockIRemoteObject>::MakeSptr();
     want2.SetParam(AGENTEXTENSIONHOSTPROXY_KEY, remoteObj2);
 
@@ -808,11 +843,11 @@ HWTEST_F(AgentConnectionManagerTest, MatchConnection_003, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "bundle1", "test.module", "test.ability");
+    want.SetElementName("", "bundle1", "test.ability", "test.module");
 
     Want want2;
     want2.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want2.SetElementName("", "bundle2", "test.module", "test.ability");
+    want2.SetElementName("", "bundle2", "test.ability", "test.module");
 
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -880,7 +915,7 @@ HWTEST_F(AgentConnectionManagerTest, MatchConnection_006, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     sptr<IRemoteObject> remoteObj = sptr<MockIRemoteObject>::MakeSptr();
     want.SetParam(AGENTEXTENSIONHOSTPROXY_KEY, remoteObj);
 
@@ -988,7 +1023,7 @@ HWTEST_F(AgentConnectionManagerTest, CreateConnection_001, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -1009,7 +1044,7 @@ HWTEST_F(AgentConnectionManagerTest, CreateConnection_002, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_INVALID_VALUE;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -1030,7 +1065,7 @@ HWTEST_F(AgentConnectionManagerTest, CreateConnection_003, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     sptr<IRemoteObject> remoteObj = sptr<MockIRemoteObject>::MakeSptr();
     want.SetParam(AGENTEXTENSIONHOSTPROXY_KEY, remoteObj);
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
@@ -1055,7 +1090,7 @@ HWTEST_F(AgentConnectionManagerTest, CreateConnection_004, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
 
     sptr<MockAbilityConnectCallback> callback = new MockAbilityConnectCallback();
@@ -1083,7 +1118,7 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAbilityInner_001, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
 
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     sptr<MockAbilityConnectCallback> callback1 = new MockAbilityConnectCallback();
@@ -1112,7 +1147,7 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAbilityInner_002, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
 
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     sptr<MockAbilityConnectCallback> callback1 = new MockAbilityConnectCallback();
@@ -1137,7 +1172,7 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAbilityInner_003, TestSize.Level1)
 {
     Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetElementName("", "test.bundle", "test.module", "test.ability");
+    want.SetElementName("", "test.bundle", "test.ability", "test.module");
 
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     sptr<MockAbilityConnectCallback> callback1 = new MockAbilityConnectCallback();
