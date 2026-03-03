@@ -34,6 +34,9 @@ public:
     bool GetApplicationInfo(const std::string &appName, const ApplicationFlag flag, const int32_t userId,
         ApplicationInfo &appInfo);
 
+    bool QueryExtensionAbilityInfos(const AAFwk::Want &want, const int32_t &flag, const int32_t &userId,
+        std::vector<ExtensionAbilityInfo> &extensionInfos);
+
 private:
     DECLARE_DELAYED_SINGLETON(BundleMgrHelper)
 };

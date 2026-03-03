@@ -16,7 +16,10 @@
 #ifndef MOCK_AGENT_RUNTIME_MY_FLAG_H
 #define MOCK_AGENT_RUNTIME_MY_FLAG_H
 
+#include <string>
 #include "iremote_object.h"
+#include "running_process_info.h"
+#include "extension_ability_info.h"
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -35,6 +38,11 @@ public:
     static int32_t retGetAllAgentCards;
     static int32_t retGetAgentCardsByBundleName;
     static int32_t retGetAgentCardByAgentId;
+    static std::string agentCardAgentId;
+    static bool retQueryExtensionAbilityInfos;
+    static AppExecFwk::ExtensionAbilityType extensionAbilityType;
+    static int32_t retGetProcessRunningInfoByPid;
+    static AppExecFwk::AppProcessState processState;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
