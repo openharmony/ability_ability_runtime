@@ -106,6 +106,9 @@ struct StartAbilityWrapParam {
     bool isServiceMatch = false;
     uint64_t specifiedFullTokenId = 0;
     std::shared_ptr<StartSpecifiedAbilityParams> startSpecifiedParams = nullptr;
+    std::string hostBundleName;
+    bool isStartByOEExt = false;
+    std::string specifiedFlag;
 };
 }
 }

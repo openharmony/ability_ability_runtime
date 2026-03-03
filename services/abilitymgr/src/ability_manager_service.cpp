@@ -883,6 +883,65 @@ int32_t AbilityManagerService::StartAbilityByInsightIntent(const Want &want, con
     return ERR_INSIGHT_INTENT_START_INVALID_COMPONENT;
 }
 
+int32_t AbilityManagerService::StartAbilityByOEExt(const Want &want,
+    sptr<IRemoteObject> callerToken, int32_t hostPid, const std::string &specifiedFlag)
+{
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    XCOLLIE_TIMER_LESS_IGNORE(__PRETTY_FUNCTION__, !want.GetElement().GetDeviceID().empty());
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid caller token");
+        return ERR_INVALID_CALLER;
+    }
+
+    const auto &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+        abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not oe extension");
+        return ERR_INVALID_CALLER;
+    }
+
+    if (want.GetElement().GetBundleName() != abilityInfo.bundleName) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want bundleName %{public}s does not match caller bundleName %{public}s",
+            want.GetElement().GetBundleName().c_str(), abilityInfo.bundleName.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    if (want.GetElement().GetAbilityName().empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want abilityName is empty");
+        return INVALID_PARAMETERS_ERR;
+    }
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(hostPid, processInfo);
+    if (!processInfo.isAbilityForegrounding) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid=%{public}d not foreground", hostPid);
+        return NOT_TOP_ABILITY;
+    }
+
+    int32_t userId = abilityRecord->GetOwnerMissionUserId();
+    EventInfo eventInfo = BuildEventInfo(want, userId);
+    SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityByOEExt: hostPid=%{public}d, specifiedFlag=%{public}s) %{public}s",
+        hostPid, specifiedFlag.c_str(), want.GetElement().GetBundleName().c_str());
+
+    StartAbilityWrapParam startAbilityWrapParam = {
+        .want = want,
+        .callerToken = callerToken,
+        .userId = userId,
+        .isUIAbilityOnly = true,
+        .hostBundleName = processInfo.bundleNames.empty() ? "" : processInfo.bundleNames[0],
+        .isStartByOEExt = true,
+        .specifiedFlag = specifiedFlag,
+    };
+    return StartAbilityWrap(startAbilityWrapParam);
+}
+
 int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
@@ -1382,6 +1441,7 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(param.want, param.requestCode, validUserId,
         true, nullptr, shouldBlockFunc);
+    interceptorParam.hostBundleName = param.hostBundleName;
     result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1415,6 +1475,8 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
     abilityRequest.hideFailureTipDialog = param.hideFailureTipDialog;
     abilityRequest.startSpecifiedParams = param.startSpecifiedParams;
     abilityRequest.isFromOpenLink = param.isFromOpenLink;
+    abilityRequest.isStartByOEExt = param.isStartByOEExt;
+    abilityRequest.specifiedFlag = param.specifiedFlag;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(param.want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
@@ -1563,6 +1625,7 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
         AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, param.requestCode, validUserId,
             true, param.callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), param.isStartAsCaller,
             appIndex);
+        afterCheckParam.hostBundleName = param.hostBundleName;
         afterCheckParam.isTargetPlugin = isTargetPlugin;
         result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
             afterCheckExecuter_->DoProcess(afterCheckParam);

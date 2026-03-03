@@ -137,6 +137,9 @@ int AbilityManagerStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_BY_INSIGHT_INTENT) {
         return StartAbilityByInsightIntentInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_BY_OE_EXT) {
+        return StartAbilityByOEExtInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::CONNECT_ABILITY) {
         return ConnectAbilityInner(data, reply);
     }
@@ -4245,6 +4248,29 @@ int32_t AbilityManagerStub::StartAbilityByInsightIntentInner(MessageParcel &data
     uint64_t intentId = data.ReadUint64();
     int32_t userId = data.ReadInt32();
     int32_t result = StartAbilityByInsightIntent(*want, callerToken, intentId, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartAbilityByOEExtInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (!data.ReadBool()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid caller token flag");
+        return ERR_INVALID_VALUE;
+    }
+    callerToken = data.ReadRemoteObject();
+
+    std::string specifiedFlag = data.ReadString();
+    int32_t hostPid = data.ReadInt32();
+
+    int32_t result = StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

@@ -714,6 +714,9 @@ enum class AbilityManagerInterfaceCode {
 
     // set app recovery flag
     SET_APP_RECOVERY_FLAG  = 6160,
+
+    // start ability by oe extension
+    START_ABILITY_BY_OE_EXT = 6161,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
