@@ -139,7 +139,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<Want> replaceWant = new (std::nothrow) Want();
     int32_t bundleType = static_cast<int32_t>(GetU32Data(data + 2 * U32_AT_SIZE)) % MAX_BUNDLE_TYPE;
     
-    executer->DoProcess(param);
     executer->DoProcess(want, userId);
     if (abilityInfo != nullptr) {
         executer->GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
