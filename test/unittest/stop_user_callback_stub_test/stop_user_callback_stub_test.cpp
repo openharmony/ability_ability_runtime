@@ -27,11 +27,8 @@ public:
     MockStopUserCallbackStub() = default;
     virtual ~MockStopUserCallbackStub()
     {}
-    void OnStopUserDone(int userId, int errcode) override
+    void OnUserCmdDone(int userId, int errcode) override
     {}
-    void OnStartUserDone(int userId, int errcode) override {}
-
-    void OnLogoutUserDone(int userId, int errcode) override {}
 };
 
 class StopUserCallbackStubTest : public testing::Test {

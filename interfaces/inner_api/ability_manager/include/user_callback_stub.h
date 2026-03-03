@@ -40,9 +40,7 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(UserCallbackStub);
 
-    int OnStopUserDoneInner(MessageParcel &data, MessageParcel &reply);
-    int OnStartUserDoneInner(MessageParcel &data, MessageParcel &reply);
-    int OnLogoutUserDoneInner(MessageParcel &data, MessageParcel &reply);
+    int OnUserCmdDoneInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
