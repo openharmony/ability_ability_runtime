@@ -60,6 +60,10 @@ const char BOOT_PATH[] = "/system/framework/bootpath.json";
 const char BACKTRACE[] = "=====================Backtrace========================";
 static const std::string DEBUGGER = "@Debugger";
 static const std::string SYS_HSP_FILE_PATH_PREFIX = "/system/app/";
+constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
+constexpr char SANDBOX_ARK_PROFILE_PATH[] = "/data/storage/ark-profile/";
+constexpr char ARK_PROFILE_SUFFIX[] = ".ap";
+constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 
 
 using CreateVMETSRuntimeType = ani_status (*)(const ani_options *options, uint32_t version, ani_vm **result);
@@ -617,7 +621,7 @@ bool ETSEnvironment::FinishPreload(napi_env jsEnv) {
 }
 
 bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
-    const std::vector<std::string> &appInnerHspPathList,
+    const std::vector<std::string> &appInnerHspPathList, const std::vector<std::string> &staticHapModuleNameList,
     const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
     const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner)
 {
@@ -640,13 +644,64 @@ bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
         return false;
     }
     ark::ets::ETSAni::Postfork(env, options);
-    
+
     appInnerHspPathList_ = appInnerHspPathList;
     commonHspBundleInfos_ = commonHspBundleInfos;
 
+    RegisterProfilePaths(staticHapModuleNameList);
     ARKVM_RegisterExternalScheduler(PostTaskWrapper);
 
     return true;
+}
+
+bool ETSEnvironment::RegisterProfilePaths(const std::vector<std::string> &staticHapModuleNameList)
+{
+    auto profileInfos = BuildProfilePathInfos(staticHapModuleNameList);
+    if (profileInfos.empty()) {
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "RegisterProfilePaths: no modules to register profile paths");
+        return true;
+    }
+
+    std::vector<arkvm_profile_path_info> infos;
+    infos.reserve(profileInfos.size());
+    for (auto &profileInfo : profileInfos) {
+        infos.push_back(arkvm_profile_path_info {
+            profileInfo.abcPath.c_str(),
+            profileInfo.curProfilePath.c_str(),
+            profileInfo.baselineProfilePath.empty() ? nullptr : profileInfo.baselineProfilePath.c_str(),
+        });
+    }
+
+    arkvm_status status = ARKVM_RegisterProfilePaths(infos.data(), infos.size());
+    if (status != ARKVM_OK) {
+        if (status == ARKVM_PARTIAL_SUCCESS) {
+            TAG_LOGW(AAFwkTag::ETSRUNTIME, "RegisterProfilePaths: partial success, status: %{public}d", status);
+            return true;
+        }
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "RegisterProfilePaths: failed, status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+std::vector<ETSEnvironment::ProfilePathInfo> ETSEnvironment::BuildProfilePathInfos(
+    const std::vector<std::string> &staticHapModuleNameList)
+{
+    // Build abc -> profile path mapping for Hap and Inner Hsp.
+    // profile path: <sandbox_path>/<moduleName>.ap
+    std::vector<ProfilePathInfo> profileInfos;
+    profileInfos.reserve(staticHapModuleNameList.size());
+    for (const auto &moduleName : staticHapModuleNameList) {
+        if (moduleName.empty()) {
+            TAG_LOGW(AAFwkTag::ETSRUNTIME, "RegisterProfilePaths: skip empty moduleName");
+            continue;
+        }
+        std::string abcPath = std::string(BUNDLE_INSTALL_PATH) + moduleName + MERGE_ABC_PATH;
+        std::string curProfilePath =
+            std::string(SANDBOX_ARK_PROFILE_PATH) + moduleName + ARK_PROFILE_SUFFIX;
+        profileInfos.push_back({std::move(abcPath), std::move(curProfilePath), {}});
+    }
+    return profileInfos;
 }
 
 bool ETSEnvironment::PreloadSystemClass(const char *className)
@@ -701,10 +756,11 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
             ETSEnvironment::GetInstance()->FinishPreload(jsEnv);
         },
         .PostFork = [](void *napiEnv, const std::string &aotPath, const std::vector<std::string> &appInnerHspPathList,
+            const std::vector<std::string> &staticHapModuleNameList,
             const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
             const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner) {
             ETSEnvironment::GetInstance()->PostFork(
-                napiEnv, aotPath, appInnerHspPathList, commonHspBundleInfos, eventRunner);
+                napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner);
         },
         .PreloadSystemClass = [](const char *className) {
             ETSEnvironment::GetInstance()->PreloadSystemClass(className);

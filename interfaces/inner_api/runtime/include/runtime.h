@@ -62,6 +62,7 @@ public:
         std::vector<std::string> assetBasePathStr;
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner = nullptr;
         std::map<std::string, std::string> hapModulePath;
+        std::vector<std::string> staticHapModuleNameList;
         std::vector<std::string> appInnerHspPathList;
         std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
         bool loadAce = true;
