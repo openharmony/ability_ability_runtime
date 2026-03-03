@@ -500,7 +500,108 @@ HWTEST_F(EtsEnvironmentTest, PostFork_0100, TestSize.Level0)
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
     auto result = etsEnv->PostFork(
-        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner);
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, false);
+    EXPECT_FALSE(result);
+}
+
+
+/**
+ * @tc.name: PostFork_0200
+ * @tc.desc: Test PostFork with baseLineProfile enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0200, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "aotPath";
+    std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostFork_0300
+ * @tc.desc: Test PostFork with empty aotPath and baseLineProfile disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0300, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "";
+    std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostFork_0400
+ * @tc.desc: Test PostFork with empty aotPath and baseLineProfile enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0400, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "";
+    std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostFork_0500
+ * @tc.desc: Test PostFork with valid aotPath and baseLineProfile enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0500, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "/data/storage/el1/bundle/aot.abc";
+    std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostFork_0600
+ * @tc.desc: Test PostFork with valid aotPath and baseLineProfile disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0600, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "/data/storage/el1/bundle/aot.abc";
+    std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner, false);
     EXPECT_FALSE(result);
 }
 
