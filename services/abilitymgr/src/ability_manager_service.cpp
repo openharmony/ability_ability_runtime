@@ -1615,7 +1615,6 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
     auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
     UpdateCallerInfoUtil::GetInstance().UpdateBackToCallerFlag(param.callerToken, abilityRequest.want,
         param.requestCode, backFlag);
-    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 
     abilityRequest.want.RemoveParam(SPECIFY_TOKEN_ID);
     if (param.specifyTokenId > 0) {
@@ -2405,7 +2404,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 #endif // SUPPORT_GRAPHICS
     auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
     UpdateCallerInfoUtil::GetInstance().UpdateBackToCallerFlag(callerToken, abilityRequest.want, requestCode, backFlag);
-    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 
     abilityRequest.want.RemoveParam(SPECIFY_TOKEN_ID);
     if (specifyTokenId > 0) {
