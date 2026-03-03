@@ -334,7 +334,10 @@ ani_object CreateEtsAgentCard(ani_env *env, const AgentCard &card)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
         return nullptr;
     }
-    status = env->Object_SetPropertyByName_Ref(object, "documentationUrl", GetAniString(env, card.documentationUrl));
+    if (!card.documentationUrl.empty()) {
+        status = env->Object_SetPropertyByName_Ref(object,
+            "documentationUrl", GetAniString(env, card.documentationUrl));
+    }
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "failed status:%{public}d", status);
         return nullptr;
