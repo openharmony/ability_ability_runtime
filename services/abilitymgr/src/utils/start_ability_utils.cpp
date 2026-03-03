@@ -163,6 +163,7 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
     StartAbilityUtils::callerAbilityInfo = StartAbilityInfo::CreateCallerAbilityInfo(callerToken);
 
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
     if ((want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY) && appIndex >= 0 &&
         appIndex < AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) || StartAbilityUtils::startSpecifiedBySCB) {
@@ -178,6 +179,7 @@ StartAbilityInfoWrap::StartAbilityInfoWrap()
     StartAbilityUtils::skipErms = false;
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 }
 
 StartAbilityInfoWrap::~StartAbilityInfoWrap()
@@ -189,6 +191,7 @@ StartAbilityInfoWrap::~StartAbilityInfoWrap()
     StartAbilityUtils::skipErms = false;
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 }
 
 void StartAbilityInfoWrap::SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo)
