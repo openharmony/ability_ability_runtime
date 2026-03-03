@@ -225,6 +225,19 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         callerInfoMap_.emplace(asCallerForAncoSessionId, std::move(callerInfo));
         abilityRequest.want.SetParam(PARAM_DIALOG_SESSION_ID, asCallerForAncoSessionId);
     }
+
+    if (oeExtRequests_.erase(sessionInfo->requestId) > 0) {
+        abilityRequest.isStartByOEExt = true;
+        abilityRequest.specifiedFlag = sessionInfo->specifiedFlag;
+        auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
+        if (callerAbility == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbility null");
+            return ERR_INVALID_VALUE;
+        }
+        sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+        sessionInfo->processOptions->selfPid = callerAbility->GetPid();
+    }
+
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
     if (!isColdStart && shouldReturnPid && uiAbilityRecord->GetPid() > 0) {
@@ -693,7 +706,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     auto requestId = RequestIdUtil::GetRequestId();
     auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified && !isPlugin) {
+    if (isSpecified && !isPlugin && !abilityRequest.isStartByOEExt) {
         if (abilityRequest.startOptions.GetCurrentProcessName().empty()) {
             auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
             specifiedRequest->preCreateProcessName = true;
@@ -723,12 +736,21 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
             return ret;
         }
     }
+    bool reuse = false;
+    persistentId = GetPersistentIdByAbilityRequest(abilityRequest, reuse);
+    if (abilityRequest.isStartByOEExt) {
+        if (persistentId != 0 && reuse) {
+            return ERROR_UIABILITY_IS_ALREADY_EXIST;
+        }
+        oeExtRequests_.insert(requestId);
+    }
     auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;
     auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     if (abilityInfo.applicationInfo.multiAppMode.multiAppModeType != AppExecFwk::MultiAppModeType::MULTI_INSTANCE ||
         !isCreating) {
-        sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
+        sessionInfo->persistentId = persistentId;
+        sessionInfo->reuse = reuse;
     }
     sessionInfo->userId = userId_;
     sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
@@ -1272,7 +1294,7 @@ void UIAbilityLifecycleManager::PreCreateProcessName(AbilityRequest &abilityRequ
 void UIAbilityLifecycleManager::UpdateProcessName(const AbilityRequest &abilityRequest,
     UIAbilityRecordPtr &abilityRecord)
 {
-    if (abilityRecord == nullptr || abilityRequest.sessionInfo == nullptr ||
+    if (abilityRecord == nullptr || abilityRequest.sessionInfo == nullptr || abilityRequest.isStartByOEExt ||
         abilityRequest.sessionInfo->processOptions == nullptr ||
         !ProcessOptions::IsNewProcessMode(abilityRequest.sessionInfo->processOptions->processMode)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No need to update process name.");
@@ -1818,6 +1840,10 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
 
 bool UIAbilityLifecycleManager::IsHookModule(const AbilityRequest &abilityRequest) const
 {
+    if (abilityRequest.isStartByOEExt) {
+        return false;
+    }
+
     AppExecFwk::HapModuleInfo hapModuleInfo;
     if (DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->GetHapModuleInfo(
         abilityRequest.abilityInfo, hapModuleInfo)) {
@@ -2704,6 +2730,9 @@ bool UIAbilityLifecycleManager::IsStartSpecifiedProcessRequest(const AbilityRequ
     }
     bool isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     if (isPlugin) {
+        return false;
+    }
+    if (abilityRequest.isStartByOEExt) {
         return false;
     }
     return true;

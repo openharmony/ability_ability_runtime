@@ -43,6 +43,7 @@ struct AbilityInterceptorParam {
     int32_t appIndex = 0;
     std::function<bool(void)> shouldBlockAllAppStartFunc_;
     bool isTargetPlugin = false; //Is it pulling up a plugin
+    std::string hostBundleName;
 };
 
 /**

@@ -1307,6 +1307,7 @@ private:
     std::unordered_map<int32_t, UIAbilityRecordPtr> hookSpecifiedMap_;
 
     std::map<int32_t, std::shared_ptr<AbilitiesRequest>> abilitiesRequestMap_;
+    std::unordered_set<int32_t> oeExtRequests_;
     std::mutex startingPidsMutex_;
     std::vector<pid_t> startingPids_;
 
