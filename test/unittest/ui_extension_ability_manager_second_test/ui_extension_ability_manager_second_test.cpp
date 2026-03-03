@@ -1287,5 +1287,330 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, TerminateOrCacheAbility_001, TestS
     TAG_LOGI(AAFwkTag::TEST, "TerminateOrCacheAbility_001 end");
 }
 
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DoForegroundUIExtension
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DoForegroundUIExtension with ability already in FOREGROUND state
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DoForegroundUIExtension_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DoForegroundUIExtension_008 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.test.uiextension";
+    abilityRequest.abilityInfo.name = "TestUIExtension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRequest.sessionInfo = sessionInfo;
+    abilityRecord->sessionInfo_ = sessionInfo;
+    abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+    abilityRecord->abilityWindowStateMap_.clear(); // Window ready
+
+    connectManager->DoForegroundUIExtension(abilityRecord, abilityRequest);
+    TAG_LOGI(AAFwkTag::TEST, "DoForegroundUIExtension_008 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchForeground
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchForeground with UIExtension type and valid token
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchForeground_002, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchForeground(abilityRecord, token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchForeground
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchForeground with non-UIExtension type
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchForeground_003, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SERVICE;
+    abilityRequest.abilityInfo.bundleName = "com.example.service";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchForeground(abilityRecord, token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchBackground
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchBackground with UIExtension type and valid token
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchBackground_001, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchBackground(abilityRecord, token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchBackground
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchBackground with non-UIExtension type
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchBackground_002, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SERVICE;
+    abilityRequest.abilityInfo.bundleName = "com.example.service";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchBackground(abilityRecord, token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchBackground
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchBackground with null abilityRecord
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchBackground_003, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    auto ret = connectManager->DispatchBackground(nullptr, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchInactive
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchInactive with CreateByConnect mode
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_006, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRecord->SetCreateByConnectMode(true);
+    abilityRecord->SetAbilityState(AbilityState::INACTIVATING);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchInactive(abilityRecord,
+        static_cast<int>(AbilityState::INACTIVATING), token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchInactive
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchInactive with Preload mode
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_007, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    abilityRequest.want.SetParam(IS_PRELOAD_UIEXTENSION_ABILITY, true);
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRecord->SetAbilityState(AbilityState::INACTIVATING);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchInactive(abilityRecord,
+        static_cast<int>(AbilityState::INACTIVATING), token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchInactive
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchInactive with normal mode
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_008, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRecord->SetAbilityState(AbilityState::INACTIVATING);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchInactive(abilityRecord,
+        static_cast<int>(AbilityState::INACTIVATING), token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchInactive
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchInactive with wrong abilityState
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_009, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    abilityRecord->SetAbilityState(AbilityState::BACKGROUNDING); // Wrong state
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    auto ret = connectManager->DispatchInactive(abilityRecord,
+        static_cast<int>(AbilityState::INACTIVATING), token);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: DispatchInactive
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DispatchInactive with null abilityRecord
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_005, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    auto ret = connectManager->DispatchInactive(nullptr,
+        static_cast<int>(AbilityState::INACTIVATING), nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: TerminateAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify TerminateAbilityInner with record from terminatingMap
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, TerminateAbilityInner_003, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    // Add record to serviceMap (simulating a normal record)
+    std::string serviceKey = "com.example.uiextension#MainUIExtension#entry";
+    connectManager->serviceMap_[serviceKey] = abilityRecord;
+
+    auto ret = connectManager->TerminateAbilityInner(token);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: TerminateAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify TerminateAbilityInner with UIExtension having connections
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, TerminateAbilityInner_002, TestSize.Level1)
+{
+    auto connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.example.uiextension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new Rosen::Session(info));
+    abilityRecord->sessionInfo_ = sessionInfo;
+    sptr<IRemoteObject> token = abilityRecord->GetToken();
+
+    // Add connection to record (simulating UIExtension with connections)
+    auto callback = new AbilityConnectCallback();
+    abilityRecord->connRecordList_.push_back(
+        std::make_shared<ConnectionRecord>(token, abilityRecord, callback, nullptr));
+    connectManager->serviceMap_["test"] = abilityRecord;
+
+    auto ret = connectManager->TerminateAbilityInner(token);
+    EXPECT_EQ(ret, ERR_OK); // Should not actually terminate because of connections
+}
 }  // namespace AAFwk
 }  // namespace OHOS
