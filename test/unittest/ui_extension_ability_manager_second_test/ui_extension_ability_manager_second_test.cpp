@@ -1342,7 +1342,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchForeground_002, TestSize.L
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     auto ret = connectManager->DispatchForeground(abilityRecord, token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1363,7 +1363,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchForeground_003, TestSize.L
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     auto ret = connectManager->DispatchForeground(abilityRecord, token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1388,7 +1388,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchBackground_001, TestSize.L
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     auto ret = connectManager->DispatchBackground(abilityRecord, token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1409,7 +1409,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchBackground_002, TestSize.L
     sptr<IRemoteObject> token = abilityRecord->GetToken();
 
     auto ret = connectManager->DispatchBackground(abilityRecord, token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1452,7 +1452,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_006, TestSize.Lev
 
     auto ret = connectManager->DispatchInactive(abilityRecord,
         static_cast<int>(AbilityState::INACTIVATING), token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1480,7 +1480,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_007, TestSize.Lev
 
     auto ret = connectManager->DispatchInactive(abilityRecord,
         static_cast<int>(AbilityState::INACTIVATING), token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
@@ -1507,7 +1507,7 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, DispatchInactive_008, TestSize.Lev
 
     auto ret = connectManager->DispatchInactive(abilityRecord,
         static_cast<int>(AbilityState::INACTIVATING), token);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /*
