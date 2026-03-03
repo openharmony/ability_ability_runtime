@@ -2743,6 +2743,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     grantInfo.userId = GetOwnerMissionUserId();
     grantInfo.flag = want.GetFlags();
     grantInfo.isNotifyCollaborator = isNotifyCollaborator;
+    grantInfo.callerUid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
     if (!isNotifyCollaborator) {
         grantInfo.targetAbilityName = abilityInfo_.name;
     }
