@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "ability_business_error.h"
 #include "ability_manager_client.h"
 #include "ability_manager_interface.h"
+#include "app_utils.h"
 #include "auto_startup_info.h"
 #include "ets_ability_auto_startup_manager_utils.h"
 #include "ets_error_utils.h"
@@ -68,6 +69,15 @@ void EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications(
     ani_env *env, ani_object callback)
 {
     GetInstance().OnQueryAllAutoStartupApplications(env, callback);
+}
+
+ani_boolean EtsAbilityAutoStartupManager::IsAutoStartupSupported(ani_env *env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null env");
+        return ANI_FALSE;
+    }
+    return AAFwk::AppUtils::GetInstance().IsProductAppbootSettingEnabled() ? ANI_TRUE : ANI_FALSE;
 }
 
 void EtsAbilityAutoStartupManager::AutoStartupInfoCheck(
@@ -298,6 +308,8 @@ void EtsAbilityAutoStartupManagerInit(ani_env *env)
         ani_native_function {"nativeQueryAllAutoStartupApplications",
             "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications)},
+        ani_native_function {"nativeIsAutoStartupSupported", ":z",
+            reinterpret_cast<void *>(EtsAbilityAutoStartupManager::IsAutoStartupSupported)},
         ani_native_function {"nativeCheckCallerIsSystemApp", ":",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::NativeCheckCallerIsSystemApp)},
     };

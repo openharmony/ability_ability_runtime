@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,7 @@ ohos_shared_library("auto_startup_manager") {
   include_dirs = [
     "./include",
     "${ability_runtime_path}/frameworks/ets/ani/ability_auto_startup_callback/include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [ "./src/ets_ability_auto_startup_manager.cpp" ]
@@ -41,6 +42,7 @@ ohos_shared_library("auto_startup_manager") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_path}/frameworks/ets/ani/ability_auto_startup_callback:autostartupcallback_ani",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
