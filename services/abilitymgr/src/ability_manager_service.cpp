@@ -6303,7 +6303,7 @@ int AbilityManagerService::SendLocalWantSender(const SenderInfo &senderInfo)
     TAG_LOGI(AAFwkTag::WANTAGENT, "call");
     auto pendingWantManager = GetCurrentPendingWantManager();
     CHECK_POINTER_AND_RETURN(pendingWantManager, ERR_INVALID_VALUE);
-    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(senderInfo.tokenId,
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(IPCSkeleton::GetCallingTokenID(),
         PermissionConstants::PERMISSION_TRIGGER_LOCAL_WANTAGENT)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "no permission to trigger local wantagent");
         return CHECK_PERMISSION_FAILED;
