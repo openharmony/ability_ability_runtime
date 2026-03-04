@@ -2146,7 +2146,7 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
     TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n"
         "%{public}s", info.bundleName.c_str(), info.errorObjectName.c_str(), info.summary.c_str());
     AAFwk::ExitReasonCompability exitReason = { REASON_JS_ERROR, info.errorObjectName };
-    exitReason.killId = HiviewDFX::ProcessKillReason::REASON_JS_ERROR;
+    exitReason.killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_JS_ERROR;
     AbilityManagerClient::GetInstance()->RecordAppWithReason(info.pid, getuid(), exitReason);
     _exit(JS_ERROR_EXIT);
 }
