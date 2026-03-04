@@ -496,10 +496,108 @@ HWTEST_F(EtsEnvironmentTest, PostFork_0100, TestSize.Level0)
     void *napiEnv = nullptr;
     std::string aotPath = "aotPath";
     std::vector<std::string> appInnerHspPathList;
+    std::vector<std::string> staticHapModuleNameList;
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
-    auto result = etsEnv->PostFork(napiEnv, aotPath, appInnerHspPathList, commonHspBundleInfos, eventRunner);
+    auto result = etsEnv->PostFork(
+        napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RegisterProfilePaths_0100
+ * @tc.desc: Verify RegisterProfilePaths returns true for empty module list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, RegisterProfilePaths_0100, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    std::vector<std::string> staticHapModuleNameList;
+    auto result = etsEnv->RegisterProfilePaths(staticHapModuleNameList);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RegisterProfilePaths_0200
+ * @tc.desc: Verify RegisterProfilePaths ignores empty module names.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, RegisterProfilePaths_0200, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    std::vector<std::string> staticHapModuleNameList = {""};
+    auto result = etsEnv->RegisterProfilePaths(staticHapModuleNameList);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RegisterProfilePaths_0300
+ * @tc.desc: Verify RegisterProfilePaths attempts registration for non-empty modules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, RegisterProfilePaths_0300, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    std::vector<std::string> staticHapModuleNameList = {"entry"};
+    auto result = etsEnv->RegisterProfilePaths(staticHapModuleNameList);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: BuildProfilePathInfos_0100
+ * @tc.desc: Verify profile path mapping for static modules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, BuildProfilePathInfos_0100, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+
+    std::vector<std::string> moduleNames = {"entry", "feature", ""};
+    auto infos = etsEnv->BuildProfilePathInfos(moduleNames);
+    ASSERT_EQ(infos.size(), 2);
+
+    const std::string entryAbc = "/data/storage/el1/bundle/entry/ets/modules_static.abc";
+    const std::string entryProfile = "/data/storage/ark-profile/entry.ap";
+    const std::string featureAbc = "/data/storage/el1/bundle/feature/ets/modules_static.abc";
+    const std::string featureProfile = "/data/storage/ark-profile/feature.ap";
+
+    auto findInfo = [&infos](const std::string &abc) -> const ETSEnvironment::ProfilePathInfo * {
+        for (const auto &it : infos) {
+            if (it.abcPath == abc) {
+                return &it;
+            }
+        }
+        return nullptr;
+    };
+
+    auto entryInfo = findInfo(entryAbc);
+    ASSERT_NE(entryInfo, nullptr);
+    EXPECT_EQ(entryInfo->curProfilePath, entryProfile);
+    EXPECT_TRUE(entryInfo->baselineProfilePath.empty());
+
+    auto featureInfo = findInfo(featureAbc);
+    ASSERT_NE(featureInfo, nullptr);
+    EXPECT_EQ(featureInfo->curProfilePath, featureProfile);
+    EXPECT_TRUE(featureInfo->baselineProfilePath.empty());
+}
+
+/**
+ * @tc.name: BuildProfilePathInfos_0200
+ * @tc.desc: Verify empty module list returns empty profile mapping.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, BuildProfilePathInfos_0200, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+
+    std::vector<std::string> moduleNames;
+    auto infos = etsEnv->BuildProfilePathInfos(moduleNames);
+    EXPECT_TRUE(infos.empty());
 }
 
 /**

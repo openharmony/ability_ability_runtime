@@ -62,6 +62,7 @@ public:
         void *&obj, void *&ref);
     bool FinishPreload(napi_env jsEnv);
     bool PostFork(void *napiEnv, const std::string &aotPath, const std::vector<std::string>& appInnerHspPathList,
+        const std::vector<std::string> &staticHapModuleNameList,
         const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
         const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner);
     bool PreloadSystemClass(const char *className);
@@ -94,6 +95,14 @@ public:
     };
 
 private:
+    struct ProfilePathInfo {
+        std::string abcPath;
+        std::string curProfilePath;
+        std::string baselineProfilePath;
+    };
+
+    bool RegisterProfilePaths(const std::vector<std::string> &staticHapModuleNameList);
+    std::vector<ProfilePathInfo> BuildProfilePathInfos(const std::vector<std::string> &staticHapModuleNameList);
     bool ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector<std::string> &hapPathInfos,
         ani_array &refArray);
     std::vector<std::string> GetHspPathList();
