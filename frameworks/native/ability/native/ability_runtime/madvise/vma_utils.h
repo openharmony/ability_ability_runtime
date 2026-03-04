@@ -24,22 +24,17 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace VmaUtil {
 constexpr size_t VMA_MAX_PATH_NAME = 256;
-constexpr size_t VMA_MAX_PERMS = 5;
+constexpr size_t PERMS_LEN = 4;
 
 struct VMARegion {
     uintptr_t start;
     uintptr_t end;
     uintptr_t size;
-    char perms[VMA_MAX_PERMS];
-    unsigned long offset;
-    unsigned long inode;
+    char perms[PERMS_LEN + 1];
+    uint64_t offset;
     char pathname[VMA_MAX_PATH_NAME];
 };
-
-std::vector<VMARegion> GetFileVmas(const char* filename);
-
 std::vector<VMARegion> GetFileVmas(const std::vector<std::string>& filenames);
-
 
 } // namespace VmaUtil
 } // namespace AbilityRuntime
