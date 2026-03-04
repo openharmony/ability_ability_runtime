@@ -32,6 +32,7 @@ int32_t InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
     totalInfos.clear();
     configInfos.clear();
     intentGenericInfos_.clear();
+    bundleVersionMap_.clear();
     if (DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(
         userId, bundleVersionMap_, totalInfos, configInfos) != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Load All IntentData failed");
