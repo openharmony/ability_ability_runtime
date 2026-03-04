@@ -14289,7 +14289,7 @@ void AbilityManagerService::RecordRecoveryExitReason(bool isAppRecovery, int32_t
     if (!isAppRecovery) {
         return;
     }
-    int32_t killId = HiviewDFX::ProcessKillReason::REASON_RESTART;
+    int32_t killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_RESTART;
     std::string killReason = HiviewDFX::ProcessKillReason::GetKillReason(killId);
     AAFwk::ExitReasonCompability exitReason = {REASON_JS_ERROR, "Kill Reason:" + killReason};
     exitReason.killId = killId;
