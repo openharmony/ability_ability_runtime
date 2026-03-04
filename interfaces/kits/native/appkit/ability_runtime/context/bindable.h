@@ -120,10 +120,10 @@ public:
     BindingObjectSubThread() = default;
     virtual ~BindingObjectSubThread() = default;
 
-    virtual void BindSubThreadObject(void* napiEnv, void* object);
-    virtual void* GetSubThreadObject(void* napiEnv);
-    virtual void RemoveSubThreadObject(void* napiEnv);
-    virtual void RemoveAllObject();
+    virtual void BindSubThreadObject(void* napiEnv, void* object) {}
+    virtual void* GetSubThreadObject(void* napiEnv) { return nullptr; }
+    virtual void RemoveSubThreadObject(void* napiEnv) {}
+    virtual void RemoveAllObject() {}
 
 private:
     BindingObjectSubThread(const BindingObjectSubThread&) = delete;
