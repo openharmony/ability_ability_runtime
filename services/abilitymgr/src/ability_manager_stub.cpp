@@ -965,6 +965,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     if (interfaceCode == AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST) {
         return GetUserLockedBundleListInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_APP_RECOVERY_FLAG) {
+        return SetAppRecoveryFlagInner(data, reply);
+    } 
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -5326,6 +5329,19 @@ int32_t AbilityManagerStub::GetUserLockedBundleListInner(MessageParcel &data, Me
         }
     }
     return result;
+}
+
+int32_t AbilityManagerStub::SetAppRecoveryFlagInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR,"Read token failed");
+        return ERR_INVALID_VALUE;
+    }
+    int flag = data.ReadInt32();
+    int32_t result = SetAppRecoveryFlag(token, flag);
+    reply.WriteInt32(result);
+    return NO_ERROR;
 }
 } // namespace AAFwk
 } // namespace OHOS

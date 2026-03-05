@@ -3433,5 +3433,16 @@ void AbilityRecord::PluginCompleteTerminate()
             hostAbility->GetAbilityInfo().name.c_str());
     }
 }
+
+void AbilityRecord::SetAppRecoveryFlag(int flag)
+{
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag%{public}d",flag);
+    appRecoveryFlag_ = flag;
+}
+
+int AbilityRecord::GetAppRecoveryFlag() const
+{
+    return appRecoveryFlag_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -2223,6 +2223,8 @@ private:
     void RemoveUninstallOrUpgradeUidSet(int32_t uid);
     bool IsUninstallingOrUpgrading(int32_t uid);
     void SendProcessKillEvent(std::shared_ptr<AppRunningRecord> appRecord);
+    void HandleForegroundAbilityDied(const std::vector<sptr<IRemoteObject>>& abilityTokens,
+        ApplicationState state);
 
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
