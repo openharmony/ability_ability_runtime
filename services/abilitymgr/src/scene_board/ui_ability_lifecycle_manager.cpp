@@ -38,6 +38,7 @@
 #include "start_ability_utils.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "server_constant.h"
+#include "utils/oe_extension_utils.h"
 #include "session_manager_lite.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "start_window_option.h"
@@ -226,7 +227,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         abilityRequest.want.SetParam(PARAM_DIALOG_SESSION_ID, asCallerForAncoSessionId);
     }
 
-    if (oeExtRequests_.erase(sessionInfo->requestId) > 0) {
+    if (OEExtensionUtils::GetInstance().RemoveOEExtRequest(sessionInfo->requestId)) {
         abilityRequest.isStartByOEExt = true;
         abilityRequest.specifiedFlag = sessionInfo->specifiedFlag;
         auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
@@ -742,7 +743,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         if (persistentId != 0 && reuse) {
             return ERROR_UIABILITY_IS_ALREADY_EXIST;
         }
-        oeExtRequests_.insert(requestId);
+        OEExtensionUtils::GetInstance().AddOEExtRequest(requestId);
     }
     auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;

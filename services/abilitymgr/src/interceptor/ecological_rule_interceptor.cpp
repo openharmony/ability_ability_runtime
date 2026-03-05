@@ -56,11 +56,11 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         callerInfo.isAsCaller = true;
     }
 
-    bool skipCallerInfo = !param.hostBundleName.empty();
-    if (skipCallerInfo) {
+    if (!param.hostBundleName.empty()) {
         callerInfo.packageName = param.hostBundleName;
     }
-    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken, skipCallerInfo);
+    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken,
+        !param.hostBundleName.empty());
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));

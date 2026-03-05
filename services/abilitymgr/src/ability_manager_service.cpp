@@ -49,6 +49,7 @@
 #include "ffrt_inner.h"
 #include "foreground_app_connection_manager.h"
 #include "freeze_util.h"
+#include "utils/oe_extension_utils.h"
 #include "global_constant.h"
 #include "hidden_start_observer_manager.h"
 #include "hitrace_meter.h"
@@ -886,56 +887,28 @@ int32_t AbilityManagerService::StartAbilityByInsightIntent(const Want &want, con
 int32_t AbilityManagerService::StartAbilityByOEExt(const Want &want,
     sptr<IRemoteObject> callerToken, int32_t hostPid, const std::string &specifiedFlag)
 {
-    if (AppUtils::GetInstance().IsForbidStart()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
-        return INNER_ERR;
-    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS_IGNORE(__PRETTY_FUNCTION__, !want.GetElement().GetDeviceID().empty());
 
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid caller token");
-        return ERR_INVALID_CALLER;
+    std::string hostBundleName;
+    int32_t userId = -1;
+    int32_t result = OEExtensionUtils::GetInstance().ValidateCaller(
+        want, callerToken, hostPid, hostBundleName, userId);
+    if (result != ERR_OK) {
+        return result;
     }
 
-    const auto &abilityInfo = abilityRecord->GetAbilityInfo();
-    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
-        abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not oe extension");
-        return ERR_INVALID_CALLER;
-    }
-
-    if (want.GetElement().GetBundleName() != abilityInfo.bundleName) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want bundleName %{public}s does not match caller bundleName %{public}s",
-            want.GetElement().GetBundleName().c_str(), abilityInfo.bundleName.c_str());
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    if (want.GetElement().GetAbilityName().empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want abilityName is empty");
-        return INVALID_PARAMETERS_ERR;
-    }
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(hostPid, processInfo);
-    if (!processInfo.isAbilityForegrounding) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid=%{public}d not foreground", hostPid);
-        return NOT_TOP_ABILITY;
-    }
-
-    int32_t userId = abilityRecord->GetOwnerMissionUserId();
     EventInfo eventInfo = BuildEventInfo(want, userId);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityByOEExt: hostPid=%{public}d, specifiedFlag=%{public}s) %{public}s",
         hostPid, specifiedFlag.c_str(), want.GetElement().GetBundleName().c_str());
-
     StartAbilityWrapParam startAbilityWrapParam = {
         .want = want,
         .callerToken = callerToken,
         .userId = userId,
         .isUIAbilityOnly = true,
-        .hostBundleName = processInfo.bundleNames.empty() ? "" : processInfo.bundleNames[0],
+        .hostBundleName = hostBundleName,
         .isStartByOEExt = true,
         .specifiedFlag = specifiedFlag,
     };
