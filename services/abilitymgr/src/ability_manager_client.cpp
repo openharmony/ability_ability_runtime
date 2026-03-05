@@ -2567,12 +2567,12 @@ ErrCode AbilityManagerClient::GetUserLockedBundleList(int32_t userId,
 int32_t AbilityManagerClient::SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"token is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr");
         return ERR_INVALID_VALUE;
     }
-    auto proxy = GetAbilityManager();   // 获取 IAbilityManager 代理
+    auto proxy = GetAbilityManager();
     if (proxy == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"GetAbilityManager proxy failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAbilityManager proxy failed");
         return ERR_INVALID_VALUE;
     }
     return proxy->SetAppRecoveryFlag(token, flag);

@@ -7691,21 +7691,21 @@ int32_t AbilityManagerProxy::SetAppRecoveryFlag(const sptr<IRemoteObject>& token
     MessageOption option;
     
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"Write interface token failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"Write token failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write token failed");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteInt32(flag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"Write flag failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write flag failed");
         return ERR_INVALID_VALUE;
     }
  
     int32_t error = SendRequest(AbilityManagerInterfaceCode::SET_APP_RECOVERY_FLAG, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"SendRequest failed, error = %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SendRequest failed");
         return error;
     }
     return reply.ReadInt32();

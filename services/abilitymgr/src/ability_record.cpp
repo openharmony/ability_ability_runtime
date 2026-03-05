@@ -3436,7 +3436,7 @@ void AbilityRecord::PluginCompleteTerminate()
 
 void AbilityRecord::SetAppRecoveryFlag(int flag)
 {
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag%{public}d",flag);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag:%{public}d", flag);
     appRecoveryFlag_ = flag;
 }
 
