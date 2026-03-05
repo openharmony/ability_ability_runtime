@@ -2588,6 +2588,17 @@ public:
     {
         return ERR_OK;
     }
+
+    /**
+     * @brief Set app recovery galg.
+     * @param token Caller ability token.
+     * @param flag App recovery flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)
+    {
+        return 0;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS
