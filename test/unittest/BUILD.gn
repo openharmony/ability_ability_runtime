@@ -395,6 +395,7 @@ group("unittest") {
       "foreground_app_connection_test:unittest",
       "hidden_start_observer_manager_test:unittest",
       "hidden_start_utils_test:unittest",
+      "hisysevent_report_test:unittest",
       "hitrace_chain_utils_test:unittest",
       "implicit_start_processor_test:unittest",
       "insight_intent:unittest",
