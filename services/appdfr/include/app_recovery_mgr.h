@@ -41,7 +41,7 @@ public:
  
 private:
     AppRecoveryMgr();
-    ~AppRecoveryMgr();   
+    ~AppRecoveryMgr();
     std::function<void(const sptr<IRemoteObject>&)> FindCallback(const sptr<IRemoteObject>& remote);
     
 private:

@@ -40,7 +40,7 @@ void AppRecoveryMgr::Init(const std::shared_ptr<AppExecFwk::EventHandler>& handl
 }
  
 void AppRecoveryMgr::SetOnRemoteDieCallback(const sptr<IRemoteObject>& abilityToken,
-                                           const std::function<void(const sptr<IRemoteObject>&)>& callback)
+    const std::function<void(const sptr<IRemoteObject>&)>& callback)
 {
     if (abilityToken == nullptr || callback == nullptr) {
         TAG_LOGI(AAFwkTag::APPDFR, "SetOnRemoteDieCallback: invalid parameter");

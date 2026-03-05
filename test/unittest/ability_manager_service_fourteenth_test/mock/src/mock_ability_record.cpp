@@ -1727,7 +1727,7 @@ bool AbilityRecord::PromotePriority()
 
 void AbilityRecord::SetAppRecoveryFlag(int flag)
 {
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag%{public}d",flag);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag%{public}d", flag);
     appRecoveryFlag_ = flag;
 }
 int AbilityRecord::GetAppRecoveryFlag() const

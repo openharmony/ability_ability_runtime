@@ -967,7 +967,7 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     }
     if (interfaceCode == AbilityManagerInterfaceCode::SET_APP_RECOVERY_FLAG) {
         return SetAppRecoveryFlagInner(data, reply);
-    } 
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -5335,7 +5335,7 @@ int32_t AbilityManagerStub::SetAppRecoveryFlagInner(MessageParcel &data, Message
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"Read token failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Read token failed");
         return ERR_INVALID_VALUE;
     }
     int flag = data.ReadInt32();
