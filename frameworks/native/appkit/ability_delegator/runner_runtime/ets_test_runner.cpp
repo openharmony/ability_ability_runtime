@@ -174,6 +174,42 @@ void ETSTestRunner::Run()
         }
     }
 }
+
+void ETSTestRunner::Stop()
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "ETSTestRunner Stop");
+    if (etsTestRunnerObj_ != nullptr) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "use etsTestRunnerObj_");
+        auto env = etsRuntime_.GetAniEnv();
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+            return;
+        }
+        if (env->ResetError() != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "ResetError failed");
+        }
+        ani_ref funRef;
+        ani_status status = ANI_ERROR;
+        status = env->Object_GetPropertyByName_Ref(etsTestRunnerObj_->aniObj, "onStop", &funRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get OnStop failed status : %{public}d", status);
+            return;
+        }
+        TAG_LOGI(AAFwkTag::DELEGATOR, "get OnStop success");
+        if (!IsValidProperty(env, funRef)) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "invalid OnStop property");
+            return;
+        }
+
+        ani_ref result;
+        status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ZERO, nullptr, &result);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void OnStop failed status : %{public}d", status);
+        } else {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void OnStop success");
+        }
+    }
+}
 } // namespace RunnerRuntime
 } // namespace OHOS
 
