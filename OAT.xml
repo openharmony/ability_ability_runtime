@@ -76,6 +76,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="test/moduletest/ui_extension_ability_test/ui_extension_provider_bundle/entry/src/main/resources/base/media/icon.png" desc="icon"/>
                 <filteritem type="filepath" name="services/dialog_ui/ams_system_dialog/entry/src/main/resources/base/media/icon.png" desc="icon"/>
                 <filteritem type="filepath" name="services/dialog_ui/ams_system_dialog/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
+                <filteritem type="filepath" name="services/dialog_ui/ams_system_dialog/AppScope/resources/base/media/app_title_icon.png" desc="app_title_icon"/>
                 <filteritem type="filepath" name="test/moduletest/ui_extension_ability_test/ui_extension_provider_bundle/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
                 <filteritem type="filepath" name="test/moduletest/ui_extension_ability_test/ui_extension_user_bundle/AppScope/resources/base/media/app_icon.png" desc="app_icon"/>
                 <filteritem type="filepath" name="services/dialog_ui/ams_system_dialog/AppScope/resources/base/media/selectedMark.png" desc="icon"/>
