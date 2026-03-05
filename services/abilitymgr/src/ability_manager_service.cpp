@@ -7808,7 +7808,6 @@ void AbilityManagerService::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
     CHECK_POINTER(abilityRecord);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAbilityRequestDone %{public}s-%{public}s state:%{public}d",
         abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str(), state);
-    HandleRecoveryRecipient(abilityRecord, state, token);
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
 
     auto type = abilityRecord->GetAbilityInfo().type;
@@ -16750,17 +16749,14 @@ int32_t AbilityManagerService::SetAppRecoveryFlag(const sptr<IRemoteObject>& tok
         return ERR_INVALID_VALUE;
     }
     abilityRecord->SetAppRecoveryFlag(flag);
+    HandleRecoveryRecipient(abilityRecord, token);
     return ERR_OK;
 }
  
 void AbilityManagerService::HandleRecoveryRecipient(
     const std::shared_ptr<AbilityRecord>& abilityRecord,
-    int state,
     const sptr<IRemoteObject>& token)
 {
-    if (state != 2) {
-        return; 
-    }
     int restartFlag = abilityRecord->GetAppRecoveryFlag();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s SetAppDeathRecipient, restartFlag is %{public}d",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
@@ -16800,6 +16796,8 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityInfo is invalid: bundleName or name is empty");
         return;
     }
+    constexpr int64_t ONE_SECOND_MS = 1000;
+    constexpr int64_t RECOVERY_DELAY = 5000;
     constexpr int64_t MIN_RECOVERY_TIME = 60;
     int64_t now = time(nullptr);
     auto it = appRecoveryHistory_.find(uid);
@@ -16817,7 +16815,7 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
     }
     if ((it != appRecoveryHistory_.end()) &&
     (it->second + MIN_RECOVERY_TIME > now)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,
+        TAG_LOGW(AAFwkTag::ABILITYMGR,
             "%{public}s appRecovery recover too frequently in one minute, kill app(%{public}d). "
             "Last recovery: %{public}lld, Now: %{public}lld, Delta: %{public}lld",
             __func__,
@@ -16825,15 +16823,15 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
             static_cast<long long>(it->second),
             static_cast<long long>(now),
             static_cast<long long>(now - it->second));
-    } else if (std::abs(now*1000-stamp)>5000){
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld,no recovery",static_cast<long long>(now),static_cast<long long>(stamp));
+    } else if (std::abs(now*ONE_SECOND_MS-stamp)>RECOVERY_DELAY){
+        TAG_LOGW(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld,no recovery",static_cast<long long>(now),static_cast<long long>(stamp));
     } else {
         appRecoveryHistory_[uid] = now;
         AAFwk::Want *newWant=new AAFwk::Want();
         newWant->SetElementName(abilityInfo.bundleName, abilityInfo.name);
         newWant->SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
         StartAbility(*newWant,MAIN_USER_ID);
-        TAG_LOGE(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld",static_cast<long long>(now),static_cast<long long>(stamp));
+        TAG_LOGW(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld",static_cast<long long>(now),static_cast<long long>(stamp));
     }
     if (remote != nullptr) {
         AppRecoveryMgr::AppRecoveryMgr::GetInstance().RemoveOnRemoteDieCallback(remote);
