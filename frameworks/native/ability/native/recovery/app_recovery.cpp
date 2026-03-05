@@ -143,6 +143,8 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     abilityRecovery->EnableAbilityRecovery(useAppSettedValue_.load(), restartFlag_, saveOccasion_, saveMode_);
     ability->EnableAbilityRecovery(abilityRecovery, useAppSettedValue_.load());
     abilityRecoverys_.push_back(abilityRecovery);
+    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    abilityMgr->SetAppRecoveryFlag(token_.promote(), restartFlag_);
     return true;
 }
 
