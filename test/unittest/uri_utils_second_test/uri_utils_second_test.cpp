@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,6 +134,35 @@ HWTEST_F(UriUtilsSecondTest, IsDmsCall_004, TestSize.Level1)
     MyFlag::bundleName_ = "distributedschedtest";
     bool ret = UriUtils::GetInstance().IsDmsCall(fromTokenId);
     EXPECT_FALSE(ret);
+}
+
+/*
+ * Feature: UriUtils
+ * Function: PublishFileOpenEvent
+ * SubFunction: NA
+ * FunctionPoints: UriUtils PublishFileOpenEvent with callerUid
+ */
+HWTEST_F(UriUtilsSecondTest, PublishFileOpenEvent_003, TestSize.Level1)
+{
+    Want want;
+    auto wangUri = want.GetUri();
+    std::string uriStr = wangUri.ToString();
+    std::string schemeStr = wangUri.GetScheme();
+    EXPECT_EQ(uriStr, "");
+    EXPECT_EQ(schemeStr, "");
+    WantParams params;
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(1, AAFwk::g_IID_IString);
+    if (ao != nullptr) {
+        ao->Set(0, String::Box("file"));
+        params.SetParam("ability.params.stream", ao);
+    }
+    want.SetParams(params);
+    want.SetUri("file://data/storage/el2/distributedfiles/test.txt");
+    GrantUriPermissionInfo grantInfo;
+    grantInfo.callerUid = 20010080;
+    UriUtils::GetInstance().PublishFileOpenEvent(want, grantInfo);
+    wangUri = want.GetUri();
+    EXPECT_NE(wangUri.ToString(), "");
 }
 
 /*
