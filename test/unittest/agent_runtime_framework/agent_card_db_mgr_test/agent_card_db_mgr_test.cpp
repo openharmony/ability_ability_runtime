@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 
 #include "ability_manager_errors.h"
+#include "mock_single_kv_store.h"
 #define private public
 #define protected public
 #include "agent_card_db_mgr.h"
@@ -29,6 +30,61 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AgentRuntime {
+namespace {
+AgentCard BuildValidCard(const std::string &agentId)
+{
+    AgentCard card;
+    card.agentId = agentId;
+    card.name = "Test Agent";
+    card.description = "Test description";
+    card.version = "1.0.0";
+    card.category = "test";
+    card.defaultInputModes = {"text"};
+    card.defaultOutputModes = {"text"};
+    auto skill = std::make_shared<AgentSkill>();
+    skill->id = "test_skill";
+    skill->name = "Test Skill";
+    skill->description = "Test skill description";
+    skill->tags = {"test_tag"};
+    card.skills.push_back(skill);
+    return card;
+}
+} // namespace
+
+class MockSingleKvStoreForDbMgr final : public OHOS::MockSingleKvStore {
+public:
+    DistributedKv::Status getStatus_ = DistributedKv::Status::SUCCESS;
+    DistributedKv::Value getValue_;
+    DistributedKv::Status getEntriesStatus_ = DistributedKv::Status::SUCCESS;
+    std::vector<DistributedKv::Entry> entries_;
+
+    DistributedKv::Status Get(const DistributedKv::Key &key, DistributedKv::Value &value) override
+    {
+        if (getStatus_ == DistributedKv::Status::SUCCESS) {
+            value = getValue_;
+        }
+        return getStatus_;
+    }
+
+    DistributedKv::Status GetEntries(
+        const DistributedKv::Key &prefix, std::vector<DistributedKv::Entry> &entries) const override
+    {
+        if (getEntriesStatus_ == DistributedKv::Status::SUCCESS) {
+            entries = entries_;
+        }
+        return getEntriesStatus_;
+    }
+
+    DistributedKv::Status GetEntries(
+        const DistributedKv::DataQuery &query, std::vector<DistributedKv::Entry> &entries) const override
+    {
+        if (getEntriesStatus_ == DistributedKv::Status::SUCCESS) {
+            entries = entries_;
+        }
+        return getEntriesStatus_;
+    }
+};
+
 class AgentCardDbMgrTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -58,11 +114,10 @@ void AgentCardDbMgrTest::TearDown(void)
 HWTEST_F(AgentCardDbMgrTest, RestoreKvStoreTest_001, TestSize.Level1)
 {
     AgentCardDbMgr agentCardDbMgr;
-    DistributedKv::Status ret = agentCardDbMgr.RestoreKvStore(DistributedKv::Status::DATA_CORRUPTED);
-    EXPECT_TRUE(ret != DistributedKv::Status::DATA_CORRUPTED);
-
-    ret = agentCardDbMgr.RestoreKvStore(DistributedKv::Status::SUCCESS);
-    EXPECT_TRUE(ret == DistributedKv::Status::SUCCESS);
+    DistributedKv::Status ret = agentCardDbMgr.RestoreKvStore(DistributedKv::Status::SUCCESS);
+    EXPECT_EQ(ret, DistributedKv::Status::SUCCESS);
+    ret = agentCardDbMgr.RestoreKvStore(DistributedKv::Status::KEY_NOT_FOUND);
+    EXPECT_EQ(ret, DistributedKv::Status::KEY_NOT_FOUND);
 }
 
 /**
@@ -74,8 +129,12 @@ HWTEST_F(AgentCardDbMgrTest, RestoreKvStoreTest_001, TestSize.Level1)
 HWTEST_F(AgentCardDbMgrTest, GetKvStoreTest_001, TestSize.Level1)
 {
     AgentCardDbMgr agentCardDbMgr;
-    DistributedKv::Status ret = agentCardDbMgr.GetKvStore();
-    EXPECT_TRUE(ret == DistributedKv::Status::SUCCESS);
+    DistributedKv::Options options = agentCardDbMgr.CreateKvStoreOptions();
+    EXPECT_TRUE(options.createIfMissing);
+    EXPECT_FALSE(options.encrypt);
+    EXPECT_FALSE(options.autoSync);
+    EXPECT_FALSE(options.syncable);
+    EXPECT_EQ(options.kvStoreType, DistributedKv::KvStoreType::SINGLE_VERSION);
 }
 
 /**
@@ -87,6 +146,7 @@ HWTEST_F(AgentCardDbMgrTest, GetKvStoreTest_001, TestSize.Level1)
 HWTEST_F(AgentCardDbMgrTest, CheckKvStoreTest_001, TestSize.Level1)
 {
     AgentCardDbMgr agentCardDbMgr;
+    agentCardDbMgr.kvStorePtr_ = std::make_shared<MockSingleKvStoreForDbMgr>();
     bool ret = agentCardDbMgr.CheckKvStore();
     EXPECT_TRUE(ret);
 }
@@ -99,10 +159,12 @@ HWTEST_F(AgentCardDbMgrTest, CheckKvStoreTest_001, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, InsertDataTest_001, TestSize.Level1)
 {
-    std::vector<AgentCard> cards;
     AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+    std::vector<AgentCard> cards = {BuildValidCard("agent_insert_001")};
     int ret = agentCardDbMgr.InsertData("test", 100, cards);
-    EXPECT_TRUE(ret == ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -114,8 +176,10 @@ HWTEST_F(AgentCardDbMgrTest, InsertDataTest_001, TestSize.Level1)
 HWTEST_F(AgentCardDbMgrTest, DeleteDataTest_001, TestSize.Level1)
 {
     AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     int ret = agentCardDbMgr.DeleteData("test", 100);
-    EXPECT_TRUE(ret == ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -128,8 +192,11 @@ HWTEST_F(AgentCardDbMgrTest, QueryDataTest_001, TestSize.Level1)
 {
     std::vector<AgentCard> cards;
     AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getStatus_ = DistributedKv::Status::KEY_NOT_FOUND;
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     int ret = agentCardDbMgr.QueryData("test", 100, cards);
-    EXPECT_TRUE(ret == ERR_NAME_NOT_FOUND);
+    EXPECT_EQ(ret, ERR_NAME_NOT_FOUND);
 }
 
 /**
@@ -140,33 +207,17 @@ HWTEST_F(AgentCardDbMgrTest, QueryDataTest_001, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryDataTest_002, TestSize.Level1)
 {
-    // Arrange: Insert valid data first
-    std::vector<AgentCard> insertCards;
-    AgentCard card;
-    card.agentId = "agent_query_invalid_001";
-    card.name = "Query Invalid JSON Test";
-    card.version = "1.0.0";
-    card.category = "test";
-    card.defaultInputModes = {"text"};
-    card.defaultOutputModes = {"text"};
-    auto skill = std::make_shared<AgentSkill>();
-    skill->id = "test_skill";
-    skill->name = "Test Skill";
-    skill->description = "Test skill description";
-    skill->tags = {"test_tag"};
-    card.skills.push_back(skill);
-    insertCards.push_back(card);
-
+    std::vector<AgentCard> insertCards = {BuildValidCard("agent_query_001")};
     AgentCardDbMgr agentCardDbMgr;
-    agentCardDbMgr.InsertData("com.test.queryinvalid", 100, insertCards);
-
-    // Note: This test validates that QueryData handles invalid JSON gracefully
-    // In real scenario, if corrupted data exists, it should return INNER_ERR
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getStatus_ = DistributedKv::Status::SUCCESS;
+    mockStore->getValue_ = agentCardDbMgr.ConvertValue(insertCards);
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
-    int ret = agentCardDbMgr.QueryData("com.test.queryinvalid", 100, queryCards);
-
-    // Assert: Should handle gracefully (either success or error)
-    EXPECT_TRUE(ret == ERR_OK || ret == AAFwk::INNER_ERR);
+    int ret = agentCardDbMgr.QueryData("com.test.query", 100, queryCards);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 1);
+    EXPECT_EQ(queryCards[0].agentId, "agent_query_001");
 }
 
 /**
@@ -177,35 +228,19 @@ HWTEST_F(AgentCardDbMgrTest, QueryDataTest_002, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_001, TestSize.Level1)
 {
-    // Arrange: Prepare test data
-    std::vector<AgentCard> insertCards;
-    AgentCard card1;
-    card1.agentId = "agent_001";
-    card1.name = "Test Agent 1";
-    card1.description = "Test agent 1 description";
-    card1.version = "1.0.0";
-    card1.category = "test";
-    card1.defaultInputModes = {"text"};
-    card1.defaultOutputModes = {"text"};
-    auto skill1 = std::make_shared<AgentSkill>();
-    skill1->id = "test_skill_1";
-    skill1->name = "Test Skill 1";
-    skill1->description = "Test skill description 1";
-    skill1->tags = {"test_tag_1"};
-    card1.skills.push_back(skill1);
-    insertCards.push_back(card1);
-
-    // Act: Insert data and then query all
+    std::vector<AgentCard> insertCards = {BuildValidCard("agent_all_001")};
     AgentCardDbMgr agentCardDbMgr;
-    int insertRet = agentCardDbMgr.InsertData("com.test.agent1", 100, insertCards);
-    EXPECT_TRUE(insertRet == ERR_OK);
-
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("k1");
+    entry.value = agentCardDbMgr.ConvertValue(insertCards);
+    mockStore->entries_.push_back(entry);
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
     int queryRet = agentCardDbMgr.QueryAllData(queryCards);
-
-    // Assert: Verify to query result
-    EXPECT_TRUE(queryRet == ERR_OK);
-    EXPECT_TRUE(queryCards.size() >= 1);
+    EXPECT_EQ(queryRet, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 1);
+    EXPECT_EQ(queryCards[0].agentId, "agent_all_001");
 }
 
 /**
@@ -216,16 +251,13 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_001, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_002, TestSize.Level1)
 {
-    // Arrange: Clear database by deleting test data
     AgentCardDbMgr agentCardDbMgr;
-    agentCardDbMgr.DeleteData("com.test.queryall", 100);
-
-    // Act: Query all data from empty database
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> cards;
     int ret = agentCardDbMgr.QueryAllData(cards);
-
-    // Assert: Should return success with empty cards (no error thrown)
-    EXPECT_TRUE(ret == ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(cards.empty());
 }
 
 /**
@@ -236,81 +268,23 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_002, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
 {
-    // Arrange: Insert multiple cards with different bundle names and users
     AgentCardDbMgr agentCardDbMgr;
-
-    std::vector<AgentCard> cards1;
-    AgentCard card1;
-    card1.agentId = "agent_multi_001";
-    card1.name = "Multi Test Agent 1";
-    card1.description = "Test description 1";
-    card1.version = "1.0.0";
-    card1.category = "test";
-    card1.defaultInputModes = {"text"};
-    card1.defaultOutputModes = {"text"};
-    auto skill1 = std::make_shared<AgentSkill>();
-    skill1->id = "test_skill_1";
-    skill1->name = "Test Skill 1";
-    skill1->description = "Test skill description 1";
-    skill1->tags = {"test_tag_1"};
-    card1.skills.push_back(skill1);
-    cards1.push_back(card1);
-
-    std::vector<AgentCard> cards2;
-    AgentCard card2;
-    card2.agentId = "agent_multi_002";
-    card2.name = "Multi Test Agent 2";
-    card2.description = "Test description 2";
-    card2.version = "1.0.0";
-    card2.category = "test";
-    card2.defaultInputModes = {"text"};
-    card2.defaultOutputModes = {"text"};
-    auto skill2 = std::make_shared<AgentSkill>();
-    skill2->id = "test_skill_2";
-    skill2->name = "Test Skill 2";
-    skill2->description = "Test skill description 2";
-    skill2->tags = {"test_tag_2"};
-    card2.skills.push_back(skill2);
-    cards2.push_back(card2);
-
-    std::vector<AgentCard> cards3;
-    AgentCard card3;
-    card3.agentId = "agent_multi_003";
-    card3.name = "Multi Test Agent 3";
-    card3.description = "Test description 3";
-    card3.version = "1.0.0";
-    card3.category = "test";
-    card3.defaultInputModes = {"text"};
-    card3.defaultOutputModes = {"text"};
-    auto skill3 = std::make_shared<AgentSkill>();
-    skill3->id = "test_skill_3";
-    skill3->name = "Test Skill 3";
-    skill3->description = "Test skill description 3";
-    skill3->tags = {"test_tag_3"};
-    card3.skills.push_back(skill3);
-    cards3.push_back(card3);
-
-    // Act: Insert cards for different bundles/users
-    int ret1 = agentCardDbMgr.InsertData("com.test.multiple1", 100, cards1);
-    int ret2 = agentCardDbMgr.InsertData("com.test.multiple2", 101, cards2);
-    int ret3 = agentCardDbMgr.InsertData("com.test.multiple3", 102, cards3);
-
-    EXPECT_TRUE(ret1 == ERR_OK);
-    EXPECT_TRUE(ret2 == ERR_OK);
-    EXPECT_TRUE(ret3 == ERR_OK);
-
-    // Query all data
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry e1;
+    e1.key = DistributedKv::Key("k1");
+    e1.value = agentCardDbMgr.ConvertValue({BuildValidCard("agent_multi_001")});
+    DistributedKv::Entry e2;
+    e2.key = DistributedKv::Key("k2");
+    e2.value = agentCardDbMgr.ConvertValue({BuildValidCard("agent_multi_002")});
+    DistributedKv::Entry e3;
+    e3.key = DistributedKv::Key("k3");
+    e3.value = agentCardDbMgr.ConvertValue({BuildValidCard("agent_multi_003")});
+    mockStore->entries_ = {e1, e2, e3};
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
     int queryRet = agentCardDbMgr.QueryAllData(queryCards);
-
-    // Assert: Should return success with all cards
-    EXPECT_TRUE(queryRet == ERR_OK);
-    EXPECT_TRUE(queryCards.size() >= 3);
-
-    // Cleanup: Delete test data
-    agentCardDbMgr.DeleteData("com.test.multiple1", 100);
-    agentCardDbMgr.DeleteData("com.test.multiple2", 101);
-    agentCardDbMgr.DeleteData("com.test.multiple3", 102);
+    EXPECT_EQ(queryRet, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 3);
 }
 
 /**
@@ -321,71 +295,22 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_003, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
 {
-    // Arrange: Insert multiple cards for same bundle
-    std::vector<AgentCard> insertCards;
-    AgentCard card1;
-    card1.agentId = "agent_single_001";
-    card1.name = "Single Bundle Agent 1";
-    card1.description = "Test description 1";
-    card1.version = "1.0.0";
-    card1.category = "test";
-    card1.defaultInputModes = {"text"};
-    card1.defaultOutputModes = {"text"};
-    auto skill1 = std::make_shared<AgentSkill>();
-    skill1->id = "test_skill_1";
-    skill1->name = "Test Skill 1";
-    skill1->description = "Test skill description 1";
-    skill1->tags = {"test_tag_1"};
-    card1.skills.push_back(skill1);
-    insertCards.push_back(card1);
-
-    AgentCard card2;
-    card2.agentId = "agent_single_002";
-    card2.name = "Single Bundle Agent 2";
-    card2.description = "Test description 2";
-    card2.version = "1.0.0";
-    card2.category = "test";
-    card2.defaultInputModes = {"text"};
-    card2.defaultOutputModes = {"text"};
-    auto skill2 = std::make_shared<AgentSkill>();
-    skill2->id = "test_skill_2";
-    skill2->name = "Test Skill 2";
-    skill2->description = "Test skill description 2";
-    skill2->tags = {"test_tag_2"};
-    card2.skills.push_back(skill2);
-    insertCards.push_back(card2);
-
-    AgentCard card3;
-    card3.agentId = "agent_single_003";
-    card3.name = "Single Bundle Agent 3";
-    card3.description = "Test description 3";
-    card3.version = "1.0.0";
-    card3.category = "test";
-    card3.defaultInputModes = {"text"};
-    card3.defaultOutputModes = {"text"};
-    auto skill3 = std::make_shared<AgentSkill>();
-    skill3->id = "test_skill_3";
-    skill3->name = "Test Skill 3";
-    skill3->description = "Test skill description 3";
-    skill3->tags = {"test_tag_3"};
-    card3.skills.push_back(skill3);
-    insertCards.push_back(card3);
-
-    // Act: Insert multiple cards for same bundle
+    std::vector<AgentCard> insertCards = {
+        BuildValidCard("agent_single_001"),
+        BuildValidCard("agent_single_002"),
+        BuildValidCard("agent_single_003"),
+    };
     AgentCardDbMgr agentCardDbMgr;
-    int insertRet = agentCardDbMgr.InsertData("com.test.singlebundle", 100, insertCards);
-    EXPECT_TRUE(insertRet == ERR_OK);
-
-    // Query all data
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("single_bundle");
+    entry.value = agentCardDbMgr.ConvertValue(insertCards);
+    mockStore->entries_ = {entry};
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
     int queryRet = agentCardDbMgr.QueryAllData(queryCards);
-
-    // Assert: Should return success with all cards
-    EXPECT_TRUE(queryRet == ERR_OK);
-    EXPECT_TRUE(queryCards.size() >= 3);
-
-    // Cleanup: Delete test data
-    agentCardDbMgr.DeleteData("com.test.singlebundle", 100);
+    EXPECT_EQ(queryRet, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 3);
 }
 
 /**
@@ -396,47 +321,22 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_004, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
 {
-    // Arrange: Insert a card with specific data
-    std::vector<AgentCard> insertCards;
-    AgentCard card;
-    card.agentId = "agent_verify_001";
-    card.name = "Verify Test Agent";
-    card.description = "This is a verification test";
-    card.version = "2.0.0";
-    card.category = "test";
-
-    std::vector<std::string> inputModes = {"text", "voice"};
-    std::vector<std::string> outputModes = {"text", "voice"};
-    card.defaultInputModes = inputModes;
-    card.defaultOutputModes = outputModes;
-    auto skill = std::make_shared<AgentSkill>();
-    skill->id = "test_skill";
-    skill->name = "Test Skill";
-    skill->description = "Test skill description";
-    skill->tags = {"test_tag"};
-    card.skills.push_back(skill);
-    insertCards.push_back(card);
-
-    // Act: Insert and query
+    std::vector<AgentCard> insertCards = {BuildValidCard("agent_verify_001")};
+    insertCards[0].name = "Verify Test Agent";
+    insertCards[0].version = "2.0.0";
     AgentCardDbMgr agentCardDbMgr;
-    int insertRet = agentCardDbMgr.InsertData("com.test.verify", 100, insertCards);
-    EXPECT_TRUE(insertRet == ERR_OK);
-
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("verify_key");
+    entry.value = agentCardDbMgr.ConvertValue(insertCards);
+    mockStore->entries_ = {entry};
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
     int queryRet = agentCardDbMgr.QueryAllData(queryCards);
-
-    // Assert: Verify returned data matches
-    EXPECT_TRUE(queryRet == ERR_OK);
-    bool found = false;
-    for (const auto &queryCard : queryCards) {
-        if (queryCard.agentId == "agent_verify_001") {
-            EXPECT_TRUE(queryCard.name == "Verify Test Agent");
-            EXPECT_TRUE(queryCard.version == "2.0.0");
-            found = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found);
+    EXPECT_EQ(queryRet, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 1);
+    EXPECT_EQ(queryCards[0].name, "Verify Test Agent");
+    EXPECT_EQ(queryCards[0].version, "2.0.0");
 }
 
 /**
@@ -447,58 +347,11 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_005, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_006, TestSize.Level1)
 {
-    // Arrange: Insert data then delete it
-    std::vector<AgentCard> insertCards;
-    AgentCard card;
-    card.agentId = "agent_delete_001";
-    card.name = "Delete Test Agent";
-    card.description = "Test description";
-    card.version = "1.0.0";
-    card.category = "test";
-    card.defaultInputModes = {"text"};
-    card.defaultOutputModes = {"text"};
-    auto skill = std::make_shared<AgentSkill>();
-    skill->id = "test_skill";
-    skill->name = "Test Skill";
-    skill->description = "Test skill description";
-    skill->tags = {"test_tag"};
-    card.skills.push_back(skill);
-    insertCards.push_back(card);
-
     AgentCardDbMgr agentCardDbMgr;
-    int insertRet = agentCardDbMgr.InsertData("com.test.todelete", 100, insertCards);
-    EXPECT_TRUE(insertRet == ERR_OK);
-
-    // Verify it exists
-    std::vector<AgentCard> queryCards1;
-    agentCardDbMgr.QueryAllData(queryCards1);
-    bool foundBeforeDelete = false;
-    for (const auto &c : queryCards1) {
-        if (c.agentId == "agent_delete_001") {
-            foundBeforeDelete = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(foundBeforeDelete);
-
-    // Act: Delete data
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     int deleteRet = agentCardDbMgr.DeleteData("com.test.todelete", 100);
-    EXPECT_TRUE(deleteRet == ERR_OK);
-
-    // Query all again
-    std::vector<AgentCard> queryCards2;
-    int queryRet = agentCardDbMgr.QueryAllData(queryCards2);
-
-    // Assert: Deleted data should not exist
-    EXPECT_TRUE(queryRet == ERR_OK);
-    bool foundAfterDelete = false;
-    for (const auto &c : queryCards2) {
-        if (c.agentId == "agent_delete_001") {
-            foundAfterDelete = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(!foundAfterDelete);
+    EXPECT_EQ(deleteRet, ERR_OK);
 }
 
 /**
@@ -509,33 +362,17 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_006, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_007, TestSize.Level1)
 {
-    // Arrange: Prepare a fresh empty vector
-    std::vector<AgentCard> insertCards;
-    AgentCard card;
-    card.agentId = "agent_emptyvec_001";
-    card.name = "Empty Vector Test";
-    card.version = "1.0.0";
-    card.category = "test";
-    card.defaultInputModes = {"text"};
-    card.defaultOutputModes = {"text"};
-    auto skill = std::make_shared<AgentSkill>();
-    skill->id = "test_skill";
-    skill->name = "Test Skill";
-    skill->description = "Test skill description";
-    skill->tags = {"test_tag"};
-    card.skills.push_back(skill);
-    insertCards.push_back(card);
-
     AgentCardDbMgr agentCardDbMgr;
-    agentCardDbMgr.InsertData("com.test.emptyvec", 100, insertCards);
-
-    // Act: Query with empty vector
-    std::vector<AgentCard> queryCards;  // Empty vector
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("empty_vec");
+    entry.value = agentCardDbMgr.ConvertValue({BuildValidCard("agent_emptyvec_001")});
+    mockStore->entries_ = {entry};
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+    std::vector<AgentCard> queryCards;
     int ret = agentCardDbMgr.QueryAllData(queryCards);
-
-    // Assert: Should populate vector correctly
-    EXPECT_TRUE(ret == ERR_OK);
-    EXPECT_TRUE(queryCards.size() >= 1);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(queryCards.size(), 1);
 }
 
 /**
@@ -546,33 +383,154 @@ HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_007, TestSize.Level1)
  */
 HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_008, TestSize.Level1)
 {
-    // Arrange: Insert valid data first
-    std::vector<AgentCard> insertCards;
-    AgentCard card;
-    card.agentId = "agent_invalidjson_001";
-    card.name = "Invalid JSON Test";
-    card.version = "1.0.0";
-    card.category = "test";
-    card.defaultInputModes = {"text"};
-    card.defaultOutputModes = {"text"};
-    auto skill = std::make_shared<AgentSkill>();
-    skill->id = "test_skill";
-    skill->name = "Test Skill";
-    skill->description = "Test skill description";
-    skill->tags = {"test_tag"};
-    card.skills.push_back(skill);
-    insertCards.push_back(card);
-
     AgentCardDbMgr agentCardDbMgr;
-    agentCardDbMgr.InsertData("com.test.invalidjson", 100, insertCards);
-
-    // Note: This test validates that QueryAllData handles invalid JSON gracefully
-    // In real scenario, if corrupted data exists, it should return INNER_ERR
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("invalid_json");
+    entry.value = DistributedKv::Value("invalid_json_payload");
+    mockStore->entries_ = {entry};
+    agentCardDbMgr.kvStorePtr_ = mockStore;
     std::vector<AgentCard> queryCards;
     int ret = agentCardDbMgr.QueryAllData(queryCards);
+    EXPECT_EQ(ret, AAFwk::INNER_ERR);
+}
 
-    // Assert: Should handle gracefully (either success or error)
-    EXPECT_TRUE(ret == ERR_OK || ret == AAFwk::INNER_ERR);
+/**
+ * @tc.name: InsertDataTest_002
+ * @tc.desc: Test InsertData returns ERR_INVALID_OPERATION when kv put fails.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, InsertDataTest_002, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->Put_ = DistributedKv::Status::KEY_NOT_FOUND;
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.InsertData("test.put.fail", 100, cards);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DeleteDataTest_002
+ * @tc.desc: Test DeleteData returns ERR_INVALID_OPERATION when kv delete fails.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, DeleteDataTest_002, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->Delete_ = DistributedKv::Status::KEY_NOT_FOUND;
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    int ret = agentCardDbMgr.DeleteData("test.delete.fail", 100);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: QueryDataTest_003
+ * @tc.desc: Test QueryData returns INNER_ERR for invalid json value.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryDataTest_003, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getStatus_ = DistributedKv::Status::SUCCESS;
+    mockStore->getValue_ = DistributedKv::Value("not-json");
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryData("test.query.invalidjson", 100, cards);
+    EXPECT_EQ(ret, AAFwk::INNER_ERR);
+}
+
+/**
+ * @tc.name: QueryDataTest_004
+ * @tc.desc: Test QueryData returns non-KEY_NOT_FOUND failure status.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryDataTest_004, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    // Use a synthetic non-KEY_NOT_FOUND status to cover the generic error path
+    // without triggering DATA_CORRUPTED recovery flow (which touches real kv backend).
+    constexpr auto testStatus = static_cast<DistributedKv::Status>(-1);
+    mockStore->getStatus_ = testStatus;
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryData("test.query.fail", 100, cards);
+    EXPECT_EQ(ret, static_cast<int32_t>(testStatus));
+}
+
+/**
+ * @tc.name: QueryAllDataTest_009
+ * @tc.desc: Test QueryAllData returns status on get entries failure.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_009, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getEntriesStatus_ = DistributedKv::Status::KEY_NOT_FOUND;
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryAllData(cards);
+    EXPECT_EQ(ret, static_cast<int32_t>(DistributedKv::Status::KEY_NOT_FOUND));
+}
+
+/**
+ * @tc.name: QueryAllDataTest_010
+ * @tc.desc: Test QueryAllData returns INNER_ERR for invalid json entry value.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_010, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getEntriesStatus_ = DistributedKv::Status::SUCCESS;
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("key_invalid_json");
+    entry.value = DistributedKv::Value("not-json");
+    mockStore->entries_.push_back(entry);
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryAllData(cards);
+    EXPECT_EQ(ret, AAFwk::INNER_ERR);
+}
+
+/**
+ * @tc.name: QueryAllDataTest_011
+ * @tc.desc: Test QueryAllData continues when AgentCard::FromJson fails.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardDbMgrTest, QueryAllDataTest_011, TestSize.Level1)
+{
+    AgentCardDbMgr agentCardDbMgr;
+    auto mockStore = std::make_shared<MockSingleKvStoreForDbMgr>();
+    mockStore->getEntriesStatus_ = DistributedKv::Status::SUCCESS;
+    DistributedKv::Entry entry;
+    entry.key = DistributedKv::Key("key_invalid_card");
+    entry.value = DistributedKv::Value(R"([{"name":"missing_agent_id"}])");
+    mockStore->entries_.push_back(entry);
+    agentCardDbMgr.kvStorePtr_ = mockStore;
+
+    std::vector<AgentCard> cards;
+    int ret = agentCardDbMgr.QueryAllData(cards);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(cards.empty());
 }
 } // namespace AgentRuntime
 } // namespace OHOS

@@ -77,5 +77,59 @@ HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_001, TestSize.Level1)
     bundleEventCallback.OnReceiveEvent(eventData2);
     EXPECT_TRUE(eventData2.GetWant().GetElement().GetBundleName().empty());
 }
+
+/**
+ * @tc.name: OnReceiveEventTest_002
+ * @tc.desc: Verify package changed branch can be reached.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_002, TestSize.Level1)
+{
+    AgentBundleEventCallback bundleEventCallback;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetBundle("test");
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    eventData.SetWant(want);
+    bundleEventCallback.OnReceiveEvent(eventData);
+    EXPECT_EQ(eventData.GetWant().GetAction(), EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+}
+
+/**
+ * @tc.name: OnReceiveEventTest_003
+ * @tc.desc: Verify package removed branch can be reached.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_003, TestSize.Level1)
+{
+    AgentBundleEventCallback bundleEventCallback;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetBundle("test");
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    eventData.SetWant(want);
+    bundleEventCallback.OnReceiveEvent(eventData);
+    EXPECT_EQ(eventData.GetWant().GetAction(), EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+}
+
+/**
+ * @tc.name: OnReceiveEventTest_004
+ * @tc.desc: Verify unsupported action branch falls through.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_004, TestSize.Level1)
+{
+    AgentBundleEventCallback bundleEventCallback;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetBundle("test");
+    want.SetAction("ohos.intent.action.UNKNOWN");
+    eventData.SetWant(want);
+    bundleEventCallback.OnReceiveEvent(eventData);
+    EXPECT_EQ(eventData.GetWant().GetAction(), "ohos.intent.action.UNKNOWN");
+}
 } // namespace AgentRuntime
 } // namespace OHOS
