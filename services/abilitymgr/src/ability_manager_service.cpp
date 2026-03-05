@@ -16791,7 +16791,6 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remote is null, cannot recover app");
         return;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR,"AbilityMgrService::HandleAppDiedForRecovery called");
     if (abilityInfo.bundleName.empty() || abilityInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityInfo is invalid: bundleName or name is empty");
         return;
@@ -16817,12 +16816,11 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
     (it->second + MIN_RECOVERY_TIME > now)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR,
             "%{public}s appRecovery recover too frequently in one minute, kill app(%{public}d). "
-            "Last recovery: %{public}lld, Now: %{public}lld, Delta: %{public}lld",
+            "Last recovery: %{public}lld, Now: %{public}lld",
             __func__,
             pid,
             static_cast<long long>(it->second),
-            static_cast<long long>(now),
-            static_cast<long long>(now - it->second));
+            static_cast<long long>(now));
     } else if (std::abs(now*ONE_SECOND_MS-stamp)>RECOVERY_DELAY){
         TAG_LOGW(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld,no recovery",static_cast<long long>(now),static_cast<long long>(stamp));
     } else {
