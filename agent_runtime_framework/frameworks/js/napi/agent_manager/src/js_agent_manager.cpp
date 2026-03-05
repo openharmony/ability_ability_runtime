@@ -283,14 +283,21 @@ napi_value JsAgentManager::OnConnectAgentExtensionAbility(napi_env env, size_t a
         return result;
     }
 
-    // 3. Create and configure connection
+    // 3. Check if maximum connections reached
+    if (AgentConnectionUtils::IsMaxConnectionsReached()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Maximum agent connections reached");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED);
+        return CreateJsUndefined(env);
+    }
+
+    // 4. Create and configure connection
     auto connection = CreateAgentConnection(env, want, agentId, callbackObject);
     if (connection == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Failed to create connection");
         return CreateJsUndefined(env);
     }
 
-    // 4. Schedule async connection
+    // 5. Schedule async connection
     result = ScheduleAgentConnection(env, want, agentId, connection);
     return result;
 }

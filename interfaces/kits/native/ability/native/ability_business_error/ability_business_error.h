@@ -218,6 +218,9 @@ enum class AbilityErrorCode {
     // The specified agentId does not exist.
     ERROR_CODE_AGENT_ID_NOT_EXIST = 35600001,
 
+    // Maximum connections from the same caller have been reached.
+    ERROR_CODE_MAX_CONNECTIONS_REACHED = 35600003,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

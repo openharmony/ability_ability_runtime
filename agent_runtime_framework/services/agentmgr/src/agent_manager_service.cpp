@@ -20,6 +20,7 @@
 #include "agent_card_mgr.h"
 #include "agent_config.h"
 #include "agent_extension_connection_constants.h"
+#include "app_mgr_client.h"
 #include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -170,13 +171,37 @@ int32_t AgentManagerService::GetAgentCardByAgentId(const std::string &bundleName
 int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &want,
     const sptr<AAFwk::IAbilityConnection> &connection)
 {
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "ConnectAgentExtensionAbility called");
-
     // Validate permission
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CONNECT_AGENT)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
         return ERR_PERMISSION_DENIED;
+    }
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(
+        callerPid, processInfo));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "get process failed: %{public}d", ret);
+        return ret;
+    }
+    if (processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "not foreground app");
+        return AAFwk::NOT_TOP_ABILITY;
+    }
+
+    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    bool queryResult = IN_PROCESS_CALL(
+        DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryExtensionAbilityInfos(
+            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
+    if (!queryResult || extensionInfos.empty()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "extension ability not exist");
+        return AAFwk::RESOLVE_ABILITY_ERR;
+    }
+    if (extensionInfos[0].type != AppExecFwk::ExtensionAbilityType::AGENT) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "incorrect extension");
+        return AAFwk::ERR_WRONG_INTERFACE_CALL;
     }
 
     std::string agentId = want.GetStringParam(AGENTID_KEY);
@@ -186,10 +211,11 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     }
 
     AgentCard card;
-    if (GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK || agentId != card.agentId) {
+    if (GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
         return AAFwk::ERR_INVALID_AGENT_CARD_ID;
     }
+    TAG_LOGI(AAFwkTag::SER_ROUTER, "connecting %{public}s-%{public}s", want.GetBundle().c_str(), agentId.c_str());
 
     // Validate connection object
     if (connection == nullptr) {
@@ -197,23 +223,18 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
         return ERR_INVALID_VALUE;
     }
 
-    // Use IN_PROCESS_CALL to reset calling identity and connect via AbilityManagerClient
-    // Using AGENT extension type since agent extensions don't have a specific type yet
-    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->ConnectAbilityWithExtensionType(
-        want, connection, nullptr, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::AGENT));
+    ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbilityWithExtensionType(
+        want, connection, nullptr, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::AGENT);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "ConnectAbilityWithExtensionType failed: %{public}d", ret);
         return ret;
     }
 
-    TAG_LOGI(AAFwkTag::SER_ROUTER, "ConnectAgentExtensionAbility succeeded");
     return ERR_OK;
 }
 
 int32_t AgentManagerService::DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection)
 {
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "DisconnectAgentExtensionAbility called");
-
     // Validate permission
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CONNECT_AGENT)) {
@@ -234,7 +255,6 @@ int32_t AgentManagerService::DisconnectAgentExtensionAbility(const sptr<AAFwk::I
         return ret;
     }
 
-    TAG_LOGI(AAFwkTag::SER_ROUTER, "DisconnectAgentExtensionAbility succeeded");
     return ERR_OK;
 }
 }  // namespace AgentRuntime

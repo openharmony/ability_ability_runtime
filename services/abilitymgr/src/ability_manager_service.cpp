@@ -11704,7 +11704,8 @@ int AbilityManagerService::CheckCallServicePermission(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionType is %{public}d.", static_cast<int>(extensionType));
         if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE ||
             extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE ||
-            extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+            extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE ||
+            extensionType == AppExecFwk::ExtensionAbilityType::AGENT) {
             return CheckCallServiceExtensionPermission(abilityRequest);
         } else {
             return CheckCallOtherExtensionPermission(abilityRequest);

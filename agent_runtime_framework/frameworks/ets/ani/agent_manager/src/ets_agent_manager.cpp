@@ -35,7 +35,6 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace AgentManagerEts {
 namespace {
-constexpr int32_t INVALID_PARAM = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
 constexpr const char* AGENT_MANAGER_SPACE_NAME = "@ohos.app.agent.agentManager.agentManager";
 constexpr const char* SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER = "utils.AgentUtils.AsyncCallbackWrapper";
 
@@ -83,7 +82,8 @@ void EtsAgentManager::GetAllAgentCards(ani_env *env, ani_object asyncCallback)
     }
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
 
@@ -113,13 +113,15 @@ void EtsAgentManager::GetAgentCardsByBundleName(ani_env *env, ani_string aniBund
     }
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
     std::string bundleName;
     if (!GetStdString(env, aniBundleName, bundleName)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "param bundlename err");
-        EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert bundleName fail.");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert bundleName fail."), nullptr);
         return;
     }
     TAG_LOGD(AAFwkTag::SER_ROUTER, "bundleName: %{public}s", bundleName.c_str());
@@ -151,19 +153,22 @@ void EtsAgentManager::GetAgentCardByAgentId(ani_env *env, ani_string aniBundleNa
     }
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
     std::string bundleName;
     if (!GetStdString(env, aniBundleName, bundleName)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "param bundlename err");
-        EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert bundleName fail.");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert bundleName fail."), nullptr);
         return;
     }
     std::string agentId;
     if (!GetStdString(env, aniAgentId, agentId)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "param agentId err");
-        EtsErrorUtil::ThrowError(env, INVALID_PARAM, "Parameter error. Convert agentId fail.");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert agentId fail."), nullptr);
         return;
     }
     TAG_LOGD(AAFwkTag::SER_ROUTER, "bundleName: %{public}s, agentId: %{public}s", bundleName.c_str(), agentId.c_str());
@@ -189,7 +194,8 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     }
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
 
@@ -197,7 +203,8 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     AAFwk::Want want;
     if (!UnwrapWant(env, aniWant, want)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "UnwrapWant failed");
-        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error. Parse want failed.");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Parse want failed."), nullptr);
         return;
     }
 
@@ -205,7 +212,8 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     std::string agentId;
     if (!GetStdString(env, aniAgentId, agentId)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "GetStdString for agentId failed");
-        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error. Convert agentId fail.");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert agentId fail."), nullptr);
         return;
     }
 
@@ -218,12 +226,21 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
         return;
     }
 
+    // Check if maximum connections reached
+    if (AgentConnectionUtils::IsMaxConnectionsReached()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Maximum agent connections reached");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED), nullptr);
+        return;
+    }
+
     // Get aniVM
     ani_vm *aniVM = nullptr;
     ani_status status = env->GetVM(&aniVM);
     if (status != ANI_OK || aniVM == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "GetVM failed");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER), nullptr);
         return;
     }
 
@@ -231,7 +248,8 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     auto connection = sptr<EtsAgentConnection>::MakeSptr(aniVM);
     if (connection == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Failed to create connection");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER), nullptr);
         return;
     }
 
@@ -266,7 +284,8 @@ void EtsAgentManager::DisconnectAgentExtensionAbility(ani_env *env, ani_object a
     }
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
 
