@@ -830,6 +830,8 @@ public:
         return firstCallerBundleName_;
     }
 
+    void SetAppRecoveryFlag(int flag);
+    int GetAppRecoveryFlag() const;
 protected:
     Want want_ = {};                                       // want to start this ability
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
@@ -1037,6 +1039,7 @@ protected:
     bool isStartingWindow_ = false;
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
+    int appRecoveryFlag_ = 0xFFFF;
 #endif
 };
 }  // namespace AAFwk
