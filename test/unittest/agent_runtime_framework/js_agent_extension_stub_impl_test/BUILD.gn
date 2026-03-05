@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/agent_runtime/js_agent_extension_stub_impl_test"
+module_output_path = "ability_runtime/ability_runtime/agent_runtime/js_agent_extension_stub_impl_test"
 
 ohos_unittest("js_agent_extension_stub_impl_test") {
   module_out_path = module_output_path

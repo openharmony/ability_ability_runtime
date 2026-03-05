@@ -62,6 +62,10 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::retVerifyCallingPermission = true;
     MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
     MyFlag::retDisconnectAbility = ERR_OK;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
 }
 
 void AgentManagerServiceTest::TearDown(void)
@@ -447,16 +451,20 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_001, TestSize.Lev
 /**
 * @tc.name  : ConnectAgentExtensionAbility_002
 * @tc.number: ConnectAgentExtensionAbility_002
-* @tc.desc  : Test ConnectAgentExtensionAbility when agentId is empty
+* @tc.desc  : Test ConnectAgentExtensionAbility when process is not foreground
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_002, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_BACKGROUND;
     AAFwk::Want want;
-    // agentId is not set, so it will be empty
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
-        ERR_INVALID_VALUE);
+        AAFwk::NOT_TOP_ABILITY);
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
 }
 
 /**
@@ -467,72 +475,158 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_002, TestSize.Lev
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_003, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+    MyFlag::retGetAgentCardByAgentId = ERR_NAME_NOT_FOUND;
     AAFwk::Want want;
     want.SetParam(AGENTID_KEY, std::string("nonExistentAgentId"));
     want.SetBundle("test.bundle");
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     // GetAgentCardByAgentId will fail since no such card exists
     EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
-        ERR_INVALID_AGENT_CARD_ID);
+        AAFwk::ERR_INVALID_AGENT_CARD_ID);
 }
 
 /**
 * @tc.name  : ConnectAgentExtensionAbility_004
 * @tc.number: ConnectAgentExtensionAbility_004
-* @tc.desc  : Test ConnectAgentExtensionAbility when connection is null
+* @tc.desc  : Test ConnectAgentExtensionAbility when agentId is empty
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_004, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
     AAFwk::Want want;
-    want.SetParam(AGENTID_KEY, std::string("testAgent"));
-    want.SetBundle("test.bundle");
-    sptr<AAFwk::IAbilityConnection> connection = nullptr;
-    // Connection is null, so it should return ERR_INVALID_AGENT_CARD_ID
+    // agentId is not set, so it will be empty
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
-        ERR_INVALID_AGENT_CARD_ID);
+        ERR_INVALID_VALUE);
 }
 
 /**
 * @tc.name  : ConnectAgentExtensionAbility_005
 * @tc.number: ConnectAgentExtensionAbility_005
-* @tc.desc  : Test ConnectAgentExtensionAbility success case
+* @tc.desc  : Test ConnectAgentExtensionAbility when connection is null
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_005, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
-    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
+    MyFlag::agentCardAgentId = "testAgent";
     AAFwk::Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
     want.SetBundle("test.bundle");
-    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
-    // Note: This test will fail at the agent card check since no card exists
-    // For the test to pass, we would need to mock GetAgentCardByAgentId
-    // or ensure a valid agent card is in the database
-    int32_t result = AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection);
-    // Since GetAgentCardByAgentId will fail, result should be ERR_INVALID_AGENT_CARD_ID
-    EXPECT_EQ(result, ERR_INVALID_AGENT_CARD_ID);
+    sptr<AAFwk::IAbilityConnection> connection = nullptr;
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
 }
 
 /**
 * @tc.name  : ConnectAgentExtensionAbility_006
 * @tc.number: ConnectAgentExtensionAbility_006
 * @tc.desc  : Test ConnectAgentExtensionAbility when ConnectAbilityWithExtensionType fails
-*           Note: This test would require mocking GetAgentCardByAgentId to succeed
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_006, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
+    MyFlag::agentCardAgentId = "testAgent";
     MyFlag::retConnectAbilityWithExtensionType = ERR_INVALID_VALUE;
     AAFwk::Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
     want.SetBundle("test.bundle");
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
-    // Note: This test will fail at the agent card check since no card exists
-    int32_t result = AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection);
-    // Since GetAgentCardByAgentId will fail, result should be ERR_INVALID_AGENT_CARD_ID
-    EXPECT_EQ(result, ERR_INVALID_AGENT_CARD_ID);
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
     MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_007
+* @tc.number: ConnectAgentExtensionAbility_007
+* @tc.desc  : Test ConnectAgentExtensionAbility when extension ability does not exist
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_007, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+    MyFlag::retQueryExtensionAbilityInfos = false;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        AAFwk::RESOLVE_ABILITY_ERR);
+    MyFlag::retQueryExtensionAbilityInfos = true;
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_008
+* @tc.number: ConnectAgentExtensionAbility_008
+* @tc.desc  : Test ConnectAgentExtensionAbility when GetRunningProcessInfoByPid fails
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_008, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_INVALID_VALUE;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        ERR_INVALID_VALUE);
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_009
+* @tc.number: ConnectAgentExtensionAbility_009
+* @tc.desc  : Test ConnectAgentExtensionAbility success case
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_009, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
+    MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
+    MyFlag::agentCardAgentId = "testAgent";
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection), ERR_OK);
+}
+
+/**
+* @tc.name  : ConnectAgentExtensionAbility_010
+* @tc.number: ConnectAgentExtensionAbility_010
+* @tc.desc  : Test ConnectAgentExtensionAbility when extension ability type is not AGENT
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_010, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    AAFwk::Want want;
+    want.SetParam(AGENTID_KEY, std::string("testAgent"));
+    want.SetBundle("test.bundle");
+    sptr<MockAbilityConnection> connection = new MockAbilityConnection();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        AAFwk::ERR_WRONG_INTERFACE_CALL);
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
 }
 
 /**
