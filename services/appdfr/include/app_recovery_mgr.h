@@ -28,8 +28,8 @@ namespace AppRecoveryMgr {
 class AppRecoveryMgr {
 public:
     static AppRecoveryMgr& GetInstance();
-    void SetOnRemoteDieCallback(const sptr<IRemoteObject>& abilityToken, 
-                                const std::function<void(const sptr<IRemoteObject>&)>& callback);
+    void SetOnRemoteDieCallback(const sptr<IRemoteObject>& abilityToken,
+        const std::function<void(const sptr<IRemoteObject>&)>& callback);
     
     void RemoveOnRemoteDieCallback(const sptr<IRemoteObject>& abilityToken);
     
