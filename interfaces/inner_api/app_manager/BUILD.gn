@@ -165,6 +165,8 @@ ohos_shared_library("app_manager") {
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "eventhandler:libeventhandler",
+    "ability_base:session_info",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
     "init:libbegetutil",
