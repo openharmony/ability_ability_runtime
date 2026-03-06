@@ -19,6 +19,7 @@ ohos_unittest("agent_card_db_mgr_test") {
   module_out_path = "ability_runtime/ability_runtime/agent_runtime/agent_card_db_mgr_test"
 
   sanitize = {
+    ubsan = true
     cfi = true
     cfi_cross_dso = true
     debug = false
@@ -34,6 +35,7 @@ ohos_unittest("agent_card_db_mgr_test") {
     "mock/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_test_path}/mock/common/include",
     "${agent_runtime_framework_path}/interfaces/inner_api/include",
     "${agent_runtime_framework_path}/services/agentmgr/include",
   ]
