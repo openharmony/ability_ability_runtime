@@ -4275,7 +4275,8 @@ int32_t AbilityManagerStub::SetApplicationAutoStartupByEDMInner(MessageParcel &d
         return ERR_INVALID_VALUE;
     }
     auto flag = data.ReadBool();
-    int32_t result = SetApplicationAutoStartupByEDM(*info, flag);
+    auto isHiddenStart = data.ReadBool();
+    int32_t result = SetApplicationAutoStartupByEDM(*info, flag, isHiddenStart);
     return reply.WriteInt32(result);
 }
 

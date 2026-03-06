@@ -253,7 +253,7 @@ public:
         sem_.Post();
     }
 
-    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag, bool isHiddenStart = false) override
     {
         return 0;
     }

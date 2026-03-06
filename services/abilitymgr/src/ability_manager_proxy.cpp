@@ -5810,7 +5810,7 @@ ErrCode AbilityManagerProxy::SendRequest(AbilityManagerInterfaceCode code, Messa
     return remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
 }
 
-int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag, bool isHiddenStart)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -5823,6 +5823,10 @@ int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInf
     }
     if (!data.WriteBool(flag)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteBool(isHiddenStart)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isHiddenStart fail");
         return INNER_ERR;
     }
 

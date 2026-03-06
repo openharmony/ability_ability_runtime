@@ -25,7 +25,6 @@ ohos_unittest("auto_startup_info_test") {
   ]
 
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/auto_startup_info.cpp",
     "auto_startup_info_test.cpp",
   ]
