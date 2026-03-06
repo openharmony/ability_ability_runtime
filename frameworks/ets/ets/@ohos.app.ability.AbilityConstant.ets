@@ -39,6 +39,7 @@ namespace AbilityConstant {
     pss: int;
     timestamp: long;
     processState?: appManager.ProcessState;
+    killReason?: string;
   }
 
   export enum LaunchReason {

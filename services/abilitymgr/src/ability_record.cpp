@@ -62,6 +62,7 @@
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
+#include "xcollie/process_kill_reason.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -2287,6 +2288,9 @@ void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExe
     lastExitDetailInfo.timestamp = timestamp;
     lastExitDetailInfo.processName = processInfo.processName_;
     lastExitDetailInfo.exitMsg = killMsg;
+    if (exitReason.killId != DEFAULT_INVALID_VALUE) {
+        lastExitDetailInfo.killReason = HiviewDFX::ProcessKillReason::GetKillReason(exitReason.killId);
+    }
     lifeCycleStateInfo_.launchParam.lastExitReason = CovertAppExitReasonToLastReason(exitReason.reason);
     lifeCycleStateInfo_.launchParam.lastExitMessage = exitMsg;
     lifeCycleStateInfo_.launchParam.lastExitDetailInfo = lastExitDetailInfo;

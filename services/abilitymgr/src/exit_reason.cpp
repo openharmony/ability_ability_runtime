@@ -56,6 +56,7 @@ bool ExitReason::ReadFromParcel(Parcel &parcel)
     exitMsg = Str16ToStr8(parcel.ReadString16());
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldSkipKillInStartup);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, killId);
     return true;
 }
 
@@ -81,6 +82,7 @@ bool ExitReason::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(exitMsg));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldSkipKillInStartup);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, killId);
     return true;
 }
 
