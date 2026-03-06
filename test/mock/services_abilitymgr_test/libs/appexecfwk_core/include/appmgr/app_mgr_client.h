@@ -107,6 +107,17 @@ public:
         sptr<AAFwk::IUserCallback> callback = nullptr);
 
     /**
+     * KillProcessesByPids, call KillProcessesByPids() through proxy object,
+     * kill processes by pid list.
+     *
+     * @param pids, pid list of processes are going to be killed.
+     * @param reason, reason to kill processes.
+     * @param subProcess, kill SubProcess or not.
+     */
+    virtual AppMgrResultCode KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false, bool isKillPrecedeStart = false);
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.

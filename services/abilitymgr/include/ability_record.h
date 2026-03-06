@@ -722,6 +722,10 @@ public:
     void ClearPluginAbilities();
     void InitPluginAbility(const AbilityRequest &abilityRequest);
     void PluginCompleteTerminate();
+    bool NeedCheckAutoStartupStatusBar() const
+    {
+        return needCheckAutoStartupStatusBar_;
+    }
 
     void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0);
@@ -939,6 +943,7 @@ protected:
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;
     bool isAppAutoStartup_ = false;
+    bool needCheckAutoStartupStatusBar_ = false;
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;

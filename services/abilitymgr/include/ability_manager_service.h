@@ -2116,9 +2116,11 @@ public:
      * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether the application is prohibited from changing the auto start up state.
+     * @param isHiddenStart Indicate whether the application is hidden start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override;
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag,
+        bool isHiddenStart = false) override;
 
     /**
      * @brief Cancel application auto start up state by EDM.
@@ -2295,6 +2297,8 @@ public:
     bool IsInStatusBar(uint32_t accessTokenId, int32_t uid, bool isMultiInstance);
 
     bool IsSupportStatusBar(int32_t uid);
+
+    bool IsSupportStatusBarByUserId(int32_t userId);
 
     bool IsSceneBoardReady(int32_t userId);
 
@@ -2686,6 +2690,13 @@ private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
+
+    /**
+     * @brief Checks and submits hidden auto-startup status bar check task.
+     * @param abilityRecord The ability record to check.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int32_t CheckAndSubmitAutoStartupStatusBarTask(std::shared_ptr<AbilityRecord> abilityRecord);
     /**
      * initialization of ability manager service.
      *

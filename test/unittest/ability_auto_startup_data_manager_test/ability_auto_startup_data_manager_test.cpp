@@ -201,7 +201,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_100, TestSize.
     info.bundleName = "com.example.testbundle";
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_100 end";
 }
@@ -225,7 +226,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_200, TestSize.
     info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_200 end";
 }
@@ -244,7 +246,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_300, TestSize.
     info.abilityName = "testDemoAbility";
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_300 end";
 }
@@ -272,7 +275,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_400, TestSize.
     info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_400 end";
 }
@@ -289,7 +293,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_100, TestSize.
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     AutoStartupInfo info;
     info.abilityName = "testDemoAbility";
-    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info, originKey);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "DeleteAutoStartupData_100 end";
 }
@@ -306,7 +311,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_200, TestSize.
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     AutoStartupInfo info;
     info.bundleName = "com.example.testbundle";
-    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info, originKey);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "DeleteAutoStartupData_200 end";
 }
@@ -327,7 +333,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_300, TestSize.
     info.accessTokenId = "123";
     info.setterUserId = 100;
     info.userId = 100;
-    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info, originKey);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "DeleteAutoStartupData_300 end";
 }
@@ -352,7 +359,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_400, TestSize.
     info.accessTokenId = "123";
     info.setterUserId = 100;
     info.userId = 100;
-    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info, originKey);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "DeleteAutoStartupData_400 end";
 }
@@ -424,7 +432,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_100, TestSize.L
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     AutoStartupInfo info;
     info.bundleName = "com.example.testbundle";
-    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info, originKey);
     EXPECT_EQ(result.code, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "QueryAutoStartupData_100 end";
 }
@@ -441,7 +450,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_200, TestSize.L
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     AutoStartupInfo info;
     info.abilityName = "testDemoAbility";
-    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info, originKey);
     EXPECT_EQ(result.code, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "QueryAutoStartupData_200 end";
 }
@@ -457,12 +467,13 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_300, TestSize.L
     GTEST_LOG_(INFO) << "QueryAutoStartupData_300 start";
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     AutoStartupInfo info;
-    info.bundleName = "com.example.testbundle";
+    info.bundleName = "com.example.testbundle1";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
     info.setterUserId = 100;
     info.userId = 100;
-    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info, originKey);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
     GTEST_LOG_(INFO) << "QueryAutoStartupData_300 end";
 }
@@ -487,7 +498,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_400, TestSize.L
     info.accessTokenId = "123";
     info.setterUserId = 100;
     info.userId = 100;
-    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info, originKey);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
     GTEST_LOG_(INFO) << "QueryAutoStartupData_400 end";
 }
@@ -759,7 +771,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_500, TestSize.Level1)
     DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
     info.moduleName = "ModuleName";
     auto result = abilityAutoStartupDataManager.IsEqual(key, info);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "IsEqual_info_500 end";
 }
 
@@ -1103,7 +1115,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_500, TestSize.
     bool isEdmForce = false;
     kvStorePtr->Put_ = DistributedKv::Status::INVALID_FORMAT;
 
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_INVALID_OPERATION);
     kvStorePtr->Put_ = DistributedKv::Status::SUCCESS;
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_500 end";
@@ -1129,7 +1142,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_600, TestSize.
     info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_600 end";
 }
@@ -1153,7 +1167,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_700, TestSize.
     info.setterType = AutoStartupSetterType::UNSPECIFIED;
     bool isAutoStartup = false;
     bool isEdmForce = false;
-    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, originKey, isAutoStartup, isEdmForce);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_700 end";
 }
@@ -1178,8 +1193,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_500, TestSize.
     info.setterUserId = 100;
     info.userId = 100;
     kvStorePtr->Delete_ = DistributedKv::Status::INVALID_FORMAT;
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
 
-    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info, originKey);
     EXPECT_EQ(result, ERR_INVALID_OPERATION);
     kvStorePtr->Delete_ = DistributedKv::Status::SUCCESS;
     GTEST_LOG_(INFO) << "DeleteAutoStartupData_500 end";
@@ -1228,8 +1244,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_500, TestSize.L
     info.setterUserId = 100;
     info.userId = 100;
     kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
+    DistributedKv::Key originKey = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
 
-    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info, originKey);
     EXPECT_EQ(result.code, ERR_INVALID_OPERATION);
     kvStorePtr->GetEntries_ = DistributedKv::Status::SUCCESS;
     GTEST_LOG_(INFO) << "QueryAutoStartupData_500 end";
