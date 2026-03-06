@@ -335,6 +335,7 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardsByBundleName_005, TestSize.Level1
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_001, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetBundleNameByPid = ERR_OK;
     MyFlag::retGetAgentCardByAgentId = ERR_NAME_NOT_FOUND;
     MyFlag::retGetApplicationInfo = true;
     std::string bundleName = "bundle";
@@ -353,6 +354,7 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_001, TestSize.Level1)
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_002, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retGetBundleNameByPid = ERR_OK;
     std::string bundleName = "bundle";
     std::string agentId = "agentId";
     AgentCard card;
@@ -369,6 +371,7 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_002, TestSize.Level1)
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_003, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetBundleNameByPid = ERR_OK;
     MyFlag::retGetAgentCardByAgentId = ERR_INVALID_VALUE;
     std::string bundleName = "bundle";
     std::string agentId = "agentId";
@@ -385,6 +388,7 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_003, TestSize.Level1)
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_004, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetBundleNameByPid = ERR_OK;
     MyFlag::retGetAgentCardByAgentId = ERR_OK;
     std::string bundleName = "bundle";
     std::string agentId = "agentId";
@@ -400,6 +404,7 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_004, TestSize.Level1)
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_005, TestSize.Level1)
 {
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retGetBundleNameByPid = ERR_OK;
     MyFlag::retGetAgentCardByAgentId = ERR_NAME_NOT_FOUND;
     MyFlag::retGetApplicationInfo = false;
     std::string bundleName = "bundle";

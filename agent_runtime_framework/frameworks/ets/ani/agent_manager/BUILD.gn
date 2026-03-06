@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("agentmanager_ani") {
   branch_protector_ret = "pac_ret"
-  shlib_type = "ani"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -37,8 +35,6 @@ ohos_shared_library("agentmanager_ani") {
   ]
 
   configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
-
-  public_configs = []
 
   sources = [
     "./src/ets_agent_manager.cpp",

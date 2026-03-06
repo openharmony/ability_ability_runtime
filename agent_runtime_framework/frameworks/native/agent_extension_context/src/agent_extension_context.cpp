@@ -12,3 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "agent_extension_context.h"
+
+#include "agent_card.h"
+
+namespace OHOS {
+namespace AgentRuntime {
+void AgentExtensionContext::SetAgentCard(const std::shared_ptr<AgentCard> &agentCard)
+{
+    agentCard_ = agentCard;
+}
+
+std::shared_ptr<AgentCard> AgentExtensionContext::GetAgentCard()
+{
+    return agentCard_;
+}
+} // namespace AgentRuntime
+} // namespace OHOS
