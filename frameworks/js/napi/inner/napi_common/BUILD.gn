@@ -21,7 +21,11 @@ config("napi_common_public_config") {
 ohos_shared_library("napi_common") {
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [ "${ability_runtime_napi_path}/featureAbility" ]
+  include_dirs = [ 
+    "${ability_runtime_napi_path}/featureAbility",
+    "${agent_runtime_framework_path}/interfaces/inner_api/include",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager/include",
+  ]
 
   public_configs = [
     ":napi_common_public_config",
@@ -41,6 +45,7 @@ ohos_shared_library("napi_common") {
     "napi_common_util.cpp",
     "napi_common_want.cpp",
     "open_link/napi_common_open_link_options.cpp",
+    "${agent_runtime_framework_path}/frameworks/js/napi/agent_manager/src/js_agent_manager_utils.cpp",
   ]
 
   deps = [
@@ -50,6 +55,7 @@ ohos_shared_library("napi_common") {
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
   ]
 
   external_deps = [

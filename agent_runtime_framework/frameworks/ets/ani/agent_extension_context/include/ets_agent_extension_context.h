@@ -34,7 +34,6 @@ public:
     ~EtsAgentExtensionContext() = default;
 
     static void Finalizer(ani_env *env, void *data, void *hint);
-    static EtsAgentExtensionContext *GetEtsAgentExtensionContext(ani_env *env, ani_object obj);
 
     std::weak_ptr<AgentExtensionContext> GetContext()
     {

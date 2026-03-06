@@ -19,6 +19,7 @@
 #include "agent_extension.h"
 #include "agent_extension_context.h"
 #include "agent_extension_connection_constants.h"
+#include "agent_manager_client.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
@@ -136,8 +137,11 @@ void JsAgentExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::SER_ROUTER, "get JsAgentExtension obj failed");
         return;
     }
-
-    BindContext(env, obj);
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (record != nullptr) {
+        want = record->GetWant();
+    }
+    BindContext(env, obj, want);
 
     SetExtensionCommon(JsExtensionCommon::Create(jsRuntime_, static_cast<NativeReference&>(*jsObj_), shellContextRef_));
 
@@ -411,14 +415,27 @@ sptr<IRemoteObject> JsAgentExtension::GetHostProxyFromWant(const AAFwk::Want &wa
     return want.GetRemoteObject(AGENTEXTENSIONHOSTPROXY_KEY);
 }
 
-void JsAgentExtension::BindContext(napi_env env, napi_value obj)
+void JsAgentExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want)
 {
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "call");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "null context");
         return;
     }
-    TAG_LOGD(AAFwkTag::SER_ROUTER, "call");
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null want");
+        return;
+    }
+    std::string agentId = want->GetStringParam(AGENTID_KEY);
+    std::shared_ptr<AgentCard> agentCard = std::make_shared<AgentCard>();
+    auto innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByAgentId(
+        want->GetElement().GetBundleName(), agentId, *agentCard);
+    if (innerErrorCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetAgentCardByAgentId error: %{public}d", innerErrorCode);
+        return;
+    }
+    context->SetAgentCard(agentCard);
     napi_value contextObj = CreateJsAgentExtensionContext(env, context);
     shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.AgentExtensionContext",
         &contextObj, ARGC_ONE);

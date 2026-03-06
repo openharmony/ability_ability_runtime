@@ -108,7 +108,7 @@ public:
 private:
     void CallObjectMethod(const char *name, const char *signature, ...);
 
-    void BindContext(ani_env *env);
+    void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
 
     void GetSrcPath(std::string &srcPath);
 

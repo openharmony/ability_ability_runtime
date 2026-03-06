@@ -94,7 +94,7 @@ export interface AgentCard {
   appInfo?: AgentAppInfo;
 }
 
-class AgentCardImpl implements AgentCard {
+export class AgentCardImpl implements AgentCard {
   public agentId: string = '';
   public name: string = '';
   public description: string = '';
