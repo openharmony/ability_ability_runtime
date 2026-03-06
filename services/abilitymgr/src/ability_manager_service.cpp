@@ -276,6 +276,7 @@ constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig.screenmode";
 constexpr const char* UD_KEY = "ability.want.params.udKey";
+constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
 constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 constexpr int64_t CLEAR_USER_LOCKED_BUNDLE_LIST_KEY_DELAY_TIME = 60 * 1000; // 60s
 
@@ -5720,6 +5721,13 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "connectManager null userId=%{public}d", validUserId);
         return ERR_INVALID_VALUE;
     }
+    if (abilityRequest.want.HasParameter(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN)
+        && AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        if (abilityRequest.appInfo.isSystemApp) {
+            GetAndSetRootHostToken(callerToken, validUserId, abilityRequest);
+        }
+        abilityRequest.want.RemoveParam(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN);
+    }
 
     if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         auto targetService = connectManager->GetServiceRecordByAbilityRequest(abilityRequest);
@@ -5758,6 +5766,22 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
         ret = connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken, sessionInfo);
     }
     return ret;
+}
+
+void AbilityManagerService::GetAndSetRootHostToken(
+    const sptr<IRemoteObject> &callerToken, const int32_t userId, AbilityRequest &abilityRequest)
+{
+    auto uiExtensionManager = GetUIExtensionAbilityManagerByUserId(userId);
+    if (uiExtensionManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiExtensionManager nullptr");
+        return;
+    }
+    sptr<IRemoteObject> rootCallerToken = uiExtensionManager->GetUIExtensionRootHostToken(callerToken);
+    if (rootCallerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rootCallerToken nullptr");
+        return;
+    }
+    abilityRequest.want.SetParam(Want::UI_EXTENSION_ROOT_TOKEN, rootCallerToken);
 }
 
 int AbilityManagerService::ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken,

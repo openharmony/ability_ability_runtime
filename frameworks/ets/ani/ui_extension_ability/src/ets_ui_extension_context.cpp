@@ -72,6 +72,7 @@ constexpr const char *COMPLETION_HANDLER_FAILURE_CODE =
     "@ohos.app.ability.CompletionHandlerForAtomicService.FailureCode";
 constexpr const char* JSON_KEY_ERR_MSG = "errMsg";
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
+constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
 
 static bool CheckUrl(std::string &urlValue)
 {
@@ -143,6 +144,19 @@ ani_long EtsUIExtensionContext::ConnectServiceExtensionAbility(ani_env *env, ani
         return FAILED_CODE;
     }
     return etsUiExtensionContext->OnConnectServiceExtensionAbility(env, aniObj, wantObj, connectOptionsObj);
+}
+
+ani_long EtsUIExtensionContext::ConnectServiceExtensionAbilityWithRootHostToken(
+    ani_env *env, ani_object aniObj, ani_object wantObj, ani_object connectOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ConnectServiceExtensionAbilityWithRootHostToken");
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return FAILED_CODE;
+    }
+    return etsUiExtensionContext->OnConnectServiceExtensionAbility(env, aniObj, wantObj, connectOptionsObj, true);
 }
 
 void EtsUIExtensionContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
@@ -571,9 +585,14 @@ void EtsUIExtensionContext::OnStartUIAbilities(ani_env *env, ani_object aniObj, 
 }
 
 ani_long EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
-    ani_object wantObj, ani_object connectOptionsObj)
+    ani_object wantObj, ani_object connectOptionsObj, bool withRootHostTokenTransfer)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "OnConnectServiceExtensionAbility");
+    if (withRootHostTokenTransfer &&
+        !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return FAILED_CODE;
+    }
+
     ani_status status = ANI_ERROR;
     auto context = context_.lock();
     if (context == nullptr) {
@@ -586,6 +605,10 @@ ani_long EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, a
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to UnwrapWant");
         EtsErrorUtil::ThrowInvalidParamError(env, "Failed to UnwrapWant");
         return FAILED_CODE;
+    }
+    want.RemoveParam(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN);
+    if (withRootHostTokenTransfer) {
+        want.SetParam(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN, true);
     }
     ani_vm *etsVm = nullptr;
     if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
@@ -1756,6 +1779,9 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         ani_native_function { "nativeStartAbility", "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability."
             "StartOptions.StartOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsUIExtensionContext::StartAbilityWithOption) },
+        ani_native_function { "nativeConnectServiceExtensionAbilityWithRootHostToken",
+            SIGNATURE_CONNECT_SERVICE_EXTENSION,
+            reinterpret_cast<void *>(EtsUIExtensionContext::ConnectServiceExtensionAbilityWithRootHostToken) },
         ani_native_function { "nativeConnectServiceExtensionAbility", SIGNATURE_CONNECT_SERVICE_EXTENSION,
             reinterpret_cast<void *>(EtsUIExtensionContext::ConnectServiceExtensionAbility) },
         ani_native_function { "nativeDisconnectServiceExtensionAbilitySync", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,

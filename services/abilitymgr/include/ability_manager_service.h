@@ -2754,7 +2754,8 @@ private:
     void InitWindowVisibilityChangedListener();
     void FreeWindowVisibilityChangedListener();
     bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
-
+    void GetAndSetRootHostToken(
+        const sptr<IRemoteObject> &callerToken, const int32_t userId, AbilityRequest &abilityRequest);
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
     void RequestPermission(const Want *resultWant);
