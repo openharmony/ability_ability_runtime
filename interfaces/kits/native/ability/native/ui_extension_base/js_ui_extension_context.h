@@ -55,7 +55,7 @@ public:
     static napi_value SetHostPageOverlayForbidden(napi_env env, napi_callback_info info);
     static napi_value StartAbilityByType(napi_env env, napi_callback_info info);
     static napi_value IsTerminating(napi_env env, napi_callback_info info);
-
+    static napi_value ConnectAbilityWithRootHostToken(napi_env env, napi_callback_info info);
 protected:
     virtual napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnTerminateSelf(napi_env env, NapiCallbackInfo& info);
@@ -65,6 +65,7 @@ protected:
     virtual napi_value OnStartUIAbilitiesInSplitWindowMode(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnStartUIAbilities(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnConnectAbility(napi_env env, NapiCallbackInfo& info);
+    virtual napi_value OnConnectAbilityWithRootHostToken(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnDisconnectAbility(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnReportDrawnCompleted(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
@@ -100,6 +101,7 @@ private:
     void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback, napi_value* result,
         bool isAbilityResult = false, bool isOpenLink = false);
     bool UnwrapWantList(napi_env env, NapiCallbackInfo &info, std::vector<AAFwk::Want> &wantList);
+    napi_value OnConnectAbilityInner(napi_env env, NapiCallbackInfo& info, bool withRootHostTokenTransfer);
     bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam,
         AAFwk::Want &want, int &requestCode);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);

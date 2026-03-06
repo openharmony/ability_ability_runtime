@@ -94,6 +94,10 @@ class UIExtensionContext extends ExtensionContext {
     return this.__context_impl__.disconnectServiceExtensionAbility(connection, callback);
   }
 
+  connectServiceExtensionAbilityWithRootHostToken(connection, callback) {
+    return this.__context_impl__.connectServiceExtensionAbilityWithRootHostToken(connection, callback);
+  }
+
   reportDrawnCompleted(callback) {
     return this.__context_impl__.reportDrawnCompleted(callback);
   }

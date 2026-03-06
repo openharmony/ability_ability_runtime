@@ -113,6 +113,8 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
+    sptr<IRemoteObject> GetUIExtensionRootHostToken(const sptr<IRemoteObject> token);
+
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo);
 
     bool IsFocused(
