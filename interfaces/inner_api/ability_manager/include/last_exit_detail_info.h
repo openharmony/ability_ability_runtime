@@ -32,6 +32,7 @@ struct LastExitDetailInfo : public Parcelable {
     int64_t timestamp = 0;
     std::string processName;
     std::string exitMsg;
+    std::string killReason = "";
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

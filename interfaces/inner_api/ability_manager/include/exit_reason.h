@@ -30,6 +30,7 @@ struct ExitReason : public Parcelable {
 
     Reason reason = Reason::REASON_UNKNOWN;
     int32_t subReason = -1;
+    int32_t killId = -1;
     std::string exitMsg = "";
     bool shouldKillForeground = true;
     bool shouldSkipKillInStartup = false; // set true in low-memory, return ERR_KILL_APP_WHILE_STARTING and do not kill
