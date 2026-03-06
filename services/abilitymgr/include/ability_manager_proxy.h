@@ -2013,6 +2013,7 @@ public:
     virtual int32_t GetUserLockedBundleList(int32_t userId,
         std::unordered_set<std::string> &userLockedBundleList) override;
 
+    virtual int32_t SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)override;
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
