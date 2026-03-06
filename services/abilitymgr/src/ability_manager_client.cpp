@@ -2563,5 +2563,19 @@ ErrCode AbilityManagerClient::GetUserLockedBundleList(int32_t userId,
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetUserLockedBundleList(userId, userLockedBundleList);
 }
+
+int32_t AbilityManagerClient::SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)
+{
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    auto proxy = GetAbilityManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAbilityManager proxy failed");
+        return ERR_INVALID_VALUE;
+    }
+    return proxy->SetAppRecoveryFlag(token, flag);
+}
 } // namespace AAFwk
 } // namespace OHOS

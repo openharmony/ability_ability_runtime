@@ -36,6 +36,7 @@
 #include "app_mgr_service.h"
 #include "app_mgr_event.h"
 #include "app_process_data.h"
+#include "app_recovery_mgr.h"
 #include "app_state_observer_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
@@ -5184,6 +5185,7 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
+    HandleForegroundAbilityDied(abilityTokens,appRecord->GetState());
     {
         std::lock_guard lock(appStateCallbacksLock_);
         for (const auto &item : appStateCallbacks_) {
@@ -11497,6 +11499,23 @@ void AppMgrServiceInner::CheckRenderAttachTimeout(std::shared_ptr<RenderRecord> 
         pid, elapsedMs);
     AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
         ProcessStartFailedReason::ATTACH_TIMEOUT, elapsedMs);
+}
+
+void AppMgrServiceInner::HandleForegroundAbilityDied(
+    const std::vector<sptr<IRemoteObject>>& abilityTokens,ApplicationState state)
+{
+    if (state != ApplicationState::APP_STATE_FOREGROUND) {
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "Handling died abilities in foreground.");
+    for (const auto& token : abilityTokens) {
+        if (token == nullptr) {
+            continue;
+        }
+        AppRecoveryMgr::AppRecoveryMgr::GetInstance().HandleAppDied(token);
+        TAG_LOGI(AAFwkTag::APPMGR, "Notified AppRecoveryMgr for ability token: %{public}p",
+                  token.GetRefPtr());
+    }
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
