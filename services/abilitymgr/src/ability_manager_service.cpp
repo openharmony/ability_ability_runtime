@@ -14324,7 +14324,10 @@ void AbilityManagerService::RecordRecoveryExitReason(bool isAppRecovery, int32_t
     std::string killReason = HiviewDFX::ProcessKillReason::GetKillReason(killId);
     AAFwk::ExitReasonCompability exitReason = {REASON_JS_ERROR, "Kill Reason:" + killReason};
     exitReason.killId = killId;
-    RecordAppWithReason(callerPid, callerUid, exitReason);
+    auto result = RecordAppWithReason(callerPid, callerUid, exitReason);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL,APP_RECOVERY], "
+        "callerPid=%{public}d, callerUid=%{public}d, killReason=%{public}s",
+        result, callerPid, callerUid, killReason.c_str());
 }
 
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
