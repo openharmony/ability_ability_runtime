@@ -90,12 +90,13 @@ ErrCode AbilityAutoStartupClient::Connect()
     return ERR_OK;
 }
 
-ErrCode AbilityAutoStartupClient::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+ErrCode AbilityAutoStartupClient::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag,
+    bool isHiddenStart)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->SetApplicationAutoStartupByEDM(info, flag);
+    return abms->SetApplicationAutoStartupByEDM(info, flag, isHiddenStart);
 }
 
 ErrCode AbilityAutoStartupClient::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
