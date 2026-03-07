@@ -1459,25 +1459,17 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return false;
     }
-    ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass(TOOL_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status: %{public}d", status);
-        return false;
-    }
-    if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "RecordSerializeTool class null");
-        return false;
-    }
     ani_static_method unwrapRecordMethod = nullptr;
-    status = env->Class_FindStaticMethod(cls, "unwrapRecordNoThrow", nullptr, &unwrapRecordMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to get unwrapRecordNoThrow method, status: %{public}d", status);
+    AniCommonMethodCacheKey unwrapKey = std::make_pair("unwrapRecordNoThrow", nullptr);
+    if (!AniCommonCacheMgr::GetCachedClassAndStaticMethod(env, TOOL_CLASS_NAME, unwrapKey,
+        cls, unwrapRecordMethod)) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to get cached class and static method");
         return false;
     }
     ani_boolean isSuccess;
     ani_long wantParamsLong = reinterpret_cast<ani_long>(&wantParams);
-    status = env->Class_CallStaticMethod_Boolean(cls, unwrapRecordMethod, &isSuccess, param, wantParamsLong);
+    ani_status status = env->Class_CallStaticMethod_Boolean(cls, unwrapRecordMethod, &isSuccess, param, wantParamsLong);
     if (status != ANI_OK || isSuccess != ANI_TRUE) {
         TAG_LOGE(AAFwkTag::ANI, "failed to call unwrapRecordNoThrow method, status: %{public}d", status);
         return false;
