@@ -137,6 +137,7 @@ std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
 const std::string PERFCMD_PROFILE = "profile";
 const std::string PERFCMD_DUMPHEAP = "dumpheap";
+const std::string BASE_LINE_PERFCMD = "baseLineProfile";
 namespace {
 #ifdef APP_USE_ARM
 constexpr char FORM_RENDER_LIB_PATH[] = "/system/lib/libformrender.z.so";
@@ -1815,6 +1816,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
              appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE);
         TAG_LOGI(AAFwkTag::APPKIT, "SmartGC: process is start. enable warm startup SmartGC: %{public}d",
             static_cast<int32_t>(options.enableWarmStartupSmartGC));
+        auto perfCmd = appLaunchData.GetPerfCmd();
+        auto findPos = perfCmd.find(BASE_LINE_PERFCMD);
+        if (findPos != std::string::npos && (appLaunchData.GetDebugFromLocal() || isDeveloperMode_)) {
+            options.baseLineProfile = true;
+        }
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
@@ -1833,7 +1839,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-        auto perfCmd = appLaunchData.GetPerfCmd();
         int32_t pid = -1;
         std::string processName = "";
         if (processInfo_ != nullptr) {
@@ -1859,7 +1864,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.bundleName = appInfo.bundleName;
         runtime->SetDebugOption(debugOption);
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
-            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
+            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos ||
+            options.baseLineProfile) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
             runtime->StartProfiler(debugOption);
         } else {

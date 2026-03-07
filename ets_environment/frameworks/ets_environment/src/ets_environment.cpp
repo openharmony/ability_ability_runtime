@@ -623,7 +623,8 @@ bool ETSEnvironment::FinishPreload(napi_env jsEnv) {
 bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
     const std::vector<std::string> &appInnerHspPathList, const std::vector<std::string> &staticHapModuleNameList,
     const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
-    const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner)
+    const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner,
+    const bool isBaseLineProfile)
 {
     InitEventHandler(eventRunner);
 
@@ -637,6 +638,10 @@ bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath,
     }
 
     options.push_back(ani_option { "--ext:interop", napiEnv });
+    if (isBaseLineProfile) {
+        TAG_LOGD(AAFwkTag::APPKIT, "start with baseLineProfile");
+        options.push_back(ani_option { "--ext:--enable-baseLine-profile", nullptr });
+    }
 
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
@@ -758,9 +763,10 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .PostFork = [](void *napiEnv, const std::string &aotPath, const std::vector<std::string> &appInnerHspPathList,
             const std::vector<std::string> &staticHapModuleNameList,
             const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
-            const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner) {
-            ETSEnvironment::GetInstance()->PostFork(
-                napiEnv, aotPath, appInnerHspPathList, staticHapModuleNameList, commonHspBundleInfos, eventRunner);
+            const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner,
+            const bool isBaseLineProfile) {
+            ETSEnvironment::GetInstance()->PostFork(napiEnv, aotPath, appInnerHspPathList,
+                staticHapModuleNameList, commonHspBundleInfos, eventRunner, isBaseLineProfile);
         },
         .PreloadSystemClass = [](const char *className) {
             ETSEnvironment::GetInstance()->PreloadSystemClass(className);
