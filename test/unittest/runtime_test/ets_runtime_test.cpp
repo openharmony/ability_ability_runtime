@@ -27,6 +27,7 @@
 #include "js_runtime.h"
 #include "runtime.h"
 #include "ets_environment.h"
+#include "hap_module_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -361,7 +362,7 @@ HWTEST_F(EtsRuntimeTest, GetHspPathList_100, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, GetHspPathList_200, TestSize.Level1)
 {
     std::unique_ptr<EtsEnv::ETSEnvironment> etsEnvironment = std::make_unique<EtsEnv::ETSEnvironment>();
-    etsEnvironment->commonHspBundleInfos_ = {{0, "", "", "/system/app/path1", "static"}};
+    etsEnvironment->commonHspBundleInfos_ = {{0, 0, "", "", "/system/app/path1", "static"}};
     auto hspPathList = etsEnvironment->GetHspPathList();
     EXPECT_EQ(hspPathList[0], "/system/app/path1");
 }
@@ -408,7 +409,11 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_003, TestSize.Level1)
     Runtime::Options options;
     options.arkNativeFilePath = "arm64/";
     options.moduleName = "entry";
-    options.aotCompileStatusMap = {{"entry", true}, {"module1", true}, {"module2", false}};
+    options.aotCompileStatusMap = {
+        {"entry", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS)},
+        {"module1", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS)},
+        {"module2", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED)}
+    };
     options.commonHspBundleInfos = {};
     auto result = etsRuntime->GetAotPath(options);
     // Should contain entry.an and module1.an (true values only)
@@ -428,7 +433,10 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_004, TestSize.Level1)
     Runtime::Options options;
     options.arkNativeFilePath = "arm64/";
     options.moduleName = "test";
-    options.aotCompileStatusMap = {{"module1", false}, {"module2", false}};
+    options.aotCompileStatusMap = {
+        {"module1", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED)},
+        {"module2", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED)}
+    };
     options.commonHspBundleInfos = {};
     auto result = etsRuntime->GetAotPath(options);
     EXPECT_EQ(result, "");
@@ -448,7 +456,8 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_005, TestSize.Level1)
     options.aotCompileStatusMap = {};
     // ARKTS_MODE_DYNAMIC should be skipped
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
-        {1001, "com.example.hsp1", "hspModule1", "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_DYNAMIC}
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp1", "hspModule1",
+        "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_DYNAMIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
@@ -469,7 +478,8 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_006, TestSize.Level1)
     options.aotCompileStatusMap = {};
     // Static mode with system app path - should be included
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
-        {1001, "com.example.hsp1", "hspModule1", "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp1", "hspModule1",
+        "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
@@ -493,7 +503,8 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_007, TestSize.Level1)
     options.aotCompileStatusMap = {};
     // Non-system path (doesn't start with /system/app/) and has no '/' - should be skipped
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
-        {1001, "com.example.hsp1", "hspModule1", "relativePathWithoutSlash", AppExecFwk::Constants::ARKTS_MODE_STATIC}
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp1", "hspModule1",
+        "relativePathWithoutSlash", AppExecFwk::Constants::ARKTS_MODE_STATIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
@@ -514,7 +525,8 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_008, TestSize.Level1)
     options.aotCompileStatusMap = {};
     // Non-system path but has '/' - should be included
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
-        {1001, "com.example.hsp1", "hspModule1", "/data/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp1", "hspModule1",
+        "/data/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
@@ -538,20 +550,24 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_009, TestSize.Level1)
     // Mix of different HSP types
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
         // Dynamic mode - should be skipped
-        {1001, "com.example.hsp1", "hspModule1", "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_DYNAMIC},
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp1", "hspModule1",
+            "/system/app/hsp1.hap", AppExecFwk::Constants::ARKTS_MODE_DYNAMIC},
         // Static mode, system path - should be included
-        {1002, "com.example.hsp2", "hspModule2", "/system/app/hsp2.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC},
+        {1002, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp2", "hspModule2",
+            "/system/app/hsp2.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC},
         // Static mode, non-system path with slash - should be included
-        {1003, "com.example.hsp3", "hspModule3", "/data/app/hsp3.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC},
+        {1003, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::INSTALL_COMPILE_SUCCESS), "com.example.hsp3",
+            "hspModule3", "/data/app/hsp3.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC},
         // Non-system path without slash - should be skipped
-        {1004, "com.example.hsp4", "hspModule4", "relativePath", AppExecFwk::Constants::ARKTS_MODE_STATIC}
+        {1004, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED), "com.example.hsp4", "hspModule4",
+            "relativePath", AppExecFwk::Constants::ARKTS_MODE_STATIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
     // Should contain entry.an (from aotCompileStatusMap)
     EXPECT_NE(result.find("entry.an"), std::string::npos);
-    // Should contain hsp2 (static mode, system path)
-    EXPECT_NE(result.find("hspModule2.an"), std::string::npos);
+    // Should not contain hsp2 (static mode, system path) since compile status is not compiled
+    EXPECT_EQ(result.find("hspModule2.an"), std::string::npos);
     // Should contain hsp3 (non-system path with slash)
     EXPECT_NE(result.find("hspModule3.an"), std::string::npos);
     // Should NOT contain hsp1 (dynamic mode)
@@ -573,9 +589,12 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_010, TestSize.Level1)
     Runtime::Options options;
     options.arkNativeFilePath = "arm64/";
     options.moduleName = "entry";
-    options.aotCompileStatusMap = {{"entry", true}};
+    options.aotCompileStatusMap = {
+        {"entry", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS)}
+    };
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
-        {1002003, "com.example.hsp", "hspModule", "/system/app/hsp.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
+        {1002003, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS), "com.example.hsp",
+            "hspModule", "/system/app/hsp.hap", AppExecFwk::Constants::ARKTS_MODE_STATIC}
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
@@ -583,6 +602,127 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_010, TestSize.Level1)
     EXPECT_NE(result.find("1002003"), std::string::npos);
     // Should have proper path structure
     EXPECT_NE(result.find("/data/service/el1/public/for-all-app/shared_bundles_ark_cache/"), std::string::npos);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_001
+ * @tc.desc: Test IsAotCompiledSuccess with IDLE_COMPILE_SUCCESS status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_001, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_002
+ * @tc.desc: Test IsAotCompiledSuccess with INSTALL_COMPILE_SUCCESS status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_002, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::INSTALL_COMPILE_SUCCESS));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_003
+ * @tc.desc: Test IsAotCompiledSuccess with NOT_COMPILED status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_003, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::NOT_COMPILED));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_004
+ * @tc.desc: Test IsAotCompiledSuccess with COMPILE_FAILED status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_004, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::COMPILE_FAILED));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_005
+ * @tc.desc: Test IsAotCompiledSuccess with COMPILE_CRASH status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_005, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::COMPILE_CRASH));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAotCompiledSuccess_006
+ * @tc.desc: Test IsAotCompiledSuccess with COMPILE_CANCELLED status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, IsAotCompiledSuccess_006, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    bool result = etsRuntime->IsAotCompiledSuccess(
+        static_cast<int32_t>(AppExecFwk::AOTCompileStatus::COMPILE_CANCELLED));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetAotPath_011
+ * @tc.desc: Test GetAotPath with IDLE_COMPILE_SUCCESS status in aotCompileStatusMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, GetAotPath_011, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    Runtime::Options options;
+    options.arkNativeFilePath = "arm64/";
+    options.moduleName = "entry";
+    options.aotCompileStatusMap = {
+        {"entry", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS)},
+        {"module1", static_cast<int32_t>(AppExecFwk::AOTCompileStatus::COMPILE_FAILED)}
+    };
+    options.commonHspBundleInfos = {};
+    auto result = etsRuntime->GetAotPath(options);
+    EXPECT_NE(result.find("entry.an"), std::string::npos);
+    EXPECT_EQ(result.find("module1.an"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetAotPath_012
+ * @tc.desc: Test GetAotPath with INSTALL_COMPILE_SUCCESS status in commonHspBundleInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, GetAotPath_012, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    Runtime::Options options;
+    options.arkNativeFilePath = "arm64/";
+    options.moduleName = "entry";
+    options.aotCompileStatusMap = {};
+    std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> hspInfos = {
+        {1001, static_cast<int32_t>(AppExecFwk::AOTCompileStatus::INSTALL_COMPILE_SUCCESS),
+         "com.example.hsp1", "hspModule1", "/system/app/hsp1.hap",
+         AppExecFwk::Constants::ARKTS_MODE_STATIC}
+    };
+    options.commonHspBundleInfos = hspInfos;
+    auto result = etsRuntime->GetAotPath(options);
+    EXPECT_NE(result.find("hspModule1.an"), std::string::npos);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
