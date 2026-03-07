@@ -236,7 +236,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<Runtime> &jsRu
     }
 
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), GetAotPath(options), options.appInnerHspPathList,
-        options.staticHapModuleNameList, options.commonHspBundleInfos, options.eventRunner);
+        options.staticHapModuleNameList, options.commonHspBundleInfos, options.eventRunner, options.baseLineProfile);
     return true;
 }
 
@@ -716,6 +716,51 @@ void ETSRuntime::StopDebugMode()
         return;
     }
     g_etsEnvFuncs->StopDebugMode(vm);
+}
+
+void ETSRuntime::StartProfiler(const DebugOption dOption)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "developer Mode false");
+        return;
+    }
+    instanceId_ = static_cast<uint32_t>(getproctid());
+
+    bool isStartWithDebug = dOption.isStartWithDebug;
+    bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Ark VM is starting profiler mode");
+    const std::string bundleName = dOption.bundleName;
+    uint32_t instanceId = instanceId_;
+    std::string inputProcessName = bundleName != dOption.processName ? dOption.processName : "";
+    HdcRegister::Get().StartHdcRegister(bundleName, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
+        [bundleName, isStartWithDebug, instanceId, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::ETSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
+        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->BroadcastAndConnect == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or BroadcastAndConnect");
+                return;
+            }
+            g_etsEnvFuncs->BroadcastAndConnect(bundleName, socketFd);
+        } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+                return;
+            }
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->StartDebuggerForSocketPair == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or StartDebuggerForSocketPair");
+                return;
+            }
+            g_etsEnvFuncs->StartDebuggerForSocketPair(option, socketFd);
+        }
+    });
 }
 
 void ETSRuntime::SetJsRuntime(std::unique_ptr<AbilityRuntime::Runtime> &jsRuntime)
