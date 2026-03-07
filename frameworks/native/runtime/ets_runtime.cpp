@@ -28,6 +28,7 @@
 #include "constants.h"
 #include "ets_interface.h"
 #include "file_path_utils.h"
+#include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
 #include "hdc_register.h"
 #include "hitrace_meter.h"
@@ -66,6 +67,7 @@ constexpr char SANDBOX_SHARED_BUNDLE_ARK_CACHE_PATH[] =
     "/data/service/el1/public/for-all-app/shared_bundles_ark_cache/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 const std::string SYS_HSP_FILE_PATH_PREFIX = "/system/app/";
+const std::string ARK_CACHE_NATIVE_PATH = "arm64/";
 
 const char *ETS_ENV_LIBNAME = "libets_environment.z.so";
 const char *ETS_ENV_REGISTER_FUNCS = "OHOS_ETS_ENV_RegisterFuncs";
@@ -160,20 +162,27 @@ void ETSRuntime::PreloadLibrary()
     }
 }
 
+bool ETSRuntime::IsAotCompiledSuccess(int32_t status)
+{
+    return status == static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS) ||
+    status == static_cast<int32_t>(AppExecFwk::AOTCompileStatus::INSTALL_COMPILE_SUCCESS);
+}
+
 std::string ETSRuntime::GetAotPath(const Options &options)
 {
     std::vector<std::string> aotFiles;
     // Handle Hap and Inner Hsp
     // path: <sandbox_path>/arm64/<moduleName>.an
     for (const auto& status: options.aotCompileStatusMap) {
-        if (status.second) {
-            aotFiles.push_back(SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + status.first + ".an");
+        if (IsAotCompiledSuccess(status.second)) {
+            aotFiles.push_back(SANDBOX_ARK_CACHE_PATH + ARK_CACHE_NATIVE_PATH + status.first + ".an");
         }
     }
 
     // Handle Outer Hsp
     for (const auto& bundleInfo: options.commonHspBundleInfos) {
-        if (bundleInfo.moduleArkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
+        if (!IsAotCompiledSuccess(bundleInfo.aotCompileStatus) ||
+            bundleInfo.moduleArkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
             continue;
         }
 
@@ -185,8 +194,7 @@ std::string ETSRuntime::GetAotPath(const Options &options)
         // path: <sandbox_path>/<bundleName>/v<versionCode>/arm64/<moduleName>.an
         std::string outerHspAnPath = SANDBOX_SHARED_BUNDLE_ARK_CACHE_PATH + bundleInfo.bundleName +
             std::string(AbilityBase::Constants::FILE_SEPARATOR) + std::to_string(bundleInfo.versionCode) +
-            std::string(AbilityBase::Constants::FILE_SEPARATOR) + options.arkNativeFilePath +
-            bundleInfo.moduleName + ".an";
+            std::string(AbilityBase::Constants::FILE_SEPARATOR) + ARK_CACHE_NATIVE_PATH + bundleInfo.moduleName + ".an";
         aotFiles.push_back(outerHspAnPath);
     }
 
