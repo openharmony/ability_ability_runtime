@@ -107,7 +107,53 @@ bool AniCommonCacheMgr::GetCachedClassAndMethod(ani_env *env, const std::string 
             return false;
         }
         methodIter->second = method;
+    }
+    return true;
+}
+
+bool AniCommonCacheMgr::GetCachedClassAndStaticMethod(ani_env *env, const std::string &className,
+    const AniCommonMethodCacheKey &methodKey, ani_class &cls, ani_static_method &method)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    std::lock_guard lock(mutex_);
+    const auto iter = aniCache_.find(className);
+    if (iter == aniCache_.end()) {
+        TAG_LOGE(AAFwkTag::ANI, "Not support cache %{public}s", className.c_str());
+        return false;
+    }
+    if (iter->second.classRef_ == nullptr) {
+        ani_status status = env->FindClass(className.c_str(), &cls);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "FindClass %{public}s failed %{public}d", className.c_str(), status);
+            return false;
+        }
+        ani_ref ref = nullptr;
+        status = env->GlobalReference_Create(cls, &ref);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "GlobalReference_Create %{public}s failed %{public}d", className.c_str(), status);
+            return false;
+        }
+        iter->second.classRef_ = ref;
+    }
+
+    cls = reinterpret_cast<ani_class>(iter->second.classRef_);
+    const auto methodIter = iter->second.staticMethodMap_.find(methodKey);
+    if (methodIter == iter->second.staticMethodMap_.end()) {
+        if (!InnerFindStaticMethod(env, methodKey, cls, method)) {
+            return false;
+        }
+        iter->second.staticMethodMap_.emplace(methodKey, method);
         return true;
+    }
+    if (methodIter->second == nullptr) {
+        if (!InnerFindStaticMethod(env, methodKey, cls, method)) {
+            return false;
+        }
+        methodIter->second = method;
     }
     method = methodIter->second;
     return true;
@@ -120,6 +166,19 @@ bool AniCommonCacheMgr::InnerFindMethod(ani_env *env, const AniCommonMethodCache
         env->Class_FindMethod(cls, methodKey.first, methodKey.second, &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod %{public}s signature %{public}s failed %{public}d",
+            methodKey.first, methodKey.second, status);
+        return false;
+    }
+    return true;
+}
+
+bool AniCommonCacheMgr::InnerFindStaticMethod(ani_env *env, const AniCommonMethodCacheKey &methodKey, ani_class cls,
+    ani_static_method &method)
+{
+    ani_status status =
+        env->Class_FindStaticMethod(cls, methodKey.first, methodKey.second, &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Class_FindStaticMethod %{public}s signature %{public}s failed %{public}d",
             methodKey.first, methodKey.second, status);
         return false;
     }
