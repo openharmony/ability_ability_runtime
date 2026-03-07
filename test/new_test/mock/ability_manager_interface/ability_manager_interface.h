@@ -28,7 +28,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.AbilityManager")
 
     OH_MOCK_METHOD_WITH_DECORATOR(virtual, int32_t, IAbilityManager, SetApplicationAutoStartupByEDM,
-        const AbilityRuntime::AutoStartupInfo &, bool);
+        const AbilityRuntime::AutoStartupInfo &info, bool flag, bool isHiddenStart = false);
     OH_MOCK_METHOD_WITH_DECORATOR(virtual, int32_t, IAbilityManager, CancelApplicationAutoStartupByEDM,
         const AbilityRuntime::AutoStartupInfo &, bool);
 

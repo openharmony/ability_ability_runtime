@@ -1494,9 +1494,11 @@ public:
      * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether the application is prohibited from changing the auto start up state.
+     * @param isHiddenStart Indicate whether the application is hidden start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override;
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag,
+        bool isHiddenStart = false) override;
 
     /**
      * @brief Cancel application auto start up state by EDM.

@@ -48,7 +48,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.abilityTypeName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.accessTokenId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    abilityAutoStartupDataManager->QueryAutoStartupData(info);
+    DistributedKv::Key originKey = abilityAutoStartupDataManager->ConvertAutoStartupDataToKey(info);
+    abilityAutoStartupDataManager->QueryAutoStartupData(info, originKey);
     return true;
 }
 }

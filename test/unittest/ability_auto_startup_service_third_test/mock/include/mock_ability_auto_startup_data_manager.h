@@ -43,13 +43,14 @@ public:
 
     int32_t InsertAutoStartupData(const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce);
 
-    int32_t UpdateAutoStartupData(const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce);
+    int32_t UpdateAutoStartupData(const AutoStartupInfo &info, DistributedKv::Key &originKey,
+        bool isAutoStartup, bool isEdmForce);
 
-    int32_t DeleteAutoStartupData(const AutoStartupInfo &info);
+    int32_t DeleteAutoStartupData(const AutoStartupInfo &info, DistributedKv::Key &originKey);
 
     int32_t DeleteAutoStartupData(const std::string &bundleName, int32_t accessTokenId);
 
-    AutoStartupStatus QueryAutoStartupData(const AutoStartupInfo &info);
+    AutoStartupStatus QueryAutoStartupData(const AutoStartupInfo &info, DistributedKv::Key &originKey);
 
     int32_t QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId, bool isCalledByEDM);
 

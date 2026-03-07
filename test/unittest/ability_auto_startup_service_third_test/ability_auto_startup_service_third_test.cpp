@@ -402,6 +402,7 @@ HWTEST_F(AbilityAutoStartupServiceThirdTest, InnerApplicationAutoStartupByEDM_00
     info.bundleName = BUNDLENAME_FONUD;
     info.abilityName = ABILITYNAME_NOT_AUTO_START;
     info.canUserModify = AUTO_STARTUP_SERVICE_TRUE;
+    info.userId = 100;
     auto result = abilityAutoStartupService->InnerApplicationAutoStartupByEDM(info, false, false);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceThirdTest InnerApplicationAutoStartupByEDM_003 end";

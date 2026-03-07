@@ -85,37 +85,40 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     AutoStartupInfo info2;
     info2.setterUserId = int32Param;
     info2.userId = int32Param;
-    dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.bundleName empty
+    DistributedKv::Key originKey1 = dataMgr->ConvertAutoStartupDataToKey(info2);
+    dataMgr->UpdateAutoStartupData(info2, originKey1, boolParam, boolParam); // branch info2.bundleName empty
     info2.bundleName = "com.example.fuzzTest";
-    dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.abilityName empty
+    dataMgr->UpdateAutoStartupData(info2, originKey1, boolParam, boolParam); // branch info2.abilityName empty
     info2.abilityName = "MainAbility";
-    dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.accestoken empty
+    dataMgr->UpdateAutoStartupData(info2, originKey1, boolParam, boolParam); // branch info2.accestoken empty
     info2.accessTokenId = "AccessTokenId";
-    dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.accestoken empty
+    dataMgr->UpdateAutoStartupData(info2, originKey1, boolParam, boolParam); // branch info2.accestoken empty
 
     AutoStartupInfo info3;
     info3.setterUserId = int32Param;
     info3.userId = int32Param;
-    dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch info3.bundleName empty
+    DistributedKv::Key originKey2 = dataMgr->ConvertAutoStartupDataToKey(info3);
+    dataMgr->UpdateAutoStartupData(info3, originKey2, boolParam, boolParam); // branch info3.bundleName empty
     info3.bundleName = "com.example.fuzzTest";
-    dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch info3.abilityName empty
+    dataMgr->UpdateAutoStartupData(info3, originKey2, boolParam, boolParam); // branch info3.abilityName empty
     info3.abilityName = "MainAbility";
-    dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch info3.accestoken empty
+    dataMgr->UpdateAutoStartupData(info3, originKey2, boolParam, boolParam); // branch info3.accestoken empty
     info3.accessTokenId = "AccessTokenId";
-    dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch userid
+    dataMgr->UpdateAutoStartupData(info3, originKey2, boolParam, boolParam); // branch userid
 
     dataMgr->DeleteAutoStartupData(stringParam, int32Param); // called
 
     AutoStartupInfo info4;
     info4.setterUserId = int32Param;
     info4.userId = int32Param;
-    dataMgr->QueryAutoStartupData(info4); // branch info3.bundleName empty
+    DistributedKv::Key originKey3 = dataMgr->ConvertAutoStartupDataToKey(info4);
+    dataMgr->QueryAutoStartupData(info4, originKey3); // branch info3.bundleName empty
     info4.bundleName = "com.example.fuzzTest";
-    dataMgr->QueryAutoStartupData(info4); // branch info3.abilityName empty
+    dataMgr->QueryAutoStartupData(info4, originKey3); // branch info3.abilityName empty
     info4.abilityName = "MainAbility";
-    dataMgr->QueryAutoStartupData(info4); // branch info3.accestoken empty
+    dataMgr->QueryAutoStartupData(info4, originKey3); // branch info3.accestoken empty
     info4.accessTokenId = "AccessTokenId";
-    dataMgr->QueryAutoStartupData(info4); // branch userid
+    dataMgr->QueryAutoStartupData(info4, originKey3); // branch userid
 
     std::vector<AutoStartupInfo> vecs;
     vecs.emplace_back(info1);
