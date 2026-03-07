@@ -277,6 +277,13 @@ constexpr const char* EVENT_KEY_INNER_MSG = "INNER_MSG";
 constexpr const char* EVENT_KEY_PROCESS_KILL_ID = "PROCESS_KILL_ID";
 constexpr const char* EVENT_KEY_ADJ = "ADJ";
 constexpr const char* EVENT_KEY_TIMESTAMP = "TIMESTAMP";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FIRST = "EVENT_PARAM_FIRST";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SECOND = "EVENT_PARAM_SECOND";
+constexpr const char* EVENT_KEY_QUICK_PARAM_THIRD = "EVENT_PARAM_THIRD";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FOURTH = "EVENT_PARAM_FOURTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FIFTH = "EVENT_PARAM_FIFTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SIXTH = "EVENT_PARAM_SIXTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SEVENTH = "EVENT_PARAM_SEVENTH";
 
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
@@ -349,7 +356,7 @@ constexpr int32_t MAX_EXTENSION_CHILD_PROCESS = 1;
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS_DEV_MODE = 3;
 
 // kill resaon
-constexpr int32_t PROCESS_KILL_PARAM = 14; // PROCESS_KILL params
+constexpr int32_t PROCESS_KILL_PARAM = 25; // PROCESS_KILL params
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -5114,7 +5121,7 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
         return;
     }
-    
+
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "no appInfo");
@@ -5144,9 +5151,16 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
     hisyseventReport->InsertParam(EVENT_KEY_VERSIONCODE, std::to_string(appInfo->versionCode));
     hisyseventReport->InsertParam(EVENT_KEY_VERSIONNAME, appInfo->versionName);
     hisyseventReport->InsertParam(EVENT_KEY_INNER_MSG, innerMsg);
-    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_KILL_ID, killId);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_KILL_ID, killInfo.killId);
     hisyseventReport->InsertParam(EVENT_KEY_ADJ, killInfo.adj);
     hisyseventReport->InsertParam(EVENT_KEY_TIMESTAMP, killInfo.timestamp);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FIRST, killInfo.eventParamFirst);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SECOND, killInfo.eventParamSecond);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_THIRD, killInfo.eventParamThird);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FOURTH, killInfo.eventParamFourth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FIFTH, killInfo.eventParamFifth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SIXTH, killInfo.eventParamSixth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SEVENTH, killInfo.eventParamSeventh);
     int result = hisyseventReport->Report("FRAMEWORK", "PROCESS_KILL", HISYSEVENT_FAULT);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s, reason=%{public}s, FOREGROUND=%{public}d,"

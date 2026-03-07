@@ -2152,7 +2152,11 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
         "%{public}s", info.bundleName.c_str(), info.errorObjectName.c_str(), info.summary.c_str());
     AAFwk::ExitReasonCompability exitReason = { REASON_JS_ERROR, info.errorObjectName };
     exitReason.killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_JS_ERROR;
-    AbilityManagerClient::GetInstance()->RecordAppWithReason(info.pid, getuid(), exitReason);
+    auto result = AbilityManagerClient::GetInstance()->RecordAppWithReason(info.pid, getuid(), exitReason);
+
+    TAG_LOGW(AAFwkTag::APPKIT, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL,JS_ERROR],"
+        " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
+        result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
     _exit(JS_ERROR_EXIT);
 }
 
