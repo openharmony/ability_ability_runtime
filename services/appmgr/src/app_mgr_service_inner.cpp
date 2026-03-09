@@ -1169,6 +1169,14 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         NotifyMemMgrPriorityChanged(appRecord);
     }
 
+    if (AAFwk::UIExtensionWrapper::IsAgentUIExtension(abilityInfo->extensionAbilityType)) {
+        if (appRecord == nullptr || !appRecord->HasAgentExtensionAbility()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "agentUI start denied, agent extension process not found");
+            NotifyStartProcessFailed(loadParam->token);
+            return;
+        }
+    }
+
     if (!appRecord) {
         TAG_LOGD(AAFwkTag::APPMGR, "appRecord null");
         if (KillingProcessManager::GetInstance().IsCallerKilling(callerKey)) {
