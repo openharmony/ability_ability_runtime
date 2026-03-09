@@ -1218,6 +1218,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
             return;
         }
+        if (loadParam->isPreloadUIExtension) {
+            UpdateUIExtensionPreloadState(appRecord, true);
+        }
     } else {
         HandleExistingAppRecordAfterFound(appRecord, abilityInfo, hapModuleInfo, want, isProcCache, loadParam);
         if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
@@ -1343,6 +1346,7 @@ void AppMgrServiceInner::HandleExistingAppRecordAfterFound(std::shared_ptr<AppRu
         appRecord->SetPreloadState(PreloadState::NONE);
         appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
     }
+    UpdateUIExtensionPreloadState(appRecord, false);
     int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
     if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
         appRecord->SetRequestProcCode(requestProcCode);
@@ -1979,6 +1983,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
         appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
     }
+    UpdateUIExtensionPreloadState(appRecord, false);
 }
 
 void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
@@ -3228,6 +3233,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
             info.appCloneIndex = appRecord->GetAppIndex();
         }
     }
+    info.isPreload = SetPreloadFlagForProcessInfo(appRecord);
 }
 
 void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -5467,6 +5473,42 @@ int32_t AppMgrServiceInner::GetRunningProcessInfoByChildProcessPid(const pid_t c
     }
 
     return appRunningManager_->GetRunningProcessInfoByChildProcessPid(childPid, info);
+}
+
+void AppMgrServiceInner::UpdateUIExtensionPreloadState(const std::shared_ptr<AppRunningRecord> &appRecord, bool state)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+    if (!AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not uiextension. uiextension type: %{public}d", appRecord->GetExtensionType());
+        return;
+    }
+
+    bool oldState = appRecord->GetUIExtensionPreloadState();
+    TAG_LOGD(AAFwkTag::APPMGR, "UIExtension preload state update from: %{public}d to: %{public}d", oldState, state);
+    if (oldState != state) {
+        appRecord->SetUIExtensionPreloadState(state);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "UIExtension preload state update to: %{public}d",
+        appRecord->GetUIExtensionPreloadState());
+}
+
+bool AppMgrServiceInner::SetPreloadFlagForProcessInfo(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return false;
+    }
+    if (appRecord->GetPreloadMode() != PreloadMode::PRELOAD_NONE || appRecord->GetUIExtensionPreloadState()) {
+        TAG_LOGD(AAFwkTag::APPMGR,
+            "Preload process: %{public}s, mode=%{public}d, isPreload: %{public}d",
+            appRecord->GetProcessName().c_str(), appRecord->GetPreloadMode(), appRecord->GetUIExtensionPreloadState());
+        return true;
+    }
+
+    return false;
 }
 
 void AppMgrServiceInner::SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const

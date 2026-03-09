@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ struct RunningProcessInfo : public Parcelable {
     bool isDebugApp = false;
     bool isExiting = false;
     bool isPreForeground = false;
+    bool isPreload = false;
     std::int32_t pid_;
     std::int32_t uid_;
     std::int32_t bundleType = 0;

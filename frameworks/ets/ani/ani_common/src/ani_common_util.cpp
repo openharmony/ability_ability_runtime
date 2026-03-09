@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -907,6 +907,11 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         (status = env->Object_SetPropertyByName_Ref(
             object, "appCloneIndex", CreateInt(env, processInfo.appCloneIndex))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "appCloneIndex failed status:%{public}d", status);
+        return false;
+    }
+    if (((status = env->Object_SetPropertyByName_Ref(
+        object, "isPreload", CreateBoolean(env, processInfo.isPreload))) != ANI_OK)) {
+        TAG_LOGE(AAFwkTag::ANI, "isPreload failed status:%{public}d", status);
         return false;
     }
     return true;

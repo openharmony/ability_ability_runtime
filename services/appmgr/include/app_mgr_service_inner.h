@@ -1175,6 +1175,21 @@ public:
     void FreeWindowPidVisibilityChangedListener();
 
     /*
+     * @brief Update UIExtension preload state for app record.
+     *
+     * @param appRecord App running record.
+     * @param state Target UIExtension preload state.
+     */
+    void UpdateUIExtensionPreloadState(const std::shared_ptr<AppRunningRecord> &appRecord, bool state);
+
+    /**
+     * @brief Set preload flag for running process info.
+     * @param appRecord App running record.
+     * @return Returns true if the preload flag is set successfully, otherwise returns false.
+     */
+    bool  SetPreloadFlagForProcessInfo(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    /*
      * @brief Notify NativeEngine GC of status change.
      *
      * @param state GC state

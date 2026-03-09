@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H
 #define OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H
 
+#include <atomic>
 #include <list>
 #include <map>
 #include <memory>
@@ -912,6 +913,10 @@ public:
 
     PreloadMode GetPreloadMode();
 
+    void SetUIExtensionPreloadState(bool isPreload);
+
+    bool GetUIExtensionPreloadState() const;
+
     void SetPreloadModuleName(const std::string& preloadModuleName);
 
     std::string GetPreloadModuleName() const;
@@ -1359,6 +1364,7 @@ private:
     int32_t callerUid_ = -1;
     int32_t exitReason_ = 0;
     int32_t pssValue_ = 0;
+    std::atomic<bool> isUIExtensionPreload_ = false;
     int32_t requestProcCode_ = 0; // render record
     int32_t rssValue_ = 0;
     int32_t killId_ = -1;

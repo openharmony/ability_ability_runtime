@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -530,6 +530,104 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
 
     appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
+}
+
+/**
+ * @tc.name: LoadAbility_002
+ * @tc.desc: test LoadAbility with isPreloadUIExtension flag set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, LoadAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(
+            applicationInfo_, processName, bundleInfo, "");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->SetUIExtensionPreloadState(false);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    loadParam.isPreloadUIExtension = false;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
+    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    TAG_LOGI(AAFwkTag::TEST, "LoadAbility_002 end");
+}
+
+/**
+ * @tc.name: UpdateUIExtensionPreloadState_001
+ * @tc.desc: test UpdateUIExtensionPreloadState function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, UpdateUIExtensionPreloadState_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateUIExtensionPreloadState_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(
+            applicationInfo_, processName, bundleInfo, "");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->extensionType_ = ExtensionAbilityType::UI;
+    appRecord->SetUIExtensionPreloadState(false);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    appMgrServiceInner->UpdateUIExtensionPreloadState(appRecord, true);
+    EXPECT_TRUE(appRecord->GetUIExtensionPreloadState());
+    appMgrServiceInner->UpdateUIExtensionPreloadState(appRecord, false);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    appMgrServiceInner->UpdateUIExtensionPreloadState(appRecord, false);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    appRecord->extensionType_ = ExtensionAbilityType::SERVICE;
+    appRecord->SetUIExtensionPreloadState(false);
+    appMgrServiceInner->UpdateUIExtensionPreloadState(appRecord, true);
+    EXPECT_FALSE(appRecord->GetUIExtensionPreloadState());
+    appMgrServiceInner->UpdateUIExtensionPreloadState(nullptr, true);
+    appRecord->extensionType_ = ExtensionAbilityType::UI;
+    appRecord->SetUIExtensionPreloadState(false);
+    appMgrServiceInner->UpdateUIExtensionPreloadState(appRecord, true);
+    EXPECT_TRUE(appRecord->GetUIExtensionPreloadState());
+    TAG_LOGI(AAFwkTag::TEST, "UpdateUIExtensionPreloadState_001 end");
+}
+
+/**
+ * @tc.name: SetPreloadFlagForProcessInfo_001
+ * @tc.desc: test SetPreloadFlagForProcessInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetPreloadFlagForProcessInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetPreloadFlagForProcessInfo_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(
+            applicationInfo_, processName, bundleInfo, "");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->SetPreloadMode(AppExecFwk::PreloadMode::PRELOAD_NONE);
+    appRecord->SetUIExtensionPreloadState(false);
+    bool result = appMgrServiceInner->SetPreloadFlagForProcessInfo(appRecord);
+    EXPECT_FALSE(result);
+    appRecord->SetUIExtensionPreloadState(true);
+    result = appMgrServiceInner->SetPreloadFlagForProcessInfo(appRecord);
+    EXPECT_TRUE(result);
+    appRecord->SetUIExtensionPreloadState(false);
+    appRecord->SetPreloadMode(AppExecFwk::PreloadMode::PRE_LAUNCH);
+    result = appMgrServiceInner->SetPreloadFlagForProcessInfo(appRecord);
+    EXPECT_TRUE(result);
+    result = appMgrServiceInner->SetPreloadFlagForProcessInfo(nullptr);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "SetPreloadFlagForProcessInfo_001 end");
 }
 
 /**
