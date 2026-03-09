@@ -844,6 +844,7 @@ private:
         AppExecFwk::ModuleTestRunner &tsTestRunner);
     bool CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
     void SleepCleanKill();
+    void TransferEnvToEventHandler(std::unique_ptr<Runtime> &runtime);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
