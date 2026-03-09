@@ -291,6 +291,22 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
     return abilitiesMap;
 }
 
+bool AppRunningRecord::HasAgentExtensionAbility()
+{
+    auto abilitiesMap = GetAbilities();
+    for (const auto &item : abilitiesMap) {
+        auto abilityRecord = item.second;
+        if (abilityRecord == nullptr || abilityRecord->GetAbilityInfo() == nullptr) {
+            continue;
+        }
+        auto abilityInfo = abilityRecord->GetAbilityInfo();
+        if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AppRunningRecord::IsAlreadyHaveAbility()
 {
     auto moduleRecordList = GetAllModuleRecord();
