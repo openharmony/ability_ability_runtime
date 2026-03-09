@@ -5163,7 +5163,7 @@ int AbilityManagerStub::StartSelfUIAbilityInCurrentProcessInner(MessageParcel &d
     std::string specifiedFlag = data.ReadString();
     StartOptions *startOptions = data.ReadParcelable<StartOptions>();
     bool hasOptions = data.ReadBool();
-    if (hasOptions && startOptions == nullptr) {
+    if (startOptions == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startOptions null");
         return ERR_INVALID_VALUE;
     }
