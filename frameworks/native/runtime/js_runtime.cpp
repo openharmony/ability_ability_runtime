@@ -642,6 +642,7 @@ void JsRuntime::PostPreload(const Options& options)
     CHECK_POINTER(env);
     panda::RuntimeOption postOption;
     postOption.SetBundleName(options.bundleName);
+    postOption.SetArkTSMode(options.arkTSMode);
     if (!options.arkNativeFilePath.empty()) {
         std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
         postOption.SetAnDir(sandBoxAnFilePath);
