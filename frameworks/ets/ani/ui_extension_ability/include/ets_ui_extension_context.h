@@ -85,6 +85,8 @@ public:
     static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
     static void ConnectUIServiceExtension(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object uiServiceExtConCallbackObj, ani_object callback);
+    static ani_long ConnectServiceExtensionAbilityWithRootHostToken(
+        ani_env *env, ani_object aniObj, ani_object wantObj, ani_object connectOptionsObj);
     static void StartUIAbilities(ani_env *env, ani_object aniObj, ani_object wantListObj,
         ani_object callback);
     static bool UnwrapWantList(ani_env *env, ani_object wantListObj, std::vector<AAFwk::Want> &wantList);
@@ -117,7 +119,7 @@ private:
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callbackObj,
         std::shared_ptr<UIExtensionContext> context, bool isAbilityResult = false, bool isOpenLink = false);
     ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
-        ani_object connectOptionsObj);
+        ani_object connectOptionsObj, bool withRootHostTokenTransfer = false);
     void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     void OnStartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,

@@ -689,6 +689,18 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
 std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetUIExtensionRootHostInfo(
     const sptr<IRemoteObject> token)
 {
+    sptr<IRemoteObject> rootCallerToken = GetUIExtensionRootHostToken(token);
+
+    if (rootCallerToken == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "get record failed");
+        return nullptr;
+    }
+
+    return AAFwk::Token::GetAbilityRecordByToken(rootCallerToken);
+}
+
+sptr<IRemoteObject> ExtensionRecordManager::GetUIExtensionRootHostToken(const sptr<IRemoteObject> token)
+{
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "input param invalid");
         return nullptr;
@@ -717,7 +729,7 @@ std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetUIExtensionRoot
         return nullptr;
     }
 
-    return AAFwk::Token::GetAbilityRecordByToken(rootCallerToken);
+    return rootCallerToken;
 }
 
 int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(

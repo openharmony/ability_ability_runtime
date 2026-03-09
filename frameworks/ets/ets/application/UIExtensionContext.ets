@@ -83,6 +83,7 @@ export default class UIExtensionContext extends ExtensionContext {
   native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbility(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
   private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
+  private native nativeConnectServiceExtensionAbilityWithRootHostToken(want: Want, options: ConnectOptions): long;
   private native nativeDisconnectServiceExtensionAbilitySync(connection: long, callback: AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
@@ -192,6 +193,10 @@ export default class UIExtensionContext extends ExtensionContext {
 
   connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
     return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  connectServiceExtensionAbilityWithRootHostToken(want: Want, options: ConnectOptions): long {
+    return this.nativeConnectServiceExtensionAbilityWithRootHostToken(want, options);
   }
 
   disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
