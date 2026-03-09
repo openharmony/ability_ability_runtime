@@ -403,6 +403,12 @@ std::shared_ptr<AAFwk::AbilityRecord> UIExtensionAbilityManager::GetUIExtensionR
     return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostInfo(token);
 }
 
+sptr<IRemoteObject> UIExtensionAbilityManager::GetUIExtensionRootHostToken(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN(token, nullptr);
+    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, nullptr);
+    return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostToken(token);
+}
 
 int UIExtensionAbilityManager::UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId)
 {

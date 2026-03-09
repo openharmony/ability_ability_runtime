@@ -130,6 +130,8 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
+    sptr<IRemoteObject> GetUIExtensionRootHostToken(const sptr<IRemoteObject> token);
+
     int UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId);
     int UnPreloadUIExtensionAbilityInner(int32_t extensionAbilityId);
     int ClearAllPreloadUIExtensionAbilityLocked();
