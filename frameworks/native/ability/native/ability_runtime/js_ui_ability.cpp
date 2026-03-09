@@ -1350,19 +1350,19 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     if (executeParam == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        TAG_LOGW(AAFwkTag::INTENT, "null executeParam");
         RequestFocus(want);
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
 
     auto asyncCallback = [weak = weak_from_this(), want](InsightIntentExecuteResult result) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "request focus");
+        TAG_LOGD(AAFwkTag::INTENT, "request focus");
         auto ability = weak.lock();
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
+            TAG_LOGE(AAFwkTag::INTENT, "null ability");
             return;
         }
         std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
@@ -1374,18 +1374,19 @@ void JsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     InsightIntentExecutorInfo executeInfo;
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        TAG_LOGE(AAFwkTag::INTENT, "get intentExecutor failed");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
     RegisterDelayResultCallback(executeParam);
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat");
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat execute start");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
+    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentRepeat execute end");
     if (!ret) {
         // callback has removed, release in insight intent executor.
-        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        TAG_LOGE(AAFwkTag::INTENT, "execute insightIntent failed");
     }
 }
 
@@ -1393,9 +1394,9 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     if (executeParam == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        TAG_LOGW(AAFwkTag::INTENT, "null executeParam");
         OnForeground(want);
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         return;
@@ -1407,10 +1408,10 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     UIAbility::OnForeground(want);
 
     auto asyncCallback = [weak = weak_from_this(), want](InsightIntentExecuteResult result) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "begin call onForeground");
+        TAG_LOGD(AAFwkTag::INTENT, "begin call onForeground");
         auto ability = weak.lock();
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
+            TAG_LOGE(AAFwkTag::INTENT, "null ability");
             return;
         }
         std::static_pointer_cast<JsUIAbility>(ability)->AddLifecycleEventAfterJSCall(
@@ -1422,18 +1423,19 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     InsightIntentExecutorInfo executeInfo;
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        TAG_LOGE(AAFwkTag::INTENT, "get intentExecutor failed");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
     RegisterDelayResultCallback(executeParam);
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground");
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground execute start");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
+    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentForeground execute end");
     if (!ret) {
         // callback has removed, release in insight intent executor.
-        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        TAG_LOGE(AAFwkTag::INTENT, "execute insightIntent failed");
         InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(
             executeParam->insightIntentId_);
         return;
@@ -1456,8 +1458,10 @@ void JsUIAbility::ExecuteInsightIntentPage(const Want &want,
     InsightIntentExecutorInfo executeInfo;
     executeInfo.hapPath = abilityInfo_->hapPath;
     executeInfo.executeParam = executeParam;
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentPage execute start");
     auto ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
+    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, "IntentPage execute end");
     if (!ret) {
         // callback has removed, release in insight intent executor.
         TAG_LOGE(AAFwkTag::INTENT, "execute insightIntent failed");
@@ -1491,9 +1495,9 @@ void JsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "executeInsightIntentBackground");
+    TAG_LOGI(AAFwkTag::INTENT, "executeInsightIntentBackground");
     if (executeParam == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        TAG_LOGW(AAFwkTag::INTENT, "null executeParam");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
@@ -1505,17 +1509,19 @@ void JsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     InsightIntentExecutorInfo executeInfo;
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        TAG_LOGE(AAFwkTag::INTENT, "get intentExecutor failed");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
 
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, "IntentBackground execute start");
     ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executeInfo, std::move(callback));
+    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BACKGROUND, "IntentBackground execute end");
     if (!ret) {
         // callback has removed, release in insight intent executor.
-        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+        TAG_LOGE(AAFwkTag::INTENT, "execute insightIntent failed");
     }
 }
 
@@ -1523,17 +1529,17 @@ bool JsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     InsightIntentExecutorInfo& executeInfo)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
 
     auto context = GetAbilityContext();
     if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "param invalid");
         return false;
     }
 
     if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND
         && jsWindowStageObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "param invalid");
         return false;
     }
 
@@ -2450,10 +2456,10 @@ void JsUIAbility::RegisterDelayResultCallback(const std::shared_ptr<InsightInten
 {
     auto delayResultCallback = [intentId = executeParam->insightIntentId_, token = token_]
         (AppExecFwk::InsightIntentExecuteResult result) -> int32_t {
-        TAG_LOGE(AAFwkTag::UIABILITY, "delayResultCallback start");
+        TAG_LOGE(AAFwkTag::INTENT, "delayResultCallback start");
         auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "ExecuteInsightIntentDone ret : %{public}d", ret);
+            TAG_LOGE(AAFwkTag::INTENT, "ExecuteInsightIntentDone ret : %{public}d", ret);
         }
         return ret;
     };

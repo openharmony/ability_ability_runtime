@@ -722,16 +722,16 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
 {
     std::string entry = "UIAbilityImpl::HandleExecuteInsightIntentForeground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
-    TAG_LOGI(AAFwkTag::UIABILITY, "handle execute insight intent foreground");
+    TAG_LOGI(AAFwkTag::INTENT, "handle execute insight intent foreground");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
+        TAG_LOGE(AAFwkTag::INTENT, "invalid params");
         HandleForegroundNewState(want, bflag);
         return;
     }
 
-    TAG_LOGD(AAFwkTag::UIABILITY,
+    TAG_LOGD(AAFwkTag::INTENT,
         "insightIntent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
         "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64"",
         executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
@@ -739,7 +739,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
+        TAG_LOGE(AAFwkTag::INTENT, "null intentCb");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -762,13 +762,13 @@ void UIAbilityImpl::ExecuteInsightIntentRepeateForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "execute insightIntent finshed, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::INTENT, "execute insightIntent finshed, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null ability impl");
+                TAG_LOGE(AAFwkTag::INTENT, "null ability impl");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
@@ -784,7 +784,7 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
 
     {
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
@@ -793,10 +793,10 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "end, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::INTENT, "end, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null ability impl");
+                TAG_LOGE(AAFwkTag::INTENT, "null ability impl");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
@@ -835,9 +835,9 @@ void UIAbilityImpl::ExecuteInsightIntentPage(const Want &want,
 
 void UIAbilityImpl::PostForegroundInsightIntent()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
+        TAG_LOGE(AAFwkTag::INTENT, "null ability_");
         return;
     }
 
@@ -868,12 +868,12 @@ bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret && !onlyExecuteIntent) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
+        TAG_LOGE(AAFwkTag::INTENT, "invalid params");
         Background();
         return true;
     }
 
-    TAG_LOGI(AAFwkTag::UIABILITY,
+    TAG_LOGI(AAFwkTag::INTENT,
         "insightIntent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
         "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64"",
         executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
@@ -882,11 +882,11 @@ bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr && !onlyExecuteIntent) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
+        TAG_LOGE(AAFwkTag::INTENT, "null intentCb");
         Background();
         return true;
     }
-    TAG_LOGD(AAFwkTag::UIABILITY, "lifecycleState_: %{public}d", lifecycleState_);
+    TAG_LOGD(AAFwkTag::INTENT, "lifecycleState_: %{public}d", lifecycleState_);
     if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL
         || lifecycleState_ == AAFwk::ABILITY_STATE_STARTED_NEW) {
         ExecuteInsightIntentBackgroundByColdBoot(want, executeParam, std::move(intentCb));
@@ -901,13 +901,13 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "execute insight intent background by cold boot");
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent background by cold boot");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "end, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::INTENT, "end, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null ability impl");
+                TAG_LOGE(AAFwkTag::INTENT, "null ability impl");
                 return;
             }
             abilityImpl->Background();
@@ -924,14 +924,14 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundAlreadyStart(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "execute insight intent background already start");
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent background already start");
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "end, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::INTENT, "end, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null ability impl");
+                TAG_LOGE(AAFwkTag::INTENT, "null ability impl");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);

@@ -23,6 +23,7 @@
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_delay_result_callback_mgr.h"
@@ -522,8 +523,10 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     InsightIntentDelayResultCallbackMgr::GetInstance().RemoveDelayResultCallback(intentId_);
     bool isDecorator = executorInfo.executeParam->decoratorType_ != static_cast<int8_t>(InsightIntentType::DECOR_NONE);
     RegisterUiExtensionDelayResultCallback(executorInfo.executeParam->insightIntentId_, sessionInfo, isDecorator);
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, "JsUIExtension::ForegroundWindowWithInsightIntent begin");
     int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, "JsUIExtension::ForegroundWindowWithInsightIntent end");
     if (!ret) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
         // callback has removed, release in insight intent executor.
