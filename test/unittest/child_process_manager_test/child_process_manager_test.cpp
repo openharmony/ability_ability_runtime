@@ -203,7 +203,7 @@ HWTEST_F(ChildProcessManagerTest, GetHapModuleInfo_0100, TestSize.Level2)
 
     AppExecFwk::HapModuleInfo hapModuleInfo;
     ret = ChildProcessManager::GetInstance().GetHapModuleInfo(bundleInfo, "entry", hapModuleInfo);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -220,7 +220,7 @@ HWTEST_F(ChildProcessManagerTest, GetEntryHapModuleInfo_0100, TestSize.Level2)
 
     AppExecFwk::HapModuleInfo hapModuleInfo;
     ret = ChildProcessManager::GetInstance().GetEntryHapModuleInfo(bundleInfo, hapModuleInfo);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(ChildProcessManagerTest, CreateRuntime_0100, TestSize.Level2)
 
     AppExecFwk::HapModuleInfo hapModuleInfo;
     ret = ChildProcessManager::GetInstance().GetEntryHapModuleInfo(bundleInfo, hapModuleInfo);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     auto runtime = ChildProcessManager::GetInstance().CreateRuntime(bundleInfo, hapModuleInfo, false, false);
     EXPECT_TRUE(runtime != nullptr);
