@@ -893,7 +893,7 @@ int32_t AbilityManagerService::StartAbilityByOEExt(const Want &want,
     std::string hostBundleName;
     int32_t userId = -1;
     int32_t result = OEExtensionUtils::GetInstance().ValidateCaller(
-        want, callerToken, hostPid, hostBundleName, userId);
+        IPCSkeleton::GetCallingUid(), want, callerToken, hostPid, hostBundleName, userId);
     if (result != ERR_OK) {
         return result;
     }
