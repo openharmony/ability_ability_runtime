@@ -343,55 +343,14 @@ bool JsSystemConfigurationUpdatedCallback::IsEqual(
     return isEqual;
 }
 
-struct JsNativeReferenceDeleterObject {
-    std::shared_ptr<NativeReference> sharedNativeRef_ = nullptr;
-};
 void JsSystemConfigurationUpdatedCallback::FreeNativeReference(std::shared_ptr<NativeReference> &&reference)
 {
     if (reference == nullptr) {
         return;
     }
-
-    uv_loop_t *loop = nullptr;
-    napi_get_uv_event_loop(env_, &loop);
-    if (loop == nullptr) {
-        return;
-    }
-
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        return;
-    }
-
-    auto cb = new (std::nothrow) JsNativeReferenceDeleterObject();
-    if (cb == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null cb");
-        delete work;
-        work = nullptr;
-        return;
-    }
-    cb->sharedNativeRef_ = std::move(reference);
-
-    work->data = reinterpret_cast<void *>(cb);
-    int ret = uv_queue_work(
-        loop,
-        work,
-        [](uv_work_t *work) {},
-        [](uv_work_t *work, int status) {
-            if (work != nullptr) {
-                if (work->data != nullptr) {
-                    delete reinterpret_cast<JsNativeReferenceDeleterObject *>(work->data);
-                    work->data = nullptr;
-                }
-                delete work;
-                work = nullptr;
-            }
-        });
-    if (ret != 0) {
-        delete reinterpret_cast<JsNativeReferenceDeleterObject *>(work->data);
-        work->data = nullptr;
-        delete work;
-        work = nullptr;
+    napi_status ret = napi_send_event(env_, [sharedNativeRef = std::move(reference)]() {}, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to send event");
     }
 }
 }  // namespace AbilityRuntime
