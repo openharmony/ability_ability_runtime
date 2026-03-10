@@ -16830,6 +16830,9 @@ void AbilityManagerService::HandleRecoveryRecipient(
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
         restartFlag);
  
+    if (restartFlag == AppExecFwk::RestartFlag::NO_RESTART) {
+        return;
+    }
     if (restartFlag == AppExecFwk::RestartFlag::ALWAYS_RESTART ||
         (restartFlag & AppExecFwk::RestartFlag::RESTART_WHEN_CPP_CRASH) != 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "enable OnAbilityRequestDone");
