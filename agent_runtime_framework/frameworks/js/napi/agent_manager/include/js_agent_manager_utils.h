@@ -17,17 +17,19 @@
 #define OHOS_AGENT_RUNTIME_JS_AGENT_MANAGER_UTILS_H
 
 #include "agent_card.h"
+#include "agent_manager_napi_utils_export.h"
 #include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AgentRuntime {
-napi_value CreateJsAgentProvider(napi_env env, const AgentProvider &provider);
-napi_value CreateJsAgentAppInfo(napi_env env, const AgentAppInfo &appInfo);
-napi_value CreateJsAgentCapabilities(napi_env env, const AgentCapabilities &capabilities);
-napi_value CreateJsAgentSkill(napi_env env, const AgentSkill &skill);
-napi_value CreateJsAgentSkillArray(napi_env env, const std::vector<std::shared_ptr<AgentSkill>> &skills);
-napi_value CreateJsAgentCard(napi_env env, const AgentCard &card);
-napi_value CreateJsAgentCardArray(napi_env env, const std::vector<AgentCard> &cards);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentProvider(napi_env env, const AgentProvider &provider);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentAppInfo(napi_env env, const AgentAppInfo &appInfo);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentCapabilities(napi_env env, const AgentCapabilities &capabilities);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentSkill(napi_env env, const AgentSkill &skill);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentSkillArray(
+    napi_env env, const std::vector<std::shared_ptr<AgentSkill>> &skills);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentCard(napi_env env, const AgentCard &card);
+JS_AGENT_MANAGER_UTILS_EXPORT napi_value CreateJsAgentCardArray(napi_env env, const std::vector<AgentCard> &cards);
 }  // namespace AgentRuntime
 }  // namespace OHOS
 #endif // OHOS_AGENT_RUNTIME_JS_AGENT_MANAGER_UTILS_H
