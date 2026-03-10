@@ -499,6 +499,47 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t GetCryptUuidById(const std::string &volumeId, std::string &uuid) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t BindRecoverKeyToPasswd(const std::string &volumeId,
+                                            const std::string &pazzword,
+                                            const std::string &recoverKey) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UpdateCryptPasswd(const std::string &volumeId,
+                                    const std::string &pazzword,
+                                    const std::string &newPazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t ResetCryptPasswd(const std::string &volumeId,
+                                    const std::string &recoverKey,
+                                    const std::string &newPazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t VerifyCryptPasswd(const std::string &volumeId, const std::string &pazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t Unlock(const std::string &volumeId, const std::string &pazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t Decrypt(const std::string &volumeId, const std::string &pazzword) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
