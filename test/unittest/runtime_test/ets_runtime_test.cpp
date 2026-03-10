@@ -483,10 +483,10 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_006, TestSize.Level1)
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
-    // Should contain the outer HSP path
-    EXPECT_NE(result.find("/data/service/el1/public/for-all-app/shared_bundles_ark_cache/"), std::string::npos);
-    EXPECT_NE(result.find("com.example.hsp1"), std::string::npos);
-    EXPECT_NE(result.find("hspModule1.an"), std::string::npos);
+    // Should not contain the outer HSP path
+    EXPECT_EQ(result.find("/data/service/el1/public/for-all-app/shared_bundles_ark_cache/"), std::string::npos);
+    EXPECT_EQ(result.find("com.example.hsp1"), std::string::npos);
+    EXPECT_EQ(result.find("hspModule1.an"), std::string::npos);
 }
 
 /**
@@ -530,9 +530,9 @@ HWTEST_F(EtsRuntimeTest, GetAotPath_008, TestSize.Level1)
     };
     options.commonHspBundleInfos = hspInfos;
     auto result = etsRuntime->GetAotPath(options);
-    // Should contain the outer HSP path
-    EXPECT_NE(result.find("com.example.hsp1"), std::string::npos);
-    EXPECT_NE(result.find("hspModule1.an"), std::string::npos);
+    // Should not contain the outer HSP path
+    EXPECT_EQ(result.find("com.example.hsp1"), std::string::npos);
+    EXPECT_EQ(result.find("hspModule1.an"), std::string::npos);
 }
 
 /**
