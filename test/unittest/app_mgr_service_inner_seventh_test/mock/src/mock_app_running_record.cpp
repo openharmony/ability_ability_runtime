@@ -1350,5 +1350,10 @@ bool AppRunningRecord::IsPreForeground() const
 {
     return isPreForeground_.load();
 }
+
+bool AppRunningRecord::HasAgentExtensionAbility()
+{
+    return false;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
