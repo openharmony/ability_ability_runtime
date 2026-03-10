@@ -4293,7 +4293,6 @@ void MainThread::SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpAppli
         }
     };
     idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
-    idleTime_->Start();
 
     IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
     jsEngine.NotifyIdleStatusControl(cb);
