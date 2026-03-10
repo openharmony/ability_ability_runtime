@@ -299,8 +299,8 @@ bool AppRunningRecord::HasAgentExtensionAbility()
         if (abilityRecord == nullptr || abilityRecord->GetAbilityInfo() == nullptr) {
             continue;
         }
-        auto abilityInfo = abilityRecord->GetAbilityInfo();
-        if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+        if (abilityRecord->GetAbilityInfo()->extensionAbilityType ==
+            AppExecFwk::ExtensionAbilityType::AGENT) {
             return true;
         }
     }

@@ -187,6 +187,56 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityTerminated_0100, TestSize
     EXPECT_EQ(appRunningRecord->processType_, ProcessType::NORMAL);
 }
 
+/**
+ * @tc.name: AppRunningRecord_HasAgentExtensionAbility_0100
+ * @tc.desc: HasAgentExtensionAbility returns false when process has no agent extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasAgentExtensionAbility_0100, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(token, abilityInfo, nullptr, RECORD_ID), nullptr);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+
+    EXPECT_FALSE(appRunningRecord->HasAgentExtensionAbility());
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasAgentExtensionAbility_0200
+ * @tc.desc: HasAgentExtensionAbility returns true when process has agent extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasAgentExtensionAbility_0200, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::AGENT;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(token, abilityInfo, nullptr, RECORD_ID), nullptr);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+
+    EXPECT_TRUE(appRunningRecord->HasAgentExtensionAbility());
+}
+
 #ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppRunningRecord_AddChildProcessRecord_0100
