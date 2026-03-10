@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,16 @@ extern "C" {
  */
 int RecordAppExitReason(int exitReason, const char *exitMsg = "");
 
+/**
+ * Record app with reason.
+ * @param pid The process ID of the app.
+ * @param uid The user ID.
+ * @param exitReason The reason of app exit. defined in ability_state.h
+ * @param killId The reason of app exit. defined in xcollie/process_kill_reason.h
+ * @param exitMsg The message of app exit.
+ * @return Returns ERR_OK on success, others on failure.
+ */
+int RecordAppWithReason(int pid, int uid, int exitReason, int killId, const char *exitMsg = "");
 #ifdef __cplusplus
 }
 #endif

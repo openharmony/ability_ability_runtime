@@ -526,6 +526,41 @@ int32_t AmsMgrProxy::ForceKillApplication(const std::string &bundleName,
     return reply.ReadInt32();
 }
 
+int32_t AmsMgrProxy::KillApplicationWithUserId(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel bundleName failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_APPLICATION_WITH_USER_ID), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d.", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");

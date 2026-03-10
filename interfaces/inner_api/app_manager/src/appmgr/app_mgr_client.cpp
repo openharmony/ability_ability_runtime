@@ -354,6 +354,23 @@ AppMgrResultCode AppMgrClient::ForceKillApplication(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::KillApplicationWithUserId(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            int32_t result = amsService->KillApplicationWithUserId(bundleName, userId, appIndex);
+            if (result == ERR_OK) {
+                return AppMgrResultCode::RESULT_OK;
+            }
+            return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

@@ -109,6 +109,19 @@ int AppScheduler::KillApplication(const std::string& bundleName, bool clearPageS
     return ERR_OK;
 }
 
+int AppScheduler::ForceKillApplication(const std::string &bundleName, const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::ForceKillApplication()");
+    return ERR_OK;
+}
+
+
+int AppScheduler::KillApplicationWithUserId(const std::string &bundleName, const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillApplicationWithUserId()");
+    return ERR_OK;
+}
+
 void AppScheduler::AttachTimeOut(const sptr<IRemoteObject>& token)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::AttachTimeOut()");

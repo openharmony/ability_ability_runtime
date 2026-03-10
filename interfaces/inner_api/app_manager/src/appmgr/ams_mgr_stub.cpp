@@ -215,6 +215,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleIsProcessContainsOnlyUIAbility(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION):
             return HandleForceKillApplication(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::KILL_APPLICATION_WITH_USER_ID):
+            return HandleKillApplicationWithUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST):
             return HandleCleanAbilityByUserRequest(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID):
@@ -448,6 +450,21 @@ ErrCode AmsMgrStub::HandleForceKillApplication(MessageParcel &data, MessageParce
         bundleName.c_str(), userId, appIndex);
 
     int32_t result = ForceKillApplication(bundleName, userId, appIndex);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleKillApplicationWithUserId(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    int userId = data.ReadInt32();
+    int appIndex = data.ReadInt32();
+
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s,userId=%{public}d,appIndex=%{public}d",
+        bundleName.c_str(), userId, appIndex);
+
+    int32_t result = KillApplicationWithUserId(bundleName, userId, appIndex);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

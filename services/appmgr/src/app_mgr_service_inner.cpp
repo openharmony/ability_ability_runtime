@@ -2179,6 +2179,24 @@ int32_t AppMgrServiceInner::ForceKillApplication(const std::string &bundleName,
     return ForceKillApplicationInner(bundleName, userId, appIndex);
 }
 
+int32_t AppMgrServiceInner::KillApplicationWithUserId(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "KillApplicationWithUserId");
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+
+    auto result = VerifyKillProcessPermission(bundleName);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
+        return result;
+    }
+
+    return KillApplicationWithUserIdInner(bundleName, userId, appIndex);
+}
+
 int32_t AppMgrServiceInner::ForceKillApplicationInner(const std::string &bundleName,
     const int userId, const int appIndex)
 {
@@ -2203,6 +2221,33 @@ int32_t AppMgrServiceInner::ForceKillApplicationInner(const std::string &bundleN
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPMGR,
                 "forceKillApplicationByBundleName fail for bundleName:%{public}s pid:%{public}d",
+                bundleName.c_str(), *iter);
+            return result;
+        }
+    }
+    return result;
+}
+
+int32_t AppMgrServiceInner::KillApplicationWithUserIdInner(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+
+    std::list<pid_t> pids;
+    int32_t newUserId = userId;
+    if (userId == DEFAULT_INVAL_VALUE) {
+        newUserId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
+    }
+    int32_t result = ERR_OK;
+    if (!appRunningManager_->GetPidsByBundleNameUserIdAndAppIndex(bundleName, newUserId, appIndex, pids)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "unstart");
+        return result;
+    }
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        result = KillProcessByPid(*iter, "KillApplicationWithUserId");
+        if (result < 0) {
+            TAG_LOGE(AAFwkTag::APPMGR,
+                "KillApplicationWithUserId fail for bundleName:%{public}s pid:%{public}d",
                 bundleName.c_str(), *iter);
             return result;
         }
