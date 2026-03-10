@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,29 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 
+#include "bundle_mgr_helper.h"
+#include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "mock_my_status.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace AbilityUtil {
 int retStartAppgallery = 0;
+constexpr const char* MARKET_BUNDLE_NAME = "com.huawei.hmsapp.appgallery";
+constexpr const char* MARKET_CROWD_TEST_BUNDLE_PARAM = "crowd_test_bundle_name";
 int StartAppgallery(const std::string &bundleName, const int requestCode, const int32_t userId,
     const std::string &action)
 {
     return retStartAppgallery;
+}
+
+std::shared_ptr<AppExecFwk::BundleMgrHelper> GetBundleManagerHelper()
+{
+    if (AAFwk::MyStatus::GetInstance().isNullPtr) {
+        return nullptr;
+    }
+    return DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
 }
 }  // namespace AbilityUtil
 }  // namespace AAFwk

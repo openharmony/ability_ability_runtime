@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,18 @@
 #include "interceptor/crowd_test_interceptor.h"
 
 #include "ability_util.h"
+#include "modal_system_ui_extension.h"
 #include "start_ability_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr const char* ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
+constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
+constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
+constexpr const char* MARKET_CROWD_TEST_UIEXTENSION_ABILITY_NAME = "TestAppUseEndExtAbility";
+constexpr const char* APP_BUNDLE_NAME = "appBundleName";
+const std::string UIEXTENSION_SYS_COMMON_UI = "sys/commonUI";
 }
 ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
 {
@@ -33,8 +39,36 @@ ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "expired");
 #ifdef SUPPORT_GRAPHICS
         if (param.isWithUI) {
-            int ret = IN_PROCESS_CALL(AbilityUtil::StartAppgallery(param.want.GetBundle(), param.requestCode,
-                param.userId, ACTION_MARKET_CROWDTEST));
+            std::string appGalleryBundleName;
+            auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+            if (bundleMgrHelper == nullptr || !bundleMgrHelper->QueryAppGalleryBundleName(appGalleryBundleName)) {
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "Failed to query appGallery bundle name");
+                appGalleryBundleName = AbilityUtil::MARKET_BUNDLE_NAME;
+            }
+            Want queryWant;
+            queryWant.SetElementName(appGalleryBundleName, MARKET_CROWD_TEST_UIEXTENSION_ABILITY_NAME);
+            std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+            bool hasUIExtension = false;
+            if (bundleMgrHelper != nullptr) {
+                hasUIExtension = IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(queryWant,
+                    static_cast<uint32_t>(AppExecFwk::GetExtensionAbilityInfoFlag::GET_EXTENSION_ABILITY_INFO_DEFAULT),
+                    param.userId, extensionInfos));
+                hasUIExtension = hasUIExtension && !extensionInfos.empty();
+            }
+            int ret = ERR_OK;
+            if (hasUIExtension) {
+                auto systemUIExtension = std::make_shared<Rosen::ModalSystemUiExtension>();
+                Want replaceWant;
+                replaceWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+                replaceWant.SetElementName(appGalleryBundleName, MARKET_CROWD_TEST_UIEXTENSION_ABILITY_NAME);
+                replaceWant.SetParam(UIEXTENSION_MODAL_TYPE, 1);
+                replaceWant.SetParam(APP_BUNDLE_NAME, param.want.GetBundle());
+                ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(replaceWant)) ? ERR_OK : INNER_ERR;
+            } else {
+                ret = IN_PROCESS_CALL(AbilityUtil::StartAppgallery(
+                    param.want.GetBundle(), param.requestCode, param.userId, ACTION_MARKET_CROWDTEST));
+            }
+
             if (ret != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "start appGallery failed:%{public}d", ret);
                 return ret;
