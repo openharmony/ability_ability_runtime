@@ -37,6 +37,7 @@ using AniCommonMethodCacheKey = std::pair<const char *, const char *>;
 struct AniCommonCacheItem {
     ani_ref classRef_ = nullptr;
     std::map<AniCommonMethodCacheKey, ani_method> methodMap_;
+    std::map<AniCommonMethodCacheKey, ani_static_method> staticMethodMap_;
 };
 
 class AniCommonCacheMgr {
@@ -46,9 +47,15 @@ public:
     static bool GetCachedClassAndMethod(ani_env *env, const std::string &className,
         const AniCommonMethodCacheKey &methodKey, ani_class &cls, ani_method &method);
 
+    static bool GetCachedClassAndStaticMethod(ani_env *env, const std::string &className,
+        const AniCommonMethodCacheKey &methodKey, ani_class &cls, ani_static_method &method);
+
 private:
     static bool InnerFindMethod(ani_env *env, const AniCommonMethodCacheKey &methodKey, ani_class cls,
         ani_method &method);
+
+    static bool InnerFindStaticMethod(ani_env *env, const AniCommonMethodCacheKey &methodKey, ani_class cls,
+        ani_static_method &method);
 
     static std::mutex mutex_;
     static std::map<std::string, AniCommonCacheItem> aniCache_;
