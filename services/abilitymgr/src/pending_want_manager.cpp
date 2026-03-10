@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -336,12 +336,12 @@ int32_t PendingWantManager::SendLocalWantSender(const SenderInfo &senderInfo)
     switch (senderInfo.operType) {
         case static_cast<int32_t>(OperationType::START_ABILITY): {
             result = PendingWantStartAbility(senderInfo.want, senderInfo.startOptions,
-                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId);
+                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId, -1);
             break;
         }
         case static_cast<int32_t>(OperationType::START_SERVICE): {
             result = PendingWantStartAbility(senderInfo.want, nullptr,
-                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId);
+                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId, -1);
             break;
         }
         default: {
@@ -393,7 +393,8 @@ void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool 
 }
 
 int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<StartOptions> &startOptions,
-    const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId)
+    const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId,
+    int32_t userId)
 {
     int32_t result = ERR_OK;
     std::string localDeviceId;
@@ -401,7 +402,7 @@ int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<Start
     if (want.GetElement().GetDeviceID() == "" || want.GetElement().GetDeviceID() == localDeviceId) {
         if (!startOptions) {
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithSpecifyTokenIdInner(
-                want, callerToken, callerTokenId, true, requestCode, callerUid);
+                want, callerToken, callerTokenId, true, userId, requestCode);
         } else {
             TAG_LOGD(AAFwkTag::WANTAGENT, "StartOptions windowMode:%{public}d displayId:%{public}d \
                 withAnimation:%{public}d windowLeft:%{public}d windowTop:%{public}d windowWidth:%{public}d \
@@ -410,7 +411,7 @@ int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<Start
                 startOptions->GetWindowLeft(), startOptions->GetWindowTop(), startOptions->GetWindowWidth(),
                 startOptions->GetWindowHeight());
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityWithSpecifyTokenIdInner(
-                want, *startOptions, callerToken, true, requestCode, callerUid, callerTokenId);
+                want, *startOptions, callerToken, true, userId, requestCode, callerTokenId);
         }
 
         if (result != ERR_OK && result != START_ABILITY_WAITING) {
@@ -438,10 +439,11 @@ int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<Start
 }
 
 int32_t PendingWantManager::PendingWantStartAbility(const Want &want, const sptr<StartOptions> &startOptions,
-    const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId)
+    const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId,
+    int32_t userId)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "start ability");
-    int32_t result = DeviceIdDetermine(want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
+    int32_t result = DeviceIdDetermine(want, startOptions, callerToken, requestCode, callerUid, callerTokenId, userId);
     return result;
 }
 
@@ -460,12 +462,13 @@ int32_t PendingWantManager::PendingWantStartServiceExtension(Want &want, const s
 
 int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo> &wantsInfo,
     const sptr<StartOptions> &startOptions, const sptr<IRemoteObject> &callerToken, int32_t requestCode,
-    const int32_t callerUid, int32_t callerTokenId)
+    const int32_t callerUid, int32_t callerTokenId, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "start abilitys");
     int32_t result = ERR_OK;
     for (const auto &item : wantsInfo) {
-        auto res = DeviceIdDetermine(item.want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
+        auto res = DeviceIdDetermine(item.want, startOptions, callerToken, requestCode, callerUid, callerTokenId,
+            userId);
         if (res != ERR_OK && res != START_ABILITY_WAITING) {
             result = res;
         }
