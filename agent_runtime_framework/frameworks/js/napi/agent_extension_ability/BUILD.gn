@@ -105,6 +105,8 @@ ohos_shared_library("js_agent_extension") {
   }
   branch_protector_ret = "pac_ret"
 
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
+
   defines = [ "AMS_LOG_TAG = \"Agent\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001353" ]
   include_dirs = [
