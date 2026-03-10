@@ -75,6 +75,7 @@ private:
     uint16_t restartFlag_;
     uint16_t saveOccasion_;
     uint16_t saveMode_;
+    uint16_t crashFlag_;
     wptr<IRemoteObject> token_;
     AAFwk::Want mainWant_;
     std::weak_ptr<AppExecFwk::EventHandler> mainHandler_;

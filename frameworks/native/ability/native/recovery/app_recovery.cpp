@@ -51,7 +51,8 @@ std::atomic<bool> g_blocked = false;
 const int DELAY_TIME = 1000;
 
 AppRecovery::AppRecovery() : isEnable_(false), restartFlag_(RestartFlag::ALWAYS_RESTART),
-    saveOccasion_(SaveOccasionFlag::SAVE_WHEN_ERROR), saveMode_(SaveModeFlag::SAVE_WITH_FILE)
+    saveOccasion_(SaveOccasionFlag::SAVE_WHEN_ERROR), saveMode_(SaveModeFlag::SAVE_WITH_FILE),
+    crashFlag_(RestartFlag::NO_RESTART)
 {
 }
 
@@ -144,7 +145,7 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     ability->EnableAbilityRecovery(abilityRecovery, useAppSettedValue_.load());
     abilityRecoverys_.push_back(abilityRecovery);
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    abilityMgr->SetAppRecoveryFlag(token_.promote(), restartFlag_);
+    abilityMgr->SetAppRecoveryFlag(token_.promote(), crashFlag_);
     return true;
 }
 
