@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +17,15 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-std::atomic<int32_t> RequestIdUtil::requestId_{ 1 };
+ffrt::mutex RequestIdUtil::requestIdUtilLock_;
+int32_t RequestIdUtil::requestId_ = 1;
 int32_t RequestIdUtil::GetRequestId()
 {
-    int32_t id = requestId_.fetch_add(1, std::memory_order_relaxed);
-    if (id == 0 || id == INT32_MAX) {
-        int32_t expect = id + 1;
-        requestId_.compare_exchange_strong(expect, 1);
-        id = requestId_.fetch_add(1, std::memory_order_relaxed);
+    std::lock_guard<ffrt::mutex> guard(requestIdUtilLock_);
+    if (requestId_ == 0 || requestId_ == INT32_MAX) {
+        requestId_ = 1;
     }
-    return id;
+    return requestId_++;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
