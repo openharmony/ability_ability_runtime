@@ -43,6 +43,7 @@ public:
     /**
      * ValidateCaller, validate OE extension caller's legitimacy.
      *
+     * @param callingUid The calling UID.
      * @param want The want of target ability.
      * @param callerToken The caller token.
      * @param hostPid The host process ID.
@@ -50,6 +51,7 @@ public:
      * @return Returns ERR_OK on success, error code on failure.
      */
     int32_t ValidateCaller(
+        int32_t callingUid,
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t hostPid,
@@ -70,17 +72,6 @@ public:
      * @return Returns true if it was an OE extension request.
      */
     bool RemoveOEExtRequest(int32_t requestId);
-
-    /**
-     * CheckDuplicateStart, check for duplicate start in OE extension scenario.
-     *
-     * @param isStartByOEExt Whether it's started by OE extension.
-     * @param persistentId The persistent ID.
-     * @param reuse Whether to reuse.
-     * @return Returns ERROR_UIABILITY_IS_ALREADY_EXIST if duplicate, ERR_OK otherwise.
-     */
-    static int32_t CheckDuplicateStart(bool isStartByOEExt, int32_t persistentId, bool reuse);
-
 private:
     /**
      * ScheduleDelayedCleanup, schedule delayed cleanup for a request ID.

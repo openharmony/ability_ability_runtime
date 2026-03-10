@@ -23,6 +23,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t OESA_UID = 7061;
+}
 
 OEExtensionUtils &OEExtensionUtils::GetInstance()
 {
@@ -31,12 +34,18 @@ OEExtensionUtils &OEExtensionUtils::GetInstance()
 }
 
 int32_t OEExtensionUtils::ValidateCaller(
+    int32_t callingUid,
     const Want &want,
     const sptr<IRemoteObject> &callerToken,
     int32_t hostPid,
     std::string &hostBundleName,
     int32_t &userId)
 {
+    if (callingUid != OESA_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid calling uid: %{public}d, expected: %{public}d", callingUid, OESA_UID);
+        return CHECK_PERMISSION_FAILED;
+    }
+
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid caller token");
@@ -65,8 +74,8 @@ int32_t OEExtensionUtils::ValidateCaller(
 
     AppExecFwk::RunningProcessInfo processInfo;
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(hostPid, processInfo);
-    if (!processInfo.isAbilityForegrounding) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid=%{public}d not foreground", hostPid);
+    if (processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid=%{public}d not foreground: %{public}d", hostPid, processInfo.state_);
         return NOT_TOP_ABILITY;
     }
 
@@ -86,19 +95,6 @@ bool OEExtensionUtils::RemoveOEExtRequest(int32_t requestId)
 {
     std::lock_guard<std::mutex> lock(oeExtRequestsMutex_);
     return oeExtRequests_.erase(requestId) > 0;
-}
-
-int32_t OEExtensionUtils::CheckDuplicateStart(bool isStartByOEExt, int32_t persistentId, bool reuse)
-{
-    if (!isStartByOEExt) {
-        return ERR_OK;
-    }
-
-    if (persistentId != 0 && reuse) {
-        return ERROR_UIABILITY_IS_ALREADY_EXIST;
-    }
-    
-    return ERR_OK;
 }
 
 void OEExtensionUtils::ScheduleDelayedCleanup(int32_t requestId)
