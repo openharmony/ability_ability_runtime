@@ -58,6 +58,7 @@ private:
     int32_t HandleKillProcessesInBatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillApplication(MessageParcel &data, MessageParcel &reply);
     int32_t HandleForceKillApplication(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillApplicationWithUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessesByAccessTokenId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAbilityAttachTimeOut(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePrepareTerminate(MessageParcel &data, MessageParcel &reply);

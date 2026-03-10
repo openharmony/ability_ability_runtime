@@ -120,6 +120,24 @@ HWTEST_F(AppMgrClientFirstTest, ForceKillApplication_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: KillApplicationWithUserId_001
+ * @tc.desc: AppMgrClient test for KillApplicationWithUserId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientFirstTest, KillApplicationWithUserId_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillApplicationWithUserId_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    std::string bundleName = "bundleName";
+    int userId = ERROR_USER_ID;
+    int appIndex = 0;
+    auto result = appMgrClient->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "KillApplicationWithUserId_001 end");
+}
+
+/**
  * @tc.name: NotifyProcMemoryLevel_001
  * @tc.desc: AppMgrClient test for NotifyProcMemoryLevel.
  * @tc.type: FUNC

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,4 +35,18 @@ int RecordAppExitReason(int exitReason, const char *exitMsg)
         return -1;
     }
     return instance->RecordAppExitReason(exitReasonData);
+}
+
+int RecordAppWithReason(int pid, int uid, int exitReason, int killId, const char *exitMsg)
+{
+    OHOS::AAFwk::Reason reason = static_cast<OHOS::AAFwk::Reason>(exitReason);
+    std::string exitMsgStr(exitMsg);
+    OHOS::AAFwk::ExitReasonCompability exitReasonData = { reason, exitMsgStr };
+    exitReasonData.killId = killId;
+
+    auto instance = OHOS::AAFwk::AbilityManagerClient::GetInstance();
+    if (!instance) {
+        return -1;
+    }
+    return instance->RecordAppWithReason(pid, uid, exitReasonData);
 }

@@ -191,6 +191,17 @@ public:
         const int appIndex = 0);
 
     /**
+     * KillApplicationWithUserId, call KillApplicationWithUserId() through proxy object, kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode KillApplicationWithUserId(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
      * force kill the application.
      *

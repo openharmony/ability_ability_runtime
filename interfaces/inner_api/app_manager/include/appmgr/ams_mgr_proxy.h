@@ -177,6 +177,17 @@ public:
         const int appIndex = 0) override;
 
     /**
+     * KillApplicationWithUserId, call KillApplicationWithUserId() through proxy object, kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int KillApplicationWithUserId(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0) override;
+
+    /**
      * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
      * force kill the application.
      *
