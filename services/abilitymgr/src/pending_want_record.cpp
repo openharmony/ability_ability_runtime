@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,7 +134,7 @@ int32_t PendingWantRecord::ExecuteOperation(
     switch (key_->GetType()) {
         case static_cast<int32_t>(OperationType::START_ABILITY):
             res = pendingWantManager->PendingWantStartAbility(want, senderInfo.startOptions,
-                senderInfo.callerToken, -1, callerUid_, callerTokenId_);
+                senderInfo.callerToken, -1, callerUid_, callerTokenId_, key_->GetUserId());
             if (res != NO_ERROR) {
                 SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
             }
@@ -142,8 +142,8 @@ int32_t PendingWantRecord::ExecuteOperation(
         case static_cast<int32_t>(OperationType::START_ABILITIES): {
             std::vector<WantsInfo> allWantsInfos = key_->GetAllWantsInfos();
             allWantsInfos.back().want = want;
-            res = pendingWantManager->PendingWantStartAbilitys(
-                allWantsInfos, senderInfo.startOptions, senderInfo.callerToken, -1, callerUid_, callerTokenId_);
+            res = pendingWantManager->PendingWantStartAbilitys(allWantsInfos, senderInfo.startOptions,
+                senderInfo.callerToken, -1, callerUid_, callerTokenId_, key_->GetUserId());
             if (res != NO_ERROR) {
                 SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
             }
@@ -152,7 +152,7 @@ int32_t PendingWantRecord::ExecuteOperation(
         case static_cast<int32_t>(OperationType::START_SERVICE):
         case static_cast<int32_t>(OperationType::START_FOREGROUND_SERVICE):
             res = pendingWantManager->PendingWantStartAbility(want, nullptr, senderInfo.callerToken,
-                -1, callerUid_, callerTokenId_);
+                -1, callerUid_, callerTokenId_, key_->GetUserId());
             if (res != NO_ERROR) {
                 SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
             }
