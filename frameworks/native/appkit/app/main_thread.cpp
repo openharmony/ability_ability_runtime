@@ -1905,6 +1905,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
                 (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncatchableExceptionHandler(
                     uncatchableTask);
+                TransferEnvToEventHandler(runtime);
             }
 #ifdef CJ_FRONTEND
         } else {
@@ -4447,6 +4448,21 @@ bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord>
         runtimeUpdateParam_.uncatchableTaskInfo.processName);
     (static_cast<AbilityRuntime::ETSRuntime&>(*etsRuntime)).RegisterUncaughtExceptionHandler(expectionInfo);
     return true;
+}
+
+void MainThread::TransferEnvToEventHandler(std::unique_ptr<Runtime> &runtime)
+{
+    if (mainHandler_ == nullptr || runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler or runtime");
+        return;
+    }
+    auto eventRunner = mainHandler_->GetEventRunner();
+    auto env = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNapiEnv();
+    if (eventRunner == nullptr || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "transfer env to eventRunner error");
+        return;
+    }
+    eventRunner->EventSetEnvToHandler(env);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
