@@ -172,6 +172,8 @@ private:
 
     bool CheckUIExtensionAbilitySessionExist(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
+    void RollbackAgentUILaunchRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
+
     void RemoveUIExtensionAbilityRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 
     void AddUIExtensionAbilityRecordToTerminatedList(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
