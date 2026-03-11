@@ -302,7 +302,7 @@ constexpr int32_t PROCESS_START_FAILED_SUB_REASON_UNKNOWN = 0;
 
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
-constexpr int32_t NWEB_PRELOAD_DELAY = 3000000;
+constexpr int32_t NWEB_PRELOAD_DELAY = 10000000;
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
