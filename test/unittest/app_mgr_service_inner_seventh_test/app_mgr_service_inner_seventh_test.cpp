@@ -261,6 +261,34 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, ForceKillApplication_001, TestSize.Level
 }
 
 /**
+ * @tc.name: KillApplicationWithUserId_001
+ * @tc.desc: test KillApplicationWithUserId_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSeventhTest, KillApplicationWithUserId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillApplicationWithUserId_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
+
+    std::string bundleName = "";
+    int userId = 0;
+    int appIndex = 0;
+    int32_t ret = appMgrServiceInner->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    ret = appMgrServiceInner->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(ret, ERR_OK);
+    userId = -1;
+    ret = appMgrServiceInner->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(ret, ERR_OK);
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "KillApplicationWithUserId_001 end");
+}
+
+/**
  * @tc.name: KillProcessesByAccessTokenId_001
  * @tc.desc: test ForceKillApplicationInner_001
  * @tc.type: FUNC

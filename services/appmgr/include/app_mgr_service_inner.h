@@ -356,6 +356,17 @@ public:
         const int appIndex = 0);
 
     /**
+     * KillApplicationWithUserId, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillApplicationWithUserId(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * KillProcessesByAccessTokenId.
      *
      * @param  accessTokenId, accessTokenId.
@@ -1646,6 +1657,9 @@ public:
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+    
+    int32_t KillApplicationWithUserIdInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
 
     std::string FaultTypeToString(FaultDataType type);

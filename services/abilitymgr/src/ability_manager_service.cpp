@@ -3443,9 +3443,24 @@ int32_t AbilityManagerService::KillBundleWithReason(
         appExitReasonHelper_->RecordInvalidKillId(NO_PID, exitReason, bundleName, userId);
         return ERR_INVALID_VALUE;
     }
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (IN_PROCESS_CALL(bms->GetCloneBundleInfoExt(bundleName,
+        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        appIndex, userId, bundleInfo)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle info when kill process failed");
+        return GET_BUNDLE_INFO_FAILED;
+    }
+    KeepAliveType type;
+    if (KeepAliveUtils::IsKeepAliveBundle(bundleInfo, userId, type)
+        && DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficient()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no kill alive process");
+        return KILL_PROCESS_KEEP_ALIVE;
+    }
     appExitReasonHelper_->AddBundleExitReason(bundleName, userId, appIndex, exitReason);
 
-    return DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, false, appIndex);
+    return DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationWithUserId(bundleName, userId, appIndex);
 }
 
 int32_t AbilityManagerService::RecordAppWithReason(

@@ -2203,6 +2203,46 @@ HWTEST_F(AmsMgrSchedulerSecondTest, ForceKillApplication_002, TestSize.Level1)
 
 /*
  * Feature: AmsMgrScheduler
+ * Function: KillApplicationWithUserId
+ * SubFunction: NA
+ * FunctionPoints: AmsMgrScheduler KillApplicationWithUserId
+ * EnvConditions: NA
+ * CaseDescription: not initial scheduler
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, KillApplicationWithUserId_001, TestSize.Level1)
+{
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler = std::make_shared<AmsMgrScheduler>(nullptr, nullptr);
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    std::string bundleName = "bundleName";
+    int userId = -1;
+    int appIndex = 0;
+    int32_t ret = amsMgrScheduler->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AmsMgrScheduler
+ * Function: KillApplicationWithUserId
+ * SubFunction: NA
+ * FunctionPoints: AmsMgrScheduler KillApplicationWithUserId
+ * EnvConditions: NA
+ * CaseDescription: initial scheduler call KillApplicationWithUserId success
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, KillApplicationWithUserId_002, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    std::string bundleName = "bundleName";
+    int userId = -1;
+    int appIndex = 0;
+    int32_t ret = amsMgrScheduler->KillApplicationWithUserId(bundleName, userId, appIndex);
+    EXPECT_NE(ret, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AmsMgrScheduler
  * Function: IsNoRequireBigMemory
  * SubFunction: NA
  * FunctionPoints: AmsMgrScheduler IsNoRequireBigMemory
