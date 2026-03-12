@@ -475,6 +475,8 @@ public:
     MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
         int32_t userId));
     MOCK_METHOD1(GetAutoStartupStatusForSelf, int32_t(bool &isAutoStartEnabled));
+    MOCK_METHOD4(StartAbilityByOEExt, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
+        int32_t hostPid, const std::string& specifiedFlag));
 
 int32_t GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList) override
 {
