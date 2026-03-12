@@ -60,6 +60,8 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::isAddSystemAbilityListenerCalled = false;
     MyFlag::isRegisterBundleEventCallbackCalled = false;
     MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyConnectAgentPermission = true;
+    MyFlag::retVerifyGetAgentCardPermission = true;
     MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
     MyFlag::retDisconnectAbility = ERR_OK;
     MyFlag::retQueryExtensionAbilityInfos = true;
@@ -244,10 +246,10 @@ HWTEST_F(AgentManagerServiceTest, GetAllAgentCards_001, TestSize.Level1)
 */
 HWTEST_F(AgentManagerServiceTest, GetAllAgentCards_002, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retVerifyGetAgentCardPermission = false;
     AgentCardsRawData rawData;
     EXPECT_EQ(AgentManagerService::GetInstance()->GetAllAgentCards(rawData), ERR_PERMISSION_DENIED);
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyGetAgentCardPermission = true;
 }
 
 /**
@@ -273,11 +275,11 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardsByBundleName_001, TestSize.Level1
 */
 HWTEST_F(AgentManagerServiceTest, GetAgentCardsByBundleName_002, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retVerifyGetAgentCardPermission = false;
     std::string bundleName = "bundle";
     std::vector<AgentCard> cards;
     EXPECT_EQ(AgentManagerService::GetInstance()->GetAgentCardsByBundleName(bundleName, cards), ERR_PERMISSION_DENIED);
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyGetAgentCardPermission = true;
 }
 
 /**
@@ -353,14 +355,14 @@ HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_001, TestSize.Level1)
 */
 HWTEST_F(AgentManagerServiceTest, GetAgentCardByAgentId_002, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retVerifyGetAgentCardPermission = false;
     MyFlag::retGetBundleNameByPid = ERR_OK;
     std::string bundleName = "bundle";
     std::string agentId = "agentId";
     AgentCard card;
     EXPECT_EQ(AgentManagerService::GetInstance()->GetAgentCardByAgentId(bundleName, agentId, card),
         ERR_PERMISSION_DENIED);
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyGetAgentCardPermission = true;
 }
 
 /**
@@ -445,12 +447,12 @@ public:
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_001, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retVerifyConnectAgentPermission = false;
     AAFwk::Want want;
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
         ERR_PERMISSION_DENIED);
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyConnectAgentPermission = true;
 }
 
 /**
@@ -475,11 +477,12 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_002, TestSize.Lev
 /**
 * @tc.name  : ConnectAgentExtensionAbility_003
 * @tc.number: ConnectAgentExtensionAbility_003
-* @tc.desc  : Test ConnectAgentExtensionAbility when agent card does not exist
+* @tc.desc  : Test ConnectAgentExtensionAbility bypasses GetAgentCard permission path and fails on missing card
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_003, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyConnectAgentPermission = true;
+    MyFlag::retVerifyGetAgentCardPermission = false;
     MyFlag::retQueryExtensionAbilityInfos = true;
     MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
     MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
@@ -488,9 +491,10 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_003, TestSize.Lev
     want.SetParam(AGENTID_KEY, std::string("nonExistentAgentId"));
     want.SetBundle("test.bundle");
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
-    // GetAgentCardByAgentId will fail since no such card exists
+    // ConnectAgentExtensionAbility should not rely on the extra GetAgentCard permission check.
     EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
         AAFwk::ERR_INVALID_AGENT_CARD_ID);
+    MyFlag::retVerifyGetAgentCardPermission = true;
 }
 
 /**
@@ -641,11 +645,11 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_010, TestSize.Lev
 */
 HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_001, TestSize.Level1)
 {
-    MyFlag::retVerifyCallingPermission = false;
+    MyFlag::retVerifyConnectAgentPermission = false;
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectAgentExtensionAbility(connection),
         ERR_PERMISSION_DENIED);
-    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retVerifyConnectAgentPermission = true;
 }
 
 /**

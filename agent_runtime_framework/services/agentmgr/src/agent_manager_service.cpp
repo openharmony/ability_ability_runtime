@@ -223,7 +223,7 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     }
 
     AgentCard card;
-    if (GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
+    if (AgentCardMgr::GetInstance().GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
         return AAFwk::ERR_INVALID_AGENT_CARD_ID;
     }
