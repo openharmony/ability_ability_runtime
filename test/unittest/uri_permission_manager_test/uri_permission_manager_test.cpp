@@ -535,11 +535,12 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_ClearPermissionTokenByMa
 {
     auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     uint32_t tokenId = 1001;
-    auto res = upmc.ClearPermissionTokenByMap(tokenId);
+    uint64_t timeNow = 0;
+    auto res = upmc.ClearPermissionTokenByMap(tokenId, timeNow);
     EXPECT_EQ(res, ERR_UPMS_SERVICE_NOT_START);
 
     upmc.isUriPermServiceStarted_.store(true);
-    res = upmc.ClearPermissionTokenByMap(tokenId);
+    res = upmc.ClearPermissionTokenByMap(tokenId, timeNow);
     EXPECT_NE(res, ERR_UPMS_SERVICE_NOT_START);
 }
 

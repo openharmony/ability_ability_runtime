@@ -518,6 +518,7 @@ int32_t UriPermissionManagerStubImpl::RevokeContentUriPermission(uint32_t tokenI
     if (!IsContentUriGranted(tokenId)) {
         return ERR_OK;
     }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "RevokeContentUriPermission, tokenId: %{public}d", tokenId);
     auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityClient == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "abilityClient null");
@@ -1189,6 +1190,7 @@ int32_t UriPermissionManagerStubImpl::CheckProxyUriPermission(BatchUri &batchUri
 
 void UriPermissionManagerStubImpl::RevokeMapUriPermission(uint32_t tokenId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // revoke uri permission record cache of tokenId when application exit
     TAG_LOGD(AAFwkTag::URIPERMMGR, "RevokeMapUriPermission call");
     std::lock_guard<std::mutex> guard(mutex_);
@@ -1539,7 +1541,8 @@ int32_t UriPermissionManagerStubImpl::CheckCalledBySandBox()
     return ERR_OK;
 }
 
-ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId, int32_t& funcResult)
+ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId, uint64_t timeNow,
+    int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
@@ -1548,25 +1551,31 @@ ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId
         return WrapErrorCode(ERR_PERMISSION_DENIED, funcResult);
     }
     RevokeContentUriPermission(tokenId);
+    RevokeFileUriPermission(tokenId, timeNow, funcResult);
+    return WrapErrorCode(ERR_OK, funcResult);
+}
+
+int32_t UriPermissionManagerStubImpl::RevokeFileUriPermission(uint32_t tokenId, uint64_t timeNow, int32_t& funcResult)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::mutex> lock(ptMapMutex_);
     if (permissionTokenMap_.find(tokenId) == permissionTokenMap_.end()) {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "permissionTokenMap_ empty");
-        return WrapErrorCode(ERR_OK, funcResult);
+        return ERR_OK;
     }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission, tokenId: %{public}d, timeNow: %{public}" PRIu64 "",
+        tokenId, timeNow);
     RevokeMapUriPermission(tokenId);
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     RevokePolicyUriPermission(tokenId);
-    uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear %{public}d permission", tokenId);
     auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "UnsetAllPolicyByToken failed, ret: %{public}d", ret);
         return WrapErrorCode(ret, funcResult);
     }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     permissionTokenMap_.erase(tokenId);
-    return WrapErrorCode(ERR_OK, funcResult);
+    return ERR_OK;
 }
 
 void UriPermissionManagerStubImpl::BoolVecToCharVec(const std::vector<bool>& boolVector, std::vector<char>& charVector)
