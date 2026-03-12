@@ -4267,8 +4267,8 @@ int32_t AbilityManagerStub::StartAbilityByOEExtInner(MessageParcel &data, Messag
     }
     callerToken = data.ReadRemoteObject();
 
-    std::string specifiedFlag = data.ReadString();
     int32_t hostPid = data.ReadInt32();
+    std::string specifiedFlag = data.ReadString();
 
     int32_t result = StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag);
     reply.WriteInt32(result);

@@ -399,13 +399,13 @@ int32_t AbilityManagerProxy::StartAbilityByOEExt(const Want &want,
         return INNER_ERR;
     }
 
-    if (!data.WriteString(specifiedFlag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag write fail");
+    if (!data.WriteInt32(hostPid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid write fail");
         return INNER_ERR;
     }
 
-    if (!data.WriteInt32(hostPid)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid write fail");
+    if (!data.WriteString(specifiedFlag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag write fail");
         return INNER_ERR;
     }
 
