@@ -70,6 +70,7 @@ private:
     void DeleteInValidMissionFileById(std::string path, int32_t missionId);
     bool GetMissionIds(std::string path, std::vector<int32_t> &missionIds);
     bool ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr);
+    bool IsEtsAPP();
     
     bool isEnable_;
     uint16_t restartFlag_;

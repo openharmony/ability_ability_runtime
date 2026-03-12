@@ -123,6 +123,21 @@ bool ApplicationDataManager::NotifyETSExceptionObject(const AppExecFwk::ErrorObj
     return AppRecovery::GetInstance().TryRecoverApp(StateReason::JS_ERROR);
 }
 
+bool ApplicationDataManager::NotifyETSErrorObject(const AppExecFwk::ErrorObject &errorObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Notify Exception error observer start");
+    if (errorCallback_) {
+        errorCallback_(errorObj);
+        return true;
+    }
+    return AppRecovery::GetInstance().TryRecoverApp(StateReason::JS_ERROR);
+}
+
+void ApplicationDataManager::SetErrorHandlerCallback(EtsErrorCallback errorCallback)
+{
+    errorCallback_ = errorCallback;
+}
+
 void ApplicationDataManager::SetIsUncatchable(bool isUncatchable)
 {
     isUncatchable_.store(isUncatchable);

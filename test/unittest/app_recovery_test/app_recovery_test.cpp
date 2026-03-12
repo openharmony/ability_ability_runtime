@@ -972,5 +972,19 @@ HWTEST_F(AppRecoveryUnitTest, PersistAppState_004, TestSize.Level1)
     ret = AppRecovery::GetInstance().PersistAppState();
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name:  IsEtsAPP_001
+ * @tc.desc:  IsEtsAPP.
+ * @tc.type: FUNC
+ * @tc.require: I5Z7LE
+ */
+HWTEST_F(AppRecoveryUnitTest, IsEtsAPP_Test_001, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().IsEtsAPP();
+    EXPECT_EQ(ret, false);
+    AppRecovery::GetInstance().InitApplicationInfo(testHandler_, applicationInfo_);
+    AppRecovery::GetInstance().IsEtsAPP();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

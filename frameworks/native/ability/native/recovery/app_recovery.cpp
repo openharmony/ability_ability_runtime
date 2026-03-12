@@ -238,6 +238,11 @@ bool AppRecovery::ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::
     if (!abilityPtr) {
         return false;
     }
+    if (IsEtsAPP() && this->freezeCallback) {
+        this->freezeCallback();
+        TAG_LOGW(AAFwkTag::RECOVERY, "Freeze callback execution completed");
+        return true;
+    }
 #ifdef SUPPORT_SCREEN
     OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
     AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
@@ -600,6 +605,18 @@ uint16_t AppRecovery::GetSaveOccasionFlag() const
 uint16_t AppRecovery::GetSaveModeFlag() const
 {
     return saveMode_;
+}
+
+bool AppRecovery::IsEtsAPP()
+{
+    TAG_LOGD(AAFwkTag::RECOVERY, "begin");
+    auto appInfo = applicationInfo_.lock();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "not exist application info");
+        return true;
+    }
+    return appInfo->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
