@@ -810,11 +810,21 @@ void UIExtensionAbilityManager::RemoveUIExtensionAbilityRecord(
     }
     if (UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
-            IPCSkeleton::GetCallingUid(),
-            abilityRecord->GetAbilityInfo().bundleName,
-            abilityRecord->GetUIExtensionAbilityId());
+            abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
     }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
+}
+
+void UIExtensionAbilityManager::RollbackAgentUILaunchRecord(
+    const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    CHECK_POINTER(uiExtensionAbilityRecordMgr_);
+    if (!UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        return;
+    }
+    uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
+        abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
 }
 
 void UIExtensionAbilityManager::AddUIExtensionAbilityRecordToTerminatedList(
@@ -1086,6 +1096,7 @@ void UIExtensionAbilityManager::HandleStartTimeoutTaskInner(const std::shared_pt
         LoadTimeout(abilityRecord);
     }
     AbilityConnectManager::HandleStartTimeoutTaskInner(abilityRecord);
+    RollbackAgentUILaunchRecord(abilityRecord);
 }
 
 void UIExtensionAbilityManager::HandleForegroundTimeoutTaskInner(
