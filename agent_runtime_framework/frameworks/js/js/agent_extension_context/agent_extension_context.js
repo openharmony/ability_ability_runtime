@@ -21,19 +21,7 @@ let TAG = 'AGENT';
 class AgentExtensionContext extends ExtensionContext {
   constructor(obj) {
     super(obj);
-    this.agentId = obj.agentId;
-  }
-
-  getBasicPathInfo(want) {
-    hilog.sLogI(domainID, TAG, 'getBasicPathInfo');
-  }
-
-  getAgentCardInfo(want) {
-    hilog.sLogI(domainID, TAG, 'getAgentCardInfo');
-  }
-
-  getAgentIdInfo(want) {
-    hilog.sLogI(domainID, TAG, 'getAgentIdInfo');
+    this.agentCard = obj.agentCard;
   }
 }
 

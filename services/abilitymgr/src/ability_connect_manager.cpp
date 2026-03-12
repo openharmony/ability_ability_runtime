@@ -1486,11 +1486,20 @@ bool AbilityConnectManager::ReportConnectEventToRss(LoadingStage stage,
     extraParams.emplace("extensionName", abilityInfo.name);
     extraParams.emplace("extensionType",
         std::to_string(static_cast<int32_t>(abilityInfo.extensionAbilityType)));
+    std::string logMsg = "rss conn: s=" + std::to_string(static_cast<int32_t>(stage)) +
+        " p=" + std::to_string(abilityRecord->GetPid()) +
+        " u=" + std::to_string(abilityRecord->GetUid()) +
+        " en=" + abilityInfo.name +
+        " et=" + std::to_string(static_cast<int32_t>(abilityInfo.extensionAbilityType));
     if (connectRecord) {
         extraParams.emplace("callerUid", std::to_string(connectRecord->GetCallerUid()));
         extraParams.emplace("callerPid", std::to_string(connectRecord->GetCallerPid()));
         extraParams.emplace("callerName", connectRecord->GetCallerName());
+        logMsg += " cu=" + std::to_string(connectRecord->GetCallerUid()) +
+            " cp=" + std::to_string(connectRecord->GetCallerPid()) +
+            " cn=" + connectRecord->GetCallerName();
     }
+    TAG_LOGD(AAFwkTag::EXT, "%{public}s", logMsg.c_str());
 
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(
         stage,

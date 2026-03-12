@@ -5810,7 +5810,7 @@ ErrCode AbilityManagerProxy::SendRequest(AbilityManagerInterfaceCode code, Messa
     return remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
 }
 
-int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag, bool isHiddenStart)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -5823,6 +5823,10 @@ int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInf
     }
     if (!data.WriteBool(flag)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteBool(isHiddenStart)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isHiddenStart fail");
         return INNER_ERR;
     }
 
@@ -7682,6 +7686,33 @@ int32_t AbilityManagerProxy::GetUserLockedBundleList(int32_t userId,
         userLockedBundleList.insert(bundle);
     }
     return NO_ERROR;
+}
+
+int32_t AbilityManagerProxy::SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    
+    if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write token failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write flag failed");
+        return ERR_INVALID_VALUE;
+    }
+ 
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::SET_APP_RECOVERY_FLAG, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SendRequest failed");
+        return error;
+    }
+    return reply.ReadInt32();
 }
 } // namespace AAFwk
 } // namespace OHOS

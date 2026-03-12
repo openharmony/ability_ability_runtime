@@ -15,9 +15,12 @@
 
 import Want from '@ohos.app.ability.Want';
 import ExtensionAbility from '@ohos.app.ability.ExtensionAbility';
+import AgentExtensionContext from 'application.AgentExtensionContext';
 import {AgentHostProxy} from 'application.AgentHostProxy';
 
 export default class AgentExtensionAbility extends ExtensionAbility {
+
+  public context: AgentExtensionContext = {};
 
   onCreate(want: Want): void{
   }

@@ -852,3 +852,89 @@ HWTEST_F(AbilityCommandTest, Ability_Command_Test_3300, Function | MediumTest | 
     std::string windowMode;
     EXPECT_EQ(cmd.MakeWantFromCmd(want, windowMode), OHOS::ERR_INVALID_VALUE);
 }
+
+
+/**
+ * @tc.number: Ability_Command_Test_3400
+ * @tc.name: CheckPerfCmdString
+ * @tc.desc: Verify the "aa start -p baseLineProfile" command.
+ */
+HWTEST_F(AbilityCommandTest, Ability_Command_Test_3400, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Command_Test_3400 is called");
+    std::string perfCmd;
+    const char* optarg = "baseLineProfile";
+    const size_t paramLength = 1024;
+    AbilityManagerShellCommand cmd(0, nullptr);
+    bool result = cmd.CheckPerfCmdString(optarg, paramLength, perfCmd);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(perfCmd, "baseLineProfile");
+}
+
+/**
+ * @tc.number: Ability_Command_Test_3500
+ * @tc.name: CheckPerfCmdString
+ * @tc.desc: Verify the "aa start -p baseLineProfile " command with trailing space.
+ */
+HWTEST_F(AbilityCommandTest, Ability_Command_Test_3500, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Command_Test_3500 is called");
+    std::string perfCmd;
+    const char* optarg = "baseLineProfile ";
+    const size_t paramLength = 1024;
+    AbilityManagerShellCommand cmd(0, nullptr);
+    bool result = cmd.CheckPerfCmdString(optarg, paramLength, perfCmd);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(perfCmd, "baseLineProfile ");
+}
+
+/**
+ * @tc.number: Ability_Command_Test_3600
+ * @tc.name: CheckPerfCmdString
+ * @tc.desc: Verify the "aa start -p baseLineProfile extra" command with extra parameters.
+ */
+HWTEST_F(AbilityCommandTest, Ability_Command_Test_3600, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Command_Test_3600 is called");
+    std::string perfCmd;
+    const char* optarg = "baseLineProfile extra";
+    const size_t paramLength = 1024;
+    AbilityManagerShellCommand cmd(0, nullptr);
+    bool result = cmd.CheckPerfCmdString(optarg, paramLength, perfCmd);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(perfCmd, "baseLineProfile extra");
+}
+
+/**
+ * @tc.number: Ability_Command_Test_3700
+ * @tc.name: CheckPerfCmdString
+ * @tc.desc: Verify the "aa start -p baseLineProfile" command with leading space.
+ */
+HWTEST_F(AbilityCommandTest, Ability_Command_Test_3700, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Command_Test_3700 is called");
+    std::string perfCmd;
+    const char* optarg = " baseLineProfile";
+    const size_t paramLength = 1024;
+    AbilityManagerShellCommand cmd(0, nullptr);
+    bool result = cmd.CheckPerfCmdString(optarg, paramLength, perfCmd);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(perfCmd, " baseLineProfile");
+}
+
+/**
+ * @tc.number: Ability_Command_Test_3800
+ * @tc.name: CheckPerfCmdString
+ * @tc.desc: Verify the "aa start -p baseLineProfile" command with multiple spaces.
+ */
+HWTEST_F(AbilityCommandTest, Ability_Command_Test_3800, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Command_Test_3800 is called");
+    std::string perfCmd;
+    const char* optarg = "  baseLineProfile  ";
+    const size_t paramLength = 1024;
+    AbilityManagerShellCommand cmd(0, nullptr);
+    bool result = cmd.CheckPerfCmdString(optarg, paramLength, perfCmd);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(perfCmd, "  baseLineProfile  ");
+}

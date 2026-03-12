@@ -1273,6 +1273,7 @@ AppfreezeManager::ProcessKillInfo AppfreezeManager::GetProcessKillReason(
         .killMsg = "",
         .adj = 0,
         .timestamp = 0,
+        .killId = killId,
     };
     if (killId == INVALID_KILL_ID) {
         killInfo.killReason = INVALID_KILL_REASON;
@@ -1309,12 +1310,25 @@ void AppfreezeManager::GetExitKernelReason(int32_t pid, ProcessKillInfo& killInf
         killInfo.adj = static_cast<int>(info.data.adj);
         killInfo.timestamp = static_cast<int64_t>(info.data.timestamp);
         killInfo.killReason = HiviewDFX::ProcessKillReason::GetKillReason(killId);
+        killInfo.killId = killId;
+        killInfo.eventParamFirst = static_cast<int64_t>(info.data.eventParamFirst);
+        killInfo.eventParamSecond = static_cast<int64_t>(info.data.eventParamSecond);
+        killInfo.eventParamThird = static_cast<int64_t>(info.data.eventParamThird);
+        killInfo.eventParamFourth = static_cast<int64_t>(info.data.eventParamFourth);
+        killInfo.eventParamFifth = static_cast<int64_t>(info.data.eventParamFifth);
+        killInfo.eventParamSixth = static_cast<int64_t>(info.data.eventParamSixth);
+        killInfo.eventParamSeventh = static_cast<int64_t>(info.data.eventParamSeventh);
         int kernelPid = static_cast<int>(info.data.pid);
-        TAG_LOGI(AAFwkTag::APPDFR, "ioctl success, killId:%{public}d, adj:%{public}d, "
-            "timestamp:%{public}" PRId64 ", killReason:%{public}s, ioctlPid:%{public}d, pid:%{public}d",
-            killId, killInfo.adj, killInfo.timestamp, killInfo.killReason.c_str(), kernelPid, pid);
+        TAG_LOGI(AAFwkTag::APPDFR, "Get killReason success, killId:%{public}d, adj:%{public}d, "
+            "timestamp:%{public}" PRId64 ", killReason:%{public}s, ioctlPid:%{public}d, pid:%{public}d "
+            "paramFirst:%{public}" PRId64 ", paramSecond:%{public}" PRId64 ", paramThird:%{public}" PRId64 ", "
+            "paramFourth:%{public}" PRId64 ", paramFifth:%{public}" PRId64 ", paramSixth:%{public}" PRId64 ", "
+            "paramSeventh:%{public}" PRId64,
+            killId, killInfo.adj, killInfo.timestamp, killInfo.killReason.c_str(), kernelPid, pid,
+            killInfo.eventParamFirst, killInfo.eventParamSecond, killInfo.eventParamThird, killInfo.eventParamFourth,
+            killInfo.eventParamFifth, killInfo.eventParamSixth, killInfo.eventParamSeventh);
     } else {
-        TAG_LOGW(AAFwkTag::APPDFR, "ioctl failed, errno:%{public}d", errno);
+        TAG_LOGW(AAFwkTag::APPDFR, "Get killReason ioctl failed, errno:%{public}d", errno);
     }
 }
 

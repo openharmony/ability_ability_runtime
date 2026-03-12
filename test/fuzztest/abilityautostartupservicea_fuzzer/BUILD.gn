@@ -26,7 +26,9 @@ ohos_fuzztest("AbilityAutoStartupServiceaFuzzTest") {
       "${ability_runtime_test_path}/fuzztest/abilityautostartupservicea_fuzzer"
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_innerkits_path}/app_manager/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
+    "${ability_runtime_path}/utils/server/startup/include",
   ]
   cflags = [
     "-g",
@@ -51,6 +53,7 @@ ohos_fuzztest("AbilityAutoStartupServiceaFuzzTest") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",

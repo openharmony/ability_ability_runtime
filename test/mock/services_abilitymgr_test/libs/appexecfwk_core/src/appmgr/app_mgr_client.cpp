@@ -71,6 +71,12 @@ AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeed
     return AppMgrResultCode::RESULT_OK;
 }
 
+AppMgrResultCode AppMgrClient::KillProcessesByPids(const std::vector<int32_t> &pids,
+    const std::string &reason, bool subProcess, bool isKillPrecedeStart)
+{
+    return AppMgrResultCode::RESULT_OK;
+}
+
 AppMgrResultCode AppMgrClient::KillApplication(
     const std::string& bundleName, bool clearPageStack = false, int32_t appIndex = 0,
     const std::string& reason = "KillApplication")

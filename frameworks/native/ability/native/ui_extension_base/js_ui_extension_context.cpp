@@ -61,6 +61,7 @@ constexpr size_t ARGC_THREE = 3;
 const std::string JSON_KEY_ERR_MSG = "errMsg";
 const std::string KEY_REQUEST_ID = "com.ohos.param.requestId";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
+constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
 } // namespace
 
 static std::map<UIExtensionConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
@@ -174,6 +175,11 @@ napi_value JsUIExtensionContext::TerminateSelfWithResult(napi_env env, napi_call
 napi_value JsUIExtensionContext::ConnectAbility(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnConnectAbility);
+}
+
+napi_value JsUIExtensionContext::ConnectAbilityWithRootHostToken(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnConnectAbilityWithRootHostToken);
 }
 
 napi_value JsUIExtensionContext::DisconnectAbility(napi_env env, napi_callback_info info)
@@ -756,9 +762,18 @@ bool JsUIExtensionContext::UnwrapWantList(napi_env env, NapiCallbackInfo &info, 
     return true;
 }
 
-napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo& info)
+napi_value JsUIExtensionContext::OnConnectAbilityInner(napi_env env, NapiCallbackInfo& info,
+    bool withRootHostTokenTransfer)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
+
+    if (withRootHostTokenTransfer) {
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+            return CreateJsUndefined(env);
+        }
+    }
     // Check params count
     if (info.argc < ARGC_TWO) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid argc");
@@ -778,6 +793,10 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
         ThrowInvalidParamError(env,
             "Parse param want or connection failed, want must be Want and connection must be Connection.");
         return CreateJsUndefined(env);
+    }
+    want.RemoveParam(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN);
+    if (withRootHostTokenTransfer) {
+        want.SetParam(UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN, true);
     }
     int64_t connectId = connection->GetConnectionId();
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
@@ -809,6 +828,18 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
     NapiAsyncTask::ScheduleHighQos("JSUIExtensionConnection::OnConnectAbility",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return CreateJsValue(env, connectId);
+}
+
+napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo &info)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    return OnConnectAbilityInner(env, info, false);
+}
+
+napi_value JsUIExtensionContext::OnConnectAbilityWithRootHostToken(napi_env env, NapiCallbackInfo &info)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    return OnConnectAbilityInner(env, info, true);
 }
 
 napi_value JsUIExtensionContext::OnDisconnectAbility(napi_env env, NapiCallbackInfo& info)
@@ -1527,6 +1558,8 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
         StartUIAbilitiesInSplitWindowMode);
     BindNativeFunction(env, objValue, "startUIAbilities", moduleName, StartUIAbilities);
     BindNativeFunction(env, objValue, "connectServiceExtensionAbility", moduleName, ConnectAbility);
+    BindNativeFunction(
+        env, objValue, "connectServiceExtensionAbilityWithRootHostToken", moduleName, ConnectAbilityWithRootHostToken);
     BindNativeFunction(env, objValue, "disconnectServiceExtensionAbility", moduleName, DisconnectAbility);
     BindNativeFunction(env, objValue, "reportDrawnCompleted", moduleName, ReportDrawnCompleted);
     BindNativeFunction(env, objValue, "openAtomicService", moduleName, OpenAtomicService);

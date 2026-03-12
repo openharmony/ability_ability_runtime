@@ -51,18 +51,21 @@ public:
     /**
      * @brief Updates the auto-startup data for the specified application.
      * @param info The auto-startup information to be updated.
+     * @param originKey The key of the existing auto-startup data to be updated.
      * @param isAutoStartup Indicates whether the application should auto-startup.
      * @param isEdmForce Indicates whether the update is forced by EDM.
      * @return Returns 0 on success, non-zero on failure.
      */
-    int32_t UpdateAutoStartupData(const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce);
+    int32_t UpdateAutoStartupData(const AutoStartupInfo &info,
+        DistributedKv::Key &originKey, bool isAutoStartup, bool isEdmForce);
 
     /**
      * @brief Deletes the auto-startup data for the specified application.
      * @param info The auto-startup information to identify the data to be deleted.
+     * @param originKey The key of the auto-startup data to be deleted.
      * @return Returns 0 on success, non-zero on failure.
      */
-    int32_t DeleteAutoStartupData(const AutoStartupInfo &info);
+    int32_t DeleteAutoStartupData(const AutoStartupInfo &info, DistributedKv::Key &originKey);
 
     /**
      * @brief Deletes auto-startup data for the specified bundle.
@@ -76,9 +79,10 @@ public:
     /**
      * @brief Queries the auto-startup status for the specified application.
      * @param info The auto-startup information to identify the application.
+     * @param originKey Output parameter that receives the key of the found auto-startup data.
      * @return Returns the auto-startup status.
      */
-    AutoStartupStatus QueryAutoStartupData(const AutoStartupInfo &info);
+    AutoStartupStatus QueryAutoStartupData(const AutoStartupInfo &info, DistributedKv::Key &originKey);
 
     /**
      * @brief Queries all auto-startup applications for the specified user.

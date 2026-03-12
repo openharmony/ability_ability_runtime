@@ -29,6 +29,7 @@ class EventRunner;
 namespace AbilityRuntime {
 struct CommonHspBundleInfo {
     uint32_t versionCode;
+    int32_t aotCompileStatus;
     std::string bundleName;
     std::string moduleName;
     std::string hapPath;
@@ -76,6 +77,7 @@ public:
         bool isMultiThread = false;
         bool isErrorInfoEnhance = false;
         bool allowArkTsLargeHeap = false;
+        bool baseLineProfile = false;
         int32_t uid = -1;
         // ArkTsCard start
         bool isUnique = false;

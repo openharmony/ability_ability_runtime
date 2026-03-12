@@ -2116,9 +2116,11 @@ public:
      * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether the application is prohibited from changing the auto start up state.
+     * @param isHiddenStart Indicate whether the application is hidden start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override;
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag,
+        bool isHiddenStart = false) override;
 
     /**
      * @brief Cancel application auto start up state by EDM.
@@ -2295,6 +2297,8 @@ public:
     bool IsInStatusBar(uint32_t accessTokenId, int32_t uid, bool isMultiInstance);
 
     bool IsSupportStatusBar(int32_t uid);
+
+    bool IsSupportStatusBarByUserId(int32_t userId);
 
     bool IsSceneBoardReady(int32_t userId);
 
@@ -2686,6 +2690,13 @@ private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
+
+    /**
+     * @brief Checks and submits hidden auto-startup status bar check task.
+     * @param abilityRecord The ability record to check.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int32_t CheckAndSubmitAutoStartupStatusBarTask(std::shared_ptr<AbilityRecord> abilityRecord);
     /**
      * initialization of ability manager service.
      *
@@ -2754,7 +2765,8 @@ private:
     void InitWindowVisibilityChangedListener();
     void FreeWindowVisibilityChangedListener();
     bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
-
+    void GetAndSetRootHostToken(
+        const sptr<IRemoteObject> &callerToken, const int32_t userId, AbilityRequest &abilityRequest);
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
     void RequestPermission(const Want *resultWant);
@@ -3143,7 +3155,7 @@ private:
         const int32_t oriValidUserId);
 
     void InitInterceptor();
-    void InitInterceptorForScreenUnlock();
+    void InitInterceptorForScreenUnlock(int32_t userId = DEFAULT_INVAL_VALUE);
     void InitPushTask();
     void InitAppSpawnMsgPipe();
     void InitDeepLinkReserve();
@@ -3356,6 +3368,14 @@ private:
     bool IsAllowAttachOrDetachAppDebug(AppExecFwk::ApplicationInfo &appInfo);
     bool IsExitReasonValid(const ExitReasonCompability &reason);
     void RecordRecoveryExitReason(bool isAppRecovery, int32_t callerPid, int32_t callerUid);
+    void SetAppDeathRecipient(const sptr<IRemoteObject>& abilityToken);
+    void HandleAppDiedForRecovery(const sptr<IRemoteObject>& remote, const AbilityInfo& abilityInfo,
+        int32_t pid, int32_t uid);
+    void startRecoveryMgr();
+    int getAppRecoveryFlag(const sptr<IRemoteObject> &token);
+    void HandleRecoveryRecipient(const std::shared_ptr<AbilityRecord>& abilityRecord,
+        const sptr<IRemoteObject>& token);
+    int32_t SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag) override;
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

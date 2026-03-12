@@ -28,6 +28,7 @@
 #include "constants.h"
 #include "ets_interface.h"
 #include "file_path_utils.h"
+#include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
 #include "hdc_register.h"
 #include "hitrace_meter.h"
@@ -66,6 +67,7 @@ constexpr char SANDBOX_SHARED_BUNDLE_ARK_CACHE_PATH[] =
     "/data/service/el1/public/for-all-app/shared_bundles_ark_cache/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 const std::string SYS_HSP_FILE_PATH_PREFIX = "/system/app/";
+const std::string ARK_CACHE_NATIVE_PATH = "arm64/";
 
 const char *ETS_ENV_LIBNAME = "libets_environment.z.so";
 const char *ETS_ENV_REGISTER_FUNCS = "OHOS_ETS_ENV_RegisterFuncs";
@@ -160,20 +162,27 @@ void ETSRuntime::PreloadLibrary()
     }
 }
 
+bool ETSRuntime::IsAotCompiledSuccess(int32_t status)
+{
+    return status == static_cast<int32_t>(AppExecFwk::AOTCompileStatus::IDLE_COMPILE_SUCCESS) ||
+    status == static_cast<int32_t>(AppExecFwk::AOTCompileStatus::INSTALL_COMPILE_SUCCESS);
+}
+
 std::string ETSRuntime::GetAotPath(const Options &options)
 {
     std::vector<std::string> aotFiles;
     // Handle Hap and Inner Hsp
     // path: <sandbox_path>/arm64/<moduleName>.an
     for (const auto& status: options.aotCompileStatusMap) {
-        if (status.second) {
-            aotFiles.push_back(SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + status.first + ".an");
+        if (IsAotCompiledSuccess(status.second)) {
+            aotFiles.push_back(SANDBOX_ARK_CACHE_PATH + ARK_CACHE_NATIVE_PATH + status.first + ".an");
         }
     }
 
     // Handle Outer Hsp
     for (const auto& bundleInfo: options.commonHspBundleInfos) {
-        if (bundleInfo.moduleArkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
+        if (!IsAotCompiledSuccess(bundleInfo.aotCompileStatus) ||
+            bundleInfo.moduleArkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
             continue;
         }
 
@@ -185,8 +194,7 @@ std::string ETSRuntime::GetAotPath(const Options &options)
         // path: <sandbox_path>/<bundleName>/v<versionCode>/arm64/<moduleName>.an
         std::string outerHspAnPath = SANDBOX_SHARED_BUNDLE_ARK_CACHE_PATH + bundleInfo.bundleName +
             std::string(AbilityBase::Constants::FILE_SEPARATOR) + std::to_string(bundleInfo.versionCode) +
-            std::string(AbilityBase::Constants::FILE_SEPARATOR) + options.arkNativeFilePath +
-            bundleInfo.moduleName + ".an";
+            std::string(AbilityBase::Constants::FILE_SEPARATOR) + ARK_CACHE_NATIVE_PATH + bundleInfo.moduleName + ".an";
         aotFiles.push_back(outerHspAnPath);
     }
 
@@ -228,7 +236,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<Runtime> &jsRu
     }
 
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), GetAotPath(options), options.appInnerHspPathList,
-        options.staticHapModuleNameList, options.commonHspBundleInfos, options.eventRunner);
+        options.staticHapModuleNameList, options.commonHspBundleInfos, options.eventRunner, options.baseLineProfile);
     return true;
 }
 
@@ -708,6 +716,51 @@ void ETSRuntime::StopDebugMode()
         return;
     }
     g_etsEnvFuncs->StopDebugMode(vm);
+}
+
+void ETSRuntime::StartProfiler(const DebugOption dOption)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "developer Mode false");
+        return;
+    }
+    instanceId_ = static_cast<uint32_t>(getproctid());
+
+    bool isStartWithDebug = dOption.isStartWithDebug;
+    bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Ark VM is starting profiler mode");
+    const std::string bundleName = dOption.bundleName;
+    uint32_t instanceId = instanceId_;
+    std::string inputProcessName = bundleName != dOption.processName ? dOption.processName : "";
+    HdcRegister::Get().StartHdcRegister(bundleName, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
+        [bundleName, isStartWithDebug, instanceId, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::ETSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
+        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->BroadcastAndConnect == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or BroadcastAndConnect");
+                return;
+            }
+            g_etsEnvFuncs->BroadcastAndConnect(bundleName, socketFd);
+        } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+                return;
+            }
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->StartDebuggerForSocketPair == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or StartDebuggerForSocketPair");
+                return;
+            }
+            g_etsEnvFuncs->StartDebuggerForSocketPair(option, socketFd);
+        }
+    });
 }
 
 void ETSRuntime::SetJsRuntime(std::unique_ptr<AbilityRuntime::Runtime> &jsRuntime)

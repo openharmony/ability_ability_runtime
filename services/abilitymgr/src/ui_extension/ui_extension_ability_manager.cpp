@@ -403,6 +403,12 @@ std::shared_ptr<AAFwk::AbilityRecord> UIExtensionAbilityManager::GetUIExtensionR
     return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostInfo(token);
 }
 
+sptr<IRemoteObject> UIExtensionAbilityManager::GetUIExtensionRootHostToken(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN(token, nullptr);
+    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, nullptr);
+    return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostToken(token);
+}
 
 int UIExtensionAbilityManager::UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId)
 {
@@ -804,11 +810,21 @@ void UIExtensionAbilityManager::RemoveUIExtensionAbilityRecord(
     }
     if (UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
-            IPCSkeleton::GetCallingUid(),
-            abilityRecord->GetAbilityInfo().bundleName,
-            abilityRecord->GetUIExtensionAbilityId());
+            abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
     }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
+}
+
+void UIExtensionAbilityManager::RollbackAgentUILaunchRecord(
+    const std::shared_ptr<BaseExtensionRecord> &abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    CHECK_POINTER(uiExtensionAbilityRecordMgr_);
+    if (!UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        return;
+    }
+    uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
+        abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
 }
 
 void UIExtensionAbilityManager::AddUIExtensionAbilityRecordToTerminatedList(
@@ -1080,6 +1096,7 @@ void UIExtensionAbilityManager::HandleStartTimeoutTaskInner(const std::shared_pt
         LoadTimeout(abilityRecord);
     }
     AbilityConnectManager::HandleStartTimeoutTaskInner(abilityRecord);
+    RollbackAgentUILaunchRecord(abilityRecord);
 }
 
 void UIExtensionAbilityManager::HandleForegroundTimeoutTaskInner(

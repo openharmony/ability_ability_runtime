@@ -722,6 +722,10 @@ public:
     void ClearPluginAbilities();
     void InitPluginAbility(const AbilityRequest &abilityRequest);
     void PluginCompleteTerminate();
+    bool NeedCheckAutoStartupStatusBar() const
+    {
+        return needCheckAutoStartupStatusBar_;
+    }
 
     void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0);
@@ -830,6 +834,8 @@ public:
         return firstCallerBundleName_;
     }
 
+    void SetAppRecoveryFlag(int flag);
+    int GetAppRecoveryFlag() const;
 protected:
     Want want_ = {};                                       // want to start this ability
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
@@ -939,6 +945,7 @@ protected:
     bool isAttachDebug_ = false;
     bool isAssertDebug_ = false;
     bool isAppAutoStartup_ = false;
+    bool needCheckAutoStartupStatusBar_ = false;
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
@@ -1037,6 +1044,7 @@ protected:
     bool isStartingWindow_ = false;
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
+    int appRecoveryFlag_ = 0xFFFF;
 #endif
 };
 }  // namespace AAFwk

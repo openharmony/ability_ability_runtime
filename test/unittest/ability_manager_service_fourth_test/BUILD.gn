@@ -31,6 +31,7 @@ ohos_unittest("ability_manager_service_fourth_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime/",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_path}/services/abilitymgr/include/interceptor/",
+    "${ability_runtime_path}/utils/server/startup/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_path}/services/abilitymgr/include/insight_intent",
