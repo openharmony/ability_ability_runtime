@@ -768,7 +768,7 @@ bool UIAbilityLifecycleManager::CheckStartByOEExt(const AbilityRequest &abilityR
     int32_t &persistentId, bool &reuse)
 {
     if (!abilityRequest.isStartByOEExt) {
-        return true
+        return true;
     }
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
         abilityRequest.specifiedFlag.empty()) {

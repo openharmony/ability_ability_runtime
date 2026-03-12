@@ -374,10 +374,6 @@ int32_t AbilityManagerProxy::StartAbilityByInsightIntent(const Want &want, const
 int32_t AbilityManagerProxy::StartAbilityByOEExt(const Want &want,
     sptr<IRemoteObject> callerToken, int32_t hostPid, const std::string &specifiedFlag)
 {
-    if (AppUtils::GetInstance().IsForbidStart()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
-        return INNER_ERR;
-    }
     MessageParcel data;
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid callertoken");

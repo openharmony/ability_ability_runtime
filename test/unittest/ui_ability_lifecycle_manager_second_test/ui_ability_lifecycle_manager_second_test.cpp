@@ -1465,5 +1465,253 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, UpdateTokenIdAndWantWithRealCaller
     EXPECT_TRUE(mgr->callerInfoMap_.find("session_3") != mgr->callerInfoMap_.end());
     EXPECT_TRUE(mgr->callerInfoMap_.find("session_2") == mgr->callerInfoMap_.end());
 }
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_001
+ * @tc.desc: Test CheckStartByOEExt with non-OE extension request
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = false;  // Not an OE extension request
+    
+    int32_t requestId = 123;
+    int32_t persistentId = 0;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true for non-OE extension
+    EXPECT_EQ(persistentId, 0);
+    EXPECT_EQ(reuse, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_002
+ * @tc.desc: Test CheckStartByOEExt with valid OE extension request in SPECIFIED mode with empty flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.specifiedFlag = "";  // Empty flag
+    
+    int32_t requestId = 456;
+    int32_t persistentId = 0;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true
+    EXPECT_EQ(persistentId, 0);  // Should set persistentId to 0
+    EXPECT_EQ(reuse, false);  // Should set reuse to false
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_003
+ * @tc.desc: Test CheckStartByOEExt with valid OE extension request in SPECIFIED mode with non-empty flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.specifiedFlag = "test_flag";  // Non-empty flag
+    
+    int32_t requestId = 789;
+    int32_t persistentId = 0;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true
+    EXPECT_EQ(persistentId, 0);
+    EXPECT_EQ(reuse, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_004
+ * @tc.desc: Test CheckStartByOEExt with valid OE extension request in non-SPECIFIED mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_004, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;  // Not SPECIFIED
+    abilityRequest.specifiedFlag = "test_flag";
+    
+    int32_t requestId = 101;
+    int32_t persistentId = 0;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true
+    EXPECT_EQ(persistentId, 0);
+    EXPECT_EQ(reuse, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_005
+ * @tc.desc: Test CheckStartByOEExt with duplicate start detection (persistentId != 0 and reuse = true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_005, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.specifiedFlag = "test_flag";
+    
+    int32_t requestId = 202;
+    int32_t persistentId = 100;  // Non-zero persistentId
+    bool reuse = true;  // Reuse is true - this indicates duplicate start
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_FALSE(ret);  // Should return false for duplicate start
+    EXPECT_EQ(persistentId, 100);  // Should remain unchanged
+    EXPECT_EQ(reuse, true);  // Should remain unchanged
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_006
+ * @tc.desc: Test CheckStartByOEExt with reuse = false but persistentId != 0 (not duplicate)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_006, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    abilityRequest.specifiedFlag = "test_flag";
+    
+    int32_t requestId = 303;
+    int32_t persistentId = 100;  // Non-zero persistentId
+    bool reuse = false;  // Reuse is false - this is not a duplicate
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true (not duplicate)
+    EXPECT_EQ(persistentId, 100);
+    EXPECT_EQ(reuse, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_007
+ * @tc.desc: Test CheckStartByOEExt with zero persistentId and reuse = true (not duplicate)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_007, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.specifiedFlag = "test_flag";
+    
+    int32_t requestId = 404;
+    int32_t persistentId = 0;  // Zero persistentId
+    bool reuse = true;  // Reuse is true but persistentId is zero - not duplicate
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true (not duplicate)
+    EXPECT_EQ(persistentId, 0);
+    EXPECT_EQ(reuse, true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_008
+ * @tc.desc: Test CheckStartByOEExt with STANDARD launch mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_008, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.specifiedFlag = "standard_test";
+    
+    int32_t requestId = 505;
+    int32_t persistentId = 999;
+    bool reuse = true;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true
+    EXPECT_EQ(persistentId, 999);
+    EXPECT_EQ(reuse, true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_009
+ * @tc.desc: Test CheckStartByOEExt with SINGLETON launch mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_009, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    abilityRequest.specifiedFlag = "singleton_test";
+    
+    int32_t requestId = 606;
+    int32_t persistentId = 777;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true
+    EXPECT_EQ(persistentId, 777);
+    EXPECT_EQ(reuse, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_010
+ * @tc.desc: Test CheckStartByOEExt with invalid launch mode enum value
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_010, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = static_cast<AppExecFwk::LaunchMode>(999);  // Invalid enum value
+    abilityRequest.specifiedFlag = "invalid_test";
+    
+    int32_t requestId = 707;
+    int32_t persistentId = 888;
+    bool reuse = false;
+    
+    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
+    
+    EXPECT_TRUE(ret);  // Should return true (falls through to default behavior)
+    EXPECT_EQ(persistentId, 888);
+    EXPECT_EQ(reuse, false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -4924,5 +4924,84 @@ HWTEST_F(AbilityManagerStubTest, GetUserLockedBundleListInner_0100, TestSize.Lev
 
     TAG_LOGI(AAFwkTag::TEST, "GetUserLockedBundleListInner_0100 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityByOEExtInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityByOEExtInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityByOEExtInner with empty data
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->StartAbilityByOEExtInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityByOEExtInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityByOEExtInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityByOEExtInner with invalid caller token flag
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // Write valid Want object
+    Want want;
+    want.SetElementName("com.test.bundle", "com.test.TestAbility", "test");
+    data.WriteParcelable(&want);
+    
+    // Write invalid caller token flag
+    data.WriteBool(false);
+    
+    auto res = stub_->StartAbilityByOEExtInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityByOEExtInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityByOEExtInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityByOEExtInner with valid parameters calls StartAbilityByOEExt successfully
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // Write valid Want object
+    Want want;
+    want.SetElementName("com.test.bundle", "com.test.TestAbility", "test");
+    data.WriteParcelable(&want);
+    
+    // Write valid caller token flag
+    data.WriteBool(true);
+    
+    // Write null caller token (simple case)
+    data.WriteRemoteObject(nullptr);
+    
+    // Write host PID
+    data.WriteInt32(12345);
+    
+    // Write specified flag
+    data.WriteString("test_flag");
+    
+    auto res = stub_->StartAbilityByOEExtInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+    
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

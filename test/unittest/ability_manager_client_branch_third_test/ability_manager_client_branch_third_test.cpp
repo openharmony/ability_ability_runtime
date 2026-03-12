@@ -1249,5 +1249,52 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, PreloadApplication_0100, TestSize.
     auto result = client_->PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: AbilityManagerClient_StartAbilityByOEExt_0100
+ * @tc.desc: StartAbilityByOEExt_0100, proxy is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartAbilityByOEExt_0100, TestSize.Level1)
+{
+    ErrorTestBoardDisable();
+    Want want;
+    int32_t hostPid = 1234;
+    std::string specifiedFlag = "test_flag";
+    auto result = client_->StartAbilityByOEExt(want, nullptr, hostPid, specifiedFlag);
+    EXPECT_EQ(result, ABILITY_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartAbilityByOEExt_0200
+ * @tc.desc: StartAbilityByOEExt_0200, normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartAbilityByOEExt_0200, TestSize.Level1)
+{
+    NormalTestBoardDisable();
+    Want want;
+    int32_t hostPid = 1234;
+    std::string specifiedFlag = "test_flag";
+    EXPECT_CALL(*mock_, StartAbilityByOEExt(_, _, _, _)).Times(1).WillOnce(Return(ERR_OK));
+    auto result = client_->StartAbilityByOEExt(want, nullptr, hostPid, specifiedFlag);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartAbilityByOEExt_0300
+ * @tc.desc: StartAbilityByOEExt_0300, with error return
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartAbilityByOEExt_0300, TestSize.Level1)
+{
+    NormalTestBoardDisable();
+    Want want;
+    int32_t hostPid = 1234;
+    std::string specifiedFlag = "test_flag";
+    EXPECT_CALL(*mock_, StartAbilityByOEExt(_, _, _, _)).Times(1).WillOnce(Return(ERR_INVALID_VALUE));
+    auto result = client_->StartAbilityByOEExt(want, nullptr, hostPid, specifiedFlag);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
