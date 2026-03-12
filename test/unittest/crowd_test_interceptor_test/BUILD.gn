@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,9 +21,14 @@ ohos_unittest("crowd_test_interceptor_test") {
   cflags_cc = []
   include_dirs = [
     "./mock",
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/interceptor/crowd_test_interceptor.cpp",
+    "./mock/mock_bundle_mgr_helper.cpp",
+    "./mock/modal_system_ui_extension.cpp",
     "./mock/start_ability_utils.cpp",
     "crowd_test_interceptor_test.cpp",
   ]
@@ -61,6 +66,7 @@ ohos_unittest("crowd_test_interceptor_test") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libmodal_system_ui_extension_client",
   ]
 
   if (ability_runtime_dsoftbus_enable) {
