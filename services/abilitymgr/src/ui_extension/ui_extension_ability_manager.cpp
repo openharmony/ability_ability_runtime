@@ -810,7 +810,7 @@ void UIExtensionAbilityManager::RemoveUIExtensionAbilityRecord(
     }
     if (UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
-            abilityRecord->GetUIExtensionAbilityId(), abilityRecord->GetAbilityInfo().bundleName);
+            abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
     }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
 }
@@ -823,7 +823,8 @@ void UIExtensionAbilityManager::RollbackAgentUILaunchRecord(
     if (!UIExtensionWrapper::IsAgentUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         return;
     }
-    uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(abilityRecord->GetUIExtensionAbilityId());
+    uiExtensionAbilityRecordMgr_->RemoveAgentUILaunchRecord(
+        abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetUIExtensionAbilityId());
 }
 
 void UIExtensionAbilityManager::AddUIExtensionAbilityRecordToTerminatedList(

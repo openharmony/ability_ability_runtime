@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <tuple>
 #include <vector>
 
 #include "base_extension_record.h"
@@ -155,7 +156,7 @@ public:
     // AgentUI extension launch limit management
     int32_t CheckAgentUILaunchLimit(int32_t callerUid, const std::string &bundleName);
     void AddAgentUILaunchRecord(int32_t callerUid, const std::string &bundleName, int32_t extensionAbilityId);
-    void RemoveAgentUILaunchRecord(int32_t extensionAbilityId, const std::string &bundleName);
+    void RemoveAgentUILaunchRecord(const std::string &bundleName, int32_t extensionAbilityId);
 
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
@@ -173,7 +174,7 @@ private:
     std::map<int32_t, sptr<IRemoteObject>> preloadUIExtensionHostClientCallerTokens_;
 
     struct AgentUIExtensionRecords {
-        int32_t callerRecordId;
+        int32_t callerUid;
         std::string targetBundle;
         std::vector<int32_t> targetRecordIds;
     };
