@@ -14,17 +14,26 @@
  */
 
 #include "mock_my_flag.h"
+#include "permission_constants.h"
 #include "permission_verification.h"
 
 namespace OHOS {
 namespace AgentRuntime {
 bool MyFlag::retVerifyCallingPermission = true;
+bool MyFlag::retVerifyConnectAgentPermission = true;
+bool MyFlag::retVerifyGetAgentCardPermission = true;
 }
 
 namespace AAFwk {
 bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
     const uint32_t specifyTokenId) const
 {
+    if (permissionName == PermissionConstants::PERMISSION_CONNECT_AGENT) {
+        return AgentRuntime::MyFlag::retVerifyConnectAgentPermission;
+    }
+    if (permissionName == PermissionConstants::PERMISSION_GET_AGENT_CARD) {
+        return AgentRuntime::MyFlag::retVerifyGetAgentCardPermission;
+    }
     return AgentRuntime::MyFlag::retVerifyCallingPermission;
 }
 }  // namespace AAFwk
