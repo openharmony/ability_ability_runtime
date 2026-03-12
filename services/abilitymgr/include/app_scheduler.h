@@ -359,6 +359,16 @@ public:
         const int appIndex = 0);
 
     /**
+     * KillApplicationWithUserId, kill designated user application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    int KillApplicationWithUserId(const std::string &bundleName, const int userId = -1, const int appIndex = 0);
+
+    /**
      * KillProcessesByAccessTokenId.
      *
      * @param  accessTokenId, accessTokenId.

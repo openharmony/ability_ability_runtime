@@ -187,6 +187,17 @@ public:
     virtual int ForceKillApplication(const std::string &bundleName, const int userId = -1, const int appIndex = 0) = 0;
 
     /**
+     * KillApplicationWithUserId, call KillApplicationWithUserId() through proxy object, kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int KillApplicationWithUserId(const std::string &bundleName,
+        const int userId = -1, const int appIndex = 0) = 0;
+
+    /**
      * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
      * force kill the application.
      *
@@ -602,6 +613,7 @@ public:
         VERIFY_KILL_PROCESS_PERMISSION,
         NOTIFY_LOAD_ABILITY_FINISHED,
         NOTIFY_APP_MGR_RECORD_EXIT_REASON_COMPABILITY,
+        KILL_APPLICATION_WITH_USER_ID,
         // Add enumeration values above
         END
     };

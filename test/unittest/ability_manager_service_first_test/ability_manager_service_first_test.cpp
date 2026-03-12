@@ -2700,7 +2700,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillBundleWithReason_0200, TestSize.Lev
     EXPECT_EQ(res, ERR_INVALID_VALUE);
     exitReason.reason = Reason::REASON_JS_ERROR;
     res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, GET_BUNDLE_INFO_FAILED);
     MyFlag::flag_ = 0;
 }
 
