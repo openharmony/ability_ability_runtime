@@ -25,6 +25,7 @@
 #include "error_msg_util.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
+#include "ffrt.h"
 #include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
@@ -34,6 +35,7 @@
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
 #include "hisysevent_report.h"
+#include "in_process_call_wrapper.h"
 #ifdef SUPPORT_SCREEN
 #include "window_visibility_info.h"
 #endif //SUPPORT_SCREEN
@@ -2827,18 +2829,26 @@ void AppRunningRecord::SetNeedLimitPrio(bool isNeedLimitPrio)
 void AppRunningRecord::UnSetPolicy()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "UnSetPolicy call");
-    auto appInfo = GetApplicationInfo();
-    if (appInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appInfo  null");
-        return;
-    }
+#ifdef SUPPORT_UPMS
     if (IsUnSetPermission()) {
         TAG_LOGI(AAFwkTag::APPMGR, "app is unset permission");
         return;
     }
     SetIsUnSetPermission(true);
-#ifdef SUPPORT_UPMS
-    AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
+    auto appInfo = GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appInfo  null");
+        return;
+    }
+    uint32_t tokenId = appInfo->accessTokenId;
+    uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    auto clearPermissionTask = [tokenId, timeNow]() {
+        IN_PROCESS_CALL_WITHOUT_RET(
+            AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(tokenId, timeNow)
+        );
+    };
+    ffrt::submit(clearPermissionTask);
 #endif // SUPPORT_UPMS
 }
 
