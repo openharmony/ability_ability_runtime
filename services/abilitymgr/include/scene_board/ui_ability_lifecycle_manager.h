@@ -1261,6 +1261,8 @@ private:
     bool HandleRestartUIAbility(sptr<SessionInfo> sessionInfo);
     void GetActiveAbilityListLocked(int32_t uid, int32_t pid, std::vector<std::string> &abilityList);
     UIAbilityRecordPtr FindUIAbilityRecordByIdLocked(int64_t abilityRecordId);
+    bool CheckStartByOEExt(const AbilityRequest &abilityRequest, int32_t requestId,
+        int32_t &persistentId, bool &reuse);
     
     struct CallerInfo {
         uint32_t callerTokenId = 0;

@@ -739,12 +739,10 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     bool reuse = false;
     persistentId = GetPersistentIdByAbilityRequest(abilityRequest, reuse);
-    if (abilityRequest.isStartByOEExt) {
-        if (persistentId != 0 && reuse) {
-            return ERROR_UIABILITY_IS_ALREADY_EXIST;
-        }
-        OEExtensionUtils::GetInstance().AddOEExtRequest(requestId);
+    if (!CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse)) {
+        return ERROR_UIABILITY_IS_ALREADY_EXIST;
     }
+
     auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;
     auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
@@ -764,6 +762,27 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     sessionInfo->want.RemoveAllFd();
     return ret;
+}
+
+bool UIAbilityLifecycleManager::CheckStartByOEExt(const AbilityRequest &abilityRequest, int32_t requestId,
+    int32_t &persistentId, bool &reuse)
+{
+    if (!abilityRequest.isStartByOEExt) {
+        return true
+    }
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
+        abilityRequest.specifiedFlag.empty()) {
+        persistentId = 0;
+        reuse = false;
+        OEExtensionUtils::GetInstance().AddOEExtRequest(requestId);
+        return true;
+    }
+    if (persistentId != 0 && reuse) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "duplicate start: %{public}d", persistentId);
+        return false;
+    }
+    OEExtensionUtils::GetInstance().AddOEExtRequest(requestId);
+    return true;
 }
 
 int UIAbilityLifecycleManager::NotifySCBToStartUIAbilities(std::vector<AbilityRequest> &abilityRequestList,
