@@ -1591,6 +1591,21 @@ ohos_prebuilt_etc("appRecovery_abc_etc") {
   deps = [ ":appRecovery_abc" ]
 }
 
+generate_static_abc("errorManager_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.errorManager.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/errorManager_abc.abc"
+}
+
+ohos_prebuilt_etc("errorManager_abc_etc") {
+  source = "$target_out_dir/errorManager_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":errorManager_abc" ]
+}
+
 generate_static_abc("ability_runtime_event_hub_abc") {
   base_url = "./"
   files = [ "./application/EventHub.ets" ]
@@ -2157,6 +2172,7 @@ group("ets_packages") {
     ":business_ability_info_abc_etc",
     ":business_ability_router_abc_etc",
     ":completion_handler_for_atomic_service_abc_etc",
+    ":errorManager_abc_etc",
     ":form_extension_ability_etc",
     ":photo_editor_extension_ability_etc",
     ":quick_fix_manager_abc_etc",
