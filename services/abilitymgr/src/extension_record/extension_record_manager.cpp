@@ -872,7 +872,7 @@ void ExtensionRecordManager::GetCallerTokenList(
 
     // If caller extension record id is same with current, need terminate, prevent possible stack-overflow.
     if (callerExtensionRecordId == extensionRecordId) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerRecordId: %{public}d, same with caller", extensionRecordId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerUid: %{public}d, same with caller", extensionRecordId);
         callerList.clear();
         return;
     }
@@ -1160,7 +1160,7 @@ int32_t ExtensionRecordManager::CheckAgentUILaunchLimit(int32_t callerUid, const
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
     for (const auto &record : agentUIExtensionRecords_) {
-        if (record.callerRecordId != callerUid || record.targetBundle != bundleName) {
+        if (record.callerUid != callerUid || record.targetBundle != bundleName) {
             continue;
         }
         if (record.targetRecordIds.size() >= AGENT_UI_MAX_COUNT) {
@@ -1181,7 +1181,7 @@ void ExtensionRecordManager::AddAgentUILaunchRecord(int32_t callerUid, const std
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
     for (auto &record : agentUIExtensionRecords_) {
-        if (record.callerRecordId != callerUid || record.targetBundle != bundleName) {
+        if (record.callerUid != callerUid || record.targetBundle != bundleName) {
             continue;
         }
         auto recordIt = std::find(record.targetRecordIds.begin(), record.targetRecordIds.end(), extensionAbilityId);
@@ -1200,21 +1200,22 @@ void ExtensionRecordManager::AddAgentUILaunchRecord(int32_t callerUid, const std
         callerUid, bundleName.c_str(), extensionAbilityId, agentUIExtensionRecords_.back().targetRecordIds.size());
 }
 
-void ExtensionRecordManager::RemoveAgentUILaunchRecord(int32_t extensionAbilityId, const std::string &bundleName)
+void ExtensionRecordManager::RemoveAgentUILaunchRecord(const std::string &bundleName, int32_t extensionAbilityId)
 {
     std::lock_guard<std::mutex> lock(agentUIExtensionMutex_);
     for (auto recordIt = agentUIExtensionRecords_.begin(); recordIt != agentUIExtensionRecords_.end(); ++recordIt) {
         if (recordIt->targetBundle != bundleName) {
             continue;
         }
-        auto targetIt = std::find(recordIt->targetRecordIds.begin(), recordIt->targetRecordIds.end(), extensionAbilityId);
+        auto targetIt = std::find(recordIt->targetRecordIds.begin(),
+            recordIt->targetRecordIds.end(), extensionAbilityId);
         if (targetIt == recordIt->targetRecordIds.end()) {
             continue;
         }
         recordIt->targetRecordIds.erase(targetIt);
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "agentUI removed, callerUid:%{public}d, bundle:%{public}s, id:%{public}d, count:%{public}zu",
-            recordIt->callerRecordId, bundleName.c_str(), extensionAbilityId, recordIt->targetRecordIds.size());
+            recordIt->callerUid, bundleName.c_str(), extensionAbilityId, recordIt->targetRecordIds.size());
         if (recordIt->targetRecordIds.empty()) {
             agentUIExtensionRecords_.erase(recordIt);
         }
