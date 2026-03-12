@@ -17,6 +17,10 @@
 #define MOCK_AGENT_RUNTIME_MY_FLAG_H
 
 #include "agent_card.h"
+#include "extension_ability_info.h"
+#include "hap_module_info.h"
+#include <string>
+#include <vector>
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -31,6 +35,16 @@ public:
     static bool retGetBundleInfo;
     static bool retGetResConfigFile;
     static bool retFromJson;
+
+    // Mock data for GetBundleInfo
+    static std::vector<AppExecFwk::ExtensionAbilityInfo> mockExtensionInfos;
+    static std::vector<AppExecFwk::HapModuleInfo> mockHapModuleInfos;
+
+    // Mock data for GetResConfigFile
+    static std::vector<std::string> mockProfileInfos;
+
+    // Test profile info content (for JSON parsing tests)
+    static std::string mockProfileInfoContent;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

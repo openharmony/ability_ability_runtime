@@ -72,7 +72,7 @@ public:
     bool NotifyHotReloadPage() override { return false; }
     bool UnLoadRepairPatch(const std::string &patchFile) override { return false; }
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string> &moduleAndPath) override {};
-    void StartProfiler(const DebugOption debugOption) override {};
+    void StartProfiler(const DebugOption debugOption) override;
     void SetExtensionApiCheckCallback(
         std::function<bool(const std::string &className, const std::string &fileName)> &cb) override;
     void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override;
@@ -107,6 +107,7 @@ private:
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
         const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
     bool PostFork(const Options &options, std::unique_ptr<Runtime> &jsRuntime, bool isMove = true);
+    bool IsAotCompiledSuccess(int32_t status);
     std::string GetAotPath(const Options &options);
     std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
     void HandleOhmUrlFileName(std::string &fileName);

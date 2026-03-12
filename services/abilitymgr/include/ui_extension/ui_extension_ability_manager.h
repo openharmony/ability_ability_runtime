@@ -130,6 +130,8 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
+    sptr<IRemoteObject> GetUIExtensionRootHostToken(const sptr<IRemoteObject> token);
+
     int UnPreloadUIExtensionAbilityLocked(int32_t extensionAbilityId);
     int UnPreloadUIExtensionAbilityInner(int32_t extensionAbilityId);
     int ClearAllPreloadUIExtensionAbilityLocked();
@@ -169,6 +171,8 @@ private:
     bool IsUIExtensionAbility(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     bool CheckUIExtensionAbilitySessionExist(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
+
+    void RollbackAgentUILaunchRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord);
 
     void RemoveUIExtensionAbilityRecord(const std::shared_ptr<BaseExtensionRecord> &abilityRecord) override;
 

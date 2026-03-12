@@ -148,8 +148,20 @@ int32_t AgentManagerService::GetAgentCardByAgentId(const std::string &bundleName
 {
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_GET_AGENT_CARD)) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
-        return ERR_PERMISSION_DENIED;
+        int32_t callerPid = IPCSkeleton::GetCallingPid();
+        std::string callerBundleName;
+        int32_t callerUid;
+        int32_t ret = IN_PROCESS_CALL(
+            DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetBundleNameByPid(
+                callerPid, callerBundleName, callerUid));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "getBundleNameByPid failed %{public}d", ret);
+            return ERR_PERMISSION_DENIED;
+        }
+        if (bundleName != callerBundleName) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
+            return ERR_PERMISSION_DENIED;
+        }
     }
     auto ret = AgentCardMgr::GetInstance().GetAgentCardByAgentId(bundleName, agentId, card);
     if (ret == ERR_NAME_NOT_FOUND) {
@@ -211,7 +223,7 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     }
 
     AgentCard card;
-    if (GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
+    if (AgentCardMgr::GetInstance().GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
         return AAFwk::ERR_INVALID_AGENT_CARD_ID;
     }

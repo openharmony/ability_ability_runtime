@@ -42,6 +42,7 @@ public:
     int32_t userId = -1;
     int32_t setterUserId = -1;
     bool canUserModify = false;
+    bool isHiddenStart = false;
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
@@ -62,6 +63,7 @@ struct AutoStartupStatus {
     int32_t setterUserId = -1;
     AutoStartupSetterType setterType = AutoStartupSetterType::UNSPECIFIED;
     int32_t code = -1;
+    bool isHiddenStart = false;
 };
 
 struct AutoStartupAbilityData {
@@ -70,6 +72,7 @@ struct AutoStartupAbilityData {
     int32_t userId = -1;
     int32_t setterUserId = -1;
     bool isVisible = false;
+    bool hasStatusBarExtension = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -114,6 +114,21 @@ public:
         return E_OK;
     }
 
+    virtual int32_t GetTotalInodes(int64_t &totalInodes) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetFreeInodes(int64_t &freeInodes) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetCurrentBundleInodes(int64_t &curInodes) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t GetSystemDataSize(int64_t &otherUidSizeSum) override
     {
         return E_OK;
@@ -481,6 +496,47 @@ public:
     }
 
     virtual int32_t NotifyEncryptVolumeStateChanged(const VolumeInfoStr &volumeInfoStr) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetCryptUuidById(const std::string &volumeId, std::string &uuid) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t BindRecoverKeyToPasswd(const std::string &volumeId,
+                                            const std::string &pazzword,
+                                            const std::string &recoverKey) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UpdateCryptPasswd(const std::string &volumeId,
+                                    const std::string &pazzword,
+                                    const std::string &newPazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t ResetCryptPasswd(const std::string &volumeId,
+                                    const std::string &recoverKey,
+                                    const std::string &newPazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t VerifyCryptPasswd(const std::string &volumeId, const std::string &pazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t Unlock(const std::string &volumeId, const std::string &pazzword) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t Decrypt(const std::string &volumeId, const std::string &pazzword) override
     {
         return E_OK;
     }

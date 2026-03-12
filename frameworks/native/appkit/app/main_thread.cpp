@@ -137,6 +137,7 @@ std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
 const std::string PERFCMD_PROFILE = "profile";
 const std::string PERFCMD_DUMPHEAP = "dumpheap";
+const std::string BASE_LINE_PERFCMD = "baseLineProfile";
 namespace {
 #ifdef APP_USE_ARM
 constexpr char FORM_RENDER_LIB_PATH[] = "/system/lib/libformrender.z.so";
@@ -1806,14 +1807,20 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             }
         }
         for (const auto &hsp : hspList) {
-            options.commonHspBundleInfos.push_back({hsp.versionCode, hsp.bundleName, hsp.moduleName,
-                                                    hsp.hapPath, hsp.moduleArkTSMode});
+            options.commonHspBundleInfos.push_back({hsp.versionCode,
+                                                    static_cast<int32_t>(hsp.aotCompileStatus),
+                                                    hsp.bundleName, hsp.moduleName, hsp.hapPath, hsp.moduleArkTSMode});
         }
         options.enableWarmStartupSmartGC =
             (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRE_MAKE ||
              appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE);
         TAG_LOGI(AAFwkTag::APPKIT, "SmartGC: process is start. enable warm startup SmartGC: %{public}d",
             static_cast<int32_t>(options.enableWarmStartupSmartGC));
+        auto perfCmd = appLaunchData.GetPerfCmd();
+        auto findPos = perfCmd.find(BASE_LINE_PERFCMD);
+        if (findPos != std::string::npos && (appLaunchData.GetDebugFromLocal() || isDeveloperMode_)) {
+            options.baseLineProfile = true;
+        }
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
@@ -1832,7 +1839,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-        auto perfCmd = appLaunchData.GetPerfCmd();
         int32_t pid = -1;
         std::string processName = "";
         if (processInfo_ != nullptr) {
@@ -1858,7 +1864,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.bundleName = appInfo.bundleName;
         runtime->SetDebugOption(debugOption);
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
-            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
+            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos ||
+            options.baseLineProfile) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
             runtime->StartProfiler(debugOption);
         } else {
@@ -1898,6 +1905,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
                 (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncatchableExceptionHandler(
                     uncatchableTask);
+                TransferEnvToEventHandler(runtime);
             }
 #ifdef CJ_FRONTEND
         } else {
@@ -2151,7 +2159,11 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
         "%{public}s", info.bundleName.c_str(), info.errorObjectName.c_str(), info.summary.c_str());
     AAFwk::ExitReasonCompability exitReason = { REASON_JS_ERROR, info.errorObjectName };
     exitReason.killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_JS_ERROR;
-    AbilityManagerClient::GetInstance()->RecordAppWithReason(info.pid, getuid(), exitReason);
+    auto result = AbilityManagerClient::GetInstance()->RecordAppWithReason(info.pid, getuid(), exitReason);
+
+    TAG_LOGW(AAFwkTag::APPKIT, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL,JS_ERROR],"
+        " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
+        result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
     _exit(JS_ERROR_EXIT);
 }
 
@@ -4282,7 +4294,6 @@ void MainThread::SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpAppli
         }
     };
     idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
-    idleTime_->Start();
 
     IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
     jsEngine.NotifyIdleStatusControl(cb);
@@ -4437,6 +4448,21 @@ bool MainThread::CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord>
         runtimeUpdateParam_.uncatchableTaskInfo.processName);
     (static_cast<AbilityRuntime::ETSRuntime&>(*etsRuntime)).RegisterUncaughtExceptionHandler(expectionInfo);
     return true;
+}
+
+void MainThread::TransferEnvToEventHandler(std::unique_ptr<Runtime> &runtime)
+{
+    if (mainHandler_ == nullptr || runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler or runtime");
+        return;
+    }
+    auto eventRunner = mainHandler_->GetEventRunner();
+    auto env = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNapiEnv();
+    if (eventRunner == nullptr || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "transfer env to eventRunner error");
+        return;
+    }
+    eventRunner->EventSetEnvToHandler(env);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

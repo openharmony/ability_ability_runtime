@@ -26,6 +26,7 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "${ability_runtime_path}/services/abilitymgr/src/",
     "${ability_runtime_path}/services/abilitymgr/include/utils",
     "${ability_runtime_path}/services/abilitymgr/include/insight_intent",
+    "${ability_runtime_path}/utils/server/startup/include",
   ]
 
   sources = [

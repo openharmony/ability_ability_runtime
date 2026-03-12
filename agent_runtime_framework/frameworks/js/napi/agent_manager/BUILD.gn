@@ -33,7 +33,6 @@ ohos_shared_library("agentmanager_napi") {
   sources = [
     "src/agent_manager_module.cpp",
     "src/js_agent_manager.cpp",
-    "src/js_agent_manager_utils.cpp",
   ]
 
   configs = [

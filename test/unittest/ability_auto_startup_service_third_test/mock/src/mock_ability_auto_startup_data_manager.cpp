@@ -31,7 +31,7 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
 }
 
 int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
-    const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
+    const AutoStartupInfo &info, DistributedKv::Key &originKey, bool isAutoStartup, bool isEdmForce)
 {
     if (info.userId == -1) {
         return ERR_INVALID_VALUE;
@@ -39,7 +39,8 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupInfo &info)
+int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupInfo &info,
+    DistributedKv::Key &originKey)
 {
     if (info.userId == -1) {
         return ERR_INVALID_VALUE;
@@ -52,7 +53,8 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
     return ERR_OK;
 }
 
-AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const AutoStartupInfo &info)
+AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const AutoStartupInfo &info,
+    DistributedKv::Key &originKey)
 {
     AutoStartupStatus startupStatus;
     if (info.bundleName == BUNDLENAME_NO_FONUD) {

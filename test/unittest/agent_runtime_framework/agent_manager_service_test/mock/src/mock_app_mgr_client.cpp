@@ -18,7 +18,9 @@
 #include "mock_my_flag.h"
 
 namespace OHOS {
+int32_t AgentRuntime::MyFlag::retGetBundleNameByPid = 0;
 namespace AppExecFwk {
+const std::string BUNDLE_NAME = "mockBundleName";
 AppMgrClient::AppMgrClient()
 {}
 
@@ -29,6 +31,12 @@ int32_t AppMgrClient::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecF
 {
     info.state_ = AgentRuntime::MyFlag::processState;
     return AgentRuntime::MyFlag::retGetProcessRunningInfoByPid;
+}
+
+int32_t AppMgrClient::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
+{
+    bundleName = BUNDLE_NAME;
+    return AgentRuntime::MyFlag::retGetBundleNameByPid;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

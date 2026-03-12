@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #undef private
 #undef protected
 
-#include "ability_util.h"
+#include "mock_my_status.h"
 #include "start_ability_utils.h"
 
 using namespace testing;
@@ -142,9 +142,144 @@ HWTEST_F(CrowdTestInterceptorTest, DoProcess_003, TestSize.Level1)
     StartAbilityUtils::retGetApplicationInfo = true;
     StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
 
-    AbilityUtil::retStartAppgallery = ERR_OK;
     auto ret = crowdTestInterceptor.DoProcess(param);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CrowdTestInterceptorTest_DoProcess_004
+ * @tc.desc: Test the DoProcess function when GetBundleManagerHelper function returns a null pointer
+ * @tc.type: FUNC
+ * @tc.require: DoProcess
+ */
+HWTEST_F(CrowdTestInterceptorTest, DoProcess_004, TestSize.Level1)
+{
+    CrowdTestInterceptor crowdTestInterceptor;
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    bool isWithUI = true;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, nullptr, shouldBlockFunc);
+
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::retGetApplicationInfo = true;
+    StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
+
+    AAFwk::MyStatus::GetInstance().isNullPtr = true;
+    auto ret = crowdTestInterceptor.DoProcess(param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CrowdTestInterceptorTest_DoProcess_005
+ * @tc.desc: Test the DoProcess function when GetBundleManagerHelper function
+ * returns a non-null pointer and QueryAppGalleryBundleName function returns
+ * true
+ * @tc.type: FUNC
+ * @tc.require: DoProcess
+ */
+HWTEST_F(CrowdTestInterceptorTest, DoProcess_005, TestSize.Level1)
+{
+    CrowdTestInterceptor crowdTestInterceptor;
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    bool isWithUI = true;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, nullptr, shouldBlockFunc);
+
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::retGetApplicationInfo = true;
+    StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
+
+    AAFwk::MyStatus::GetInstance().isNullPtr = false;
+    AAFwk::MyStatus::GetInstance().isFalse = true;
+    auto ret = crowdTestInterceptor.DoProcess(param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CrowdTestInterceptorTest_DoProcess_006
+ * @tc.desc: Test the DoProcess function when GetBundleManagerHelper function
+ * returns a non-null pointer and QueryAppGalleryBundleName function returns
+ * false
+ * @tc.type: FUNC
+ * @tc.require: DoProcess
+ */
+HWTEST_F(CrowdTestInterceptorTest, DoProcess_006, TestSize.Level1)
+{
+    CrowdTestInterceptor crowdTestInterceptor;
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    bool isWithUI = true;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, nullptr, shouldBlockFunc);
+
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::retGetApplicationInfo = true;
+    StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
+
+    AAFwk::MyStatus::GetInstance().isNullPtr = false;
+    AAFwk::MyStatus::GetInstance().isFalse = false;
+    auto ret = crowdTestInterceptor.DoProcess(param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CrowdTestInterceptorTest_DoProcess_007
+ * @tc.desc: Test the DoProcess function when CreateModalUIExtension function returns false
+ * @tc.type: FUNC
+ * @tc.require: DoProcess
+ */
+HWTEST_F(CrowdTestInterceptorTest, DoProcess_007, TestSize.Level1)
+{
+    CrowdTestInterceptor crowdTestInterceptor;
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    bool isWithUI = true;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, nullptr, shouldBlockFunc);
+
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::retGetApplicationInfo = true;
+    StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
+
+    AAFwk::MyStatus::GetInstance().isNullPtr = false;
+    AAFwk::MyStatus::GetInstance().isFalse = false;
+    AAFwk::MyStatus::GetInstance().retCreateModalUIExtension = false;
+    auto ret = crowdTestInterceptor.DoProcess(param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CrowdTestInterceptorTest_DoProcess_008
+ * @tc.desc: Test the DoProcess function when the target UIExtension is not found.
+ * @tc.type: FUNC
+ * @tc.require: DoProcess
+ */
+HWTEST_F(CrowdTestInterceptorTest, DoProcess_008, TestSize.Level1)
+{
+    CrowdTestInterceptor crowdTestInterceptor;
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    bool isWithUI = true;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, nullptr, shouldBlockFunc);
+
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::retGetApplicationInfo = true;
+    StartAbilityUtils::applicationInfo.crowdtestDeadline = 1;
+
+    AAFwk::MyStatus::GetInstance().isNullPtr = false;
+    AAFwk::MyStatus::GetInstance().isFalse = false;
+    AAFwk::MyStatus::GetInstance().retCreateModalUIExtension = true;
+    AAFwk::MyStatus::GetInstance().queryExtensionAbilityInfos = false;
+    auto ret = crowdTestInterceptor.DoProcess(param);
+    EXPECT_NE(ret, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS

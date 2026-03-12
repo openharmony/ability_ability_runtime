@@ -1926,9 +1926,11 @@ public:
      * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether the application is prohibited from changing the auto start up state.
+     * @param isHiddenStart Indicate whether the application is hidden start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
+    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag,
+        bool isHiddenStart = false) = 0;
 
     /**
      * @brief Cancel application auto start up state by EDM.
@@ -2587,6 +2589,17 @@ public:
     virtual ErrCode GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList)
     {
         return ERR_OK;
+    }
+
+    /**
+     * @brief Set app recovery galg.
+     * @param token Caller ability token.
+     * @param flag App recovery flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetAppRecoveryFlag(const sptr<IRemoteObject>& token, int flag)
+    {
+        return 0;
     }
 };
 }  // namespace AAFwk

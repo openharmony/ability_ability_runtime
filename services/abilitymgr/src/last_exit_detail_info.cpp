@@ -32,6 +32,9 @@ bool LastExitDetailInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int64, parcel, timestamp);
     processName = Str16ToStr8(parcel.ReadString16());
     exitMsg = Str16ToStr8(parcel.ReadString16());
+    std::u16string killReasonTemp;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, killReasonTemp);
+    killReason = Str16ToStr8(killReasonTemp);
     return true;
 }
 
@@ -62,6 +65,7 @@ bool LastExitDetailInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int64, parcel, timestamp);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(processName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(exitMsg));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(killReason));
     return true;
 }
 }  // namespace AAFwk

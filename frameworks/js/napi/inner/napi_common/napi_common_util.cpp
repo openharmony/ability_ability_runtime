@@ -1285,15 +1285,26 @@ std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue)
         TAG_LOGE(AAFwkTag::JSNAPI, "null napi_uint8_array");
         return {};
     }
-    std::string *data = nullptr;
+    uint8_t *data = nullptr;
     size_t total = 0;
     NAPI_CALL_BASE(env, napi_get_arraybuffer_info(env, buffer, reinterpret_cast<void **>(&data), &total), {});
-    length = std::min<size_t>(length, total - offset);
-    std::vector<std::string> result(sizeof(std::string) + length);
-    int retCode = memcpy_s(result.data(), result.size(), &data[offset], length);
-    if (retCode != 0) {
+
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "arraybuffer data is null");
         return {};
     }
+    // security check: prevent offset out of bounds
+    if (offset >= total) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "offset out of bounds");
+        return {};
+    }
+
+    if (length == 0) {
+        return {};
+    }
+    length = std::min<size_t>(length, total - offset);
+    std::vector<std::string> result;
+    result.emplace_back(reinterpret_cast<char*>(data + offset), length);
     return result;
 }
 

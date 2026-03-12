@@ -42,6 +42,7 @@ const std::string JSON_KEY_ACCESS_TOKENID = "accessTokenId";
 const std::string JSON_KEY_SETTER_USERID = "setterUserId";
 const std::string JSON_KEY_USERID = "userId";
 const std::string JSON_KEY_SETTER_TYPE = "setterType";
+const std::string JSON_KEY_IS_HIDDEN_START = "isHiddenStart";
 } // namespace
 const DistributedKv::AppId AbilityAutoStartupDataManager::APP_ID = { "auto_startup_storage" };
 const DistributedKv::StoreId AbilityAutoStartupDataManager::STORE_ID = { "auto_startup_infos" };
@@ -157,8 +158,8 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
-    const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
+int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(const AutoStartupInfo &info,
+    DistributedKv::Key &originKey, bool isAutoStartup, bool isEdmForce)
 {
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() ||
         info.setterUserId == -1 || info.userId == -1 || info.setterType == AutoStartupSetterType::UNSPECIFIED) {
@@ -184,7 +185,7 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        status = kvStorePtr_->Delete(key);
+        status = kvStorePtr_->Delete(originKey);
     }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore delete error: %{public}d", status);
@@ -212,7 +213,8 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupInfo &info)
+int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupInfo &info,
+    DistributedKv::Key &originKey)
 {
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
         TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value");
@@ -232,11 +234,10 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupIn
         }
     }
 
-    DistributedKv::Key key = ConvertAutoStartupDataToKey(info);
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        status = kvStorePtr_->Delete(key);
+        status = kvStorePtr_->Delete(originKey);
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
@@ -303,7 +304,8 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
     return ERR_OK;
 }
 
-AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const AutoStartupInfo &info)
+AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const AutoStartupInfo &info,
+    DistributedKv::Key &originKey)
 {
     AutoStartupStatus startupStatus;
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
@@ -345,8 +347,10 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
     startupStatus.code = ERR_NAME_NOT_FOUND;
     for (const auto &item : allEntries) {
         if (IsEqual(item.key, info)) {
+            originKey = item.key;
             ConvertAutoStartupStatusFromValue(item.value, startupStatus);
             startupStatus.code = ERR_OK;
+            break;
         }
     }
 
@@ -472,6 +476,7 @@ DistributedKv::Value AbilityAutoStartupDataManager::ConvertAutoStartupStatusToVa
         { JSON_KEY_TYPE_NAME, info.abilityTypeName },
         { JSON_KEY_SETTER_USERID, info.setterUserId },
         { JSON_KEY_SETTER_TYPE, info.setterType },
+        { JSON_KEY_IS_HIDDEN_START, info.isHiddenStart },
     };
     DistributedKv::Value value(jsonObject.dump());
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "value: %{public}s", value.ToString().c_str());
@@ -498,6 +503,9 @@ void AbilityAutoStartupDataManager::ConvertAutoStartupStatusFromValue(
     if (jsonObject.contains(JSON_KEY_SETTER_TYPE) && jsonObject[JSON_KEY_SETTER_TYPE].is_number()) {
         startupStatus.setterType =
             static_cast<AutoStartupSetterType>(jsonObject.at(JSON_KEY_SETTER_TYPE).get<int32_t>());
+    }
+    if (jsonObject.contains(JSON_KEY_IS_HIDDEN_START) && jsonObject[JSON_KEY_IS_HIDDEN_START].is_boolean()) {
+        startupStatus.isHiddenStart = jsonObject.at(JSON_KEY_IS_HIDDEN_START).get<bool>();
     }
 }
 
@@ -579,6 +587,10 @@ void AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromValue(
     if (jsonValueObject.contains(JSON_KEY_SETTER_USERID) && jsonValueObject[JSON_KEY_SETTER_USERID].is_number()) {
         info.setterUserId = jsonValueObject.at(JSON_KEY_SETTER_USERID).get<int32_t>();
     }
+
+    if (jsonValueObject.contains(JSON_KEY_IS_HIDDEN_START) && jsonValueObject[JSON_KEY_IS_HIDDEN_START].is_boolean()) {
+        info.isHiddenStart = jsonValueObject.at(JSON_KEY_IS_HIDDEN_START).get<bool>();
+    }
 }
 
 bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info)
@@ -591,7 +603,6 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
 
     if (!AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_BUNDLE_NAME, info.bundleName)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_ABILITY_NAME, info.abilityName)
-        || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_MODULE_NAME, info.moduleName, true)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_ACCESS_TOKENID, info.accessTokenId)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_USERID, info.userId)) {

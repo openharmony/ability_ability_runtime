@@ -22,10 +22,10 @@
 #define private public
 #define protected public
 #include "ability_auto_startup_service.h"
+#include "ability_auto_startup_data_manager.h"
 #undef protected
 #undef private
 
-#include "ability_auto_startup_data_manager.h"
 #include "ability_record.h"
 
 using namespace OHOS::AAFwk;
@@ -108,9 +108,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     service->AddHandledAutoStartupUsers(int32Param);
     service->RemoveHandledAutoStartupUsers(int32Param);
     service->FindHandledAutoStartupUsers(int32Param);
-
+    DistributedKv::Key originKey =
+        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->ConvertAutoStartupDataToKey(info);
     AutoStartupStatus status =
-        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
+        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info, originKey);
     status.code = int32Param;
     service->InnerApplicationAutoStartupByEDM(info, isSet, flag);
     status.code = ERR_NAME_NOT_FOUND;

@@ -33,6 +33,8 @@ public:
     static bool isRegisterBundleEventCallbackCalled;
     static bool isAddSystemAbilityListenerCalled;
     static bool retVerifyCallingPermission;
+    static bool retVerifyConnectAgentPermission;
+    static bool retVerifyGetAgentCardPermission;
     static int32_t retConnectAbilityWithExtensionType;
     static int32_t retDisconnectAbility;
     static int32_t retGetAllAgentCards;
@@ -43,6 +45,7 @@ public:
     static AppExecFwk::ExtensionAbilityType extensionAbilityType;
     static int32_t retGetProcessRunningInfoByPid;
     static AppExecFwk::AppProcessState processState;
+    static int32_t retGetBundleNameByPid;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

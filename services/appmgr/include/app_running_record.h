@@ -286,6 +286,13 @@ public:
      */
     const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> GetAbilities();
 
+    /**
+     * @brief Check whether the current process contains agent extension ability.
+     *
+     * @return Returns true if any ability in current process is agent extension.
+     */
+    bool HasAgentExtensionAbility();
+
     bool IsAlreadyHaveAbility();
 
     // Update appThread with appThread

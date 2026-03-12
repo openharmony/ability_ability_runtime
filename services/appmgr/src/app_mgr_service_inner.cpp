@@ -36,6 +36,7 @@
 #include "app_mgr_service.h"
 #include "app_mgr_event.h"
 #include "app_process_data.h"
+#include "app_recovery_mgr.h"
 #include "app_state_observer_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
@@ -276,6 +277,13 @@ constexpr const char* EVENT_KEY_INNER_MSG = "INNER_MSG";
 constexpr const char* EVENT_KEY_PROCESS_KILL_ID = "PROCESS_KILL_ID";
 constexpr const char* EVENT_KEY_ADJ = "ADJ";
 constexpr const char* EVENT_KEY_TIMESTAMP = "TIMESTAMP";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FIRST = "EVENT_PARAM_FIRST";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SECOND = "EVENT_PARAM_SECOND";
+constexpr const char* EVENT_KEY_QUICK_PARAM_THIRD = "EVENT_PARAM_THIRD";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FOURTH = "EVENT_PARAM_FOURTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_FIFTH = "EVENT_PARAM_FIFTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SIXTH = "EVENT_PARAM_SIXTH";
+constexpr const char* EVENT_KEY_QUICK_PARAM_SEVENTH = "EVENT_PARAM_SEVENTH";
 
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
@@ -326,7 +334,7 @@ constexpr int32_t ATTACH_TIMEOUT_SUB_REASON_TIMEOUT = 0;
 
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
-constexpr int32_t NWEB_PRELOAD_DELAY = 3000000;
+constexpr int32_t NWEB_PRELOAD_DELAY = 10000000;
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
@@ -348,7 +356,7 @@ constexpr int32_t MAX_EXTENSION_CHILD_PROCESS = 1;
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS_DEV_MODE = 3;
 
 // kill resaon
-constexpr int32_t PROCESS_KILL_PARAM = 14; // PROCESS_KILL params
+constexpr int32_t PROCESS_KILL_PARAM = 25; // PROCESS_KILL params
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -1167,6 +1175,13 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
+    }
+
+    if (AAFwk::UIExtensionWrapper::IsAgentUIExtension(abilityInfo->extensionAbilityType) &&
+        (appRecord == nullptr || !appRecord->HasAgentExtensionAbility())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "agentUI start denied, agentExtension process not found");
+        NotifyStartProcessFailed(loadParam->token);
+        return;
     }
 
     if (!appRecord) {
@@ -5113,7 +5128,7 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
         return;
     }
-    
+
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "no appInfo");
@@ -5143,9 +5158,16 @@ void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> 
     hisyseventReport->InsertParam(EVENT_KEY_VERSIONCODE, std::to_string(appInfo->versionCode));
     hisyseventReport->InsertParam(EVENT_KEY_VERSIONNAME, appInfo->versionName);
     hisyseventReport->InsertParam(EVENT_KEY_INNER_MSG, innerMsg);
-    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_KILL_ID, killId);
+    hisyseventReport->InsertParam(EVENT_KEY_PROCESS_KILL_ID, killInfo.killId);
     hisyseventReport->InsertParam(EVENT_KEY_ADJ, killInfo.adj);
     hisyseventReport->InsertParam(EVENT_KEY_TIMESTAMP, killInfo.timestamp);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FIRST, killInfo.eventParamFirst);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SECOND, killInfo.eventParamSecond);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_THIRD, killInfo.eventParamThird);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FOURTH, killInfo.eventParamFourth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_FIFTH, killInfo.eventParamFifth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SIXTH, killInfo.eventParamSixth);
+    hisyseventReport->InsertParam(EVENT_KEY_QUICK_PARAM_SEVENTH, killInfo.eventParamSeventh);
     int result = hisyseventReport->Report("FRAMEWORK", "PROCESS_KILL", HISYSEVENT_FAULT);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s, reason=%{public}s, FOREGROUND=%{public}d,"
@@ -5184,6 +5206,8 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
+    HandleForegroundAbilityDied(abilityTokens,appRecord->GetState());
+    CacheExitInfo(appRecord);
     {
         std::lock_guard lock(appStateCallbacksLock_);
         for (const auto &item : appStateCallbacks_) {
@@ -5194,14 +5218,13 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     }
     ClearData(appRecord);
 
+    auto userId = appRecord->GetUserId();
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId(),
-            appRecord->GetUserId());
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId(), userId);
     }
     appRecord->ResetSpecifiedRequest();
     if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetNewProcessRequestId(),
-            appRecord->GetUserId());
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetNewProcessRequestId(), userId);
     }
     appRecord->ResetNewProcessRequest();
 }
@@ -11497,6 +11520,23 @@ void AppMgrServiceInner::CheckRenderAttachTimeout(std::shared_ptr<RenderRecord> 
         pid, elapsedMs);
     AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
         ProcessStartFailedReason::ATTACH_TIMEOUT, elapsedMs);
+}
+
+void AppMgrServiceInner::HandleForegroundAbilityDied(
+    const std::vector<sptr<IRemoteObject>>& abilityTokens,ApplicationState state)
+{
+    if (state != ApplicationState::APP_STATE_FOREGROUND) {
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "Handling died abilities in foreground.");
+    for (const auto& token : abilityTokens) {
+        if (token == nullptr) {
+            continue;
+        }
+        AppRecoveryMgr::AppRecoveryMgr::GetInstance().HandleAppDied(token);
+        TAG_LOGI(AAFwkTag::APPMGR, "Notified AppRecoveryMgr for ability token: %{public}p",
+                  token.GetRefPtr());
+    }
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

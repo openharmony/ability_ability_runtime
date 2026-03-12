@@ -62,6 +62,7 @@
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
+#include "xcollie/process_kill_reason.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -109,6 +110,7 @@ constexpr const char* DMS_CALLER_NATIVE_NAME = "ohos.dms.param.sourceCallerNativ
 constexpr const char* DMS_CALLER_APP_ID = "ohos.dms.param.sourceCallerAppId";
 constexpr const char* DMS_CALLER_APP_IDENTIFIER = "ohos.dms.param.sourceCallerAppIdentifier";
 constexpr const char* IS_HOOK = "ohos.ability_runtime.is_hook";
+constexpr const char* HIDDEN_START_AUTOSTARTUP = "hiddenStartAutoStartup";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 std::atomic<int64_t> AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -442,6 +444,8 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability record: %{public}s/%{public}s", GetElementName().GetBundleName().c_str(),
         GetElementName().GetAbilityName().c_str());
+    needCheckAutoStartupStatusBar_ = GetWant().GetBoolParam(HIDDEN_START_AUTOSTARTUP, false);
+    GetWant().RemoveParam(HIDDEN_START_AUTOSTARTUP);
 #ifdef SUPPORT_UPMS
     {
         std::lock_guard guard(wantLock_);
@@ -2287,6 +2291,9 @@ void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExe
     lastExitDetailInfo.timestamp = timestamp;
     lastExitDetailInfo.processName = processInfo.processName_;
     lastExitDetailInfo.exitMsg = killMsg;
+    if (exitReason.killId != DEFAULT_INVALID_VALUE) {
+        lastExitDetailInfo.killReason = HiviewDFX::ProcessKillReason::GetKillReason(exitReason.killId);
+    }
     lifeCycleStateInfo_.launchParam.lastExitReason = CovertAppExitReasonToLastReason(exitReason.reason);
     lifeCycleStateInfo_.launchParam.lastExitMessage = exitMsg;
     lifeCycleStateInfo_.launchParam.lastExitDetailInfo = lastExitDetailInfo;
@@ -3432,6 +3439,17 @@ void AbilityRecord::PluginCompleteTerminate()
             GetAbilityInfo().name.c_str(),
             hostAbility->GetAbilityInfo().name.c_str());
     }
+}
+
+void AbilityRecord::SetAppRecoveryFlag(int flag)
+{
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppRecoveryFlag:%{public}d", flag);
+    appRecoveryFlag_ = flag;
+}
+
+int AbilityRecord::GetAppRecoveryFlag() const
+{
+    return appRecoveryFlag_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

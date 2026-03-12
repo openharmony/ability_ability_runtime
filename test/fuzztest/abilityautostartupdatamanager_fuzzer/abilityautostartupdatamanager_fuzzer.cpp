@@ -55,10 +55,12 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     bool isEdmForce = *data % ENABLE;
     bool isCalledByEDM = *data % ENABLE;
     abilityAutoStartupDataManager->InsertAutoStartupData(info, isAutoStartup, isEdmForce);
-    abilityAutoStartupDataManager->UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    DistributedKv::Key originKey1 = abilityAutoStartupDataManager->ConvertAutoStartupDataToKey(info);
+    abilityAutoStartupDataManager->UpdateAutoStartupData(info, originKey1, isAutoStartup, isEdmForce);
     std::string strParam(data, size);
     int32_t in32Param = static_cast<int32_t>(GetU32Data(data));
-    abilityAutoStartupDataManager->QueryAutoStartupData(info);
+    DistributedKv::Key originKey2 = abilityAutoStartupDataManager->ConvertAutoStartupDataToKey(info);
+    abilityAutoStartupDataManager->QueryAutoStartupData(info, originKey2);
     std::vector<AbilityRuntime::AutoStartupInfo> infoList;
     abilityAutoStartupDataManager->QueryAllAutoStartupApplications(infoList, in32Param, isCalledByEDM);
     abilityAutoStartupDataManager->GetCurrentAppAutoStartupData(strParam, infoList, strParam);
@@ -81,7 +83,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityAutoStartupDataManager->IsEqual(key, info);
     abilityAutoStartupDataManager->IsEqual(key, strParam);
     abilityAutoStartupDataManager->IsEqual(key, in32Param);
-    abilityAutoStartupDataManager->DeleteAutoStartupData(info);
+    DistributedKv::Key originKey3 = abilityAutoStartupDataManager->ConvertAutoStartupDataToKey(info);
+    abilityAutoStartupDataManager->DeleteAutoStartupData(info, originKey3);
     abilityAutoStartupDataManager->DeleteAutoStartupData(strParam, in32Param);
     abilityAutoStartupDataManager->GetAutoStartupStatusForSelf(in32Param, isAutoStartEnabled);
 

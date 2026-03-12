@@ -898,6 +898,8 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessKillEvent_003, TestSize.Level1)
     appMgrServiceInner->SendProcessKillEvent(appRecord);
     killId = 1;
     appMgrServiceInner->SendProcessKillEvent(appRecord);
+    killId = 3;
+    appMgrServiceInner->SendProcessKillEvent(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "SendProcessKillEvent_003 end");
 }
 
