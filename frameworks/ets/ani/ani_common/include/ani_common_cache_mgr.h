@@ -31,6 +31,7 @@ constexpr const char *CLASSNAME_FLOAT = "std.core.Float";
 constexpr const char *CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char *CLASSNAME_STRING = "std.core.String";
 constexpr const char *CLASSNAME_RECORD = "std.core.Record";
+constexpr const char *TOOL_CLASS_NAME = "@ohos.app.ability.Want.RecordSerializeTool";
 
 using AniCommonMethodCacheKey = std::pair<const char *, const char *>;
 
