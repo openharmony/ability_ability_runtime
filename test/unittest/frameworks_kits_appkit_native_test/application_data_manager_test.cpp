@@ -185,6 +185,30 @@ HWTEST_F(ApplicationDataManagerTest,
 }
 
 /**
+ * @tc.number: ApplicationDataManager_NotifyETSErrorObject_001
+ * @tc.name: ApplicationDataManager NotifyExceptionObject
+ * @tc.desc: Test whether NotifyETSErrorObject are called normally.
+ */
+HWTEST_F(ApplicationDataManagerTest,
+    ApplicationDataManager_NotifyETSErrorObject_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSErrorObject_001 start";
+    AppExecFwk::ErrorObject errorObj;
+    errorObj.name = "errorName";
+    errorObj.message = "errorMessage";
+    errorObj.stack = "errorStack";
+    EXPECT_EQ(nullptr, ApplicationDataManager::GetInstance().errorCallback_);
+    ApplicationDataManager::GetInstance().NotifyETSErrorObject(errorObj);
+    auto errorCallback = [](const AppExecFwk::ErrorObject &errorObj) {
+        printf("test\n");
+    };
+    ApplicationDataManager::GetInstance().SetErrorHandlerCallback(errorCallback);
+    EXPECT_NE(nullptr, ApplicationDataManager::GetInstance().errorCallback_);
+    ApplicationDataManager::GetInstance().NotifyETSErrorObject(errorObj);
+    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSErrorObject_001 end";
+}
+
+/**
  * @tc.number: ApplicationDataManager_IsUncatchable_001
  * @tc.name: ApplicationDataManager IsUncatchable
  * @tc.desc: Test whether IsUncatchable are called normally.
