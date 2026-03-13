@@ -24,6 +24,7 @@
 #include "remote_object_taihe_ani.h"
 #include "configuration_utils.h"
 #include "display_util.h"
+#include "ets_extension_common.h"
 #include "ets_service_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -126,6 +127,14 @@ EtsServiceExtension::~EtsServiceExtension()
     if (context) {
         context->Unbind();
     }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
+        return;
+    }
+    if (shellContextRef_ && shellContextRef_->aniRef) {
+        env->GlobalReference_Delete(shellContextRef_->aniRef);
+    }
 }
 
 void EtsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -180,7 +189,8 @@ void EtsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         return;
     }
     BindContext(env, record->GetWant());
-
+    SetExtensionCommon(EtsExtensionCommon::Create(
+        etsRuntime_, static_cast<AppExecFwk::ETSNativeReference &>(*etsObj_), shellContextRef_));
     handler_ = handler;
     auto context = GetContext();
     auto appContext = Context::GetApplicationContext();
@@ -634,6 +644,9 @@ void EtsServiceExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want>
     if (env->Object_SetField_Ref(etsObj_->aniObj, contextField, contextRef) != ANI_OK) {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "Object_SetField_Ref contextObj failed");
     }
+    shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
+    shellContextRef_->aniObj = contextObj;
+    shellContextRef_->aniRef = contextRef;
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "BindContext end");
 }
 
