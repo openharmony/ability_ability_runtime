@@ -40,7 +40,6 @@ namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
 constexpr const char *ABILITY_WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
-constexpr const char *TOOL_CLASS_NAME = "@ohos.app.ability.Want.RecordSerializeTool";
 constexpr const char *INNER_CLASS_NAME = "ability.abilityResult.AbilityResultInner";
 constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 constexpr const char *RECORD_SET_NAME =
@@ -101,7 +100,7 @@ bool InnerSetRecord(ani_env *env, ani_object recordObject, ani_string key, ani_o
     ani_method recordSetMethod = nullptr;
     AniCommonMethodCacheKey recordSet = std::make_pair("$_set", RECORD_SET_NAME);
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordSet,
-        cls, recordSetMethod)) {
+        recordCls, recordSetMethod)) {
         TAG_LOGE(AAFwkTag::ANI, "failed to get cached class and method for record $_set");
         return false;
     }
