@@ -1294,12 +1294,12 @@ std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
 
 void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId, bool schedulerdied)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResult:%{public}s,tokeId:%{public}u,%{public}d",
-        abilityInfo_.name.c_str(), tokeId, static_cast<int32_t>(schedulerdied));
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResult:%{public}s,tokeId:%{public}u,%{public}d, requestCode:%{public}d",
+        abilityInfo_.name.c_str(), tokeId, static_cast<int32_t>(schedulerdied), result->requestCode_);
 #ifdef SUPPORT_UPMS
     if (!schedulerdied) {
         GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId, false);

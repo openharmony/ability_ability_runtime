@@ -433,7 +433,7 @@ bool UIAbilityThread::HandlePrepareTerminateAbility()
 
 void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &want)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "SendResult");
     if (abilityHandler_ == nullptr || requestCode == -1) {
         TAG_LOGW(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
         return;
