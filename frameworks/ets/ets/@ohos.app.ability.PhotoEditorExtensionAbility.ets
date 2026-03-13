@@ -23,7 +23,7 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 
 export default class PhotoEditorExtensionAbility extends UIExtensionAbility {
 
-  context: PhotoEditorExtensionContext = {};
+  photoEditorContext: PhotoEditorExtensionContext = {};
 
   onCreate(): void {}
 
