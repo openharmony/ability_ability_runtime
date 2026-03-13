@@ -166,6 +166,7 @@ private:
     ETSRuntime &etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsObj_;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
+    std::shared_ptr<ETSNativeReference> shellContextRef_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
 protected:
