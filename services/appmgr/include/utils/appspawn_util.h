@@ -42,7 +42,6 @@ static uint64_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     if (want.GetBoolParam("coldStart", false)) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::COLD_START);
     }
-
 #ifdef WITH_DLP
     if (want.GetIntParam(DLP_PARAMS_INDEX, 0) != 0) {
         if (want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false)) {
@@ -52,7 +51,6 @@ static uint64_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
         }
     }
 #endif // WITH_DLP
-
     if (applicationInfo.debug && applicationInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::DEBUGGABLE);
     }
@@ -87,7 +85,9 @@ static uint64_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     if (applicationInfo.cloudFileSyncEnabled) {
         startFlags = startFlags | (START_FLAG_BASE << APP_FLAGS_CLOUD_FILE_SYNC_ENABLED);
     }
-
+    if (applicationInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        startFlags = startFlags | (START_FLAG_BASE << APP_FLAGS_DEBUG_SIGN);
+    }
     return startFlags;
 }
 
