@@ -400,6 +400,37 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_0200
+ * @tc.desc: CreateSessionInfo
+ * @tc.type: FUNC condition for isStartByOEExt
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(mgr, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    std::string testFlag = "testFlag";
+    abilityRequest.specifiedFlag = testFlag;
+    int32_t requestId = 10000;
+    auto sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_EQ(sessionInfo->specifiedFlag, testFlag);
+
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_TRUE(sessionInfo->specifiedFlag.empty());
+
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_TRUE(sessionInfo->specifiedFlag.empty());
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_AbilityTransactionDone_0100
  * @tc.desc: AbilityTransactionDone
  * @tc.type: FUNC
