@@ -3339,5 +3339,334 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityInCurren
         mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityWithStartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityWithStartOptions
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartSelfUIAbilityWithStartOptions
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityWithStartOptions_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    StartOptions startOptions;
+    auto res = proxy_->StartSelfUIAbilityWithStartOptions(want, startOptions);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_START_OPTIONS),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityWithStartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityWithStartOptions
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of StartSelfUIAbilityWithStartOptions
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityWithStartOptions_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    Want want;
+    StartOptions startOptions;
+    auto res = proxy_->StartSelfUIAbilityWithStartOptions(want, startOptions);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_START_OPTIONS),
+        mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityWithPidResult
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityWithPidResult
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartSelfUIAbilityWithPidResult
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityWithPidResult_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    StartOptions startOptions;
+    uint64_t callbackId = 12345;
+    auto res = proxy_->StartSelfUIAbilityWithPidResult(want, startOptions, callbackId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityWithPidResult
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityWithPidResult
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of StartSelfUIAbilityWithPidResult
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityWithPidResult_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    Want want;
+    StartOptions startOptions;
+    uint64_t callbackId = 12345;
+    auto res = proxy_->StartSelfUIAbilityWithPidResult(want, startOptions, callbackId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT),
+        mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetElementNameByToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetElementNameByToken
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of GetElementNameByToken with isNeedLocalDeviceId=true
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetElementNameByToken_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    ASSERT_NE(token, nullptr);
+    bool isNeedLocalDeviceId = true;
+    auto result = proxy_->GetElementNameByToken(token, isNeedLocalDeviceId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ELEMENT_NAME_BY_TOKEN), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetElementNameByToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetElementNameByToken
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of GetElementNameByToken with isNeedLocalDeviceId=false
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetElementNameByToken_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    ASSERT_NE(token, nullptr);
+    bool isNeedLocalDeviceId = false;
+    auto result = proxy_->GetElementNameByToken(token, isNeedLocalDeviceId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ELEMENT_NAME_BY_TOKEN), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetElementNameByToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetElementNameByToken
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of GetElementNameByToken
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetElementNameByToken_003, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    bool isNeedLocalDeviceId = true;
+    auto result = proxy_->GetElementNameByToken(token, isNeedLocalDeviceId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ELEMENT_NAME_BY_TOKEN), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCaller with StartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartAbilityForResultAsCaller with StartOptions
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCallerWithOptions_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    StartOptions startOptions;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    int32_t requestCode = 100;
+    int32_t userId = 0;
+    auto res = proxy_->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCaller with StartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of StartAbilityForResultAsCaller with StartOptions
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCallerWithOptions_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    Want want;
+    StartOptions startOptions;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    int32_t requestCode = 100;
+    int32_t userId = 0;
+    auto res = proxy_->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS),
+        mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCaller with StartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify StartAbilityForResultAsCaller with null callerToken
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCallerWithOptions_003, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    StartOptions startOptions;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t requestCode = 100;
+    int32_t userId = 0;
+    auto res = proxy_->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilitiesInSplitWindowMode with valid callerToken
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilitiesInSplitWindowMode_003, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t primaryWindowId = 1;
+    Want secondaryWant;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of StartUIAbilitiesInSplitWindowMode
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilitiesInSplitWindowMode_004, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    int32_t primaryWindowId = 1;
+    Want secondaryWant;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE),
+        mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities with multiple wants
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_005, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::vector<Want> wantList;
+    Want want1;
+    want1.SetElementName("com.example.bundle1", "Ability1");
+    Want want2;
+    want2.SetElementName("com.example.bundle2", "Ability2");
+    wantList.push_back(want1);
+    wantList.push_back(want2);
+    std::string requestKey = "test_request_key";
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of StartUIAbilities
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_006, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    std::vector<Want> wantList;
+    Want want1;
+    want1.SetElementName("com.example.bundle1", "Ability1");
+    wantList.push_back(want1);
+    std::string requestKey = "test_request_key";
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES), mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify StartUIAbilities with empty wantList
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_007, TestSize.Level1)
+{
+    std::vector<Want> wantList;
+    std::string requestKey = "test_request_key";
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS
