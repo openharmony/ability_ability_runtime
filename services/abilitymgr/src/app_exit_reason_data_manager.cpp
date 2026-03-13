@@ -190,7 +190,8 @@ int32_t AppExitReasonDataManager::DeleteAppExitReason(const std::string &bundleN
 
 int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName, uint32_t accessTokenId,
     const std::string &abilityName, bool &isSetReason, AAFwk::ExitReason &exitReason,
-    AppExecFwk::RunningProcessInfo &processInfo, int64_t &time_stamp, bool &withKillMsg)
+    AppExecFwk::RunningProcessInfo &processInfo, int64_t &time_stamp, bool &withKillMsg,
+    bool cleanFlag)
 {
     auto accessTokenIdStr = std::to_string(accessTokenId);
     if (bundleName.empty() || accessTokenId == Security::AccessToken::INVALID_TOKENID) {
@@ -219,8 +220,7 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
                 withKillMsg);
             auto pos = std::find(abilityList.begin(), abilityList.end(), abilityName);
             if (pos != abilityList.end()) {
-                isSetReason = true;
-                abilityList.erase(std::remove(abilityList.begin(), abilityList.end(), abilityName), abilityList.end());
+                HandleAbilityMatchAndCleanup(abilityName, abilityList, isSetReason, cleanFlag);
                 UpdateAppExitReason(accessTokenId, abilityList, exitReason, processInfo, withKillMsg);
             }
             TAG_LOGD(AAFwkTag::ABILITYMGR, "current bundle name: %{public}s, tokenId:%{private}u, reason: %{public}d,"
@@ -235,6 +235,17 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
     }
 
     return ERR_OK;
+}
+
+void AppExitReasonDataManager::HandleAbilityMatchAndCleanup(
+    const std::string& abilityName, std::vector<std::string>& abilityList,
+    bool& isSetReason, bool cleanFlag)
+{
+    isSetReason = true;
+    if (cleanFlag) {
+        auto newEnd = std::remove(abilityList.begin(), abilityList.end(), abilityName);
+        abilityList.erase(newEnd, abilityList.end());
+    }
 }
 
 void AppExitReasonDataManager::UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,

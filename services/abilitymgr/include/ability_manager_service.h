@@ -3370,7 +3370,7 @@ private:
     void RecordRecoveryExitReason(bool isAppRecovery, int32_t callerPid, int32_t callerUid);
     void SetAppDeathRecipient(const sptr<IRemoteObject>& abilityToken);
     void HandleAppDiedForRecovery(const sptr<IRemoteObject>& remote, const AbilityInfo& abilityInfo,
-        int32_t pid, int32_t uid);
+        int32_t pid, int32_t uid, int32_t userId);
     void startRecoveryMgr();
     int getAppRecoveryFlag(const sptr<IRemoteObject> &token);
     void HandleRecoveryRecipient(const std::shared_ptr<AbilityRecord>& abilityRecord,
