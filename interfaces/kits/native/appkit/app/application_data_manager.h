@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+typedef void (*EtsErrorCallback)(const AppExecFwk::ErrorObject &errorObj);
 class ApplicationDataManager {
 public:
     struct ExceptionParams {
@@ -48,6 +49,10 @@ public:
     void SetIsUncatchable(bool isUncatchable);
     bool GetIsUncatchable();
     static bool NotifyUncaughtException(const ExceptionParams &params, const AppExecFwk::ErrorObject &errorObj);
+
+    void SetErrorHandlerCallback(EtsErrorCallback errorCallback);
+    bool NotifyETSErrorObject(const AppExecFwk::ErrorObject &errorObj);
+
 private:
     ApplicationDataManager();
     ~ApplicationDataManager();
@@ -55,6 +60,7 @@ private:
     DISALLOW_COPY_AND_MOVE(ApplicationDataManager);
     std::shared_ptr<IErrorObserver> errorObserver_;
     std::atomic_bool isUncatchable_;
+    EtsErrorCallback errorCallback_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
