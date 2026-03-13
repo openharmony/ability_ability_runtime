@@ -14,6 +14,42 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
+ohos_shared_library("js_agent_manager_utils") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  include_dirs = [
+    "include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${agent_runtime_framework_path}/interfaces/inner_api/include",
+  ]
+
+  sources = [ "src/js_agent_manager_utils.cpp" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 ohos_shared_library("agentmanager_napi") {
   sanitize = {
     cfi = true
@@ -35,12 +71,10 @@ ohos_shared_library("agentmanager_napi") {
     "src/js_agent_manager.cpp",
   ]
 
-  configs = [
-    "${ability_runtime_services_path}/common:common_config",
-    "${ability_runtime_services_path}/common:optimize_config",
-  ]
+  configs = [ "${ability_runtime_services_path}/common:optimize_config" ]
 
   deps = [
+    ":js_agent_manager_utils",
     "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",

@@ -163,6 +163,7 @@ ohos_shared_library("agent_ui_extension_module") {
   configs = [
       ":ability_config",
       ":agent_ui_extension_config",
+      "${ability_runtime_services_path}/common:optimize_config",
   ]
 
   deps = [
