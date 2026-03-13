@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <map>
 
 #include "resource_config_helper.h"
 #include "ability_manager_client.h"
@@ -1432,6 +1433,44 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
         };
     return uncaughtExceptionInfo;
 }
+
+CJEventReportInfo MainThread::CreateCjEventReportInfo(const std::string &bundleName,
+    uint32_t versionCode, const std::string &hapPath, std::string &appRunningId)
+{
+    CJEventReportInfo reportInfo;
+    wptr<MainThread> weak_this = this;
+    reportInfo.hapPath = hapPath.c_str();
+    std::string processName = processInfo_ != nullptr ? processInfo_->GetProcessName() : "unknown";
+    reportInfo.reportInfoTask = [weak_this, bundleName, versionCode, processName, appRunningId =
+        std::move(appRunningId)](const char* domain,
+        const char* event, size_t hiSysEventType, const std::map<std::string, std::string>& params) {
+            auto shared_this = weak_this.promote();
+            if (shared_this == nullptr) {
+                return;
+            }
+            time_t timet;
+            time(&timet);
+            auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+            hisyseventReport->InsertParam("PID", std::to_string(getpid()));
+            hisyseventReport->InsertParam("TID", std::to_string(gettid()));
+            hisyseventReport->InsertParam("PROCESS_NAME", processName);
+            hisyseventReport->InsertParam("APP_RUNNING_UNIQUE_ID", appRunningId);
+            for (const auto& [key, value] : params) {
+                hisyseventReport->InsertParam(key.c_str(), value);
+            }
+            int32_t ret = hisyseventReport->Report(domain, event, static_cast<HiSysEventEventType>(hiSysEventType));
+            auto it = params.find("DUMP_LOG_PATH");
+            if (it != params.end() && it->second == "EMPTY") {
+                TAG_LOGI(AAFwkTag::APPKIT, "DUMP_LOG_PATH is EMPTY, trigger CJ heap dump");
+                OHOS::AppExecFwk::CjHeapDumpInfo cjHeapInfo;
+                cjHeapInfo.needSnapshot = true;
+                cjHeapInfo.needGc = false;
+                cjHeapInfo.pid = getpid();
+                shared_this->HandleCjHeapMemory(cjHeapInfo);
+            }
+        };
+    return reportInfo;
+}
 #endif
 
 bool MainThread::GetBundleAndHspListForUpdateRuntime(BundleInfo &bundleInfo, std::string bundleName, HspList &hspList)
@@ -1911,6 +1950,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         } else {
             auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
             (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
+            auto reportInfo = CreateCjEventReportInfo(bundleName, versionCode, hapPath, appRunningId);
+            (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterEventHandler(reportInfo);
         }
 #endif
         wptr<MainThread> weak = this;
