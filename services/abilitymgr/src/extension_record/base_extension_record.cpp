@@ -41,6 +41,11 @@ std::shared_ptr<BaseExtensionRecord> BaseExtensionRecord::CreateBaseExtensionRec
     auto abilityRecord = std::make_shared<BaseExtensionRecord>(abilityRequest.want, abilityRequest.abilityInfo,
         abilityRequest.appInfo, abilityRequest.requestCode);
     abilityRecord->Init(abilityRequest);
+    if (abilityRequest.extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE &&
+        abilityRequest.extensionProcessMode == AppExecFwk::ExtensionProcessMode::TYPE) {
+        std::string processName = abilityRequest.abilityInfo.bundleName + ":" + abilityRequest.abilityInfo.name;
+        abilityRecord->SetProcessName(processName);
+    }
     return abilityRecord;
 }
 
