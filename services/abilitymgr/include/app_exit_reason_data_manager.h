@@ -40,7 +40,7 @@ public:
 
     int32_t GetAppExitReason(const std::string &bundleName, uint32_t accessTokenId, const std::string &abilityName,
         bool &isSetReason, AAFwk::ExitReason &exitReason, AppExecFwk::RunningProcessInfo &processInfo,
-        int64_t &time_stamp, bool &withKillMsg);
+        int64_t &time_stamp, bool &withKillMsg, bool cleanFlag = true);
 
     int32_t DeleteAppExitReason(const std::string &bundleName, int32_t uid, int32_t appIndex);
 
@@ -74,6 +74,8 @@ public:
 
     void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
         const AAFwk::ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
+    void HandleAbilityMatchAndCleanup(const std::string& abilityName, std::vector<std::string>& abilityList,
+        bool& isSetReason, bool cleanFlag);
 
 private:
     DistributedKv::Status GetKvStore();

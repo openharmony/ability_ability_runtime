@@ -16861,17 +16861,17 @@ void AbilityManagerService::SetAppDeathRecipient(const sptr<IRemoteObject> &toke
     const auto &abilityInfo = abilityRecord->GetAbilityInfo();
     int32_t pid = abilityRecord->GetPid();
     int32_t uid = abilityRecord->GetUid();
-    auto callback = [this,abilityInfo,pid,uid](const sptr<IRemoteObject>& remote) {
-        this->HandleAppDiedForRecovery(remote,abilityInfo,pid,uid);
+    int32_t userId = abilityRecord->GetOwnerMissionUserId();
+    auto callback = [this,abilityInfo,pid,uid,userId](const sptr<IRemoteObject>& remote) {
+        this->HandleAppDiedForRecovery(remote,abilityInfo,pid,uid,userId);
     };
     
     AppRecoveryMgr::AppRecoveryMgr::GetInstance().SetOnRemoteDieCallback(token, callback);
 }
  
 void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& remote,
-                              const AbilityInfo& abilityInfo,
-                              int32_t pid,
-                              int32_t uid)
+                              const AbilityInfo& abilityInfo, int32_t pid,
+                              int32_t uid, int32_t userId)
 {
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remote is null, cannot recover app");
@@ -16893,7 +16893,7 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
     auto accessTokenId = abilityInfo.applicationInfo.accessTokenId;
     AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
     auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(abilityInfo.bundleName, accessTokenId,
-        abilityInfo.name, isSetReason, exitReason, processInfo, stamp, withKillMsg);
+        abilityInfo.name, isSetReason, exitReason, processInfo, stamp, withKillMsg, false);
     if(exitReason.reason!= AAFwk::REASON_CPP_CRASH) {
         TAG_LOGI(AAFwkTag::APPMGR, "app exit reason is not REASON_CPP_CRASH");
         return;
@@ -16914,8 +16914,8 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
         AAFwk::Want *newWant=new AAFwk::Want();
         newWant->SetElementName(abilityInfo.bundleName, abilityInfo.name);
         newWant->SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
-        StartAbility(*newWant,MAIN_USER_ID);
-        TAG_LOGW(AAFwkTag::ABILITYMGR,"now is %{public}lld,timestamp is %{public}lld",static_cast<long long>(now),static_cast<long long>(stamp));
+        StartAbility(*newWant,userId);
+        TAG_LOGI(AAFwkTag::ABILITYMGR,"CPP_CRASH recovery. bundleName is %{public}s",abilityInfo.bundleName.c_str());
     }
     if (remote != nullptr) {
         AppRecoveryMgr::AppRecoveryMgr::GetInstance().RemoveOnRemoteDieCallback(remote);
