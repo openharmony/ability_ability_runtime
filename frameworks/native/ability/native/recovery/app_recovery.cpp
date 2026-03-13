@@ -398,6 +398,7 @@ void AppRecovery::EnableAppRecovery(uint16_t restartFlag, uint16_t saveFlag, uin
 {
     isEnable_ = true;
     restartFlag_ = restartFlag;
+    crashFlag_ = restartFlag;
     saveOccasion_ = saveFlag;
     saveMode_ = saveMode;
     useAppSettedValue_.store(true);

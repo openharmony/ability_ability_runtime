@@ -22,7 +22,7 @@ export default namespace appRecovery {
         ALWAYS_RESTART = 0,
         RESTART_WHEN_JS_CRASH = 0x0001,
         RESTART_WHEN_APP_FREEZE = 0x0002,
-        RESTART_WHEN_CPP_CRASH = 0x0008,
+        RESTART_WHEN_CPP_CRASH = 0x0004,
         NO_RESTART = 0xFFFF
     }
 

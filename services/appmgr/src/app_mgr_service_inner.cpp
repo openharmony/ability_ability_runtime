@@ -11579,8 +11579,6 @@ void AppMgrServiceInner::HandleForegroundAbilityDied(
             continue;
         }
         AppRecoveryMgr::AppRecoveryMgr::GetInstance().HandleAppDied(token);
-        TAG_LOGI(AAFwkTag::APPMGR, "Notified AppRecoveryMgr for ability token: %{public}p",
-                  token.GetRefPtr());
     }
 }
 } // namespace AppExecFwk
