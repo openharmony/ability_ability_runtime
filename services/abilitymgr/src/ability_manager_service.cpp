@@ -3417,9 +3417,26 @@ int32_t AbilityManagerService::KillAppWithReason(const int32_t pid, const ExitRe
         TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcess permission verification fail");
         return ERR_PERMISSION_DENIED;
     }
+    if (!exitReason.shouldKillForeground) {
+        AppExecFwk::RunningProcessInfo processInfo;
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(pid, processInfo);
+        if (processInfo.isAbilityForegrounding || processInfo.isFocused) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "do not kill foreground apps, pid = %{public}d", pid);
+            return ERR_KILL_APP_WHILE_FOREGROUND;
+        }
+    }
+    bool isKillPrecedeStart = (exitReason.reason == Reason::REASON_RESOURCE_CONTROL &&
+        exitReason.exitMsg == GlobalConstant::LOW_MEMORY_KILL) || exitReason.shouldSkipKillInStartup;
+    ExitReason reason(exitReason.reason, exitReason.subReason, exitReason.exitMsg);
+    if (ProcessLowMemoryKill(pid, reason, isKillPrecedeStart)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}d is starting", pid);
+        return ERR_KILL_APP_WHILE_STARTING;
+    }
+    
     appExitReasonHelper_->AddAppExitReason(bundleName, pid, uid, appIndex, exitReason);
-
-    return DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, false, appIndex);
+    std::vector<int32_t> pidToBeKilled = { pid };
+    return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled,
+        reason.exitMsg, true, isKillPrecedeStart));
 }
 
 int32_t AbilityManagerService::KillBundleWithReason(

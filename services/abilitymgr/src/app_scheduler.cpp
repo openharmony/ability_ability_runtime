@@ -317,7 +317,6 @@ int AppScheduler::ForceKillApplication(const std::string &bundleName,
 int AppScheduler::KillApplicationWithUserId(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillApplicationWithUserId(bundleName, userId, appIndex);
     if (ret != ERR_OK) {

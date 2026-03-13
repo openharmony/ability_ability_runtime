@@ -4823,7 +4823,7 @@ int32_t AbilityManagerProxy::KillAppWithReason(const int32_t pid, const ExitReas
     TAG_LOGD(AAFwkTag::ABILITYMGR, "start.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -4848,7 +4848,7 @@ int32_t AbilityManagerProxy::KillBundleWithReason(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "start.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");

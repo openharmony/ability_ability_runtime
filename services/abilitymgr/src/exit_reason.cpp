@@ -109,6 +109,8 @@ bool ExitReasonCompability::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, killId);
     killMsg = Str16ToStr8(parcel.ReadString16());
     innerMsg = Str16ToStr8(parcel.ReadString16());
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldSkipKillInStartup);
     return true;
 }
 
@@ -135,6 +137,8 @@ bool ExitReasonCompability::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, killId);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(killMsg));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(innerMsg));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldSkipKillInStartup);
     return true;
 }
 }  // namespace AppExecFwk
