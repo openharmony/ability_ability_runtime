@@ -109,7 +109,7 @@ HWTEST_F(ExtensionRecordTest, CreateBaseExtensionRecord_AppService_TypeProcess_0
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     abilityRequest.abilityInfo.bundleName = "com.example.test";
     abilityRequest.abilityInfo.process = "";
-    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
     abilityRequest.extensionProcessMode = AppExecFwk::ExtensionProcessMode::TYPE;
 
     // 调用被测方法
@@ -141,7 +141,7 @@ HWTEST_F(ExtensionRecordTest, CreateBaseExtensionRecord_NonAppService_002, TestS
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     abilityRequest.abilityInfo.bundleName = "com.example.test2";
     abilityRequest.abilityInfo.process = "com.example.test2:process";
-    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
     abilityRequest.extensionProcessMode = AppExecFwk::ExtensionProcessMode::TYPE;
 
     std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
@@ -171,7 +171,7 @@ HWTEST_F(ExtensionRecordTest, CreateBaseExtensionRecord_AppService_NonTypeProces
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     abilityRequest.abilityInfo.bundleName = "com.example.test3";
     abilityRequest.abilityInfo.process = "com.example.test3:shared";
-    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
     abilityRequest.extensionProcessMode = AppExecFwk::ExtensionProcessMode::BUNDLE;
 
     std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
@@ -202,7 +202,7 @@ HWTEST_F(ExtensionRecordTest, CreateBaseExtensionRecord_ProcessNameFormat_004, T
     abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
     abilityRequest.abilityInfo.bundleName = "com.company.myapp";
     abilityRequest.abilityInfo.process = "";
-    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
     abilityRequest.extensionProcessMode = AppExecFwk::ExtensionProcessMode::TYPE;
 
     std::shared_ptr<BaseExtensionRecord> abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
