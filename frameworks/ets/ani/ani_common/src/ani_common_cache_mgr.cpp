@@ -29,6 +29,7 @@ std::map<std::string, AniCommonCacheItem> AniCommonCacheMgr::aniCache_ = {
     { CLASSNAME_DOUBLE, {} },
     { CLASSNAME_STRING, {} },
     { CLASSNAME_RECORD, {} },
+    { TOOL_CLASS_NAME, {} },
 };
 
 bool AniCommonCacheMgr::GetCachedClass(ani_env *env, const std::string &className, ani_class &cls)
@@ -108,6 +109,7 @@ bool AniCommonCacheMgr::GetCachedClassAndMethod(ani_env *env, const std::string 
         }
         methodIter->second = method;
     }
+    method = methodIter->second;
     return true;
 }
 
