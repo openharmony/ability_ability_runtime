@@ -45,11 +45,11 @@ static constexpr int DEFAULT_APPFREEZE_REPORT_TIMES = 1;
 class AppfreezeManager : public std::enable_shared_from_this<AppfreezeManager> {
 public:
     struct AppInfo {
-        std::string bundleName;
-        std::string processName;
+        bool isOccurException = false;
         int pid;
         int uid;
-        bool isOccurException = false;
+        std::string bundleName;
+        std::string processName;
     };
 
     enum TypeAttribute {

@@ -33,7 +33,7 @@ ohos_unittest("child_process_capi_test") {
 
   sources = [ "child_process_capi_test.cpp" ]
 
-  deps = [ "${ability_runtime_services_path}/common:app_util" ]
+  deps = [ "${ability_runtime_services_path}/common:app_util_static" ]
 
   external_deps = [
     "c_utils:utils",
