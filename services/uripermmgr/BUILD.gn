@@ -115,6 +115,8 @@ ohos_shared_library("libupms") {
     defines += [ "ABILITY_RUNTIME_UDMF_ENABLE" ]
   }
 
+  ldflags = [ "-Wl,-Bsymbolic" ]
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
