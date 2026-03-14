@@ -40,7 +40,6 @@ namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
 constexpr const char *ABILITY_WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
-constexpr const char *TOOL_CLASS_NAME = "@ohos.app.ability.Want.RecordSerializeTool";
 constexpr const char *INNER_CLASS_NAME = "ability.abilityResult.AbilityResultInner";
 constexpr const char *ELEMENTNAME_CLASS_NAME = "bundleManager.ElementNameInner.ElementNameInner";
 constexpr const char *RECORD_SET_NAME =
@@ -84,6 +83,7 @@ bool InnerCreateRecordObject(ani_env *env, ani_object &recordObject)
     AniCommonMethodCacheKey recordCtor = std::make_pair("<ctor>", ":");
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordCtor,
         recordCls, recordCtorMethod)) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to get cached class and method for record ctor");
         return false;
     }
     ani_status status = env->Object_New(recordCls, recordCtorMethod, &recordObject);
@@ -101,6 +101,7 @@ bool InnerSetRecord(ani_env *env, ani_object recordObject, ani_string key, ani_o
     AniCommonMethodCacheKey recordSet = std::make_pair("$_set", RECORD_SET_NAME);
     if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordSet,
         recordCls, recordSetMethod)) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to get cached class and method for record $_set");
         return false;
     }
 
@@ -1072,6 +1073,7 @@ bool InnerWrapWantParamsArray(
     } else if (AAFwk::Array::IsWantParamsArray(ao)) {
         return InnerWrapWantParamsArrayWantParams(env, recordObject, key, array);
     } else {
+        TAG_LOGE(AAFwkTag::ANI, "unsupported array type for key: %{public}s", key.c_str());
         return false;
     }
 }
