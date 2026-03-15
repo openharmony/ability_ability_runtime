@@ -73,10 +73,10 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
         std::vector<std::string> profileInfos{};
         bundleMgrClient_.GetResConfigFile(extensionInfo, AGENT_CONFIG, profileInfos);
         for (const std::string &profileInfo : profileInfos) {
-            if (!json::accept(profileInfo)) {
+            if (!json::accept(profileInfo, true)) {
                 return -1;
             }
-            json j = json::parse(profileInfo);
+            json j = json::parse(profileInfo, nullptr, false, true);
             if (!j.contains("agentCards")) {
                 return -1;
             }
