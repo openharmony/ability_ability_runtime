@@ -104,6 +104,36 @@ bool FaultData::ReadContent(Parcel &parcel)
     markedId = parcel.ReadInt32();
     processedId = parcel.ReadInt32();
     dispatchedEventId = parcel.ReadInt32();
+    return ReadLeakContent(parcel);
+}
+
+bool FaultData::ReadLeakContent(Parcel &parcel)
+{
+    int type = 0;
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "LeakType read int32 failed.");
+    leakObject.leakType = static_cast<LeakType>(type);
+
+    uint64_t sizeValue = 0;
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo leakSize read uint64 failed.");
+    leakObject.leakSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo arktsSize read uint64 failed.");
+    leakObject.detailInfo.arktsSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo nativeSize read uint64 failed.");
+    leakObject.detailInfo.nativeSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo ionSize read uint64 failed.");
+    leakObject.detailInfo.ionSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo gpuSize read uint64 failed.");
+    leakObject.detailInfo.gpuSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo ashmemSize read uint64 failed.");
+    leakObject.detailInfo.ashmemSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo otherSize read uint64 failed.");
+    leakObject.detailInfo.otherSize = sizeValue;
     return true;
 }
 
@@ -115,6 +145,49 @@ FaultData *FaultData::Unmarshalling(Parcel &parcel)
         info = nullptr;
     }
     return info;
+}
+
+bool FaultData::WriteLeakContent(Parcel &parcel) const
+{
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(leakObject.leakType)),
+        "LeakObject leakType [%{public}d] write int32 failed.", static_cast<int32_t>(leakObject.leakType)
+    );
+
+    uint64_t leakSize = static_cast<uint64_t>(leakObject.leakSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(leakSize),
+        "LeakObject leakSize [%{public}" PRIu64 "] write uint64 failed.", leakSize
+    );
+
+    uint64_t arktsSize = static_cast<uint64_t>(leakObject.detailInfo.arktsSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(arktsSize),
+        "LeakDetailInfo arktsSize [%{public}" PRIu64 "] write uint64 failed.", arktsSize
+    );
+
+    uint64_t nativeSize = static_cast<uint64_t>(leakObject.detailInfo.nativeSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(nativeSize),
+        "LeakDetailInfo nativeSize [%{public}" PRIu64 "] write uint64 failed.", nativeSize
+    );
+
+    uint64_t ionSize = static_cast<uint64_t>(leakObject.detailInfo.ionSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(ionSize),
+        "LeakDetailInfo ionSize [%{public}" PRIu64 "] write uint64 failed.", ionSize
+    );
+
+    uint64_t gpuSize = static_cast<uint64_t>(leakObject.detailInfo.gpuSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(gpuSize),
+        "LeakDetailInfo gpuSize [%{public}" PRIu64 "] write uint64 failed.", gpuSize
+    );
+
+    uint64_t ashmemSize = static_cast<uint64_t>(leakObject.detailInfo.ashmemSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(ashmemSize),
+        "LeakDetailInfo ashmemSize [%{public}" PRIu64 "] write uint64 failed.", ashmemSize
+    );
+
+    uint64_t otherSize = static_cast<uint64_t>(leakObject.detailInfo.otherSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(otherSize),
+        "LeakDetailInfo otherSize [%{public}" PRIu64 "] write uint64 failed.", otherSize
+    );
+    return true;
 }
 
 bool FaultData::WriteContent(Parcel &parcel) const
@@ -171,7 +244,7 @@ bool FaultData::WriteContent(Parcel &parcel) const
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(dispatchedEventId),
         "DispatchedEventId [%{public}d] write int32 failed.", dispatchedEventId
     );
-    return true;
+    return WriteLeakContent(parcel);
 }
 
 bool FaultData::Marshalling(Parcel &parcel) const
@@ -317,6 +390,36 @@ bool AppFaultDataBySA::ReadContent(Parcel &parcel)
 
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcessLifeTime read string failed.");
     processLifeTime = strValue;
+    return ReadLeakContent(parcel);
+}
+
+bool AppFaultDataBySA::ReadLeakContent(Parcel &parcel)
+{
+    int type = 0;
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "LeakType read int32 failed.");
+    leakObject.leakType = static_cast<LeakType>(type);
+
+    uint64_t sizeValue = 0;
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakObject leakSize read uint64 failed.");
+    leakObject.leakSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo arktsSize read uint64 failed.");
+    leakObject.detailInfo.arktsSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo nativeSize read uint64 failed.");
+    leakObject.detailInfo.nativeSize = sizeValue;
+ 
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo ionSize read uint64 failed.");
+    leakObject.detailInfo.ionSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo gpuSize read uint64 failed.");
+    leakObject.detailInfo.gpuSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo ashmemSize read uint64 failed.");
+    leakObject.detailInfo.ashmemSize = sizeValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(sizeValue), "LeakDetailInfo otherSize read uint64 failed.");
+    leakObject.detailInfo.otherSize = sizeValue;
     return true;
 }
 
@@ -328,6 +431,49 @@ AppFaultDataBySA *AppFaultDataBySA::Unmarshalling(Parcel &parcel)
         info = nullptr;
     }
     return info;
+}
+
+bool AppFaultDataBySA::WriteLeakContent(Parcel &parcel) const
+{
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(leakObject.leakType)),
+        "LeakObject leakType [%{public}d] write int32 failed.", static_cast<int32_t>(leakObject.leakType)
+    );
+
+    uint64_t leakSize = static_cast<uint64_t>(leakObject.leakSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(leakSize),
+        "LeakObject leakSize [%{public}" PRIu64 "] write uint64 failed.", leakSize
+    );
+
+    uint64_t arktsSize = static_cast<uint64_t>(leakObject.detailInfo.arktsSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(arktsSize),
+        "LeakDetailInfo arktsSize [%{public}" PRIu64 "] write uint64 failed.", arktsSize
+    );
+
+    uint64_t nativeSize = static_cast<uint64_t>(leakObject.detailInfo.nativeSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(nativeSize),
+        "LeakDetailInfo nativeSize [%{public}" PRIu64 "] write uint64 failed.", nativeSize
+    );
+
+    uint64_t ionSize = static_cast<uint64_t>(leakObject.detailInfo.ionSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(ionSize),
+        "LeakDetailInfo ionSize [%{public}" PRIu64 "] write uint64 failed.", ionSize
+    );
+
+    uint64_t gpuSize = static_cast<uint64_t>(leakObject.detailInfo.gpuSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(gpuSize),
+        "LeakDetailInfo gpuSize [%{public}" PRIu64 "] write uint64 failed.", gpuSize
+    );
+
+    uint64_t ashmemSize = static_cast<uint64_t>(leakObject.detailInfo.ashmemSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(ashmemSize),
+        "LeakDetailInfo ashmemSize [%{public}" PRIu64 "] write uint64 failed.", ashmemSize
+    );
+
+    uint64_t otherSize = static_cast<uint64_t>(leakObject.detailInfo.otherSize);
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(otherSize),
+        "LeakDetailInfo otherSize [%{public}" PRIu64 "] write uint64 failed.", otherSize
+    );
+    return true;
 }
 
 bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
@@ -368,7 +514,7 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(processLifeTime),
         "processLifeTime [%{public}s] write string failed.", processLifeTime.c_str()
     );
-    return true;
+    return WriteLeakContent(parcel);
 }
 
 bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
