@@ -44,6 +44,7 @@ UIExtensionSessionInfo *UIExtensionSessionInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     info->hostElementName = *hostElement;
+    info->isBlockSubwindow = parcel.ReadBool();
     return info;
 }
 
@@ -76,6 +77,11 @@ bool UIExtensionSessionInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteParcelable(&hostElementName)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write hostElementName failed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(isBlockSubwindow)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isBlockSubwindow failed");
         return false;
     }
 
