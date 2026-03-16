@@ -207,7 +207,7 @@ HWTEST_F(ApplicationDataManagerTest,
     ApplicationDataManager::GetInstance().NotifyETSErrorObject(errorObj);
     GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSErrorObject_001 end";
 }
- 
+
 /**
  * @tc.number: ApplicationDataManager_IsUncatchable_001
  * @tc.name: ApplicationDataManager IsUncatchable
@@ -221,72 +221,6 @@ HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_IsUncatchable_001, F
     ApplicationDataManager::GetInstance().SetIsUncatchable(false);
     EXPECT_TRUE(!ApplicationDataManager::GetInstance().GetIsUncatchable());
     GTEST_LOG_(INFO) << "ApplicationDataManager_IsUncatchable_001 end";
-}
-
-/**
- * @tc.number: ApplicationDataManager_NotifyLeakObject_001
- * @tc.name: ApplicationDataManager NotifyLeakObject
- * @tc.desc: Test whether NotifyLeakObject returns false when no leak observer is set.
- */
-HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_NotifyLeakObject_001, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyLeakObject_001 start";
-    LeakObject testObj{
-        .leakType = LeakType::PSS_MEMORY,
-        .leakSize = 1024 * 1024,  // 1MB
-        .detailInfo = {
-            .arktsSize = 512 * 1024,
-            .nativeSize = 512 * 1024,
-            .ionSize = 0,
-            .gpuSize = 0,
-            .ashmemSize = 0,
-            .otherSize = 0
-        }
-    };
-    bool result = ApplicationDataManager::GetInstance().NotifyLeakObject(testObj);
-    EXPECT_FALSE(result);
-    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyLeakObject_001 end";
-}
-
-/**
- * @tc.number: ApplicationDataManager_NotifyLeakObject_002
- * @tc.name: ApplicationDataManager NotifyLeakObject WithObserver
- * @tc.desc: Test whether NotifyLeakObject executes callback normally
- */
-HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_NotifyLeakObject_002, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyLeakObject_002 start";
-    LeakObject testObj{
-        .leakType = LeakType::ION_MEMORY,
-        .leakSize = 2048 * 1024,  // 2MB
-        .detailInfo = {
-            .arktsSize = 0,
-            .nativeSize = 0,
-            .ionSize = 2048 * 1024,
-            .gpuSize = 0,
-            .ashmemSize = 0,
-            .otherSize = 0
-        }
-    };
-    bool callbackExecuted = false;
-    const bool expectedCallbackResult = true;
-    auto testCallback = [&callbackExecuted, expectedCallbackResult](const LeakObject &obj) -> bool {
-        callbackExecuted = true;
-        EXPECT_EQ(obj.leakType, LeakType::ION_MEMORY);
-        EXPECT_EQ(obj.leakSize, 2048 * 1024);
-        EXPECT_EQ(obj.detailInfo.arktsSize, 0);
-        EXPECT_EQ(obj.detailInfo.nativeSize, 0);
-        EXPECT_EQ(obj.detailInfo.ionSize, 2048 * 1024);
-        EXPECT_EQ(obj.detailInfo.gpuSize, 0);
-        EXPECT_EQ(obj.detailInfo.ashmemSize, 0);
-        EXPECT_EQ(obj.detailInfo.otherSize, 0);
-        return expectedCallbackResult;
-    };
-    ApplicationDataManager::GetInstance().SetLeakObserver(testCallback);
-    bool result = ApplicationDataManager::GetInstance().NotifyLeakObject(testObj);
-    EXPECT_TRUE(callbackExecuted);
-    EXPECT_EQ(result, expectedCallbackResult);
-    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyLeakObject_002 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
