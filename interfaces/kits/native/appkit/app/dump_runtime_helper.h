@@ -27,12 +27,15 @@ namespace AppExecFwk {
 class DumpRuntimeHelper : public std::enable_shared_from_this<DumpRuntimeHelper> {
 public:
     explicit DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application);
+    DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application,
+                      const std::shared_ptr<ApplicationInfo> &appInfo);
     ~DumpRuntimeHelper() = default;
     void SetAppFreezeFilterCallback();
     void DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
     void DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info);
 private:
     std::shared_ptr<OHOSApplication> application_ = nullptr;
+    std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;
 
     static bool Check2DOOMDumpOpt();
     void GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList);
@@ -61,6 +64,8 @@ private:
     static int GetCompressQuota (const std::vector<int64_t> &quotas);
     static bool SplitPropertyByComma(const std::string &property, std::string &runningId, std::string &value);
     static std::string GetEventConfig(const std::string &key);
+    void DumpJsHeapGc(const std::unique_ptr<AbilityRuntime::Runtime> &runtime,
+        const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 };
 } // namespace AppExecFwk
 } // namespace OHOS
