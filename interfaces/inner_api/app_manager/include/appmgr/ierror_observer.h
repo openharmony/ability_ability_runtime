@@ -24,6 +24,7 @@ struct ErrorObject {
     std::string name;
     std::string message;
     std::string stack;
+    std::string mainStack;
 };
 
 class IErrorObserver {
