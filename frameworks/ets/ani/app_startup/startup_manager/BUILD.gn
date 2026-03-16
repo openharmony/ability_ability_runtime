@@ -52,6 +52,7 @@ ohos_shared_library("startup_manager_ani_kit") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "hisysevent:libhisysevent",
     "napi:ace_napi",
     "runtime_core:ani",
