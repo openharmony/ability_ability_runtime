@@ -15,6 +15,7 @@
 
 #include "app_scheduler_proxy.h"
 
+#include "app_mem_info.h"
 #include "error_msg_util.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
@@ -208,7 +209,16 @@ void AppSchedulerProxy::ScheduleMemoryCommon(const int32_t level, const uint32_t
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!isShellCall) {
-        option.SetFlags(MessageOption::TF_ASYNC_WAKEUP_LATER);
+        switch (level) {
+            case static_cast<uint32_t>(MemoryLevel::MEMORY_LEVEL_UI_HIDDEN):
+            case static_cast<uint32_t>(MemoryLevel::MEMORY_LEVEL_BACKGROUND_MODERATE):
+            case static_cast<uint32_t>(MemoryLevel::MEMORY_LEVEL_BACKGROUND_LOW):
+            case static_cast<uint32_t>(MemoryLevel::MEMORY_LEVEL_BACKGROUND_CRITICAL):
+                option.SetFlags(MessageOption::TF_ASYNC_WAKEUP_LATER);
+                break;
+            default:
+                break;
+        }
     }
     TAG_LOGD(AAFwkTag::APPMGR, "option: %{public}d", option.GetFlags());
     if (!WriteInterfaceToken(data)) {
