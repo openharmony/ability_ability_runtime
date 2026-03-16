@@ -8155,14 +8155,6 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     newfaultData.applicationHeapInfo = faultData.applicationHeapInfo;
     newfaultData.processLifeTime = faultData.processLifeTime;
-    newfaultData.leakObject.leakType = faultData.leakObject.leakType;
-    newfaultData.leakObject.leakSize = faultData.leakObject.leakSize;
-    newfaultData.leakObject.detailInfo.arktsSize = faultData.leakObject.detailInfo.arktsSize;
-    newfaultData.leakObject.detailInfo.nativeSize = faultData.leakObject.detailInfo.nativeSize;
-    newfaultData.leakObject.detailInfo.ionSize = faultData.leakObject.detailInfo.ionSize;
-    newfaultData.leakObject.detailInfo.gpuSize = faultData.leakObject.detailInfo.gpuSize;
-    newfaultData.leakObject.detailInfo.ashmemSize = faultData.leakObject.detailInfo.ashmemSize;
-    newfaultData.leakObject.detailInfo.otherSize = faultData.leakObject.detailInfo.otherSize;
     if (appRunningManager_) {
         std::string appRunningUniqueId;
         int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(faultData.pid, appRunningUniqueId);
