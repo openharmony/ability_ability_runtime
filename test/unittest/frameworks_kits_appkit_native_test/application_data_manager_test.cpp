@@ -207,7 +207,7 @@ HWTEST_F(ApplicationDataManagerTest,
     ApplicationDataManager::GetInstance().NotifyETSErrorObject(errorObj);
     GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSErrorObject_001 end";
 }
-
+ 
 /**
  * @tc.number: ApplicationDataManager_IsUncatchable_001
  * @tc.name: ApplicationDataManager IsUncatchable
