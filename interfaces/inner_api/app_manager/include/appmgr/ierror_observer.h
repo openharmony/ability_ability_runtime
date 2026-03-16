@@ -26,6 +26,31 @@ struct ErrorObject {
     std::string stack;
 };
 
+enum class LeakType {
+    PSS_MEMORY = 1,
+    ION_MEMORY = 2,
+    ASHMEM_MEMORY = 3,
+    GPU_MEMORY = 4,
+    FD = 5,
+    THREAD = 6,
+};
+
+struct LeakDetailInfo {
+    unsigned long arktsSize = 0;
+    unsigned long nativeSize = 0;
+    unsigned long ionSize = 0;
+    unsigned long gpuSize = 0;
+    unsigned long ashmemSize = 0;
+    unsigned long otherSize = 0;
+};
+
+struct LeakObject {
+    LeakType leakType;
+    unsigned long leakSize = 0;
+    LeakDetailInfo detailInfo;
+};
+
+
 class IErrorObserver {
 public:
     IErrorObserver() = default;
