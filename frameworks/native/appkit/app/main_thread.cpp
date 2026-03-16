@@ -1006,7 +1006,7 @@ void MainThread::HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto helper = std::make_shared<DumpRuntimeHelper>(app);
+    auto helper = std::make_shared<DumpRuntimeHelper>(app, applicationInfo_);
     helper->DumpJsHeap(info);
 }
 
