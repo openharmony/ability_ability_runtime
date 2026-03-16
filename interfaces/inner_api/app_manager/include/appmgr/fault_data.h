@@ -71,6 +71,8 @@ struct FaultData : public Parcelable {
     bool ReadContent(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     bool WriteContent(Parcel &parcel) const;
+    bool ReadLeakContent(Parcel &parcel);
+    bool WriteLeakContent(Parcel &parcel) const;
     static FaultData *Unmarshalling(Parcel &parcel);
     // error object
     ErrorObject errorObject;
@@ -102,6 +104,7 @@ struct FaultData : public Parcelable {
     int32_t markedId = 0;
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
+    LeakObject leakObject;
 };
 
 /**
@@ -111,9 +114,11 @@ struct FaultData : public Parcelable {
 struct AppFaultDataBySA : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     bool ReadContent(Parcel &parcel);
+    bool ReadLeakContent(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     bool WriteErrorObject(Parcel &parcel) const;
     bool WriteContent(Parcel &parcel) const;
+    bool WriteLeakContent(Parcel &parcel) const;
     static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
     bool waitSaveState = false;
     bool notifyApp = false;
@@ -137,6 +142,7 @@ struct AppFaultDataBySA : public Parcelable {
     bool isEnableMainThreadSample;
     std::string applicationHeapInfo;
     std::string processLifeTime;
+    LeakObject leakObject;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
