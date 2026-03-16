@@ -50,7 +50,6 @@ struct LeakObject {
     LeakDetailInfo detailInfo;
 };
 
-
 class IErrorObserver {
 public:
     IErrorObserver() = default;
