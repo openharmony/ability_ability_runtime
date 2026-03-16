@@ -4261,6 +4261,7 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_003, TestSize.Level2)
     uint64_t flag = 0x0;
     uint64_t baseFlag = 1;
     flag = flag | (baseFlag << StartFlags::DEBUGGABLE);
+    flag = flag | (baseFlag << APP_FLAGS_DEBUG_SIGN);
     EXPECT_EQ(result, flag);
     TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_003 end");
 }
@@ -4282,6 +4283,25 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_004, TestSize.Level2)
     flag = flag | (baseFlag << APP_FLAGS_CLOUD_FILE_SYNC_ENABLED);
     EXPECT_EQ(result, flag);
     TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_004 end");
+}
+
+/**
+ * @tc.name: BuildStartFlags_005
+ * @tc.desc: build start flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_005, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_005 start");
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    abilityInfo.applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    uint64_t result = AppspawnUtil::BuildStartFlags(want, abilityInfo);
+    uint64_t flag = 0x0;
+    uint64_t baseFlag = 1;
+    flag = flag | (baseFlag << APP_FLAGS_DEBUG_SIGN);
+    EXPECT_EQ(result, flag);
+    TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_005 end");
 }
 
 /**
