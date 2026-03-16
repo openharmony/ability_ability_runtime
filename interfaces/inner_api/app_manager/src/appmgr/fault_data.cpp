@@ -49,6 +49,9 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Stack read string failed.");
     errorObject.stack = strValue;
 
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "MainStack read string failed.");
+    errorObject.mainStack = strValue;
+
     int type = 0;
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "FaultType read int32 failed.");
     faultType = static_cast<FaultDataType>(type);
@@ -185,6 +188,10 @@ bool FaultData::Marshalling(Parcel &parcel) const
         "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
     );
 
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.mainStack),
+        "MainStack [%{public}s] write string failed.", errorObject.mainStack.c_str()
+    );
+
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(faultType)),
         "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType)
     );
@@ -263,6 +270,9 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
 
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Stack read string failed.");
     errorObject.stack = strValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "MainStack read string failed.");
+    errorObject.mainStack = strValue;
 
     int type = 0;
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "Type read int32 failed.");
@@ -430,6 +440,10 @@ bool AppFaultDataBySA::WriteErrorObject(Parcel &parcel) const
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.stack),
         "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.mainStack),
+        "MainStack [%{public}s] write string failed.", errorObject.mainStack.c_str()
     );
     return true;
 }
