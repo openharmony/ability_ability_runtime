@@ -391,8 +391,6 @@ int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,
 int32_t AmsMgrScheduler::KillApplicationWithUserId(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName=%{public}s,userId=%{public}d,apIndex=%{public}d",
-        bundleName.c_str(), userId, appIndex);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
