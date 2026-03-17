@@ -30,6 +30,7 @@ public:
     static int32_t retDeleteData;
     static int32_t retQueryData;
     static int32_t retQueryAllData;
+    static std::vector<AgentCard> insertedCards;
     static std::vector<AgentCard> queryDataCards;
     static std::vector<AgentCard> queryAllDataCards;
     static bool retGetBundleInfo;
