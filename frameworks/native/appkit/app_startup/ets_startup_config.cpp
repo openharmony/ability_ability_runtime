@@ -141,6 +141,10 @@ bool ETSStartupConfig::GetTimeoutMs(ani_env *env, ani_object config, int32_t &ti
         TAG_LOGE(AAFwkTag::STARTUP, "null env");
         return false;
     }
+    if (config == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null config");
+        return false;
+    }
     ani_status status = env->FindClass("@ohos.app.appstartup.StartupConfig.StartupConfig", &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "Findclass failed, status: %{public}d", status);
