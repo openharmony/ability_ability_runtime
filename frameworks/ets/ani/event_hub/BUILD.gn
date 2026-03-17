@@ -47,6 +47,7 @@ ohos_shared_library("event_hub_ani_kit") {
     "ability_base:configuration",
     "hilog:libhilog",
     "napi:ace_napi",
+    "ipc:ipc_single",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
   ]
