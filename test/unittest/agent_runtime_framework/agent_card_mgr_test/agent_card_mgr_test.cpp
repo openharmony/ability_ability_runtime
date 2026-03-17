@@ -48,6 +48,7 @@ void AgentCardMgrTest::SetUp(void)
     MyFlag::retDeleteData = 0;
     MyFlag::retQueryData = 0;
     MyFlag::retQueryAllData = 0;
+    MyFlag::insertedCards.clear();
     MyFlag::queryDataCards.clear();
     MyFlag::queryAllDataCards.clear();
     MyFlag::retGetBundleInfo = true;
@@ -467,6 +468,65 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_015, TestSize.Level1)
     MyFlag::retInsertData = 0;
     int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
     EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: HandleBundleInstallTest_016
+ * @tc.desc: HandleBundleInstall deduplicates duplicate agentId entries with last-write-wins
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_016, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+
+    AppExecFwk::ExtensionAbilityInfo extensionInfo;
+    extensionInfo.bundleName = "test.bundle";
+    extensionInfo.moduleName = "testModule";
+    extensionInfo.name = "TestAgent";
+    extensionInfo.type = AppExecFwk::ExtensionAbilityType::AGENT;
+    MyFlag::mockExtensionInfos.push_back(extensionInfo);
+
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "testModule";
+    hapModuleInfo.deviceTypes = {"phone", "tablet"};
+    MyFlag::mockHapModuleInfos.push_back(hapModuleInfo);
+
+    MyFlag::mockProfileInfoContent = R"({
+        "agentCards": [{
+            "agentId": "dupAgent",
+            "name": "First Agent",
+            "description": "First Description",
+            "version": "1.0",
+            "category": "productivity",
+            "defaultInputModes": ["text"],
+            "defaultOutputModes": ["text"],
+            "appInfo": {
+                "deviceTypes": ["phone"]
+            }
+        }, {
+            "agentId": "dupAgent",
+            "name": "Second Agent",
+            "description": "Second Description",
+            "version": "2.0",
+            "category": "assistant",
+            "defaultInputModes": ["voice"],
+            "defaultOutputModes": ["text"],
+            "appInfo": {
+                "deviceTypes": ["tablet"]
+            }
+        }]
+    })";
+
+    int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
+    EXPECT_EQ(ret, 0);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].agentId, "dupAgent");
+    EXPECT_EQ(MyFlag::insertedCards[0].name, "Second Agent");
+    EXPECT_EQ(MyFlag::insertedCards[0].description, "Second Description");
+    ASSERT_NE(MyFlag::insertedCards[0].appInfo, nullptr);
+    ASSERT_EQ(MyFlag::insertedCards[0].appInfo->deviceTypes.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].appInfo->deviceTypes[0], "tablet");
 }
 
 /**

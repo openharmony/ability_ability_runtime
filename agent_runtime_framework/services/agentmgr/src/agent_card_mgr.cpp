@@ -55,7 +55,7 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Get Bundle Info fail");
         return -1;
     }
-    std::map<std::string, AgentCard> cards;
+    std::vector<AgentCard> cards;
     for (auto const &extensionInfo : bundleInfo.extensionInfos) {
         if (extensionInfo.type != ExtensionAbilityType::AGENT) {
             continue;
@@ -108,16 +108,18 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
                     // If deviceTypes is empty, use hapModuleInfo's deviceTypes
                     card.appInfo->deviceTypes = hapDeviceTypes;
                 }
-
-                cards[card.agentId] = card;
+                auto it = std::find_if(cards.begin(), cards.end(), [&card](const AgentCard &existingCard) {
+                    return existingCard.agentId == card.agentId;
+                });
+                if (it != cards.end()) {
+                    *it = card;
+                    continue;
+                }
+                cards.push_back(card);
             }
         }
     }
-    std::vector<AgentCard> cardVec;
-    for (const auto& [key, value] : cards) {
-        cardVec.push_back(value);
-    }
-    return AgentCardDbMgr::GetInstance().InsertData(bundleName, userId, cardVec);
+    return AgentCardDbMgr::GetInstance().InsertData(bundleName, userId, cards);
 }
 
 int32_t AgentCardMgr::HandleBundleUpdate(const std::string &bundleName, int32_t userId)
