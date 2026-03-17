@@ -240,5 +240,21 @@ bool ApplicationDataManager::NotifyUncaughtException(const ExceptionParams &para
     }
     return false;
 }
+
+bool ApplicationDataManager::NotifyLeakObject(const LeakObject &leakObj)
+{
+    std::lock_guard<std::mutex> lock(leakObserverMutex_);
+    if (leakObserver_) {
+        return leakObserver_(leakObj);
+    }
+    return false;
+}
+
+void ApplicationDataManager::SetLeakObserver(LeakObserverFunction leakCallback)
+{
+    std::lock_guard<std::mutex> lock(leakObserverMutex_);
+    leakObserver_ = leakCallback;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
