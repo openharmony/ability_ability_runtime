@@ -26,11 +26,10 @@ namespace OHOS {
 namespace AAFwk {
 class AbilityRecord : public std::enable_shared_from_this<AbilityRecord> {
 public:
+    static std::shared_ptr<AbilityRecord> CreateAbilityRecord(
+        const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId);
     AbilityRecord(const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId)
-        : abilityInfo_(abilityInfo), userId_(userId)
-    {
-        token_ = sptr<Token>::MakeSptr(weak_from_this());
-    }
+        : abilityInfo_(abilityInfo), userId_(userId) {}
 
     inline int32_t GetOwnerMissionUserId() const
     {

@@ -64,7 +64,7 @@ std::shared_ptr<AbilityRecord> OEExtensionUtilsTest::CreateOEExtensionAbilityRec
     abilityInfo.name = "OEExtension";
     abilityInfo.type = AbilityType::EXTENSION;
     abilityInfo.extensionAbilityType = ExtensionAbilityType::CONTENT_EMBED;
-    return std::make_shared<AbilityRecord>(abilityInfo, TEST_USER_ID);
+    return AbilityRecord::CreateAbilityRecord(abilityInfo, TEST_USER_ID);
 }
 
 Want OEExtensionUtilsTest::CreateValidOEExtWant()

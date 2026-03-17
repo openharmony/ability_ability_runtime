@@ -52,8 +52,6 @@ int32_t OEExtensionUtils::ValidateCaller(
         return ERR_INVALID_CALLER;
     }
 
-    userId = abilityRecord->GetOwnerMissionUserId();
-
     const auto &abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
@@ -80,6 +78,7 @@ int32_t OEExtensionUtils::ValidateCaller(
     }
 
     hostBundleName = processInfo.bundleNames.empty() ? "" : processInfo.bundleNames[0];
+    userId = abilityRecord->GetOwnerMissionUserId();
     return ERR_OK;
 }
 
