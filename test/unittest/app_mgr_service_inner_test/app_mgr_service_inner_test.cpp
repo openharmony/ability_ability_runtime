@@ -6353,7 +6353,7 @@ HWTEST_F(AppMgrServiceInnerTest, AfterLoadAbility_0001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfoSptr = std::make_shared<AbilityInfo>(abilityInfo);
     auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
     appMgrServiceInner->taskHandler_ = nullptr;
-    appMgrServiceInner->AfterLoadAbility(appRecord, abilityInfoSptr, loadParam);
+    appMgrServiceInner->AfterLoadAbility(appRecord, abilityInfoSptr, loadParam, false);
     ASSERT_NE(appRecord, nullptr);
 }
 
