@@ -1945,7 +1945,7 @@ private:
 #endif // SUPPORT_CHILD_PROCESS
 
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
-        std::shared_ptr<AbilityRuntime::LoadParam> loadParam, bool isProcessReuse);
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam, bool isProcessReuse = false);
 
     static int32_t GetLoadTimeout(int32_t loadTimeout);
 
