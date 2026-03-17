@@ -1334,6 +1334,32 @@ bool AppRunningRecord::IsLastAbilityByFlag(sptr<IRemoteObject> token, bool clear
     return IsLastAbilityRecord(token);
 }
 
+bool AppRunningRecord::IsLastAgentExtensionAbility(const sptr<IRemoteObject> &token)
+{
+    auto abilityRecord = GetAbilityRunningRecordByToken(token);
+    if (abilityRecord == nullptr || abilityRecord->GetAbilityInfo() == nullptr ||
+        abilityRecord->GetAbilityInfo()->extensionAbilityType != AppExecFwk::ExtensionAbilityType::AGENT) {
+        return false;
+    }
+
+    int32_t agentAbilitySize = 0;
+    auto abilitiesMap = GetAbilities();
+    for (const auto &item : abilitiesMap) {
+        auto currentAbilityRecord = item.second;
+        if (currentAbilityRecord == nullptr || currentAbilityRecord->GetAbilityInfo() == nullptr) {
+            continue;
+        }
+        if (currentAbilityRecord->GetAbilityInfo()->extensionAbilityType ==
+            AppExecFwk::ExtensionAbilityType::AGENT) {
+            agentAbilitySize++;
+        }
+        if (agentAbilitySize > 1) {
+            return false;
+        }
+    }
+    return agentAbilitySize == 1;
+}
+
 bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
     {

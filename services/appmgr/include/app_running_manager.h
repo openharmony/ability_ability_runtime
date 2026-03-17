@@ -455,6 +455,8 @@ public:
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void NotifyTerminateAgentUIExtensionAbility(std::shared_ptr<AppRunningRecord> appRecord,
+        std::shared_ptr<AppMgrServiceInner> appMgrServiceInner);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
     void ExecuteConfigurationTask(const BackgroundAppInfo& info,

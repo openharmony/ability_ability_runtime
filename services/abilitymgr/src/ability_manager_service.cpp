@@ -13898,6 +13898,12 @@ void AbilityManagerService::OnStartProcessFailed(const std::vector<sptr<IRemoteO
     }
 }
 
+void AbilityManagerService::NotifyTerminateAbility(const sptr<IRemoteObject> &token)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NotifyTerminateAbility");
+    TerminateAbility(token);
+}
+
 void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)

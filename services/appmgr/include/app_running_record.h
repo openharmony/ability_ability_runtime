@@ -1232,6 +1232,8 @@ public:
         return isAllowScbProcessMoveToBackground_.load();
     }
 
+    bool IsLastAgentExtensionAbility(const sptr<IRemoteObject> &token);
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
