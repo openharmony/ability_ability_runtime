@@ -1184,6 +1184,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         return;
     }
 
+    bool isProcessReuse = false;
     if (!appRecord) {
         TAG_LOGD(AAFwkTag::APPMGR, "appRecord null");
         if (KillingProcessManager::GetInstance().IsCallerKilling(callerKey)) {
@@ -1226,6 +1227,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             return;
         }
     } else {
+        isProcessReuse = true;
         HandleExistingAppRecordAfterFound(appRecord, abilityInfo, hapModuleInfo, want, isProcCache, loadParam);
         if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
             AddUIExtensionBindItem(want, appRecord, loadParam->token);
@@ -1245,7 +1247,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         want->RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
     }
     guard.appRecord_ = appRecord;
-    AfterLoadAbility(appRecord, abilityInfo, loadParam);
+    AfterLoadAbility(appRecord, abilityInfo, loadParam, isProcessReuse);
 }
 
 void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_ptr<AbilityInfo>& abilityInfo,
@@ -1272,7 +1274,8 @@ void AppMgrServiceInner::ReportUIExtensionProcColdStartToRss(const std::shared_p
 }
 
 void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord,
-    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
+    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+    bool isProcessReuse)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRecord || !abilityInfo || !loadParam) {
@@ -1286,7 +1289,8 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     PerfProfile::GetInstance().Reset();
 
     auto reportLoadTask = [appRecord, abilityRecordId = loadParam->abilityRecordId,
-        loadTimeout = loadParam->loadTimeout]() {
+        loadTimeout = loadParam->loadTimeout, extensionType = abilityInfo->extensionAbilityType,
+        isProcessReuse]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
             auto timeOut = AppMgrServiceInner::GetLoadTimeout(loadTimeout);
@@ -1295,8 +1299,12 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
                     AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             }
             TAG_LOGD(AAFwkTag::APPMGR, "report load,timeout:%{public}d", timeOut);
+            std::unordered_map<std::string, std::string> eventParams;
+            eventParams["extensionType"] = std::to_string(static_cast<int32_t>(extensionType));
+            eventParams["isProcessReuse"] = std::to_string(isProcessReuse);
             AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
-                priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
+                priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId),
+                eventParams);
         }
     };
     if (rssTaskHandler_) {
