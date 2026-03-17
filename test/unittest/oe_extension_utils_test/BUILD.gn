@@ -41,6 +41,7 @@ ohos_unittest("oe_extension_utils_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_record/ability_record_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_token_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/oe_extension_utils.cpp",
+    "mock/src/ability_record.cpp",
     "mock/src/app_scheduler.cpp",
     "oe_extension_utils_test.cpp"
   ]

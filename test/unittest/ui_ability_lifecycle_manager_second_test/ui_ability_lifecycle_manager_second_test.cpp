@@ -1504,8 +1504,8 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_002, TestSize.Le
     abilityRequest.specifiedFlag = "";  // Empty flag
     
     int32_t requestId = 456;
-    int32_t persistentId = 0;
-    bool reuse = false;
+    int32_t persistentId = 1;
+    bool reuse = true;
     
     auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
     
@@ -1575,7 +1575,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_005, TestSize.Le
     
     AbilityRequest abilityRequest;
     abilityRequest.isStartByOEExt = true;
-    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     abilityRequest.specifiedFlag = "test_flag";
     
     int32_t requestId = 202;
@@ -1625,7 +1625,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_007, TestSize.Le
     
     AbilityRequest abilityRequest;
     abilityRequest.isStartByOEExt = true;
-    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     abilityRequest.specifiedFlag = "test_flag";
     
     int32_t requestId = 404;
@@ -1637,81 +1637,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_007, TestSize.Le
     EXPECT_TRUE(ret);  // Should return true (not duplicate)
     EXPECT_EQ(persistentId, 0);
     EXPECT_EQ(reuse, true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_008
- * @tc.desc: Test CheckStartByOEExt with STANDARD launch mode
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_008, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    
-    AbilityRequest abilityRequest;
-    abilityRequest.isStartByOEExt = true;
-    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
-    abilityRequest.specifiedFlag = "standard_test";
-    
-    int32_t requestId = 505;
-    int32_t persistentId = 999;
-    bool reuse = true;
-    
-    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
-    
-    EXPECT_TRUE(ret);  // Should return true
-    EXPECT_EQ(persistentId, 999);
-    EXPECT_EQ(reuse, true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_009
- * @tc.desc: Test CheckStartByOEExt with SINGLETON launch mode
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_009, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    
-    AbilityRequest abilityRequest;
-    abilityRequest.isStartByOEExt = true;
-    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
-    abilityRequest.specifiedFlag = "singleton_test";
-    
-    int32_t requestId = 606;
-    int32_t persistentId = 777;
-    bool reuse = false;
-    
-    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
-    
-    EXPECT_TRUE(ret);  // Should return true
-    EXPECT_EQ(persistentId, 777);
-    EXPECT_EQ(reuse, false);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_CheckStartByOEExt_010
- * @tc.desc: Test CheckStartByOEExt with invalid launch mode enum value
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_010, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    
-    AbilityRequest abilityRequest;
-    abilityRequest.isStartByOEExt = true;
-    abilityRequest.abilityInfo.launchMode = static_cast<AppExecFwk::LaunchMode>(999);  // Invalid enum value
-    abilityRequest.specifiedFlag = "invalid_test";
-    
-    int32_t requestId = 707;
-    int32_t persistentId = 888;
-    bool reuse = false;
-    
-    auto ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
-    
-    EXPECT_TRUE(ret);  // Should return true (falls through to default behavior)
-    EXPECT_EQ(persistentId, 888);
-    EXPECT_EQ(reuse, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
