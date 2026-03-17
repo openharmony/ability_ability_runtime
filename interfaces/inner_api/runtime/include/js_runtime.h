@@ -75,6 +75,7 @@ public:
     static std::unique_ptr<JsRuntime> Create(const Options& options);
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
+    static void SetOrUpdateLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
     static void InheritPluginNamespace(const std::vector<std::string> &moduleNames);
     static void CreatePluginDefaultNamespace(const std::string &lddictorys);
 
