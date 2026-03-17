@@ -22,6 +22,7 @@ int32_t AgentRuntime::MyFlag::retInsertData = 0;
 int32_t AgentRuntime::MyFlag::retDeleteData = 0;
 int32_t AgentRuntime::MyFlag::retQueryData = 0;
 int32_t AgentRuntime::MyFlag::retQueryAllData = 0;
+std::vector<AgentRuntime::AgentCard> AgentRuntime::MyFlag::insertedCards;
 std::vector<AgentRuntime::AgentCard> AgentRuntime::MyFlag::queryDataCards;
 std::vector<AgentRuntime::AgentCard> AgentRuntime::MyFlag::queryAllDataCards;
 
@@ -40,6 +41,7 @@ AgentCardDbMgr::~AgentCardDbMgr()
 
 int32_t AgentCardDbMgr::InsertData(const std::string &bundleName, int32_t userId, const std::vector<AgentCard> &cards)
 {
+    MyFlag::insertedCards = cards;
     return MyFlag::retInsertData;
 }
 
