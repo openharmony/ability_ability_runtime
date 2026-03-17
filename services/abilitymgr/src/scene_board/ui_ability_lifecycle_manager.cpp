@@ -705,9 +705,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     const auto &abilityInfo = abilityRequest.abilityInfo;
     auto requestId = RequestIdUtil::GetRequestId();
-    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
-    auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified && !isPlugin && !abilityRequest.isStartByOEExt) {
+    if (SkipSpecified(abilityRequest)) {
         if (abilityRequest.startOptions.GetCurrentProcessName().empty()) {
             auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
             specifiedRequest->preCreateProcessName = true;
@@ -762,6 +760,12 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     sessionInfo->want.RemoveAllFd();
     return ret;
+}
+
+bool UIAbilityLifecycleManager::SkipSpecified(const AbilityRequest &abilityRequest)
+{
+    return abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED ||
+        StartupUtil::IsStartPlugin(abilityRequest.want) || abilityRequest.isStartByOEExt;
 }
 
 bool UIAbilityLifecycleManager::CheckStartByOEExt(const AbilityRequest &abilityRequest, int32_t requestId,

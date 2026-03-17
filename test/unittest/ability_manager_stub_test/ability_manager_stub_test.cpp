@@ -4972,7 +4972,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_003
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityByOEExtInner
  * EnvConditions: NA
- * CaseDescription: Verify the function StartAbilityByOEExtInner with valid parameters calls StartAbilityByOEExt successfully
+ * CaseDescription: Verify the function StartAbilityByOEExtInner success
  */
 HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_004, TestSize.Level1)
 {
