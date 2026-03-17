@@ -355,8 +355,11 @@ const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS = 1;
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS_DEV_MODE = 3;
 
+constexpr const char* AGENT_EXTENSION_TYPE = "agent";
+
 // kill resaon
 constexpr int32_t PROCESS_KILL_PARAM = 25; // PROCESS_KILL params
+
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -1469,6 +1472,11 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
         return;
     }
+    if (abilityInfo->type == AppExecFwk::AbilityType::EXTENSION &&
+        abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+        processName = appInfo->bundleName + ":" + AGENT_EXTENSION_TYPE;
+        return;
+    }
     if (!abilityInfo->process.empty() && (isCallerSetProcess || specifiedProcessFlag.empty())) {
         TAG_LOGD(AAFwkTag::APPMGR, "Process not null");
         if (AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
@@ -1783,6 +1791,17 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
             item.callback->OnAppRemoteDied(abilityTokens);
+        }
+    }
+}
+
+void AppMgrServiceInner::NotifyTerminateAbility(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyTerminateAbility(token);
         }
     }
 }
