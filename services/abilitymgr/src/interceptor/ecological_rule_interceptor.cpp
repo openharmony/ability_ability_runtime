@@ -34,18 +34,7 @@ constexpr int32_t ERMS_ISALLOW_EMBED_RESULTCODE = 1;
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (StartAbilityUtils::skipErms) {
-        StartAbilityUtils::skipErms = false;
-        return ERR_OK;
-    }
-    if (param.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
-        param.want.GetElement().GetBundleName()) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "same bundle");
-        StartAbilityUtils::ermsSupportBackToCallerFlag = true;
-        return ERR_OK;
-    }
-    if (param.isTargetPlugin) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start plugin ability");
+    if (PreHandle(param)) {
         return ERR_OK;
     }
     ErmsCallerInfo callerInfo;
@@ -88,6 +77,25 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     }
 #endif
     return ERR_ECOLOGICAL_CONTROL_STATUS;
+}
+
+bool EcologicalRuleInterceptor::PreHandle(const AbilityInterceptorParam &param)
+{
+    if (StartAbilityUtils::skipErms) {
+        StartAbilityUtils::skipErms = false;
+        return true;
+    }
+    if (param.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
+        param.want.GetElement().GetBundleName()) {
+        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "same bundle");
+        StartAbilityUtils::ermsSupportBackToCallerFlag = true;
+        return true;
+    }
+    if (param.isTargetPlugin) {
+        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start plugin ability");
+        return true;
+    }
+    return false;
 }
 
 bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)

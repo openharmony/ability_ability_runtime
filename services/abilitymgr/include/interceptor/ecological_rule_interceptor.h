@@ -53,6 +53,7 @@ private:
         ErmsCallerInfo &callerInfo, int32_t userId, const sptr<IRemoteObject> &callerToken = nullptr,
         bool skipCallerInfo = false);
     static int32_t GetAppTypeByBundleType(int32_t bundleType);
+    static bool PreHandle(const AbilityInterceptorParam &param);
 };
 } // namespace AAFwk
 } // namespace OHOS
