@@ -1623,7 +1623,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_006, TestSize.Le
     ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
     EXPECT_TRUE(ret);  // Should return true (not duplicate)
 
-    mgr->sessionAbilityMap_.emplace(persistentId, abilityRecord);
+    mgr->sessionAbilityMap_[persistentId] = abilityRecord;
     ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
     EXPECT_TRUE(ret);  // Should return true (not duplicate)
 
@@ -1632,7 +1632,65 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckStartByOEExt_006, TestSize.Le
     ability2->SetPid(1);
     abilityRequest.callerToken = ability2->GetToken();
     ret = mgr->CheckStartByOEExt(abilityRequest, requestId, persistentId, reuse);
-    EXPECT_FALSE(ret); 
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ExactSpecified_001
+ * @tc.desc: ExactSpecified
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, ExactSpecified_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    // 000
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    EXPECT_TRUE(mgr->ExactSpecified(abilityRequest));
+
+    // 100
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 110
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 101
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 111
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 010
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 011
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
+
+    // 001
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    EXPECT_FALSE(mgr->ExactSpecified(abilityRequest));
 }
 }  // namespace AAFwk
 }  // namespace OHOS
