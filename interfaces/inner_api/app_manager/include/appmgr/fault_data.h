@@ -102,6 +102,7 @@ struct FaultData : public Parcelable {
     int32_t markedId = 0;
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
+    std::string callbackLog;
 };
 
 /**
