@@ -255,6 +255,28 @@ void AppfreezeInner::GetApplicationInfo(FaultData& faultData)
         faultData.applicationHeapInfo.c_str(), faultData.processLifeTime.c_str());
 }
 
+int AppfreezeInner::TransformHicollieFaultNumber(const std::string& faultName)
+{
+    if (faultName == AppFreezeType::THREAD_BLOCK_3S) {
+        return 0;
+    } else if (faultName == AppFreezeType::THREAD_BLOCK_6S) {
+        return 1;
+    } else if (faultName == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        return 2;
+    } else if (faultName == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        return 3;
+    } else if (faultName == AppFreezeType::APP_INPUT_BLOCK) {
+        return 4;
+    } else if (faultName == AppFreezeType::BUSSINESS_THREAD_BLOCK_3S) {
+        return 5;
+    } else if (faultName == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+        return 6;
+    } else if (faultName == AppFreezeType::BUSINESS_INPUT_BLOCK) {
+        return 7;
+    }
+    return -1;
+}
+
 void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent)
 {
     faultData.errorObject.message += msgContent;
@@ -264,6 +286,8 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.notifyApp = false;
     faultData.waitSaveState = false;
     faultData.forceExit = false;
+    int faultNum = TransformHicollieFaultNumber(faultData.errorObject.name);
+    faultData.callbackLog = OHOS::HiviewDFX::WatchDog::GetInstance().ReadDataFromBuffer(faultNum);
     GetApplicationInfo(faultData);
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         MMI::InputManager::GetInstance()->GetLastEventIds(faultData.markedId,

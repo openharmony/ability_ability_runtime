@@ -104,6 +104,10 @@ bool FaultData::ReadContent(Parcel &parcel)
     markedId = parcel.ReadInt32();
     processedId = parcel.ReadInt32();
     dispatchedEventId = parcel.ReadInt32();
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "callback log read string failed.");
+        return false;
+    }
     return true;
 }
 
@@ -170,6 +174,10 @@ bool FaultData::WriteContent(Parcel &parcel) const
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(dispatchedEventId),
         "DispatchedEventId [%{public}d] write int32 failed.", dispatchedEventId
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(callbackLog),
+        "CallbackLog [%{public}s] write int32 failed.", callbackLog.c_str()
     );
     return true;
 }
