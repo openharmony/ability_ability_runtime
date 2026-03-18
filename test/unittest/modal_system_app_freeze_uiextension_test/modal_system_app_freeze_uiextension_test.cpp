@@ -95,5 +95,29 @@ HWTEST_F(ModalSystemAppFreezeUiextensionTest, CreateSystemDialogWant_001, TestSi
     EXPECT_NE(ret, true);
 }
 
+/**
+ * @tc.number: ProcessAppFreeze_001
+ * @tc.name: DumpFfrt
+ * @tc.desc: Test whether ProcessAppFreeze is called normally.
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(ModalSystemAppFreezeUiextensionTest, ProcessAppFreeze_001, TestSize.Level1)
+{
+    bool focus = true;
+    std::string pid = "1";
+    std::string bundleName = "Test";
+    FaultData faultData;
+    faultData.faultType = FaultDataType::APP_FREEZE;
+    faultData.errorObject.name = "THREAD_BLOCK_6S";
+    ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(
+        focus, faultData, pid, bundleName, nullptr);
+    EXPECT_TRUE(focus);
+    faultData.errorObject.name = "BUSSINESS_THREAD_BLOCK_6S";
+    ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(
+        focus, faultData, pid, bundleName, nullptr);
+    EXPECT_TRUE(focus);
+}
+
 }
 }
