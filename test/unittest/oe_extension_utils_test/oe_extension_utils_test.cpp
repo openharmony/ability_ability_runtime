@@ -339,5 +339,21 @@ HWTEST_F(OEExtensionUtilsTest, RemoveOEExtRequest_002, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest RemoveOEExtRequest_002 end");
 }
+
+/*
+ * Feature: OEExtensionUtils
+ * Function: GetInstance
+ */
+HWTEST_F(OEExtensionUtilsTest, GetInstance_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest GetInstance_001 start");
+
+    OEExtensionUtils &instance = OEExtensionUtils::GetInstance();
+    EXPECT_EQ(&instance, &OEExtensionUtils::GetInstance());
+
+    OEExtensionUtils &instance2 = OEExtensionUtils::GetInstance();
+    EXPECT_EQ(&instance, &instance2);
+    TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest GetInstance_001 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

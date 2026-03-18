@@ -1531,7 +1531,8 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
         DelayedSingleton<ForegroundAppConnectionManager>::GetInstance()->OnCallerStarted(IPCSkeleton::GetCallingPid(),
             IPCSkeleton::GetCallingUid(), param.want.GetBundle());
     }
-    if (param.specifyTokenId > 0 && param.callerToken != nullptr) { // for sa specify tokenId and caller token
+    if ((param.specifyTokenId > 0 || param.isStartByOEExt) && param.callerToken != nullptr) {
+        // for sa specify tokenId and caller token
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfoFromToken(abilityRequest.want, param.callerToken);
     } else if (!param.isStartAsCaller) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
