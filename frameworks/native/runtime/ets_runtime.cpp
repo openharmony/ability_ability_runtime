@@ -233,6 +233,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<Runtime> &jsRu
         auto vm = static_cast<JsRuntime *>(jsRuntimeValid->get())->GetEcmaVm();
         panda::JSNApi::SetHostResolveBufferTrackerForHybridApp(
             vm, HybridJsModuleReader(options.bundleName, options.hapPath, options.isUnique));
+        panda::JSNApi::UpdateArkTSMode(vm, options.arkTSMode);
     }
 
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), GetAotPath(options), options.appInnerHspPathList,

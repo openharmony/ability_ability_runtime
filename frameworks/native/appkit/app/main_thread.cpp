@@ -1755,6 +1755,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.isStartWithDebug = appLaunchData.GetDebugApp();
         options.allowArkTsLargeHeap = appInfo.allowArkTsLargeHeap;
         options.versionCode = appInfo.versionCode;
+        options.arkTSMode = appInfo.arkTSMode;
 #ifdef CJ_FRONTEND
         if (isCJApp) {
             options.lang = AbilityRuntime::Runtime::Language::CJ;
