@@ -78,20 +78,48 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     wptr<IRemoteObject> remote;
     FuzzedDataProvider fdp(data, size);
-    connectionObserverClientImpl->RemoveObserversLocked(observer);
-    connectionObserverClientImpl->GetServiceProxy();
-    connectionObserverClientImpl->ConnectLocked();
-    connectionObserverClientImpl->HandleRemoteDied(remote);
-    connectionObserverClientImpl->ResetProxy(remote);
-    connectionObserverClientImpl->ResetStatus();
-    connectionObserverClientImpl->NotifyServiceDiedToObservers();
-    connectionObserverClientImpl->GetObservers();
-    auto deathRecipient = std::make_shared<AbilityRuntime::ConnectionObserverClientImpl::ServiceDeathRecipient>(
-        connectionObserverClientImpl);
-    if (!deathRecipient) {
-        return false;
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->RemoveObserversLocked(observer);
     }
-    deathRecipient->OnRemoteDied(remote);
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->GetServiceProxy();
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->ConnectLocked();
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->HandleRemoteDied(remote);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->ResetProxy(remote);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->ResetStatus();
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->NotifyServiceDiedToObservers();
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->GetObservers();
+    }
+
+    if (fdp.ConsumeBool()) {
+        auto deathRecipient = std::make_shared<AbilityRuntime::ConnectionObserverClientImpl::ServiceDeathRecipient>(
+            connectionObserverClientImpl);
+        if (!deathRecipient) {
+            return false;
+        }
+        deathRecipient->OnRemoteDied(remote);
+    }
+
     return true;
 }
 }
