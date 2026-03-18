@@ -142,6 +142,8 @@ void ETSTestRunner::Prepare()
 void ETSTestRunner::Run()
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "ETSTestRunner Run");
+    std::unique_lock<std::mutex> lck(mutexHasStop_);
+    hasStop_ = false;
     if (etsTestRunnerObj_ != nullptr) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "use etsTestRunnerObj_");
         auto env = etsRuntime_.GetAniEnv();
@@ -178,7 +180,9 @@ void ETSTestRunner::Run()
 void ETSTestRunner::Stop()
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "ETSTestRunner Stop");
-    if (etsTestRunnerObj_ != nullptr) {
+    std::unique_lock<std::mutex> lck(mutexHasStop_);
+    if (!hasStop_ && etsTestRunnerObj_ != nullptr) {
+        hasStop_ = true;
         TAG_LOGI(AAFwkTag::DELEGATOR, "use etsTestRunnerObj_");
         auto env = etsRuntime_.GetAniEnv();
         if (env == nullptr) {
