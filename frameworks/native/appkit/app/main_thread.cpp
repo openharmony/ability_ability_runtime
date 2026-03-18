@@ -1733,8 +1733,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
 
-    RunNativeStartupTask(bundleInfo, appLaunchData);
-
     if (isStageBased) {
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
@@ -2048,6 +2046,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
+    RunNativeStartupTask(bundleInfo, appLaunchData);
     if (!IsEtsAPP(appInfo) &&
         (appLaunchData.IsNeedPreloadModule() ||
         appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE)) {
