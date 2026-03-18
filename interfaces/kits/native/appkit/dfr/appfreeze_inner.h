@@ -80,6 +80,7 @@ private:
     void GetApplicationInfo(FaultData& faultData);
     bool GetProcessStartTime(pid_t tid, unsigned long long &startTime);
     bool ReadFdToString(int fd, std::string& content);
+    
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
