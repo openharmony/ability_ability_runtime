@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ export interface ProcessInformation {
     state: appManager.ProcessState;
     bundleType: bundleManager.BundleType;
     appCloneIndex?: int;
+    isPreload?: boolean;
 }
 
 export default class ProcessInformationInner implements ProcessInformation {
@@ -35,4 +36,5 @@ export default class ProcessInformationInner implements ProcessInformation {
   state: appManager.ProcessState = appManager.ProcessState.STATE_CREATE;
   bundleType: bundleManager.BundleType = bundleManager.BundleType.APP;
   appCloneIndex?: int;
+  isPreload?: boolean;
 }
