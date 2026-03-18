@@ -68,7 +68,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     }
     FaultDataType faultType = faultData.faultType;
     std::string name = faultData.errorObject.name;
-    if (name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+    if (name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
         return;
     }
     bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S ||
