@@ -125,5 +125,56 @@ HWTEST_F(AppExitReasonHelperTest, GetActiveAbilityListWithPid_0100, TestSize.Lev
     int32_t result = appExitReasonHelper_->GetActiveAbilityListWithPid(uid, abilityList, pid);
     EXPECT_EQ(abilityList.size(), 0);
 }
+
+/**
+ * @tc.name: GetRunningProcessInfos_0100
+ * @tc.desc: GetRunningProcessInfos
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, GetRunningProcessInfos_0100, TestSize.Level1)
+{
+    auto appExitReasonHelper = std::make_shared<AAFwk::AppExitReasonHelper>(nullptr);
+
+    auto pid = AAFwk::NO_PID;
+    int32_t userId = -1;
+    std::string bundleName = "com.example.app";
+    auto res = appExitReasonHelper->GetRunningProcessInfos(userId, bundleName);
+    EXPECT_TRUE(res.empty());
+}
+
+/**
+ * @tc.name: GetRunningProcessInfos_0200
+ * @tc.desc: GetRunningProcessInfos
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, GetRunningProcessInfos_0200, TestSize.Level1)
+{
+    auto appExitReasonHelper = std::make_shared<AAFwk::AppExitReasonHelper>(nullptr);
+
+    auto pid = AAFwk::NO_PID;
+    int32_t userId = 100;
+    std::string bundleName = "";
+    auto res = appExitReasonHelper->GetRunningProcessInfos(userId, bundleName);
+    EXPECT_TRUE(res.empty());
+}
+
+/**
+ * @tc.name: GetRunningProcessInfos_0300
+ * @tc.desc: GetRunningProcessInfos
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, GetRunningProcessInfos_0300, TestSize.Level1)
+{
+    auto appExitReasonHelper = std::make_shared<AAFwk::AppExitReasonHelper>(nullptr);
+
+    auto pid = AAFwk::NO_PID;
+    int32_t userId = -1;
+    std::string bundleName = "";
+    auto res = appExitReasonHelper->GetRunningProcessInfos(userId, bundleName);
+    EXPECT_TRUE(res.empty());
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
