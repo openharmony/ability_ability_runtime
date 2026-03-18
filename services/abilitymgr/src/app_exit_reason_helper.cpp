@@ -347,7 +347,14 @@ int32_t AppExitReasonHelper::AddBundleExitReason(
         return ret;
     }
     AppExecFwk::RunningProcessInfo processInfo;
-    GetRunningProcessInfo(NO_PID, userId, bundleName, processInfo);
+    auto processInfos = GetRunningProcessInfos(userId, bundleName);
+    for (const auto& info : processInfos) {
+        if (info.appCloneIndex == appIndex || info.appCloneIndex == -1) {
+            processInfo = info;
+            break;
+        }
+    }
+
     RecordExitReasonParams params;
     params.pid = processInfo.pid_;
     params.uid = bundleInfo.uid;
@@ -479,19 +486,26 @@ void AppExitReasonHelper::GetRunningProcessInfo(int32_t pid, int32_t userId, con
             processInfo);
         return;
     }
+    std::vector<AppExecFwk::RunningProcessInfo> infoList = GetRunningProcessInfos(userId, bundleName);
+    if (infoList.size() == 1) {
+        processInfo = infoList.front();
+    }
+}
+
+std::vector<AppExecFwk::RunningProcessInfo> AppExitReasonHelper::GetRunningProcessInfos(
+    int32_t userId, const std::string &bundleName)
+{
+    std::vector<AppExecFwk::RunningProcessInfo> infoList;
     if (userId == -1 || bundleName.empty()) {
-        return;
+        return infoList;
     }
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
-        return;
+        return infoList;
     }
-    std::vector<AppExecFwk::RunningProcessInfo> infoList;
     IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, userId, infoList));
-    if (infoList.size() == 1) {
-        processInfo = infoList.front();
-    }
+    return infoList;
 }
 
 int32_t AppExitReasonHelper::AddProcessExitReason(const RecordExitReasonParams &params)

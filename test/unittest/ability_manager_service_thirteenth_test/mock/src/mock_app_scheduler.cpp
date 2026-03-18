@@ -21,6 +21,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t MOCK_FAILED_PID = 654321;
+}
 AppScheduler::AppScheduler()
 {
     TAG_LOGI(AAFwkTag::TEST, " Test AppScheduler::AppScheduler()");
@@ -201,8 +204,13 @@ void AppScheduler::GetRunningProcessInfoByToken(const sptr<IRemoteObject>& token
 
 void AppScheduler::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo& info) const
 {
-    info.isAbilityForegrounding = true;
-    info.isFocused = true;
+    if (pid == MOCK_FAILED_PID) {
+        info.isAbilityForegrounding = false;
+        info.isFocused = false;
+    } else {
+        info.isAbilityForegrounding = true;
+        info.isFocused = true;
+    }
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::GetRunningProcessInfoByPid()");
 }
 
