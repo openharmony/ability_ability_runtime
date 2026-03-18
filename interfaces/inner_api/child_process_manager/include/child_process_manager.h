@@ -44,6 +44,8 @@ public:
     static void HandleSigChild(int32_t signo);
     bool IsChildProcess();
     bool IsChildProcessBySelfFork();
+    bool IsArkChildProcessSupported();
+    bool IsNativeChildProcessSupported();
     ChildProcessManagerErrorCode StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid,
         bool isStaticChildProcess = false);
     ChildProcessManagerErrorCode StartChildProcessByAppSpawnFork(const std::string &srcEntry, pid_t &pid,
@@ -91,6 +93,7 @@ private:
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     void MakeProcessName(const std::string &srcEntry);
     bool IsMultiProcessFeatureApp(const AppExecFwk::BundleInfo &bundleInfo);
+    bool IsChildProcessSupportedImpl(bool isNative);
     ChildProcessManagerErrorCode GetErrorCodeCompat(int32_t ret, int32_t childProcessType);
 
     static bool signalRegistered_;

@@ -11653,8 +11653,7 @@ int32_t AppMgrServiceInner::CreateNativeChildProcess(const pid_t hostPid, const 
         return ERR_INVALID_OPERATION;
     }
 
-    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
-        !AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, appRecord->GetAppIdentifier()) &&
+    if (!AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, appRecord->GetAppIdentifier()) &&
         !AllowChildProcessInMultiProcessFeatureApp(appRecord)) {
         TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
         return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
