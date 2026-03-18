@@ -3775,7 +3775,18 @@ void MainThread::NotifyAppFault(const FaultData &faultData)
             .message = faultData.errorObject.message,
             .stack = faultData.errorObject.stack
         };
-        ApplicationDataManager::GetInstance().NotifyExceptionObject(faultErrorObj);
+
+        LeakObject leakObj = {
+            .leakType = faultData.leakObject.leakType,
+            .leakSize = faultData.leakObject.leakSize,
+            .detailInfo = faultData.leakObject.detailInfo,
+        };
+
+        if (faultData.faultType == FaultDataType::RESOURCE_CONTROL) {
+            ApplicationDataManager::GetInstance().NotifyLeakObject(leakObj);
+        } else {
+            ApplicationDataManager::GetInstance().NotifyExceptionObject(faultErrorObj);
+        }
     }
 }
 
