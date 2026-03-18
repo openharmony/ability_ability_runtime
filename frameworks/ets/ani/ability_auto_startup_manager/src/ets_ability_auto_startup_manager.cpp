@@ -71,6 +71,11 @@ void EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications(
     GetInstance().OnQueryAllAutoStartupApplications(env, callback);
 }
 
+void EtsAbilityAutoStartupManager::GetAutoStartupStatusForSelf(ani_env *env, ani_object callback)
+{
+    GetInstance().OnGetAutoStartupStatusForSelf(env, callback);
+}
+
 ani_boolean EtsAbilityAutoStartupManager::IsAutoStartupSupported(ani_env *env)
 {
     if (env == nullptr) {
@@ -262,6 +267,21 @@ void EtsAbilityAutoStartupManager::OnQueryAllAutoStartupApplications(ani_env *en
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), result);
 }
 
+void EtsAbilityAutoStartupManager::OnGetAutoStartupStatusForSelf(ani_env *env, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called GetAutoStartupStatusForSelf");
+    bool isAutoStartEnabled = false;
+    auto ret = AbilityManagerClient::GetInstance()->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    if (ret != ERR_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        return;
+    }
+    ani_object result = AppExecFwk::CreateBoolean(env, isAutoStartEnabled);
+    AppExecFwk::AsyncCallback(env, callback,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), result);
+}
+
 void EtsAbilityAutoStartupManager::OnNativeCheckCallerIsSystemApp(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called NativeCheckCallerIsSystemApp");
@@ -308,6 +328,8 @@ void EtsAbilityAutoStartupManagerInit(ani_env *env)
         ani_native_function {"nativeQueryAllAutoStartupApplications",
             "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications)},
+        ani_native_function {"nativeGetAutoStartupStatusForSelf", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
+            reinterpret_cast<void *>(EtsAbilityAutoStartupManager::GetAutoStartupStatusForSelf)},
         ani_native_function {"nativeIsAutoStartupSupported", ":z",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::IsAutoStartupSupported)},
         ani_native_function {"nativeCheckCallerIsSystemApp", ":",
