@@ -315,6 +315,7 @@ private:
     int StartAbilityForResultAsCallerForOptionsInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartUIAbilitiesInSplitWindowModeInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartUIAbilitiesInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RecordAppWithReasonByUserIdInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t StartAbilityOnlyUIAbilityInner(MessageParcel &data, MessageParcel &reply);
 

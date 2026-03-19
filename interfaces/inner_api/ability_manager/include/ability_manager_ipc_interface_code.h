@@ -553,6 +553,7 @@ enum class AbilityManagerInterfaceCode {
     KILL_APP_WITH_REASON = 6007,
     KILL_BUNDLE_WITH_REASON = 6008,
     RECORD_APP_WITH_REASON = 6009,
+    RECORD_APP_WITH_REASON_BY_USERID = 6010,
 
     // ipc id for register auto startup system callback
     REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6101,

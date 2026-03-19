@@ -75,6 +75,7 @@ ohos_unittest("ability_auto_startup_service_second_test") {
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "image_framework:image_native",

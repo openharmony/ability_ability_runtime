@@ -17,6 +17,7 @@
 
 #include "app_mgr_service_inner.h"
 #include "datetime_ex.h"
+#include "exit_reason.h"
 #include "iremote_object.h"
 
 #include "appexecfwk_errors.h"
@@ -45,6 +46,7 @@
 #include "time_util.h"
 #include "ui_extension_wrapper.h"
 #include "app_native_spawn_manager.h"
+#include "xcollie/process_kill_reason.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -759,6 +761,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             TAG_LOGI(AAFwkTag::APPMGR, "pname: %{public}s, pid: %{public}d", appRecord->GetProcessName().c_str(),
                 priorityObject->GetPid());
             if (appMgrServiceInner != nullptr) {
+#ifdef APP_MGR_KILL_REASON_TAG
+                appMgrServiceInner->RecordAppWithReason(priorityObject->GetPid(), appRecord->GetUid(),
+                    HiviewDFX::ProcessKillReason::KillEventId::REASON_ON_REMOTE_DIED);
+#endif
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
             AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
