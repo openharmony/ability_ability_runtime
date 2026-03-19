@@ -776,6 +776,8 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetProcessKillReason_Test001
     printf("killInfo killId: %d", killInfo.killId);
     killId = 0;
     appfreezeManager->GetProcessKillReason(killId, pid, killMsg);
+    killId = 4000;
+    appfreezeManager->GetProcessKillReason(killId, pid, killMsg);
 }
 
 /**
@@ -803,6 +805,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetExitKernelReason_Test001,
     appfreezeManager->GetExitKernelReason(pid, killInfo);
     printf("killInfo killId: %d", killInfo.killId);
     pid = -1;
+    appfreezeManager->GetExitKernelReason(pid, killInfo);
+    printf("killInfo killId: %d", killInfo.killId);
+    killInfo.killId = 4000;
     appfreezeManager->GetExitKernelReason(pid, killInfo);
     printf("killInfo killId: %d", killInfo.killId);
 }
