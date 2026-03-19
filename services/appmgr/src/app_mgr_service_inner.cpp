@@ -8125,8 +8125,9 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
     }
     record->NotifyAppFault(transformedFaultData);
     TAG_LOGW(AAFwkTag::APPMGR, "FaultDataBySA is: name: %{public}s, faultType: %{public}s, uid: %{public}d,"
-        "pid: %{public}d, bundleName: %{public}s, eventId: %{public}d", faultData.errorObject.name.c_str(),
-        FaultTypeToString(faultData.faultType).c_str(), uid, pid, bundleName.c_str(), faultData.eventId);
+        "pid: %{public}d, bundleName: %{public}s, eventId: %{public}d, foreground: %{public}d",
+        faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(), uid, pid,
+        bundleName.c_str(), faultData.eventId, transformedFaultData.isInForeground);
     return ERR_OK;
 }
 

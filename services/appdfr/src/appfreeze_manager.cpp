@@ -91,20 +91,20 @@ static constexpr int SYSLOAD_GET_KILL_INFO_MAGIC = 0xE5AC02;
 #define SYSLOAD_GET_KILL_INFO_MAGIC 0xE5AC02
 
 struct KillEventInfo {
-    int id;
-    int adj;
-    bool processed;
-    bool foreground;
-    pid_t pid;
-    int uid;
-    int64_t timestamp;
-    int64_t eventParamFirst;
-    int64_t eventParamSecond;
-    int64_t eventParamThird;
-    int64_t eventParamFourth;
-    int64_t eventParamFifth;
-    int64_t eventParamSixth;
-    int64_t eventParamSeventh;
+    int id = 0;
+    int adj = 0;
+    bool processed = false;
+    bool foreground = false;
+    pid_t pid = 0;
+    int uid = 0;
+    int64_t timestamp = 0;
+    int64_t eventParamFirst = 0;
+    int64_t eventParamSecond = 0;
+    int64_t eventParamThird = 0;
+    int64_t eventParamFourth = 0;
+    int64_t eventParamFifth = 0;
+    int64_t eventParamSixth = 0;
+    int64_t eventParamSeventh = 0;
 };
 
 struct KillInfo {
@@ -1276,6 +1276,13 @@ AppfreezeManager::ProcessKillInfo AppfreezeManager::GetProcessKillReason(
         .adj = 0,
         .timestamp = 0,
         .killId = killId,
+        .eventParamFirst = 0,
+        .eventParamSecond = 0,
+        .eventParamThird = 0,
+        .eventParamFourth = 0,
+        .eventParamFifth = 0,
+        .eventParamSixth = 0,
+        .eventParamSeventh = 0,
     };
     if (killId == INVALID_KILL_ID) {
         killInfo.killReason = INVALID_KILL_REASON;
@@ -1330,6 +1337,7 @@ void AppfreezeManager::GetExitKernelReason(int32_t pid, ProcessKillInfo& killInf
             killInfo.eventParamFirst, killInfo.eventParamSecond, killInfo.eventParamThird, killInfo.eventParamFourth,
             killInfo.eventParamFifth, killInfo.eventParamSixth, killInfo.eventParamSeventh);
     } else {
+        killInfo.killReason = INVALID_KILL_REASON;
         TAG_LOGW(AAFwkTag::APPDFR, "Get killReason ioctl failed, errno:%{public}d", errno);
     }
 }
