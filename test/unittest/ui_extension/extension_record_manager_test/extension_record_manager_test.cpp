@@ -1767,5 +1767,33 @@ HWTEST_F(ExtensionRecordManagerTest, RemoveAgentUILaunchRecord_0500, TestSize.Le
 
     TAG_LOGI(AAFwkTag::TEST, "RemoveAgentUILaunchRecord_0500 end");
 }
+
+/**
+ * @tc.name: RollbackAgentUILaunchRecord_0100
+ * @tc.desc: Test RemoveAgentUILaunchRecord removes record correctly (simulating RollbackAgentUILaunchRecord).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionRecordManagerTest, RollbackAgentUILaunchRecord_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RollbackAgentUILaunchRecord_0100 start");
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    EXPECT_NE(extRecordMgr, nullptr);
+
+    int32_t callerUid = 1000;
+    std::string bundleName = "com.test.agentui";
+    int32_t extensionAbilityId = 1;
+    extRecordMgr->AddAgentUILaunchRecord(callerUid, bundleName, extensionAbilityId);
+    auto ret = extRecordMgr->CheckAgentUILaunchLimit(callerUid, bundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    extRecordMgr->RemoveAgentUILaunchRecord(bundleName, extensionAbilityId);
+    auto it = std::find_if(extRecordMgr->agentUIExtensionRecords_.begin(),
+        extRecordMgr->agentUIExtensionRecords_.end(),
+        [&callerUid, &bundleName](const auto& record) {
+            return record.callerUid == callerUid && record.targetBundle == bundleName;
+        });
+    EXPECT_EQ(it, extRecordMgr->agentUIExtensionRecords_.end());
+
+    TAG_LOGI(AAFwkTag::TEST, "RollbackAgentUILaunchRecord_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
