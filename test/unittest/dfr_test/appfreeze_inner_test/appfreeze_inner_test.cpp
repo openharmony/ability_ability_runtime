@@ -610,9 +610,9 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetApplicationInfo_002, TestSize
  */
 HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_TransformHicollieFaultNumber_001, TestSize.Level1)
 {
-    const int BUSINESS_INPUT_BLOCK_TYPE = 7;
+    const int businessInputBlockType = 7;
     int ret = appfreezeInner->TransformHicollieFaultNumber(AppFreezeType::BUSINESS_INPUT_BLOCK);
-    EXPECT_EQ(ret, BUSINESS_INPUT_BLOCK_TYPE);
+    EXPECT_EQ(ret, businessInputBlockType);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
