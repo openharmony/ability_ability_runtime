@@ -67,7 +67,7 @@ void EtsPhotoEditorExtensionImpl::BindContext()
     }
 
     ani_field contextField = nullptr;
-    auto status = env->Class_FindField(etsObj_->aniCls, "context", &contextField);
+    auto status = env->Class_FindField(etsObj_->aniCls, "photoEditorContext", &contextField);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "BindContext::Class_FindField status : %{public}d", status);
         return;
