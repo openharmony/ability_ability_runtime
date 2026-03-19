@@ -602,5 +602,17 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetApplicationInfo_002, TestSize
     appfreezeInner->GetApplicationInfo(faultData);
     EXPECT_TRUE(!faultData.timeoutMarkers.empty());
 }
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: TransformHicollieFaultNumber Test.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_TransformHicollieFaultNumber_001, TestSize.Level1)
+{
+    const int BUSINESS_INPUT_BLOCK_TYPE = 7;
+    int ret = appfreezeInner->TransformHicollieFaultNumber(AppFreezeType::BUSINESS_INPUT_BLOCK);
+    EXPECT_EQ(ret, BUSINESS_INPUT_BLOCK_TYPE);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
