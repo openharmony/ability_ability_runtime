@@ -492,6 +492,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEleventh(uint32_t code, MessageParce
     if (interfaceCode == AbilityManagerInterfaceCode::IS_RESTART_APP_LIMIT) {
         return IsRestartAppLimitInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::RECORD_APP_WITH_REASON_BY_USERID) {
+        return RecordAppWithReasonByUserIdInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4181,6 +4184,22 @@ int32_t AbilityManagerStub::StartUIAbilitiesInner(MessageParcel &data, MessagePa
 
     int32_t result = StartUIAbilities(wantList, requestKey, callerToken);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+ErrCode AbilityManagerStub::RecordAppWithReasonByUserIdInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    std::unique_ptr<ExitReasonCompability> exitReason(data.ReadParcelable<ExitReasonCompability>());
+    if (!exitReason) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "exitReason null");
+        return ERR_READ_EXIT_REASON_FAILED;
+    }
+    int32_t result = RecordAppWithReasonByUserId(userId, *exitReason);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 

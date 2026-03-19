@@ -34,6 +34,16 @@ struct RecordExitReasonParams {
     AppExecFwk::RunningProcessInfo processInfo;
     bool fromKillWithReason = false;
 };
+
+struct AppReasonInfo {
+    int32_t userId = -1;
+    std::string bundleName = "";
+    int32_t appIndex = -1;
+
+    AppReasonInfo() = default;
+    AppReasonInfo(int32_t userId, const std::string &bundleName, int32_t appIndex)
+        : userId(userId), bundleName(bundleName), appIndex(appIndex) {}
+};
 class AppExitReasonHelper {
 public:
     explicit AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper);
@@ -55,8 +65,13 @@ public:
     int32_t AddBundleExitReason(const std::string &bundleName, int32_t userId, int32_t appIndex,
         const ExitReasonCompability &exitReason);
     int32_t RecordAppWithReason(int32_t pid, int32_t uid, const ExitReasonCompability &exitReason);
+    void RecordAppsWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason,
+        const std::vector<AppExecFwk::RunningProcessInfo> &processInfoList);
     void RecordInvalidKillId(int32_t pid, const ExitReasonCompability &params,
         const std::string &bundleName = "", int32_t userId = 0);
+    int32_t RecordAppWithReasonByAccessTokenId(int32_t userId, uint32_t accessTokenId,
+        const ExitReasonCompability &exitReasonCompability,
+        const std::vector<AppExecFwk::RunningProcessInfo> &processInfoList);
 
 private:
     int32_t RecordProcessExitReason(const int32_t pid, const std::string bundleName, const int32_t uid,
@@ -70,6 +85,9 @@ private:
     void GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
         AppExecFwk::RunningProcessInfo &processInfo);
     int32_t AddProcessExitReason(const RecordExitReasonParams &params);
+
+    int32_t RecordAppWithReasonInner(const AppReasonInfo &appInfo, const ExitReasonCompability &exitReasonCompability,
+        const AppExecFwk::RunningProcessInfo &processInfo, const std::vector<std::string> &abilityList);
 
     std::shared_ptr<SubManagersHelper> subManagersHelper_;
 };
