@@ -295,7 +295,7 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.waitSaveState = false;
     faultData.forceExit = false;
     int faultNum = TransformHicollieFaultNumber(faultData.errorObject.name);
-    faultData.callbackLog = OHOS::HiviewDFX::WatchDog::GetInstance().ReadDataFromBuffer(faultNum);
+    faultData.callbackLog = OHOS::HiviewDFX::Watchdog::GetInstance().ReadDataFromBuffer(faultNum);
     GetApplicationInfo(faultData);
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         MMI::InputManager::GetInstance()->GetLastEventIds(faultData.markedId,
