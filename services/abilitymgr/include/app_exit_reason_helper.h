@@ -70,6 +70,7 @@ private:
     void GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
         AppExecFwk::RunningProcessInfo &processInfo);
     int32_t AddProcessExitReason(const RecordExitReasonParams &params);
+    std::vector<AppExecFwk::RunningProcessInfo> GetRunningProcessInfos(int32_t userId, const std::string &bundleName);
 
     std::shared_ptr<SubManagersHelper> subManagersHelper_;
 };

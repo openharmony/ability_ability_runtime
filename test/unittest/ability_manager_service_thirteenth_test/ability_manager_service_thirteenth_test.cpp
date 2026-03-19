@@ -3254,5 +3254,77 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryCallerTokenIdForAnco_002, Tes
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest QueryCallerTokenIdForAnco_002 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillAppWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0100, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = -1;
+    MyStatus::GetInstance().permPermission_ = 1;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    ExitReasonCompability exitReason{};
+    exitReason.reason = Reason::REASON_JS_ERROR;
+    exitReason.exitMsg = "Js Error.";
+    exitReason.subReason = 0;
+    exitReason.shouldKillForeground = false;
+    exitReason.killId = 1;
+    auto res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, DEFAULT_INVAL_VALUE);
+    MyStatus::GetInstance().permPermission_ = 0;
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillAppWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0200, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = 12345;
+    MyStatus::GetInstance().permPermission_ = 1;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    ExitReasonCompability exitReason{};
+    exitReason.reason = Reason::REASON_JS_ERROR;
+    exitReason.exitMsg = "Js Error.";
+    exitReason.subReason = 0;
+    exitReason.shouldKillForeground = false;
+    exitReason.killId = 1;
+    auto res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, ERR_KILL_APP_WHILE_FOREGROUND);
+    MyStatus::GetInstance().permPermission_ = 0;
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillAppWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0300, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = 654321;
+    MyStatus::GetInstance().permPermission_ = 1;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    ExitReasonCompability exitReason{};
+    exitReason.reason = Reason::REASON_JS_ERROR;
+    exitReason.exitMsg = "Js Error.";
+    exitReason.subReason = 0;
+    exitReason.shouldKillForeground = false;
+    exitReason.killId = 1;
+    auto res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, ERR_OK);
+    MyStatus::GetInstance().permPermission_ = 0;
+}
 } // namespace AAFwk
 } // namespace OHOS
