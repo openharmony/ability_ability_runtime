@@ -1381,12 +1381,12 @@ HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_020, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreHandle_001
+ * @tc.name: NoNeedErms_001
  * @tc.desc: Tests hostBundleName not empty
  * @tc.type: FUNC
  * @tc.require: No
  */
-HWTEST_F(EcologicalRuleInterceptorTest, PreHandle_001, TestSize.Level1)
+HWTEST_F(EcologicalRuleInterceptorTest, NoNeedErms_001, TestSize.Level1)
 {
     Want want;
     int32_t requestCode = 0;
@@ -1395,22 +1395,22 @@ HWTEST_F(EcologicalRuleInterceptorTest, PreHandle_001, TestSize.Level1)
     auto shouldBlockFunc = []() { return false; };
     AbilityInterceptorParam param{want, requestCode, userId, false, nullptr, shouldBlockFunc};
     StartAbilityUtils::skipErms = true;
-    EXPECT_TRUE(EcologicalRuleInterceptor::PreHandle(param));
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
     EXPECT_FALSE(StartAbilityUtils::skipErms);
 
     std::string testBundelName = "bundle.test.com";
     StartAbilityUtils::ermsSupportBackToCallerFlag = false;
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, testBundelName);
     want.SetBundle(testBundelName);
-    EXPECT_TRUE(EcologicalRuleInterceptor::PreHandle(param));
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
     EXPECT_TRUE(StartAbilityUtils::ermsSupportBackToCallerFlag);
 
     want.SetBundle("");
     param.isTargetPlugin = true;
-    EXPECT_TRUE(EcologicalRuleInterceptor::PreHandle(param));
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
 
     param.isTargetPlugin = false;
-    EXPECT_FALSE(EcologicalRuleInterceptor::PreHandle(param));
+    EXPECT_FALSE(EcologicalRuleInterceptor::NoNeedErms(param));
 }
 
 /**

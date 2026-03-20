@@ -34,7 +34,7 @@ constexpr int32_t ERMS_ISALLOW_EMBED_RESULTCODE = 1;
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (PreHandle(param)) {
+    if (NoNeedErms(param)) {
         return ERR_OK;
     }
     ErmsCallerInfo callerInfo;
@@ -45,11 +45,11 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         callerInfo.isAsCaller = true;
     }
 
+    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken,
+        !param.hostBundleName.empty());
     if (!param.hostBundleName.empty()) {
         callerInfo.packageName = param.hostBundleName;
     }
-    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken,
-        !param.hostBundleName.empty());
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
@@ -79,7 +79,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     return ERR_ECOLOGICAL_CONTROL_STATUS;
 }
 
-bool EcologicalRuleInterceptor::PreHandle(const AbilityInterceptorParam &param)
+bool EcologicalRuleInterceptor::NoNeedErms(const AbilityInterceptorParam &param)
 {
     if (StartAbilityUtils::skipErms) {
         StartAbilityUtils::skipErms = false;
@@ -132,7 +132,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
 
     ErmsCallerInfo callerInfo;
     InitErmsCallerInfo(want, std::make_shared<AppExecFwk::AbilityInfo>(startAbilityInfo->abilityInfo),
-        callerInfo, userId, nullptr, false);
+        callerInfo, userId);
 
     ExperienceRule rule;
     auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
@@ -167,7 +167,7 @@ ErrCode EcologicalRuleInterceptor::QueryAtomicServiceStartupRule(Want &want, spt
 
     ErmsCallerInfo callerInfo;
     InitErmsCallerInfo(want, std::make_shared<AppExecFwk::AbilityInfo>(
-        startAbilityInfo->abilityInfo), callerInfo, userId, nullptr, false);
+        startAbilityInfo->abilityInfo), callerInfo, userId);
 
     ExperienceRule _rule;
     auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,

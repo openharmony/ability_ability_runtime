@@ -775,16 +775,8 @@ bool UIAbilityLifecycleManager::CheckStartByOEExt(const AbilityRequest &abilityR
         return true;
     }
 
-    if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
-        if (persistentId != 0) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "other duplicate start: %{public}d", persistentId);
-            return false;
-        }
-        OEExtensionUtils::GetInstance().AddOEExtRequest(requestId);
-        return true;
-    }
-
-    if (abilityRequest.specifiedFlag.empty()) {
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
+        abilityRequest.specifiedFlag.empty()) {
         persistentId = 0;
         reuse = false;
     }
@@ -793,7 +785,7 @@ bool UIAbilityLifecycleManager::CheckStartByOEExt(const AbilityRequest &abilityR
         auto uiAbility = sessionAbilityMap_[persistentId];
         auto extAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
         if (uiAbility != nullptr && extAbility != nullptr && uiAbility->GetPid() != extAbility->GetPid()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "specified duplicate start: %{public}d", persistentId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "ByOEExt duplicate start: %{public}d", persistentId);
             return false;
         }
     }

@@ -19,6 +19,7 @@
 #include "ability_record.h"
 #include "app_scheduler.h"
 #include "hilog_tag_wrapper.h"
+#include "startup_util.h"
 #include "utils/oe_extension_utils.h"
 
 using namespace testing;
@@ -279,6 +280,55 @@ HWTEST_F(OEExtensionUtilsTest, ValidateCaller_008, TestSize.Level1)
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest ValidateCaller_008 end");
+}
+
+/*
+ * Feature: OEExtensionUtils
+ * Function: ValidateCaller
+ * SubFunction: NA
+ * FunctionPoints: Validate caller with invalid UID
+ */
+HWTEST_F(OEExtensionUtilsTest, ValidateCaller_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest ValidateCaller_009 start");
+
+    auto abilityRecord = CreateOEExtensionAbilityRecord();
+    Want want = CreateValidOEExtWant();
+    std::string hostBundleName;
+    int32_t userId = -1;
+
+    AbilityRuntime::StartupUtil::mockStatus = false;
+    AbilityRuntime::StartupUtil::mockAppIndex = 1;
+    int32_t result = OEExtensionUtils::GetInstance().ValidateCaller(
+        OESA_UID, want, abilityRecord->GetToken(), TEST_HOST_PID, hostBundleName, userId);
+    EXPECT_EQ(result, ERR_APP_CLONE_INDEX_INVALID);
+
+    AbilityRuntime::StartupUtil::mockStatus = true;
+    AbilityRuntime::StartupUtil::mockAppIndex = 1;
+    result = OEExtensionUtils::GetInstance().ValidateCaller(
+        OESA_UID, want, abilityRecord->GetToken(), TEST_HOST_PID, hostBundleName, userId);
+    EXPECT_EQ(result, ERR_APP_CLONE_INDEX_INVALID);
+
+    AbilityRuntime::StartupUtil::mockStatus = false;
+    AbilityRuntime::StartupUtil::mockAppIndex = 0;
+    result = OEExtensionUtils::GetInstance().ValidateCaller(
+        OESA_UID, want, abilityRecord->GetToken(), TEST_HOST_PID, hostBundleName, userId);
+    EXPECT_EQ(result, ERR_APP_CLONE_INDEX_INVALID);
+
+    AbilityRuntime::StartupUtil::mockStatus = true;
+    AbilityRuntime::StartupUtil::mockAppIndex = 0;
+    result = OEExtensionUtils::GetInstance().ValidateCaller(
+        OESA_UID, want, abilityRecord->GetToken(), TEST_HOST_PID, hostBundleName, userId);
+    EXPECT_EQ(result, ERR_OK);
+
+    AbilityRuntime::StartupUtil::mockStatus = true;
+    AbilityRuntime::StartupUtil::mockAppIndex = 1;
+    abilityRecord->appIndex_ = 1;
+    result = OEExtensionUtils::GetInstance().ValidateCaller(
+        OESA_UID, want, abilityRecord->GetToken(), TEST_HOST_PID, hostBundleName, userId);
+    EXPECT_EQ(result, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "OEExtensionUtilsTest ValidateCaller_009 end");
 }
 
 /*
