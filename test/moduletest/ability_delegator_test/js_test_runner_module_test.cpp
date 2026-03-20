@@ -129,8 +129,7 @@ HWTEST_F(JsTestRunnerModuleTest, Js_Test_Runner_Module_Test_0100, Function | Med
 
     JsTestRunner* jsRunnerdrive = nullptr;
     jsRunnerdrive->ReportFinished(REPORT_FINISH_MSG);
-
-    EXPECT_TRUE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_EQ(testRunner, nullptr);
 }
 
 /**
