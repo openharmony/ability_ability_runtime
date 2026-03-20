@@ -325,6 +325,7 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.markedId = faultData.markedId;
     faultNotifyData.processedId = faultData.processedId;
     faultNotifyData.dispatchedEventId = faultData.dispatchedEventId;
+    faultNotifyData.callbackLog = faultData.callbackLog;
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%{public}d-name:%{public}s",
         appInfo.pid, faultData.errorObject.name.c_str());
     return MergeNotifyInfo(faultNotifyData, appInfo);
@@ -451,6 +452,7 @@ FaultData AppfreezeManager::GetFaultNotifyData(const FaultData& faultData, int p
     faultNotifyData.markedId = faultData.markedId;
     faultNotifyData.processedId = faultData.processedId;
     faultNotifyData.dispatchedEventId = faultData.dispatchedEventId;
+    faultNotifyData.callbackLog = faultData.callbackLog;
     return faultNotifyData;
 }
 
@@ -606,6 +608,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     eventInfo.markedId = faultData.markedId;
     eventInfo.processedId = faultData.processedId;
     eventInfo.dispatchedEventId = faultData.dispatchedEventId;
+    eventInfo.externalLog = faultData.callbackLog;
 
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName, HISYSEVENT_FAULT, eventInfo);
     TAG_LOGW(AAFwkTag::APPDFR, "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, "

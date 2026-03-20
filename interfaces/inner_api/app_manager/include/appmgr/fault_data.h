@@ -105,6 +105,7 @@ struct FaultData : public Parcelable {
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
     LeakObject leakObject;
+    std::string callbackLog;
 };
 
 /**

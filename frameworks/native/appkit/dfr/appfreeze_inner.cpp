@@ -49,6 +49,14 @@ static constexpr const char *const PROCESS_LIFETIME = "PROCESS_LIFETIME";
 static constexpr const char *const COLON_SEPARATOR = ":";
 static constexpr const char *const COMMA_SEPARATOR = ",";
 static constexpr const char *const SECOND = "s";
+constexpr int THREAD_BLOCK_3S_TYPE = 0;
+constexpr int THREAD_BLOCK_6S_TYPE = 1;
+constexpr int LIFECYCLE_HALF_TIMEOUT_TYPE = 2;
+constexpr int LIFECYCLE_TIMEOUT_TYPE = 3;
+constexpr int APP_INPUT_BLOCK_TYPE = 4;
+constexpr int BUSSINESS_THREAD_BLOCK_3S_TYPE = 5;
+constexpr int BUSSINESS_THREAD_BLOCK_6S_TYPE = 6;
+constexpr int BUSINESS_INPUT_BLOCK_TYPE = 7;
 }
 std::weak_ptr<EventHandler> AppfreezeInner::appMainHandler_;
 std::shared_ptr<AppfreezeInner> AppfreezeInner::instance_ = nullptr;
@@ -255,6 +263,28 @@ void AppfreezeInner::GetApplicationInfo(FaultData& faultData)
         faultData.applicationHeapInfo.c_str(), faultData.processLifeTime.c_str());
 }
 
+int AppfreezeInner::TransformHicollieFaultNumber(const std::string& faultName)
+{
+    if (faultName == AppFreezeType::THREAD_BLOCK_3S) {
+        return THREAD_BLOCK_3S_TYPE;
+    } else if (faultName == AppFreezeType::THREAD_BLOCK_6S) {
+        return THREAD_BLOCK_6S_TYPE;
+    } else if (faultName == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        return LIFECYCLE_HALF_TIMEOUT_TYPE;
+    } else if (faultName == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        return LIFECYCLE_TIMEOUT_TYPE;
+    } else if (faultName == AppFreezeType::APP_INPUT_BLOCK) {
+        return APP_INPUT_BLOCK_TYPE;
+    } else if (faultName == AppFreezeType::BUSSINESS_THREAD_BLOCK_3S) {
+        return BUSSINESS_THREAD_BLOCK_3S_TYPE;
+    } else if (faultName == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+        return BUSSINESS_THREAD_BLOCK_6S_TYPE;
+    } else if (faultName == AppFreezeType::BUSINESS_INPUT_BLOCK) {
+        return BUSINESS_INPUT_BLOCK_TYPE;
+    }
+    return -1;
+}
+
 void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent)
 {
     faultData.errorObject.message += msgContent;
@@ -264,6 +294,8 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.notifyApp = false;
     faultData.waitSaveState = false;
     faultData.forceExit = false;
+    int faultNum = TransformHicollieFaultNumber(faultData.errorObject.name);
+    faultData.callbackLog = OHOS::HiviewDFX::Watchdog::GetInstance().ReadDataFromBuffer(faultNum);
     GetApplicationInfo(faultData);
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         MMI::InputManager::GetInstance()->GetLastEventIds(faultData.markedId,
