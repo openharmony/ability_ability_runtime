@@ -111,6 +111,7 @@ private:
     void Timer();
     void ReportEvent();
     void SetMainThreadSample();
+    void SetReportLifeCycleAsAppfreeze();
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
     void SetHiTraceChainId();
 

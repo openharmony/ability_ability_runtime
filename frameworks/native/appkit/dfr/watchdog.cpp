@@ -89,6 +89,17 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
         CHECK_INTERVAL_TIME, INI_TIMER_FIRST_SECOND);
 #endif
     SetMainThreadSample();
+    SetReportLifeCycleAsAppfreeze();
+}
+
+void Watchdog::SetReportLifeCycleAsAppfreeze()
+{
+    char* env = getenv("DFX_APPFREEZE_LOG_OPTIONS");
+    if (env == nullptr) {
+        return;
+    }
+    AppExecFwk::AppfreezeInner::GetInstance()->SetReportLifeCycleAsAppfreeze(
+        strstr(env, "report_lifecycle_as_appfreeze:enable") != nullptr);
 }
 
 void Watchdog::SetMainThreadSample()

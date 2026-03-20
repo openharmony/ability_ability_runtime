@@ -614,5 +614,17 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_TransformHicollieFaultNumber_001
     int ret = appfreezeInner->TransformHicollieFaultNumber(AppFreezeType::BUSINESS_INPUT_BLOCK);
     EXPECT_EQ(ret, businessInputBlockType);
 }
+
+/**
+ * @tc.number: AppfreezeInner_ReportLifeCycleAsAppfreeze_001
+ * @tc.name: SetReportLifeCycleAsAppfreeze and GetReportLifeCycleAsAppfreeze
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ReportLifeCycleAsAppfreeze_001, TestSize.Level1)
+{
+    appfreezeInner->SetReportLifeCycleAsAppfreeze(true);
+    EXPECT_TRUE(appfreezeInner->GetReportLifeCycleAsAppfreeze());
+    appfreezeInner->SetReportLifeCycleAsAppfreeze(false);
+    EXPECT_TRUE(!appfreezeInner->GetReportLifeCycleAsAppfreeze());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -8203,6 +8203,7 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.procStatm = faultData.procStatm;
     newfaultData.isInForeground = faultData.isInForeground;
     newfaultData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
+    newfaultData.reportLifecycleToFreeze = faultData.reportLifecycleToFreeze;
     newfaultData.applicationHeapInfo = faultData.applicationHeapInfo;
     newfaultData.processLifeTime = faultData.processLifeTime;
     newfaultData.leakObject.leakType = faultData.leakObject.leakType;
