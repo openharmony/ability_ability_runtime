@@ -1922,7 +1922,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_002, TestSize.Level1)
     abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
     abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
-    abilityRecord->isPreLaunch_ = true'
+    abilityRecord->isPreLaunch_ = true;
     abilityRecord->LoadUIAbility();
     EXPECT_NE(abilityRecord_, nullptr);
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
