@@ -13,28 +13,22 @@
  * limitations under the License.
  */
 
-#include "ability_record.h"
+#ifndef OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
+#define OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
 
-#include "startup_util.h"
+#include <cstdint>
+
+#include "want.h"
 
 namespace OHOS {
-namespace AAFwk {
-std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(
-    const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId)
-{
-    auto abilityRecord = std::make_shared<AbilityRecord>(abilityInfo, userId);
-    abilityRecord->token_ = sptr<Token>::MakeSptr(abilityRecord);
-    return abilityRecord;
-}
-}
 namespace AbilityRuntime {
-bool StartupUtil::mockStatus = true;
-int32_t StartupUtil::mockAppIndex = 0;
+class StartupUtil {
+public:
+    static bool GetAppIndex(const AAFwk::Want &want, int32_t &appIndex);
 
-bool StartupUtil::GetAppIndex(const AAFwk::Want &want, int32_t &appIndex)
-{
-    appIndex = mockAppIndex;
-    return mockStatus;
-}
-}
-}
+    static bool mockStatus;
+    static int32_t mockAppIndex;
+};
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H

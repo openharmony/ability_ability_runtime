@@ -46,9 +46,15 @@ public:
         return token_;
     }
 
+    inline int32_t GetAppIndex() const
+    {
+        return appIndex_;
+    }
+
     AppExecFwk::AbilityInfo abilityInfo_;
     int32_t userId_ = 0;
     sptr<Token> token_;
+    int32_t appIndex_ = 0;
 };
 }
 }

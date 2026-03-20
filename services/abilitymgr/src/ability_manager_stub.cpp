@@ -4270,8 +4270,7 @@ int32_t AbilityManagerStub::StartAbilityByOEExtInner(MessageParcel &data, Messag
     int32_t hostPid = data.ReadInt32();
     std::string specifiedFlag = data.ReadString();
 
-    int32_t result = StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag);
-    reply.WriteInt32(result);
+    reply.WriteInt32(StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag));
     return NO_ERROR;
 }
 

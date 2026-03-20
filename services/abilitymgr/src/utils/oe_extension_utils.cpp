@@ -20,6 +20,7 @@
 #include "app_scheduler.h"
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
+#include "startup_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -76,6 +77,13 @@ int32_t OEExtensionUtils::ValidateCaller(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "hostPid=%{public}d not foreground: %{public}d", hostPid, processInfo.state_);
         return NOT_TOP_ABILITY;
     }
+
+    int32_t appIndex = 0;
+    if (!AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ||
+        (appIndex != 0 && appIndex != abilityRecord->GetAppIndex())) {
+        return ERR_APP_CLONE_INDEX_INVALID;
+    }
+    const_cast<Want &>(want).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
 
     hostBundleName = processInfo.bundleNames.empty() ? "" : processInfo.bundleNames[0];
     userId = abilityRecord->GetOwnerMissionUserId();
