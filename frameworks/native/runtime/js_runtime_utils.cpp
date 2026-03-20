@@ -406,6 +406,7 @@ bool NapiAsyncTask::StartHighQos(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    env_ = env;
     if (execute_ == nullptr) {
         return SendNapiEvent(env, napi_eprio_immediate);
     }
@@ -426,6 +427,7 @@ bool NapiAsyncTask::StartLowQos(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    env_ = env;
     if (execute_ == nullptr) {
         return SendNapiEvent(env, napi_eprio_low);
     }
