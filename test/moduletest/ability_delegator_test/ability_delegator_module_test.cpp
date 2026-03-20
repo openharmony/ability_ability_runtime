@@ -1022,8 +1022,7 @@ HWTEST_F(AbilityDelegatorModuleTest, Ability_Delegator_Args_Test_2400, Function 
     ability->name_ = ABILITY_NAME;
     ability->lifecycleState_ = AbilityLifecycleExecutor::LifecycleState::STARTED_NEW;
     abilityDelegator->FinishUserTest(FINISH_MSG, FINISH_RESULT_CODE);
-
-    EXPECT_TRUE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_EQ(testRunner, nullptr);
 }
 
 /**
