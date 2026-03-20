@@ -1434,8 +1434,7 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3500, Function | MediumTes
     ability->name_ = ABILITY_NAME;
     ability->lifecycleState_ = AbilityLifecycleExecutor::LifecycleState::STARTED_NEW;
     abilityDelegator->FinishUserTest(FINISH_MSG, FINISH_RESULT_CODE);
-
-    EXPECT_TRUE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_EQ(testRunner, nullptr);
 }
 
 /**

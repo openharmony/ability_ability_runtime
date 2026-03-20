@@ -155,6 +155,8 @@ void JsTestRunner::Prepare()
 void JsTestRunner::Run()
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    std::unique_lock<std::mutex> lck(mutexHasStop_);
+    hasStop_ = false;
     TestRunner::Run();
     CallObjectMethod("onRun");
 }
@@ -162,8 +164,12 @@ void JsTestRunner::Run()
 void JsTestRunner::Stop()
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
-    TestRunner::Stop();
-    CallObjectMethod("onStop");
+    std::unique_lock<std::mutex> lck(mutexHasStop_);
+    if (!hasStop_) {
+        hasStop_ = true;
+        TestRunner::Stop();
+        CallObjectMethod("onStop");
+    }
 }
 
 void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
