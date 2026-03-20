@@ -298,6 +298,15 @@ ErrCode AbilityManagerClient::StartUIAbilities(const std::vector<AAFwk::Want> &w
     return abms->StartUIAbilities(wantList, requestKey, callerToken);
 }
 
+ErrCode AbilityManagerClient::RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RecordAppWithReasonByUserId userId:%{public}d, killId:%{public}d",
+        userId, exitReason.killId);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RecordAppWithReasonByUserId(userId, exitReason);
+}
+
 ErrCode AbilityManagerClient::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     sptr<IRemoteObject> callerToken, sptr<AAFwk::SessionInfo> sessionInfo,
     int requestCode, int32_t userId)
@@ -1797,6 +1806,8 @@ ErrCode AbilityManagerClient::RecordProcessExitReason(int32_t pid, int32_t uid, 
 
 ErrCode AbilityManagerClient::KillAppWithReason(int32_t pid, const ExitReasonCompability &exitReason)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillAppWithReason pid:%{public}d, killId:%{public}d",
+        pid, exitReason.killId);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->KillAppWithReason(pid, exitReason);
@@ -1805,6 +1816,9 @@ ErrCode AbilityManagerClient::KillAppWithReason(int32_t pid, const ExitReasonCom
 ErrCode AbilityManagerClient::KillBundleWithReason(
     const std::string &bundleName, int32_t userId, int32_t appIndex, const ExitReasonCompability &exitReason)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillBundleWithReason bundleName:%{public}s, userId:%{public}d, "
+        "appIndex:%{public}d, killId:%{public}d",
+        bundleName.c_str(), userId, appIndex, exitReason.killId);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
@@ -1813,6 +1827,8 @@ ErrCode AbilityManagerClient::KillBundleWithReason(
 ErrCode AbilityManagerClient::RecordAppWithReason(
     const int32_t pid, const int32_t uid, const ExitReasonCompability &exitReason)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RecordAppWithReason pid:%{public}d, uid:%{public}d, killId:%{public}d",
+        pid, uid, exitReason.killId);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RecordAppWithReason(pid, uid, exitReason);

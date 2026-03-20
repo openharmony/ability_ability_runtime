@@ -1009,6 +1009,10 @@ public:
 
     int32_t NotifyAppMgrRecordExitReasonCompability(
         int32_t pid, int32_t killId, const std::string &killMsg, const std::string &innerMsg);
+#ifdef APP_MGR_KILL_REASON_TAG
+    void RecordAppWithReason(int32_t pid, int32_t uid, int32_t killId);
+    void RecordAppWithReasonByUserId(int32_t userId, int32_t killId);
+#endif
 
     /**
      * Notify application status.

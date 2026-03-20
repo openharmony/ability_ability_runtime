@@ -22,6 +22,7 @@
 #include "auto_startup_interface.h"
 #include "distributed_kv_data_manager.h"
 #include "display_util.h"
+#include "exit_reason.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -31,6 +32,7 @@
 #include "start_options.h"
 #include "user_controller/user_controller.h"
 #include "utils/main_element_utils.h"
+#include "xcollie/process_kill_reason.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -812,6 +814,12 @@ std::function<void()> AbilityAutoStartupService::CreateHiddenStartCheckTask(
             return;
         }
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "timeout, status bar not created, killing app");
+
+        ExitReasonCompability exitReasonCompability(
+            HiviewDFX::ProcessKillReason::KillEventId::REASON_NOT_ATTACHED_TO_STATUS_BAR);
+        DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppWithReason(pid, applicationInfo.uid,
+            exitReasonCompability);
+
         std::vector<pid_t> pids = { pid };
         (void)DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillProcessesByPids(pids);
     };

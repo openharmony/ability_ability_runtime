@@ -77,6 +77,7 @@ ohos_fuzztest("AbilityAutoStartupServicebFuzzTest") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "input:libmmi-client",

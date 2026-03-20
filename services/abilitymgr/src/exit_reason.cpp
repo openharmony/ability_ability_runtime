@@ -99,6 +99,19 @@ ExitReasonCompability::ExitReasonCompability(const Reason &reason, int32_t subRe
     this->exitMsg = exitMsg;
 }
 
+ExitReasonCompability::ExitReasonCompability(const ExitReason &exitReason)
+{
+    this->reason = exitReason.reason;
+    this->subReason = exitReason.subReason;
+    this->killId = exitReason.killId;
+    this->exitMsg = exitReason.exitMsg;
+}
+
+ExitReasonCompability::ExitReasonCompability(int32_t killId)
+{
+    this->killId = killId;
+}
+
 bool ExitReasonCompability::ReadFromParcel(Parcel &parcel)
 {
     int32_t reasonData;
@@ -141,5 +154,5 @@ bool ExitReasonCompability::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldSkipKillInStartup);
     return true;
 }
-}  // namespace AppExecFwk
+}  // namespace AAFwk
 }  // namespace OHOS
