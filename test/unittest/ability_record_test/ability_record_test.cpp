@@ -1910,6 +1910,24 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_001, TestSize.Level1)
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
 }
 
+/**
+ * @tc.name: AbilityRecord_LoadUIAbility_002
+ * @tc.desc: Test LoadUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
+    abilityRecord->isPrelaunch_ = true;
+    abilityRecord->LoadUIAbility();
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
+}
+
 /*
  * Feature: AbilityRecord
  * Function: ForegroundAbility
