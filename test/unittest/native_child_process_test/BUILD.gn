@@ -94,6 +94,7 @@ ohos_unittest("native_child_process_test") {
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

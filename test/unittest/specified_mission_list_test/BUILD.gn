@@ -68,6 +68,7 @@ ohos_unittest("specified_mission_list_test") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbeget_proxy",

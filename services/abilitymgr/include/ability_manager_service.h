@@ -398,6 +398,15 @@ public:
      */
     ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
         const std::string &requestKey, sptr<IRemoteObject> callerToken) override;
+    
+    /**
+     * RecordAppWithReasonByUserId, record app exit reason by userId.
+     *
+     * @param userId The user id.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason) override;
 
     /**
      * Start ui session ability with extension session info, send session info to ability manager service.
@@ -3165,6 +3174,9 @@ private:
     int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, int32_t appIndex, const bool isUpgrade,
         const std::string &exitMsg);
 
+    int32_t HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
+        const std::string &exitMsg);
+
     int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);
     bool CheckCallerIsDmsProcess();
 
@@ -3352,6 +3364,9 @@ private:
         AbilityRuntime::ExtractInsightIntentGenericInfo &linkInfo, const int32_t userId);
  
     AbilityRuntime::ExtractInsightIntentGenericInfo GetInsightIntentGenericInfo(const InsightIntentExecuteParam &param);
+
+    int32_t RecordAppWithReasonByAccessTokenId(uint32_t accessTokenId,
+        const ExitReasonCompability &exitReasonCompability);
  
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);

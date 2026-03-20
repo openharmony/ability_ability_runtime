@@ -322,6 +322,15 @@ public:
         const std::string &requestKey, sptr<IRemoteObject> callerToken);
 
     /**
+     * RecordAppWithReasonByUserId, record app exit reason by userId.
+     *
+     * @param userId The user id.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason);
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want Ability want.

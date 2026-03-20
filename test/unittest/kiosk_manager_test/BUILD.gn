@@ -109,6 +109,7 @@ ohos_unittest("kiosk_manager_test") {
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbegetutil",
