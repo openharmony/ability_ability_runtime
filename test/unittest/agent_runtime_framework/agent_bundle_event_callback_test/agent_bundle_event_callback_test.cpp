@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "agent_bundle_event_callback.h"
+#include "global_constant.h"
 #include "want.h"
 
 using namespace OHOS;
@@ -130,6 +131,45 @@ HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_004, TestSize.Level1)
     eventData.SetWant(want);
     bundleEventCallback.OnReceiveEvent(eventData);
     EXPECT_EQ(eventData.GetWant().GetAction(), "ohos.intent.action.UNKNOWN");
+}
+
+/**
+ * @tc.name: OnReceiveEventTest_005
+ * @tc.desc: Verify clone app package event is ignored.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_005, TestSize.Level1)
+{
+    AgentBundleEventCallback bundleEventCallback;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetBundle("test");
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    want.SetParam("appIndex", 1);
+    eventData.SetWant(want);
+    bundleEventCallback.OnReceiveEvent(eventData);
+    EXPECT_EQ(eventData.GetWant().GetIntParam("appIndex", 0), 1);
+}
+
+/**
+ * @tc.name: OnReceiveEventTest_006
+ * @tc.desc: Verify sandbox app package event still reaches normal flow.
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentBundleEventCallbackTest, OnReceiveEventTest_006, TestSize.Level1)
+{
+    AgentBundleEventCallback bundleEventCallback;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetBundle("test");
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    want.SetParam("appIndex", AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX + 1);
+    eventData.SetWant(want);
+    bundleEventCallback.OnReceiveEvent(eventData);
+    EXPECT_EQ(eventData.GetWant().GetIntParam("appIndex", 0),
+        AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX + 1);
 }
 } // namespace AgentRuntime
 } // namespace OHOS
