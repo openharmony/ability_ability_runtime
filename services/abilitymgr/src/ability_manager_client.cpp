@@ -195,6 +195,19 @@ ErrCode AbilityManagerClient::StartAbilityByInsightIntent(
     return abms->StartAbilityByInsightIntent(want, callerToken, intentId, userId);
 }
 
+ErrCode AbilityManagerClient::StartAbilityByOEExt(
+    const Want &want, sptr<IRemoteObject> callerToken, int32_t hostPid, const std::string &specifiedFlag)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityByOEExt ability:%{public}s/%{public}s, hostPid=%{public}d, "
+        "specifiedFlag=%{public}s", want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str(), hostPid, specifiedFlag.c_str());
+    HandleDlpApp(const_cast<Want &>(want));
+    return abms->StartAbilityByOEExt(want, callerToken, hostPid, specifiedFlag);
+}
+
 ErrCode AbilityManagerClient::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     sptr<IRemoteObject> callerToken, int requestCode, int32_t userId)
 {

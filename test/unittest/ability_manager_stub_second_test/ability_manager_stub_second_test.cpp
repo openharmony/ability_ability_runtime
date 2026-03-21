@@ -1082,5 +1082,73 @@ HWTEST_F(AbilityManagerStubSecondTest, PreloadApplicationInner_001, TestSize.Lev
         static_cast<uint32_t>(AbilityManagerInterfaceCode::PRELOAD_APPLICATION), data, reply, option);
     EXPECT_EQ(ret, NO_ERROR);
 }
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: StartAbilityByOEExtInner
+ * SubFunction: Error case with null want
+ * FunctionPoints: Test error handling when want is null
+ * EnvConditions: Invalid want parameter
+ * CaseDescription: Verify that StartAbilityByOEExtInner returns ERR_INVALID_VALUE when want is null
+ */
+HWTEST_F(AbilityManagerStubSecondTest, StartAbilityByOEExtInner_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByOEExtInner_002 begin");
+
+    MessageParcel data;
+    WriteInterfaceToken(data);
+
+    MessageParcel reply;
+    MessageOption option;
+
+    EXPECT_CALL(*stub_, StartAbilityByOEExt(_, _, _, _))
+        .Times(0);
+
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_BY_OE_EXT), data, reply, option);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByOEExtInner_002 end");
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: StartAbilityByOEExtInner
+ * SubFunction: Normal case with valid parameters
+ * FunctionPoints: Test normal execution with valid want, caller token, hostPid and specifiedFlag
+ * EnvConditions: Normal conditions
+ * CaseDescription: Verify that StartAbilityByOEExtInner executes correctly with valid parameters
+ */
+HWTEST_F(AbilityManagerStubSecondTest, StartAbilityByOEExtInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByOEExtInner_001 begin");
+
+    MessageParcel data;
+    WriteInterfaceToken(data);
+
+    Want want;
+    want.SetElementName("com.test.bundle", "com.test.TestAbility", "test");
+    data.WriteParcelable(&want);
+
+    EXPECT_TRUE(data.WriteBool(true));
+    auto token = sptr<IRemoteObject>(new AbilityScheduler());
+    EXPECT_TRUE(data.WriteRemoteObject(token));
+    
+    EXPECT_TRUE(data.WriteInt32(12345));
+    EXPECT_TRUE(data.WriteString("test_flag"));
+
+    MessageParcel reply;
+    MessageOption option;
+
+    EXPECT_CALL(*stub_, StartAbilityByOEExt(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_BY_OE_EXT), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByOEExtInner_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

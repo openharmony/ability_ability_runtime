@@ -34,18 +34,7 @@ constexpr int32_t ERMS_ISALLOW_EMBED_RESULTCODE = 1;
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (StartAbilityUtils::skipErms) {
-        StartAbilityUtils::skipErms = false;
-        return ERR_OK;
-    }
-    if (param.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
-        param.want.GetElement().GetBundleName()) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "same bundle");
-        StartAbilityUtils::ermsSupportBackToCallerFlag = true;
-        return ERR_OK;
-    }
-    if (param.isTargetPlugin) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start plugin ability");
+    if (NoNeedErms(param)) {
         return ERR_OK;
     }
     ErmsCallerInfo callerInfo;
@@ -55,7 +44,12 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     if (param.isStartAsCaller) {
         callerInfo.isAsCaller = true;
     }
-    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
+
+    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken,
+        !param.hostBundleName.empty());
+    if (!param.hostBundleName.empty()) {
+        callerInfo.packageName = param.hostBundleName;
+    }
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
@@ -83,6 +77,25 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     }
 #endif
     return ERR_ECOLOGICAL_CONTROL_STATUS;
+}
+
+bool EcologicalRuleInterceptor::NoNeedErms(const AbilityInterceptorParam &param)
+{
+    if (StartAbilityUtils::skipErms) {
+        StartAbilityUtils::skipErms = false;
+        return true;
+    }
+    if (param.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
+        param.want.GetElement().GetBundleName()) {
+        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "same bundle");
+        StartAbilityUtils::ermsSupportBackToCallerFlag = true;
+        return true;
+    }
+    if (param.isTargetPlugin) {
+        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start plugin ability");
+        return true;
+    }
+    return false;
 }
 
 bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
@@ -261,7 +274,8 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
 
 void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
     const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
-    ErmsCallerInfo &callerInfo, int32_t userId, const sptr<IRemoteObject> &callerToken)
+    ErmsCallerInfo &callerInfo, int32_t userId, const sptr<IRemoteObject> &callerToken,
+    bool skipCallerInfo)
 {
     if (callerToken != nullptr) {
         auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
@@ -270,17 +284,24 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
             callerInfo.callerModelType = ErmsCallerInfo::MODEL_FA;
         }
     }
-    callerInfo.packageName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    callerInfo.uid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
-    callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
-    callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
+
+    if (!skipCallerInfo) {
+        callerInfo.packageName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        callerInfo.uid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
+        callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
+        callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
+    }
+
     callerInfo.userId = userId;
     if (want.GetElement().GetBundleName().empty() && abilityInfo != nullptr) {
         callerInfo.targetBundleName = abilityInfo->bundleName;
     }
 
     GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
-    GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+
+    if (!skipCallerInfo) {
+        GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    }
 
     TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "ERMS's caller{%{public}s_%{public}d_%{public}d}",
         callerInfo.packageName.c_str(), callerInfo.uid, callerInfo.pid);

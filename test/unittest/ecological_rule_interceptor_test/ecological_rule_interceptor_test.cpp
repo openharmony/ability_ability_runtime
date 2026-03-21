@@ -1361,6 +1361,59 @@ HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoProcess_020
+ * @tc.desc: Tests hostBundleName not empty
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_020, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, false, nullptr,
+        shouldBlockFunc);
+    param.hostBundleName = "bundle.test.com";
+    ErrCode result = interceptor->DoProcess(param);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: NoNeedErms_001
+ * @tc.desc: Tests hostBundleName not empty
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, NoNeedErms_001, TestSize.Level1)
+{
+    Want want;
+    int32_t requestCode = 0;
+    int32_t userId = -1;
+    int32_t isWithUI = false;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param{want, requestCode, userId, false, nullptr, shouldBlockFunc};
+    StartAbilityUtils::skipErms = true;
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
+    EXPECT_FALSE(StartAbilityUtils::skipErms);
+
+    std::string testBundelName = "bundle.test.com";
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, testBundelName);
+    want.SetBundle(testBundelName);
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
+    EXPECT_TRUE(StartAbilityUtils::ermsSupportBackToCallerFlag);
+
+    want.SetBundle("");
+    param.isTargetPlugin = true;
+    EXPECT_TRUE(EcologicalRuleInterceptor::NoNeedErms(param));
+
+    param.isTargetPlugin = false;
+    EXPECT_FALSE(EcologicalRuleInterceptor::NoNeedErms(param));
+}
+
+/**
  * @tc.name: GetEcologicalTargetInfo_004
  * @tc.desc: Tests GetEcologicalTargetInfo
  * @tc.type: FUNC
