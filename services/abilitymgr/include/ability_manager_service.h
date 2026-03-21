@@ -3174,7 +3174,7 @@ private:
     int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, int32_t appIndex, const bool isUpgrade,
         const std::string &exitMsg);
 
-    int32_t HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
+    void HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
         const std::string &exitMsg);
 
     int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);
