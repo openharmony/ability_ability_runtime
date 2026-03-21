@@ -266,12 +266,12 @@ ability_runtime/
 
 ### 日志记录
 
-使用 HiLog 进行日志记录：
+使用 HiLog 进行日志记录，已封装在hilog_tag_wrapper.h文件中。
 ```cpp
-#include "hilog/log.h"
+#include "hilog_tag_wrapper.h"
 
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "MyTag"};
-HILOG_INFO(LABEL, "Message: %{public}d", value);
+// LABEL定义在AAFwkLogTag， 如AAFwkLogTag::ABILITY
+TAG_LOGI(LABEL, "Message: %{public}d", value);
 ```
 
 ### aa 命令
