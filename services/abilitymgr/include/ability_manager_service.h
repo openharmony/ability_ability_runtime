@@ -3164,7 +3164,8 @@ private:
         const int32_t oriValidUserId);
 
     void InitInterceptor();
-    void InitInterceptorForScreenUnlock(int32_t userId = DEFAULT_INVAL_VALUE);
+    void InitInterceptorForScreenUnlock();
+    void UpdateScreenUnlockInterceptor(int32_t userId);
     void InitPushTask();
     void InitAppSpawnMsgPipe();
     void InitDeepLinkReserve();
