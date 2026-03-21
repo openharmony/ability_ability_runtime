@@ -109,7 +109,7 @@ private:
     bool CheckParamsValid(const uint16_t params[])
     {
         uint16_t restartFlag = params[0];
-        constexpr uint16_t restartMaxVal = 0x0003;
+        constexpr uint16_t restartMaxVal = 0x0004;
         if ((restartFlag < 0 || restartFlag > restartMaxVal) && (restartFlag != RestartFlag::NO_RESTART)) {
             TAG_LOGE(AAFwkTag::RECOVERY, "invalid restartFlag: %{public}d", restartFlag);
             return false;
