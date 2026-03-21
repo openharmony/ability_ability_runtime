@@ -5562,7 +5562,8 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
             }
             return ERR_INVALID_VALUE;
         }
-        result = freeInstallManager_->ConnectFreeInstall(want, validUserId, callerToken, localDeviceId);
+        result = freeInstallManager_->ConnectFreeInstall(
+            want, validUserId, callerToken, localDeviceId, extensionType);
         if (result != ERR_OK) {
             if (extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
                 eventInfo.errReason = "ConnectFreeInstall error";
