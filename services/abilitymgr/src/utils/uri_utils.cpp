@@ -496,7 +496,8 @@ void UriUtils::PublishFileOpenEvent(const Want &want, const GrantUriPermissionIn
             std::chrono::system_clock::now().time_since_epoch()).count();
         std::string currentTime = std::to_string(timeNow);
         msgWant.SetParam("viewTime", currentTime);
-        msgWant.SetParam("uid", grantInfo.callerUid);
+        msgWant.SetParam("targetUid", grantInfo.targetUid);
+        msgWant.SetParam("callerUid", grantInfo.callerUid);
         EventFwk::CommonEventData commonData{msgWant};
         EventFwk::CommonEventPublishInfo commonEventPublishInfo;
         std::vector<std::string> subscriberPermissions = {"ohos.permission.MANAGE_LOCAL_ACCOUNTS"};
