@@ -210,6 +210,24 @@ public:
         uint64_t intentId,
         int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
+     /**
+      * Starts a new ability by oe extension.
+      *
+      * @param want Indicates the ability to start.
+      * @param callerToken Indicates the caller ability token.
+      * @param hostPid Indicates the host process ID.
+      * @param specifiedFlag Indicates the specified flag for the target UIAbility for specified mode.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    virtual int32_t StartAbilityByOEExt(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int32_t hostPid,
+        const std::string &specifiedFlag)
+    {
+        return 0;
+    }
+
     /**
      * Starts a new ability with specific start settings.
      *

@@ -109,6 +109,7 @@ struct AbilityRequest {
     bool hideFailureTipDialog = false;
     bool promotePriority = false;
     bool isFromOpenLink = false;
+    bool isStartByOEExt = false;
     std::pair<bool, LaunchReason> IsContinuation() const;
 
     bool IsAcquireShareData() const
