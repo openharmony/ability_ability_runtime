@@ -576,5 +576,15 @@ HWTEST_F(WatchdogTest, WatchdogTest_CheckBgThread_000, TestSize.Level1)
     }
     EXPECT_TRUE(watchdog_->backgroundReportCount_.load() >= count);
 }
+
+/**
+ * @tc.number: WatchdogTest_SetReportLifeCycleAsAppfreeze_000
+ * @tc.desc: Verify that function ReportEvent.
+ */
+HWTEST_F(WatchdogTest, WatchdogTest_SetReportLifeCycleAsAppfreeze_000, TestSize.Level1)
+{
+    EXPECT_NE(watchdog_, nullptr);
+    watchdog_->SetReportLifeCycleAsAppfreeze();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
