@@ -8042,7 +8042,7 @@ void AppMgrServiceInner::RecordAppWithReason(int32_t pid, int32_t uid, int32_t k
 void AppMgrServiceInner::RecordAppWithReasonByUserId(int32_t userId, int32_t killId)
 {
     AAFwk::ExitReasonCompability exitReasonCompability(killId);
-    AbilityManagerClient::GetInstance()->RecordAppWithReasonByUserId(userId, exitReasonCompability);
+    IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->RecordAppWithReasonByUserId(userId, exitReasonCompability));
 }
 #endif
 

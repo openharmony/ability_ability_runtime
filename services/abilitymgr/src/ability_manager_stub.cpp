@@ -4198,8 +4198,7 @@ ErrCode AbilityManagerStub::RecordAppWithReasonByUserIdInner(MessageParcel &data
         TAG_LOGE(AAFwkTag::ABILITYMGR, "exitReason null");
         return ERR_READ_EXIT_REASON_FAILED;
     }
-    int32_t result = RecordAppWithReasonByUserId(userId, *exitReason);
-    if (!reply.WriteInt32(result)) {
+    if (!reply.WriteInt32(RecordAppWithReasonByUserId(userId, *exitReason))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
