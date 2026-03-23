@@ -608,6 +608,10 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
         return ERR_PERMISSION_DENIED;
     }
+    if (appIndex != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not support clone app preload");
+        return ERR_INVALID_VALUE;
+    }
     return PreloadApplication(bundleName, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED);
 }
 
