@@ -784,6 +784,10 @@ sptr<Rosen::WindowOption> JsUIExtensionBase::CreateWindowOption(const sptr<AAFwk
         uint64_t temp = (static_cast<uint64_t>(high) << 32) | low;
         launchTimestamp = static_cast<int64_t>(temp);
     }
+    if (context_->GetAbilityInfo()->extensionAbilityType ==
+        AppExecFwk::ExtensionAbilityType::AGENT_UI) {
+        option->SetIsBlockSubwindow(true);
+    }
     option->SetStartModalExtensionTimeStamp(launchTimestamp);
     return option;
 }

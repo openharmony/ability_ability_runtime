@@ -762,6 +762,8 @@ int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(
     uiExtensionSessionInfo.uiExtensionUsage = sessionInfo->uiExtensionUsage;
     uiExtensionSessionInfo.elementName = abilityRecord->GetElementName();
     uiExtensionSessionInfo.extensionAbilityType = abilityRecord->GetAbilityInfo().extensionAbilityType;
+    uiExtensionSessionInfo.isBlockSubwindow =
+        (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT_UI);
 
     auto callerToken = sessionInfo->callerToken;
     if (callerToken != nullptr) {
