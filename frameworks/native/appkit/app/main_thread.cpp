@@ -2119,6 +2119,12 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
 
         ApplicationDataManager::GetInstance().SetIsUncatchable(isUncatchable);
 
+        bool foreground = (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
+            ApplicationImpl::APP_STATE_FOREGROUND) ? true : false;
+        ProcessExitInfo info = {bundleName, errorObject.name, summary, appRunningId, processName, pid, foreground,
+            isUncatchable};
+        ProcessExit(info);
+
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
         auto mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
         ApplicationDataManager::ExceptionParams params = {env, mainEnv, exception, summary, isUncatchable};
@@ -2135,12 +2141,7 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
             TAG_LOGW(AAFwkTag::APPKIT, "Current thread does not need to exit the process");
             return;
         }
-
-        bool foreground = (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
-            ApplicationImpl::APP_STATE_FOREGROUND) ? true : false;
-        ProcessExitInfo info = {bundleName, errorObject.name, summary, appRunningId, processName, pid, foreground,
-            isUncatchable};
-        ProcessExit(info);
+        _exit(JS_ERROR_EXIT);
     };
 }
 
@@ -2163,7 +2164,6 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
     TAG_LOGW(AAFwkTag::APPKIT, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL,JS_ERROR],"
         " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
-    _exit(JS_ERROR_EXIT);
 }
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
