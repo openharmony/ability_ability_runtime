@@ -351,5 +351,43 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_RunAutoStartupTask_001, Funct
     EXPECT_TRUE(abilityStage_->RunAutoStartupTask(callback, nullptr, isAsyncCallback, context, false) == ERR_OK);
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_RunAutoStartupTask_001 end";
 }
+
+/**
+ * @tc.number: AppExecFwk_AbilityStage_OnLaunchFromHyperSnap_001
+ * @tc.name: OnLaunchFromHyperSnap
+ * @tc.desc: Test whether OnLaunchFromHyperSnap is called normally.
+ * @tc.type: FUNC
+ * @tc.require: issueIAXXXX
+ */
+HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_OnLaunchFromHyperSnap_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnLaunchFromHyperSnap_001 start";
+    bool boolValue = false;
+    if (abilityStage_ != nullptr) {
+        abilityStage_->OnLaunchFromHyperSnap();
+        boolValue = true;
+    }
+    EXPECT_TRUE(boolValue);
+    GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnLaunchFromHyperSnap_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AbilityStage_OnAboutToCreateAbility_001
+ * @tc.name: OnAboutToCreateAbility
+ * @tc.desc: Test whether OnAboutToCreateAbility is called normally.
+ * @tc.type: FUNC
+ * @tc.require: issueIAXXXX
+ */
+HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_OnAboutToCreateAbility_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnAboutToCreateAbility_001 start";
+    bool boolValue = false;
+    if (abilityStage_ != nullptr) {
+        abilityStage_->OnAboutToCreateAbility();
+        boolValue = true;
+    }
+    EXPECT_TRUE(boolValue);
+    GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnAboutToCreateAbility_001 end";
+}
 }  // namespace AppExecFwk
 }

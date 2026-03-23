@@ -52,6 +52,10 @@ public:
     std::string OnNewProcessRequest(const AAFwk::Want &want,
         AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
 
+    void OnLaunchFromHyperSnap() override;
+
+    void OnAboutToCreateAbility() override;
+
     static void OnAcceptWantCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
 
     static void OnNewProcessRequestCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
