@@ -5501,6 +5501,35 @@ ErrCode AbilityManagerProxy::QueryCallerTokenIdForAnco(int32_t userId, const std
     return NO_ERROR;
 }
 
+int32_t AbilityManagerProxy::LaunchGameCustomized(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write bundleName fail");
+        return ERR_WRITE_STRING_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId fail");
+        return ERR_WRITE_INT32_FAILED;
+    }
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write appIndex fail");
+        return ERR_WRITE_INT32_FAILED;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::LAUNCH_GAME_CUSTOMIZED, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate)
 {
     MessageParcel data;
@@ -7652,6 +7681,85 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityInCurrentProcess(const Want &want
     auto ret = SendRequest(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_IN_CURRENT_PROCESS, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::NotifyCancelGamePreLaunch(const sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::CANCEL_GAME_PRELAUNCH, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::NotifyCompleteGamePreLaunch(const sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::COMPLETE_GAME_PRELAUNCH, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::SetGamePreLaunchCompleteTime(int32_t userId, int64_t completeTime)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId fail");
+        return ERR_WRITE_INT32_FAILED;
+    }
+    if (!data.WriteInt64(completeTime)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write completeTime fail");
+        return INNER_ERR;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::SET_GAME_PRELAUNCH_COMPLETE_TIME, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
         return ret;
     }
     return reply.ReadInt32();

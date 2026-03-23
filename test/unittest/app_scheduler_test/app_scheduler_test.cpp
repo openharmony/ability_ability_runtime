@@ -1241,5 +1241,120 @@ HWTEST_F(AppSchedulerTest, AppScheduler_CheckPreloadAppRecordExist_0100, TestSiz
         bundleName, userId, appIndex, isExist);
     EXPECT_EQ(result, INNER_ERR);
 }
+
+/**
+ * @tc.name: AppScheduler_SetGameSAPrelaunch_001
+ * @tc.desc: SetGameSAPrelaunch with null appMgrClient.
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetGameSAPrelaunch_001, TestSize.Level1)
+{
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    sptr<IRemoteObject> token;
+    bool isGameSAPrelaunch = true;
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, INNER_ERR);
+}
+
+/**
+ * @tc.name: AppScheduler_SetGameSAPrelaunch_002
+ * @tc.desc: SetGameSAPrelaunch with valid appMgrClient and isGameSAPrelaunch true.
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetGameSAPrelaunch_002, TestSize.Level1)
+{
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    clientMock_ = std::make_unique<AppMgrClientMock>();
+    appScheduler->appMgrClient_ = std::move(clientMock_);
+    EXPECT_NE(appScheduler->appMgrClient_, nullptr);
+
+    sptr<IRemoteObject> token;
+    bool isGameSAPrelaunch = true;
+    auto mockClient = static_cast<AppMgrClientMock*>(appScheduler->appMgrClient_.get());
+    EXPECT_CALL(*mockClient, SetGameSAPrelaunch(_, _)).Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+
+    auto result = appScheduler->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppScheduler_SetGameSAPrelaunch_003
+ * @tc.desc: SetGameSAPrelaunch with valid appMgrClient and isGameSAPrelaunch false.
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetGameSAPrelaunch_003, TestSize.Level1)
+{
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    clientMock_ = std::make_unique<AppMgrClientMock>();
+    appScheduler->appMgrClient_ = std::move(clientMock_);
+    EXPECT_NE(appScheduler->appMgrClient_, nullptr);
+
+    sptr<IRemoteObject> token;
+    bool isGameSAPrelaunch = false;
+    auto mockClient = static_cast<AppMgrClientMock*>(appScheduler->appMgrClient_.get());
+    EXPECT_CALL(*mockClient, SetGameSAPrelaunch(_, _)).Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+
+    auto result = appScheduler->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppScheduler_SetGameSAPrelaunch_004
+ * @tc.desc: SetGameSAPrelaunch with null token.
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetGameSAPrelaunch_004, TestSize.Level1)
+{
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    clientMock_ = std::make_unique<AppMgrClientMock>();
+    appScheduler->appMgrClient_ = std::move(clientMock_);
+    EXPECT_NE(appScheduler->appMgrClient_, nullptr);
+
+    sptr<IRemoteObject> token = nullptr;
+    bool isGameSAPrelaunch = true;
+    auto mockClient = static_cast<AppMgrClientMock*>(appScheduler->appMgrClient_.get());
+    EXPECT_CALL(*mockClient, SetGameSAPrelaunch(_, _)).Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+
+    auto result = appScheduler->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppScheduler_SetGameSAPrelaunch_005
+ * @tc.desc: SetGameSAPrelaunch toggle between true and false.
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetGameSAPrelaunch_005, TestSize.Level1)
+{
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    clientMock_ = std::make_unique<AppMgrClientMock>();
+    appScheduler->appMgrClient_ = std::move(clientMock_);
+    EXPECT_NE(appScheduler->appMgrClient_, nullptr);
+
+    sptr<IRemoteObject> token;
+    auto mockClient = static_cast<AppMgrClientMock*>(appScheduler->appMgrClient_.get());
+
+    // Set to true
+    bool isGameSAPrelaunch = true;
+    EXPECT_CALL(*mockClient, SetGameSAPrelaunch(_, _)).Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+    auto result = appScheduler->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+
+    // Set to false
+    isGameSAPrelaunch = false;
+    EXPECT_CALL(*mockClient, SetGameSAPrelaunch(_, _)).Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+    result = appScheduler->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

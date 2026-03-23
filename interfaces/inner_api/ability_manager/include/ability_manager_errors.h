@@ -1402,6 +1402,11 @@ enum NativeFreeInstallError {
      */
     ERR_INVALID_PID = 29360226,
 
+    /*
+     * Result (29360227) The current application is not in a game preloading state.
+     */
+    ERR_NOT_GAME_PRELOAD_STATE = 29360227,
+
     /**
      * Undefine error code.
      */
