@@ -183,10 +183,10 @@ int32_t AgentCardDbMgr::QueryData(const std::string &bundleName, int32_t userId,
         RestoreKvStore(status);
         return status;
     }
-    if (!nlohmann::json::accept(value.ToString())) {
+    if (!nlohmann::json::accept(value.ToString(), true)) {
         return AAFwk::INNER_ERR;
     }
-    nlohmann::json jsonArray = nlohmann::json::parse(value.ToString(), nullptr, false);
+    nlohmann::json jsonArray = nlohmann::json::parse(value.ToString(), nullptr, false, true);
     for (const auto &item : jsonArray) {
         AgentCard card;
         if (!AgentCard::FromJson(item, card)) {
@@ -213,10 +213,10 @@ int32_t AgentCardDbMgr::QueryAllData(std::vector<AgentCard> &cards)
     }
 
     for (const auto &item : allEntries) {
-        if (!nlohmann::json::accept(item.value.ToString())) {
+        if (!nlohmann::json::accept(item.value.ToString(), true)) {
             return AAFwk::INNER_ERR;
         }
-        nlohmann::json jsonArray = nlohmann::json::parse(item.value.ToString(), nullptr, false);
+        nlohmann::json jsonArray = nlohmann::json::parse(item.value.ToString(), nullptr, false, true);
         for (const auto &item : jsonArray) {
             AgentCard card;
             if (!AgentCard::FromJson(item, card)) {
