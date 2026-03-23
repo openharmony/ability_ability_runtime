@@ -113,6 +113,7 @@ enum class PreloadMode {
     PRELOAD_MODULE = 2,
     PRELOAD_BY_PHASE = 3,
     PRE_LAUNCH = 4,
+    GAME_PRELAUNCH = 5,
 };
 
 enum class PreloadPhase {

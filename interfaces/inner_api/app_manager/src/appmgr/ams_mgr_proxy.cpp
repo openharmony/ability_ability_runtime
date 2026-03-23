@@ -272,6 +272,32 @@ void AmsMgrProxy::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
+int32_t AmsMgrProxy::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "SetGameSAPrelaunch, isGameSAPrelaunch: %{public}d", isGameSAPrelaunch);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteBool(isGameSAPrelaunch)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write isGameSAPrelaunch");
+        return ERR_INVALID_DATA;
+    }
+    int32_t ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_GAME_SA_PRELAUNCH),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
     sptr<AAFwk::IUserCallback> callback)
 {
