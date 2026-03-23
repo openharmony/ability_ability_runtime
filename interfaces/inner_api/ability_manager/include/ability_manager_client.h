@@ -942,6 +942,18 @@ public:
     ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo);
 
     /**
+     * @brief Get mission info by id.
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param missionInfo mission info of target mission.
+     * @param displayInfo display info of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetMissionInfo(const std::string& deviceId, int32_t missionId, MissionInfo &missionInfo,
+        DisplayInfo &displayInfo);
+
+    /**
      * @brief Get the Mission Snapshot Info object
      * @param deviceId local or remote deviceId.
      * @param missionId Id of target mission.
