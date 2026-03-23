@@ -37,6 +37,7 @@ public:
     AppExecFwk::ElementName elementName;
     AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     AppExecFwk::ElementName hostElementName;
+    bool isBlockSubwindow = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
