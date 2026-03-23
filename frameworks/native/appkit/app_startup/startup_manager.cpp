@@ -63,6 +63,7 @@ constexpr const char* PRELOAD_SYSTEM_SO_STARTUP_TASKS = "systemPreloadHintStartu
 constexpr const char* PRELOAD_SYSTEM_SO_ALLOWLIST_FILE_PATH = "/etc/ability_runtime_app_startup.json";
 constexpr const char* SYSTEM_PRELOAD_SO_ALLOW_LIST = "systemPreloadSoAllowList";
 constexpr const char* ARK_TS_MODE = "arkTSMode";
+constexpr const int32_t PRIORITY_PRELOAD_SO = -20;
 
 struct StartupTaskResultCallbackInfo {
     std::unique_ptr<StartupTaskResultCallback> callback_;
@@ -132,6 +133,10 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::STARTUP, "self is null");
             return;
+        }
+        auto ret = setpriority(PRIO_PROCESS, gettid(), PRIORITY_PRELOAD_SO);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::STARTUP, "setpriority fail, ret:%{public}d, err:%{public}d", ret, errno);
         }
         self->PreloadAppHintStartupTask(data);
     });
