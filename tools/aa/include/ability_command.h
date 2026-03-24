@@ -79,7 +79,6 @@ const std::string HELP_MSG_START =
     "  [--wh <window-height>] "
     "  [--ww <window-width>] "
     "  [-u <user-id>] "
-    "  [--userId <user-id>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =

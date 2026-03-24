@@ -162,7 +162,6 @@ constexpr struct option LONG_OPTIONS[] = {
     {"wt", required_argument, nullptr, OPTION_WINDOW_TOP},
     {"wh", required_argument, nullptr, OPTION_WINDOW_HEIGHT},
     {"ww", required_argument, nullptr, OPTION_WINDOW_WIDTH},
-    {"userId", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
@@ -2176,7 +2175,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             }
             case 'u': {
                 // 'aa start -u <user-id>'
-                // 'aa start --userId <user-id>'
                 // save user id
                 if (optarg != nullptr) {
                     (void)StrToInt(optarg, userId);
