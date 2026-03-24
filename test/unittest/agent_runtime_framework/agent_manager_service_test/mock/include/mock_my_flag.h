@@ -37,6 +37,10 @@ public:
     static bool retVerifyConnectAgentPermission;
     static bool retVerifyGetAgentCardPermission;
     static bool retJudgeCallerIsAllowedToUseSystemAPI;
+    static bool retVerifyModifyAgentCardPermission;
+    static int32_t retRegisterAgentCard;
+    static int32_t retUpdateAgentCard;
+    static int32_t retDeleteAgentCard;
     static int32_t retConnectAbilityWithExtensionType;
     static int32_t retDisconnectAbility;
     static int32_t retGetAllAgentCards;

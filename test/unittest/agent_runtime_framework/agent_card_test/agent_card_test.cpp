@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "ability_manager_errors.h"
 #include "agent_card.h"
+#include "parcel_mock.h"
 #include "securec.h"
 
 using namespace OHOS;
@@ -44,7 +45,9 @@ void AgentCardTest::TearDownTestCase(void)
 {}
 
 void AgentCardTest::SetUp(void)
-{}
+{
+    ParcelMock::Reset();
+}
 
 void AgentCardTest::TearDown(void)
 {}
@@ -547,6 +550,68 @@ HWTEST_F(AgentCardTest, AgentCardReadFromParcel_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AgentCardReadFromParcel_004
+ * @tc.desc: AgentCardReadFromParcel returns true when type bytes are absent
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_004, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.type = AgentCardType::LOW_CODE;
+    agentCard.defaultInputModes = { "test" };
+    agentCard.defaultOutputModes = { "test" };
+    Parcel parcelMock;
+    ParcelMock::SetReadableBytes(0);
+
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(agentCard.type, AgentCardType::LOW_CODE);
+}
+
+/**
+ * @tc.name: AgentCardReadFromParcel_005
+ * @tc.desc: AgentCardReadFromParcel returns false when type is invalid
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_005, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.defaultInputModes = { "test" };
+    agentCard.defaultOutputModes = { "test" };
+    Parcel parcelMock;
+    ParcelMock::SetReadableBytes(sizeof(int32_t));
+    ParcelMock::SetReadInt32Value(99);
+
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AgentCardReadFromParcel_006
+ * @tc.desc: AgentCardReadFromParcel updates type when type is valid
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardReadFromParcel_006, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.defaultInputModes = { "test" };
+    agentCard.defaultOutputModes = { "test" };
+    Parcel parcelMock;
+    ParcelMock::SetReadableBytes(sizeof(int32_t));
+    ParcelMock::SetReadInt32Value(static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE));
+
+    bool result = agentCard.ReadFromParcel(parcelMock);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(agentCard.type, AgentCardType::ATOMIC_SERVICE);
+}
+
+/**
  * @tc.name: AgentCardMarshalling_001
  * @tc.desc: AgentCardMarshalling_001
  * @tc.type: FUNC
@@ -556,6 +621,7 @@ HWTEST_F(AgentCardTest, AgentCardMarshalling_001, TestSize.Level1)
 {
     AgentCard agentCard;
     agentCard.agentId = "1";
+    agentCard.type = AgentCardType::LOW_CODE;
     agentCard.name = "test1";
     agentCard.description = "test1";
     std::shared_ptr<AgentProvider> provider = std::make_shared<AgentProvider>();
@@ -1919,6 +1985,7 @@ HWTEST_F(AgentCardTest, AgentCard_Marshalling_001, TestSize.Level1)
     Parcel parcelMock;
     auto agentCard = std::make_shared<AgentCard>();
     agentCard->agentId = "1";
+    agentCard->type = AgentCardType::LOW_CODE;
     agentCard->name = "ExampleName";
     agentCard->description = "ExampleDescription";
     agentCard->category = "ExampleCategory";
@@ -3495,6 +3562,181 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_043, TestSize.Level1)
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
     EXPECT_EQ(agentCard.appInfo->deviceTypes.size(), 2);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_044
+ * @tc.desc: Test AgentCard FromJson defaults type to APP when absent
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_044, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.type, AgentCardType::APP);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_045
+ * @tc.desc: Test AgentCard FromJson parses valid string type
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_045, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "type", "LOW_CODE" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.type, AgentCardType::LOW_CODE);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_046
+ * @tc.desc: Test AgentCard FromJson fails when string type is invalid
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_046, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "type", "workflow" },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_047
+ * @tc.desc: Test AgentCard FromJson fails when numeric type is out of range
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_047, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "type", 99 },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
+}
+
+/**
+ * @tc.name: AgentCardFromJson_048
+ * @tc.desc: Test AgentCard FromJson parses valid numeric type
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_048, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "type", static_cast<int32_t>(AgentCardType::LOW_CODE) },
+        { "name", "test" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "category", "productivity" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+    };
+    AgentCard agentCard;
+    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
+    EXPECT_EQ(agentCard.type, AgentCardType::LOW_CODE);
+}
+
+/**
+ * @tc.name: AgentCardToJson_002
+ * @tc.desc: Test AgentCard ToJson includes type
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardToJson_002, TestSize.Level1)
+{
+    AgentCard agentCard;
+    agentCard.agentId = "1";
+    agentCard.type = AgentCardType::LOW_CODE;
+    agentCard.name = "test";
+    agentCard.description = "test description";
+    agentCard.version = "1.0";
+    agentCard.category = "productivity";
+    agentCard.defaultInputModes = { "text" };
+    agentCard.defaultOutputModes = { "text" };
+
+    nlohmann::json jsonObject = agentCard.ToJson();
+    EXPECT_TRUE(jsonObject.contains("type"));
+    EXPECT_EQ(jsonObject["type"], static_cast<int32_t>(AgentCardType::LOW_CODE));
 }
 
 /**
