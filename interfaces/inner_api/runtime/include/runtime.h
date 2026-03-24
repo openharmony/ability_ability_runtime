@@ -106,6 +106,13 @@ public:
         std::string arkTSMode = CODE_LANGUAGE_ARKTS_1_0;
     };
 
+    struct JsHeapDumpParam {
+        bool isFullGC = false;
+        bool isBinary = false;
+        bool isClearNodeIdCache = false;
+        bool isProcDump = false;
+    };
+
     static std::unique_ptr<Runtime> Create(Options &options);
     static void SavePreloaded(std::unique_ptr<Runtime> &&instance);
     static std::unique_ptr<Runtime> GetPreloaded(Language key);
@@ -124,7 +131,7 @@ public:
     virtual void ForceFullGC() = 0;
     virtual void ForceFullGC(uint32_t tid) = 0;
     virtual void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) = 0;
-    virtual void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary, bool isClearNodeIdCache) {};
+    virtual void DumpHeapSnapshot(uint32_t tid, const JsHeapDumpParam &param) {};
     virtual void AllowCrossThreadExecution() = 0;
     virtual void GetHeapPrepare() = 0;
     virtual void NotifyApplicationState(bool isBackground) = 0;

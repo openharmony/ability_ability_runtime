@@ -1376,7 +1376,7 @@ HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0200, TestSize.Level1)
 
 /**
  * @tc.name: DumpHeapSnapshot_0400
- * @tc.desc: JsRuntime test for DumpHeapSnapshot.
+ * @tc.desc: JsRuntime test for DumpHeapSnapshot with JsHeapDumpParam.
  * @tc.type: FUNC
  */
 HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0400, TestSize.Level1)
@@ -1384,10 +1384,48 @@ HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0400, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot_0400 start");
     auto jsRuntime = std::make_unique<JsRuntime>();
     uint32_t tid = 1;
-    bool isFullGC = false;
-    bool isBinary = false;
-    bool isClearNodeIdCache = true;
-    jsRuntime->DumpHeapSnapshot(tid, isFullGC, isBinary, isClearNodeIdCache);
+    OHOS::AbilityRuntime::Runtime::JsHeapDumpParam param;
+    param.isFullGC = false;
+    param.isBinary = false;
+    param.isClearNodeIdCache = true;
+    param.isProcDump = false;
+    jsRuntime->DumpHeapSnapshot(tid, param);
+    EXPECT_TRUE(jsRuntime != nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot end");
+}
+
+/**
+ * @tc.name: DumpHeapSnapshot_0500
+ * @tc.desc: JsRuntime test for DumpHeapSnapshot with JsHeapDumpParam isMergeBinary true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot_0500 start");
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    uint32_t tid = 1;
+    OHOS::AbilityRuntime::Runtime::JsHeapDumpParam param;
+    param.isFullGC = true;
+    param.isBinary = true;
+    param.isClearNodeIdCache = true;
+    param.isProcDump = true;
+    jsRuntime->DumpHeapSnapshot(tid, param);
+    EXPECT_TRUE(jsRuntime != nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot end");
+}
+
+/**
+ * @tc.name: DumpHeapSnapshot_0600
+ * @tc.desc: JsRuntime test for DumpHeapSnapshot with default JsHeapDumpParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot_0600 start");
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    uint32_t tid = 1;
+    OHOS::AbilityRuntime::Runtime::JsHeapDumpParam param;
+    jsRuntime->DumpHeapSnapshot(tid, param);
     EXPECT_TRUE(jsRuntime != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot end");
 }
