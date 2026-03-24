@@ -351,6 +351,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT) {
         return GetPendingRequestWantInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT_FROM_PROXY) {
+        return GetPendingRequestWantInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO) {
         return GetWantSenderInfoInner(data, reply);
     }
@@ -2214,6 +2217,25 @@ int AbilityManagerStub::GetPendingRequestWantInner(MessageParcel &data, MessageP
 
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     int32_t result = GetPendingRequestWant(wantSender, want);
+    if (result != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getPendingRequestWant fail");
+        return ERR_INVALID_VALUE;
+    }
+    reply.WriteParcelable(want.get());
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::GetPendingRequestWantFromProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    sptr<IWantSender> wantSender = iface_cast<IWantSender>(data.ReadRemoteObject());
+    if (wantSender == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSender null");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    int32_t result = GetPendingRequestWantFromProxy(wantSender, want);
     if (result != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getPendingRequestWant fail");
         return ERR_INVALID_VALUE;

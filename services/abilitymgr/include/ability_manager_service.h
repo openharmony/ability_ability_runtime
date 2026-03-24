@@ -1122,6 +1122,14 @@ public:
     virtual int GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
 
     /**
+     * @brief Get the pending want from a want sender from want.
+     * @param target The target want sender.
+     * @param want The output pending want.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int GetPendingRequestWantFromProxy(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
+
+    /**
      * @brief Get the want sender information.
      * @param target The target want sender.
      * @param info The output want sender information.
