@@ -78,6 +78,8 @@ const std::string HELP_MSG_START =
     "  [--wt <window-top>] "
     "  [--wh <window-height>] "
     "  [--ww <window-width>] "
+    "  [-u <user-id>] "
+    "  [--userId <user-id>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =
@@ -272,6 +274,7 @@ private:
 #endif
     sptr<IAbilityManager> GetAbilityManagerService();
 
+    ErrCode MakeWantFromCmd(Want& want, std::string& windowMode, int32_t& userId);
     ErrCode MakeWantFromCmd(Want& want, std::string& windowMode);
     ErrCode MakeWantFromCmdForStopService(Want& want);
     ErrCode MakeWantForProcess(Want& want);
@@ -280,7 +283,7 @@ private:
     bool MatchOrderString(const std::regex &r, const std::string &orderCmd);
     bool CheckPerfCmdString(const char* optarg, const size_t paramLength, std::string &perfCmd);
     void ParseBundleName(std::string &bundleName);
-    ErrCode StartAbilityWithWait(Want& want);
+    ErrCode StartAbilityWithWait(Want& want, int32_t userId = DEFAULT_INVAL_VALUE);
     void FormatOutputForWithWait(const Want &want, const AbilityStartWithWaitObserverData& data);
     bool IsImplicitStartAction(const Want &want);
     bool startAbilityWithWaitFlag_ = false;
