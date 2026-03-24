@@ -21,6 +21,7 @@ class AbilityStageContext extends Context {
 
     this.currentHapModuleInfo = obj.currentHapModuleInfo;
     this.config = obj.config;
+    this.launchElement = obj.launchElement;
   }
 
   onUpdateConfiguration(config) {
