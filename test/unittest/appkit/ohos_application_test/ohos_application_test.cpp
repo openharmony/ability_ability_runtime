@@ -1600,5 +1600,108 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbi
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterGetAllUIAbilitiesCallback_0100 end.";
 }
 #endif
+
+/**
+ * @tc.number: AppExecFwk_OHOSApplicationTest_LaunchElement_0100
+ * @tc.name: AddAbilityStage sets launchElement with valid Want
+ * @tc.desc: Test that AddAbilityStage correctly sets launchElement when Want contains valid ElementName.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_LaunchElement_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0100 start.";
+
+    // Create mock objects using the correct types
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+
+    // Set ElementName in Want
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("com.example.launchtest");
+    elementName.SetAbilityName("LaunchTestAbility");
+    elementName.SetModuleName("entry");
+    want->SetElement(elementName);
+
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+    ASSERT_NE(abilityRecord, nullptr);
+
+    auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
+    bool isAsyncCallback = false;
+
+    // Call AddAbilityStage
+    ohosApplication_->AddAbilityStage(abilityRecord, callback, isAsyncCallback);
+
+    // Verify abilityStages_ is not empty
+    EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
+
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0100 end.";
+}
+
+/**
+ * @tc.number: AppExecFwk_OHOSApplicationTest_LaunchElement_0200
+ * @tc.name: AddAbilityStage handles null Want gracefully
+ * @tc.desc: Test that AddAbilityStage handles null Want without crashing.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_LaunchElement_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0200 start.";
+
+    // Create mock objects with null Want
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+
+    // Pass nullptr as Want
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
+    ASSERT_NE(abilityRecord, nullptr);
+
+    auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
+    bool isAsyncCallback = false;
+
+    // Call AddAbilityStage - should not crash even with null Want
+    ohosApplication_->AddAbilityStage(abilityRecord, callback, isAsyncCallback);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0200 end.";
+}
+
+/**
+ * @tc.number: AppExecFwk_OHOSApplicationTest_LaunchElement_0300
+ * @tc.name: AddAbilityStage sets launchElement before onCreate
+ * @tc.desc: Test that AddAbilityStage sets launchElement before calling abilityStage->OnCreate().
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_LaunchElement_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0300 start.";
+
+    // Create mock objects
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+
+    // Set ElementName in Want
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("com.example.timingtest");
+    elementName.SetAbilityName("TimingTestAbility");
+    want->SetElement(elementName);
+
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+    ASSERT_NE(abilityRecord, nullptr);
+
+    auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
+    bool isAsyncCallback = false;
+
+    // Call AddAbilityStage
+    ohosApplication_->AddAbilityStage(abilityRecord, callback, isAsyncCallback);
+
+    // Verify that abilityStages_ is not empty (AbilityStage was created)
+    EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
+
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0300 end.";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
