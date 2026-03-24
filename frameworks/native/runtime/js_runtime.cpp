@@ -1359,15 +1359,18 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
 
 void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
 {
-    DumpHeapSnapshot(tid, isFullGC, isBinary, false);
+    OHOS::AbilityRuntime::Runtime::JsHeapDumpParam param;
+    param.isFullGC = isFullGC;
+    param.isBinary = isBinary;
+    DumpHeapSnapshot(tid, param);
 }
 
-void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary, bool isClearNodeIdCache)
+void JsRuntime::DumpHeapSnapshot(uint32_t tid, const OHOS::AbilityRuntime::Runtime::JsHeapDumpParam &param)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     panda::ecmascript::DumpSnapShotOption dumpOption;
-    if (isBinary) {
+    if (param.isBinary) {
         dumpOption.dumpFormat = panda::ecmascript::DumpFormat::BINARY;
     } else {
         dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
@@ -1375,9 +1378,10 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary, boo
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
     dumpOption.captureNumericValue = true;
-    dumpOption.isFullGC = isFullGC;
+    dumpOption.isFullGC = param.isFullGC;
     dumpOption.isSync = false;
-    dumpOption.isClearNodeIdCache = isClearNodeIdCache;
+    dumpOption.isClearNodeIdCache = param.isClearNodeIdCache;
+    dumpOption.isProcDump = param.isProcDump;
     DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
