@@ -2177,7 +2177,17 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // 'aa start -u <user-id>'
                 // save user id
                 if (optarg != nullptr) {
-                    (void)StrToInt(optarg, userId);
+                    int32_t tempUserId = DEFAULT_INVAL_VALUE;
+                    if (!StrToInt(optarg, tempUserId) || tempUserId < 0) {
+                        // 'aa start -u' with invalid argument
+                        TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -u' invalid arg: %{public}s", cmd_.c_str(), optarg);
+
+                        resultReceiver_.append("error: invalid user id: ");
+                        resultReceiver_.append(optarg).append("\n");
+                        result = OHOS::ERR_INVALID_VALUE;
+                    } else {
+                        userId = tempUserId;
+                    }
                 }
                 TAG_LOGD(AAFwkTag::AA_TOOL, "userId: %{public}d", userId);
                 break;
