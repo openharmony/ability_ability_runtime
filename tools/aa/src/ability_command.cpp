@@ -69,8 +69,8 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNRu:";
-const std::string SHORT_OPTION_CHARS = "chdabetpsmAUCDESNRu";
+const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:u:A:U:CDESNR";
+const std::string SHORT_OPTION_CHARS = "chdabetpsmuAUCDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
