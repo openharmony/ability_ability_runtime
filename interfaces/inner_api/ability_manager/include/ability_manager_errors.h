@@ -1116,6 +1116,15 @@ enum {
     // Result (2099214) for agent connections from the same caller reach the limit.
     ERR_MAX_AGENT_CONNECTIONS_REACHED = 2099214,
 
+    // Result (2099215) for agent card version is older than stored version.
+    ERR_AGENT_CARD_VERSION_TOO_OLD = 2099215,
+
+    // Result (2099216) for invalid agent card version.
+    ERR_INVALID_AGENT_CARD_VERSION = 2099216,
+
+    // Result (2099217) for duplicate register of an existing agent card.
+    ERR_AGENT_CARD_DUPLICATE_REGISTER = 2099217,
+
     /**
      * Result (2099411) for not support screen.
      */

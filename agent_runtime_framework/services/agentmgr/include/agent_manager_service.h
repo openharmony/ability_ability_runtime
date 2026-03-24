@@ -56,6 +56,12 @@ public:
 
     int32_t GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card) override;
 
+    int32_t RegisterAgentCard(const AgentCard &card) override;
+
+    int32_t UpdateAgentCard(const AgentCard &card) override;
+
+    int32_t DeleteAgentCard(const std::string &bundleName, const std::string &agentId) override;
+
     int32_t ConnectAgentExtensionAbility(const AAFwk::Want &want,
         const sptr<AAFwk::IAbilityConnection> &connection) override;
 
