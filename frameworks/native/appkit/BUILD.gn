@@ -467,6 +467,7 @@ ohos_shared_library("app_context") {
 
   configs = [
     ":appkit_config",
+    ":appkit_exception_config",
     "${ability_runtime_services_path}/common:optimize_config",
   ]
 
