@@ -461,7 +461,10 @@ ohos_shared_library("app_context") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
   ]
 
-  configs = [ ":appkit_config" ]
+  configs = [
+    ":appkit_config",
+    ":appkit_exception_config",
+  ]
 
   public_configs = [ ":appkit_public_config" ]
 
