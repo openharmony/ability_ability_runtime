@@ -129,6 +129,12 @@ std::string AbilityStage::OnNewProcessRequest(const AAFwk::Want &want,
     return "";
 }
 
+void AbilityStage::OnLaunchFromHyperSnap()
+{}
+
+void AbilityStage::OnAboutToCreateAbility()
+{}
+
 void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {}
 
