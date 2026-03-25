@@ -303,6 +303,8 @@ enum class AbilityErrorCode {
 
     ERROR_CODE_SELF_REDIRECTION_DISALLOWED = 16000136,
 
+    ERROR_CODE_SEND_REQUEST_TO_SYSTEM_FAIL = 16000150,
+
     // target bundle is not in u1
     ERROR_CODE_NO_U1 = 16000204,
 
