@@ -968,6 +968,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
         return ManualStartAutoStartupAppsInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::QUERY_SELF_MODULAR_OBJECT_EXTENSION_INFOS) {
+        return QuerySelfModularObjectExtensionInfosInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST) {
         return GetUserLockedBundleListInner(data, reply);
     }
@@ -5348,6 +5351,27 @@ int32_t AbilityManagerStub::UnRegisterPreloadUIExtensionHostClientInner(MessageP
     int32_t callerPid = data.ReadInt32();
     int32_t result = UnRegisterPreloadUIExtensionHostClient(callerPid);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::QuerySelfModularObjectExtensionInfosInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::vector<ModularObjectExtensionInfo> extensionInfos;
+    int32_t result = QuerySelfModularObjectExtensionInfos(extensionInfos);
+    if (!reply.WriteInt32(result)) {
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "QuerySelfModularObjectExtensionInfos failed, result: %{public}d", result);
+        return NO_ERROR;
+    }
+    reply.WriteInt32(extensionInfos.size());
+    for (auto &it : extensionInfos) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
     return NO_ERROR;
 }
 

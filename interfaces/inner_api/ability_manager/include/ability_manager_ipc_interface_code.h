@@ -718,6 +718,9 @@ enum class AbilityManagerInterfaceCode {
 
     // start ability by oe extension
     START_ABILITY_BY_OE_EXT = 6161,
+
+    // query self modular object Extension infos
+    QUERY_SELF_MODULAR_OBJECT_EXTENSION_INFOS = 6162,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

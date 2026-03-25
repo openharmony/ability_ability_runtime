@@ -42,6 +42,7 @@ config("abilityms_config") {
     "include/foreground_app_connection_manager",
     "include/insight_intent",
     "include/mission/",
+    "include/modular_object/",
     "include/rdb/",
     "include/resident_process/",
     "include/keep_alive/",
