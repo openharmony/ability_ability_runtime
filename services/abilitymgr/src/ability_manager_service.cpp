@@ -94,6 +94,7 @@
 #include "sa_interceptor_manager.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
+#include "session_handler_proxy.h"
 #ifdef SUPPORT_RECORDER_DSOFTBUS
 #include "softbus_bus_center.h"
 #endif
