@@ -2184,10 +2184,9 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                         resultReceiver_.append("error: invalid user id: ");
                         resultReceiver_.append(optarg).append("\n");
-                        result = OHOS::ERR_INVALID_VALUE;
-                    } else {
-                        userId = tempUserId;
+                        return OHOS::ERR_INVALID_VALUE;
                     }
+                    userId = tempUserId;
                 }
                 TAG_LOGD(AAFwkTag::AA_TOOL, "userId: %{public}d", userId);
                 break;
