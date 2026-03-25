@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "configuration_convertor.h"
 #include "connection_manager.h"
+#include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "string_wrapper.h"
@@ -33,6 +34,15 @@ int UIExtensionContext::ILLEGAL_REQUEST_CODE(-1);
 constexpr const char* REQUEST_COMPONENT_TERMINATE_KEY = "ohos.param.key.requestComponentTerminate";
 constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
 constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+constexpr int32_t TERMINATE_SELF_ANIMATION_TIMEOUT_MS = 2000;
+
+namespace {
+bool IsEmbeddableStart(int32_t screenMode)
+{
+    return screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
+        screenMode == AAFwk::EMBEDDED_HALF_SCREEN_MODE;
+}
+}
 
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 {
@@ -92,15 +102,163 @@ ErrCode UIExtensionContext::StartUIServiceExtension(const AAFwk::Want& want, int
     return err;
 }
 
+bool UIExtensionContext::CheckAndSetPendingTerminate()
+{
+    std::lock_guard<std::mutex> lock(terminateSelfMutex_);
+    if (pendingAnimationTerminate_) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "Already pending animation terminate, skip");
+        return false;
+    }
+    pendingAnimationTerminate_ = true;
+    return true;
+}
+
+bool UIExtensionContext::TryGetAnimationCallback(TerminateSelfWithAnimationCallback &callback)
+{
+    std::lock_guard<std::mutex> lock(terminateSelfMutex_);
+    if (terminateSelfWithAnimationCallback_ != nullptr) {
+        std::swap(callback, terminateSelfWithAnimationCallback_);
+        return true;
+    }
+    return false;
+}
+
+ErrCode UIExtensionContext::GetOrCreateEventHandler(std::shared_ptr<AppExecFwk::EventHandler> &handler)
+{
+    std::lock_guard<std::mutex> lock(terminateSelfMutex_);
+    if (eventHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("UIExtensionTerminateRunner");
+        if (runner == nullptr) {
+            TAG_LOGW(AAFwkTag::UI_EXT, "Failed to create EventRunner, fallback without timeout");
+            return ERR_INVALID_VALUE;
+        }
+        eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        TAG_LOGI(AAFwkTag::UI_EXT, "Created independent EventRunner for timeout task");
+    }
+    handler = eventHandler_;
+    return ERR_OK;
+}
+
+ErrCode UIExtensionContext::HandleTerminateWithAnimation()
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "Handle terminate with animation");
+
+    if (!CheckAndSetPendingTerminate()) {
+        return ERR_OK;
+    }
+
+    TerminateSelfWithAnimationCallback callback;
+    if (!TryGetAnimationCallback(callback)) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "Callback not registered, fallback to normal terminate");
+        return TerminateSelfInner();
+    }
+
+    std::shared_ptr<AppExecFwk::EventHandler> localHandler;
+    if (GetOrCreateEventHandler(localHandler) != ERR_OK) {
+        callback();
+        return TerminateSelfInner();
+    }
+
+    terminateTimeoutExec_.store(false);
+    auto timeoutTask = [weakContext = weak_from_this(), token = token_]() {
+        auto context = std::static_pointer_cast<UIExtensionContext>(weakContext.lock());
+        if (context == nullptr || context->isTerminated_.load()) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "Context destroyed or already terminated, timeout skipped");
+            return;
+        }
+        if (context->terminateTimeoutExec_.exchange(true)) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "Already terminated by another thread");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::UI_EXT, "Animation timeout, force terminate");
+        auto err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token, -1, nullptr);
+        if (err != ERR_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Force terminate failed, err=%{public}d", err);
+        } else {
+            context->isTerminated_.store(true);
+        }
+    };
+    if (!localHandler->PostTask(timeoutTask, "UIExtensionTerminateTimeout", TERMINATE_SELF_ANIMATION_TIMEOUT_MS)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to post timeout task, fallback to normal terminate");
+        return TerminateSelfInner();
+    }
+
+    callback();
+    TAG_LOGI(AAFwkTag::UI_EXT, "Callback executed, waiting for ArkUI");
+    return ERR_OK;
+}
+
 ErrCode UIExtensionContext::TerminateSelf()
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
-    if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "ret = %{public}d", err);
+
+    if (IsEmbeddableStart(screenMode_)) {
+        return HandleTerminateWithAnimation();
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf end");
+
+    return TerminateSelfInner();
+}
+
+ErrCode UIExtensionContext::TerminateSelfInner()
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfInner begin");
+
+    if (IsEmbeddableStart(screenMode_)) {
+        if (terminateTimeoutExec_.exchange(true)) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "Already terminated by timeout");
+            return ERR_OK;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(terminateSelfMutex_);
+            if (eventHandler_ != nullptr) {
+                eventHandler_->RemoveTask("UIExtensionTerminateTimeout");
+                TAG_LOGI(AAFwkTag::UI_EXT, "Timeout task removed");
+            }
+            terminateSelfWithAnimationCallback_ = nullptr;
+            pendingAnimationTerminate_ = false;
+        }
+    }
+
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
+
+    if (IsEmbeddableStart(screenMode_)) {
+        isTerminated_.store(true);
+    }
+
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "TerminateAbility failed, err = %{public}d", err);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfInner end");
     return err;
+}
+
+ErrCode UIExtensionContext::TerminateSelfWithAnimation(
+    TerminateSelfWithAnimationCallback &&callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithAnimation called");
+
+    if (!IsEmbeddableStart(screenMode_)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Not embeddable mode, registration not allowed");
+        return ERR_INVALID_OPERATION;
+    }
+
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Callback is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(terminateSelfMutex_);
+        if (terminateSelfWithAnimationCallback_ != nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Callback already registered, duplicate registration not allowed");
+            return ERR_INVALID_OPERATION;
+        }
+
+        terminateSelfWithAnimationCallback_ = std::move(callback);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithAnimation success");
+    return ERR_OK;
 }
 
 ErrCode UIExtensionContext::ConnectAbility(
