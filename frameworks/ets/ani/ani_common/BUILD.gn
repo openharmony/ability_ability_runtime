@@ -45,7 +45,7 @@ config("ani_common_exception_config") {
   ]
 
   public_configs = [
-    ":ani_common_public_config"
+    ":ani_common_public_config",
     ":ani_common_exception_config",
   ]
 
