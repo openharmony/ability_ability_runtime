@@ -44,6 +44,7 @@
 #include "iprepare_terminate_callback_interface.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
+#include "modular_object_extension_info.h"
 #include "query_erms_observer_interface.h"
 #include "remote_mission_listener_interface.h"
 #include "remote_on_listener_interface.h"
@@ -2605,6 +2606,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QuerySelfModularObjectExtensionInfos(std::vector<ModularObjectExtensionInfo> &extensionInfos)
     {
         return 0;
     }

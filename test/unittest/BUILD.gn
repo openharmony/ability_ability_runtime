@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -436,6 +436,8 @@ group("unittest") {
       "mission_manager_client_test:unittest",
       "modal_system_app_freeze_uiextension_test:unittest",
       "modal_system_dialog_util_test:unittest",
+      "modular_object_extension_manager_test:unittest",
+      "modular_object_rdb_data_mgr_test:unittest",
       "multi_app_utils_test:unittest",
       "multi_instance_utils_second_test",
       "multi_instance_utils_test:unittest",

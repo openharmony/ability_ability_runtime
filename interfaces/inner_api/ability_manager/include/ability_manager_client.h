@@ -2104,6 +2104,14 @@ public:
     ErrCode UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE);
 
     /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QuerySelfModularObjectExtensionInfos(std::vector<ModularObjectExtensionInfo> &extensionInfos);
+
+    /**
      * @brief Get list of applications launched before the first unlock.
      * @param userId The User Id.
      * @param userLockedBundleList List of applications launched before the first unlock.

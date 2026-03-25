@@ -60,6 +60,8 @@
 #include "iremote_object.h"
 #include "kiosk_manager.h"
 #include "mission_list_manager_interface.h"
+#include "modular_object_event_mgr.h"
+#include "modular_object_manager.h"
 #include "parameter.h"
 #include "pending_want_manager.h"
 #include "permission_verification.h"
@@ -2699,6 +2701,15 @@ protected:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
+    
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QuerySelfModularObjectExtensionInfos(
+        std::vector<ModularObjectExtensionInfo> &extensionInfos) override;
 
     /**
      * @brief Get list of applications launched before the first unlock.
@@ -3346,6 +3357,8 @@ private:
     std::list<std::string> exportWhiteList_;
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
+
+    std::shared_ptr<AbilityRuntime::ModularObjectExtensionEventMgr> modularObjectExtensionEventMgr_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
