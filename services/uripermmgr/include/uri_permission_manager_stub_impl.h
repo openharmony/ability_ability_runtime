@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -177,6 +177,9 @@ private:
         uint32_t flag, uint32_t targetTokenId, const std::string &targetBundleName);
 
     int32_t RevokeContentUriPermission(uint32_t tokenId);
+
+    int32_t VerifyContentUriPermission(const std::vector<std::string> &contentUris, uint32_t flag,
+        uint32_t tokenId, std::vector<bool> &checkResults);
 
     bool IsContentUriGranted(uint32_t tokenId);
 
