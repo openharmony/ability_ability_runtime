@@ -130,6 +130,7 @@ const std::string HELP_MSG_TEST =
     "                  [-s timeout <test-timeout>]\n"
     "                  [-s <any-key> <any-value>]\n"
     "                  [-w <wait-time>]\n"
+    "                  [-u <userId>]                          user id for running test\n"
     "                  [-D]\n";
 
 const std::string HELP_MSG_SEND_MEMORY_LEVEL =
