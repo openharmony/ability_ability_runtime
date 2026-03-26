@@ -141,11 +141,18 @@ int32_t PendingWantRecord::ExecuteOperation(
             break;
         case static_cast<int32_t>(OperationType::START_ABILITIES): {
             std::vector<WantsInfo> allWantsInfos = key_->GetAllWantsInfos();
-            allWantsInfos.back().want = want;
-            res = pendingWantManager->PendingWantStartAbilitys(allWantsInfos, senderInfo.startOptions,
-                senderInfo.callerToken, -1, callerUid_, callerTokenId_, key_->GetUserId());
-            if (res != NO_ERROR) {
-                SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
+            if (allWantsInfos.empty()) {
+                TAG_LOGE(AAFwkTag::WANTAGENT, "allWantsInfos is empty for START_ABILITIES operation");
+                SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, ERR_INVALID_VALUE,
+                    "Empty wants infos");
+                res = ERR_INVALID_VALUE;
+            } else {
+                allWantsInfos.back().want = want;
+                res = pendingWantManager->PendingWantStartAbilitys(allWantsInfos, senderInfo.startOptions,
+                    senderInfo.callerToken, -1, callerUid_, callerTokenId_, key_->GetUserId());
+                if (res != NO_ERROR) {
+                    SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
+                }
             }
             break;
         }
