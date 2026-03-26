@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -591,6 +591,23 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, GetMissionInfo_0300, TestSize.Leve
         .Times(1).WillOnce(Return(WSError::WS_OK));
     auto result = client_->GetMissionInfo(deviceId, 0, missionInfo);
     EXPECT_EQ(result, static_cast<ErrCode>(WSError::WS_OK));
+}
+
+/**
+ * @tc.name: AbilityManagerClient_GetMissionInfo_0400
+ * @tc.desc: GetMissionInfo with displayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, GetMissionInfo_0400, TestSize.Level1)
+{
+    ErrorTestBoardDisable();
+    std::string deviceId = "test_deviceId";
+    int32_t missionId = -1;
+    MissionInfo missionInfo;
+    DisplayInfo displayInfo;
+    auto result = client_->GetMissionInfo(deviceId, missionId, missionInfo, displayInfo);
+    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(displayInfo.displayName.empty(), true);
 }
 
 /**
