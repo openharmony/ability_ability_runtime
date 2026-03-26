@@ -2397,9 +2397,13 @@ void MainThread::DoUpdatePluginInfoInstalled(std::vector<AppExecFwk::PluginBundl
     application_->UpdateApplicationInfoInstalled(*applicationInfo_);
     AppLibPathMap appLibPaths {};
     GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
-    AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, applicationInfo_->isSystemApp);
+    AbilityRuntime::JsRuntime::SetOrUpdateLibPath(appLibPaths, applicationInfo_->isSystemApp);
+    std::vector<std::string> moduleNames;
+    for (const auto &appLibPath : appLibPaths) {
+        moduleNames.emplace_back(appLibPath.first);
+    }
     if (IsPluginNamespaceInherited()) {
-        AbilityRuntime::JsRuntime::InheritPluginNamespace(pluginModuleNames);
+        AbilityRuntime::JsRuntime::InheritPluginNamespace(moduleNames);
     }
 }
 

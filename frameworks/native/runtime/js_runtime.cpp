@@ -920,6 +920,31 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSy
     }
 }
 
+void JsRuntime::SetOrUpdateLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp)
+{
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "SetOrUpdate library path");
+
+    if (appLibPaths.size() == 0) {
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "no lib path to set");
+        return;
+    }
+
+    auto moduleManager = NativeModuleManager::GetInstance();
+    if (moduleManager == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null moduleManager");
+        return;
+    }
+
+    for (const auto &appLibPath : appLibPaths) {
+        std::string pluginNamespace;
+        if (moduleManager->GetLdNamespaceName(appLibPath.first, pluginNamespace)) {
+            moduleManager->UpdateNamespaceLibPath(appLibPath.first, appLibPath.second);
+        } else {
+            moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
+        }
+    }
+}
+
 void JsRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNames)
 {
     auto moduleManager = NativeModuleManager::GetInstance();
