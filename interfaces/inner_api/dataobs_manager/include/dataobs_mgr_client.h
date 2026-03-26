@@ -92,8 +92,6 @@ public:
     ErrCode NotifyChangeFromExtension(const Uri &uri, int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption());
 
-    ErrCode CheckTrusts(uint32_t consumerToken, uint32_t providerToken);
-
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
      *

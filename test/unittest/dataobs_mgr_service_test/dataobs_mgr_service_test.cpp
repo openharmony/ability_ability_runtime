@@ -795,6 +795,18 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_VerifyDataSharePermi
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0100 end");
 }
 
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+
+    Uri uri("");
+    ObserverInfo info;
+    int32_t ret = dataObsMgrServer->VerifyDataSharePermissionInner(uri, true, info);
+    EXPECT_EQ(ret, DATAOBS_INVALID_URI);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200 end");
+}
+ 	 
 /*
  * Feature: DataObsMgrService
  * Function: test DATA_MANAGER_SERVICE_UID
@@ -819,6 +831,74 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_DataMgrServiceUid_01
     ret = dataObsMgrServer->IsDataMgrService(tokenID, uid);
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_GetDataMgrServiceUid_0100 end");
+}
+
+/**
+ * @tc.name: AaFwk_DataObsMgrServiceTest_RegisterObserver_0500
+ * @tc.desc: Test dataObsMgrServer RegisterObserver calling from process that possess TOKEN_NATIVE
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.precon:
+    1. process is equivalent to shell calling
+    2. uri is in allowed provider list
+ * @tc.step:
+    1. Define a test Uri and an observer
+    2. Get a DataObsMgrService instance
+    3. Call NotifyChange using DataObsMgrService
+ * @tc.expect:
+    1. NotifyChange return E_OK
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_RegisterObserver_0500 start");
+    const int testVal = static_cast<int>(NO_ERROR);
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("datashare:///com.ohos.contactsdataability");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+
+    EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility, -1, DataObsOption(false, true)));
+
+    testing::Mock::AllowLeak(dataobsAbility);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_RegisterObserver_0500 end");
+}
+
+/**
+ * @tc.name: AaFwk_DataObsMgrServiceTest_RegisterObserver_0510
+ * @tc.desc: Test RegisterObserver with system permission
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.precon:
+    1. process is equivalent to a system ability
+    2. uri is in allowed provider list
+ * @tc.step:
+    1. Define a test Uri and an observer
+    2. Get a DataObsMgrService instance
+    3. Call RegisterObserver using DataObsMgrService
+ * @tc.expect:
+    1. RegisterObserver return E_OK
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_0510, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_RegisterObserver_0510 start");
+    const int testVal = static_cast<int>(NO_ERROR);
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("datashare:///com.ohos.contactsdataability");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    auto originalToken = GetSelfTokenID();
+
+    // set token native
+    uint32_t tokenID = Security::AccessToken::DEFAULT_TOKEN_VERSION;
+    Security::AccessToken::AccessTokenIDInner *idInner =
+        reinterpret_cast<Security::AccessToken::AccessTokenIDInner *>(&tokenID);
+    idInner->type = Security::AccessToken::TOKEN_NATIVE;
+    SetSelfTokenID(tokenID);
+
+    EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility, -1, DataObsOption(false, true)));
+
+    SetSelfTokenID(originalToken);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_RegisterObserver_0510 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

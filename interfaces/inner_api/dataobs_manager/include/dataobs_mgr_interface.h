@@ -34,9 +34,14 @@ struct DataObsOption {
 private:
     bool isSystem = false;
     uint32_t firstCallerTokenID = 0;
+    int32_t firstCallerPid = 0;
+    bool isDataShare = false;
+    // fullTokenID's high 32 bits for system permission check purpose
+    uint64_t firstCallerFullTokenID_ = 0;
 public:
     DataObsOption() {}
     DataObsOption(bool isSystem):isSystem(isSystem) {}
+    DataObsOption(bool isSystem, bool isDataShare):isSystem(isSystem), isDataShare(isDataShare) {}
     bool IsSystem()
     {
         return isSystem;
@@ -48,6 +53,30 @@ public:
     void SetFirstCallerTokenID(uint32_t token)
     {
         firstCallerTokenID = token;
+    }
+    uint32_t FirstCallerPid()
+    {
+        return firstCallerPid;
+    }
+    void SetFirstCallerPid(int32_t pid)
+    {
+        firstCallerPid = pid;
+    }
+    bool IsDataShare()
+    {
+        return isDataShare;
+    }
+    void SetDataShare(bool flag)
+    {
+        isDataShare = flag;
+    }
+    void SetFirstCallerFullTokenID(uint64_t fulltoken)
+    {
+        firstCallerFullTokenID_ = fulltoken;
+    }
+    uint64_t FirstCallerFullTokenID()
+    {
+        return firstCallerFullTokenID_;
     }
 };
 
@@ -71,7 +100,6 @@ public:
         NOTIFY_PROCESS,
         REGISTER_OBSERVER_FROM_EXTENSION,
         NOTIFY_CHANGE_FROM_EXTENSION,
-        CHECK_TRUSTS,
         TRANS_BUTT,
     };
 
@@ -131,8 +159,6 @@ public:
      */
     virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) = 0;
-
-    virtual ErrCode CheckTrusts(uint32_t consumerToken, uint32_t providerToken) = 0;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
