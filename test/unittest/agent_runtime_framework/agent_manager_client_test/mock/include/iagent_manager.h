@@ -44,6 +44,11 @@ public:
         return 0;
     }
 
+    virtual int32_t GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card)
+    {
+        return 0;
+    }
+
     virtual int32_t ConnectAgentExtensionAbility(
         const AAFwk::Want &want, const sptr<AAFwk::IAbilityConnection> &connection)
     {
@@ -58,4 +63,3 @@ public:
 }  // namespace AgentRuntime
 }  // namespace OHOS
 #endif  // OHOS_AGENT_RUNTIME_AGENT_MANAGER_INTERFACE_H
- 

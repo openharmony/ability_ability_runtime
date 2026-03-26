@@ -17,6 +17,7 @@
 #define OHOS_AGENT_RUNTIME_FRAMEWORK_AGENT_MANAGER_SERVICE_H
 
 #include <memory>
+#include <map>
 #include <mutex>
 #include <string>
 
@@ -53,22 +54,43 @@ public:
 
     int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card) override;
 
+    int32_t GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card) override;
+
     int32_t ConnectAgentExtensionAbility(const AAFwk::Want &want,
         const sptr<AAFwk::IAbilityConnection> &connection) override;
 
     int32_t DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection) override;
 
 private:
+    friend class AgentServiceConnection;
+    struct TrackedConnectionRecord {
+        int32_t callerUid = 0;
+        sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
+        sptr<IRemoteObject> callerRemote = nullptr;
+        sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
+        bool isDisconnecting = false;
+    };
+
     AgentManagerService();
     void Init();
     void RegisterBundleEventCallback();
+    bool HasReachedCallerConnectionLimitLocked(int32_t callerUid) const;
+    int32_t TryRegisterConnectionLocked(const sptr<AAFwk::IAbilityConnection> &connection, int32_t callerUid);
+    void HandleConnectionDone(const sptr<AAFwk::IAbilityConnection> &connection, int32_t resultCode, bool isDisconnect);
+    bool ReleaseCallerConnectionCountLocked(const sptr<IRemoteObject> &callerRemote);
+    void ReleaseTrackedConnection(const sptr<AAFwk::IAbilityConnection> &connection);
+    void HandleCallerConnectionDied(const wptr<IRemoteObject> &remote);
     DISALLOW_COPY_AND_MOVE(AgentManagerService);
 
 private:
+    static constexpr size_t MAX_CONNECTIONS_PER_CALLER = 5;
     static sptr<AgentManagerService> instance_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AgentEventHandler> eventHandler_;
     sptr<AgentBundleEventCallback> bundleEventCallback_;
+    std::mutex connectionLock_;
+    std::map<sptr<IRemoteObject>, TrackedConnectionRecord> trackedConnections_;
+    std::map<int32_t, size_t> callerConnectionCounts_;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
