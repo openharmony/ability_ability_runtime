@@ -1004,6 +1004,7 @@ ProcessData AppStateObserverManager::WrapProcessData(
     processData.killReason = appRecord->GetKillReason();
     processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     processData.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
+    processData.isPreloadUIExtension = appRecord->GetUIExtensionPreloadState();
     return processData;
 }
 
