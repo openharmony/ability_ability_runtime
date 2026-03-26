@@ -2621,7 +2621,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillAppWithReason_0100, TestSize.Level1
     auto res = abilityMs->KillAppWithReason(pid, exitReason);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 2;
     res = abilityMs->KillAppWithReason(pid, exitReason);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
     MyFlag::flag_ = 0;
@@ -2639,7 +2639,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillAppWithReason_0200, TestSize.Level1
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = 1;
     ExitReasonCompability exitReason;
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     exitReason.reason = static_cast<Reason>(-1);
     auto res = abilityMs->KillAppWithReason(pid, exitReason);
@@ -2650,6 +2650,32 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillAppWithReason_0200, TestSize.Level1
     exitReason.reason = Reason::REASON_JS_ERROR;
     res = abilityMs->KillAppWithReason(pid, exitReason);
     EXPECT_EQ(res, ERR_NAME_NOT_FOUND);
+    MyFlag::flag_ = 0;
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillAppWithReason
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, KillAppWithReason_0300, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = -1;
+    ExitReasonCompability exitReason;
+    MyFlag::flag_ = 2;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    exitReason.reason = static_cast<Reason>(11);
+    auto res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    exitReason.killId = 50;
+    res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    exitReason.reason = Reason::REASON_JS_ERROR;
+    res = abilityMs->KillAppWithReason(pid, exitReason);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
     MyFlag::flag_ = 0;
 }
 
@@ -2669,7 +2695,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillBundleWithReason_0100, TestSize.Lev
     ExitReasonCompability exitReason;
     auto res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
@@ -2690,7 +2716,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillBundleWithReason_0200, TestSize.Lev
     int32_t userId = 0;
     int32_t appIndex = 0;
     ExitReasonCompability exitReason;
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     exitReason.reason = static_cast<Reason>(-1);
     auto res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
@@ -2701,6 +2727,34 @@ HWTEST_F(AbilityManagerServiceFirstTest, KillBundleWithReason_0200, TestSize.Lev
     exitReason.reason = Reason::REASON_JS_ERROR;
     res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
     EXPECT_EQ(res, GET_BUNDLE_INFO_FAILED);
+    MyFlag::flag_ = 0;
+}
+
+/*
+ * Feature: KillBundleWithReason
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillBundleWithReason
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, KillBundleWithReason_0300, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    std::string bundleName = "";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    ExitReasonCompability exitReason;
+    MyFlag::flag_ = 2;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    exitReason.reason = static_cast<Reason>(11);
+    auto res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
+    exitReason.killId = 50;
+    res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
+    exitReason.reason = Reason::REASON_JS_ERROR;
+    res = abilityMs->KillBundleWithReason(bundleName, userId, appIndex, exitReason);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
     MyFlag::flag_ = 0;
 }
 
@@ -2716,7 +2770,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, RecordAppWithReason_0100, TestSize.Leve
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = 1234;
     int32_t uid = 1000;
-    MyFlag::flag_ = 1;
+    MyFlag::flag_ = 2;
     ExitReasonCompability exitReason;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     auto res = abilityMs->RecordAppWithReason(pid, uid, exitReason);
@@ -2724,6 +2778,27 @@ HWTEST_F(AbilityManagerServiceFirstTest, RecordAppWithReason_0100, TestSize.Leve
     exitReason.killId = 1;
     res = abilityMs->RecordAppWithReason(pid, uid, exitReason);
     EXPECT_EQ(res, ERR_BUNDLE_MANAGER_PERMISSION_DENIED);
+    MyFlag::flag_ = 0;
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillAppWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillAppWithReason
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, RecordAppWithReason_0200, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t pid = -1;
+    int32_t uid = 1000;
+    MyFlag::flag_ = 2;
+    ExitReasonCompability exitReason;
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
+    exitReason.reason = static_cast<Reason>(11);
+    auto res = abilityMs->RecordAppWithReason(pid, uid, exitReason);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
     MyFlag::flag_ = 0;
 }
 
