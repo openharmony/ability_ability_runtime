@@ -61,7 +61,7 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
         !needFindPluginHsp, inputPath.c_str(), realHapPath.c_str());
     if (realHapPath.empty() || (needFindPluginHsp && inputPath.find_first_of("/") == inputPath.find_last_of("/"))) {
         errorMsg = "empty appHspPath";
-        TAG_LOGE(AAFwkTag::JSRUNTIME, errorMsg);
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty appHspPath");
         return false;
     }
 
@@ -69,7 +69,7 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
         realHapPath = GetPluginHspPath(inputPath);
         if (realHapPath.empty()) {
             errorMsg = "empty pluginHspPath";
-            TAG_LOGE(AAFwkTag::JSRUNTIME, errorMsg);
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty pluginHspPath");
             return false;
         }
     }
