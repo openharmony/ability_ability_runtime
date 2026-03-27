@@ -40,6 +40,7 @@ namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want &, bool)>;
 using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
 using TerminateSelfWithAnimationCallback = std::function<void()>;
+using TerminateSelfResultCallback = std::function<void(ErrCode)>;
 /**
  * @brief context supply for UIExtension
  *
@@ -70,6 +71,18 @@ public:
      * @return errCode ERR_OK on success, others on failure.
      */
     virtual ErrCode TerminateSelf();
+    /**
+     * @brief Destroys the current ui extension ability with result.
+     *
+     * @param resultCode Indicates the result code returned to the caller.
+     * @param want Indicates the data returned to the caller.
+     * @param callback Result callback, called when termination completes.
+     *
+     * Non-embedded mode: execute synchronously and call callback.
+     * Embedded mode: trigger animation, transfer result after animation completes, then call callback.
+     */
+    virtual void TerminateSelfWithResult(int32_t resultCode, const AAFwk::Want &want,
+        TerminateSelfResultCallback callback);
         /**
      * @brief Connects the current ability to an ability using the AbilityInfo.AbilityType.SERVICE template.
      *
@@ -276,6 +289,13 @@ private:
     bool TryGetAnimationCallback(TerminateSelfWithAnimationCallback &callback);
     ErrCode GetOrCreateEventHandler(std::shared_ptr<AppExecFwk::EventHandler> &handler);
 
+    // Helper methods for TerminateSelfWithResult refactoring
+    ErrCode TransferAbilityResultToWindow(int32_t resultCode, const AAFwk::Want &want);
+    void NotifyPendingCallback(ErrCode err);
+    void CleanupAnimationResources();
+    ErrCode TransferPendingResult();
+    void ExecuteTerminationWithTimeout(const sptr<IRemoteObject> &token);
+
     std::mutex onRequestResultMutex_;
     std::mutex onOpenLinkRequestResultMutex_;
     std::vector<std::shared_ptr<OnAtomicRequestResult>> onAtomicRequestResults_;
@@ -287,6 +307,12 @@ private:
     std::mutex terminateSelfMutex_;
     std::atomic<bool> isTerminated_{false};
     bool pendingAnimationTerminate_ = false;
+
+    // Embedded mode: pending result to transfer after animation completes
+    int32_t pendingResultCode_ = 0;
+    AAFwk::Want pendingResultWant_;
+    TerminateSelfResultCallback pendingTerminateCallback_;
+    bool hasPendingTerminateRequest_ = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

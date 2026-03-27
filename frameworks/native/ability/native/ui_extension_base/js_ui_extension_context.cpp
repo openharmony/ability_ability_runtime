@@ -62,6 +62,13 @@ const std::string JSON_KEY_ERR_MSG = "errMsg";
 const std::string KEY_REQUEST_ID = "com.ohos.param.requestId";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
+
+bool IsEmbeddableStart(int32_t screenMode)
+{
+    return screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
+        screenMode == AAFwk::EMBEDDED_HALF_SCREEN_MODE;
+}
+
 } // namespace
 
 static std::map<UIExtensionConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
@@ -561,13 +568,81 @@ napi_value JsUIExtensionContext::OnTerminateSelfWithResult(napi_env env, NapiCal
         return CreateJsUndefined(env);
     }
 
+    napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
+
+    // Check if embeddable mode
+    auto context = context_.lock();
+    bool isEmbeddable = false;
+    if (context) {
+        auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
+        if (extensionContext) {
+            int32_t screenMode = extensionContext->GetScreenMode();
+            isEmbeddable = IsEmbeddableStart(screenMode);
+        }
+    }
+
+    // Route to appropriate handler based on mode
+    if (isEmbeddable) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Embedded mode: use async callback pattern");
+        return HandleTerminateSelfWithResultInEmbeddedMode(env, lastParam, context, resultCode, want);
+    } else {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Non-embedded mode: use ScheduleHighQos pattern");
+        return HandleTerminateSelfWithResultInNonEmbeddedMode(env, lastParam, resultCode, want);
+    }
+}
+
+napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInEmbeddedMode(napi_env env, napi_value lastParam,
+    const std::shared_ptr<AbilityRuntime::Context>& context, int32_t resultCode, const AAFwk::Want& want)
+{
+    napi_value result = nullptr;
+
+    // Create shared_ptr for asyncTask (consistent with OnStartAbilityForResult pattern)
+    std::unique_ptr<NapiAsyncTask> uasyncTask =
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
+
+    // Validate context
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return result;
+    }
+
+    auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
+    if (!extensionContext) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null extensionContext");
+        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return result;
+    }
+
+    // Create callback with shared_ptr capture to extend lifetime
+    auto callback = [env, asyncTask](ErrCode errCode) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "TerminateSelfWithResult callback called, errCode=%{public}d", errCode);
+        if (errCode == ERR_OK) {
+            asyncTask->ResolveWithNoError(env, CreateJsUndefined(env));
+        } else {
+            asyncTask->Reject(env, CreateJsErrorByNativeErr(env, errCode));
+        }
+    };
+
+    // Call C++ layer directly without ScheduleHighQos (supports async animation)
+    extensionContext->TerminateSelfWithResult(resultCode, want, std::move(callback));
+
+    TAG_LOGI(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInEmbeddedMode end");
+    return result;
+}
+
+napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInNonEmbeddedMode(napi_env env, napi_value lastParam,
+    int32_t resultCode, AAFwk::Want& want)
+{
+    napi_value result = nullptr;
+
     NapiAsyncTask::CompleteCallback complete;
     SetCallbackForTerminateWithResult(resultCode, want, complete);
-    napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
-    napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsUIExtensionContext::OnTerminateSelfWithResult",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInNonEmbeddedMode end");
     return result;
 }
 
