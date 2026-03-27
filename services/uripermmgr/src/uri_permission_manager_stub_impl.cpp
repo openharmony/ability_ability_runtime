@@ -1541,8 +1541,7 @@ int32_t UriPermissionManagerStubImpl::CheckCalledBySandBox()
     return ERR_OK;
 }
 
-ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId, uint64_t timeNow,
-    int32_t& funcResult)
+ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
@@ -1551,11 +1550,11 @@ ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(uint32_t tokenId
         return WrapErrorCode(ERR_PERMISSION_DENIED, funcResult);
     }
     RevokeContentUriPermission(tokenId);
-    RevokeFileUriPermission(tokenId, timeNow, funcResult);
+    RevokeFileUriPermission(tokenId, funcResult);
     return WrapErrorCode(ERR_OK, funcResult);
 }
 
-int32_t UriPermissionManagerStubImpl::RevokeFileUriPermission(uint32_t tokenId, uint64_t timeNow, int32_t& funcResult)
+int32_t UriPermissionManagerStubImpl::RevokeFileUriPermission(uint32_t tokenId, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::mutex> lock(ptMapMutex_);
@@ -1563,11 +1562,13 @@ int32_t UriPermissionManagerStubImpl::RevokeFileUriPermission(uint32_t tokenId, 
         TAG_LOGD(AAFwkTag::URIPERMMGR, "permissionTokenMap_ empty");
         return ERR_OK;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission, tokenId: %{public}d, timeNow: %{public}" PRIu64 "",
-        tokenId, timeNow);
     RevokeMapUriPermission(tokenId);
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     RevokePolicyUriPermission(tokenId);
+    uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission, tokenId: %{public}d, timeNow: %{public}" PRIu64 "",
+        tokenId, timeNow);
     auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "UnsetAllPolicyByToken failed, ret: %{public}d", ret);

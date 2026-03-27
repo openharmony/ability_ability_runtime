@@ -203,7 +203,7 @@ private:
 
     void RevokePolicyUriPermission(uint32_t tokenId);
 
-    int32_t RevokeFileUriPermission(uint32_t tokenId, uint64_t timeNow, int32_t& funcResult);
+    int32_t RevokeFileUriPermission(uint32_t tokenId, int32_t& funcResult);
 
     int32_t RevokeAllMapUriPermissions(uint32_t tokenId);
 
@@ -225,7 +225,7 @@ private:
 
     bool IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri);
 
-    ErrCode ClearPermissionTokenByMap(uint32_t tokenId, uint64_t timeNow, int32_t& funcResult) override;
+    ErrCode ClearPermissionTokenByMap(uint32_t tokenId, int32_t& funcResult) override;
 
     void BoolVecToCharVec(const std::vector<bool>& boolVector, std::vector<char>& charVector);
 

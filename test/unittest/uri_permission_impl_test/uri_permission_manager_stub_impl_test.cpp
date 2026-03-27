@@ -596,8 +596,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_ClearPermissionTokenByMap_001, 
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
     uint32_t tokenId = 0;
     int32_t funcResult = 0;
-    uint64_t timeNow = 0;
-    auto result = upmsi->ClearPermissionTokenByMap(tokenId, timeNow, funcResult);
+    auto result = upmsi->ClearPermissionTokenByMap(tokenId, funcResult);
     EXPECT_EQ(funcResult, ERR_PERMISSION_DENIED);
     EXPECT_EQ(result, ERR_OK);
 }
