@@ -57,7 +57,7 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
 
     bool needFindPluginHsp = true;
     auto realHapPath = GetAppHspPath(inputPath, needFindPluginHsp);
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "GetAppHspPath: %{public}d, inputPath: %{public}s, appHspPath: %{public}s",
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "GetAppHspPath: %{public}d, inputPath: %{private}s, appHspPath: %{private}s",
         !needFindPluginHsp, inputPath.c_str(), realHapPath.c_str());
     if (realHapPath.empty() || (needFindPluginHsp && inputPath.find_first_of("/") == inputPath.find_last_of("/"))) {
         errorMsg = "empty appHspPath";
@@ -77,8 +77,8 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
     if (extractor == nullptr) {
-        errorMsg = "extractor null";
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{public}s GetExtractor failed", realHapPath.c_str());
+        errorMsg = realHapPath + " extractor null";
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{private}s GetExtractor failed", realHapPath.c_str());
         return false;
     }
 
