@@ -1260,5 +1260,35 @@ HWTEST_F(PendingWantRecordTest, BuildSendWant_AppInstanceKey_0300, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "BuildSendWant_AppInstanceKey_0300 end");
 }
 
+/*
+ * @tc.number    : ExecuteOperation_EmptyAllWantsInfos_START_ABILITIES_0100
+ * @tc.name      : ExecuteOperation
+ * @tc.desc      : 1.ExecuteOperation, START_ABILITIES with empty allWantsInfos should return error
+ */
+HWTEST_F(PendingWantRecordTest, ExecuteOperation_EmptyAllWantsInfos_START_ABILITIES_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteOperation_EmptyAllWantsInfos_START_ABILITIES_0100 start");
+
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetType(static_cast<int32_t>(OperationType::START_ABILITIES));
+    key->GetAllWantsInfos().clear();
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    int32_t result = pendingWantRecord->ExecuteOperation(pendingManager_, info, want);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteOperation_EmptyAllWantsInfos_START_ABILITIES_0100 end");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
