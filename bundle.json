@@ -34,7 +34,8 @@
         "ability_runtime_start_window_options_with_pixelmap",
         "ability_runtime_check_internet_permission",
         "ability_runtime_no_screen",
-        "ability_runtime_forbid_start_enabled"
+        "ability_runtime_forbid_start_enabled",
+        "ability_runtime_dsoftbus_enable"
       ],
       "adapted_system_type": [
           "standard"
