@@ -245,6 +245,8 @@ public:
 
     bool UpdateETSRuntime(AbilityRuntime::Runtime::Options &option);
 
+    void InitJSLeakWatcher(const std::string &bundleName);
+
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
