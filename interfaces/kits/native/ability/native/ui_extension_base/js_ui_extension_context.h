@@ -115,6 +115,13 @@ private:
         const std::shared_ptr<NativeReference> &atomicServiceRef,
         const std::shared_ptr<NativeReference> &onRequestSuccRef,
         const std::shared_ptr<NativeReference> &onRequestFailRef);
+
+    // Helper methods for TerminateSelfWithResult in different modes
+    napi_value HandleTerminateSelfWithResultInEmbeddedMode(napi_env env, napi_value lastParam,
+        const std::shared_ptr<AbilityRuntime::Context>& context, int32_t resultCode, const AAFwk::Want& want);
+    napi_value HandleTerminateSelfWithResultInNonEmbeddedMode(napi_env env, napi_value lastParam,
+        int32_t resultCode, AAFwk::Want& want);
+
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);
     void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);
