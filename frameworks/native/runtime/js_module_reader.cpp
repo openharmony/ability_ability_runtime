@@ -57,16 +57,19 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
 
     bool needFindPluginHsp = true;
     auto realHapPath = GetAppHspPath(inputPath, needFindPluginHsp);
-    if (realHapPath.empty()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "GetAppHspPath: %{public}d, inputPath: %{public}s, appHspPath: %{public}s",
+        !needFindPluginHsp, inputPath.c_str(), realHapPath.c_str());
+    if (realHapPath.empty() || (needFindPluginHsp && inputPath.find_first_of("/") == inputPath.find_last_of("/"))) {
+        errorMsg = "empty appHspPath";
+        TAG_LOGE(AAFwkTag::JSRUNTIME, errorMsg);
         return false;
     }
 
     if (needFindPluginHsp) {
-        // find plugin
         realHapPath = GetPluginHspPath(inputPath);
         if (realHapPath.empty()) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+            errorMsg = "empty pluginHspPath";
+            TAG_LOGE(AAFwkTag::JSRUNTIME, errorMsg);
             return false;
         }
     }
@@ -74,13 +77,14 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
     if (extractor == nullptr) {
-        errorMsg = "hap path error: " + realHapPath;
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{private}s GetExtractor failed", realHapPath.c_str());
+        errorMsg = "extractor null";
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{public}s GetExtractor failed", realHapPath.c_str());
         return false;
     }
 
     auto data = extractor->GetSafeData(MERGE_ABC_PATH);
     if (!data) {
+        errorMsg = "getSafeData failed";
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null data");
         return false;
     }
