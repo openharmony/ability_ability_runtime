@@ -43,6 +43,7 @@
 #include "syspara/parameter.h"
 #include "ui_ability.h"
 #include "application_configuration_manager.h"
+#include "js_leak_watcher_ts.h"
 #ifdef SUPPORT_GRAPHICS
 #include "display_manager.h"
 #include "window.h"
@@ -1296,6 +1297,18 @@ bool OHOSApplication::UpdateETSRuntime(AbilityRuntime::Runtime::Options &option)
         runtime_ = std::move(etsRuntime);
     }
     return true;
+}
+
+void OHOSApplication::InitJSLeakWatcher(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "InitJSLeakWatcher call");
+    if (runtime_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return;
+    }
+    auto env = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_)).GetNapiEnv();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    JSLeakWatcherEarlyInit(env, bundleName);
 }
 
 #ifdef SUPPORT_SCREEN
