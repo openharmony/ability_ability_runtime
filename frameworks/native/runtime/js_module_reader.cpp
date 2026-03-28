@@ -57,10 +57,10 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
 
     bool needFindPluginHsp = true;
     auto realHapPath = GetAppHspPath(inputPath, needFindPluginHsp);
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "GetAppHspPath: %{public}d, inputPath: %{private}s, appHspPath: %{private}s",
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "GetAppHspPath: %{public}d, inputPath: %{private}s, appHspPath: %{private}s",
         !needFindPluginHsp, inputPath.c_str(), realHapPath.c_str());
     if (realHapPath.empty() || (needFindPluginHsp && inputPath.find_first_of("/") == inputPath.find_last_of("/"))) {
-        errorMsg = "empty appHspPath";
+        errorMsg = "get appHspPath failed, please check module is exist";
         TAG_LOGE(AAFwkTag::JSRUNTIME, "empty appHspPath");
         return false;
     }
@@ -68,7 +68,7 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     if (needFindPluginHsp) {
         realHapPath = GetPluginHspPath(inputPath);
         if (realHapPath.empty()) {
-            errorMsg = "empty pluginHspPath";
+            errorMsg = "get pluginHspPath failed, please check module is exist";
             TAG_LOGE(AAFwkTag::JSRUNTIME, "empty pluginHspPath");
             return false;
         }
@@ -77,14 +77,14 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
     if (extractor == nullptr) {
-        errorMsg = realHapPath + " extractor null";
+        errorMsg = "GetExtractor failed, please check " + realHapPath;
         TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{private}s GetExtractor failed", realHapPath.c_str());
         return false;
     }
 
     auto data = extractor->GetSafeData(MERGE_ABC_PATH);
     if (!data) {
-        errorMsg = "getSafeData failed";
+        errorMsg = "getData failed, please check " + realHapPath;
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null data");
         return false;
     }
