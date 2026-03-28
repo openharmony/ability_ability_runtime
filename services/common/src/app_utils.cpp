@@ -454,6 +454,7 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
 bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "appId:%{private}s", appIdentifier.c_str());
+    std::lock_guard lock(allowStartNativeProcessAppsMutex_);
     if (!allowStartNativeProcessApps_.isLoaded) {
         LoadAllowNativeChildProcessApps();
         allowStartNativeProcessApps_.isLoaded = true;
