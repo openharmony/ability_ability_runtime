@@ -137,7 +137,8 @@ std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
     return presetAppHapPath;
 }
 
-std::string JsModuleReader::GetAppHspPath(const std::string& inputPath, bool& needFindPluginHsp, std::string& errorMsg) const
+std::string JsModuleReader::GetAppHspPath(const std::string& inputPath,
+    bool& needFindPluginHsp, std::string& errorMsg) const
 {
     if (isFormRender_) {
         return GetFormAppHspPath(inputPath, needFindPluginHsp, errorMsg);
@@ -145,7 +146,8 @@ std::string JsModuleReader::GetAppHspPath(const std::string& inputPath, bool& ne
     return GetCommonAppHspPath(inputPath, needFindPluginHsp, errorMsg);
 }
 
-std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath, bool& needFindPluginHsp, std::string& errorMsg) const
+std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath,
+    bool& needFindPluginHsp, std::string& errorMsg) const
 {
     std::string realHapPath;
     std::string suffix = std::string(SHARED_FILE_SUFFIX);
@@ -171,7 +173,8 @@ std::string JsModuleReader::GetModuleName(const std::string& inputPath) const
     return inputPath.substr(inputPath.find_last_of("/") + 1);
 }
 
-std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath, bool& needFindPluginHsp, std::string& errorMsg) const
+std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath,
+    bool& needFindPluginHsp, std::string& errorMsg) const
 {
     std::string suffix = std::string(SHARED_FILE_SUFFIX);
     std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_, needFindPluginHsp, errorMsg);
