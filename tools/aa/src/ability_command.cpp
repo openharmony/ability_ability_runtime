@@ -69,8 +69,8 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNR";
-const std::string SHORT_OPTION_CHARS = "chdabetpsmAUCDESNR";
+const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:u:A:U:CDESNR";
+const std::string SHORT_OPTION_CHARS = "chdabetpsmuAUCDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
@@ -447,19 +447,20 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
 {
     Want want;
     std::string windowMode;
-    ErrCode result = MakeWantFromCmd(want, windowMode);
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    ErrCode result = MakeWantFromCmd(want, windowMode, userId);
     if (result == OHOS::ERR_OK) {
         int windowModeKey = std::atoi(windowMode.c_str());
         if (windowModeKey > 0) {
             auto setting = AbilityStartSetting::GetEmptySetting();
             if (setting != nullptr) {
                 setting->AddProperty(AbilityStartSetting::WINDOW_MODE_KEY, windowMode);
-                result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1);
+                result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1, userId);
             }
         } else if (startAbilityWithWaitFlag_) {
-            result = StartAbilityWithWait(want);
+            result = StartAbilityWithWait(want, userId);
         } else {
-            result = AbilityManagerClient::GetInstance()->StartAbility(want);
+            result = AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_INVAL_VALUE, userId);
         }
         if (result == OHOS::ERR_OK) {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_START_ABILITY_OK.c_str());
@@ -1617,6 +1618,12 @@ ErrCode AbilityManagerShellCommand::RunForceTimeoutForTest()
 
 ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& windowMode)
 {
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    return MakeWantFromCmd(want, windowMode, userId);
+}
+
+ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& windowMode, int32_t& userId)
+{
     int result = OHOS::ERR_OK;
 
     int option = -1;
@@ -1874,6 +1881,17 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'U': {
                     // 'aa start -U' with no argument
                     TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -U' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+
+                    break;
+                }
+                case 'u': {
+                    // 'aa start -u' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -u' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -2153,6 +2171,24 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // app multi thread
                 isMultiThread = true;
                 TAG_LOGD(AAFwkTag::AA_TOOL, "isMultiThread");
+                break;
+            }
+            case 'u': {
+                // 'aa start -u <user-id>'
+                // save user id
+                if (optarg != nullptr) {
+                    int32_t tempUserId = DEFAULT_INVAL_VALUE;
+                    if (!StrToInt(optarg, tempUserId) || tempUserId < 0) {
+                        // 'aa start -u' with invalid argument
+                        TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -u' invalid arg: %{public}s", cmd_.c_str(), optarg);
+
+                        resultReceiver_.append("error: invalid user id: ");
+                        resultReceiver_.append(optarg).append("\n");
+                        return OHOS::ERR_INVALID_VALUE;
+                    }
+                    userId = tempUserId;
+                }
+                TAG_LOGD(AAFwkTag::AA_TOOL, "userId: %{public}d", userId);
                 break;
             }
             case 0: {
@@ -2554,15 +2590,18 @@ sptr<IAbilityManager> AbilityManagerShellCommand::GetAbilityManagerService()
     return iface_cast<IAbilityManager>(remoteObject);
 }
 
-ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want)
+ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want, int32_t userId)
 {
     if (IsImplicitStartAction(want)) {
-        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want);
+        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_INVAL_VALUE, userId);
         if (ret != ERR_OK) {
             return ret;
         }
         resultReceiver_.append(STRING_IMPLICT_START_WITH_WAIT_NG + "\n");
         return ret;
+    }
+    if (userId != DEFAULT_INVAL_VALUE) {
+        TAG_LOGW(AAFwkTag::AA_TOOL, "userId %{public}d is ignored when using -W option", userId);
     }
     auto observer = sptr<AbilityStartWithWaitObserver>::MakeSptr();
     if (!observer) {
