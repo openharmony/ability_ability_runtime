@@ -237,6 +237,121 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasAgentExtensionAbility_0200, T
     EXPECT_TRUE(appRunningRecord->HasAgentExtensionAbility());
 }
 
+/**
+ * @tc.name: AppRunningRecord_IsLastAgentExtensionAbility_0100
+ * @tc.desc: IsLastAgentExtensionAbility returns false when token does not match any ability record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAgentExtensionAbility_0100, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+
+    EXPECT_FALSE(appRunningRecord->IsLastAgentExtensionAbility(token));
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsLastAgentExtensionAbility_0200
+ * @tc.desc: IsLastAgentExtensionAbility returns false when target token is not an agent extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAgentExtensionAbility_0200, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(token, abilityInfo, nullptr, RECORD_ID), nullptr);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+
+    EXPECT_FALSE(appRunningRecord->IsLastAgentExtensionAbility(token));
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsLastAgentExtensionAbility_0300
+ * @tc.desc: IsLastAgentExtensionAbility returns true when target token is the only agent extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAgentExtensionAbility_0300, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+
+    auto agentAbilityInfo = std::make_shared<AbilityInfo>();
+    agentAbilityInfo->type = AbilityType::EXTENSION;
+    agentAbilityInfo->extensionAbilityType = ExtensionAbilityType::AGENT;
+    sptr<IRemoteObject> agentToken = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(agentToken, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(agentToken, agentAbilityInfo, nullptr, RECORD_ID), nullptr);
+
+    auto serviceAbilityInfo = std::make_shared<AbilityInfo>();
+    serviceAbilityInfo->type = AbilityType::EXTENSION;
+    serviceAbilityInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> serviceToken = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(serviceToken, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(serviceToken, serviceAbilityInfo, nullptr, RECORD_ID + 1), nullptr);
+
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+
+    EXPECT_TRUE(appRunningRecord->IsLastAgentExtensionAbility(agentToken));
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsLastAgentExtensionAbility_0400
+ * @tc.desc: IsLastAgentExtensionAbility returns false when process has more than one agent extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsLastAgentExtensionAbility_0400, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto firstModuleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    auto secondModuleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(firstModuleRecord, nullptr);
+    ASSERT_NE(secondModuleRecord, nullptr);
+
+    auto firstAgentAbilityInfo = std::make_shared<AbilityInfo>();
+    firstAgentAbilityInfo->type = AbilityType::EXTENSION;
+    firstAgentAbilityInfo->extensionAbilityType = ExtensionAbilityType::AGENT;
+    sptr<IRemoteObject> firstAgentToken = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(firstAgentToken, nullptr);
+    ASSERT_NE(firstModuleRecord->AddAbility(firstAgentToken, firstAgentAbilityInfo, nullptr, RECORD_ID), nullptr);
+
+    auto secondAgentAbilityInfo = std::make_shared<AbilityInfo>();
+    secondAgentAbilityInfo->type = AbilityType::EXTENSION;
+    secondAgentAbilityInfo->extensionAbilityType = ExtensionAbilityType::AGENT;
+    sptr<IRemoteObject> secondAgentToken = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(secondAgentToken, nullptr);
+    ASSERT_NE(secondModuleRecord->AddAbility(secondAgentToken, secondAgentAbilityInfo, nullptr, RECORD_ID + 1),
+        nullptr);
+
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(firstModuleRecord);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(secondModuleRecord);
+
+    EXPECT_FALSE(appRunningRecord->IsLastAgentExtensionAbility(firstAgentToken));
+}
+
 #ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppRunningRecord_AddChildProcessRecord_0100

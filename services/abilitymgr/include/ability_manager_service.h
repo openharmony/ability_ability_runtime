@@ -2631,6 +2631,12 @@ protected:
     void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     /**
+     * @brief Notify one ability is being terminated.
+     * @param token ability token.
+     */
+    void NotifyTerminateAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * @brief Notify abilityms process info when an app dies
      * @param accessTokenId app accessTokenId.
      * @param exitInfo process running info.

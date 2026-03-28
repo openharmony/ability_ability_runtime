@@ -150,6 +150,11 @@ void AppScheduler::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnStartProcessFailed()");
 }
 
+void AppScheduler::NotifyTerminateAbility(const sptr<IRemoteObject> &token)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyTerminateAbility()");
+}
+
 void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyAppPreCache()");
