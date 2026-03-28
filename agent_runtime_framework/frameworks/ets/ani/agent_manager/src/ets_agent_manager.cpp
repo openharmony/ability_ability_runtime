@@ -80,13 +80,6 @@ void EtsAgentManager::GetAllAgentCards(ani_env *env, ani_object asyncCallback)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     std::vector<AgentCard> cards;
     int32_t ret = AgentManagerClient::GetInstance().GetAllAgentCards(cards);
     if (ret != ERR_OK) {
@@ -109,12 +102,6 @@ void EtsAgentManager::GetAgentCardsByBundleName(ani_env *env, ani_string aniBund
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
-        return;
-    }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
     std::string bundleName;
@@ -149,12 +136,6 @@ void EtsAgentManager::GetAgentCardByAgentId(ani_env *env, ani_string aniBundleNa
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
-        return;
-    }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
     std::string bundleName;
@@ -192,13 +173,6 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     // Extract want
     AAFwk::Want want;
     if (!UnwrapWant(env, aniWant, want)) {
@@ -223,14 +197,6 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     // Check for duplicate connection
     if (CheckConnectAlreadyExist(env, want, callbackObj, asyncCallback)) {
         TAG_LOGI(AAFwkTag::SER_ROUTER, "Duplicate connection found");
-        return;
-    }
-
-    // Check if maximum connections reached
-    if (AgentConnectionUtils::IsMaxConnectionsReached()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "Maximum agent connections reached");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED), nullptr);
         return;
     }
 
@@ -282,13 +248,6 @@ void EtsAgentManager::DisconnectAgentExtensionAbility(ani_env *env, ani_object a
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     // Get the proxy using GetEtsAgentReceiverProxy (similar to GetEtsUIServiceProxy)
     EtsAgentReceiverProxy* proxy = EtsAgentReceiverProxy::GetEtsAgentReceiverProxy(env, agentProxyObj);
     if (proxy == nullptr) {

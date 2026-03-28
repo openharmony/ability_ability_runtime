@@ -38,6 +38,7 @@ public:
     int32_t GetAllAgentCards(std::vector<AgentCard> &cards);
     int32_t GetAgentCardsByBundleName(const std::string &bundleName, std::vector<AgentCard> &cards);
     int32_t GetAgentCardByAgentId(const std::string &bundleName, const std::string &agentId, AgentCard &card);
+    int32_t GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card);
 
     int32_t ConnectAgentExtensionAbility(const AAFwk::Want &want,
         const sptr<AAFwk::IAbilityConnection> &connection);

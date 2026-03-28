@@ -17,8 +17,8 @@
 
 #include "ability_business_error.h"
 #include "agent_extension.h"
-#include "agent_extension_context.h"
 #include "agent_extension_connection_constants.h"
+#include "agent_extension_context.h"
 #include "agent_manager_client.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
@@ -429,10 +429,9 @@ void JsAgentExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr
     }
     std::string agentId = want->GetStringParam(AGENTID_KEY);
     std::shared_ptr<AgentCard> agentCard = std::make_shared<AgentCard>();
-    auto innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByAgentId(
-        want->GetElement().GetBundleName(), agentId, *agentCard);
+    auto innerErrorCode = AgentManagerClient::GetInstance().GetCallerAgentCardByAgentId(agentId, *agentCard);
     if (innerErrorCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetAgentCardByAgentId error: %{public}d", innerErrorCode);
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetCallerAgentCardByAgentId error: %{public}d", innerErrorCode);
         return;
     }
     context->SetAgentCard(agentCard);

@@ -22,6 +22,7 @@ namespace AgentRuntime {
 int MyFlag::retGetAllAgentCards = 0;
 int MyFlag::retGetAgentCardsByBundleName = 0;
 int MyFlag::retGetAgentCardByAgentId = 0;
+int MyFlag::retGetCallerAgentCardByAgentId = 0;
 int MyFlag::retConnectAgentExtensionAbility = 0;
 int MyFlag::retDisconnectAgentExtensionAbility = 0;
 
@@ -46,6 +47,11 @@ int32_t MockAgentManagerService::GetAgentCardByAgentId(const std::string &bundle
     AgentCard &card)
 {
     return MyFlag::retGetAgentCardByAgentId;
+}
+
+int32_t MockAgentManagerService::GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card)
+{
+    return MyFlag::retGetCallerAgentCardByAgentId;
 }
 
 int32_t MockAgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &want,

@@ -399,10 +399,9 @@ void EtsAgentExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> w
     }
     std::string agentId = want->GetStringParam(AGENTID_KEY);
     std::shared_ptr<AgentCard> agentCard = std::make_shared<AgentCard>();
-    auto innerErrorCode = AgentManagerClient::GetInstance().GetAgentCardByAgentId(
-        want->GetElement().GetBundleName(), agentId, *agentCard);
+    auto innerErrorCode = AgentManagerClient::GetInstance().GetCallerAgentCardByAgentId(agentId, *agentCard);
     if (innerErrorCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetAgentCardByAgentId error: %{public}d", innerErrorCode);
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "GetCallerAgentCardByAgentId error: %{public}d", innerErrorCode);
         return;
     }
     context->SetAgentCard(agentCard);
