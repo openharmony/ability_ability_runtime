@@ -14,60 +14,70 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("agentmgr") {
+group("agent_common_target") {
+  deps = [
+    ":agent_card_utils",
+    ":agent_semver",
+  ]
+}
+
+config("agent_common_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+}
+
+ohos_shared_library("agent_semver") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
 
+  public_configs = [ ":agent_common_config" ]
+  include_dirs = [ "include" ]
+  sources = [ "src/sem_ver.cpp" ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("agent_card_utils") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  public_configs = [ ":agent_common_config" ]
   include_dirs = [
     "include",
-    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "${ability_runtime_path}/utils/global/constant",
     "${ability_runtime_services_path}/common/include",
-    "${agent_runtime_framework_path}/interfaces/kits/native/agent_extension/connection/include",
+    "${agent_runtime_framework_path}/interfaces/inner_api/include",
   ]
-  sources = [
-    "src/agent_bundle_event_callback.cpp",
-    "src/agent_card_db_mgr.cpp",
-    "src/agent_card_mgr.cpp",
-    "src/agent_event_handler.cpp",
-    "src/agent_manager_service.cpp",
-  ]
-
-  public_configs = []
+  sources = [ "src/agent_card_utils.cpp" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
-    "${ability_runtime_services_path}/common:perm_verification",
-    "${ability_runtime_services_path}/common:task_handler_wrap",
-    "${agent_runtime_framework_path}/services/common:agent_card_utils",
-    "${agent_runtime_framework_path}/services/common:agent_semver",
     "${agent_runtime_framework_path}/interfaces/inner_api:agent_fwk",
-    "${agent_runtime_framework_path}/interfaces/inner_api:agent_manager",
+    "${agent_runtime_framework_path}/services/common:agent_semver",
   ]
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
-    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
-    "kv_store:distributeddata_inner",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
-  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
