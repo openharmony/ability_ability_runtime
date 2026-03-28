@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -493,6 +493,17 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
+
+        // Set launchElement
+        Want want;
+        if (abilityRecord->GetWant()) {
+            want = *(abilityRecord->GetWant());
+            auto elementName = want.GetElement();
+            TAG_LOGD(AAFwkTag::APPKIT, "Set launchElement to stageContext: %{public}s/%{public}s",
+                elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str());
+            stageContext->SetLaunchElement(elementName);
+        }
+
         abilityStage->Init(stageContext, weak);
         auto firstCallback = CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord, *hapModuleInfo,
             callback);
@@ -518,11 +529,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
 
         TAG_LOGD(AAFwkTag::APPKIT, "no wait startup second");
-        Want want;
-        if (abilityRecord->GetWant()) {
-            TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
-            want = *(abilityRecord->GetWant());
-        }
         abilityStage->OnCreate(want);
         abilityStages_[moduleName] = abilityStage;
     } else {

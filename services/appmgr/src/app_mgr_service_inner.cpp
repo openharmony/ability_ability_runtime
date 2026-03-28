@@ -357,8 +357,11 @@ const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS = 1;
 constexpr int32_t MAX_EXTENSION_CHILD_PROCESS_DEV_MODE = 3;
 
+constexpr const char* AGENT_EXTENSION_TYPE = "agent";
+
 // kill resaon
 constexpr int32_t PROCESS_KILL_PARAM = 25; // PROCESS_KILL params
+
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -607,6 +610,10 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
         return ERR_PERMISSION_DENIED;
+    }
+    if (appIndex != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not support clone app preload");
+        return ERR_INVALID_VALUE;
     }
     return PreloadApplication(bundleName, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED);
 }
@@ -1221,15 +1228,15 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             }
         }
         ReportUIExtensionProcColdStartToRss(abilityInfo, want, loadParam->isPreloadUIExtension);
+        if (loadParam->isPreloadUIExtension) {
+            UpdateUIExtensionPreloadState(appRecord, true);
+        }
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
             AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag, loadParam->isStartupHide);
         if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
             return;
-        }
-        if (loadParam->isPreloadUIExtension) {
-            UpdateUIExtensionPreloadState(appRecord, true);
         }
     } else {
         isProcessReuse = true;
@@ -1481,6 +1488,11 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
 {
     if (!abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
+        return;
+    }
+    if (abilityInfo->type == AppExecFwk::AbilityType::EXTENSION &&
+        abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
+        processName = appInfo->bundleName + ":" + AGENT_EXTENSION_TYPE;
         return;
     }
     if (!abilityInfo->process.empty() && (isCallerSetProcess || specifiedProcessFlag.empty())) {
@@ -1797,6 +1809,17 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
             item.callback->OnAppRemoteDied(abilityTokens);
+        }
+    }
+}
+
+void AppMgrServiceInner::NotifyTerminateAbility(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyTerminateAbility(token);
         }
     }
 }
@@ -8038,7 +8061,7 @@ void AppMgrServiceInner::RecordAppWithReason(int32_t pid, int32_t uid, int32_t k
 void AppMgrServiceInner::RecordAppWithReasonByUserId(int32_t userId, int32_t killId)
 {
     AAFwk::ExitReasonCompability exitReasonCompability(killId);
-    AbilityManagerClient::GetInstance()->RecordAppWithReasonByUserId(userId, exitReasonCompability);
+    IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->RecordAppWithReasonByUserId(userId, exitReasonCompability));
 }
 #endif
 

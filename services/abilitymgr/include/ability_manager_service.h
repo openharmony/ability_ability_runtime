@@ -1122,6 +1122,14 @@ public:
     virtual int GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
 
     /**
+     * @brief Get the pending want from a want sender from want.
+     * @param target The target want sender.
+     * @param want The output pending want.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int GetPendingRequestWantFromProxy(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
+
+    /**
      * @brief Get the want sender information.
      * @param target The target want sender.
      * @param info The output want sender information.
@@ -2623,6 +2631,12 @@ protected:
     void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     /**
+     * @brief Notify one ability is being terminated.
+     * @param token ability token.
+     */
+    void NotifyTerminateAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * @brief Notify abilityms process info when an app dies
      * @param accessTokenId app accessTokenId.
      * @param exitInfo process running info.
@@ -3179,7 +3193,8 @@ private:
         const int32_t oriValidUserId);
 
     void InitInterceptor();
-    void InitInterceptorForScreenUnlock(int32_t userId = DEFAULT_INVAL_VALUE);
+    void InitInterceptorForScreenUnlock();
+    void UpdateScreenUnlockInterceptor(int32_t userId);
     void InitPushTask();
     void InitAppSpawnMsgPipe();
     void InitDeepLinkReserve();
@@ -3189,7 +3204,7 @@ private:
     int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, int32_t appIndex, const bool isUpgrade,
         const std::string &exitMsg);
 
-    int32_t HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
+    void HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
         const std::string &exitMsg);
 
     int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);

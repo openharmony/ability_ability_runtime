@@ -2656,6 +2656,37 @@ int AbilityManagerProxy::GetPendingRequestWant(const sptr<IWantSender> &target, 
     return NO_ERROR;
 }
 
+int AbilityManagerProxy::GetPendingRequestWantFromProxy(const sptr<IWantSender> &target, std::shared_ptr<Want> &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write fail");
+        return INNER_ERR;
+    }
+    if (want == nullptr || !data.WriteParcelable(want.get())) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "want write fail");
+        return INNER_ERR;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT_FROM_PROXY, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "request error:%{public}d", error);
+        return error;
+    }
+    std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
+    if (!wantInfo) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "readParcelableInfo fail");
+        return INNER_ERR;
+    }
+    want = std::move(wantInfo);
+
+    return NO_ERROR;
+}
+
 int AbilityManagerProxy::GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info)
 {
     MessageParcel data;

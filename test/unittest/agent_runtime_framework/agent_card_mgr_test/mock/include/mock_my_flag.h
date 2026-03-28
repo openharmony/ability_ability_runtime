@@ -36,6 +36,7 @@ public:
     static bool retGetBundleInfo;
     static bool retGetResConfigFile;
     static bool retFromJson;
+    static bool mockApplicationInfoIsSystemApp;
 
     // Mock data for GetBundleInfo
     static std::vector<AppExecFwk::ExtensionAbilityInfo> mockExtensionInfos;

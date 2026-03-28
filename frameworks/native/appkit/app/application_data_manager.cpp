@@ -256,5 +256,21 @@ void ApplicationDataManager::SetLeakObserver(LeakObserverFunction leakCallback)
     leakObserver_ = leakCallback;
 }
 
+void ApplicationDataManager::RegisterHasOnErrorCallback(HasOnErrorCallback hasOnErrorCallback)
+{
+    std::lock_guard<std::mutex> lock(hasOnErrorCallbackMutex_);
+    hasOnErrorCallback_ = hasOnErrorCallback;
+}
+
+
+bool ApplicationDataManager::GetHasOnErrorCallback()
+{
+    std::lock_guard<std::mutex> lock(hasOnErrorCallbackMutex_);
+    if (hasOnErrorCallback_) {
+        return hasOnErrorCallback_();
+    }
+    return false;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

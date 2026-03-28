@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "ability_connect_callback_interface.h"
 #include "agent_card.h"
+
 #define private public
 #include "ability_manager_errors.h"
 #include "agent_manager_client.h"
 #include "agent_load_callback.h"
-#include "hilog_tag_wrapper.h"
 #undef private
+#include "hilog_tag_wrapper.h"
 #include "iremote_object.h"
 #include "mock_agent_manager_service.h"
 #include "mock_my_flag.h"
@@ -52,7 +53,15 @@ void AgentManagerClientTest::TearDownTestCase(void)
 {}
 
 void AgentManagerClientTest::SetUp(void)
-{}
+{
+    MyFlag::retGetAllAgentCards = ERR_OK;
+    MyFlag::retGetAgentCardsByBundleName = ERR_OK;
+    MyFlag::retGetAgentCardByAgentId = ERR_OK;
+    MyFlag::retGetCallerAgentCardByAgentId = ERR_OK;
+    MyFlag::retConnectAgentExtensionAbility = ERR_OK;
+    MyFlag::retDisconnectAgentExtensionAbility = ERR_OK;
+    MyFlag::nullSystemAbility = false;
+}
 
 void AgentManagerClientTest::TearDown(void)
 {}
@@ -236,6 +245,59 @@ HWTEST_F(AgentManagerClientTest, GetAgentCardByAgentId_003, TestSize.Level1)
     std::string bundleName = "bundle";
     std::string agentId = "agentId";
     int32_t result = client.GetAgentCardByAgentId(bundleName, agentId, card);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+* @tc.name  : GetCallerAgentCardByAgentId_ShouldReturnError_WhenProxyIsNull
+* @tc.number: GetCallerAgentCardByAgentId_001
+ * @tc.desc : Test that GetCallerAgentCardByAgentId returns ERR_NULL_AGENT_MGR_PROXY when the agent manager proxy is
+ * null.
+*/
+HWTEST_F(AgentManagerClientTest, GetCallerAgentCardByAgentId_001, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = true;
+
+    AgentCard card;
+    std::string agentId = "agentId";
+    int32_t result = client.GetCallerAgentCardByAgentId(agentId, card);
+    EXPECT_EQ(result, ERR_NULL_AGENT_MGR_PROXY);
+}
+
+/**
+* @tc.name  : GetCallerAgentCardByAgentId_ShouldReturnError_WhenRetrievalFails
+* @tc.number: GetCallerAgentCardByAgentId_002
+* @tc.desc  : Test that GetCallerAgentCardByAgentId returns the error code when agent card retrieval fails.
+*/
+HWTEST_F(AgentManagerClientTest, GetCallerAgentCardByAgentId_002, TestSize.Level1)
+{
+    AgentManagerClient client;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retGetCallerAgentCardByAgentId = -1;
+
+    AgentCard card;
+    std::string agentId = "agentId";
+    int32_t result = client.GetCallerAgentCardByAgentId(agentId, card);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+* @tc.name  : GetCallerAgentCardByAgentId_ShouldReturnSuccess_WhenAllOperationsSucceed
+* @tc.number: GetCallerAgentCardByAgentId_003
+* @tc.desc  : Test that GetCallerAgentCardByAgentId returns ERR_OK when all operations succeed.
+*/
+HWTEST_F(AgentManagerClientTest, GetCallerAgentCardByAgentId_003, TestSize.Level1)
+{
+    AgentManagerClient client;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retGetCallerAgentCardByAgentId = ERR_OK;
+
+    AgentCard card;
+    std::string agentId = "agentId";
+    int32_t result = client.GetCallerAgentCardByAgentId(agentId, card);
     EXPECT_EQ(result, ERR_OK);
 }
 

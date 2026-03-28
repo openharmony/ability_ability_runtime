@@ -1402,5 +1402,10 @@ bool AppRunningRecord::HasAgentExtensionAbility()
 {
     return false;
 }
+
+bool AppRunningRecord::IsLastAgentExtensionAbility(const sptr<IRemoteObject> &token)
+{
+    return false;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
