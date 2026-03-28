@@ -9227,10 +9227,10 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
         result = StartExtensionAbility(
             want, nullptr, userId, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
     } else {
-        if (!info.isHiddenStart) {
-            result = StartAbility(want, userId);
-        } else {
+        if (info.isHiddenStart && info.abilityTypeName == AbilityRuntime::ABILITY_TYPE_UI_ABILITY) {
             result = abilityAutoStartupService_->HiddenStartAutoStartupApp(want, userId);
+        } else {
+            result = StartAbility(want, userId);
         }
     }
     if ((result != ERR_OK) && (info.retryCount > 0)) {
