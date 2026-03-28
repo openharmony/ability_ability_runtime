@@ -263,6 +263,13 @@ void AppScheduler::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &
     callback->OnStartProcessFailed(abilityTokens);
 }
 
+void AppScheduler::NotifyTerminateAbility(const sptr<IRemoteObject> &token)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyTerminateAbility(token);
+}
+
 void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)

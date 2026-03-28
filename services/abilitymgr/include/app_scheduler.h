@@ -136,6 +136,12 @@ public:
     virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
     /**
+     * @brief Notify one ability is being terminated.
+     * @param token ability token.
+     */
+    virtual void NotifyTerminateAbility(const sptr<IRemoteObject> &token) {}
+
+    /**
      * @brief Notify abilityms process info when an app dies
      * @param accessTokenId app accessTokenId.
      * @param exitInfo process running info.
@@ -749,6 +755,12 @@ protected:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    /**
+     * @brief Notify abilityms one ability is being terminated.
+     * @param token ability token.
+     */
+    virtual void NotifyTerminateAbility(const sptr<IRemoteObject> &token) override;
 
     /**
      * @brief Notify abilityms exit info
