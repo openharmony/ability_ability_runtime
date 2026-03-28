@@ -780,6 +780,67 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartUserTest_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartUserTest with invalid userId parameter
+ * SubFunction: ParseAndValidateUserId
+ * FunctionPoints: AbilityManagerService StartUserTest with invalid userId format
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, StartUserTest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("-b", std::string("com.example.test"));
+    want.SetParam("-u", std::string("invalid"));  // Invalid userId format
+
+    sptr<IRemoteObject> observer = MockToken(AbilityType::PAGE);
+    // Invalid userId format should return ERR_INVALID_VALUE
+    EXPECT_EQ(abilityMs_->StartUserTest(want, observer), ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUserTest with empty userId parameter
+ * SubFunction: ParseAndValidateUserId
+ * FunctionPoints: AbilityManagerService StartUserTest with empty userId
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, StartUserTest_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("-b", std::string("com.example.test"));
+    want.SetParam("-u", std::string(""));  // Empty userId
+
+    sptr<IRemoteObject> observer = MockToken(AbilityType::PAGE);
+    // Empty userId should use caller's userId, expect GET_BUNDLE_INFO_FAILED since bundle is not installed
+    EXPECT_EQ(abilityMs_->StartUserTest(want, observer), GET_BUNDLE_INFO_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUserTest with negative userId parameter
+ * SubFunction: ParseAndValidateUserId
+ * FunctionPoints: AbilityManagerService StartUserTest with negative userId
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, StartUserTest_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("-b", std::string("com.example.test"));
+    want.SetParam("-u", std::string("-1"));  // Negative userId
+
+    sptr<IRemoteObject> observer = MockToken(AbilityType::PAGE);
+    // Negative userId -1 should be parsed successfully but IsForegroundUser will fail
+    // Expect INVALID_USERID_VALUE since -1 is not a foreground user
+    EXPECT_EQ(abilityMs_->StartUserTest(want, observer), INVALID_USERID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartUserTest_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: FinishUserTest
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService FinishUserTest

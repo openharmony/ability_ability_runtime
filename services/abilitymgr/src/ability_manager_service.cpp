@@ -10845,21 +10845,10 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
         return ERR_NOT_SUPPORT_APP_CLONE;
     }
 
-    int32_t userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
-    std::string userIdParam = want.GetStringParam("-u");
-    if (!userIdParam.empty()) {
-        try {
-            userId = std::stoi(userIdParam);
-        } catch (...) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid userId: %{public}s", userIdParam.c_str());
-            return ERR_INVALID_VALUE;
-        }
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "userId specified: %{public}d", userId);
-        // Check if the specified userId is a foreground user
-        if (!AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "userId %{public}d is not a foreground user", userId);
-            return ERR_INVALID_USERID_VALUE;
-        }
+    int32_t userId;
+    auto ret = ParseAndValidateUserId(want, userId);
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     auto bms = AbilityUtil::GetBundleManagerHelper();
@@ -10883,6 +10872,26 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
     }
 
     return DelayedSingleton<AppScheduler>::GetInstance()->StartUserTest(want, observer, bundleInfo, userId);
+}
+
+int AbilityManagerService::ParseAndValidateUserId(const Want &want, int32_t &userId)
+{
+    userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    std::string userIdParam = want.GetStringParam("-u");
+    if (!userIdParam.empty()) {
+        try {
+            userId = std::stoi(userIdParam);
+        } catch (...) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid userId: %{public}s", userIdParam.c_str());
+            return ERR_INVALID_VALUE;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "userId specified: %{public}d", userId);
+        if (!AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "userId %{public}d is not a foreground user", userId);
+            return INVALID_USERID_VALUE;
+        }
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::FinishUserTest(
