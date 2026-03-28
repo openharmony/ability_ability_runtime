@@ -938,7 +938,7 @@ public:
      * @param requestId request id to callback
      */
     void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0, const std::string &customProcess = "");
+        int32_t requestId = 0, const std::string &customProcess = "", bool isPreloadStart = false);
 
     /**
      * Start specified process.
@@ -1196,6 +1196,12 @@ public:
      * @param state Target UIExtension preload state.
      */
     void UpdateUIExtensionPreloadState(const std::shared_ptr<AppRunningRecord> &appRecord, bool state);
+
+    /**
+     * @brief Set preload start state for app running record.
+     * @param appRecord App running record.
+     */
+    void UpdateWindowStageCreatedPreloadState(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     /**
      * @brief Set preload flag for running process info.

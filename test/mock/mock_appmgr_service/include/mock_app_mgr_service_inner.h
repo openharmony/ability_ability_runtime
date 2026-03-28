@@ -99,7 +99,7 @@ public:
     MOCK_METHOD2(RegisterApplicationStateObserver, int32_t(const sptr<IApplicationStateObserver> &observer,
         const std::vector<std::string> &bundleNameList));
 
-    void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t, const std::string&)
+    void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t, const std::string&, bool)
     {}
 
     void Post()

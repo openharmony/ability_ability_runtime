@@ -924,6 +924,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null ability");
         return;
     }
+    if (GetPreloadPhase() == PreloadPhase::WINDOW_STAGE_CREATED) {
+        SetPreloadMode(PreloadMode::PRELOAD_NONE);
+    }
 
     AbilityState curAbilityState = ability->GetState();
     if (curAbilityState != AbilityState::ABILITY_STATE_READY &&

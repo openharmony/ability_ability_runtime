@@ -237,6 +237,37 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasAgentExtensionAbility_0200, T
     EXPECT_TRUE(appRunningRecord->HasAgentExtensionAbility());
 }
 
+/**
+ * @tc.name: AppRunningRecord_AbilityForeground_0100
+ * @tc.desc: AbilityForeground clears preload mode for window stage created preload process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityForeground_0100, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.test.process");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+    auto abilityRecord = moduleRecord->AddAbility(token, abilityInfo, nullptr, RECORD_ID);
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->SetState(AbilityState::ABILITY_STATE_BACKGROUND);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+
+    appRunningRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+    appRunningRecord->SetPreloadPhase(PreloadPhase::WINDOW_STAGE_CREATED);
+    appRunningRecord->SetState(ApplicationState::APP_STATE_CREATE);
+
+    appRunningRecord->AbilityForeground(abilityRecord);
+
+    EXPECT_EQ(appRunningRecord->GetPreloadMode(), PreloadMode::PRELOAD_NONE);
+}
+
 #ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppRunningRecord_AddChildProcessRecord_0100
