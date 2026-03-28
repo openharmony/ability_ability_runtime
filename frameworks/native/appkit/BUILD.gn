@@ -352,6 +352,7 @@ ohos_shared_library("ability_stage_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -698,6 +699,7 @@ ohos_shared_library("test_runner_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
