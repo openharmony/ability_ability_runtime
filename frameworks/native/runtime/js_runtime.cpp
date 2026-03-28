@@ -1217,33 +1217,34 @@ napi_value JsRuntime::GetExportObjectFromOhmUrl(const std::string &srcEntrance, 
     return ArkNativeEngine::ArkValueToNapiValue(env, exportObj);
 }
 
-bool JsRuntime::ExecuteSecureWithOhmUrl(const std::string &moduleName, const std::string &hapPath,
-    const std::string &srcEntrance)
+std::unique_ptr<AbilityBase::FileMapper> JsRuntime::ExecuteSecureWithOhmUrl(const std::string &moduleName,
+    const std::string &hapPath, const std::string &srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName %{public}s, hapPath %{private}s, execute %{private}s",
         moduleName.c_str(), hapPath.c_str(), srcEntrance.c_str());
     auto vm = GetEcmaVm();
-    CHECK_POINTER_AND_RETURN(vm, false);
+    CHECK_POINTER_AND_RETURN(vm, nullptr);
     auto ohmUrl = panda::JSNApi::IsOhmUrl(srcEntrance);
     if (!ohmUrl) {
         TAG_LOGW(AAFwkTag::JSRUNTIME, "srcEntrance %{private}s not ohmurl", srcEntrance.c_str());
-        return false;
+        return nullptr;
     }
 
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
-    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
+    auto extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
     if (extractor == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "get hapPath %{private}s extractor failed", hapPath.c_str());
-        return false;
+        return nullptr;
     }
+    extractor->SetAutoCloseFd(true);
 
     std::string srcFileName = BUNDLE_INSTALL_PATH + moduleName + MERGE_ABC_PATH;
     auto safeData = extractor->GetSafeData(srcFileName);
     if (safeData == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData srcFileName %{private}s", srcFileName.c_str());
-        return false;
+        return nullptr;
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -1252,7 +1253,11 @@ bool JsRuntime::ExecuteSecureWithOhmUrl(const std::string &moduleName, const std
     auto end = std::chrono::high_resolution_clock::now();
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     TAG_LOGI(AAFwkTag::JSRUNTIME, "srcEntrance %{public}s timing %{public}lld", srcEntrance.c_str(), duration_ms);
-    return ret;
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "ExecuteSecureWithOhmUrl failed");
+        return nullptr;
+    }
+    return safeData;
 }
 
 bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk,
