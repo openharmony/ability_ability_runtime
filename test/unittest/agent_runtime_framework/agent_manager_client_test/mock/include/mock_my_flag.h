@@ -28,6 +28,7 @@ public:
     static int retGetAllAgentCards;
     static int retGetAgentCardsByBundleName;
     static int retGetAgentCardByAgentId;
+    static int retGetCallerAgentCardByAgentId;
     static int retToAgentCardVec;
     static int retConnectAgentExtensionAbility;
     static int retDisconnectAgentExtensionAbility;

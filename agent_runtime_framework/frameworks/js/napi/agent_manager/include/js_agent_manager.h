@@ -185,8 +185,6 @@ private:
      */
     napi_value ScheduleAgentConnection(napi_env env, const AAFwk::Want &want,
         const std::string &agentId, sptr<JSAgentConnection> connection);
-
-    static bool CheckCallerIsSystemApp();
 };
 
 /**

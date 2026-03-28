@@ -17,6 +17,7 @@
 #define MOCK_AGENT_RUNTIME_MY_FLAG_H
 
 #include <string>
+#include "ability_connect_callback_interface.h"
 #include "iremote_object.h"
 #include "running_process_info.h"
 #include "extension_ability_info.h"
@@ -35,6 +36,7 @@ public:
     static bool retVerifyCallingPermission;
     static bool retVerifyConnectAgentPermission;
     static bool retVerifyGetAgentCardPermission;
+    static bool retJudgeCallerIsAllowedToUseSystemAPI;
     static int32_t retConnectAbilityWithExtensionType;
     static int32_t retDisconnectAbility;
     static int32_t retGetAllAgentCards;
@@ -46,6 +48,8 @@ public:
     static int32_t retGetProcessRunningInfoByPid;
     static AppExecFwk::AppProcessState processState;
     static int32_t retGetBundleNameByPid;
+    static sptr<AAFwk::IAbilityConnection> lastConnectAbilityConnection;
+    static sptr<AAFwk::IAbilityConnection> lastDisconnectAbilityConnection;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
