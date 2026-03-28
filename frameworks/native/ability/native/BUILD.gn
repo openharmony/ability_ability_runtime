@@ -233,6 +233,7 @@ ohos_shared_library("configuration_helper") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -495,6 +496,7 @@ ohos_shared_library("cj_abilitykit_native_ffi") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
@@ -658,6 +660,7 @@ ohos_shared_library("cj_extensionkit_native") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
@@ -779,6 +782,7 @@ ohos_shared_library("insight_intent_executor_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -842,6 +846,7 @@ ohos_shared_library("cj_insight_intent_executor") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   sources = [
@@ -920,6 +925,7 @@ ohos_shared_library("ui_ability_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -1251,6 +1257,7 @@ ohos_shared_library("ets_form_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -1386,6 +1393,7 @@ ohos_shared_library("cj_form_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
@@ -1568,6 +1576,7 @@ ohos_shared_library("app_service_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -1641,6 +1650,7 @@ ohos_shared_library("service_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
@@ -1724,6 +1734,7 @@ ohos_shared_library("ui_service_extension_connection") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -1770,6 +1781,7 @@ ohos_shared_library("ui_service_extension_connection_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -1827,6 +1839,7 @@ ohos_shared_library("ui_service_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -1924,6 +1937,7 @@ ohos_shared_library("ui_service_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -2029,6 +2043,7 @@ ohos_shared_library("ui_service_extension_module") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -2478,6 +2493,7 @@ ohos_shared_library("photo_editor_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   configs = [
@@ -2572,6 +2588,7 @@ ohos_shared_library("ui_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -2673,6 +2690,7 @@ ohos_shared_library("cj_ui_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   include_dirs = [
@@ -2852,6 +2870,7 @@ ohos_shared_library("cj_share_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   configs = [ ":share_extension_config" ]
@@ -2963,6 +2982,7 @@ ohos_shared_library("cj_action_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   configs = [ ":action_extension_config" ]
@@ -3188,6 +3208,7 @@ ohos_shared_library("embedded_ui_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -3249,6 +3270,7 @@ ohos_shared_library("cj_embedded_ui_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -3302,6 +3324,7 @@ ohos_shared_library("embedded_ui_extension_module") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -3418,6 +3441,7 @@ ohos_shared_library("auto_fill_extension_ani") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -3580,6 +3604,7 @@ ohos_shared_library("photo_editor_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   configs = [ ":photo_editor_extension_config" ]
@@ -3643,6 +3668,7 @@ ohos_shared_library("cj_photo_editor_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   configs = [ ":photo_editor_extension_config" ]
@@ -3702,6 +3728,7 @@ ohos_shared_library("photo_editor_extension_module") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -3746,6 +3773,7 @@ ohos_shared_library("app_service_extension") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
@@ -3822,6 +3850,7 @@ ohos_shared_library("app_service_extension_module") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
   branch_protector_ret = "pac_ret"
