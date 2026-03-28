@@ -173,7 +173,7 @@ AgentCapabilities AgentCapabilities::FromJson(const nlohmann::json &jsonObject)
         if (capabilities.extension.length() < 1 || capabilities.extension.length() > LENGTH_1024) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension length is invalid");
             capabilities.extension = "";
-        } else if (!nlohmann::json::accept(capabilities.extension)) {
+        } else if (!nlohmann::json::accept(capabilities.extension, true)) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension is not valid json format");
             capabilities.extension = "";
         }
@@ -350,7 +350,7 @@ bool AgentSkill::FromJson(const nlohmann::json &jsonObject, AgentSkill &skill)
         if (skill.extension.length() < 1 || skill.extension.length() > LENGTH_1024) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension length is invalid");
             skill.extension = "";
-        } else if (!nlohmann::json::accept(skill.extension)) {
+        } else if (!nlohmann::json::accept(skill.extension, true)) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension is not valid json format");
             skill.extension = "";
         }
@@ -764,7 +764,7 @@ bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
         if (agentCard.extension.length() < 1 || agentCard.extension.length() > LENGTH_5120) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension length is invalid");
             agentCard.extension = "";
-        } else if (!nlohmann::json::accept(agentCard.extension)) {
+        } else if (!nlohmann::json::accept(agentCard.extension, true)) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "extension is not valid json format");
             agentCard.extension = "";
         }
@@ -821,7 +821,7 @@ int32_t AgentCardsRawData::ToAgentCardVec(const AgentCardsRawData &rawData, std:
         }
         std::string cardStr(cardSize, '\0');
         ss.read(cardStr.data(), cardSize);
-        nlohmann::json jsonObject = nlohmann::json::parse(cardStr, nullptr, false);
+        nlohmann::json jsonObject = nlohmann::json::parse(cardStr, nullptr, false, true);
         if (!AgentCard::FromJson(jsonObject, cards[i])) {
             TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed, index: %{public}u", i);
             return ERR_INVALID_AGENT_CARD_DATA;

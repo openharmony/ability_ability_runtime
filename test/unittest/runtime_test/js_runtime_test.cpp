@@ -1956,5 +1956,26 @@ HWTEST_F(JsRuntimeTest, RegisterUncatchableExceptionHandler_0100, TestSize.Level
     EXPECT_NE(jsRuntime, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "RegisterUncatchableExceptionHandler_0100 end");
 }
+
+/**
+ * @tc.name: JsRuntimeTestSetOrUpdateLibPath_0100
+ * @tc.desc: JsRuntime Test for SetOrUpdateLibPath
+ * @tc.type: FUNC
+ * @tc.require: issueI581RO
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeTestSetOrUpdateLibPath_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetOrUpdateLibPath_0100 start");
+    std::string appLibPathKey = TEST_BUNDLE_NAME + TEST_MODULE_NAME;
+    std::string libPath = TEST_LIB_PATH;
+
+    AppLibPathMap appLibPaths {};
+    JsRuntime::SetOrUpdateLibPath(appLibPaths);
+
+    appLibPaths[appLibPathKey].emplace_back(libPath);
+    JsRuntime::SetOrUpdateLibPath(appLibPaths);
+    EXPECT_NE(appLibPaths.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "SetOrUpdateLibPath_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

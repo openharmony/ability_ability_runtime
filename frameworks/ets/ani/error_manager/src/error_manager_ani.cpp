@@ -358,6 +358,12 @@ public:
         }
         return true;
     }
+
+    static bool IsErrorObserverListNotEmpty()
+    {
+        std::lock_guard<std::mutex> lock(g_defaultHandlerMtx);
+        return g_defaultHandler.ref == nullptr ? false : true;
+    }
 };
 
 static void EtsErrorManagerInit(ani_env *env)
@@ -402,6 +408,8 @@ static void EtsErrorManagerInit(ani_env *env)
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "ErrorManager ets called end");
 }
+
+
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 
@@ -424,6 +432,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     *result = ANI_VERSION_1;
     OHOS::AppExecFwk::ApplicationDataManager::GetInstance().SetErrorHandlerCallback(
         OHOS::AbilityRuntime::ErrorManagerAni::DoErrorCallback);
+    OHOS::AppExecFwk::ApplicationDataManager::GetInstance().RegisterHasOnErrorCallback(
+        OHOS::AbilityRuntime::ErrorManagerAni::IsErrorObserverListNotEmpty);
 
     TAG_LOGD(AAFwkTag::RECOVERY, "ANI_Constructor finish");
     return ANI_OK;

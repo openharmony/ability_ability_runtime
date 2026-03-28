@@ -33,6 +33,8 @@ public:
     virtual int32_t GetAgentCardByAgentId(const std::string &bundleName,
         const std::string &agentId, AgentCard &card) override;
 
+    virtual int32_t GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card) override;
+
     virtual int32_t ConnectAgentExtensionAbility(const AAFwk::Want &want,
         const sptr<AAFwk::IAbilityConnection> &connection) override;
 

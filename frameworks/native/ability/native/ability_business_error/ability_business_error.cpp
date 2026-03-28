@@ -114,7 +114,8 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
 constexpr const char* ERROR_MSG_AGENT_ID_NOT_EXIST =
     "The specified agentId does not exist.";
 constexpr const char* ERROR_MSG_MAX_CONNECTIONS_REACHED =
-    "Maximum connections from the same caller have been reached. Please disconnect at least one agent extension beforehand.";
+    "Maximum connections from the same caller have been reached. "
+    "Please disconnect at least one agent extension beforehand.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
     "The context is not UIAbilityContext.";
 constexpr const char* ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE = "Invalid main element type.";
@@ -355,6 +356,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_TARGET_NOT_STARTED, AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED},
     {ERR_CALLER_NOT_ATOMIC_SERVICE, AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE},
     {ERR_INVALID_AGENT_CARD_ID, AbilityErrorCode::ERROR_CODE_AGENT_ID_NOT_EXIST},
+    {ERR_MAX_AGENT_CONNECTIONS_REACHED, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED},
     {ERR_INVALID_MAIN_ELEMENT_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE},
     {ERR_CHANGE_KEEP_ALIVE, AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE},
     {ERR_NO_U1, AbilityErrorCode::ERROR_CODE_NO_U1},

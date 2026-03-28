@@ -2716,6 +2716,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, RecordAppWithReason_0100, TestSize.Leve
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = 1234;
     int32_t uid = 1000;
+    MyFlag::flag_ = 1;
     ExitReasonCompability exitReason;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     auto res = abilityMs->RecordAppWithReason(pid, uid, exitReason);
@@ -2723,6 +2724,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, RecordAppWithReason_0100, TestSize.Leve
     exitReason.killId = 1;
     res = abilityMs->RecordAppWithReason(pid, uid, exitReason);
     EXPECT_EQ(res, ERR_BUNDLE_MANAGER_PERMISSION_DENIED);
+    MyFlag::flag_ = 0;
 }
 
 /*
