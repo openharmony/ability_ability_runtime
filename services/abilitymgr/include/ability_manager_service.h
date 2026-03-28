@@ -2716,6 +2716,14 @@ private:
         const Want *resultWant = nullptr, bool flag = true);
 
     /**
+     * @brief Parse and validate userId from want parameters.
+     * @param want The want containing userId parameter.
+     * @param userId Output userId after parsing and validation.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int ParseAndValidateUserId(const Want &want, int32_t &userId);
+
+    /**
      * @brief Checks and submits hidden auto-startup status bar check task.
      * @param abilityRecord The ability record to check.
      * @return Returns ERR_OK on success, error code on failure.
