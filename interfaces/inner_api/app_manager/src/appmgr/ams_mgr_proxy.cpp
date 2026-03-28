@@ -860,7 +860,7 @@ void AmsMgrProxy::PrepareTerminateApp(const pid_t pid, const std::string &module
 }
 
 void AmsMgrProxy::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, const std::string &customProcess)
+    int32_t requestId, const std::string &customProcess, bool isPreloadStart)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -870,7 +870,8 @@ void AmsMgrProxy::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFw
     }
 
     if (!data.WriteParcelable(&want) || !data.WriteParcelable(&abilityInfo) ||
-        !data.WriteInt32(requestId) || !data.WriteString(customProcess)) {
+        !data.WriteInt32(requestId) || !data.WriteString(customProcess) ||
+        !data.WriteBool(isPreloadStart)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
