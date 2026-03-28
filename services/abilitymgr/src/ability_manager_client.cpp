@@ -1070,7 +1070,7 @@ ErrCode AbilityManagerClient::GetMissionInfo(const std::string& deviceId, int32_
         return static_cast<int>(err);
     }
 #endif //SUPPORT_SCREEN
-    return ERR_NOT_SUPPORT_SCREEN;
+    return ERR_CAPABILITY_NOT_SUPPORT;
 }
 
 ErrCode AbilityManagerClient::CleanMission(int32_t missionId)
