@@ -1696,6 +1696,7 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsErrorManager.release(), JsErrorManager::Finalizer, nullptr, nullptr);
 
     std::call_once(registerCallbackFlag, []() {
+        AppExecFwk::ApplicationDataManager::GetInstance().RegisterHasOnErrorCallback(IsErrorObserverListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterHasOnErrorCallback(IsErrorObserverListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterHasAllUnhandledRejectionCallback(IsGlobalPromiseListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterOnErrorCallback(
