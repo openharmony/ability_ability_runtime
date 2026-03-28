@@ -178,6 +178,8 @@ constexpr char EVENT_KEY_THREAD_NAME[] = "THREAD_NAME";
 constexpr char EVENT_KEY_APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char EVENT_KEY_PROCESS_LIFETIME[] = "PROCESS_LIFETIME";
+constexpr char ERRORMANAGER_CAPTURE[] = "ERRORMANAGER_CAPTURE";
+constexpr char IS_UNCATCH_FAULT[] = "IS_UNCATCH_FAULT";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_plugin_namespace";
@@ -2095,7 +2097,7 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         time(&timet);
         std::string lifeTime = GetProcessLifeCycleByPid(pid);
         if (!ApplicationDataManager::jsErrorHasReport_.exchange(true)) {
-            auto hisyseventReport = std::make_shared<HisyseventReport>(12);
+            auto hisyseventReport = std::make_shared<HisyseventReport>(14);
             hisyseventReport->InsertParam(EVENT_KEY_PACKAGE_NAME, bundleName);
             hisyseventReport->InsertParam(EVENT_KEY_VERSION, std::to_string(versionCode));
             hisyseventReport->InsertParam(EVENT_KEY_TYPE, JSCRASH_TYPE);
@@ -2109,6 +2111,9 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
                 std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
             hisyseventReport->InsertParam(EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
             hisyseventReport->InsertParam(EVENT_KEY_PROCESS_LIFETIME, lifeTime);
+            hisyseventReport->InsertParam(ERRORMANAGER_CAPTURE,
+                ApplicationDataManager::GetInstance().GetHasOnErrorCallback());
+            hisyseventReport->InsertParam(IS_UNCATCH_FAULT, isUncatchable);
             int result = hisyseventReport->Report("AAFWK", "JS_ERROR", HISYSEVENT_FAULT);
             TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,JS_ERROR],"
                 " packageName=%{public}s, pid=%{public}d, appRunningId=%{public}s, threadName=%{public}s,"
