@@ -1306,6 +1306,9 @@ void OHOSApplication::InitJSLeakWatcher(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
+    if (runtime_->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
+        return;
+    }
     auto env = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_)).GetNapiEnv();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     JSLeakWatcherEarlyInit(env, bundleName);
