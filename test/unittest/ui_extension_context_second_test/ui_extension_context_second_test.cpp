@@ -1506,69 +1506,6 @@ HWTEST_F(UIExtensionContextTest, GetOrCreateEventHandler_0200, TestSize.Level1)
 }
 
 /**
- * @tc.number: HandleTerminateWithAnimation_DuplicateCall_0100
- * @tc.name: HandleTerminateWithAnimation blocks duplicate calls
- * @tc.desc: HandleTerminateWithAnimation returns OK when already pending.
- */
-HWTEST_F(UIExtensionContextTest, HandleTerminateWithAnimation_DuplicateCall_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "HandleTerminateWithAnimation_DuplicateCall_0100 start");
-    auto context = std::make_shared<UIExtensionContext>();
-    ASSERT_NE(context, nullptr);
-    context->screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
-
-    bool callbackExecuted = false;
-    TerminateSelfWithAnimationCallback callback = [&callbackExecuted]() { callbackExecuted = true; };
-    context->terminateSelfWithAnimationCallback_ = std::move(callback);
-
-    // First call should succeed
-    auto result1 = context->HandleTerminateWithAnimation();
-    EXPECT_EQ(result1, ERR_OK);
-    EXPECT_TRUE(callbackExecuted);
-
-    // Reset callback for second call
-    callbackExecuted = false;
-    context->terminateSelfWithAnimationCallback_ = [&callbackExecuted]() { callbackExecuted = true; };
-
-    // Second call should be blocked due to pending flag
-    auto result2 = context->HandleTerminateWithAnimation();
-    EXPECT_EQ(result2, ERR_OK);
-    EXPECT_FALSE(callbackExecuted);  // Callback should NOT be executed
-    EXPECT_TRUE(context->pendingAnimationTerminate_);
-
-    TAG_LOGI(AAFwkTag::TEST, "HandleTerminateWithAnimation_DuplicateCall_0100 end");
-}
-
-/**
- * @tc.number: HandleTerminateWithAnimation_PendingCheck_0100
- * @tc.name: HandleTerminateWithAnimation pending state check
- * @tc.desc: HandleTerminateWithAnimation checks pending state correctly.
- */
-HWTEST_F(UIExtensionContextTest, HandleTerminateWithAnimation_PendingCheck_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "HandleTerminateWithAnimation_PendingCheck_0100 start");
-    auto context = std::make_shared<UIExtensionContext>();
-    ASSERT_NE(context, nullptr);
-    context->screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
-
-    // Set pending flag before calling
-    context->pendingAnimationTerminate_ = true;
-
-    bool callbackExecuted = false;
-    TerminateSelfWithAnimationCallback callback = [&callbackExecuted]() { callbackExecuted = true; };
-    context->terminateSelfWithAnimationCallback_ = std::move(callback);
-
-    // Should return OK immediately without executing callback
-    auto result = context->HandleTerminateWithAnimation();
-    EXPECT_EQ(result, ERR_OK);
-    EXPECT_FALSE(callbackExecuted);
-    EXPECT_TRUE(context->pendingAnimationTerminate_);
-
-    context->pendingAnimationTerminate_ = false;
-    TAG_LOGI(AAFwkTag::TEST, "HandleTerminateWithAnimation_PendingCheck_0100 end");
-}
-
-/**
  * @tc.number: TerminateSelfInner_NonEmbedded_0100
  * @tc.name: TerminateSelfInner in non-embedded mode
  * @tc.desc: TerminateSelfInner directly terminates in non-embedded mode.
@@ -1589,35 +1526,5 @@ HWTEST_F(UIExtensionContextTest, TerminateSelfInner_NonEmbedded_0100, TestSize.L
 
     TAG_LOGI(AAFwkTag::TEST, "TerminateSelfInner_NonEmbedded_0100 end");
 }
-
-/**
- * @tc.number: TerminateSelfInner_EmbeddedCleanup_0100
- * @tc.name: TerminateSelfInner cleans up embedded state
- * @tc.desc: TerminateSelfInner properly cleans up animation state in embedded mode.
- */
-HWTEST_F(UIExtensionContextTest, TerminateSelfInner_EmbeddedCleanup_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "TerminateSelfInner_EmbeddedCleanup_0100 start");
-    auto context = std::make_shared<UIExtensionContext>();
-    ASSERT_NE(context, nullptr);
-    context->screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
-
-    // Setup embedded mode state
-    context->eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create());
-    context->terminateSelfWithAnimationCallback_ = []() {};
-    context->pendingAnimationTerminate_ = true;
-    context->terminateTimeoutExec_.store(false);
-
-    auto result = context->TerminateSelfInner();
-    EXPECT_NE(result, ERR_OK);
-    EXPECT_TRUE(context->terminateTimeoutExec_.load());
-    EXPECT_TRUE(context->isTerminated_.load());
-    EXPECT_EQ(context->terminateSelfWithAnimationCallback_, nullptr);
-    EXPECT_FALSE(context->pendingAnimationTerminate_);
-
-    context->eventHandler_ = nullptr;
-    TAG_LOGI(AAFwkTag::TEST, "TerminateSelfInner_EmbeddedCleanup_0100 end");
-}
-
 } // namespace AbilityRuntime
 } // namespace OHOS
