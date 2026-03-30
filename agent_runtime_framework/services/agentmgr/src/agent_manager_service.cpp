@@ -216,6 +216,36 @@ int32_t AgentManagerService::GetCallerAgentCardByAgentId(const std::string &agen
     return ret;
 }
 
+int32_t AgentManagerService::RegisterAgentCard(const AgentCard &card)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_MODIFY_AGENT_CARD)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    return AgentCardMgr::GetInstance().RegisterAgentCard(card);
+}
+
+int32_t AgentManagerService::UpdateAgentCard(const AgentCard &card)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_MODIFY_AGENT_CARD)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    return AgentCardMgr::GetInstance().UpdateAgentCard(card);
+}
+
+int32_t AgentManagerService::DeleteAgentCard(const std::string &bundleName, const std::string &agentId)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_MODIFY_AGENT_CARD)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    return AgentCardMgr::GetInstance().DeleteAgentCard(bundleName, agentId);
+}
+
 int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &want,
     const sptr<AAFwk::IAbilityConnection> &connection)
 {

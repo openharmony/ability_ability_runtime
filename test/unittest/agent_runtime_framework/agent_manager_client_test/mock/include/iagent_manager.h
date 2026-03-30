@@ -49,6 +49,21 @@ public:
         return 0;
     }
 
+    virtual int32_t RegisterAgentCard(const AgentCard &card)
+    {
+        return 0;
+    }
+
+    virtual int32_t UpdateAgentCard(const AgentCard &card)
+    {
+        return 0;
+    }
+
+    virtual int32_t DeleteAgentCard(const std::string &bundleName, const std::string &agentId)
+    {
+        return 0;
+    }
+
     virtual int32_t ConnectAgentExtensionAbility(
         const AAFwk::Want &want, const sptr<AAFwk::IAbilityConnection> &connection)
     {

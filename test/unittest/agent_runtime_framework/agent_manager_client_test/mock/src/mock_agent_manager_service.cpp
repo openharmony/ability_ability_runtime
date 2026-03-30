@@ -23,6 +23,9 @@ int MyFlag::retGetAllAgentCards = 0;
 int MyFlag::retGetAgentCardsByBundleName = 0;
 int MyFlag::retGetAgentCardByAgentId = 0;
 int MyFlag::retGetCallerAgentCardByAgentId = 0;
+int MyFlag::retRegisterAgentCard = 0;
+int MyFlag::retUpdateAgentCard = 0;
+int MyFlag::retDeleteAgentCard = 0;
 int MyFlag::retConnectAgentExtensionAbility = 0;
 int MyFlag::retDisconnectAgentExtensionAbility = 0;
 
@@ -52,6 +55,21 @@ int32_t MockAgentManagerService::GetAgentCardByAgentId(const std::string &bundle
 int32_t MockAgentManagerService::GetCallerAgentCardByAgentId(const std::string &agentId, AgentCard &card)
 {
     return MyFlag::retGetCallerAgentCardByAgentId;
+}
+
+int32_t MockAgentManagerService::RegisterAgentCard(const AgentCard &card)
+{
+    return MyFlag::retRegisterAgentCard;
+}
+
+int32_t MockAgentManagerService::UpdateAgentCard(const AgentCard &card)
+{
+    return MyFlag::retUpdateAgentCard;
+}
+
+int32_t MockAgentManagerService::DeleteAgentCard(const std::string &bundleName, const std::string &agentId)
+{
+    return MyFlag::retDeleteAgentCard;
 }
 
 int32_t MockAgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &want,
