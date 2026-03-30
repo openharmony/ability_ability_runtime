@@ -1897,5 +1897,18 @@ int32_t AppMgrClient::PreloadExtension(const AAFwk::Want &want, int32_t appIndex
     return service->PreloadExtension(want, appIndex, userId);
 }
 
+int32_t AppMgrClient::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder is nullptr.");
+        return ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->GetAllAbilityInfos(pid, infos);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
