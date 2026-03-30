@@ -616,7 +616,7 @@ bool AppRecovery::IsEtsAPP()
         appInfo->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
 }
 
-panda::ecmascript::EcmaVM* AppRecovery::GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
+panda::ecmascript::EcmaVM* AppRecovery::GetVMFromAbility(const std::shared_ptr<AbilityRuntime::UIAbility>& abilityPtr)
 {
     if (!abilityPtr) {
         return nullptr;

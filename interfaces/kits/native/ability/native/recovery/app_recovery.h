@@ -72,7 +72,7 @@ private:
     bool GetMissionIds(std::string path, std::vector<int32_t> &missionIds);
     bool ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr);
     bool IsEtsAPP();
-    panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr);
+    panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<AbilityRuntime::UIAbility>& abilityPtr);
     void DisallowCrossThreadExecutionInRecovery();
 
     bool isEnable_;
