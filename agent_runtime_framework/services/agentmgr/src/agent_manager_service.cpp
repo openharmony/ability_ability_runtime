@@ -330,7 +330,7 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
 
     // Step 5: create the tracked wrapper connection before talking to AMS.
     sptr<AAFwk::IAbilityConnection> serviceConnection;
-    ret = RegisterTrackedConnectionAndGetServiceConnection(connection, callerUid, serviceConnection);
+    ret = RegisterTrackedConnectionAndGetServiceConnection(connection, callerUid, true, serviceConnection);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -344,6 +344,38 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
         return ret;
     }
 
+    return ERR_OK;
+}
+
+int32_t AgentManagerService::ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const AAFwk::Want &want,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    auto ret = ValidateConnectServiceRequest(callerToken, connection);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    AAFwk::Want connectWant;
+    ret = PrepareServiceConnectWant(want, connectWant);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    sptr<AAFwk::IAbilityConnection> serviceConnection;
+    ret = RegisterTrackedConnectionAndGetServiceConnection(connection, IPCSkeleton::GetCallingUid(), false,
+        serviceConnection);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbilityWithExtensionType(connectWant, serviceConnection,
+        callerToken, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::SERVICE);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Connect service extension ability failed: %{public}d", ret);
+        ReleaseTrackedConnection(connection);
+        return ret;
+    }
     return ERR_OK;
 }
 
@@ -453,15 +485,53 @@ int32_t AgentManagerService::PrepareStandardAgentConnectWant(AAFwk::Want &connec
     return ERR_OK;
 }
 
+int32_t AgentManagerService::ValidateConnectServiceRequest(const sptr<IRemoteObject> &callerToken,
+    const sptr<AAFwk::IAbilityConnection> &connection) const
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "caller no system-app, can not use system-api");
+        return AAFwk::ERR_NOT_SYSTEM_APP;
+    }
+    if (connection == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Invalid connection object");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "caller token is null");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t AgentManagerService::PrepareServiceConnectWant(const AAFwk::Want &want, AAFwk::Want &connectWant) const
+{
+    connectWant = want;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    bool queryResult = IN_PROCESS_CALL(
+        DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryExtensionAbilityInfos(
+            connectWant, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
+    if (!queryResult || extensionInfos.empty()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "service extension ability not exist");
+        return AAFwk::RESOLVE_ABILITY_ERR;
+    }
+    if (extensionInfos[0].type != AppExecFwk::ExtensionAbilityType::SERVICE) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "incorrect extension type");
+        return AAFwk::ERR_WRONG_INTERFACE_CALL;
+    }
+    return ERR_OK;
+}
+
 int32_t AgentManagerService::RegisterTrackedConnectionAndGetServiceConnection(
-    const sptr<AAFwk::IAbilityConnection> &connection, int32_t callerUid,
+    const sptr<AAFwk::IAbilityConnection> &connection, int32_t callerUid, bool countTowardsCallerLimit,
     sptr<AAFwk::IAbilityConnection> &serviceConnection)
 {
     // Register the caller callback and allocate the service-side wrapper connection.
     int32_t ret = ERR_OK;
     {
         std::lock_guard<std::mutex> lock(connectionLock_);
-        ret = TryRegisterConnectionLocked(connection, callerUid);
+        ret = TryRegisterConnectionLocked(connection, callerUid, nullptr, nullptr, countTowardsCallerLimit);
     }
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "register tracked connection failed: %{public}d", ret);
@@ -640,6 +710,55 @@ AgentManagerService::FindTrackedConnectionLocked(
     }
     return matched;
 }
+
+int32_t AgentManagerService::DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "caller no system-app, can not use system-api");
+        return AAFwk::ERR_NOT_SYSTEM_APP;
+    }
+    if (callerToken == nullptr || connection == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Invalid callerToken or connection object");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    (void)callerToken;
+
+    sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(connectionLock_);
+        auto it = trackedConnections_.find(connection->AsObject());
+        if (it == trackedConnections_.end()) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "Connection not tracked");
+            return ERR_INVALID_VALUE;
+        }
+        if (it->second.isDisconnecting) {
+            TAG_LOGI(AAFwkTag::SER_ROUTER, "Connection is already disconnecting");
+            return ERR_OK;
+        }
+        it->second.isDisconnecting = true;
+        if (it->second.countTowardsCallerLimit && !ReleaseCallerConnectionCountLocked(it->first)) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "Release caller connection count failed");
+            return ERR_INVALID_VALUE;
+        }
+        serviceConnection = it->second.serviceConnection;
+    }
+
+    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(serviceConnection));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "DisconnectAbility failed: %{public}d", ret);
+        std::lock_guard<std::mutex> lock(connectionLock_);
+        auto it = trackedConnections_.find(connection->AsObject());
+        if (it != trackedConnections_.end() && it->second.isDisconnecting) {
+            it->second.isDisconnecting = false;
+            if (it->second.countTowardsCallerLimit) {
+                callerConnectionCounts_[it->second.callerUid]++;
+            }
+        }
+        return ret;
+    }
+    return ERR_OK;
+}
 bool AgentManagerService::HasReachedCallerConnectionLimitLocked(int32_t callerUid) const
 {
     auto countIt = callerConnectionCounts_.find(callerUid);
@@ -650,7 +769,8 @@ bool AgentManagerService::HasReachedCallerConnectionLimitLocked(int32_t callerUi
 }
 
 int32_t AgentManagerService::TryRegisterConnectionLocked(const sptr<AAFwk::IAbilityConnection> &connection,
-    int32_t callerUid, const sptr<AAFwk::IAbilityConnection> &serviceConnection, const AgentHostKey *hostKey)
+    int32_t callerUid, const sptr<AAFwk::IAbilityConnection> &serviceConnection, const AgentHostKey *hostKey,
+    bool countTowardsCallerLimit)
 {
     auto callerRemote = GetConnectionIdentityRemote(connection);
     if (callerRemote == nullptr) {
@@ -668,7 +788,7 @@ int32_t AgentManagerService::TryRegisterConnectionLocked(const sptr<AAFwk::IAbil
     if (countIt != callerConnectionCounts_.end()) {
         currentCount = countIt->second;
     }
-    if (HasReachedCallerConnectionLimitLocked(callerUid)) {
+    if (countTowardsCallerLimit && HasReachedCallerConnectionLimitLocked(callerUid)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "Maximum agent connections reached for callerUid: %{public}d", callerUid);
         return AAFwk::ERR_MAX_AGENT_CONNECTIONS_REACHED;
     }
@@ -690,6 +810,7 @@ int32_t AgentManagerService::TryRegisterConnectionLocked(const sptr<AAFwk::IAbil
     if (hostKey != nullptr) {
         record.hostKey = *hostKey;
     }
+    record.countTowardsCallerLimit = countTowardsCallerLimit;
     if (record.callerRemote != nullptr) {
         auto handler = [service = wptr<AgentManagerService>(AgentManagerService::GetInstance()),
                            callerRemote = record.callerRemote](
@@ -707,7 +828,9 @@ int32_t AgentManagerService::TryRegisterConnectionLocked(const sptr<AAFwk::IAbil
     }
 
     trackedConnections_.emplace(callerRemote, record);
-    callerConnectionCounts_[callerUid] = currentCount + 1;
+    if (countTowardsCallerLimit) {
+        callerConnectionCounts_[callerUid] = currentCount + 1;
+    }
     return ERR_OK;
 }
 
@@ -730,6 +853,9 @@ bool AgentManagerService::ReleaseCallerConnectionCountLocked(const sptr<IRemoteO
     if (it == trackedConnections_.end()) {
         return false;
     }
+    if (!it->second.countTowardsCallerLimit) {
+        return true;
+    }
     auto countIt = callerConnectionCounts_.find(it->second.callerUid);
     if (countIt == callerConnectionCounts_.end()) {
         return false;
@@ -751,6 +877,7 @@ void AgentManagerService::ReleaseTrackedConnection(const sptr<AAFwk::IAbilityCon
     }
 
     auto callerUid = it->second.callerUid;
+    auto countTowardsCallerLimit = it->second.countTowardsCallerLimit;
     if (it->second.callerRemote != nullptr && it->second.deathRecipient != nullptr) {
         it->second.callerRemote->RemoveDeathRecipient(it->second.deathRecipient);
     }
@@ -758,6 +885,9 @@ void AgentManagerService::ReleaseTrackedConnection(const sptr<AAFwk::IAbilityCon
     trackedConnections_.erase(it);
 
     if (isDisconnecting) {
+        return;
+    }
+    if (!countTowardsCallerLimit) {
         return;
     }
 

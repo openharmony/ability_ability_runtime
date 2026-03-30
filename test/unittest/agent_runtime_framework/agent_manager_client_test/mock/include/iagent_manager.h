@@ -75,6 +75,20 @@ public:
         return 0;
     }
 
+    virtual int32_t ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken, const AAFwk::Want &want,
+        const sptr<AAFwk::IAbilityConnection> &connection)
+    {
+        return 0;
+    }
+
+    virtual int32_t DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+        const sptr<AAFwk::IAbilityConnection> &connection)
+    {
+        (void)callerToken;
+        (void)connection;
+        return 0;
+    }
+
     virtual int32_t NotifyLowCodeAgentComplete(const std::string &agentId)
     {
         return 0;

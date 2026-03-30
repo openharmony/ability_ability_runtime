@@ -103,6 +103,10 @@ public:
      */
     static napi_value DisconnectAgentExtensionAbility(napi_env env, napi_callback_info info);
 
+    static napi_value ConnectServiceExtensionAbility(napi_env env, napi_callback_info info);
+
+    static napi_value DisconnectServiceExtensionAbility(napi_env env, napi_callback_info info);
+
     static napi_value NotifyLowCodeAgentComplete(napi_env env, napi_callback_info info);
 
 private:
@@ -161,6 +165,10 @@ private:
      * @return Returns the N-API value.
      */
     napi_value OnDisconnectAgentExtensionAbility(napi_env env, size_t argc, napi_value *argv);
+
+    napi_value OnConnectServiceExtensionAbility(napi_env env, size_t argc, napi_value *argv);
+
+    napi_value OnDisconnectServiceExtensionAbility(napi_env env, size_t argc, napi_value *argv);
 
     napi_value OnNotifyLowCodeAgentComplete(napi_env env, size_t argc, napi_value *argv);
 

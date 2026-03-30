@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 import Want from '@ohos.app.ability.Want';
+import AgentExtensionContext from 'application.AgentExtensionContext';
 import { AgentCard } from 'application.AgentCard';
 import { AgentProxy } from 'application.AgentProxy';
 import { AgentExtensionConnectCallback } from 'application.AgentExtensionConnectCallback';
+import { ConnectOptions } from 'ability.connectOptions';
 import { AsyncCallbackWrapper } from './utils/AgentUtils';
 import { BusinessError } from '@ohos.base';
 
@@ -31,6 +33,10 @@ export default namespace agentManager {
   export native function nativeConnectAgentExtensionAbility(want: Want, agentId: string,
     connectCallback: AgentExtensionConnectCallback, asyncCallback: AsyncCallbackWrapper<AgentProxy>): void;
   export native function nativeDisconnectAgentExtensionAbility(proxy: AgentProxy,
+    asyncCallback: AsyncCallbackWrapper<void>): void;
+  export native function nativeConnectServiceExtensionAbility(context: AgentExtensionContext, want: Want,
+    options: ConnectOptions): long;
+  export native function nativeDisconnectServiceExtensionAbility(context: AgentExtensionContext, connectId: long,
     asyncCallback: AsyncCallbackWrapper<void>): void;
   export native function nativeNotifyLowCodeAgentComplete(agentId: string,
     asyncCallback: AsyncCallbackWrapper<void>): void;
@@ -171,6 +177,28 @@ export default namespace agentManager {
       });
       taskpool.execute((): void => {
         agentManager.nativeDisconnectAgentExtensionAbility(proxy, asyncCallbackWrapper);
+      });
+    });
+    return p;
+  }
+
+  export function connectServiceExtensionAbility(context: AgentExtensionContext, want: Want,
+    options: ConnectOptions): long {
+    return agentManager.nativeConnectServiceExtensionAbility(context, want, options);
+  }
+
+  export function disconnectServiceExtensionAbility(context: AgentExtensionContext, connectId: long): Promise<void> {
+    let p: Promise<void> = new Promise<void>(
+      (res: (data: undefined) => void, rej: (error: BusinessError) => void): void => {
+      let asyncCallbackWrapper = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          res(undefined);
+        } else {
+          rej(err);
+        }
+      });
+      taskpool.execute((): void => {
+        agentManager.nativeDisconnectServiceExtensionAbility(context, connectId, asyncCallbackWrapper);
       });
     });
     return p;

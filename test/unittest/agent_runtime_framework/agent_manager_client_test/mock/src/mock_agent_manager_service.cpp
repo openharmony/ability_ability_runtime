@@ -28,6 +28,8 @@ int MyFlag::retUpdateAgentCard = 0;
 int MyFlag::retDeleteAgentCard = 0;
 int MyFlag::retConnectAgentExtensionAbility = 0;
 int MyFlag::retDisconnectAgentExtensionAbility = 0;
+int MyFlag::retConnectServiceExtensionAbility = 0;
+int MyFlag::retDisconnectServiceExtensionAbility = 0;
 int MyFlag::retNotifyLowCodeAgentComplete = 0;
 
 MockAgentManagerService::MockAgentManagerService()
@@ -82,6 +84,20 @@ int32_t MockAgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want 
 int32_t MockAgentManagerService::DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection)
 {
     return MyFlag::retDisconnectAgentExtensionAbility;
+}
+
+int32_t MockAgentManagerService::ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const AAFwk::Want &want, const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    return MyFlag::retConnectServiceExtensionAbility;
+}
+
+int32_t MockAgentManagerService::DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    (void)callerToken;
+    (void)connection;
+    return MyFlag::retDisconnectServiceExtensionAbility;
 }
 
 int32_t MockAgentManagerService::NotifyLowCodeAgentComplete(const std::string &agentId)

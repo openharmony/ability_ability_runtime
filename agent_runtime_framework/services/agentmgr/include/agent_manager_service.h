@@ -72,6 +72,12 @@ public:
 
     int32_t DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection) override;
 
+    int32_t ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken, const AAFwk::Want &want,
+        const sptr<AAFwk::IAbilityConnection> &connection) override;
+
+    int32_t DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+        const sptr<AAFwk::IAbilityConnection> &connection) override;
+
     int32_t NotifyLowCodeAgentComplete(const std::string &agentId) override;
 
 private:
@@ -88,6 +94,7 @@ private:
         sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
         AgentHostKey hostKey;
         bool isLowCode = false;
+        bool countTowardsCallerLimit = true;
         bool isDisconnecting = false;
     };
 
@@ -112,16 +119,26 @@ private:
      */
     int32_t ResolveLowCodeHostInfo(const AAFwk::Want &want, int32_t userId, int32_t &hostUid) const;
     /**
+     * @brief Validates service-extension connect input for the caller-token based connect path.
+     */
+    int32_t ValidateConnectServiceRequest(const sptr<IRemoteObject> &callerToken,
+        const sptr<AAFwk::IAbilityConnection> &connection) const;
+    /**
+     * @brief Resolves the target service extension and builds the connect Want used by AMS.
+     */
+    int32_t PrepareServiceConnectWant(const AAFwk::Want &want, AAFwk::Want &connectWant) const;
+    /**
      * @brief Installs a tracked wrapper connection and returns the service-side callback object sent to AMS.
      */
     int32_t RegisterTrackedConnectionAndGetServiceConnection(const sptr<AAFwk::IAbilityConnection> &connection,
-        int32_t callerUid, sptr<AAFwk::IAbilityConnection> &serviceConnection);
+        int32_t callerUid, bool countTowardsCallerLimit, sptr<AAFwk::IAbilityConnection> &serviceConnection);
     bool HasReachedCallerConnectionLimitLocked(int32_t callerUid) const;
     /**
      * @brief Adds one tracked connection record, optionally binding it to a shared low-code host session.
      */
     int32_t TryRegisterConnectionLocked(const sptr<AAFwk::IAbilityConnection> &connection, int32_t callerUid,
-        const sptr<AAFwk::IAbilityConnection> &serviceConnection = nullptr, const AgentHostKey *hostKey = nullptr);
+        const sptr<AAFwk::IAbilityConnection> &serviceConnection = nullptr, const AgentHostKey *hostKey = nullptr,
+        bool countTowardsCallerLimit = true);
     sptr<IRemoteObject> GetConnectionIdentityRemote(const sptr<AAFwk::IAbilityConnection> &connection) const;
     /**
      * @brief Finds the tracked record that matches the caller callback object or the fallback caller uid path.
