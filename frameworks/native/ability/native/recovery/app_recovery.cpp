@@ -46,32 +46,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace {
-static panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
-{
-    if (!abilityPtr) {
-        return nullptr;
-    }
-    OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
-    AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
-    return runtime.GetEcmaVm();
-}
-
-void DisallowCrossThreadExecutionInRecovery()
-{
-#ifdef SUPPORT_SCREEN
-    auto abilityPtr = ability_.lock();
-    if (!abilityPtr || !abilityPtr->GetAbilityContext()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "null ability or context");
-        return;
-    }
-    panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
-    if (vm != nullptr) {
-        panda::JSNApi::DisallowCrossThreadExecution(vm);
-    }
-#endif
-}
-}
 std::mutex g_mutex;
 std::atomic<bool> g_blocked = false;
 const int DELAY_TIME = 1000;
@@ -640,6 +614,31 @@ bool AppRecovery::IsEtsAPP()
     }
     return appInfo->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
         appInfo->arkTSMode == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
+}
+
+panda::ecmascript::EcmaVM* AppRecovery::GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
+{
+    if (!abilityPtr) {
+        return nullptr;
+    }
+    OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
+    AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
+    return runtime.GetEcmaVm();
+}
+
+void AppRecovery::DisallowCrossThreadExecutionInRecovery()
+{
+#ifdef SUPPORT_SCREEN
+    auto abilityPtr = ability_.lock();
+    if (!abilityPtr || !abilityPtr->GetAbilityContext()) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "null ability or context");
+        return;
+    }
+    panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
+    if (vm != nullptr) {
+        panda::JSNApi::DisallowCrossThreadExecution(vm);
+    }
+#endif
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
