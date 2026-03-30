@@ -65,6 +65,10 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::retVerifyConnectAgentPermission = true;
     MyFlag::retVerifyGetAgentCardPermission = true;
     MyFlag::retJudgeCallerIsAllowedToUseSystemAPI = true;
+    MyFlag::retVerifyModifyAgentCardPermission = true;
+    MyFlag::retRegisterAgentCard = ERR_OK;
+    MyFlag::retUpdateAgentCard = ERR_OK;
+    MyFlag::retDeleteAgentCard = ERR_OK;
     MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
     MyFlag::retDisconnectAbility = ERR_OK;
     MyFlag::retQueryExtensionAbilityInfos = true;
@@ -567,6 +571,117 @@ HWTEST_F(AgentManagerServiceTest, GetCallerAgentCardByAgentId_005, TestSize.Leve
     AgentCard card;
     EXPECT_EQ(AgentManagerService::GetInstance()->GetCallerAgentCardByAgentId(agentId, card), ERR_INVALID_VALUE);
     MyFlag::retGetAgentCardByAgentId = ERR_OK;
+}
+
+/**
+* @tc.name  : UpdateAgentCard_001
+* @tc.number: UpdateAgentCard_001
+* @tc.desc  : Test UpdateAgentCard when permission verification fails
+*/
+HWTEST_F(AgentManagerServiceTest, UpdateAgentCard_001, TestSize.Level1)
+{
+    MyFlag::retVerifyModifyAgentCardPermission = false;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->UpdateAgentCard(card), ERR_PERMISSION_DENIED);
+    MyFlag::retVerifyModifyAgentCardPermission = true;
+}
+
+/**
+* @tc.name  : RegisterAgentCard_001
+* @tc.number: RegisterAgentCard_001
+* @tc.desc  : Test RegisterAgentCard when permission verification fails
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterAgentCard_001, TestSize.Level1)
+{
+    MyFlag::retVerifyModifyAgentCardPermission = false;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->RegisterAgentCard(card), ERR_PERMISSION_DENIED);
+    MyFlag::retVerifyModifyAgentCardPermission = true;
+}
+
+/**
+* @tc.name  : RegisterAgentCard_002
+* @tc.number: RegisterAgentCard_002
+* @tc.desc  : Test RegisterAgentCard propagates manager error
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterAgentCard_002, TestSize.Level1)
+{
+    MyFlag::retRegisterAgentCard = AAFwk::ERR_AGENT_CARD_DUPLICATE_REGISTER;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->RegisterAgentCard(card),
+        AAFwk::ERR_AGENT_CARD_DUPLICATE_REGISTER);
+}
+
+/**
+* @tc.name  : RegisterAgentCard_003
+* @tc.number: RegisterAgentCard_003
+* @tc.desc  : Test RegisterAgentCard success case
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterAgentCard_003, TestSize.Level1)
+{
+    MyFlag::retRegisterAgentCard = ERR_OK;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->RegisterAgentCard(card), ERR_OK);
+}
+
+/**
+* @tc.name  : UpdateAgentCard_002
+* @tc.number: UpdateAgentCard_002
+* @tc.desc  : Test UpdateAgentCard propagates manager error
+*/
+HWTEST_F(AgentManagerServiceTest, UpdateAgentCard_002, TestSize.Level1)
+{
+    MyFlag::retUpdateAgentCard = AAFwk::ERR_AGENT_CARD_VERSION_TOO_OLD;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->UpdateAgentCard(card),
+        AAFwk::ERR_AGENT_CARD_VERSION_TOO_OLD);
+}
+
+/**
+* @tc.name  : UpdateAgentCard_003
+* @tc.number: UpdateAgentCard_003
+* @tc.desc  : Test UpdateAgentCard success case
+*/
+HWTEST_F(AgentManagerServiceTest, UpdateAgentCard_003, TestSize.Level1)
+{
+    MyFlag::retUpdateAgentCard = ERR_OK;
+    AgentCard card;
+    EXPECT_EQ(AgentManagerService::GetInstance()->UpdateAgentCard(card), ERR_OK);
+}
+
+/**
+* @tc.name  : DeleteAgentCard_001
+* @tc.number: DeleteAgentCard_001
+* @tc.desc  : Test DeleteAgentCard when permission verification fails
+*/
+HWTEST_F(AgentManagerServiceTest, DeleteAgentCard_001, TestSize.Level1)
+{
+    MyFlag::retVerifyModifyAgentCardPermission = false;
+    EXPECT_EQ(AgentManagerService::GetInstance()->DeleteAgentCard("bundle", "agentId"), ERR_PERMISSION_DENIED);
+    MyFlag::retVerifyModifyAgentCardPermission = true;
+}
+
+/**
+* @tc.name  : DeleteAgentCard_002
+* @tc.number: DeleteAgentCard_002
+* @tc.desc  : Test DeleteAgentCard propagates manager error
+*/
+HWTEST_F(AgentManagerServiceTest, DeleteAgentCard_002, TestSize.Level1)
+{
+    MyFlag::retDeleteAgentCard = AAFwk::ERR_INVALID_AGENT_CARD_ID;
+    EXPECT_EQ(AgentManagerService::GetInstance()->DeleteAgentCard("bundle", "agentId"),
+        AAFwk::ERR_INVALID_AGENT_CARD_ID);
+}
+
+/**
+* @tc.name  : DeleteAgentCard_003
+* @tc.number: DeleteAgentCard_003
+* @tc.desc  : Test DeleteAgentCard success case
+*/
+HWTEST_F(AgentManagerServiceTest, DeleteAgentCard_003, TestSize.Level1)
+{
+    MyFlag::retDeleteAgentCard = ERR_OK;
+    EXPECT_EQ(AgentManagerService::GetInstance()->DeleteAgentCard("bundle", "agentId"), ERR_OK);
 }
 
 namespace {

@@ -21,6 +21,9 @@ namespace OHOS {
 int32_t AgentRuntime::MyFlag::retGetAllAgentCards = ERR_OK;
 int32_t AgentRuntime::MyFlag::retGetAgentCardsByBundleName = ERR_OK;
 int32_t AgentRuntime::MyFlag::retGetAgentCardByAgentId = ERR_OK;
+int32_t AgentRuntime::MyFlag::retRegisterAgentCard = ERR_OK;
+int32_t AgentRuntime::MyFlag::retUpdateAgentCard = ERR_OK;
+int32_t AgentRuntime::MyFlag::retDeleteAgentCard = ERR_OK;
 std::string AgentRuntime::MyFlag::agentCardAgentId = "testAgent";
 
 namespace AgentRuntime {
@@ -52,6 +55,21 @@ int32_t AgentCardMgr::GetAgentCardByAgentId(const std::string &bundleName, const
         card.agentId = MyFlag::agentCardAgentId;
     }
     return MyFlag::retGetAgentCardByAgentId;
+}
+
+int32_t AgentCardMgr::RegisterAgentCard(const AgentCard &card)
+{
+    return MyFlag::retRegisterAgentCard;
+}
+
+int32_t AgentCardMgr::UpdateAgentCard(const AgentCard &card)
+{
+    return MyFlag::retUpdateAgentCard;
+}
+
+int32_t AgentCardMgr::DeleteAgentCard(const std::string &bundleName, const std::string &agentId)
+{
+    return MyFlag::retDeleteAgentCard;
 }
 
 int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t userId)
