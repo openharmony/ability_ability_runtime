@@ -21,7 +21,7 @@ import { ChildProcessOptions } from '@ohos.app.ability.ChildProcessOptions';
 namespace childProcessManager {
   loadLibraryWithPermissionCheck("ability_child_process_manager_ani_kit.z", "@ohos.app.ability.childProcessManager");
 
-  export const enum StartMode {
+  export enum StartMode {
     SELF_FORK = 0,
     APP_SPAWN_FORK = 1,
   }
