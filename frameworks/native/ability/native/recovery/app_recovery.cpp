@@ -46,8 +46,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace{
-
+namespace {
 static panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
 {
     if (!abilityPtr) {
@@ -60,12 +59,12 @@ static panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<OHOS::A
 
 void DisallowCrossThreadExecutionInRecovery()
 {
-    #ifdef SUPPORT_SCREEN
-        panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
-        if (vm != nullptr) {
-            panda::JSNApi::DisallowCrossThreadExecution(vm);
-        }
-    #endif
+#ifdef SUPPORT_SCREEN
+    panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
+    if (vm != nullptr) {
+        panda::JSNApi::DisallowCrossThreadExecution(vm);
+    }
+#endif
 }
 }
 std::mutex g_mutex;
