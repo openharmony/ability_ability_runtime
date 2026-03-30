@@ -22,6 +22,9 @@ int32_t MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
 int32_t MyFlag::retDisconnectAbility = ERR_OK;
 AAFwk::Want MyFlag::lastConnectAbilityWant;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastConnectAbilityConnection = nullptr;
+sptr<IRemoteObject> MyFlag::lastConnectAbilityCallerToken = nullptr;
+AppExecFwk::ExtensionAbilityType MyFlag::lastConnectAbilityExtensionType =
+    AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastDisconnectAbilityConnection = nullptr;
 int32_t MyFlag::connectAbilityWithExtensionTypeCallCount = 0;
 int32_t MyFlag::disconnectAbilityCallCount = 0;
@@ -39,6 +42,8 @@ ErrCode AbilityManagerClient::ConnectAbilityWithExtensionType(const Want &want, 
 {
     AgentRuntime::MyFlag::lastConnectAbilityWant = want;
     AgentRuntime::MyFlag::lastConnectAbilityConnection = connect;
+    AgentRuntime::MyFlag::lastConnectAbilityCallerToken = callerToken;
+    AgentRuntime::MyFlag::lastConnectAbilityExtensionType = extensionType;
     AgentRuntime::MyFlag::connectAbilityWithExtensionTypeCallCount++;
     return AgentRuntime::MyFlag::retConnectAbilityWithExtensionType;
 }

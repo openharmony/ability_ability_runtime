@@ -55,6 +55,18 @@ public:
     int32_t DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection);
 
     /**
+     * @brief Connects a service extension ability on behalf of the given caller token.
+     */
+    int32_t ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken, const AAFwk::Want &want,
+        const sptr<AAFwk::IAbilityConnection> &connection);
+
+    /**
+     * @brief Disconnects a previously connected service extension ability for the given caller token.
+     */
+    int32_t DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+        const sptr<AAFwk::IAbilityConnection> &connection);
+
+    /**
      * @brief Releases the active LOW_CODE agent marker once the caller reports completion.
      */
     int32_t NotifyLowCodeAgentComplete(const std::string &agentId);
