@@ -342,6 +342,7 @@ bool AppRecovery::TryRecoverApp(StateReason reason)
 {
     if (isEnable_) {
         ScheduleSaveAppState(reason);
+        DisallowCrossThreadExecutionInRecovery();
         PersistAppState();
     }
     return ScheduleRecoverApp(reason);
