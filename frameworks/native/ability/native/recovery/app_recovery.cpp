@@ -46,6 +46,28 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace{
+
+static panda::ecmascript::EcmaVM* GetVMFromAbility(const std::shared_ptr<OHOS::AbilityRuntime::UIAbility>& abilityPtr)
+{
+    if (!abilityPtr) {
+        return nullptr;
+    }
+    OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
+    AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
+    return runtime.GetEcmaVm();
+}
+
+void DisallowCrossThreadExecutionInRecovery()
+{
+    #ifdef SUPPORT_SCREEN
+        panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
+        if (vm != nullptr) {
+            panda::JSNApi::DisallowCrossThreadExecution(vm);
+        }
+    #endif
+}
+}
 std::mutex g_mutex;
 std::atomic<bool> g_blocked = false;
 const int DELAY_TIME = 1000;
@@ -244,9 +266,7 @@ bool AppRecovery::ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::
         return true;
     }
 #ifdef SUPPORT_SCREEN
-    OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
-    AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
-    panda::ecmascript::EcmaVM* vm = runtime.GetEcmaVm();
+    panda::ecmascript::EcmaVM* vm = GetVMFromAbility(abilityPtr);
     if (!panda::JSNApi::CheckAndSetAllowCrossThreadExecution(vm)) {
         TAG_LOGE(AAFwkTag::RECOVERY, "VM is in gc process");
         return false;
@@ -256,9 +276,6 @@ bool AppRecovery::ExecuteFreezeCallbackWithVMSafety(const std::shared_ptr<OHOS::
         this->freezeCallback();
         TAG_LOGW(AAFwkTag::RECOVERY, "Freeze callback execution completed");
     }
-#ifdef SUPPORT_SCREEN
-    panda::JSNApi::DisallowCrossThreadExecution(vm);
-#endif
     return true;
 }
 
