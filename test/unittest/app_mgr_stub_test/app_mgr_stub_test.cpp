@@ -1140,5 +1140,122 @@ HWTEST_F(AppMgrStubTest, SetProcessPrepareExit_0100, TestSize.Level1)
         static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
+
+/**
+ * @tc.name: HandleGetAllAbilityInfos_0100
+ * @tc.desc: Test HandleGetAllAbilityInfos when service returns error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleGetAllAbilityInfos_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1001;
+    data.WriteInt32(pid);
+
+    EXPECT_CALL(*mockAppMgrService_, GetAllAbilityInfos(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_PERMISSION_DENIED));
+
+    mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS), data, reply, option);
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: HandleGetAllAbilityInfos_0200
+ * @tc.desc: Test HandleGetAllAbilityInfos when write result fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleGetAllAbilityInfos_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1001;
+    data.WriteInt32(pid);
+
+    EXPECT_CALL(*mockAppMgrService_, GetAllAbilityInfos(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(std::vector<AppExecFwk::AbilityStateData>()), Return(ERR_OK)));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleGetAllAbilityInfos_0300
+ * @tc.desc: Test HandleGetAllAbilityInfos with empty info list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleGetAllAbilityInfos_0300, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = -1;
+    data.WriteInt32(pid);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    EXPECT_CALL(*mockAppMgrService_, GetAllAbilityInfos(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(infos), Return(ERR_OK)));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+    int32_t infoSize = reply.ReadInt32();
+    EXPECT_EQ(infoSize, 0);
+}
+
+/**
+ * @tc.name: HandleGetAllAbilityInfos_0400
+ * @tc.desc: Test HandleGetAllAbilityInfos with one ability info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleGetAllAbilityInfos_0400, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1001;
+    data.WriteInt32(pid);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    AppExecFwk::AbilityStateData info;
+    info.abilityRecordId = 1001;
+    info.pid = 1001;
+    info.uid = 1001;
+    info.abilityType = 1;
+    info.extensionAbilityType = 0;
+    infos.push_back(info);
+
+    EXPECT_CALL(*mockAppMgrService_, GetAllAbilityInfos(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(infos), Return(ERR_OK)));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+    int32_t infoSize = reply.ReadInt32();
+    EXPECT_EQ(infoSize, 1);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

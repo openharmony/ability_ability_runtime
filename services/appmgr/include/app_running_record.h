@@ -1076,6 +1076,8 @@ public:
      */
     void SetWatchdogBackgroundStatusRunning(bool status);
 
+    void GetAllAbilityInfos(std::vector<AppExecFwk::AbilityStateData> &infos);
+
     void SetUserRequestCleaning();
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();

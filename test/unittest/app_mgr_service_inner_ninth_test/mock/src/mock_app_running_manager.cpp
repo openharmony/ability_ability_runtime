@@ -566,5 +566,10 @@ int32_t AppRunningManager::SignRestartProcess(int32_t)
 {
     return AAFwk::MyStatus::GetInstance().signRestartProcessStatus_;
 }
+
+int32_t AppRunningManager::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

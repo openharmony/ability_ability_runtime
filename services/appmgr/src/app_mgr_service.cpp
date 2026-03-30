@@ -53,6 +53,7 @@ constexpr const char* OPTION_KEY_DUMP_IPC = "--ipc";
 constexpr const char* OPTION_KEY_DUMP_FFRT = "--ffrt";
 constexpr const char* OPTION_KEY_DUMP_WEB = "--web";
 const int32_t HIDUMPER_SERVICE_UID = 1212;
+constexpr int32_t RESOURCE_MANAGER_UID = 1096;
 constexpr const int INDEX_PID = 1;
 constexpr const int INDEX_CMD = 2;
 constexpr const int INDEX_WEB_CUSTOM_ARGS = 2;
@@ -2157,6 +2158,22 @@ void AppMgrService::SetProcessPrepareExit(int32_t pid)
         return;
     }
     appMgrServiceInner_->SetProcessPrepareExit(pid);
+}
+
+int32_t AppMgrService::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    bool isRssCalling = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
+        BS_PROCESS_NAME) && (callingUid == RESOURCE_MANAGER_UID);
+    if (!isRssCalling) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    return appMgrServiceInner_->GetAllAbilityInfos(pid, infos);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

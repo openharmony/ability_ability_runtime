@@ -1460,5 +1460,9 @@ bool AppRunningRecord::HasAgentExtensionAbility()
 {
     return false;
 }
+
+void AppRunningRecord::GetAllAbilityInfos(std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
