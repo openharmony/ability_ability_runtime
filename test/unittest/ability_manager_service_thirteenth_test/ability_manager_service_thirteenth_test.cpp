@@ -3266,7 +3266,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0100, TestSize.L
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = -1;
-    MyStatus::GetInstance().permPermission_ = 1;
+    MyStatus::GetInstance().permPermission_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     ExitReasonCompability exitReason{};
     exitReason.reason = Reason::REASON_JS_ERROR;
@@ -3290,7 +3290,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0200, TestSize.L
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = 12345;
-    MyStatus::GetInstance().permPermission_ = 1;
+    MyStatus::GetInstance().permPermission_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     ExitReasonCompability exitReason{};
     exitReason.reason = Reason::REASON_JS_ERROR;
@@ -3314,7 +3314,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillAppWithReason_0300, TestSize.L
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     int32_t pid = 654321;
-    MyStatus::GetInstance().permPermission_ = 1;
+    MyStatus::GetInstance().permPermission_ = 2;
     abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     ExitReasonCompability exitReason{};
     exitReason.reason = Reason::REASON_JS_ERROR;
