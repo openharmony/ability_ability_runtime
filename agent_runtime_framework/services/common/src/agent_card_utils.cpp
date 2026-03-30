@@ -28,6 +28,7 @@ using namespace OHOS::AppExecFwk;
 
 namespace {
 AppExecFwk::BundleMgrClient g_bundleMgrClient;
+constexpr size_t MAX_ICON_URL_LENGTH = 512;
 
 bool FindAgentExtensionInfo(const BundleInfo &bundleInfo, const std::string &abilityName,
     ExtensionAbilityInfo &extensionInfo)
@@ -97,12 +98,29 @@ bool AgentCardUtils::HasRequiredRegisterFields(const AgentCard &card)
 {
     return !card.agentId.empty() && !card.name.empty() && !card.description.empty() && !card.version.empty() &&
         !card.defaultInputModes.empty() && !card.defaultOutputModes.empty() && !card.skills.empty() &&
-        !card.category.empty() && card.appInfo != nullptr;
+        !card.category.empty() && card.appInfo != nullptr && HasValidIconUrl(card.iconUrl);
+}
+
+bool AgentCardUtils::HasValidIconUrl(const std::string &iconUrl)
+{
+    return !iconUrl.empty() && iconUrl.length() <= MAX_ICON_URL_LENGTH;
 }
 
 bool AgentCardUtils::ShouldValidateAppInfo(const AgentCard &card)
 {
-    return card.type == AgentCardType::APP || card.type == AgentCardType::LOW_CODE;
+    return card.type == AgentCardType::APP || card.type == AgentCardType::ATOMIC_SERVICE ||
+        card.type == AgentCardType::LOW_CODE;
+}
+
+bool AgentCardUtils::BundleExists(const std::string &bundleName, int32_t userId)
+{
+    if (bundleName.empty()) {
+        return false;
+    }
+
+    BundleInfo bundleInfo;
+    return IN_PROCESS_CALL(g_bundleMgrClient.GetBundleInfo(
+        bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
 }
 
 void AgentCardUtils::ApplyDeviceTypes(const std::vector<std::string> &hapDeviceTypes, AgentCard &card)

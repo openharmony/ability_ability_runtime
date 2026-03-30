@@ -114,7 +114,7 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
 constexpr const char* ERROR_MSG_AGENT_ID_NOT_EXIST =
     "The specified agentId does not exist.";
 constexpr const char* ERROR_MSG_AGENT_CARD_VERSION_TOO_OLD =
-    "The specified agent card version is older than the existing version.";
+    "The specified agent card version is older than the current version.";
 constexpr const char* ERROR_MSG_AGENT_CARD_VERSION_INVALID =
     "The specified agent card version is invalid.";
 constexpr const char* ERROR_MSG_AGENT_CARD_DUPLICATE_REGISTER =
@@ -122,6 +122,8 @@ constexpr const char* ERROR_MSG_AGENT_CARD_DUPLICATE_REGISTER =
 constexpr const char* ERROR_MSG_MAX_CONNECTIONS_REACHED =
     "Maximum connections from the same caller have been reached. "
     "Please disconnect at least one agent extension beforehand.";
+constexpr const char* ERROR_MSG_LOW_CODE_AGENT_ACTIVE =
+    "The specified LOW_CODE agent is already active and is not yet completed.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
     "The context is not UIAbilityContext.";
 constexpr const char* ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE = "Invalid main element type.";
@@ -252,6 +254,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID, ERROR_MSG_AGENT_CARD_VERSION_INVALID},
     { AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER, ERROR_MSG_AGENT_CARD_DUPLICATE_REGISTER},
     { AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED, ERROR_MSG_MAX_CONNECTIONS_REACHED },
+    { AbilityErrorCode::ERROR_CODE_LOW_CODE_AGENT_ACTIVE, ERROR_MSG_LOW_CODE_AGENT_ACTIVE },
     { AbilityErrorCode::ERROR_CODE_NOT_UI_ABILITY_CONTEXT, ERROR_MSG_NOT_UI_ABILITY_CONTEXT},
     { AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE, ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE},
     { AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE, ERROR_MSG_CHANGE_KEEP_ALIVE},

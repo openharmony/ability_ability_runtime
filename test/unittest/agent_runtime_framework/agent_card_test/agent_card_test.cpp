@@ -551,7 +551,7 @@ HWTEST_F(AgentCardTest, AgentCardReadFromParcel_003, TestSize.Level1)
 
 /**
  * @tc.name: AgentCardReadFromParcel_004
- * @tc.desc: AgentCardReadFromParcel returns true when type bytes are absent
+ * @tc.desc: AgentCardReadFromParcel reads the default type value from parcel
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -567,7 +567,7 @@ HWTEST_F(AgentCardTest, AgentCardReadFromParcel_004, TestSize.Level1)
     bool result = agentCard.ReadFromParcel(parcelMock);
 
     EXPECT_TRUE(result);
-    EXPECT_EQ(agentCard.type, AgentCardType::LOW_CODE);
+    EXPECT_EQ(agentCard.type, AgentCardType::APP);
 }
 
 /**

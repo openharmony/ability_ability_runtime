@@ -17,7 +17,9 @@
 #define MOCK_AGENT_RUNTIME_MY_FLAG_H
 
 #include <string>
+#include <vector>
 #include "ability_connect_callback_interface.h"
+#include "hap_module_info.h"
 #include "want.h"
 #include "iremote_object.h"
 #include "running_process_info.h"
@@ -32,6 +34,8 @@ public:
     static bool retPublish;
     static bool retRegisterBundleEventCallback;
     static bool retGetApplicationInfo;
+    static bool retGetBundleInfo;
+    static bool retGetResConfigFile;
     static bool isRegisterBundleEventCallbackCalled;
     static bool isAddSystemAbilityListenerCalled;
     static bool retVerifyCallingPermission;
@@ -56,6 +60,10 @@ public:
     static bool retQueryExtensionAbilityInfos;
     static bool shouldFillExtensionAbilityInfos;
     static AppExecFwk::ExtensionAbilityType extensionAbilityType;
+    static bool mockApplicationInfoIsSystemApp;
+    static std::vector<AppExecFwk::ExtensionAbilityInfo> mockExtensionInfos;
+    static std::vector<AppExecFwk::HapModuleInfo> mockHapModuleInfos;
+    static std::vector<std::string> mockProfileInfos;
     static int32_t retGetProcessRunningInfoByPid;
     static AppExecFwk::AppProcessState processState;
     static int32_t retGetBundleNameByPid;
