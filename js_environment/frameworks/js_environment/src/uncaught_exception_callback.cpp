@@ -112,6 +112,10 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
     AppendAsyncStack(obj, summary);
     AppendModuleStack(obj, summary);
 
+    if (env_ != nullptr) {
+        summary += DFXJSNApi::GetExtraJSCrashMessage(reinterpret_cast<NativeEngine*>(env_)->GetEcmaVm());
+    }
+
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj, env_, obj);
     }
