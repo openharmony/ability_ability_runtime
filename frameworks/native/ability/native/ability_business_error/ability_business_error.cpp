@@ -113,6 +113,12 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
     "The caller is not an atomic service.";
 constexpr const char* ERROR_MSG_AGENT_ID_NOT_EXIST =
     "The specified agentId does not exist.";
+constexpr const char* ERROR_MSG_AGENT_CARD_VERSION_TOO_OLD =
+    "The specified agent card version is older than the existing version.";
+constexpr const char* ERROR_MSG_AGENT_CARD_VERSION_INVALID =
+    "The specified agent card version is invalid.";
+constexpr const char* ERROR_MSG_AGENT_CARD_DUPLICATE_REGISTER =
+    "The specified agent card has already been registered. Use updateAgentCard instead.";
 constexpr const char* ERROR_MSG_MAX_CONNECTIONS_REACHED =
     "Maximum connections from the same caller have been reached. "
     "Please disconnect at least one agent extension beforehand.";
@@ -241,6 +247,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED, ERROR_TARGET_NOT_STARTED},
     { AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE, ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE},
     { AbilityErrorCode::ERROR_CODE_AGENT_ID_NOT_EXIST, ERROR_MSG_AGENT_ID_NOT_EXIST},
+    { AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_TOO_OLD, ERROR_MSG_AGENT_CARD_VERSION_TOO_OLD},
+    { AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID, ERROR_MSG_AGENT_CARD_VERSION_INVALID},
+    { AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER, ERROR_MSG_AGENT_CARD_DUPLICATE_REGISTER},
     { AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED, ERROR_MSG_MAX_CONNECTIONS_REACHED },
     { AbilityErrorCode::ERROR_CODE_NOT_UI_ABILITY_CONTEXT, ERROR_MSG_NOT_UI_ABILITY_CONTEXT},
     { AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE, ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE},
@@ -357,6 +366,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_CALLER_NOT_ATOMIC_SERVICE, AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE},
     {ERR_INVALID_AGENT_CARD_ID, AbilityErrorCode::ERROR_CODE_AGENT_ID_NOT_EXIST},
     {ERR_MAX_AGENT_CONNECTIONS_REACHED, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED},
+    {ERR_AGENT_CARD_VERSION_TOO_OLD, AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_TOO_OLD},
+    {ERR_INVALID_AGENT_CARD_VERSION, AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID},
+    {ERR_AGENT_CARD_DUPLICATE_REGISTER, AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER},
     {ERR_INVALID_MAIN_ELEMENT_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE},
     {ERR_CHANGE_KEEP_ALIVE, AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE},
     {ERR_NO_U1, AbilityErrorCode::ERROR_CODE_NO_U1},

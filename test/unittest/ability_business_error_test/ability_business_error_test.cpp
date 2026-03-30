@@ -74,6 +74,12 @@ HWTEST_F(AbilityBusinessErrorTest, GetJsErrorCodeByNativeError_0100, TestSize.Le
 
     result = GetJsErrorCodeByNativeError(AAFwk::ERR_MAX_AGENT_CONNECTIONS_REACHED);
     EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED);
+
+    result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_INVALID_AGENT_CARD_VERSION);
+    EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID);
+
+    result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_AGENT_CARD_DUPLICATE_REGISTER);
+    EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
