@@ -214,7 +214,6 @@ ohos_shared_library("appkit_native") {
     "graphic_2d:librender_service_base",
     "hicollie:libhicollie",
     "hilog:libhilog",
-    "hichecker:libhichecker",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "i18n:preferred_language",

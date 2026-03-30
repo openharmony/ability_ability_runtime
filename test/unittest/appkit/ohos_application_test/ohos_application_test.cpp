@@ -37,7 +37,6 @@
 #endif
 #undef private
 #include "mock_ability_stage.h"
-#include "mock_js_runtime.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1703,97 +1702,6 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_LaunchElement_0300,
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
 
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_LaunchElement_0300 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0100
-* @tc.name: InitJSLeakWatcher
-* @tc.desc: Verify function InitJSLeakWatcher when runtime_ is nullptr
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0100 start.";
-
-    // Ensure runtime_ is nullptr
-    ohosApplication_->runtime_ = nullptr;
-
-    // Call InitJSLeakWatcher - should handle gracefully without crashing
-    std::string bundleName = "com.example.test";
-    ohosApplication_->InitJSLeakWatcher(bundleName);
-
-    // Verify runtime_ is still nullptr (no crash occurred)
-    EXPECT_TRUE(ohosApplication_->runtime_ == nullptr);
-
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0200
-* @tc.name: InitJSLeakWatcher
-* @tc.desc: Verify function InitJSLeakWatcher with valid runtime_
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0200 start.";
-
-    // Set runtime_ to MockJsRuntime
-    ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockJsRuntime>();
-    ASSERT_NE(ohosApplication_->runtime_, nullptr);
-
-    // Call InitJSLeakWatcher with bundle name
-    std::string bundleName = "com.example.test";
-    ohosApplication_->InitJSLeakWatcher(bundleName);
-
-    // Verify runtime_ is still valid after the call
-    EXPECT_TRUE(ohosApplication_->runtime_ != nullptr);
-
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0300
-* @tc.name: InitJSLeakWatcher
-* @tc.desc: Verify function InitJSLeakWatcher with empty bundle name
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0300 start.";
-
-    // Set runtime_ to MockJsRuntime
-    ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockJsRuntime>();
-    ASSERT_NE(ohosApplication_->runtime_, nullptr);
-
-    // Call InitJSLeakWatcher with empty bundle name
-    std::string bundleName = "";
-    ohosApplication_->InitJSLeakWatcher(bundleName);
-
-    // Verify runtime_ is still valid after the call
-    EXPECT_TRUE(ohosApplication_->runtime_ != nullptr);
-
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0300 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0400
-* @tc.name: InitJSLeakWatcher
-* @tc.desc: Verify function InitJSLeakWatcher with long bundle name
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0400, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0400 start.";
-
-    // Set runtime_ to MockJsRuntime
-    ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockJsRuntime>();
-    ASSERT_NE(ohosApplication_->runtime_, nullptr);
-
-    // Call InitJSLeakWatcher with long bundle name
-    std::string bundleName = "com.very.long.package.name.for.testing.purposes.bundle";
-    ohosApplication_->InitJSLeakWatcher(bundleName);
-
-    // Verify runtime_ is still valid after the call
-    EXPECT_TRUE(ohosApplication_->runtime_ != nullptr);
-
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_InitJSLeakWatcher_0400 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
