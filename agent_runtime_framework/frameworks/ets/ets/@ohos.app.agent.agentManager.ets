@@ -25,6 +25,9 @@ export default namespace agentManager {
   export native function nativeGetAllAgentCards(asyncCallback: AsyncCallbackWrapper<Array<AgentCard>>): void;
   export native function nativeGetAgentCardsByBundleName(bundleName: string, asyncCallback: AsyncCallbackWrapper<Array<AgentCard>>): void;
   export native function nativeGetAgentCardByAgentId(bundleName: string, agentId: string, asyncCallback: AsyncCallbackWrapper<AgentCard>): void;
+  export native function nativeRegisterAgentCard(card: AgentCard, asyncCallback: AsyncCallbackWrapper<void>): void;
+  export native function nativeUpdateAgentCard(card: AgentCard, asyncCallback: AsyncCallbackWrapper<void>): void;
+  export native function nativeDeleteAgentCard(bundleName: string, agentId: string, asyncCallback: AsyncCallbackWrapper<void>): void;
   export native function nativeConnectAgentExtensionAbility(want: Want, agentId: string,
     connectCallback: AgentExtensionConnectCallback, asyncCallback: AsyncCallbackWrapper<AgentProxy>): void;
   export native function nativeDisconnectAgentExtensionAbility(proxy: AgentProxy,
@@ -79,6 +82,57 @@ export default namespace agentManager {
         });
       taskpool.execute((): void => {
         agentManager.nativeGetAgentCardByAgentId(bundleName, agentId, asyncCallbackWrapper);
+      });
+    });
+    return p;
+  }
+
+  export function registerAgentCard(card: AgentCard): Promise<void> {
+    let p: Promise<void> = new Promise<void>(
+      (res: (data: undefined) => void, rej: (error: BusinessError) => void): void => {
+      let asyncCallbackWrapper = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          res(undefined);
+        } else {
+          rej(err);
+        }
+      });
+      taskpool.execute((): void => {
+        agentManager.nativeRegisterAgentCard(card, asyncCallbackWrapper);
+      });
+    });
+    return p;
+  }
+
+  export function updateAgentCard(card: AgentCard): Promise<void> {
+    let p: Promise<void> = new Promise<void>(
+      (res: (data: undefined) => void, rej: (error: BusinessError) => void): void => {
+      let asyncCallbackWrapper = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          res(undefined);
+        } else {
+          rej(err);
+        }
+      });
+      taskpool.execute((): void => {
+        agentManager.nativeUpdateAgentCard(card, asyncCallbackWrapper);
+      });
+    });
+    return p;
+  }
+
+  export function deleteAgentCard(bundleName: string, agentId: string): Promise<void> {
+    let p: Promise<void> = new Promise<void>(
+      (res: (data: undefined) => void, rej: (error: BusinessError) => void): void => {
+      let asyncCallbackWrapper = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          res(undefined);
+        } else {
+          rej(err);
+        }
+      });
+      taskpool.execute((): void => {
+        agentManager.nativeDeleteAgentCard(bundleName, agentId, asyncCallbackWrapper);
       });
     });
     return p;
