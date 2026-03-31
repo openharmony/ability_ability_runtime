@@ -574,6 +574,7 @@ public:
     void NotifyCallersOnTerminate();
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
+    int32_t GetByCallStatus() const;
     void CallRequest();
     bool CallRequestDone(const sptr<IRemoteObject> &callStub) const;
     bool IsStartToBackground() const;

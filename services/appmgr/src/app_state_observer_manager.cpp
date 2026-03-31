@@ -1067,6 +1067,7 @@ ProcessData AppStateObserverManager::WrapProcessData(
     processData.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
     processData.imageProcessType = static_cast<int32_t>(appRecord->GetImageProcessType());
     processData.isPreloadUIExtension = appRecord->GetUIExtensionPreloadState();
+    processData.byCallStatus = appRecord->GetStartedByCallStatus();
     return processData;
 }
 
@@ -1358,6 +1359,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
         appStateData.callerBundleName = "";
     }
     appStateData.appIndex = appRecord->GetAppIndex();
+    appStateData.byCallStatus = appRecord->GetStartedByCallStatus();
     TAG_LOGD(AAFwkTag::APPMGR, "Handle state change, bundle:%{public}s, state:%{public}d, pid:%{public}d,"
         "uid:%{public}d, isFocused:%{public}d, callerBUndleName: %{public}s, appIndex:%{public}d, callerUid:%{public}d",
         appStateData.bundleName.c_str(), appStateData.state, appStateData.pid, appStateData.uid,
