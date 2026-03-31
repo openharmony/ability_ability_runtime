@@ -66,6 +66,7 @@ struct StartAbilityUtils {
     static int32_t HandleSelfRedirection(bool isFromOpenLink,
         const std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     static std::string GenerateAsCallerForAncoSessionId();
+    static void RemoveAtomicServiceShareRouterIfNeeded(Want &want, const AppExecFwk::AbilityInfo &targetAbilityInfo);
 
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;
