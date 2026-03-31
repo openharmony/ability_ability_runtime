@@ -79,6 +79,12 @@ public:
      */
     static napi_value GetAgentCardByAgentId(napi_env env, napi_callback_info info);
 
+    static napi_value RegisterAgentCard(napi_env env, napi_callback_info info);
+
+    static napi_value UpdateAgentCard(napi_env env, napi_callback_info info);
+
+    static napi_value DeleteAgentCard(napi_env env, napi_callback_info info);
+
     /**
      * @brief Native method for connecting to an agent extension.
      *
@@ -127,6 +133,12 @@ private:
      * @return Returns the N-API value.
      */
     napi_value OnGetAgentCardByAgentId(napi_env env, size_t argc, napi_value *argv);
+
+    napi_value OnRegisterAgentCard(napi_env env, size_t argc, napi_value *argv);
+
+    napi_value OnUpdateAgentCard(napi_env env, size_t argc, napi_value *argv);
+
+    napi_value OnDeleteAgentCard(napi_env env, size_t argc, napi_value *argv);
 
     /**
      * @brief Implementation for connecting to an agent extension.

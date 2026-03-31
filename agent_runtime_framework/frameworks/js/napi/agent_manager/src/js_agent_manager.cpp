@@ -123,6 +123,21 @@ napi_value JsAgentManager::GetAgentCardByAgentId(napi_env env, napi_callback_inf
     GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnGetAgentCardByAgentId);
 }
 
+napi_value JsAgentManager::RegisterAgentCard(napi_env env, napi_callback_info info)
+{
+    GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnRegisterAgentCard);
+}
+
+napi_value JsAgentManager::UpdateAgentCard(napi_env env, napi_callback_info info)
+{
+    GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnUpdateAgentCard);
+}
+
+napi_value JsAgentManager::DeleteAgentCard(napi_env env, napi_callback_info info)
+{
+    GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnDeleteAgentCard);
+}
+
 napi_value JsAgentManager::ConnectAgentExtensionAbility(napi_env env, napi_callback_info info)
 {
     GET_CB_INFO_AND_CALL(env, info, JsAgentManager, OnConnectAgentExtensionAbility);
@@ -230,6 +245,115 @@ napi_value JsAgentManager::OnGetAgentCardByAgentId(napi_env env, size_t argc, na
 
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsAgentManager::OnGetAgentCardByAgentId", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAgentManager::OnRegisterAgentCard(napi_env env, size_t argc, napi_value *argv)
+{
+    if (argc < ARGC_ONE) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto card = std::make_shared<AgentCard>();
+    if (!ParseJsAgentCard(env, argv[ARG_INDEX_0], *card)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "parse card failed");
+        ThrowInvalidParamError(env, "Parse param card failed.");
+        return CreateJsUndefined(env);
+    }
+
+    auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [card, innerErrorCode]() {
+        *innerErrorCode = AgentManagerClient::GetInstance().RegisterAgentCard(*card);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (*innerErrorCode != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "error: %{public}d", *innerErrorCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsAgentManager::OnRegisterAgentCard", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAgentManager::OnUpdateAgentCard(napi_env env, size_t argc, napi_value *argv)
+{
+    if (argc < ARGC_ONE) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto card = std::make_shared<AgentCard>();
+    if (!ParseJsAgentCard(env, argv[ARG_INDEX_0], *card)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "parse card failed");
+        ThrowInvalidParamError(env, "Parse param card failed.");
+        return CreateJsUndefined(env);
+    }
+
+    auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [card, innerErrorCode]() {
+        *innerErrorCode = AgentManagerClient::GetInstance().UpdateAgentCard(*card);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (*innerErrorCode != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "error: %{public}d", *innerErrorCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsAgentManager::OnUpdateAgentCard", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAgentManager::OnDeleteAgentCard(napi_env env, size_t argc, napi_value *argv)
+{
+    if (argc < ARGC_TWO) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], bundleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "bundleName not string");
+        ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+        return CreateJsUndefined(env);
+    }
+
+    std::string agentId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], agentId)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "agentId not string");
+        ThrowInvalidParamError(env, "Parse param agentId failed, must be a string.");
+        return CreateJsUndefined(env);
+    }
+
+    auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [bundleName, agentId, innerErrorCode]() {
+        *innerErrorCode = AgentManagerClient::GetInstance().DeleteAgentCard(bundleName, agentId);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (*innerErrorCode != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "error: %{public}d", *innerErrorCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsAgentManager::OnDeleteAgentCard", env,
         CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -441,6 +565,9 @@ napi_value JsAgentManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getAgentCardsByBundleName", moduleName,
         JsAgentManager::GetAgentCardsByBundleName);
     BindNativeFunction(env, exportObj, "getAgentCardByAgentId", moduleName, JsAgentManager::GetAgentCardByAgentId);
+    BindNativeFunction(env, exportObj, "registerAgentCard", moduleName, JsAgentManager::RegisterAgentCard);
+    BindNativeFunction(env, exportObj, "updateAgentCard", moduleName, JsAgentManager::UpdateAgentCard);
+    BindNativeFunction(env, exportObj, "deleteAgentCard", moduleName, JsAgentManager::DeleteAgentCard);
     BindNativeFunction(env, exportObj, "connectAgentExtensionAbility", moduleName,
         JsAgentManager::ConnectAgentExtensionAbility);
     BindNativeFunction(env, exportObj, "disconnectAgentExtensionAbility", moduleName,
