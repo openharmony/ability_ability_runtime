@@ -74,6 +74,15 @@ struct EventInfo {
     bool shouldKillForeground = true;
 };
 
+struct SnapshotInfo {
+    int32_t uid = -1;
+    std::string bundleName = "";
+    std::string snapshotCond = ""; // 事件触发场景(例如xxx事件触发了镜像制作，目前几个打点不涉及，后续新增打点会使用)
+    std::string snapshotEvent = ""; // 镜像相关事件,例如镜像制作，镜像启动等
+    int32_t snapshotResult = 0; // 结果返回值
+    std::string snapshotReason = ""; // 对返回值原因的说明
+};
+
 enum class EventName {
     // fault event
     START_ABILITY_ERROR = 0,
@@ -137,7 +146,10 @@ enum class EventName {
     WANTAGENT_NUMBER,
 
     // report data
-    USER_DATA_SIZE
+    USER_DATA_SIZE,
+
+    // report snapshot info
+    SNAPSHOT_REPORT
 };
 
 typedef enum {
@@ -174,6 +186,7 @@ public:
         const EventInfo &eventInfo);
     static void SendAppStartupErrorEvent(
         const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo);
+    static void SendSnapshotEvent(const EventName &eventName, const SnapshotInfo &snapshotInfo);
 
 private:
     static std::string ConvertEventName(const EventName &eventName);

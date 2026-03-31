@@ -75,6 +75,12 @@ constexpr const char *EVENT_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
 constexpr const char *EVENT_COMPONENT_NAME_KEY = "COMPONENT_NAME";
 constexpr const char *EVENT_PARTITION_NAME_KEY = "PARTITION_NAME";
 constexpr const char *EVENT_REMAIN_PARTITION_SIZE_KEY = "REMAIN_PARTITION_SIZE";
+constexpr const char *EVENT_IMAGE_UID = "UID";
+constexpr const char *EVENT_IMAGE_BUNDLE_NAME = "BUNDLE_NAME";
+constexpr const char *EVENT_IMAGE_COND = "COND";
+constexpr const char *EVENT_IMAGE_EVENT = "EVENT";
+constexpr const char *EVENT_IMAGE_REASON = "REASON";
+constexpr const char *EVENT_IMAGE_RESULT = "RESULT";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -853,6 +859,23 @@ void EventReport::SendAppStartupErrorEvent(
     hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
+void EventReport::SendSnapshotEvent(const EventName &eventName, const SnapshotInfo &snapshotInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+    auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+    hisyseventReport->InsertParam(EVENT_IMAGE_UID, snapshotInfo.uid);
+    hisyseventReport->InsertParam(EVENT_IMAGE_BUNDLE_NAME, snapshotInfo.bundleName);
+    hisyseventReport->InsertParam(EVENT_IMAGE_COND, snapshotInfo.snapshotCond);
+    hisyseventReport->InsertParam(EVENT_IMAGE_EVENT, snapshotInfo.snapshotEvent);
+    hisyseventReport->InsertParam(EVENT_IMAGE_RESULT, snapshotInfo.snapshotResult);
+    hisyseventReport->InsertParam(EVENT_IMAGE_REASON, snapshotInfo.snapshotReason);
+    hisyseventReport->Report("HM_KERNEL", name.c_str(), HISYSEVENT_STATISTIC);
+}
+
 std::string EventReport::ConvertEventName(const EventName &eventName)
 {
     const char* eventNames[] = {
@@ -888,7 +911,10 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         "WANTAGENT_NUMBER",
 
         // report data
-        "USER_DATA_SIZE"
+        "USER_DATA_SIZE",
+
+        // report snapshot info
+        "SNAPSHOT_REPORT"
     };
     uint32_t eventIndex = static_cast<uint32_t> (eventName);
     if (eventIndex >= sizeof(eventNames) / sizeof(const char*)) {
