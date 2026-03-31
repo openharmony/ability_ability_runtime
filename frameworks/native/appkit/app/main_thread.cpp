@@ -1734,6 +1734,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
     }
 #endif
+    
+    LoadExtStartupTasks();
 
     if (isStageBased) {
         // Create runtime
@@ -4332,6 +4334,22 @@ void MainThread::PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunch
         appLaunchData.GetStartupTaskData());
 }
 
+void MainThread::LoadExtStartupTasks()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::map<std::string, std::shared_ptr<AbilityRuntime::StartupTask>> nativeStartupTask;
+
+    auto loadExtStartupTask = std::make_shared<LoadExtStartupTask>();
+    std::shared_ptr<AbilityRuntime::StartupTask> extStartupTask;
+    AbilityRuntime::ExtNativeStartupManager::BuildExtStartupTask(loadExtStartupTask, extStartupTask);
+    if (extStartupTask != nullptr) {
+        nativeStartupTask.emplace(extStartupTask->GetName(), extStartupTask);
+    } else {
+        TAG_LOGE(AAFwkTag::APPKIT, "null extStartupTask");
+    }
+    AbilityRuntime::ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
+}
+
 void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -4352,15 +4370,6 @@ void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLau
     };
     auto preloadAppStartup = std::make_shared<AbilityRuntime::NativeStartupTask>(PRELOAD_APP_STARTUP, task);
     nativeStartupTask.emplace(preloadAppStartup->GetName(), preloadAppStartup);
-
-    auto loadExtStartupTask = std::make_shared<LoadExtStartupTask>();
-    std::shared_ptr<AbilityRuntime::StartupTask> extStartupTask;
-    AbilityRuntime::ExtNativeStartupManager::BuildExtStartupTask(loadExtStartupTask, extStartupTask);
-    if (extStartupTask != nullptr) {
-        nativeStartupTask.emplace(extStartupTask->GetName(), extStartupTask);
-    } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "null extStartupTask");
-    }
     AbilityRuntime::ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
 }
 
