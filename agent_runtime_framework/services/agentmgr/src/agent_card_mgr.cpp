@@ -36,6 +36,7 @@ using json = nlohmann::json;
 namespace {
 constexpr const char* AGENT_CONFIG = "ohos.extension.agent";
 constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t MAX_AGENT_CARD_SIZE = 1000;
 } // namespace
 AgentCardMgr &AgentCardMgr::GetInstance()
 {
@@ -62,6 +63,10 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
     }
     std::unordered_map<std::string, AgentCard> incomingCardMap;
     for (auto const &extensionInfo : bundleInfo.extensionInfos) {
+        if (static_cast<int32_t>(incomingCardMap.size()) >= MAX_AGENT_CARD_SIZE) {
+            TAG_LOGW(AAFwkTag::SER_ROUTER, "incomingCardMap reached max size %{public}d", MAX_AGENT_CARD_SIZE);
+            break;
+        }
         if (extensionInfo.type != ExtensionAbilityType::AGENT) {
             continue;
         }
@@ -72,14 +77,22 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
         std::vector<std::string> profileInfos{};
         bundleMgrClient_.GetResConfigFile(extensionInfo, AGENT_CONFIG, profileInfos);
         for (const std::string &profileInfo : profileInfos) {
+            if (static_cast<int32_t>(incomingCardMap.size()) >= MAX_AGENT_CARD_SIZE) {
+                break;
+            }
             if (!json::accept(profileInfo, true)) {
+                TAG_LOGE(AAFwkTag::SER_ROUTER, "profileInfo is not json format");
                 return -1;
             }
             json j = json::parse(profileInfo, nullptr, false, true);
             if (!j.contains("agentCards")) {
+                TAG_LOGE(AAFwkTag::SER_ROUTER, "profileInfo is not contains agentCards");
                 return -1;
             }
             for (auto cardStr : j["agentCards"]) {
+                if (static_cast<int32_t>(incomingCardMap.size()) >= MAX_AGENT_CARD_SIZE) {
+                    break;
+                }
                 AgentCard card;
                 if (!AgentCard::FromJson(cardStr, card)) {
                     TAG_LOGE(AAFwkTag::SER_ROUTER, "FromJson failed");
