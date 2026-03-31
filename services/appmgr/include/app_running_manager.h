@@ -433,7 +433,7 @@ public:
     bool GetPidsByBundleNameUserIdAndAppIndex(const std::string &bundleName,
         const int userId, const int appIndex, std::list<pid_t> &pids);
 
-    bool HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid);
+    bool HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid, int32_t &recordId);
 
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 

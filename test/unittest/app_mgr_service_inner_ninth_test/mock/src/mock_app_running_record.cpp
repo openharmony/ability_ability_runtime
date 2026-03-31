@@ -107,6 +107,11 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
+bool AppRunningRecord::GetExtensionSandBoxFlag() const
+{
+    return isExtensionSandBox_;
+}
+
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 {
 }
@@ -442,6 +447,11 @@ void AppRunningRecord::SetAppDeathRecipient(const sptr<AppDeathRecipient> &appDe
     appDeathRecipient_ = appDeathRecipient;
 }
 
+sptr<AppDeathRecipient> AppRunningRecord::GetAppDeathRecipient() const
+{
+    return appDeathRecipient_;
+}
+
 std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
 {
     AAFwk::MyStatus::GetInstance().getPriorityObjectCalled_ = true;
@@ -633,6 +643,10 @@ int32_t AppRunningRecord::GetSpecifiedRequestId() const
 void AppRunningRecord::ResetSpecifiedRequest()
 {
     AAFwk::MyStatus::GetInstance().resetSpecifiedRequestCall_++;
+}
+
+void AppRunningRecord::TryToUpdateWorkProcessInfo()
+{
 }
 
 void AppRunningRecord::SetScheduleNewProcessRequestState(int32_t requestId,
@@ -1101,6 +1115,51 @@ bool AppRunningRecord::IsPreloading() const
 bool AppRunningRecord::IsPreloaded() const
 {
     return preloadState_ == PreloadState::PRELOADED;
+}
+
+void AppRunningRecord::SetMakeImageState(MakeImageState state)
+{
+    makeImageState_ = state;
+}
+
+MakeImageState AppRunningRecord::GetMakeImageState() const
+{
+    return makeImageState_;
+}
+
+void AppRunningRecord::SetIsCreateFromImage(bool flag)
+{
+    isCreateFromImage_ = flag;
+}
+
+bool AppRunningRecord::GetIsCreateFromImage() const
+{
+    return isCreateFromImage_;
+}
+
+void AppRunningRecord::SetImageProcessType(ImageProcessType type)
+{
+    imageProcessType_ = type;
+}
+
+ImageProcessType AppRunningRecord::GetImageProcessType() const
+{
+    return imageProcessType_;
+}
+
+void AppRunningRecord::SetNeedRemoveDeathRecipient(bool flag)
+{
+    needRemoveDeathRecipient_ = flag;
+}
+
+bool AppRunningRecord::GetNeedRemoveDeathRecipient() const
+{
+    return needRemoveDeathRecipient_;
+}
+
+void AppRunningRecord::SetNeedUpdate(bool needUpdate)
+{
+    needUpdate_ = needUpdate;
 }
 
 int32_t AppRunningRecord::GetAssignTokenId() const
