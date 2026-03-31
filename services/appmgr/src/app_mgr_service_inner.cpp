@@ -9513,6 +9513,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfoEx(const std::shared_ptr<ChildPro
     info.srcEntry = childProcessRecord->GetSrcEntry();
     info.entryFunc = childProcessRecord->GetEntryFunc();
     info.entryParams = childProcessRecord->GetEntryParams();
+    info.isStaticChildProcess = childProcessRecord->IsStatic();
     info.jitEnabled = appRecord->IsJITEnabled();
     info.isStartWithDebug = childProcessRecord->isStartWithDebug();
     auto applicationInfo = appRecord->GetApplicationInfo();

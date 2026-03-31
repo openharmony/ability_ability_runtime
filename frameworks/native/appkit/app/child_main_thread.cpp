@@ -204,7 +204,8 @@ void ChildMainThread::HandleLoadJs()
         return;
     }
 
-    runtime_ = childProcessManager.CreateRuntime(bundleInfoCopy, hapModuleInfo, true, processInfo_->jitEnabled);
+    runtime_ = childProcessManager.CreateRuntime(bundleInfoCopy, hapModuleInfo, true, processInfo_->jitEnabled,
+        processInfo_->isStaticChildProcess);
     if (!runtime_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -217,7 +218,17 @@ void ChildMainThread::HandleLoadJs()
     runtime_->StartDebugMode(debugOption);
     std::string srcPath;
     srcPath.append(hapModuleInfo.moduleName).append("/").append(processInfo_->srcEntry);
-    childProcessManager.LoadJsFile(srcPath, hapModuleInfo, runtime_);
+
+    if (processInfo_->isStaticChildProcess) {
+        auto pos = processInfo_->srcEntry.find('/');
+        std::string prefix = (pos != std::string::npos) ?
+            processInfo_->srcEntry.substr(0, pos) : processInfo_->srcEntry;
+        if (prefix == "entry") {
+            childProcessManager.LoadJsFile(processInfo_->srcEntry, hapModuleInfo, runtime_);
+        }
+    } else {
+        childProcessManager.LoadJsFile(srcPath, hapModuleInfo, runtime_);
+    }
     ExitProcessSafely();
 }
 
@@ -245,7 +256,8 @@ void ChildMainThread::HandleLoadArkTs()
         return;
     }
 
-    runtime_ = childProcessManager.CreateRuntime(*bundleInfo_, hapModuleInfo, true, processInfo_->jitEnabled);
+    runtime_ = childProcessManager.CreateRuntime(*bundleInfo_, hapModuleInfo, true, processInfo_->jitEnabled,
+        processInfo_->isStaticChildProcess);
     if (!runtime_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
