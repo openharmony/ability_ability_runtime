@@ -70,7 +70,7 @@ private:
     LeakObserverFunction leakObserver_ = nullptr;
     std::mutex leakObserverMutex_;
     std::mutex hasOnErrorCallbackMutex_;
-    EtsErrorCallback errorCallback_;
+    EtsErrorCallback errorCallback_ = nullptr;
     HasOnErrorCallback hasOnErrorCallback_ = nullptr;
 };
 }  // namespace AppExecFwk

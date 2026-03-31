@@ -1496,33 +1496,26 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         FaultData faultData;
         faultData.faultType = FaultDataType::JS_ERROR;
         faultData.errorObject = appExecErrorObj;
+        AAFwk::ExitReasonCompability exitReason = { REASON_JS_ERROR, errorObj.name };
+        exitReason.killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_JS_ERROR;
+        std::string eventKeyReason = "JsError";
+        exitReason.killMsg = eventKeyReason;
+        exitReason.innerMsg = eventKeyReason;
+        bool foreground = false;
+        if (appThread->applicationImpl_ &&
+            appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
+            foreground = true;
+        }
+        auto result = AbilityManagerClient::GetInstance()->RecordAppWithReason(pid, getuid(), exitReason);
+        TAG_LOGW(AAFwkTag::APPKIT, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], "
+            "pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d",
+            result, pid, processName.c_str(), eventKeyReason.c_str(), foreground);
         DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
         if (ApplicationDataManager::GetInstance().NotifyETSErrorObject(appExecErrorObj)) {
             return;
         }
         TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError "
             "type:%{public}s\n%{public}s", bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
-        bool foreground = false;
-        if (appThread->applicationImpl_ &&
-            appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
-            foreground = true;
-        }
-        std::string eventKeyReason = "JsError";
-        auto exitReport = std::make_shared<HisyseventReport>(6);
-        exitReport->InsertParam("PID", pid);
-        exitReport->InsertParam("PROCESS_NAME", processName);
-        exitReport->InsertParam("MSG", KILL_REASON);
-        exitReport->InsertParam(EVENT_KEY_APP_RUNNING_UNIQUE_ID, appRunningId);
-        exitReport->InsertParam(EVENT_KEY_REASON, eventKeyReason);
-        exitReport->InsertParam("FOREGROUND", foreground);
-        int result = exitReport->Report("FRAMEWORK", "PROCESS_KILL", HISYSEVENT_FAULT);
-        TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event "
-            "[FRAMEWORK,PROCESS_KILL],"
-            " pid=%{public}d, processName=%{public}s, msg=%{public}s, "
-            "foreground=%{public}d",
-            result, pid, processName.c_str(), KILL_REASON, foreground);
-        AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
-        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
         _exit(JS_ERROR_EXIT);
     };
     return uncaughtExceptionInfo;
