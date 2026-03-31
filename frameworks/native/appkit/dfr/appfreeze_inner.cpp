@@ -16,6 +16,7 @@
 
 #include <sys/time.h>
 
+#include "ability_manager_client.h"
 #include "ability_state.h"
 #include "appfreeze_manager.h"
 #include "app_recovery.h"
@@ -34,6 +35,7 @@
 #include "parameters.h"
 #include "unique_fd.h"
 #include "input_manager.h"
+#include "exit_reason.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -289,7 +291,6 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
 {
     faultData.errorObject.message += msgContent;
     faultData.isInForeground = GetAppInForeground();
-    bool isInBackGround = AppExecFwk::AppfreezeManager::GetInstance()->CheckInBackGround(faultData);
     faultData.faultType = FaultDataType::APP_FREEZE;
     faultData.notifyApp = false;
     faultData.waitSaveState = false;
@@ -305,6 +306,7 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
             faultData.processedId, faultData.dispatchedEventId);
     }
     int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
     std::string mainStack = "";
     std::string startTime = "\nDump main thread stack start time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
@@ -316,6 +318,15 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     if (isExit) {
         faultData.forceExit = true;
         faultData.waitSaveState = AppRecovery::GetInstance().IsEnabled();
+        std::string reason = faultData.errorObject.name;
+        AAFwk::ExitReasonCompability exitReason = { REASON_APP_FREEZE, "Reason:" + reason };
+        exitReason.killId =
+            AppExecFwk::AppfreezeManager::GetInstance()->GetFreezeExitReason(faultData.errorObject.name);
+        exitReason.killMsg = reason;
+        exitReason.innerMsg = reason;
+        auto result = AbilityManagerClient::GetInstance()->RecordAppWithReason(pid, uid, exitReason);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Record result=%{public}d, pid=%{public}d, uid=%{public}d, "
+            "killId=%{public}d", result, pid, uid, exitReason.killId);
     }
     NotifyANR(faultData);
     if (isExit) {
