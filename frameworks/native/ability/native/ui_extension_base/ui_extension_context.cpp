@@ -731,6 +731,34 @@ void UIExtensionContext::SetAbilityConfiguration(const AppExecFwk::Configuration
         abilityConfiguration_->Merge(changeKeyV, config);
     }
     TAG_LOGI(AAFwkTag::CONTEXT, "abilityConfiguration: %{public}s", abilityConfiguration_->GetName().c_str());
+
+    auto fullConfig = GetConfiguration();
+    if (fullConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "fullConfig is null");
+        return ;
+    }
+    changeKeyV.clear();
+    fullConfig->CompareDifferent(changeKeyV, config);
+    if (!changeKeyV.empty()) {
+        fullConfig->Merge(changeKeyV, config);
+    }
+}
+
+void UIExtensionContext::SetAbilityFontSize(double fontSize)
+{
+    TAG_LOGI(AAFwkTag::CONTEXT, "SetAbilityFontSize size: %{public}lf", fontSize);
+    if (fontSize < 0.0) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "fontSize error");
+        return;
+    }
+    AppExecFwk::Configuration config;
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSize));
+
+    if (!abilityConfigUpdateCallback_) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "abilityConfigUpdateCallback_ nullptr");
+        return;
+    }
+    abilityConfigUpdateCallback_(config);
 }
 
 void UIExtensionContext::SetAbilityColorMode(int32_t colorMode)
