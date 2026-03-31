@@ -194,6 +194,7 @@ HWTEST_F(ApplicationDataManagerTest,
 {
     GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSErrorObject_001 start";
     AppExecFwk::ErrorObject errorObj;
+    ApplicationDataManager::GetInstance().NotifyETSErrorObject(errorObj);
     errorObj.name = "errorName";
     errorObj.message = "errorMessage";
     errorObj.stack = "errorStack";
