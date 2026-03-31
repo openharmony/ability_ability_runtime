@@ -3342,6 +3342,26 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityInCurren
 
 /*
  * Feature: AbilityManagerService
+ * Function: QuerySelfModularObjectExtensionInfos
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService QuerySelfModularObjectExtensionInfos
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of QuerySelfModularObjectExtensionInfos
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_QuerySelfModularObjectExtensionInfos_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::vector<ModularObjectExtensionInfo> infos;
+    auto res = proxy_->QuerySelfModularObjectExtensionInfos(infos);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_SELF_MODULAR_OBJECT_EXTENSION_INFOS),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartSelfUIAbilityWithStartOptions
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartSelfUIAbilityWithStartOptions

@@ -2278,6 +2278,27 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_005,
 
 /*
  * Feature: AbilityManagerService
+ * Function: QuerySelfModularObjectExtensionInfos
+ * FunctionPoints: AbilityManagerService QuerySelfModularObjectExtensionInfos
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, QuerySelfModularObjectExtensionInfos_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest QuerySelfModularObjectExtensionInfos_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    std::vector<ModularObjectExtensionInfo> infos;
+    AppUtils::GetInstance().isSupportModularObjectExtension_.isLoaded = true;
+    AppUtils::GetInstance().isSupportModularObjectExtension_.value = false;
+    auto ret = abilityMs->QuerySelfModularObjectExtensionInfos(infos);
+    EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
+    AppUtils::GetInstance().isSupportModularObjectExtension_.value = true;
+    ret = abilityMs->QuerySelfModularObjectExtensionInfos(infos);
+    EXPECT_EQ(ret, ERR_BUNDLE_MANAGER_INVALID_UID);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest QuerySelfModularObjectExtensionInfos_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: IsAppCloneOrMultiInstance
  * FunctionPoints: AbilityManagerService IsAppCloneOrMultiInstance
  */
