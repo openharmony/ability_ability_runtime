@@ -973,7 +973,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             TAG_LOGE(AAFwkTag::APPMGR, "pid error");
             return;
         }
-        auto result = inner->KillProcessByPid(pid, "TerminateAbility");
+        auto result = inner->KillProcessByPid(pid, "TerminateAbility", false, appRecordSptr->GetRecordId());
         if (result < 0) {
             TAG_LOGW(AAFwkTag::APPMGR, "failed, pid: %{public}d", pid);
         }
@@ -2216,7 +2216,8 @@ int32_t AppRunningManager::DumpArkWeb(const std::vector<int32_t> &pids, const st
     return DumpErrorCode::ERR_OK;
 }
 
-bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid)
+bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid,
+    int32_t &recordId)
 {
     if (abilityToken == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityToken");
@@ -2250,6 +2251,7 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         pid = appRecord->GetPid();
     }
     uid = appRecord->GetUid();
+    recordId = appRecord->GetRecordId();
     return true;
 }
 

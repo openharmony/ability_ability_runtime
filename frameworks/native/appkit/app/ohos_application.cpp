@@ -24,6 +24,7 @@
 #include "ability.h"
 #include "ability_record_mgr.h"
 #include "ability_thread.h"
+#include "app_image_observer_manager.h"
 #include "app_loader.h"
 #include "application_context.h"
 #include "application_cleaner.h"
@@ -393,6 +394,41 @@ void OHOSApplication::OnStart()
 void OHOSApplication::OnTerminate()
 {}
 
+void OHOSApplication::OnHyperSnapUpdate()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "OnHyperSnapUpdate");
+    AppExecFwk::AppImageObserverManager::GetInstance().NotifyApplicationUpdate();
+    for (auto& item : abilityStages_) {
+        if (item.second) {
+            item.second->OnLaunchFromHyperSnap();
+        }
+    }
+}
+
+void OHOSApplication::AddAbility(std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    const sptr<IRemoteObject> &token,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord)
+{
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
+        return;
+    }
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
+        return;
+    }
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
+        return;
+    }
+    if (!abilityStage->IsAbilityCreated()) {
+        TAG_LOGI(AAFwkTag::APPKIT, "OnAboutToCreateAbility");
+        abilityStage->OnAboutToCreateAbility();
+        abilityStage->MarkAbilityCreated();
+    }
+    abilityStage->AddAbility(token, abilityRecord);
+}
+
 void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
 {
     if (appEnvironments.empty()) {
@@ -540,7 +576,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return nullptr;
     }
-    abilityStage->AddAbility(token, abilityRecord);
+    AddAbility(abilityStage, token, abilityRecord);
     return abilityStage->GetContext();
 }
 
@@ -720,7 +756,7 @@ void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> 
         TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
-    abilityStage->AddAbility(token, abilityRecord);
+    AddAbility(abilityStage, token, abilityRecord);
 }
 
 void OHOSApplication::AutoStartupDone(

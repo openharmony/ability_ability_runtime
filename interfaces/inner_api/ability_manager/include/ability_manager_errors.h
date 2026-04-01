@@ -1126,6 +1126,11 @@ enum {
     ERR_AGENT_CARD_DUPLICATE_REGISTER = 2099217,
 
     /**
+     * Result (2099220) for pid has been reused.
+     */
+    ERR_PID_HAS_BEEN_REUSED = 2099220,
+
+    /**
      * Result (2099411) for not support screen.
      */
     ERR_NOT_SUPPORT_SCREEN = 2099411,

@@ -71,7 +71,8 @@ void AppLifeCycleDeal::AddAbilityStage(const HapModuleInfo &abilityStage)
     appThread->ScheduleAbilityStage(abilityStage);
 }
 
-void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord> &ability)
+void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord> &ability,
+    std::shared_ptr<AppUpdateInfo> updateInfo)
 {
     auto appThread = GetApplicationClient();
     if (appThread && ability) {
@@ -106,7 +107,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             }
         }
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
-            ability->GetWant(), ability->GetAbilityRecordId());
+            ability->GetWant(), ability->GetAbilityRecordId(), updateInfo);
         if (ability->GetWant() != nullptr) {
             ability->GetWant()->RemoveParam(REUSING_WINDOW);
             ability->GetWant()->RemoveParam(IS_HOOK);
@@ -114,6 +115,17 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
     }
+}
+
+void AppLifeCycleDeal::ScheduleUpdateWorkProcessInfo(std::shared_ptr<AppUpdateInfo> updateInfo)
+{
+    auto appThread = GetApplicationClient();
+    if (!appThread) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
+        return;
+    }
+
+    appThread->ScheduleUpdateWorkProcessInfo(updateInfo);
 }
 
 void AppLifeCycleDeal::ScheduleTerminate(bool isLastProcess)

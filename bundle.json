@@ -528,6 +528,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/appkit/app",
+              "header_files": [
+                "app_image_observer_manager.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/appkit:application_image_observer_manager"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/kits/c/ability/ability_runtime/child_process",
               "header_files": [
                 "native_child_process.h"
