@@ -31,6 +31,7 @@
 #include "ffrt.h"
 #include "directory_ex.h"
 #include "storage_acl.h"
+#include "hidebug_dump.h"
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
@@ -354,6 +355,26 @@ void DumpRuntimeHelper::DumpNativeHeap(const OHOS::AppExecFwk::MemDumpInfo &info
             TAG_LOGE(AAFwkTag::APPKIT, "RequestFileDescriptor failed");
         }
     }
+    if (info.dumpType == MemDumpType::KMP_KOTLIN) {
+        DumpKmpKotlinHeap(info);
+    }
+}
+
+void DumpRuntimeHelper::DumpKmpKotlinHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
+{
+    int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::KMP_HEAP_SNAPSHOT));
+    if (fd < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "RequestFileDescriptor failed");
+        return;
+    }
+    auto dumpListener = std::make_shared<OHOS::HiviewDFX::HidebugMemDumpListenter>();
+    bool ret = dumpListener->TriggerListener("KMP", fd, OH_HiDebug_MemListenerType::OH_HiDebug_DUMP_SNAPSHOT, "test");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::APPKIT, "TriggerListener failed");
+        close(fd);
+        return;
+    }
+    close(fd);
 }
 
 GetMemLeakStringFunc DumpRuntimeHelper::LoadMemLeakFunc()

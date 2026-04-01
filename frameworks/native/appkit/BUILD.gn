@@ -232,6 +232,7 @@ ohos_shared_library("appkit_native") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_acl",
+    "hiprofiler:hidebug_dump"
   ]
   public_external_deps = [ "ability_base:configuration" ]
 
