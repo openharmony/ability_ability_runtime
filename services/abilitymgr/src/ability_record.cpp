@@ -1904,8 +1904,9 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         CHECK_POINTER_LOG(ability, "ability nullptr");
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
+    std::string typeName = abilityInfo_.type == AppExecFwk::AbilityType::PAGE ? "(uiability)" : "(extension)";
     handler->SubmitTask(task, AAFwk::TaskAttribute{
-        .taskName_ = "OnSchedulerDied",
+        .taskName_ = "OnSchedulerDied" + typeName,
         .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
     });
     auto resultTask = [want = GetWant(), ability = shared_from_this()]() {
