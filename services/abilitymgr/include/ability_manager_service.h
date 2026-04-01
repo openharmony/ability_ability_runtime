@@ -3389,6 +3389,8 @@ private:
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 
+    bool CheckSupportVpn(const AppExecFwk::AbilityInfo& abilityInfo);
+
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
 
