@@ -15,6 +15,7 @@
 
 #include "watchdog.h"
 
+#include <charconv>
 #include <parameter.h>
 #include <unistd.h>
 
@@ -43,7 +44,9 @@ constexpr uint32_t CHECK_INTERVAL_TIME = 45000;
 constexpr uint32_t CHECK_INTERVAL_TIME = 3000;
 #endif
 static uint32_t checkIntervalTime_ = 3000;
-
+constexpr float FLOAT_EPSILON = 0.01f;
+constexpr int32_t TIME_CONVERT_RATIO = 1000;
+constexpr int32_t MAX_RATIO_SIZE = 4;
 #ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
 constexpr uint32_t WEARABLE_CHECK_INTERVAL_TIME = 5000;
 #endif
@@ -75,14 +78,29 @@ Watchdog::~Watchdog()
 
 float Watchdog::getRatioValue()
 {
+    float defaultRatio = 1.0f;
     std::string ratioStr = OHOS::system::GetParameter("const.sys.dfx.appfreeze.timeout_unit_time_ratio", "1000");
-    int32_t ratioVal = static_cast<int32_t>(std::stoll(ratioStr));
-    float ratio = (ratioVal * 1.0) / 1000;
-    if (ratio <= 0) {
-        ratio = 1.0;
-        TAG_LOGE(AAFwkTag::APPDFR, "const.sys.dfx.appfreeze.timeout_unit_time_ratio read failed.");
+    if (ratioStr.empty() || !IsNumeric(ratioStr)) {
+        return defaultRatio;
     }
-    return ratio;
+
+    if (ratioStr.size() > MAX_RATIO_SIZE) {
+        return defaultRatio;
+    }
+
+    uint64_t ratioVal = 0;
+    auto [ptr, ec] = std::from_chars(ratioStr.data(), ratioStr.data() + ratioStr.size(), ratioVal);
+    if (ec != std::errc()) {
+        return defaultRatio;
+    }
+
+    float result = (ratioVal * 1.0) / TIME_CONVERT_RATIO;
+    return (result < FLOAT_EPSILON) ? defaultRatio : result;
+}
+
+bool Watchdog::IsNumeric(const std::string &str)
+{
+    return !str.empty() && std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
 void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
