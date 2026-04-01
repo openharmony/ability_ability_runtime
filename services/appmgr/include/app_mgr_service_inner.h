@@ -37,6 +37,7 @@
 #include "app_mgr_event.h"
 #include "app_preloader.h"
 #include "app_record_id.h"
+#include "app_refresh_recipient.h"
 #include "app_running_manager.h"
 #include "app_running_record.h"
 #include "app_running_status_listener_interface.h"
@@ -58,10 +59,13 @@
 #include "exit_resident_process_manager.h"
 #include "fault_data.h"
 #include "fd_guard.h"
+#include "fork_image_info.h"
 #include "hisysevent_report.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
+#include "image_error_handler_interface.h"
+#include "image_process_state_observer_interface.h"
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
@@ -96,6 +100,7 @@ class FocusChangeInfo;
 namespace AppExecFwk {
 using OHOS::AAFwk::Want;
 using AAFwk::FdGuard;
+using ImageError = IImageErrorHandler::ImageError;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
 class WindowPidVisibilityChangedListener;
@@ -126,6 +131,30 @@ public:
     struct AppStateCallbackWithUserId {
         sptr<IAppStateCallback> callback;
         int32_t userId = -1;
+    };
+
+    struct MakeImageRequest {
+        std::string bundleName;
+        int32_t userId = -1;
+        int32_t appCloneIndex = -1;
+        PreloadMode preloadMode = PreloadMode::PRELOAD_NONE;
+
+        bool operator==(const MakeImageRequest& other) const
+        {
+            return bundleName == other.bundleName &&
+                   userId == other.userId &&
+                   appCloneIndex == other.appCloneIndex;
+        }
+
+        struct Hash {
+            size_t operator()(const MakeImageRequest& req) const
+            {
+                size_t h1 = std::hash<std::string>{}(req.bundleName);
+                size_t h2 = std::hash<int32_t>{}(req.userId);
+                size_t h3 = std::hash<int32_t>{}(req.appCloneIndex);
+                return h1 ^ (h2 << 1) ^ (h3 << 2);
+            }
+        };
     };
 
     AppMgrServiceInner();
@@ -287,6 +316,21 @@ public:
      * @param recordId id of the app record
      */
     virtual void PreloadModuleFinished(const int32_t pid);
+
+    void MakeImage(const std::string &bundleName, int32_t userId,
+        AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler);
+    ImageError MakeImageInner(const std::string &bundleName, int32_t userId,
+        AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler);
+    void DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler);
+    ImageError DestroyImageInner(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler);
+    ImageError DestroyImageForUninstallOrUpgrade(int32_t uid);
+    ImageError DestroyImageForFault(const std::string& bundleName, int32_t userId, int32_t appIndex);
+    int32_t HandleForkAll(int32_t pid);
+    ImageError HandleForkAllInner(std::shared_ptr<AppRunningRecord> appRecord, int32_t pid);
+    void HandleMakeImageTimeout(const std::string& bundleName, int32_t userId, int32_t appIndex);
+    void CheckMakeImageState(std::shared_ptr<AppRunningRecord> appRecord, ImageError error);
+    void HandleMakeImageFailed(const PreloadRequest& request, ImageError error);
+    void HandleMakeImageFailed(const std::string& bundleName, int32_t userId, int32_t appIndex, ImageError err);
 
     /**
      * ApplicationForegrounded, set the application to Foreground State.
@@ -761,7 +805,8 @@ public:
      * @param isChildProcess is child process died.
      * @return
      */
-    void OnRemoteDied(const wptr<IRemoteObject> &remote, bool isRenderProcess = false, bool isChildProcess = false);
+    void OnRemoteDied(const wptr<IRemoteObject> &remote, bool isRenderProcess = false, bool isChildProcess = false,
+        bool isImageProcess = false);
 
     /**
      * @brief Call the callbacks to notify one process should go dying due fatal error.
@@ -770,6 +815,8 @@ public:
     void NotifyStartProcessFailed(std::shared_ptr<AppRunningRecord> appRecord);
 
     void HandleTimeOut(const AAFwk::EventWrap &event);
+
+    void HandleTimeOutInner(const AAFwk::EventWrap &event);
 
     void CacheExitInfo(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -886,6 +933,10 @@ public:
      */
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
 
+    int32_t RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer);
+
+    int32_t UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer);
+
     /**
      * Register application or process state observer.
      * @param observer, Is ability foreground state observer
@@ -998,6 +1049,9 @@ public:
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
 
+    void SubmitDestroyImageTask(const std::shared_ptr<AppRunningRecord>,
+        const int32_t reason, const std::string &exitMsg);
+
     /**
      * Record process exit reason to appRunningRecord
      * @param pid pid
@@ -1037,7 +1091,7 @@ public:
         const std::string &eventName, const Want &want);
 
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation",
-        bool isKillPrecedeStart = false);
+        bool isKillPrecedeStart = false, int32_t recordId = -1);
 
     int32_t KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
         AAFwk::EventInfo &eventInfo);
@@ -1900,6 +1954,8 @@ private:
 
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
+    void OnImageProcessRemoteDied(const wptr<IRemoteObject> &remote);
+
     void AddWatchParameter();
 
     bool VerifyAPL() const;
@@ -2044,10 +2100,10 @@ private:
     void SetAppEnvInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg& startMsg);
 
     void TimeoutNotifyApp(int32_t pid, int32_t uid, const std::string& bundleName, const std::string& processName,
-        const FaultData &faultData);
+        const FaultData &faultData, int32_t recordId);
 
     void AppRecoveryNotifyApp(int32_t pid, const std::string& bundleName,
-        FaultDataType faultType, const std::string& markers);
+        FaultDataType faultType, const std::string& markers, int32_t recordId);
 
     void ProcessAppDebug(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
     AppDebugInfo MakeAppDebugInfo(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
@@ -2091,7 +2147,8 @@ private:
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
     int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex,
-        AppExecFwk::PreloadMode preloadMode, AppExecFwk::PreloadPhase preloadPhase);
+        AppExecFwk::PreloadMode preloadMode, AppExecFwk::PreloadPhase preloadPhase, bool needMakeImage = false,
+        sptr<IImageErrorHandler> errorHandler = nullptr);
     void HandlePreloadApplication(const PreloadRequest &request);
     void SetPreloadDebugApp(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ApplicationInfo> appInfo);
     bool CheckAppRecordExistByPreloadRequest(const PreloadRequest &request, std::string &processName,
@@ -2184,7 +2241,7 @@ private:
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
-        bool isNeedExit = false);
+        bool isNeedExit = false, int32_t recordId = -1);
 #ifdef APP_MGR_KILL_REASON_TAG
     void RecordAppfreezeKillReason(int32_t pid, const FaultData &faultData);
 #endif
@@ -2261,6 +2318,40 @@ private:
     void HandleForegroundAbilityDied(const std::vector<sptr<IRemoteObject>>& abilityTokens,
         ApplicationState state);
 
+    int32_t GetValidUserId(int32_t userId);
+    int32_t NotifyImageOperationFailed(sptr<IImageErrorHandler> errorHandler, ImageError errorCode);
+    int32_t KillImageProcess(uint64_t checkpointId);
+
+    int32_t PreAddImageInfo(const std::string& bundleName, int32_t userId, int32_t appIndex,
+        sptr<IImageErrorHandler> errorHandler, const PreloadRequest& preloadRequest);
+    void SetTemplatePid(std::shared_ptr<AppRunningRecord> appRecord);
+    void UpdateImageInfo(int32_t imagePid, uint64_t checkpointId, std::shared_ptr<AppRunningRecord> appRecord);
+    void RemoveImageInfo(const std::string &bundleName, int32_t userId, int32_t appIndex);
+    void RemoveImageInfoByCheckpointId(uint64_t checkpointId);
+    bool IsImageInfoExist(std::shared_ptr<AppRunningRecord> appRecord);
+    bool IsImageInfoExist(const std::string &bundleName, int32_t userId, int32_t appIndex);
+    std::shared_ptr<ForkImageInfo> GetImageInfo(const std::string &bundleName, int32_t userId, int32_t appIndex);
+    std::shared_ptr<ForkImageInfo> GetImageInfoByCheckPointId(uint64_t checkpointId);
+    std::shared_ptr<ForkImageInfo> GetImageInfoByUid(int32_t uid);
+    std::shared_ptr<ForkImageInfo> GetImageInfoByRemoteObject(sptr<IRemoteObject> object);
+    bool IsImageMakeSuccess(const std::string &bundleName, int32_t userId, int32_t appIndex);
+    bool IsImageInfoMatched(std::shared_ptr<ForkImageInfo> imageInfo, int32_t appIndex, const std::string &processName,
+        const std::string &instanceKey, const std::string &specifiedProcessFlag, const std::string &customProcessFlag);
+    void RemoveImageDeathRecipient(std::shared_ptr<ForkImageInfo> imageInfo);
+    std::shared_ptr<AppRunningRecord> CreateAppRunningRecordFromImageInfo(std::shared_ptr<ForkImageInfo> imageInfo);
+
+    int32_t TryToUseImageInfo(std::shared_ptr<AbilityInfo> abilityInfo,
+        std::shared_ptr<ApplicationInfo> appInfo, sptr<IRemoteObject> token, const std::string& callerKey,
+        int32_t appIndex, const std::string& processName, const std::string& instanceKey,
+        const std::string& specifiedProcessFlag, const std::string& customProcessFlag,
+        std::shared_ptr<AppRunningRecord>& appRecord);
+
+    void SnapshotStartReport(int32_t uid, const std::string &bundleName, int32_t result, const std::string &reason);
+    void SnapshotErrorReport(int32_t uid, const std::string &bundleName, int32_t result, const std::string &reason);
+
+    void MarkTemplateProcess(int32_t templatePid, std::string bundleName);
+    void UnMarkTemplateProcess(int32_t templatePid);
+
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
@@ -2328,6 +2419,16 @@ private:
     ffrt::mutex exitMasterProcessRoleLock_;
     std::shared_mutex startProcessLock_;
     bool isInitAppWaitingDebugListExecuted_ = false;
+
+    std::mutex imageInfoLock_;
+    std::unordered_map<MakeImageRequest, std::shared_ptr<ForkImageInfo>, MakeImageRequest::Hash> imageInfoMap_;
+
+    std::mutex imageSerialLock_;
+
+    std::mutex imageReportLock_;
+    std::map<std::string, int32_t> imageStartReportMap_;
+    std::chrono::steady_clock::time_point lastReportTime_ = std::chrono::steady_clock::now();
+    int32_t imageStartCount_ {0};
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

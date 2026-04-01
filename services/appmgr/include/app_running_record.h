@@ -543,6 +543,8 @@ public:
      */
     void SetAppDeathRecipient(const sptr<AppDeathRecipient> &appDeathRecipient);
 
+    sptr<AppDeathRecipient> GetAppDeathRecipient() const;
+
     /**
      * @brief Obtains application priority info.
      *
@@ -719,6 +721,8 @@ public:
      * Called when one specified request is finished to clear the request
      */
     void ResetSpecifiedRequest();
+
+    void TryToUpdateWorkProcessInfo();
 
     void SchedulePrepareTerminate(const std::string &moduleName);
 
@@ -915,6 +919,24 @@ public:
     bool IsPreloading() const;
 
     bool IsPreloaded() const;
+
+    void SetMakeImageState(MakeImageState state);
+
+    MakeImageState GetMakeImageState() const;
+
+    void SetIsCreateFromImage(bool flag);
+
+    bool GetIsCreateFromImage() const;
+
+    void SetImageProcessType(ImageProcessType type);
+
+    ImageProcessType GetImageProcessType() const;
+
+    void SetNeedRemoveDeathRecipient(bool flag);
+
+    bool GetNeedRemoveDeathRecipient() const;
+
+    void SetNeedUpdate(bool needUpdate);
 
     void SetPreloadMode(PreloadMode mode);
 
@@ -1360,6 +1382,12 @@ private:
     WatchdogVisibilityState watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_READY;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE; // render record
     std::chrono::system_clock::time_point preloadAttachTimeoutStartTime_;
+
+    MakeImageState makeImageState_ = MakeImageState::NONE;
+    bool isCreateFromImage_ = false;
+    ImageProcessType imageProcessType_ = ImageProcessType::UNSPECIFIED;
+    bool needRemoveDeathRecipient_ = true;
+    bool needUpdate_ = false;
 
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     uint64_t appRunningUniqueId_ = 0; // The unique running ID generated from random number

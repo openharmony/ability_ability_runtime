@@ -235,7 +235,7 @@ void AppSchedulerProxy::ScheduleMemoryCommon(const int32_t level, const uint32_t
 }
 
 void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemoteObject> &token,
-    const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
+    const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId, const std::shared_ptr<AppUpdateInfo> updateInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -270,12 +270,42 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
         TAG_LOGE(AAFwkTag::APPMGR, "write ability record id fail.");
         return;
     }
+    if (updateInfo) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(updateInfo.get())) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag and updateInfo");
+            return;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag");
+            return;
+        }
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_LAUNCH_ABILITY_TRANSACTION), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             "AppLifeCycleDeal::LaunchAbility; ipc error " + std::to_string(ret));
+    }
+}
+
+void AppSchedulerProxy::ScheduleUpdateWorkProcessInfo(const std::shared_ptr<AppUpdateInfo> updateInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteParcelable(updateInfo.get())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write updateInfo fail.");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_UPDATE_WORK_PROCESS_INFO), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }
 }
 

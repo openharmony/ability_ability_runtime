@@ -147,7 +147,10 @@ public:
      * @return
      */
     virtual void ScheduleLaunchAbility(const AbilityInfo &, const sptr<IRemoteObject> &,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) override;
+        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId,
+        std::shared_ptr<AppUpdateInfo> updateInfo = nullptr) override;
+
+    virtual void ScheduleUpdateWorkProcessInfo(const std::shared_ptr<AppUpdateInfo> updateInfo) override;
 
     /**
      * ScheduleCleanAbility, call ScheduleCleanAbility() through proxy project,
