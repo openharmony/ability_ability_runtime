@@ -210,12 +210,6 @@ int32_t ETSStartupManager::GetStartupTaskManager(ani_env *env, ani_object startu
         TAG_LOGE(AAFwkTag::STARTUP, "get dependencies failed");
         return ERR_STARTUP_INVALID_VALUE;
     }
-    for (const auto &dep : dependencies) {
-        if (dep.empty()) {
-            TAG_LOGE(AAFwkTag::STARTUP, "empty task name");
-            return ERR_STARTUP_INVALID_VALUE;
-        }
-    }
     std::shared_ptr<StartupConfig> config;
     ani_boolean isConfigUndefined = ANI_TRUE;
     env->Reference_IsUndefined(reinterpret_cast<ani_ref>(startupConfig), &isConfigUndefined);
