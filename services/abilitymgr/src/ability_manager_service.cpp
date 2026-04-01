@@ -281,6 +281,8 @@ constexpr const char* UD_KEY = "ability.want.params.udKey";
 constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
 constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 constexpr int64_t CLEAR_USER_LOCKED_BUNDLE_LIST_KEY_DELAY_TIME = 60 * 1000; // 60s
+constexpr const char* VPN_PERMISSION_IF = "libnet_vpn_permission_if.z.so";
+using RequestVpnPermission = int32_t(*)(int32_t, const std::string&, const std::string&,bool &);
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
@@ -5764,6 +5766,37 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     return err;
 }
 
+bool AbilityManagerService::CheckSupportVpn(const AppExecFwk::AbilityInfo& abilityInfo) 
+{
+    if(abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::VPN) {
+        return false;
+    }
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CHECK_CALLER_IS_SYSTEM_APP start uid: %{public}d", callerUid);
+    // LCOV_EXCL_START
+    if (AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        return true;
+    }
+    auto bundleName = abilityInfo.applicationInfo.bundleName;
+    bool isAuthorized = false;
+    static void* vpnPermissionIf = dlopen(VPN_PERMISSION_IF, RTLD_LAZY); 
+    if (vpnPermissionIf == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "vpnPermissionIf is nullptr");
+        return false;
+    }
+    static auto requestVpnPermission =
+        reinterpret_cast<RequestVpnPermission>(dlsym(vpnPermissionIf, "RequestVpnPermission"));
+    if (requestVpnPermission == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "requestVpnPermission is nullptr");
+        return false;
+    }
+    // LCOV_EXCL_STOP
+    requestVpnPermission(callerUid, bundleName, abilityInfo.name, isAuthorized);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "allow uid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
+        " isAuthorized: %{public}d", callerUid, bundleName.c_str(), abilityInfo.name.c_str(), isAuthorized);
+    return isAuthorized;
+}
+
 int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, const sptr<SessionInfo> &sessionInfo,
@@ -5814,7 +5847,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
             return ERR_WRONG_INTERFACE_CALL;
         }
         // not allow app to connect other extension by using connectServiceExtensionAbility
-        bool isVpn = abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN;
+        bool isVpn = CheckSupportVpn(abilityInfo);
         if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService && !isVpn) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "ability, type not service");
             return TARGET_ABILITY_NOT_SERVICE;
