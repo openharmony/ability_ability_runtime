@@ -33,8 +33,8 @@ struct MemDumpInfo : public Parcelable {
     bool needLeakobj = false;
     uint32_t pid = 0;
     uint32_t tid = 0;
-    bool isSync = true;
-    std::string caller;
+    bool isSync = false;
+    bool mayReportToOEM = false;
     virtual bool Marshalling(Parcel &parcel) const override;
     static MemDumpInfo *Unmarshalling(Parcel &parcel);
 };
