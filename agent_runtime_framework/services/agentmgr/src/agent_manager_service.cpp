@@ -43,6 +43,24 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(AgentManagerS
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
+namespace {
+bool IsMatchedAgentCardTarget(const AAFwk::Want &want, const AgentCard &card)
+{
+    if (card.appInfo == nullptr) {
+        return false;
+    }
+
+    const auto &element = want.GetElement();
+    if (element.GetBundleName() != card.appInfo->bundleName ||
+        element.GetAbilityName() != card.appInfo->abilityName) {
+        return false;
+    }
+
+    return element.GetModuleName().empty() || card.appInfo->moduleName.empty() ||
+        element.GetModuleName() == card.appInfo->moduleName;
+}
+}
+
 sptr<AgentManagerService> AgentManagerService::GetInstance()
 {
     std::lock_guard<std::mutex> lock(g_mutex);
@@ -307,6 +325,10 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     if (AgentCardMgr::GetInstance().GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
         return AAFwk::ERR_INVALID_AGENT_CARD_ID;
+    }
+    if (!IsMatchedAgentCardTarget(want, card)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "want target does not match agent card");
+        return AAFwk::ERR_WRONG_INTERFACE_CALL;
     }
     TAG_LOGI(AAFwkTag::SER_ROUTER, "connecting %{public}s-%{public}s", want.GetBundle().c_str(), agentId.c_str());
 
