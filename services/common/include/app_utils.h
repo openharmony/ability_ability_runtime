@@ -470,6 +470,7 @@ private:
     std::mutex requireBigMemoryAppMutex_;
     DeviceConfiguration<std::vector<std::string>>
         allowStartNativeProcessApps_ = {false, {}};
+    std::mutex allowStartNativeProcessAppsMutex_;
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerProc_ = {false, DEFAULT_MAX_EXT_PER_PROC};
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerDevice_ = {false, DEFAULT_MAX_EXT_PER_DEV};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
