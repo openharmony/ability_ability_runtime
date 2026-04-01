@@ -97,6 +97,12 @@ int32_t ETSStartupConfig::Init(ani_object config)
         TAG_LOGE(AAFwkTag::STARTUP, "null config");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
+    ani_boolean isUndefined = ANI_TRUE;
+    env->Reference_IsUndefined(reinterpret_cast<ani_ref>(config), &isUndefined);
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::STARTUP, "undefined config");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
 
     InitAwaitTimeout(env, config);
     InitListener(env, config);
