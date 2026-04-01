@@ -211,10 +211,14 @@ int32_t ETSStartupManager::GetStartupTaskManager(ani_env *env, ani_object startu
         return ERR_STARTUP_INVALID_VALUE;
     }
     std::shared_ptr<StartupConfig> config;
-    int32_t result = GetConfig(env, startupConfig, config);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::STARTUP, "get config failed");
-        return result;
+    ani_boolean isConfigUndefined = ANI_TRUE;
+    env->Reference_IsUndefined(reinterpret_cast<ani_ref>(startupConfig), &isConfigUndefined);
+    if (!isConfigUndefined) {
+        int32_t result = GetConfig(env, startupConfig, config);
+        if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::STARTUP, "get config failed");
+            return result;
+        }
     }
     bool supportFeatureModule = isDefaultContext != ANI_TRUE;
     result = DelayedSingleton<StartupManager>::GetInstance()->BuildAppStartupTaskManager(dependencies,
