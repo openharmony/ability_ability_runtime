@@ -36,6 +36,9 @@ bool MemDumpInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isSync)) {
         return false;
     }
+    if (!parcel.WriteString(caller)) {
+        return false;
+    }
     return true;
 }
 
@@ -71,6 +74,10 @@ MemDumpInfo *MemDumpInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     if (!parcel.ReadBool(info->isSync)) {
+        delete info;
+        return nullptr;
+    }
+    if (!parcel.ReadString(info->caller)) {
         delete info;
         return nullptr;
     }
