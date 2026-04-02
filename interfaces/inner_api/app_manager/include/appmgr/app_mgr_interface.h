@@ -623,6 +623,14 @@ public:
      */
     virtual bool SetAppFreezeFilter(int32_t pid) = 0;
 
+    /**
+     * @brief Update freeze excluded pid set.
+     * @param isAdd true to add pid, false to remove pid.
+     * @param targetPid The target process id to be added or removed.
+     * @param profilerPid The profiler process id.
+     */
+    virtual void UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid) = 0;
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     /**
      * @brief Set whether the process is continuousTask.

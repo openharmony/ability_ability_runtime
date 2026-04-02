@@ -286,6 +286,11 @@ public:
         return false;
     }
 
+    virtual void UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid)
+    {
+        return;
+    }
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 
     virtual int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
