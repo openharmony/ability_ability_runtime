@@ -53,6 +53,12 @@ static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cac
 static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
 static constexpr const char* const JS_HEAP_LOGTYPE = "user.event_config.js_heap_logtype";
 static constexpr const char* const EVENT_RAWHEAP = "event_rawheap";
+#ifdef __LP64__
+static constexpr const char* const SO_NAME = "libmemleak.z.so";
+#else
+static constexpr const char* const SO_NAME = "";
+#endif
+static constexpr const char* const GET_MEM_LEAK_STRING_SYMBOL = "OHOS_GetMemLeakString";
 static constexpr uint64_t OOM_DUMP_INTERVAL = 7 * 24 * 60 * 60;
 static constexpr uint64_t OOM_DUMP_SPACE_LIMIT = 30ull * 1024 * 1024 * 1024;
 static constexpr uint32_t EVENT_RESOURCE_OVERLIMIT_MASK = 6;
@@ -60,6 +66,7 @@ static constexpr uint64_t BIT_MASK = 1;
 static constexpr uint32_t BUF_SIZE_256 = 256;
 static constexpr int DECIMAL_BASE = 10;
 static constexpr int KB_PER_MB = 1024;
+static constexpr size_t MEM_LEAK_MAX_SIZE = 100;
 
 enum {
     INDEX_DELIVERY_TS = 0,
@@ -72,6 +79,12 @@ enum {
     INDEX_HAS_SENT,
     INDEX_ROM_RSV_SIZE,
     PROPERTY2C_SIZE
+};
+
+enum {
+    TYPE_TXT = 0,
+    TYPE_VECTOR,
+    TYPE_SNAPSHOT
 };
 
 DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application)
@@ -312,6 +325,98 @@ void DumpRuntimeHelper::DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
         cjEnv->forceFullGC();
     }
 #endif
+}
+
+void DumpRuntimeHelper::DumpMem(const OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "dump type: %{public}d", static_cast<uint32_t>(info.dumpType));
+    if (info.dumpType == MemDumpType::NATIVE) {
+        DumpNativeHeap(info, dumpResult);
+    }
+}
+
+void DumpRuntimeHelper::DumpNativeHeap(const OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    if (info.needLeakobj) {
+        TAG_LOGI(AAFwkTag::APPKIT, "dump native need leakobj");
+        if (!GetDumpResult(dumpResult)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "GetDumpResult failed");
+        }
+    } else {
+        TAG_LOGI(AAFwkTag::APPKIT, "dump native no need leakobj");
+        int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::NATIVE_SNAPSHOT));
+        if (fd > 0) {
+            if (!GetSnapshot(fd)) {
+                TAG_LOGE(AAFwkTag::APPKIT, "GetSnapshot failed");
+            }
+            close(fd);
+        } else {
+            TAG_LOGE(AAFwkTag::APPKIT, "RequestFileDescriptor failed");
+        }
+    }
+}
+
+GetMemLeakStringFunc DumpRuntimeHelper::LoadMemLeakFunc()
+{
+    if (SO_NAME[0] == '\0') {
+        TAG_LOGW(AAFwkTag::APPKIT, "mem leak so is unsupported on non-64-bit");
+        return nullptr;
+    }
+    void* hd = dlopen(SO_NAME, RTLD_LAZY);
+    if (!hd) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Error loading %{public}s", SO_NAME);
+        return nullptr;
+    }
+    auto func = reinterpret_cast<GetMemLeakStringFunc>(dlsym(hd, GET_MEM_LEAK_STRING_SYMBOL));
+    if (!func) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to resolve symbol: %{public}s", GET_MEM_LEAK_STRING_SYMBOL);
+        dlclose(hd);
+        return nullptr;
+    }
+    return func;
+}
+
+bool DumpRuntimeHelper::GetDumpResult(std::string &dumpResult)
+{
+    auto func = LoadMemLeakFunc();
+    if (!func) {
+        return false;
+    }
+    char* buf = nullptr;
+    bool ret = func(TYPE_TXT, &buf, MEM_LEAK_MAX_SIZE);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::APPKIT, "TYPE_TXT Error");
+    } else if (buf != nullptr) {
+        dumpResult = buf;
+        TAG_LOGI(AAFwkTag::APPKIT, "TYPE_TXT finish, result:%{public}s", dumpResult.c_str());
+    }
+    free(buf);
+    return ret;
+}
+
+bool DumpRuntimeHelper::GetSnapshot(int fd)
+{
+    auto func = LoadMemLeakFunc();
+    if (!func) {
+        return false;
+    }
+    char* buf = nullptr;
+    bool ret = func(TYPE_SNAPSHOT, &buf, MEM_LEAK_MAX_SIZE);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::APPKIT, "TYPE_SNAPSHOT Error");
+    } else if (buf != nullptr) {
+        size_t len = strlen(buf);
+        lseek(fd, 0, SEEK_END);
+        ssize_t written = write(fd, buf, len);
+        if (written < 0) {
+            TAG_LOGE(AAFwkTag::APPKIT, "write snapshot failed, errno:%{public}d", errno);
+            free(buf);
+            return false;
+        }
+        TAG_LOGI(AAFwkTag::APPKIT, "TYPE_SNAPSHOT finish");
+    }
+    free(buf);
+    return ret;
 }
 
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)

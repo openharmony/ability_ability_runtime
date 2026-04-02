@@ -300,6 +300,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) override;
+    /**
+     * DumpMem, call DumpMem() through proxy project.
+     * triggerGC and dump application's memory info.
+     *
+     * @param info The information to be dumped
+     * @param dumpResult The dump result string
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual int32_t DumpMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult) override;
 
     // the function about service running info
     /**

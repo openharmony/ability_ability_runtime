@@ -111,6 +111,17 @@ public:
     virtual void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) override;
 
     /**
+     * ScheduleMem, call ScheduleMem() through proxy project,
+     * triggerGC and dump application's memory info.
+     *
+     * @param info, pid, tid, needGc, needSnapshot
+     * @param dumpResult The dump result string
+     *
+     * @return
+     */
+    virtual void ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult) override;
+
+    /**
      * ScheduleLaunchApplication, call ScheduleLaunchApplication() through proxy project,
      * Notify application to launch application.
      *

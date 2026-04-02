@@ -21,6 +21,7 @@
 #include "ams_mgr_interface.h"
 #include "app_foreground_state_observer_interface.h"
 #include "app_malloc_info.h"
+#include "app_mem_dump_info.h"
 #include "app_mgr_ipc_interface_code.h"
 #include "app_record_id.h"
 #include "application_info.h"
@@ -339,6 +340,16 @@ public:
      * @return ERR_OK ,return back success, others fail.
      */
     virtual int DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) = 0;
+
+    /**
+     * DumpMem, call DumpMem() through proxy project.
+     * triggerGC and dump application's memory info.
+     *
+     * @param info The information to be dumped
+     * @param dumpResult The dump result string
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual int DumpMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult) = 0;
 
     /**
      * Start a resident process
