@@ -47,6 +47,11 @@ ChildMainThread::~ChildMainThread()
     TAG_LOGD(AAFwkTag::APPKIT, "ChildMainThread deconstructor called");
 }
 
+extern "C" void ChildMainThreadStart(const std::map<std::string, int32_t> &fds)
+{
+    ChildMainThread::Start(fds);
+}
+
 void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "ChildMainThread start");
