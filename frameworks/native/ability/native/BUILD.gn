@@ -758,6 +758,7 @@ ohos_shared_library("insight_intent_executor") {
   }
 
   external_deps += [
+    "ability_base:extractortool",
     "ability_base:session_info",
     "ability_base:want",
     "access_token:libaccesstoken_sdk",
