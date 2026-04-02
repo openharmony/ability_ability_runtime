@@ -1695,6 +1695,9 @@ int32_t AppMgrServiceInner::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject>
         "NotifyPreloadAbilityStateChanged bundle:%{public}s, pid:%{public}d, isPreForeground:%{public}d",
         appRecord->GetBundleName().c_str(), appRecord->GetPid(), isPreForeground);
     appRecord->SetPreForeground(isPreForeground);
+    if (!isPreForeground) {
+        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+    }
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessPreForegroundChanged(appRecord);
     return ERR_OK;
 }
@@ -2030,7 +2033,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
                 appRecord->SetPreloadMode(PreloadMode::PRE_LAUNCH);
             }
             if (loadParam->isPreloadStart) {
-                appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+                UpdateWindowStageCreatedPreloadState(appRecord);
             }
         }
         ReportUIExtensionProcColdStartToRss(abilityInfo, want, loadParam->isPreloadUIExtension);
@@ -2174,8 +2177,11 @@ void AppMgrServiceInner::HandleExistingAppRecordAfterFound(std::shared_ptr<AppRu
         appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
     }
     if (appRecord->IsPreloaded() || appRecord->IsPreloading()) {
-        appRecord->SetPreloadState(PreloadState::NONE);
-        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+        if (appRecord->GetPreloadPhase() != PreloadPhase::WINDOW_STAGE_CREATED ||
+            appRecord->GetAbilities().size() > 1) {
+            appRecord->SetPreloadState(PreloadState::NONE);
+            appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+        }
     }
     UpdateUIExtensionPreloadState(appRecord, false);
     int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
@@ -4480,6 +4486,7 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
     CHECK_POINTER_AND_RETURN_LOG(appRecord, "app unexist");
     if (appRecord->IsPreForeground() && state == AbilityState::ABILITY_STATE_FOREGROUND) {
         appRecord->SetPreForeground(false);
+        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessPreForegroundChanged(appRecord);
     }
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
@@ -6423,6 +6430,17 @@ void AppMgrServiceInner::UpdateUIExtensionPreloadState(const std::shared_ptr<App
         appRecord->GetUIExtensionPreloadState());
 }
 
+void AppMgrServiceInner::UpdateWindowStageCreatedPreloadState(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+    appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+    appRecord->SetPreloadPhase(PreloadPhase::WINDOW_STAGE_CREATED);
+    appRecord->SetPreloadState(PreloadState::PRELOADING);
+}
+
 bool AppMgrServiceInner::SetPreloadFlagForProcessInfo(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
@@ -7018,7 +7036,7 @@ int AppMgrServiceInner::FinishUserTestLocked(
 }
 
 void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, const std::string &customProcess)
+    int32_t requestId, const std::string &customProcess, bool isWindowStagePreload)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Start specified ability.");
     if (!CheckRemoteClient()) {
@@ -7106,6 +7124,9 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetPerfCmd(wantPtr->GetStringParam(PERF_CMD));
             appRecord->SetErrorInfoEnhance(wantPtr->GetBoolParam(ERROR_INFO_ENHANCE, false));
             appRecord->SetMultiThread(wantPtr->GetBoolParam(MULTI_THREAD, false));
+        }
+        if (isWindowStagePreload) {
+            UpdateWindowStageCreatedPreloadState(appRecord);
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetStartupTaskData(want);
