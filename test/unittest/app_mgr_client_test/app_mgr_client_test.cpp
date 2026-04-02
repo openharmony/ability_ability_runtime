@@ -582,7 +582,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartSpecifiedAbility_001, TestSize.Leve
 HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterStartSpecifiedAbilityResponse_001, TestSize.Level2)
 {
     sptr<IStartSpecifiedAbilityResponse> response = nullptr;
-    auto appMgrClient = std::make_unique<AppMgrClient>();
+    auto appMgrClient = std::make_shared<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
     auto result = appMgrClient->ConnectAppMgrService();
@@ -1697,6 +1697,75 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateConfigurationByUserIds_002, TestSi
     std::vector<int32_t> userids;
     auto result = appMgrClient->UpdateConfigurationByUserIds(config, userids);
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+}
+
+/**
+ * @tc.name: AppMgrClient_RegisterImageProcessStateObserver_001
+ * @tc.desc: RegisterImageProcessStateObserver.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterImageProcessStateObserver_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<IImageProcessStateObserver> observer = nullptr;
+    auto result = appMgrClient->RegisterImageProcessStateObserver(observer);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppMgrClient_UnregisterImageProcessStateObserver_001
+ * @tc.desc: UnregisterImageProcessStateObserver.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterImageProcessStateObserver_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<IImageProcessStateObserver> observer = nullptr;
+    auto result = appMgrClient->UnregisterImageProcessStateObserver(observer);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MakeImage_001
+ * @tc.desc: make image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, MakeImage_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    std::string bundleName = "com.acts.makeImagetest";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrClient->MakeImage(bundleName, userId, preloadMode, appIndex, nullptr);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: DestroyImage_001
+ * @tc.desc: destory image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, DestroyImage_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    uint64_t checkpointId = 1;
+    int32_t ret = appMgrClient->DestroyImage(checkpointId, nullptr);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

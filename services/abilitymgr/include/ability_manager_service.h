@@ -60,6 +60,8 @@
 #include "iremote_object.h"
 #include "kiosk_manager.h"
 #include "mission_list_manager_interface.h"
+#include "modular_object_event_mgr.h"
+#include "modular_object_manager.h"
 #include "parameter.h"
 #include "pending_want_manager.h"
 #include "permission_verification.h"
@@ -2713,6 +2715,15 @@ protected:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
+    
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QuerySelfModularObjectExtensionInfos(
+        std::vector<ModularObjectExtensionInfo> &extensionInfos) override;
 
     /**
      * @brief Get list of applications launched before the first unlock.
@@ -2728,6 +2739,14 @@ private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
+
+    /**
+     * @brief Parse and validate userId from want parameters.
+     * @param want The want containing userId parameter.
+     * @param userId Output userId after parsing and validation.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int ParseAndValidateUserId(const Want &want, int32_t &userId);
 
     /**
      * @brief Checks and submits hidden auto-startup status bar check task.
@@ -3361,6 +3380,8 @@ private:
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
+    std::shared_ptr<AbilityRuntime::ModularObjectExtensionEventMgr> modularObjectExtensionEventMgr_;
+
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
     void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
@@ -3375,6 +3396,8 @@ private:
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
+
+    bool CheckSupportVpn(const AppExecFwk::AbilityInfo& abilityInfo);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);

@@ -19,6 +19,8 @@
 #define protected public
 #include "app_foreground_state_observer_stub.h"
 #include "app_mgr_stub.h"
+#include "image_error_handler_stub.h"
+#include "image_process_state_observer_stub.h"
 #undef private
 #undef protected
 
@@ -43,6 +45,26 @@ public:
     virtual ~AppForegroundStateObserverMock() = default;
     void OnAppStateChanged(const AppStateData &appStateData) override
     {}
+};
+
+class MockImageErrorHandlerStub : public ImageErrorHandlerStub {
+public:
+    MockImageErrorHandlerStub() = default;
+    virtual ~MockImageErrorHandlerStub() = default;
+
+    void OnError(int32_t errCode) override
+    {}
+};
+
+class ImageProcessStateObserverMock : public ImageProcessStateObserverStub {
+public:
+    ImageProcessStateObserverMock() = default;
+    virtual ~ImageProcessStateObserverMock() = default;
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        return 0;
+    }
 };
 
 class RenderStateObserverMock : public RenderStateObserverStub {
@@ -1138,6 +1160,94 @@ HWTEST_F(AppMgrStubTest, SetProcessPrepareExit_0100, TestSize.Level1)
 
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleMakeImage_ShouldReturnInvalidValueWhenFlagIsTrueAndHandlerIsNullptr
+ * @tc.desc: handle make image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleMakeImage_ShouldReturnInvalidValueWhenFlagIsTrueAndHandlerIsNullptr, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::string bundleName = "com.acts.makeimagetest";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    data.WriteString16(Str8ToStr16(bundleName));
+    data.WriteInt32(userId);
+    data.WriteInt32(static_cast<int32_t>(preloadMode));
+    data.WriteInt32(appIndex);
+    data.WriteBool(true);
+    EXPECT_CALL(*mockAppMgrService_, MakeImage(_, _, _, _, _)).Times(0);
+    auto result = mockAppMgrService_->HandleMakeImage(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleMakeImage_ShouldReturnNoErrorWhenFlagIsTrueAndHandlerIsNotNullptr
+ * @tc.desc: handle make image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleMakeImage_ShouldReturnNoErrorWhenFlagIsTrueAndHandlerIsNotNullptr, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::string bundleName = "com.acts.makeimagetest";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    data.WriteString16(Str8ToStr16(bundleName));
+    data.WriteInt32(userId);
+    data.WriteInt32(static_cast<int32_t>(preloadMode));
+    data.WriteInt32(appIndex);
+    data.WriteBool(true);
+    sptr<MockImageErrorHandlerStub> errorHandler = new (std::nothrow) MockImageErrorHandlerStub();
+    data.WriteRemoteObject(errorHandler->AsObject());
+    EXPECT_CALL(*mockAppMgrService_, MakeImage(_, _, _, _, _)).Times(1);
+    auto result = mockAppMgrService_->HandleMakeImage(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleDestroyImage_ShouldReturnInvalidValueWhenFlagIsTrueAndHandlerIsNullptr
+ * @tc.desc: handle destroy image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleDestroyImage_ShouldReturnInvalidValueWhenFlagIsTrueAndHandlerIsNullptr, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint64_t checkpointId = 1;
+    data.WriteUint64(checkpointId);
+    data.WriteBool(true);
+    EXPECT_CALL(*mockAppMgrService_, DestroyImage(_, _)).Times(0);
+    auto result = mockAppMgrService_->HandleDestroyImage(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleDestroyImage_ShouldReturnNoErrorWhenFlagIsTrueAndHandlerIsNotNullptr
+ * @tc.desc: handle destroy image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleDestroyImage_ShouldReturnNoErrorWhenFlagIsTrueAndHandlerIsNotNullptr, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint64_t checkpointId = 1;
+    data.WriteUint64(checkpointId);
+    data.WriteBool(true);
+    sptr<MockImageErrorHandlerStub> errorHandler = new (std::nothrow) MockImageErrorHandlerStub();
+    data.WriteRemoteObject(errorHandler->AsObject());
+    EXPECT_CALL(*mockAppMgrService_, DestroyImage(_, _)).Times(1);
+    auto result = mockAppMgrService_->HandleDestroyImage(data, reply);
     EXPECT_EQ(result, NO_ERROR);
 }
 

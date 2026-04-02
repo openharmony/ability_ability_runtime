@@ -264,6 +264,77 @@ void AppMgrService::PreloadModuleFinished(const int32_t recordId)
     return appMgrServiceInner_->PreloadModuleFinished(IPCSkeleton::GetCallingPid());
 }
 
+int32_t AppMgrService::MakeImage(const std::string &bundleName, int32_t userId,
+    AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "MakeImage called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "MakeImage failed");
+        return ERR_INVALID_OPERATION;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto task = [appMgrServiceInner = appMgrServiceInner_, bundleName, userId, preloadMode,
+        appIndex, errorHandler] () {
+        appMgrServiceInner->MakeImage(bundleName, userId, preloadMode, appIndex, errorHandler);
+    };
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "MakeImageTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
+    return ERR_OK;
+}
+
+int32_t AppMgrService::DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "DestroyImage called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "DestroyImage failed");
+        return ERR_INVALID_OPERATION;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto task = [appMgrServiceInner = appMgrServiceInner_, checkpointId, errorHandler] () {
+        appMgrServiceInner->DestroyImage(checkpointId, errorHandler);
+    };
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "DestroyImageTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
+    return ERR_OK;
+}
+
+int32_t AppMgrService::NotifyTemplateProcessDeepFrozen(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    if (IPCSkeleton::GetCallingUid() != RESOURCE_MANAGER_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not rss");
+        return AAFwk::CHECK_PERMISSION_FAILED;
+    }
+    if (!taskHandler_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler_");
+        return ERR_INVALID_VALUE;
+    }
+    auto task = [appMgrServiceInner = appMgrServiceInner_, pid] () {
+        appMgrServiceInner->HandleForkAll(pid);
+    };
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "NotifyTemplateProcessDeepFrozenTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
+    return ERR_OK;
+}
+
 void AppMgrService::ApplicationForegrounded(const int32_t recordId)
 {
     if (!IsReady()) {
@@ -629,6 +700,26 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->UnregisterApplicationStateObserver(observer);
+}
+
+int32_t AppMgrService::RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterImageProcessStateObserver(observer);
+}
+
+int32_t AppMgrService::UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterImageProcessStateObserver(observer);
 }
 
 int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)

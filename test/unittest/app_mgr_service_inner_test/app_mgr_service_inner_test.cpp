@@ -2260,10 +2260,10 @@ HWTEST_F(AppMgrServiceInnerTest, HandleTimeOut_001, TestSize.Level2)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     AAFwk::EventWrap innerEvent(0);
-    appMgrServiceInner->HandleTimeOut(innerEvent);
+    appMgrServiceInner->HandleTimeOutInner(innerEvent);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->HandleTimeOut(innerEvent);
+    appMgrServiceInner->HandleTimeOutInner(innerEvent);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleTimeOut_001 end");
 }
@@ -4712,8 +4712,8 @@ HWTEST_F(AppMgrServiceInnerTest, AppRecoveryNotifyApp_001, TestSize.Level1)
     EXPECT_NE(appMgrServiceInner, nullptr);
     int32_t pid = 0;
     std::string bundleName = "com.is.hiserice";
-    appMgrServiceInner->AppRecoveryNotifyApp(pid, bundleName, FaultDataType::RESOURCE_CONTROL, "appRecovery");
-    appMgrServiceInner->AppRecoveryNotifyApp(pid, bundleName, FaultDataType::APP_FREEZE, "recovery");
+    appMgrServiceInner->AppRecoveryNotifyApp(pid, bundleName, FaultDataType::RESOURCE_CONTROL, "appRecovery", -1);
+    appMgrServiceInner->AppRecoveryNotifyApp(pid, bundleName, FaultDataType::APP_FREEZE, "recovery", -1);
     TAG_LOGI(AAFwkTag::TEST, "AppRecoveryNotifyApp_001 end");
 }
 
@@ -4754,7 +4754,7 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     FaultData faultData;
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
-    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, processName, faultData);
+    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, processName, faultData, -1);
     EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }

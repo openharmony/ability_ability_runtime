@@ -221,6 +221,15 @@ enum class AbilityErrorCode {
     // Maximum connections from the same caller have been reached.
     ERROR_CODE_MAX_CONNECTIONS_REACHED = 35600003,
 
+    // The specified agent card version is older than the existing version.
+    ERROR_CODE_AGENT_CARD_VERSION_TOO_OLD = 35600004,
+
+    // The specified agent card version is invalid.
+    ERROR_CODE_AGENT_CARD_VERSION_INVALID = 35600005,
+
+    // The specified agent card has already been registered.
+    ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER = 35600006,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

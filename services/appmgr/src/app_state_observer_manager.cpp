@@ -20,6 +20,7 @@
 #include "application_state_observer_stub.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "image_process_state_observer_stub.h"
 #include "in_process_call_wrapper.h"
 #include "remote_client_manager.h"
 #include "ui_extension_wrapper.h"
@@ -106,6 +107,58 @@ int32_t AppStateObserverManager::UnregisterApplicationStateObserver(const sptr<I
             DecreaseObserverCount(it->second.uid);
             appStateObserverMap_.erase(it);
             TAG_LOGD(AAFwkTag::APPMGR, "appStateObserverMap_ size:%{public}zu", appStateObserverMap_.size());
+            RemoveObserverDeathRecipient(observer);
+            return ERR_OK;
+        }
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "observer not exist");
+    return ERR_INVALID_VALUE;
+}
+
+int32_t AppStateObserverManager::RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
+        return ERR_INVALID_VALUE;
+    }
+    if (IsImageProcessObserverExist(observer)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "observer exist");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lockRegister(imageProcessObserverLock_);
+    imageProcessStateObserverMap_.emplace(observer, IPCSkeleton::GetCallingUid());
+    AddObserverDeathRecipient(observer, ObserverType::IMAGE_PROCESS_STATE_OBSERVER);
+    AddObserverCount(IPCSkeleton::GetCallingUid());
+    if (imageProcessStateObserverMap_.size() >= OBSERVER_SINGLE_COUNT_LOG &&
+        imageProcessStateObserverMap_.size() % OBSERVER_SINGLE_STEP_LOG == 0) {
+        TAG_LOGW(AAFwkTag::APPMGR, "imageProcessStateObserverMap_ size:%{public}zu",
+            imageProcessStateObserverMap_.size());
+    }
+    return ERR_OK;
+}
+
+int32_t AppStateObserverManager::UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
+        return ERR_INVALID_VALUE;
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    std::lock_guard lockUnregister(imageProcessObserverLock_);
+    for (const auto &[it, uid] : imageProcessStateObserverMap_) {
+        if (it != nullptr && it->AsObject() == observer->AsObject()) {
+            DecreaseObserverCount(uid);
+            imageProcessStateObserverMap_.erase(it);
             RemoveObserverDeathRecipient(observer);
             return ERR_OK;
         }
@@ -1004,6 +1057,7 @@ ProcessData AppStateObserverManager::WrapProcessData(
     processData.killReason = appRecord->GetKillReason();
     processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     processData.preloadMode = static_cast<int32_t>(appRecord->GetPreloadMode());
+    processData.imageProcessType = static_cast<int32_t>(appRecord->GetImageProcessType());
     processData.isPreloadUIExtension = appRecord->GetUIExtensionPreloadState();
     return processData;
 }
@@ -1090,6 +1144,21 @@ bool AppStateObserverManager::IsAppForegroundObserverExist(const sptr<IRemoteBro
     return false;
 }
 
+bool AppStateObserverManager::IsImageProcessObserverExist(const sptr<IRemoteBroker> &observer)
+{
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
+        return false;
+    }
+    std::lock_guard lockRegister(imageProcessObserverLock_);
+    for (const auto &[it, uid] : imageProcessStateObserverMap_) {
+        if (it != nullptr && it->AsObject() == observer->AsObject()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker> &observer, const ObserverType &type)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1118,6 +1187,8 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
             deathRecipient = new (std::nothrow) AppForegroundStateObserverRecipient(deathRecipientFunc);
         } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AbilityForegroundStateObserverRecipient(deathRecipientFunc);
+        } else if (type == ObserverType::IMAGE_PROCESS_STATE_OBSERVER) {
+            deathRecipient = new (std::nothrow) ImageProcessStateObserverRecipient(deathRecipientFunc);
         } else {
             TAG_LOGW(AAFwkTag::APPMGR, "null ObserverType");
             return;
@@ -1207,6 +1278,12 @@ AbilityForegroundObserverMap AppStateObserverManager::GetAbilityForegroundObserv
     return abilityForegroundObserverMap_;
 }
 
+ImageProcessObserverMap AppStateObserverManager::GetImageProcessObserverMapCopy()
+{
+    std::lock_guard lock(imageProcessObserverLock_);
+    return imageProcessStateObserverMap_;
+}
+
 void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1226,6 +1303,9 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
     } else if (type == ObserverType::APP_FOREGROUND_STATE_OBSERVER) {
         sptr<IAppForegroundStateObserver> observer = iface_cast<IAppForegroundStateObserver>(object);
         UnregisterAppForegroundStateObserver(observer);
+    } else if (type == ObserverType::IMAGE_PROCESS_STATE_OBSERVER) {
+        sptr<IImageProcessStateObserver> observer = iface_cast<IImageProcessStateObserver>(object);
+        UnregisterImageProcessStateObserver(observer);
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null ObserverType");
         return;
@@ -1630,6 +1710,151 @@ void AppStateObserverManager::HandleOnProcessTypeChanged(const std::shared_ptr<A
         if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
             it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessTypeChanged(data);
+        }
+    }
+}
+
+std::shared_ptr<ImageProcessStateData> AppStateObserverManager::WrapImageProcessStateData(
+    std::shared_ptr<ForkImageInfo> imageInfo, ImageProcessState state)
+{
+    if (imageInfo == nullptr || imageInfo->baseAppRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "nullptr");
+        return nullptr;
+    }
+    auto data = std::make_shared<ImageProcessStateData>();
+    data->imagePid = imageInfo->imagePid;
+    data->checkpointId = imageInfo->checkpointId;
+    data->originalPid = imageInfo->baseAppRecord->GetPid();
+    data->uid = imageInfo->baseAppRecord->GetUid();
+    data->state = static_cast<int32_t>(state);
+    data->bundleName = imageInfo->baseAppRecord->GetBundleName();
+    return data;
+}
+
+void AppStateObserverManager::OnImageProcessStateChanged(std::shared_ptr<ForkImageInfo> imageInfo,
+    ImageProcessState state)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
+        return;
+    }
+
+    auto imageProcessStateData = WrapImageProcessStateData(imageInfo, state);
+    if (imageProcessStateData == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null imageProcessStateData");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), imageProcessStateData]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "HandleOnImageProcessStateChanged come.");
+        self->HandleOnImageProcessStateChanged(imageProcessStateData);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::HandleOnImageProcessStateChanged(std::shared_ptr<ImageProcessStateData> data)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null data");
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "i_p:%{public}d, o_p:%{public}d, s:%{public}d",
+        data->imagePid, data->originalPid, data->state);
+    auto imageProcessStateObserverMapCopy = GetImageProcessObserverMapCopy();
+    for (auto it = imageProcessStateObserverMapCopy.begin(); it != imageProcessStateObserverMapCopy.end(); ++it) {
+        if (it->first) {
+            it->first->OnImageProcessStateChanged(*data);
+        }
+    }
+}
+
+void AppStateObserverManager::OnForkAllWorkProcessFailed(std::shared_ptr<ForkImageInfo> imageInfo,
+    int32_t errCode)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
+        return;
+    }
+
+    auto imageProcessStateData = WrapImageProcessStateData(imageInfo, ImageProcessState::UNSPECIFIED);
+    if (imageProcessStateData == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null imageProcessStateData");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), imageProcessStateData, errCode]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "HandleOnForkAllWorkProcessFailed come.");
+        self->HandleOnForkAllWorkProcessFailed(imageProcessStateData, errCode);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::HandleOnForkAllWorkProcessFailed(std::shared_ptr<ImageProcessStateData> data,
+    int32_t errCode)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null data");
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "i_p:%{public}d, o_p:%{public}d, e:%{public}d",
+        data->imagePid, data->originalPid, errCode);
+    auto imageProcessStateObserverMapCopy = GetImageProcessObserverMapCopy();
+    for (auto it = imageProcessStateObserverMapCopy.begin(); it != imageProcessStateObserverMapCopy.end(); ++it) {
+        if (it->first) {
+            it->first->OnForkAllWorkProcessFailed(*data, errCode);
+        }
+    }
+}
+
+void AppStateObserverManager::OnPreForkAllWorkProcess(std::shared_ptr<ForkImageInfo> imageInfo)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
+        return;
+    }
+    auto imageProcessStateData = WrapImageProcessStateData(imageInfo, ImageProcessState::UNSPECIFIED);
+    if (imageProcessStateData == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null imageProcessStateData");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), imageProcessStateData]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "HandleOnPreForkAllWorkProcess come.");
+        self->HandleOnPreForkAllWorkProcess(imageProcessStateData);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::HandleOnPreForkAllWorkProcess(std::shared_ptr<ImageProcessStateData> data)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null data");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "imagePid:%{public}d, originalPid:%{public}d", data->imagePid, data->originalPid);
+    auto imageProcessStateObserverMapCopy = GetImageProcessObserverMapCopy();
+    for (auto it = imageProcessStateObserverMapCopy.begin(); it != imageProcessStateObserverMapCopy.end(); ++it) {
+        if (it->first) {
+            it->first->OnPreForkAllWorkProcess(*data);
         }
     }
 }

@@ -299,10 +299,10 @@ public:
     }
 
     void ScheduleLaunchAbility(const AbilityInfo& abilityinf, const sptr<IRemoteObject>& token,
-        const std::shared_ptr<AAFwk::Want>& want)
+        const std::shared_ptr<AAFwk::Want>& want, std::shared_ptr<AppUpdateInfo> updateInfo = nullptr)
     {
         if (Appthread_ != nullptr) {
-            Appthread_->ScheduleLaunchAbility(abilityinf, token, want, 0);
+            Appthread_->ScheduleLaunchAbility(abilityinf, token, want, 0, updateInfo);
         }
     }
 

@@ -94,6 +94,70 @@ void AppMgrProxy::PreloadModuleFinished(const int32_t recordId)
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED, data, reply, option);
 }
 
+int32_t AppMgrProxy::MakeImage(const std::string &bundleName, int32_t userId,
+    AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "MakeImage Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String16, Str8ToStr16(bundleName));
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, static_cast<int32_t>(preloadMode));
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, appIndex);
+    if (errorHandler) {
+        PARCEL_UTIL_WRITE_RET_INT(data, Bool, true);
+        PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, errorHandler->AsObject());
+    } else {
+        PARCEL_UTIL_WRITE_RET_INT(data, Bool, false);
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::MAKE_IMAGE, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "DestroyImage Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Uint64, checkpointId);
+    if (errorHandler) {
+        PARCEL_UTIL_WRITE_RET_INT(data, Bool, true);
+        PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, errorHandler->AsObject());
+    } else {
+        PARCEL_UTIL_WRITE_RET_INT(data, Bool, false);
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::DESTROY_IMAGE, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::NotifyTemplateProcessDeepFrozen(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::NOTIFY_TEMPLATE_PROCESS_DEEP_FROZEN, data, reply, option);
+    return reply.ReadInt32();
+}
+
 void AppMgrProxy::ApplicationForegrounded(const int32_t recordId)
 {
     MessageParcel data;
@@ -632,6 +696,51 @@ int AppMgrProxy::UnregisterApplicationStateObserver(
     PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, observer->AsObject());
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UNREGISTER_APPLICATION_STATE_OBSERVER, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::APPMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "RegisterImageProcessStateObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    auto error = SendRequest(AppMgrInterfaceCode::REGISTER_IMAGE_PROCESS_STATE_OBSERVER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::APPMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "UnregisterImageProcessStateObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, observer->AsObject());
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UNREGISTER_IMAGE_PROCESS_STATE_OBSERVER, data, reply, option);
     return reply.ReadInt32();
 }
 

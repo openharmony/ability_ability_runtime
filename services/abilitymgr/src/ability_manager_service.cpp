@@ -281,6 +281,8 @@ constexpr const char* UD_KEY = "ability.want.params.udKey";
 constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
 constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 constexpr int64_t CLEAR_USER_LOCKED_BUNDLE_LIST_KEY_DELAY_TIME = 60 * 1000; // 60s
+constexpr const char* VPN_PERMISSION_IF = "libnet_vpn_permission_if.z.so";
+using RequestVpnPermission = int32_t(*)(int32_t, const std::string&, const std::string&,bool &);
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventEventType type, const EventInfo &eventInfo)
 {
@@ -463,6 +465,8 @@ bool AbilityManagerService::Init()
     InitAppSpawnMsgPipe();
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
+    modularObjectExtensionEventMgr_ = std::make_shared<AbilityRuntime::ModularObjectExtensionEventMgr>();
+    modularObjectExtensionEventMgr_->SubscribeSysEventReceiver();
     ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResourceSchedule::ResSchedClient::GetInstance().InitKillReasonListener();
@@ -2944,6 +2948,16 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
 
     auto abilityInfo = abilityRequest.abilityInfo;
     threadLocalInfo.SetStartAbilityInfo(abilityInfo);
+
+    EventInfo eventInfo;
+    eventInfo.bundleName = abilityInfo.bundleName;
+    eventInfo.moduleName = abilityInfo.moduleName;
+    eventInfo.abilityName = abilityInfo.name;
+    eventInfo.extensionType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+    eventInfo.callerBundleName = abilityRequest.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    eventInfo.callerBundleName = "RequestDialogServiceTrace:" + eventInfo.callerBundleName;
+    EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
+
     validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
@@ -5762,6 +5776,37 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     return err;
 }
 
+bool AbilityManagerService::CheckSupportVpn(const AppExecFwk::AbilityInfo& abilityInfo) 
+{
+    if(abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::VPN) {
+        return false;
+    }
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CHECK_CALLER_IS_SYSTEM_APP start uid: %{public}d", callerUid);
+    // LCOV_EXCL_START
+    if (AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        return true;
+    }
+    auto bundleName = abilityInfo.applicationInfo.bundleName;
+    bool isAuthorized = false;
+    static void* vpnPermissionIf = dlopen(VPN_PERMISSION_IF, RTLD_LAZY); 
+    if (vpnPermissionIf == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "vpnPermissionIf is nullptr");
+        return false;
+    }
+    static auto requestVpnPermission =
+        reinterpret_cast<RequestVpnPermission>(dlsym(vpnPermissionIf, "RequestVpnPermission"));
+    if (requestVpnPermission == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "requestVpnPermission is nullptr");
+        return false;
+    }
+    // LCOV_EXCL_STOP
+    requestVpnPermission(callerUid, bundleName, abilityInfo.name, isAuthorized);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "allow uid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
+        " isAuthorized: %{public}d", callerUid, bundleName.c_str(), abilityInfo.name.c_str(), isAuthorized);
+    return isAuthorized;
+}
+
 int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, const sptr<SessionInfo> &sessionInfo,
@@ -5812,7 +5857,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
             return ERR_WRONG_INTERFACE_CALL;
         }
         // not allow app to connect other extension by using connectServiceExtensionAbility
-        bool isVpn = abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN;
+        bool isVpn = CheckSupportVpn(abilityInfo);
         if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService && !isVpn) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "ability, type not service");
             return TARGET_ABILITY_NOT_SERVICE;
@@ -10882,10 +10927,15 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
         return ERR_NOT_SUPPORT_APP_CLONE;
     }
 
+    int32_t userId;
+    auto ret = ParseAndValidateUserId(want, userId);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, START_USER_TEST_FAIL);
     AppExecFwk::BundleInfo bundleInfo;
-    int32_t userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     if (!IN_PROCESS_CALL(
         bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, U0_USER_ID))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get bundleInfo by U0_USER_ID %{public}d", U0_USER_ID);
@@ -10904,6 +10954,26 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
     }
 
     return DelayedSingleton<AppScheduler>::GetInstance()->StartUserTest(want, observer, bundleInfo, userId);
+}
+
+int AbilityManagerService::ParseAndValidateUserId(const Want &want, int32_t &userId)
+{
+    userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    std::string userIdParam = want.GetStringParam("-u");
+    if (!userIdParam.empty()) {
+        try {
+            userId = std::stoi(userIdParam);
+        } catch (...) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid userId: %{public}s", userIdParam.c_str());
+            return ERR_INVALID_VALUE;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "userId specified: %{public}d", userId);
+        if (!AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "userId %{public}d is not a foreground user", userId);
+            return INVALID_USERID_VALUE;
+        }
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::FinishUserTest(
@@ -14588,7 +14658,6 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
 
     SignRestartAppFlagParam param =
         { userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery, false };
-    RecordRecoveryExitReason(isAppRecovery, callerPid, callerUid);
     result = SignRestartAppFlag(param);
     if (!isAppRecovery && result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
@@ -16992,6 +17061,28 @@ int32_t AbilityManagerService::UnRegisterPreloadUIExtensionHostClient(int32_t ca
         return ERR_INVALID_VALUE;
     }
     return connectManager->UnRegisterPreloadUIExtensionHostClient(callerPid);
+}
+
+int32_t AbilityManagerService::QuerySelfModularObjectExtensionInfos(
+    std::vector<ModularObjectExtensionInfo> &extensionInfos)
+{
+    if (!AppUtils::GetInstance().IsSupportModularObjectExtension()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "device not supported");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    int32_t callinguid = IPCSkeleton::GetCallingUid();
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_INVALID_VALUE);
+    std::string callerBundleName;
+    int32_t callerAppIndex;
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetNameAndIndexForUid(callinguid, callerBundleName, callerAppIndex));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetNameAndIndexForUid failed for uid: %{public}d", callinguid);
+        return ret;
+    }
+    int32_t userId = callinguid / BASE_USER_RANGE;
+    return DelayedSingleton<ModularObjectManager>::GetInstance()->QuerySelfModularObjectExtensionInfos(userId,
+        callerBundleName, callerAppIndex, extensionInfos);
 }
 
 int32_t AbilityManagerService::GetUserLockedBundleList(int32_t userId,

@@ -131,6 +131,7 @@ const std::string HELP_MSG_TEST =
     "                  [-s timeout <test-timeout>]\n"
     "                  [-s <any-key> <any-value>]\n"
     "                  [-w <wait-time>]\n"
+    "                  [-u <userId>]                          user id for running test\n"
     "                  [-D]\n";
 
 const std::string HELP_MSG_SEND_MEMORY_LEVEL =
@@ -279,6 +280,7 @@ private:
     ErrCode MakeWantForProcess(Want& want);
     ErrCode RunAsTestCommand();
     ErrCode TestCommandError(const std::string& info);
+    ErrCode ParseTestCommandOption(const std::string &opt, int &i, std::map<std::string, std::string> &params);
     bool MatchOrderString(const std::regex &r, const std::string &orderCmd);
     bool CheckPerfCmdString(const char* optarg, const size_t paramLength, std::string &perfCmd);
     void ParseBundleName(std::string &bundleName);

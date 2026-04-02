@@ -263,7 +263,8 @@ public:
     void ScheduleAbilityStage(const HapModuleInfo &abilityStage) override;
 
     void ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemoteObject> &token,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) override;
+        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId,
+        std::shared_ptr<AppUpdateInfo> updateInfo) override;
 
     /**
      *
@@ -507,7 +508,8 @@ private:
      * @param abilityRecord The abilityRecord which belongs to the ability launched.
      *
      */
-    void HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
+    void HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
+        std::shared_ptr<AppUpdateInfo> updateInfo);
 
     /**
      *
@@ -670,6 +672,10 @@ private:
      * @param runtime runtime the ability runtime
      */
     void UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
+
+    void UpdateWorkProcessInfo(std::shared_ptr<AppUpdateInfo> updateInfo);
+
+    void ScheduleUpdateWorkProcessInfo(std::shared_ptr<AppUpdateInfo> updateInfo) override;
 
     static void HandleDumpHeapPrepare();
     static void HandleDumpHeap(bool isPrivate);
@@ -840,6 +846,7 @@ private:
         const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData) const;
     void RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData);
+    void LoadExtStartupTasks();
     bool GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
         AppExecFwk::ModuleTestRunner &tsTestRunner);
     bool CheckAndUpdateRuntime(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);

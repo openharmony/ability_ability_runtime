@@ -447,6 +447,21 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_003, TestSize.Le
 }
 
 /**
+ * @tc.number: AppfreezeInner_ChangeFaultDateInfo_004
+ * @tc.name: ChangeFaultDateInfo
+ * @tc.desc: Verify that function ChangeFaultDateInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_004, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string msgContent = "AppfreezeInner_ChangeFaultDateInfo_004";
+    faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    EXPECT_TRUE(!faultData.errorObject.message.empty());
+    EXPECT_TRUE(faultData.forceExit);
+}
+
+/**
  * @tc.number: AppfreezeInnerTest
  * @tc.name: add test
  * @tc.desc: Verify that function SetMainHandler.

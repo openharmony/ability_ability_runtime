@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
 
+#include <atomic>
 #include <map>
 
 #include "ability_connect_callback.h"
@@ -31,9 +32,15 @@
 #endif // SUPPORT_SCREEN
 
 namespace OHOS {
+namespace AppExecFwk {
+class EventHandler;
+}
+
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want &, bool)>;
 using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
+using TerminateSelfWithAnimationCallback = std::function<void()>;
+using TerminateSelfResultCallback = std::function<void(ErrCode)>;
 /**
  * @brief context supply for UIExtension
  *
@@ -64,6 +71,18 @@ public:
      * @return errCode ERR_OK on success, others on failure.
      */
     virtual ErrCode TerminateSelf();
+    /**
+     * @brief Destroys the current ui extension ability with result.
+     *
+     * @param resultCode Indicates the result code returned to the caller.
+     * @param want Indicates the data returned to the caller.
+     * @param callback Result callback, called when termination completes.
+     *
+     * Non-embedded mode: execute synchronously and call callback.
+     * Embedded mode: trigger animation, transfer result after animation completes, then call callback.
+     */
+    virtual void TerminateSelfWithResult(int32_t resultCode, const AAFwk::Want &want,
+        TerminateSelfResultCallback callback);
         /**
      * @brief Connects the current ability to an ability using the AbilityInfo.AbilityType.SERVICE template.
      *
@@ -169,6 +188,20 @@ public:
      */
     void RequestComponentTerminate();
 
+    /**
+     * @brief Register terminate self with animation callback.
+     * Only available for embedded atomic service.
+     * @param callback The callback to be called when terminateSelf is invoked.
+     * @return errCode ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateSelfWithAnimation(TerminateSelfWithAnimationCallback &&callback);
+
+    /**
+     * @brief Terminate self inner, should be called by ArkUI when animation is finished.
+     * Will cancel the timeout task and proceed with termination.
+     */
+    ErrCode TerminateSelfInner();
+
 #ifdef SUPPORT_SCREEN
     void SetWindow(sptr<Rosen::Window> window);
 
@@ -250,11 +283,36 @@ private:
 
     void GetFailureInfoByMessage(const std::string &message, int32_t &failureCode,
         std::string &failureMessage, int32_t resultCode);
-    
+
+    ErrCode HandleTerminateWithAnimation();
+    bool CheckAndSetPendingTerminate();
+    bool TryGetAnimationCallback(TerminateSelfWithAnimationCallback &callback);
+    ErrCode GetOrCreateEventHandler(std::shared_ptr<AppExecFwk::EventHandler> &handler);
+
+    // Helper methods for TerminateSelfWithResult refactoring
+    ErrCode TransferAbilityResultToWindow(int32_t resultCode, const AAFwk::Want &want);
+    void NotifyPendingCallback(ErrCode err);
+    void CleanupAnimationResources();
+    ErrCode TransferPendingResult();
+    void ExecuteTerminationWithTimeout(const sptr<IRemoteObject> &token);
+
     std::mutex onRequestResultMutex_;
     std::mutex onOpenLinkRequestResultMutex_;
     std::vector<std::shared_ptr<OnAtomicRequestResult>> onAtomicRequestResults_;
     std::vector<std::shared_ptr<AAFwk::OnOpenLinkRequestResult>> onOpenLinkRequestResults_;
+    
+    TerminateSelfWithAnimationCallback terminateSelfWithAnimationCallback_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    std::atomic<bool> terminateTimeoutExec_{false};
+    std::mutex terminateSelfMutex_;
+    std::atomic<bool> isTerminated_{false};
+    bool pendingAnimationTerminate_ = false;
+
+    // Embedded mode: pending result to transfer after animation completes
+    int32_t pendingResultCode_ = 0;
+    AAFwk::Want pendingResultWant_;
+    TerminateSelfResultCallback pendingTerminateCallback_;
+    bool hasPendingTerminateRequest_ = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -134,6 +134,8 @@ const std::string ERR_INVALID_PID_VALUE_SOLUTION_ONE =
     "Check if the pid specified by the application exists.";
 const std::string ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE =
     "Check if the value range of level is [0, 1, 2, 3, 4, 5, 6].";
+const std::string ERR_INVALID_USERID_VALUE_SOLUTION_ONE =
+    "Check if the userId is a foreground user. Only foreground users can run tests.";
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
@@ -415,6 +417,9 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_INVALID_OPERATION] = GetAaToolErrorInfo("10105002", "Failed to obtain ability information.",
         "The abilityInfo is empty when generating the Ability request through BMS",
         {GET_ABILITY_SERVICE_FAILED_SOLUTION_ONE});
+    messageMap_[INVALID_USERID_VALUE] = GetAaToolErrorInfo("10104005", "The specified userId is not a foreground user.",
+        "The userId specified by the aa test command is not currently a foreground user.",
+        {ERR_INVALID_USERID_VALUE_SOLUTION_ONE});
     return OHOS::ERR_OK;
 }
 
@@ -2464,34 +2469,11 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
         if ((opt == "-h") || (opt == "--help")) {
             resultReceiver_.append(HELP_MSG_TEST);
             return OHOS::ERR_OK;
-        } else if ((opt == "-b") || (opt == "-p") || (opt == "-m")) {
-            if (i >= argc_ - 1) {
-                return TestCommandError("error: option [" + opt + "] requires a value.\n");
-            }
-            std::string argv = argv_[++i];
-            params[opt] = argv;
-        } else if (opt == "-w") {
-            if (i >= argc_ - 1) {
-                return TestCommandError("error: option [" + opt + "] requires a value.\n");
-            }
+        }
 
-            std::string argv = argv_[++i];
-            if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
-                return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
-            }
-
-            params[opt] = argv;
-        } else if (opt == "-s") {
-            if (i >= argc_ - USER_TEST_COMMAND_PARAMS_NUM) {
-                return TestCommandError("error: option [-s] is incorrect.\n");
-            }
-            std::string argKey = argv_[++i];
-            std::string argValue = argv_[++i];
-            params[opt + " " + argKey] = argValue;
-        } else if (opt == "-D") {
-            params[opt] = DEBUG_VALUE;
-        } else if (opt.at(0) == '-') {
-            return TestCommandError("error: unknown option: " + opt + "\n");
+        auto ret = ParseTestCommandOption(opt, i, params);
+        if (ret != OHOS::ERR_OK) {
+            return ret;
         }
     }
 
@@ -2500,6 +2482,48 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
     }
 
     return StartUserTest(params);
+}
+
+ErrCode AbilityManagerShellCommand::ParseTestCommandOption(const std::string &opt, int &i,
+    std::map<std::string, std::string> &params)
+{
+    if ((opt == "-b") || (opt == "-p") || (opt == "-m")) {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        params[opt] = argv;
+    } else if (opt == "-w") {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+            return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
+        }
+        params[opt] = argv;
+    } else if (opt == "-u" || opt == "--userId") {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+            return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
+        }
+        params["-u"] = argv;
+    } else if (opt == "-s") {
+        if (i >= argc_ - USER_TEST_COMMAND_PARAMS_NUM) {
+            return TestCommandError("error: option [-s] is incorrect.\n");
+        }
+        std::string argKey = argv_[++i];
+        std::string argValue = argv_[++i];
+        params[opt + " " + argKey] = argValue;
+    } else if (opt == "-D") {
+        params[opt] = DEBUG_VALUE;
+    } else if (opt.at(0) == '-') {
+        return TestCommandError("error: unknown option: " + opt + "\n");
+    }
+    return OHOS::ERR_OK;
 }
 
 bool AbilityManagerShellCommand::IsTestCommandIntegrity(const std::map<std::string, std::string>& params)
