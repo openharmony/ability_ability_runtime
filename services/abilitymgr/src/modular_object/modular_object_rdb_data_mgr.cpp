@@ -78,7 +78,6 @@ int32_t ModularObjectExtensionRdbDataMgr::IsDatabaseReady()
         return ret;
     }
 
-    HmfsUtils::AddDeleteDfx(config_.dbPath);
     return NativeRdb::E_OK;
 }
 
