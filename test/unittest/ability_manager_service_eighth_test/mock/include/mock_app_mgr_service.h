@@ -130,6 +130,7 @@ public:
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
     MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
     MOCK_METHOD1(SetAppFreezeFilter, bool(int32_t));
+    MOCK_METHOD3(UpdateFreezeExcludedPid, void(bool isAdd, int32_t targetPid, int32_t profilerPid));
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {

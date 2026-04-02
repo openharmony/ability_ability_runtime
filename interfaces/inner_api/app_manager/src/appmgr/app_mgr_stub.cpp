@@ -239,6 +239,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleNotifyFaultBySA(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APPFREEZE_FILTER):
             return HandleSetAppFreezeFilter(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_FREEZE_EXCLUDED_PID):
+            return HandleUpdateFreezeExcludedPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_BUNDLE_NAME_BY_PID):
             return HandleGetBundleNameByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_PROCESS_INFO_BY_PID):
@@ -1518,6 +1520,15 @@ int32_t AppMgrStub::HandleSetAppFreezeFilter(MessageParcel &data, MessageParcel 
         TAG_LOGE(AAFwkTag::APPMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUpdateFreezeExcludedPid(MessageParcel &data, MessageParcel &reply)
+{
+    bool isAdd = data.ReadBool();
+    int32_t targetPid = data.ReadInt32();
+    int32_t profilerPid = data.ReadInt32();
+    UpdateFreezeExcludedPid(isAdd, targetPid, profilerPid);
     return NO_ERROR;
 }
 
