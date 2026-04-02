@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_MODULAR_OBJECT_EXTENSION_INFO_H
 
 #include <string>
+#include "nlohmann/json.hpp"
 #include "parcel.h"
 
 namespace OHOS {
@@ -97,8 +98,21 @@ struct ModularObjectExtensionInfo : public Parcelable {
      * @return Pointer to the created ModularObjectExtensionInfo object, nullptr if failed.
      */
     static ModularObjectExtensionInfo *Unmarshalling(Parcel &parcel);
-    std::string ToJsonString() const;
-    bool FromJsonString(const std::string &jsonString);
+
+    /**
+     * @brief Convert this object to a JSON object.
+     *
+     * @return nlohmann::json The JSON representation.
+     */
+    nlohmann::json ToJson() const;
+
+    /**
+     * @brief Create a ModularObjectExtensionInfo object from a JSON object.
+     *
+     * @param jsonObject The JSON object.
+     * @return ModularObjectExtensionInfo The constructed object.
+     */
+    static ModularObjectExtensionInfo FromJson(const nlohmann::json &jsonObject);
 };
 } // namespace AAFwk
 } // namespace OHOS
