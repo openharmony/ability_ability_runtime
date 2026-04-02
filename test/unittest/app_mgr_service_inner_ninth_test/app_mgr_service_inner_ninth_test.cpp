@@ -482,11 +482,13 @@ HWTEST_F(AppMgrServiceInnerNinthTest, PreloadApplication_013, TestSize.Level1)
     appMgrServiceInner->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("test_queue3");
 
     std::string bundleName = "com.test.preload";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRELOAD_MODULE;
     int32_t appIndex = 0;
     PreloadPhase preloadPhase = PreloadPhase::UNSPECIFIED;
-    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, appIndex, preloadMode,
+    int32_t ret = appMgrServiceInner->PreloadApplication(want, userId, appIndex, preloadMode,
         preloadPhase, true, nullptr);
     EXPECT_EQ(ret, ERR_OK);
     appMgrServiceInner->taskHandler_.reset();

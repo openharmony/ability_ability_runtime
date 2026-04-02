@@ -483,7 +483,11 @@ int32_t AppMgrStub::HandleMakeImage(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string bundleName = Str16ToStr8(data.ReadString16());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     int32_t userId = data.ReadInt32();
     int32_t preloadMode = data.ReadInt32();
     int32_t appIndex = data.ReadInt32();
@@ -496,7 +500,7 @@ int32_t AppMgrStub::HandleMakeImage(MessageParcel &data, MessageParcel &reply)
             return ERR_INVALID_VALUE;
         }
     }
-    auto result = MakeImage(bundleName, userId, static_cast<PreloadMode>(preloadMode),
+    auto result = MakeImage(*want, userId, static_cast<PreloadMode>(preloadMode),
         appIndex, errorHandler);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");

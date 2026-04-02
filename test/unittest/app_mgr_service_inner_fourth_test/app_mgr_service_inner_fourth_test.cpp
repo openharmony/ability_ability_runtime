@@ -937,10 +937,12 @@ HWTEST_F(AppMgrServiceInnerFourthTest, MakeImage_ShouldReturnInvalidOperationWhe
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.acts.imagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
     int32_t appIndex = 0;
-    EXPECT_EQ(appMgrServiceInner->MakeImageInner(bundleName, userId, preloadMode, appIndex, nullptr),
+    EXPECT_EQ(appMgrServiceInner->MakeImageInner(want, userId, preloadMode, appIndex, nullptr),
         ImageError::ERR_INVALID_PRELOAD_TYPE);
     TAG_LOGI(AAFwkTag::TEST, "MakeImage_ShouldReturnInvalidOperationWhenPreloadModeIsNotPreloadMode end");
 }
@@ -957,13 +959,15 @@ HWTEST_F(AppMgrServiceInnerFourthTest, MakeImageInner_ShouldReturnImageInfoNotEx
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.acts.imagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRELOAD_MODULE;
     int32_t appIndex = 0;
     PreloadRequest preloadRequest;
     appMgrServiceInner->PreAddImageInfo(bundleName, userId, appIndex, nullptr, preloadRequest);
-    appMgrServiceInner->MakeImage(bundleName, userId, preloadMode, appIndex, nullptr);
-    EXPECT_EQ(appMgrServiceInner->MakeImageInner(bundleName, userId, preloadMode, appIndex, nullptr),
+    appMgrServiceInner->MakeImage(want, userId, preloadMode, appIndex, nullptr);
+    EXPECT_EQ(appMgrServiceInner->MakeImageInner(want, userId, preloadMode, appIndex, nullptr),
         ImageError::ERR_IMAGE_INFO_EXIST);
     TAG_LOGI(AAFwkTag::TEST, "MakeImageInner_ShouldReturnImageInfoNotExistWhenPreloadModeIsPreloadMode end");
 }
@@ -980,10 +984,12 @@ HWTEST_F(AppMgrServiceInnerFourthTest, MakeImage_ShouldReturnNotOkWhenImageInfoN
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.acts.imagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRELOAD_MODULE;
     int32_t appIndex = 0;
-    EXPECT_EQ(appMgrServiceInner->MakeImageInner(bundleName, userId, preloadMode, appIndex, nullptr),
+    EXPECT_EQ(appMgrServiceInner->MakeImageInner(want, userId, preloadMode, appIndex, nullptr),
         ImageError::ERR_PRELOAD_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "MakeImage_ShouldReturnNotOkWhenImageInfoNotExist end");
 }
