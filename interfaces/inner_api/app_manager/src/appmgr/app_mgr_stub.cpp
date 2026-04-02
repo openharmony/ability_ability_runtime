@@ -431,6 +431,16 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleLockProcessCache(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT):
             return HandleSetProcessPrepareExit(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::MAKE_IMAGE):
+            return HandleMakeImage(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::DESTROY_IMAGE):
+            return HandleDestroyImage(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_TEMPLATE_PROCESS_DEEP_FROZEN):
+            return HandleNotifyTemplateProcessDeepFrozen(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_IMAGE_PROCESS_STATE_OBSERVER):
+            return HandleRegisterImageProcessStateObserver(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_IMAGE_PROCESS_STATE_OBSERVER):
+            return HandleUnregisterImageProcessStateObserver(data, reply);
     }
     return INVALID_FD;
 }
@@ -471,6 +481,66 @@ int32_t AppMgrStub::HandlePreloadModuleFinished(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleMakeImage(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string bundleName = Str16ToStr8(data.ReadString16());
+    int32_t userId = data.ReadInt32();
+    int32_t preloadMode = data.ReadInt32();
+    int32_t appIndex = data.ReadInt32();
+    bool flag = data.ReadBool();
+    sptr<IImageErrorHandler> errorHandler;
+    if (flag) {
+        errorHandler = iface_cast<IImageErrorHandler>(data.ReadRemoteObject());
+        if (errorHandler == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+    auto result = MakeImage(bundleName, userId, static_cast<PreloadMode>(preloadMode),
+        appIndex, errorHandler);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleDestroyImage(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    uint64_t checkpointId = data.ReadUint64();
+    bool flag = data.ReadBool();
+    sptr<IImageErrorHandler> errorHandler;
+    if (flag) {
+        errorHandler = iface_cast<IImageErrorHandler>(data.ReadRemoteObject());
+        if (errorHandler == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+    auto result = DestroyImage(checkpointId, errorHandler);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyTemplateProcessDeepFrozen(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    int32_t pid = data.ReadInt32();
+    auto result = NotifyTemplateProcessDeepFrozen(pid);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    return NO_ERROR;
+}
 
 int32_t AppMgrStub::HandleApplicationForegrounded(MessageParcel &data, MessageParcel &reply)
 {
@@ -834,6 +904,30 @@ int32_t AppMgrStub::HandleUnregisterApplicationStateObserver(MessageParcel &data
         return ERR_INVALID_VALUE;
     }
     int32_t result = UnregisterApplicationStateObserver(callback);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterImageProcessStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IImageProcessStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterImageProcessStateObserver(callback);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterImageProcessStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IImageProcessStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterImageProcessStateObserver(callback);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

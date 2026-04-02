@@ -409,6 +409,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetPreloadModuleName(preloadModuleName_);
     launchData.SetDebugFromLocal(isDebugFromLocal_);
     launchData.SetStartupTaskData(startupTaskData_);
+    launchData.SetImageProcessType(static_cast<int32_t>(imageProcessType_));
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -552,8 +553,14 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
         TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return;
     }
-
-    moduleRecord->LaunchAbility(ability);
+    std::shared_ptr<AppUpdateInfo> updateInfo;
+    if (needUpdate_) {
+        updateInfo = std::make_shared<AppUpdateInfo>();
+        updateInfo->appRecordId = appRecordId_;
+        updateInfo->appRunningUniqueId = std::to_string(startTimeMillis_);
+        needUpdate_ = false;
+    }
+    moduleRecord->LaunchAbility(ability, updateInfo);
 }
 
 void AppRunningRecord::ScheduleTerminate()
@@ -1193,6 +1200,11 @@ std::list<std::shared_ptr<ModuleRunningRecord>> AppRunningRecord::GetAllModuleRe
 
 void AppRunningRecord::RemoveAppDeathRecipient() const
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "RemoveAppDeathRecipient");
+    if (GetNeedRemoveDeathRecipient()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "image exist, no need to remove");
+        return;
+    }
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
@@ -1227,6 +1239,11 @@ void AppRunningRecord::SetAppMgrServiceInner(const std::weak_ptr<AppMgrServiceIn
 void AppRunningRecord::SetAppDeathRecipient(const sptr<AppDeathRecipient> &appDeathRecipient)
 {
     appDeathRecipient_ = appDeathRecipient;
+}
+
+sptr<AppDeathRecipient> AppRunningRecord::GetAppDeathRecipient() const
+{
+    return appDeathRecipient_;
 }
 
 std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
@@ -1691,6 +1708,23 @@ bool AppRunningRecord::IsStartSpecifiedAbility() const
 {
     std::lock_guard lock(specifiedMutex_);
     return specifiedAbilityRequest_ != nullptr;
+}
+
+void AppRunningRecord::TryToUpdateWorkProcessInfo()
+{
+    if (imageProcessType_ != ImageProcessType::WORK || !needUpdate_) {
+        TAG_LOGD(AAFwkTag::APPMGR, "no need to update");
+        return;
+    }
+    if (appLifeCycleDeal_ == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
+        return;
+    }
+    needUpdate_ = false;
+    auto updateInfo = std::make_shared<AppUpdateInfo>();
+    updateInfo->appRecordId = appRecordId_;
+    updateInfo->appRunningUniqueId = std::to_string(startTimeMillis_);
+    appLifeCycleDeal_->ScheduleUpdateWorkProcessInfo(updateInfo);
 }
 
 void AppRunningRecord::SchedulePrepareTerminate(const std::string &moduleName)
@@ -2477,6 +2511,51 @@ bool AppRunningRecord::IsPreloading() const
 bool AppRunningRecord::IsPreloaded() const
 {
     return preloadState_ == PreloadState::PRELOADED;
+}
+
+void AppRunningRecord::SetMakeImageState(MakeImageState state)
+{
+    makeImageState_ = state;
+}
+
+MakeImageState AppRunningRecord::GetMakeImageState() const
+{
+    return makeImageState_;
+}
+
+void AppRunningRecord::SetIsCreateFromImage(bool flag)
+{
+    isCreateFromImage_ = flag;
+}
+
+bool AppRunningRecord::GetIsCreateFromImage() const
+{
+    return isCreateFromImage_;
+}
+
+void AppRunningRecord::SetImageProcessType(ImageProcessType type)
+{
+    imageProcessType_ = type;
+}
+
+ImageProcessType AppRunningRecord::GetImageProcessType() const
+{
+    return imageProcessType_;
+}
+
+void AppRunningRecord::SetNeedRemoveDeathRecipient(bool flag)
+{
+    needRemoveDeathRecipient_ = flag;
+}
+
+bool AppRunningRecord::GetNeedRemoveDeathRecipient() const
+{
+    return needRemoveDeathRecipient_;
+}
+
+void AppRunningRecord::SetNeedUpdate(bool needUpdate)
+{
+    needUpdate_ = needUpdate;
 }
 
 int32_t AppRunningRecord::GetAssignTokenId() const

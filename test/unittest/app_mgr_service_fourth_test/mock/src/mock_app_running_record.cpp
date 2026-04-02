@@ -103,6 +103,11 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
+bool AppRunningRecord::GetExtensionSandBoxFlag() const
+{
+    return isExtensionSandBox_;
+}
+
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 {
 }
@@ -374,6 +379,11 @@ void AppRunningRecord::SetAppDeathRecipient(const sptr<AppDeathRecipient> &appDe
     appDeathRecipient_ = appDeathRecipient;
 }
 
+sptr<AppDeathRecipient> AppRunningRecord::GetAppDeathRecipient() const
+{
+    return appDeathRecipient_;
+}
+
 std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
 {
     return priorityObject_;
@@ -554,6 +564,10 @@ int32_t AppRunningRecord::GetSpecifiedRequestId() const
 }
 
 void AppRunningRecord::ResetSpecifiedRequest()
+{
+}
+
+void AppRunningRecord::TryToUpdateWorkProcessInfo()
 {
 }
 
@@ -1003,6 +1017,51 @@ void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
 PreloadPhase AppRunningRecord::GetPreloadPhase()
 {
     return preloadPhase_;
+}
+
+void AppRunningRecord::SetMakeImageState(MakeImageState state)
+{
+    makeImageState_ = state;
+}
+
+MakeImageState AppRunningRecord::GetMakeImageState() const
+{
+    return makeImageState_;
+}
+
+void AppRunningRecord::SetIsCreateFromImage(bool flag)
+{
+    isCreateFromImage_ = flag;
+}
+
+bool AppRunningRecord::GetIsCreateFromImage() const
+{
+    return isCreateFromImage_;
+}
+
+void AppRunningRecord::SetImageProcessType(ImageProcessType type)
+{
+    imageProcessType_ = type;
+}
+
+ImageProcessType AppRunningRecord::GetImageProcessType() const
+{
+    return imageProcessType_;
+}
+
+void AppRunningRecord::SetNeedRemoveDeathRecipient(bool flag)
+{
+    needRemoveDeathRecipient_ = flag;
+}
+
+bool AppRunningRecord::GetNeedRemoveDeathRecipient() const
+{
+    return needRemoveDeathRecipient_;
+}
+
+void AppRunningRecord::SetNeedUpdate(bool needUpdate)
+{
+    needUpdate_ = needUpdate;
 }
 
 bool AppRunningRecord::IsPreloading() const

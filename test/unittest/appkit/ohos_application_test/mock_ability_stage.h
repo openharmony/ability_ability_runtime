@@ -29,6 +29,7 @@ public:
 
     MOCK_METHOD5(RunAutoStartupTask, int32_t(const std::function<void()>&, std::shared_ptr<AAFwk::Want>, bool&,
         const std::shared_ptr<Context>&, bool));
+    MOCK_METHOD0(OnLaunchFromHyperSnap, void());
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

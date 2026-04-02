@@ -1294,6 +1294,24 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
     return service->UnregisterApplicationStateObserver(observer);
 }
 
+int32_t AppMgrClient::RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterImageProcessStateObserver(observer);
+}
+
+int32_t AppMgrClient::UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterImageProcessStateObserver(observer);
+}
+
 int32_t AppMgrClient::RegisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1490,6 +1508,34 @@ int32_t AppMgrClient::PreloadApplication(const std::string &bundleName, int32_t 
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
     return service->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+}
+
+int32_t AppMgrClient::MakeImage(const std::string &bundleName, int32_t userId,
+    AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->MakeImage(bundleName, userId, preloadMode, appIndex, errorHandler);
+}
+
+int32_t AppMgrClient::DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->DestroyImage(checkpointId, errorHandler);
+}
+
+int32_t AppMgrClient::NotifyTemplateProcessDeepFrozen(int32_t pid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->NotifyTemplateProcessDeepFrozen(pid);
 }
 
 int32_t AppMgrClient::SetSupportedProcessCacheSelf(bool isSupport)

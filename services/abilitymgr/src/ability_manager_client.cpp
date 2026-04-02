@@ -1070,7 +1070,7 @@ ErrCode AbilityManagerClient::GetMissionInfo(const std::string& deviceId, int32_
         return static_cast<int>(err);
     }
 #endif //SUPPORT_SCREEN
-    return ERR_NOT_SUPPORT_SCREEN;
+    return ERR_CAPABILITY_NOT_SUPPORT;
 }
 
 ErrCode AbilityManagerClient::CleanMission(int32_t missionId)
@@ -2603,6 +2603,14 @@ ErrCode AbilityManagerClient::UnRegisterPreloadUIExtensionHostClient(int32_t cal
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->UnRegisterPreloadUIExtensionHostClient(callerPid);
+}
+
+ErrCode AbilityManagerClient::QuerySelfModularObjectExtensionInfos(
+    std::vector<ModularObjectExtensionInfo> &extensionInfos)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->QuerySelfModularObjectExtensionInfos(extensionInfos);
 }
 
 ErrCode AbilityManagerClient::GetUserLockedBundleList(int32_t userId,

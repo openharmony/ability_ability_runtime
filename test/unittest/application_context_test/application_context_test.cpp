@@ -21,6 +21,7 @@
 #include "js_ability_lifecycle_callback.h"
 #include "mock_ability_token.h"
 #include "mock_application_state_change_callback.h"
+#include "mock_application_update_callback.h"
 #include "mock_context_impl.h"
 #include "mock_interop_ability_lifecycle_callback.h"
 #include "running_process_info.h"

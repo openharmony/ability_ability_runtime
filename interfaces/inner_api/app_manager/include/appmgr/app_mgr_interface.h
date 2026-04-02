@@ -37,6 +37,8 @@
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
+#include "image_error_handler_interface.h"
+#include "image_process_state_observer_interface.h"
 #include "iquick_fix_callback.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -90,6 +92,22 @@ public:
     virtual void PreloadModuleFinished(const int32_t recordId)
     {
         return;
+    }
+
+    virtual int32_t MakeImage(const std::string &bundleName, int32_t userId,
+        AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0, sptr<IImageErrorHandler> errorHandler = nullptr)
+    {
+        return 0;
+    }
+
+    virtual int32_t DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler = nullptr)
+    {
+        return 0;
+    }
+
+    virtual int32_t NotifyTemplateProcessDeepFrozen(int32_t pid)
+    {
+        return 0;
     }
 
     /**
@@ -343,6 +361,16 @@ public:
     virtual int32_t RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
         const std::vector<std::string> &bundleNameList = {}, const AppStateFilter &appStateFilter = AppStateFilter(),
         bool isUsingFilter = false)
+    {
+        return 0;
+    }
+
+    virtual int32_t RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
+    {
+        return 0;
+    }
+
+    virtual int32_t UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer)
     {
         return 0;
     }
