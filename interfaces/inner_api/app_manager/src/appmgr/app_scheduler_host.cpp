@@ -145,6 +145,8 @@ int32_t AppSchedulerHost::OnRemoteRequestInnerThird(uint32_t code, MessageParcel
             return HandleScheduleJsHeapMemory(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_CJHEAP_MEMORY_APPLICATION_TRANSACTION):
             return HandleScheduleCjHeapMemory(data, reply);
+        case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_MEM_APPLICATION_TRANSACTION):
+            return HandleScheduleMem(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_DUMP_IPC_START):
             return HandleScheduleDumpIpcStart(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_DUMP_IPC_STOP):
@@ -240,6 +242,25 @@ int32_t AppSchedulerHost::HandleScheduleCjHeapMemory(MessageParcel &data, Messag
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     ScheduleCjHeapMemory(*info);
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleScheduleMem(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::unique_ptr<MemDumpInfo> info(data.ReadParcelable<MemDumpInfo>());
+    if (!info) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<MemDumpInfo> failed");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    std::string dumpResult;
+    ScheduleMem(*info, dumpResult);
+    if (info->isSync) {
+        if (!reply.WriteString(dumpResult)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write dumpResult failed");
+            return ERR_APPEXECFWK_PARCEL_ERROR;
+        }
+    }
     return NO_ERROR;
 }
 
