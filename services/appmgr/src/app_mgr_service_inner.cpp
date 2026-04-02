@@ -614,7 +614,9 @@ int32_t AppMgrServiceInner::PreloadApplicationByPhase(const std::string &bundleN
         TAG_LOGE(AAFwkTag::ABILITYMGR, "preload application not supported");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
-    return PreloadApplication(bundleName, userId, appIndex, AppExecFwk::PreloadMode::PRELOAD_BY_PHASE, preloadPhase);
+    Want want;
+    want.SetBundle(bundleName);
+    return PreloadApplication(want, userId, appIndex, AppExecFwk::PreloadMode::PRELOAD_BY_PHASE, preloadPhase);
 }
 
 int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, int32_t userId,
@@ -629,14 +631,17 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         TAG_LOGE(AAFwkTag::APPMGR, "not support clone app preload");
         return ERR_INVALID_VALUE;
     }
-    return PreloadApplication(bundleName, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED);
+    Want want;
+    want.SetBundle(bundleName);
+    return PreloadApplication(want, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED);
 }
 
-int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex,
+int32_t AppMgrServiceInner::PreloadApplication(const AAFwk::Want &want, int32_t userId, int32_t appIndex,
     AppExecFwk::PreloadMode preloadMode, AppExecFwk::PreloadPhase preloadPhase, bool needMakeImage,
     sptr<IImageErrorHandler> errorHandler)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::string bundleName = want.GetBundle();
     TAG_LOGI(AAFwkTag::APPMGR, "PreloadApplication %{public}s#%{public}d userId:%{public}d \
         preloadMode:%{public}d preloadPhase:%{public}d", bundleName.c_str(), appIndex, userId,
         static_cast<int32_t>(preloadMode), static_cast<int32_t>(preloadPhase));
@@ -666,7 +671,18 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     request.preloadMode = preloadMode;
     request.preloadPhase = preloadPhase;
     request.needMakeImage = needMakeImage;
-    auto ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    auto element = want.GetElement();
+    int32_t ret {0};
+    if (element.GetAbilityName().empty()) {
+        ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    } else {
+        AbilityInfo abilityInfo;
+        if (!CreateAbilityInfo(want, abilityInfo)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "createAbilityInfo fail");
+            return ERR_INVALID_OPERATION;
+        }
+        ret = appPreloader_->GeneratePreloadExtensionRequest(want, abilityInfo, userId, appIndex, request);
+    }
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "generatePreloadRequest fail, ret:%{public}d", ret);
         return ret;
@@ -727,21 +743,22 @@ int32_t AppMgrServiceInner::NotifyImageOperationFailed(sptr<IImageErrorHandler> 
     return ERR_OK;
 }
 
-void AppMgrServiceInner::MakeImage(const std::string &bundleName, int32_t userId,
+void AppMgrServiceInner::MakeImage(const AAFwk::Want &want, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR, "make image, bundleName:%{public}s, userId:%{public}d, appIndex:%{public}d",
-        bundleName.c_str(), userId, appIndex);
-    auto ret = MakeImageInner(bundleName, userId, preloadMode, appIndex, errorHandler);
+    auto ret = MakeImageInner(want, userId, preloadMode, appIndex, errorHandler);
     if (ret != ImageError::ERR_OK) {
         NotifyImageOperationFailed(errorHandler, ret);
     }
 }
 
-ImageError AppMgrServiceInner::MakeImageInner(const std::string &bundleName, int32_t userId,
+ImageError AppMgrServiceInner::MakeImageInner(const AAFwk::Want &want, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
 {
+    std::string bundleName = want.GetBundle();
+    TAG_LOGI(AAFwkTag::APPMGR, "make image, bundleName:%{public}s, userId:%{public}d, appIndex:%{public}d",
+        bundleName.c_str(), userId, appIndex);
     if (preloadMode != PreloadMode::PRELOAD_MODULE) {
         TAG_LOGE(AAFwkTag::APPMGR, "only support preloadModule");
         return ImageError::ERR_INVALID_PRELOAD_TYPE;
@@ -752,10 +769,8 @@ ImageError AppMgrServiceInner::MakeImageInner(const std::string &bundleName, int
         TAG_LOGE(AAFwkTag::APPMGR, "image exist");
         return ImageError::ERR_IMAGE_INFO_EXIST;
     }
-
-    auto ret = PreloadApplication(bundleName, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED,
-        true, errorHandler);
-    if (ret != ERR_OK) {
+    if (PreloadApplication(want, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED,
+        true, errorHandler) != ERR_OK) {
         return ImageError::ERR_PRELOAD_FAILED;
     }
     return ImageError::ERR_OK;
@@ -1213,7 +1228,13 @@ bool AppMgrServiceInner::IsImageInfoMatched(std::shared_ptr<ForkImageInfo> image
         return false;
     }
     auto appRecord = imageInfo->baseAppRecord;
-    if (appRecord && AppRunningManager::CheckAppProcessNameIsSame(appRecord, processName, false) &&
+    if (!appRecord) {
+        TAG_LOGD(AAFwkTag::APPMGR, "apprecord is null");
+        return false;
+    }
+    /* reset preload mode for extension ability to image starting */
+    appRecord->SetPreloadMode(PreloadMode::PRELOAD_MODULE);
+    if (AppRunningManager::CheckAppProcessNameIsSame(appRecord, processName, false) &&
         appRecord->GetInstanceKey() == instanceKey &&
         (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
         (appRecord->GetCustomProcessFlag() == customProcessFlag)) {
@@ -1650,7 +1671,7 @@ bool AppMgrServiceInner::CheckAppRecordExistByPreloadRequest(const PreloadReques
         return false;
     }
     auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, request.bundleInfo,
-        specifiedProcessFlag, nullptr, "", "", true, true);
+        specifiedProcessFlag, nullptr, "", "", true, false);
     return appRecord != nullptr;
 }
 

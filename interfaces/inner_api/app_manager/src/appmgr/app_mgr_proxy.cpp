@@ -94,7 +94,7 @@ void AppMgrProxy::PreloadModuleFinished(const int32_t recordId)
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED, data, reply, option);
 }
 
-int32_t AppMgrProxy::MakeImage(const std::string &bundleName, int32_t userId,
+int32_t AppMgrProxy::MakeImage(const AAFwk::Want &want, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -105,7 +105,7 @@ int32_t AppMgrProxy::MakeImage(const std::string &bundleName, int32_t userId,
         TAG_LOGE(AAFwkTag::APPMGR, "MakeImage Write interface token failed.");
         return IPC_PROXY_ERR;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, String16, Str8ToStr16(bundleName));
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, static_cast<int32_t>(preloadMode));
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, appIndex);
