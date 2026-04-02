@@ -164,8 +164,8 @@ public:
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
 
-    bool ExecuteSecureWithOhmUrl(const std::string &moduleName, const std::string &hapPath,
-        const std::string &srcEntrance);
+    std::unique_ptr<AbilityBase::FileMapper> ExecuteSecureWithOhmUrl(const std::string &moduleName,
+        const std::string &hapPath, const std::string &srcEntrance);
     napi_value GetExportObjectFromOhmUrl(const std::string &srcEntrance, const std::string &key);
 
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;

@@ -30,6 +30,7 @@
 #include "mock_jsnapi.h"
 #include "hilog_tag_wrapper.h"
 #include "js_runtime_lite.h"
+#include "file_mapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1929,7 +1930,7 @@ HWTEST_F(JsRuntimeTest, ExecuteSecureWithOhmUrl_0100, TestSize.Level1)
     std::string hapPath = "hapPath";
     std::string srcEntrance = "srcEntrance";
     auto ret = jsRuntime->ExecuteSecureWithOhmUrl(moduleName, hapPath, srcEntrance);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, nullptr);
 
     std::string key = "key";
     auto retVal = jsRuntime->GetExportObjectFromOhmUrl(srcEntrance, key);
