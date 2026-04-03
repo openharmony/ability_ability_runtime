@@ -50,6 +50,7 @@ AgentCard BuildCard(const std::string &agentId, const std::string &version,
     skill->description = "skill desc";
     skill->tags = {"tag"};
     card.skills = {skill};
+    card.iconUrl = "http://example.com/icon.png";
     card.appInfo = std::make_shared<AgentAppInfo>();
     card.appInfo->bundleName = bundleName;
     card.appInfo->moduleName = "testModule";
