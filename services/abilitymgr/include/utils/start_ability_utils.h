@@ -48,6 +48,7 @@ struct StartAbilityInfo {
     int32_t status = ERR_OK;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     bool isTargetPlugin = false;
+    bool skipAbilityStageLifecycle = false;
 };
 
 struct StartAbilityUtils {
