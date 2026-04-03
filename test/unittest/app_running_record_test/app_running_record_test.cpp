@@ -1855,5 +1855,464 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetKillAppReason_0100, TestSize.
     appRunningRecord->SetInnerMsg(reason);
     EXPECT_EQ(appRunningRecord->GetInnerMsg(), reason);
 }
+
+/**
+ * @tc.name: AppRunningRecord_GetAbilityRunningRecord_0100
+ * @tc.desc: Test GetAbilityRunningRecord returns valid record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetAbilityRunningRecord_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto result = appRunningRecord->GetAbilityRunningRecord(START_PROCESS_SPECIFY_ABILITY_EVENT_ID);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AppRunningRecord_LaunchAbility_0100
+ * @tc.desc: Test LaunchAbility with null appLifeCycleDeal_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_LaunchAbility_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->appLifeCycleDeal_ = nullptr;
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: AppRunningRecord_LaunchAbility_0200
+ * @tc.desc: Test LaunchAbility with null ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_LaunchAbility_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: AppRunningRecord_LaunchAbility_0300
+ * @tc.desc: Test LaunchAbility with null moduleRecord.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_LaunchAbility_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto appLifeCycleDeal = std::make_shared<AppLifeCycleDeal>();
+    appRunningRecord->appLifeCycleDeal_ = appLifeCycleDeal;
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendAppStartupTypeEvent_0100
+ * @tc.desc: Test SendAppStartupTypeEvent with null ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendAppStartupTypeEvent_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->SendAppStartupTypeEvent(ability, AppStartType::COLD);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendAppStartupTypeEvent_0200
+ * @tc.desc: Test SendAppStartupTypeEvent with null applicationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendAppStartupTypeEvent_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = nullptr;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->SendAppStartupTypeEvent(ability, AppStartType::COLD);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendAppStartupTypeEvent_0300
+ * @tc.desc: Test SendAppStartupTypeEvent with null abilityInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendAppStartupTypeEvent_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = "testBundle";
+    appInfo->versionName = "1.0";
+    appInfo->versionCode = 1;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    appRunningRecord->SendAppStartupTypeEvent(ability, AppStartType::COLD);
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsAbilitiesBackground_0100
+ * @tc.desc: Test IsAbilitiesBackground returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsAbilitiesBackground_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto result = appRunningRecord->IsAbilitiesBackground();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsProcessAttached_0100
+ * @tc.desc: Test IsProcessAttached with null appLifeCycleDeal_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsProcessAttached_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->appLifeCycleDeal_ = nullptr;
+    auto result = appRunningRecord->IsProcessAttached();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_ChangeAppGcState_0100
+ * @tc.desc: Test ChangeAppGcState with null appLifeCycleDeal_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ChangeAppGcState_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->appLifeCycleDeal_ = nullptr;
+    auto result = appRunningRecord->ChangeAppGcState(1, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_GetAddStageTimeout_0100
+ * @tc.desc: Test GetAddStageTimeout with empty keep alive app.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetAddStageTimeout_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto result = appRunningRecord->GetAddStageTimeout();
+    EXPECT_EQ(result, AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
+}
+
+/**
+ * @tc.name: AppRunningRecord_AbilityUnfocused_0100
+ * @tc.desc: Test AbilityUnfocused with null ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityUnfocused_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    std::shared_ptr<AbilityRunningRecord> ability = nullptr;
+    auto result = appRunningRecord->AbilityUnfocused(ability);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_AbilityUnfocused_0200
+ * @tc.desc: Test AbilityUnfocused when isFocused_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityUnfocused_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->isFocused_ = false;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 1);
+    auto result = appRunningRecord->AbilityUnfocused(ability);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_AbilityUnfocused_0300
+ * @tc.desc: Test AbilityUnfocused when another ability has focus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityUnfocused_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->isFocused_ = true;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 1);
+    auto result = appRunningRecord->AbilityUnfocused(ability);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_AbilityUnfocused_0400
+ * @tc.desc: Test AbilityUnfocused normal case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityUnfocused_0400, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->isFocused_ = true;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 1);
+    auto result = appRunningRecord->AbilityUnfocused(ability);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_CanRestartResidentProc_0100
+ * @tc.desc: Test CanRestartResidentProc when restartResidentProcCount >= 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_CanRestartResidentProc_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->restartResidentProcCount_ = 1;
+    auto result = appRunningRecord->CanRestartResidentProc();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_CanRestartResidentProc_0200
+ * @tc.desc: Test CanRestartResidentProc when time interval satisfied.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_CanRestartResidentProc_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->restartResidentProcCount_ = -1;
+    appRunningRecord->restartTimeMillis_ = 0;
+    auto result = appRunningRecord->CanRestartResidentProc();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_CanRestartResidentProc_0300
+ * @tc.desc: Test CanRestartResidentProc when time interval not satisfied.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_CanRestartResidentProc_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->restartResidentProcCount_ = -1;
+    appRunningRecord->restartTimeMillis_ = INT64_MAX;
+    auto result = appRunningRecord->CanRestartResidentProc();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_TryToUpdateWorkProcessInfo_0100
+ * @tc.desc: Test TryToUpdateWorkProcessInfo when no need to update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_TryToUpdateWorkProcessInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->imageProcessType_ = ImageProcessType::TEMPLATE;
+    appRunningRecord->needUpdate_ = false;
+    appRunningRecord->TryToUpdateWorkProcessInfo();
+}
+
+/**
+ * @tc.name: AppRunningRecord_TryToUpdateWorkProcessInfo_0200
+ * @tc.desc: Test TryToUpdateWorkProcessInfo when appLifeCycleDeal is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_TryToUpdateWorkProcessInfo_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->imageProcessType_ = ImageProcessType::WORK;
+    appRunningRecord->needUpdate_ = true;
+    appRunningRecord->appLifeCycleDeal_ = nullptr;
+    appRunningRecord->TryToUpdateWorkProcessInfo();
+}
+
+/**
+ * @tc.name: AppRunningRecord_TryToUpdateWorkProcessInfo_0300
+ * @tc.desc: Test TryToUpdateWorkProcessInfo normal case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_TryToUpdateWorkProcessInfo_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->imageProcessType_ = ImageProcessType::WORK;
+    appRunningRecord->needUpdate_ = true;
+    auto appLifeCycleDeal = std::make_shared<AppLifeCycleDeal>();
+    appRunningRecord->appLifeCycleDeal_ = appLifeCycleDeal;
+    appRunningRecord->TryToUpdateWorkProcessInfo();
+    EXPECT_FALSE(appRunningRecord->needUpdate_);
+}
+
+/**
+ * @tc.name: AppRunningRecord_ScheduleNewProcessRequest_0100
+ * @tc.desc: Test ScheduleNewProcessRequest when appLifeCycleDeal is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ScheduleNewProcessRequest_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->appLifeCycleDeal_ = nullptr;
+    AAFwk::Want want;
+    appRunningRecord->ScheduleNewProcessRequest(want, "moduleName");
+}
+
+/**
+ * @tc.name: AppRunningRecord_ScheduleNewProcessRequest_0200
+ * @tc.desc: Test ScheduleNewProcessRequest normal case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ScheduleNewProcessRequest_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appRunningRecord->eventHandler_ = std::make_shared<AMSEventHandler>(appRunningRecord->taskHandler_,
+        appRunningRecord->appMgrServiceInner_);
+    auto appLifeCycleDeal = std::make_shared<AppLifeCycleDeal>();
+    appRunningRecord->appLifeCycleDeal_ = appLifeCycleDeal;
+    AAFwk::Want want;
+    appRunningRecord->ScheduleNewProcessRequest(want, "moduleName");
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsAbilitiesBackground_0200
+ * @tc.desc: Test IsAbilitiesBackground when there is ability not backgrounded.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsAbilitiesBackground_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appRunningRecord->eventHandler_ = std::make_shared<AMSEventHandler>(appRunningRecord->taskHandler_, appRunningRecord->appMgrServiceInner_);
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, appRunningRecord->eventHandler_);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 1);
+    abilityRecord->SetState(AbilityState::ABILITY_STATE_FOREGROUND);
+    moduleRecord->abilities_.emplace(token, abilityRecord);
+    appRunningRecord->hapModules_["bundleName"] = { moduleRecord };
+    auto result = appRunningRecord->IsAbilitiesBackground();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsProcessAttached_0200
+ * @tc.desc: Test IsProcessAttached when GetApplicationClient is not null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsProcessAttached_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto appLifeCycleDeal = std::make_shared<AppLifeCycleDeal>();
+    appRunningRecord->appLifeCycleDeal_ = appLifeCycleDeal;
+    auto result = appRunningRecord->IsProcessAttached();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AppRunningRecord_ChangeAppGcState_0200
+ * @tc.desc: Test ChangeAppGcState normal case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ChangeAppGcState_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    auto appLifeCycleDeal = std::make_shared<AppLifeCycleDeal>();
+    appRunningRecord->appLifeCycleDeal_ = appLifeCycleDeal;
+    auto result = appRunningRecord->ChangeAppGcState(1, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_GetAddStageTimeout_0200
+ * @tc.desc: Test GetAddStageTimeout when IsEmptyKeepAliveApp returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetAddStageTimeout_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "processName");
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->isEmptyKeepAliveApp_ = true;
+    auto result = appRunningRecord->GetAddStageTimeout();
+    EXPECT_EQ(result, AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

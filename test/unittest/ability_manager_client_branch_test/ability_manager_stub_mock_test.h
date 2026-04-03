@@ -400,6 +400,11 @@ public:
         return 0;
     }
 
+    int RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability& exitReason) override
+    {
+        return 0;
+    }
+
     int GetTopAbility(sptr<IRemoteObject>& token) override
     {
         return 0;
