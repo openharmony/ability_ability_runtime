@@ -2865,5 +2865,42 @@ void AppMgrProxy::SetProcessPrepareExit(int32_t pid)
     PARCEL_UTIL_WRITE_NORET(data, Int32, pid);
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT, data, reply, option);
 }
+
+int32_t AppMgrProxy::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllAbilityInfos failed, error code: %{public}d", ret);
+        return ret;
+    }
+
+    int32_t infosSize = reply.ReadInt32();
+    if (infosSize < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Read Parcelable infosSize failed, size: %{public}d", infosSize);
+        return ERR_INVALID_VALUE;
+    }
+
+    for (int32_t idx = 0; idx < infosSize; idx++) {
+        std::unique_ptr<AppExecFwk::AbilityStateData> info(reply.ReadParcelable<AppExecFwk::AbilityStateData>());
+        if (!info) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Read Parcelable info failed at index: %{public}d", idx);
+            return ERR_INVALID_VALUE;
+        }
+        infos.emplace_back(*info);
+    }
+
+    return ret;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

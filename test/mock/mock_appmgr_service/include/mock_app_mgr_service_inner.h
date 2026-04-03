@@ -103,6 +103,7 @@ public:
     MOCK_METHOD2(DestroyImage, int32_t(uint64_t checkpointId, sptr<IImageErrorHandler>));
     MOCK_METHOD1(RegisterImageProcessStateObserver, int32_t(const sptr<IImageProcessStateObserver> &observer));
     MOCK_METHOD1(UnregisterImageProcessStateObserver, int32_t(const sptr<IImageProcessStateObserver> &observer));
+    MOCK_METHOD2(GetAllAbilityInfos, int32_t(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos));
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t, const std::string&)
     {}

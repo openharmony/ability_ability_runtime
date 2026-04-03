@@ -2982,5 +2982,23 @@ void AppRunningRecord::SetSupportMultiProcessDeviceFeature(bool support)
     std::lock_guard<ffrt::mutex> supportLock(supportMultiProcessDeviceFeatureLock_);
     supportMultiProcessDeviceFeature_ = support;
 }
+
+void AppRunningRecord::GetAllAbilityInfos(std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    auto abilitiesMap = GetAbilities();
+    for (const auto &pair : abilitiesMap) {
+        const auto &abilityRecord = pair.second;
+        if (abilityRecord == nullptr || abilityRecord->GetAbilityInfo() == nullptr) {
+            continue;
+        }
+        AbilityStateData info;
+        info.abilityRecordId = abilityRecord->GetAbilityRecordId();
+        info.pid = GetPid();
+        info.uid = abilityRecord->GetAbilityInfo()->applicationInfo.uid;
+        info.abilityType = static_cast<int32_t>(abilityRecord->GetAbilityInfo()->type);
+        info.extensionAbilityType = static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType);
+        infos.emplace_back(info);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
