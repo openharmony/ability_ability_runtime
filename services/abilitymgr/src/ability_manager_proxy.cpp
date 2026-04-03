@@ -7097,19 +7097,15 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
         TAG_LOGE(AAFwkTag::INTENT, "request error:%{public}d", error);
         return error;
     }
-    int32_t infoSize = reply.ReadInt32();
-    if (infoSize < 0 || infoSize >= MAX_INTENT_SIZE) {
-        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
-        return ERR_INVALID_VALUE;
-    }
 
     infos.clear();
-    for (int32_t i = 0; i < infoSize; i++) {
-        std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
-        if (info == nullptr) {
-            return false;
-        }
-        infos.emplace_back(*info);
+    if (!InsightIntentInfoForQuery::UnmarshallingVector(reply, infos)) {
+        TAG_LOGE(AAFwkTag::INTENT, "UnmarshallingVector failed");
+        return INNER_ERR;
+    }
+    if (infos.size() >= static_cast<size_t>(MAX_INTENT_SIZE)) {
+        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
+        return ERR_INVALID_VALUE;
     }
     return reply.ReadInt32();
 }
@@ -7123,7 +7119,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::INTENT, "writeInterfaceToken failed");
         return INNER_ERR;
@@ -7150,19 +7146,15 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
         TAG_LOGE(AAFwkTag::INTENT, "request error:%{public}d", error);
         return error;
     }
-    int32_t infoSize = reply.ReadInt32();
-    if (infoSize < 0 || infoSize >= MAX_INTENT_SIZE) {
-        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
-        return ERR_INVALID_VALUE;
-    }
 
     infos.clear();
-    for (int32_t i = 0; i < infoSize; i++) {
-        std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
-        if (info == nullptr) {
-            return false;
-        }
-        infos.emplace_back(*info);
+    if (!InsightIntentInfoForQuery::UnmarshallingVector(reply, infos)) {
+        TAG_LOGE(AAFwkTag::INTENT, "UnmarshallingVector failed");
+        return INNER_ERR;
+    }
+    if (infos.size() >= static_cast<size_t>(MAX_INTENT_SIZE)) {
+        TAG_LOGE(AAFwkTag::INTENT, "The number of intents exceeds the limit.");
+        return ERR_INVALID_VALUE;
     }
     return reply.ReadInt32();
 }
