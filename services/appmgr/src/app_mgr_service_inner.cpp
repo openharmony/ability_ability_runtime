@@ -5957,7 +5957,8 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     }
 
     if (abilityInfo && abilityInfo->type != AppExecFwk::AbilityType::PAGE &&
-        !AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        !AAFwk::UIExtensionWrapper::IsUIExtension(abilityInfo->extensionAbilityType) &&
+        abilityInfo->extensionAbilityType != ExtensionAbilityType::INPUTMETHOD) {
         return;
     }
 
