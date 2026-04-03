@@ -6490,5 +6490,60 @@ HWTEST_F(AppMgrServiceInnerTest, UpdateConfigurationByUserIds_0002, TestSize.Lev
     EXPECT_EQ(res, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "UpdateConfigurationByUserIds_0002 end");
 }
+
+/**
+ * @tc.name: GetAllAbilityInfos_0001
+ * @tc.desc: GetAllAbilityInfos when appRunningManager is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllAbilityInfos_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = nullptr;
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    auto ret = appMgrServiceInner->GetAllAbilityInfos(-1, infos);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0001 end");
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0002
+ * @tc.desc: GetAllAbilityInfos with valid appRunningManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllAbilityInfos_0002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    auto ret = appMgrServiceInner->GetAllAbilityInfos(-1, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0002 end");
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0003
+ * @tc.desc: GetAllAbilityInfos with valid appRunningManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllAbilityInfos_0003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    int32_t pid = 1001;
+    auto ret = appMgrServiceInner->GetAllAbilityInfos(pid, infos);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllAbilityInfos_0003 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
