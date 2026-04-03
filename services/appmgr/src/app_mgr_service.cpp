@@ -264,7 +264,7 @@ void AppMgrService::PreloadModuleFinished(const int32_t recordId)
     return appMgrServiceInner_->PreloadModuleFinished(IPCSkeleton::GetCallingPid());
 }
 
-int32_t AppMgrService::MakeImage(const std::string &bundleName, int32_t userId,
+int32_t AppMgrService::MakeImage(const AAFwk::Want &want, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "MakeImage called");
@@ -277,9 +277,9 @@ int32_t AppMgrService::MakeImage(const std::string &bundleName, int32_t userId,
         TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
         return ERR_PERMISSION_DENIED;
     }
-    auto task = [appMgrServiceInner = appMgrServiceInner_, bundleName, userId, preloadMode,
+    auto task = [appMgrServiceInner = appMgrServiceInner_, want, userId, preloadMode,
         appIndex, errorHandler] () {
-        appMgrServiceInner->MakeImage(bundleName, userId, preloadMode, appIndex, errorHandler);
+        appMgrServiceInner->MakeImage(want, userId, preloadMode, appIndex, errorHandler);
     };
     taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
         .taskName_ = "MakeImageTask",
