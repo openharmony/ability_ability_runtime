@@ -84,7 +84,7 @@ public:
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex) override;
 
-    virtual int32_t MakeImage(const std::string &bundleName, int32_t userId,
+    virtual int32_t MakeImage(const AAFwk::Want &want, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0,
         sptr<IImageErrorHandler> errorHandler = nullptr) override;
 

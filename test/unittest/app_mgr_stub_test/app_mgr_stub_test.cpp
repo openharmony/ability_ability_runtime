@@ -1174,10 +1174,12 @@ HWTEST_F(AppMgrStubTest, HandleMakeImage_ShouldReturnInvalidValueWhenFlagIsTrueA
     MessageParcel reply;
     MessageOption option;
     std::string bundleName = "com.acts.makeimagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRE_MAKE;
     int32_t appIndex = 0;
-    data.WriteString16(Str8ToStr16(bundleName));
+    data.WriteParcelable(&want);
     data.WriteInt32(userId);
     data.WriteInt32(static_cast<int32_t>(preloadMode));
     data.WriteInt32(appIndex);
@@ -1198,10 +1200,12 @@ HWTEST_F(AppMgrStubTest, HandleMakeImage_ShouldReturnNoErrorWhenFlagIsTrueAndHan
     MessageParcel reply;
     MessageOption option;
     std::string bundleName = "com.acts.makeimagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRE_MAKE;
     int32_t appIndex = 0;
-    data.WriteString16(Str8ToStr16(bundleName));
+    data.WriteParcelable(&want);
     data.WriteInt32(userId);
     data.WriteInt32(static_cast<int32_t>(preloadMode));
     data.WriteInt32(appIndex);

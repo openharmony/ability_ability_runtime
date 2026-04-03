@@ -317,9 +317,9 @@ public:
      */
     virtual void PreloadModuleFinished(const int32_t pid);
 
-    void MakeImage(const std::string &bundleName, int32_t userId,
+    void MakeImage(const AAFwk::Want &want, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler);
-    ImageError MakeImageInner(const std::string &bundleName, int32_t userId,
+    ImageError MakeImageInner(const AAFwk::Want &want, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler);
     void DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler);
     ImageError DestroyImageInner(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler);
@@ -2146,7 +2146,7 @@ private:
      */
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
-    int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    int32_t PreloadApplication(const AAFwk::Want &want, int32_t userId, int32_t appIndex,
         AppExecFwk::PreloadMode preloadMode, AppExecFwk::PreloadPhase preloadPhase, bool needMakeImage = false,
         sptr<IImageErrorHandler> errorHandler = nullptr);
     void HandlePreloadApplication(const PreloadRequest &request);
