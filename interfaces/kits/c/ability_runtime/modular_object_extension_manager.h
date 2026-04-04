@@ -45,30 +45,18 @@ extern "C" {
 #endif
 
 /**
- * @brief Defines the pointer to OH_AbilityRuntime_ModularObject_ExtensionInfo.
+ * @brief Defines the pointer to OH_AbilityRuntime_ModularObjectExtensionInfo.
  *
  * @since 26.0.0
  */
-typedef struct OH_AbilityRuntime_ModularObject_ExtensionInfo* OH_AbilityRuntime_MoeInfoHandle;
+typedef struct OH_AbilityRuntime_ModularObjectExtensionInfo* OH_AbilityRuntime_ModObjExtensionInfoHandle;
 
 /**
- * @brief Defines the pointer to OH_AbilityRuntime_ModularObject_AllExtensionInfos.
+ * @brief Defines the pointer to OH_AbilityRuntime_AllModularObjectExtensionInfos.
  *
  * @since 26.0.0
  */
-typedef struct OH_AbilityRuntime_ModularObject_AllExtensionInfos* OH_AbilityRuntime_AllMoeInfosHandle;
-
-/**
- * @brief Destroys the specified modular object all extension infos.
- *
- * @param allExtensionInfos The modular object all extension infos to be deleted.
- * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
- * @since 26.0.0
- */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_DestroyAllExtensionInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle *allExtensionInfos);
+typedef struct OH_AbilityRuntime_AllModularObjectExtensionInfos* OH_AbilityRuntime_AllModObjExtensionInfosHandle;
 
 /**
  * @brief The launch mode of a modular object extension.
@@ -147,7 +135,7 @@ typedef enum OH_AbilityRuntime_ThreadMode {
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_LaunchMode *launchMode);
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_LaunchMode *launchMode);
 
 /**
  * @brief Gets the process mode from modular object extension info.
@@ -160,7 +148,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMo
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoProcessMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_ProcessMode *processMode);
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_ProcessMode *processMode);
 
 /**
  * @brief Gets the thread mode from modular object extension info.
@@ -173,7 +161,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoProcessM
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_ThreadMode *threadMode);
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_ThreadMode *threadMode);
 
 /**
  * @brief Gets elementName from modular object extension info.
@@ -186,7 +174,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMo
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoElementName(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, AbilityBase_Element *element);
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, AbilityBase_Element *element);
 
 /**
  * @brief Gets the disable state of modular object extension.
@@ -199,20 +187,35 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoElementN
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoDisableState(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, bool *isDisabled);
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, bool *isDisabled);
 
 /**
- * @brief Queries all modular object extension infos within the self application.
+ * @brief Acquires all modular object extension infos within the self application.
+
  *
- * @param allExtensionInfos Information about all extensions within the self application.
+ * @param outOwnedAllExtensionInfos Information about all extensions within the self application.
  * @return Returns a specific error code.
  *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
  *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
  *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support.
+ * @release OH_AbilityRuntime_ReleaseAllExtensionInfos {outOwnedAllExtensionInfos}
  * @since 26.0.0
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle *allExtensionInfos);
+AbilityRuntime_ErrorCode OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle *outOwnedAllExtensionInfos);
+
+/**
+ * @brief Releases the specified all modular object extension infos.
+ *
+ * @param allExtensionInfos The all modular object extension infos to be released.
+ * @return Returns a specific error code.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
+ * @see OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos
+ * @since 26.0.0
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ReleaseAllExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle *allExtensionInfos);
 
 /**
  * @brief Gets the exact count of modular object extension infos present in the collection.
@@ -224,8 +227,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(
  *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
  * @since 26.0.0
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllMoeInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos, size_t *count);
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos, size_t *count);
 
 /**
  * @brief Retrieves a specific modular object extension info handle from the collection by its index.
@@ -238,9 +241,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllMoeInfos(
  *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
  * @since 26.0.0
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_GetMoeInfoByIndex(
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos, size_t index,
-    OH_AbilityRuntime_MoeInfoHandle *extensionInfo);
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModObjExtensionInfoByIndex(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos, size_t index,
+    OH_AbilityRuntime_ModObjExtensionInfoHandle *extensionInfo);
 
 #ifdef __cplusplus
 }
