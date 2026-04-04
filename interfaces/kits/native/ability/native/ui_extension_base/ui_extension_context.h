@@ -182,6 +182,7 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config);
     void SetAbilityColorMode(int32_t colorMode);
+    void SetAbilityFontSize(double fontSize);
 
     /**
      * @brief Send destroy request to the host component.
