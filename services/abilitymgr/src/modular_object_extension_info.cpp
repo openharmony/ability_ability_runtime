@@ -14,8 +14,6 @@
  */
 
 #include "modular_object_extension_info.h"
-#include "nlohmann/json.hpp"
-#include "json_util.h"
 
 namespace {
 constexpr const char *JSON_KEY_BUNDLE_NAME = "bundleName";
@@ -27,6 +25,7 @@ constexpr const char *JSON_KEY_PROCESS_MODE = "processMode";
 constexpr const char *JSON_KEY_THREAD_MODE = "threadMode";
 constexpr const char *JSON_KEY_IS_DISABLED = "isDisabled";
 }
+
 namespace OHOS {
 namespace AAFwk {
 bool ModularObjectExtensionInfo::ReadFromParcel(Parcel &parcel)
@@ -84,7 +83,7 @@ ModularObjectExtensionInfo *ModularObjectExtensionInfo::Unmarshalling(Parcel &pa
     return info;
 }
 
-std::string ModularObjectExtensionInfo::ToJsonString() const
+nlohmann::json ModularObjectExtensionInfo::ToJson() const
 {
     nlohmann::json jsonObject = nlohmann::json {
         {JSON_KEY_BUNDLE_NAME, bundleName},
@@ -96,48 +95,23 @@ std::string ModularObjectExtensionInfo::ToJsonString() const
         {JSON_KEY_THREAD_MODE, static_cast<int32_t>(threadMode)},
         {JSON_KEY_IS_DISABLED, isDisabled},
     };
-    return jsonObject.dump();
+    return jsonObject;
 }
 
-bool ModularObjectExtensionInfo::FromJsonString(const std::string &jsonString)
+ModularObjectExtensionInfo ModularObjectExtensionInfo::FromJson(const nlohmann::json &jsonObject)
 {
-    nlohmann::json jsonObject = nlohmann::json::parse(jsonString, nullptr, false);
-    if (jsonObject.is_discarded() || !jsonObject.is_object()) {
-        return false;
+    ModularObjectExtensionInfo info;
+    if (jsonObject.is_object()) {
+        info.bundleName = jsonObject.value(JSON_KEY_BUNDLE_NAME, "");
+        info.moduleName = jsonObject.value(JSON_KEY_MODULE_NAME, "");
+        info.abilityName = jsonObject.value(JSON_KEY_ABILITY_NAME, "");
+        info.appIndex = jsonObject.value(JSON_KEY_APP_INDEX, 0);
+        info.launchMode = static_cast<MoeLaunchMode>(jsonObject.value(JSON_KEY_LAUNCH_MODE, 0));
+        info.processMode = static_cast<MoeProcessMode>(jsonObject.value(JSON_KEY_PROCESS_MODE, 0));
+        info.threadMode = static_cast<MoeThreadMode>(jsonObject.value(JSON_KEY_THREAD_MODE, 0));
+        info.isDisabled = jsonObject.value(JSON_KEY_IS_DISABLED, false);
     }
-
-    int32_t parseResult = ERR_OK;
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(
-        jsonObject, jsonObjectEnd, JSON_KEY_BUNDLE_NAME, bundleName, false, parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(
-        jsonObject, jsonObjectEnd, JSON_KEY_MODULE_NAME, moduleName, false, parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(
-        jsonObject, jsonObjectEnd, JSON_KEY_ABILITY_NAME, abilityName, false, parseResult);
-    AppExecFwk::GetValueIfFindKey<int32_t>(
-        jsonObject, jsonObjectEnd, JSON_KEY_APP_INDEX, appIndex, AppExecFwk::JsonType::NUMBER,
-        false, parseResult, AppExecFwk::ArrayType::NOT_ARRAY);
-    AppExecFwk::BMSJsonUtil::GetBoolValueIfFindKey(
-        jsonObject, jsonObjectEnd, JSON_KEY_IS_DISABLED, isDisabled, false, parseResult);
-
-    int32_t enumValue = 0;
-    AppExecFwk::GetValueIfFindKey<int32_t>(
-        jsonObject, jsonObjectEnd, JSON_KEY_LAUNCH_MODE, enumValue, AppExecFwk::JsonType::NUMBER,
-        false, parseResult, AppExecFwk::ArrayType::NOT_ARRAY);
-    launchMode = static_cast<MoeLaunchMode>(enumValue);
-    AppExecFwk::GetValueIfFindKey<int32_t>(
-        jsonObject, jsonObjectEnd, JSON_KEY_PROCESS_MODE, enumValue, AppExecFwk::JsonType::NUMBER,
-        false, parseResult, AppExecFwk::ArrayType::NOT_ARRAY);
-    processMode = static_cast<MoeProcessMode>(enumValue);
-    AppExecFwk::GetValueIfFindKey<int32_t>(
-        jsonObject, jsonObjectEnd, JSON_KEY_THREAD_MODE, enumValue, AppExecFwk::JsonType::NUMBER,
-        false, parseResult, AppExecFwk::ArrayType::NOT_ARRAY);
-    threadMode = static_cast<MoeThreadMode>(enumValue);
-
-    if (parseResult != ERR_OK) {
-        return false;
-    }
-    return true;
+    return info;
 }
 } // namespace AAFwk
 } // namespace OHOS

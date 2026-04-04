@@ -19,6 +19,7 @@
 #include "common_event_support.h"
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "modular_object_rdb_storage_mgr.h"
 #include "os_account_manager_wrapper.h"
@@ -32,6 +33,7 @@ const std::string IS_DISABLED = "isDisabled";
 const std::string PROCESS_MODE = "processMode";
 const std::string THREAD_MODE = "threadMode";
 const std::string LAUNCH_MODE = "launchMode";
+const int32_t MAIN_USER_ID = 100;
 } // namespace
 
 ModularObjectEventReceiver::ModularObjectEventReceiver(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
@@ -47,6 +49,8 @@ void ModularObjectEventReceiver::OnReceiveEvent(const EventFwk::CommonEventData 
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         HandleEventUserSwitched(data);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_BUNDLE_SCAN_FINISHED) {
+        HandleBundleScanFinished(data);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
         HandleBundleInstall(data);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
@@ -58,36 +62,74 @@ void ModularObjectEventReceiver::OnReceiveEvent(const EventFwk::CommonEventData 
     }
 }
 
-void ModularObjectEventReceiver::LoadModularObjectExtensionInfos()
+void ModularObjectEventReceiver::LoadModularObjectExtensionInfos(int32_t userId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::EXT, "load modular object start, userId: %{public}d", userId);
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null bundleMgrHelper");
         return;
     }
 
-    int32_t userId = AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId();
-    TAG_LOGD(AAFwkTag::EXT, "init modular object, userId: %{public}d", userId);
-
+    std::lock_guard<std::mutex> lock(loadMoeMutex_);
     std::vector<AppExecFwk::BundleInfo> bundleInfos {};
-    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO,
-        bundleInfos, userId)) != ERR_OK) {
+    auto flags =
+        (AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO);
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(flags, bundleInfos, userId))) {
         TAG_LOGE(AAFwkTag::EXT, "get bundle infos failed");
         return;
     }
-    TAG_LOGD(AAFwkTag::EXT, "bundleInfos size: %{public}zu", bundleInfos.size());
+
+    TAG_LOGI(AAFwkTag::EXT, "bundleInfos size: %{public}zu", bundleInfos.size());
     std::vector<AAFwk::ModularObjectExtensionInfo> infos;
     for (const auto &bundleInfo : bundleInfos) {
-        GetModularObjectExtensionInfos(bundleInfo, infos);
         std::string key = GenerateModularObjectKey(userId, bundleInfo.name, bundleInfo.appIndex);
-        DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertData(key, infos);
+        uint32_t versionCode = 0;
+        bool hasRecord =
+            DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->QueryVersion(key, versionCode);
+        GetModularObjectExtensionInfos(bundleInfo, infos);
+        if (hasRecord && bundleInfo.versionCode != versionCode) {
+            DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertData(
+                key, infos, bundleInfo.versionCode);
+        } else if (!hasRecord && !infos.empty()) {
+            DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertData(
+                key, infos, bundleInfo.versionCode);
+        }
         infos.clear();
     }
 }
 
 void ModularObjectEventReceiver::HandleEventUserSwitched(const EventFwk::CommonEventData &data)
 {
-    auto task = [self = shared_from_this()]() { self->LoadModularObjectExtensionInfos(); };
+    int32_t userId = data.GetCode();
+    if (userId < 0) {
+        TAG_LOGE(AAFwkTag::EXT, "invalid switched userId: %{public}d", userId);
+    }
+
+    std::lock_guard<std::mutex> lock(userIdMutex_);
+    if (userId == lastUserId_) {
+        TAG_LOGE(AAFwkTag::EXT, "same userId: %{public}d", lastUserId_);
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::EXT, "userId: %{public}d switch to  current userId: %{public}d", lastUserId_, userId);
+    lastUserId_ = userId;
+
+    auto task = [self = shared_from_this(), userId]() { self->LoadModularObjectExtensionInfos(userId); };
+    ffrt::submit(task);
+}
+
+void ModularObjectEventReceiver::HandleBundleScanFinished(const EventFwk::CommonEventData &data)
+{
+    uint32_t userId = AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId();
+    if (userId == 0) {
+        TAG_LOGI(AAFwkTag::EXT, "use MAIN_USER_ID(%{public}d) instead of current userId: (%{public}d)",
+            MAIN_USER_ID, userId);
+        userId = MAIN_USER_ID;
+    }
+
+    auto task = [self = shared_from_this(), userId]() { self->LoadModularObjectExtensionInfos(userId); };
     ffrt::submit(task);
 }
 
@@ -177,7 +219,8 @@ void ModularObjectEventReceiver::InsertModularObjectExtensionInfo(
         return;
     }
     std::string key = GenerateModularObjectKey(userId, bundleName, appIndex);
-    DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertData(key, infos);
+    DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertData(
+        key, infos, bundleInfo.versionCode);
 }
 
 void ModularObjectEventReceiver::UpdateModularObjectExtensionInfos(const std::string &bundleName, int32_t userId,
@@ -203,7 +246,8 @@ void ModularObjectEventReceiver::UpdateModularObjectExtensionInfos(const std::st
         DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->DeleteData(key);
         return;
     }
-    DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->UpdateData(key, infos);
+    DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->UpdateData(
+        key, infos, bundleInfo.versionCode);
 }
 
 void ModularObjectEventReceiver::RemoveModularObjectExtensionInfo(

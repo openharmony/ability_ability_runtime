@@ -28,12 +28,15 @@ namespace AbilityRuntime {
 class ModularObjectExtensionRdbStorageMgr : public std::enable_shared_from_this<ModularObjectExtensionRdbStorageMgr> {
     DECLARE_DELAYED_SINGLETON(ModularObjectExtensionRdbStorageMgr)
 public:
-    int32_t InsertData(const std::string &key, const std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
-    int32_t UpdateData(const std::string &key, const std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
+    int32_t InsertData(const std::string &key, const std::vector<AAFwk::ModularObjectExtensionInfo> &infos,
+        uint32_t versionCode);
+    int32_t UpdateData(const std::string &key, const std::vector<AAFwk::ModularObjectExtensionInfo> &infos,
+        uint32_t versionCode);
     int32_t DeleteData(const std::string &key);
     int32_t QueryData(const std::string &key, std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
+    bool QueryVersion(const std::string& key, uint32_t &versionCode);
 private:
-    std::string ToJsonString(const std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
+    std::string ToJsonString(const std::vector<AAFwk::ModularObjectExtensionInfo> &infos, uint32_t versionCode);
     void FromJsonString(const std::string& jsonStr, std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
 };
 }  // namespace AbilityRuntime
