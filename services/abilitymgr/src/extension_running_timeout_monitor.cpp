@@ -153,39 +153,17 @@ void ExtensionRunningTimeoutMonitor::SubmitPeriodicTask()
     taskHandler->SubmitTask(task, PERIODIC_TASK_NAME, REPORT_INTERVAL_MS);
 }
 
-void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
+void ExtensionRunningTimeoutMonitor::BuildReportArrays(
+    const std::list<ExtensionTimeoutEvent> &events,
+    std::vector<int32_t> &extensionTypes, std::vector<char*> &bundleNamePtrs,
+    std::vector<char*> &abilityNamePtrs, std::vector<int32_t> &runningDurations,
+    std::vector<int32_t> &stillAliveFlags, std::vector<int32_t> &cnts)
 {
-    std::list<ExtensionTimeoutEvent> eventsToReport;
-    {
-        std::lock_guard<std::mutex> lock(monitorMutex_);
-        if (cachedEvents_.empty()) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "no timeout events to report");
-            return;
-        }
-        eventsToReport = cachedEvents_;
-        cachedEvents_.clear();
-    }
-
-    // Build arrays for HiSysEvent
-    std::vector<int32_t> extensionTypes;
-    std::vector<char*> bundleNamePtrs;
-    std::vector<char*> abilityNamePtrs;
-    std::vector<int32_t> runningDurations;
-    std::vector<int32_t> stillAliveFlags;
-    std::vector<int32_t> cnts;
-
-    // Keep string references alive until report completes
     std::vector<std::string> bundleNames;
     std::vector<std::string> abilityNames;
-
-    bundleNames.reserve(eventsToReport.size());
-    abilityNames.reserve(eventsToReport.size());
-    extensionTypes.reserve(eventsToReport.size());
-    runningDurations.reserve(eventsToReport.size());
-    stillAliveFlags.reserve(eventsToReport.size());
-    cnts.reserve(eventsToReport.size());
-
-    for (const auto &event : eventsToReport) {
+    bundleNames.reserve(events.size());
+    abilityNames.reserve(events.size());
+    for (const auto &event : events) {
         extensionTypes.push_back(event.extensionType);
         bundleNames.push_back(event.bundleName);
         abilityNames.push_back(event.abilityName);
@@ -199,6 +177,29 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
     for (auto &name : abilityNames) {
         abilityNamePtrs.push_back(const_cast<char*>(name.c_str()));
     }
+}
+
+void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
+{
+    std::list<ExtensionTimeoutEvent> eventsToReport;
+    {
+        std::lock_guard<std::mutex> lock(monitorMutex_);
+        if (cachedEvents_.empty()) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "no timeout events to report");
+            return;
+        }
+        eventsToReport = cachedEvents_;
+        cachedEvents_.clear();
+    }
+
+    std::vector<int32_t> extensionTypes;
+    std::vector<char*> bundleNamePtrs;
+    std::vector<char*> abilityNamePtrs;
+    std::vector<int32_t> runningDurations;
+    std::vector<int32_t> stillAliveFlags;
+    std::vector<int32_t> cnts;
+    BuildReportArrays(eventsToReport, extensionTypes, bundleNamePtrs,
+        abilityNamePtrs, runningDurations, stillAliveFlags, cnts);
 
     auto paramCount = static_cast<int32_t>(6 + eventsToReport.size());
     HisyseventReport report(paramCount);
