@@ -515,9 +515,9 @@ USER_DATA_SIZE:
 
 EXTENSION_RUNNING_TIMEOUT:
   __BASE: {type: STATISTIC, level: MINOR, desc: extension ability running timeout}
-  EXTENSION_TYPE: {type: INT32_ARRAY, desc: extension type list}
-  BUNDLE_NAME: {type: STRING_ARRAY, desc: bundle name list}
-  ABILITY_NAME: {type: STRING_ARRAY, desc: ability name list}
-  RUNNING_DURATION: {type: INT32_ARRAY, desc: running duration list in seconds}
-  STILL_ALIVE: {type: INT32_ARRAY, desc: still alive flag list}
-  CNT: {type: INT32_ARRAY, desc: occurrence count list}
+  EXTENSION_TYPE: {type: INT32, desc: extension type}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  RUNNING_DURATION: {type: INT32, desc: running duration in seconds}
+  STILL_ALIVE: {type: INT32, desc: still alive flag}
+  CNT: {type: INT32, desc: occurrence count}
