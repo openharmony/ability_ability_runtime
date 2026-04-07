@@ -27,7 +27,7 @@ namespace {
 constexpr const char* EXTENSION_CONFIG_DEFAULT_PATH = "/system/etc/ams_extension_config.json";
 constexpr const char* EXTENSION_CONFIG_FILE_PATH = "/etc/ams_extension_config.json";
 
-constexpr const char* EXTENSION_CONFIG_NAME = "ams_extension_config";
+constexpr const char* EXTENSION_CONFIG_NAME = "extension_config";
 constexpr const char* EXTENSION_TYPE_NAME = "extension_type_name";
 constexpr const char* EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
 constexpr const char* EXTENSION_RUNNING_TIMEOUT_TIME = "running_timeout_time";
