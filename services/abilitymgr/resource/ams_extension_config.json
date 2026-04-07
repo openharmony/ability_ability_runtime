@@ -1,5 +1,5 @@
 {
-    "ams_extension_config": [
+    "extension_config": [
         {
             "extension_type_name": "service",
             "auto_disconnect_time": -1,
