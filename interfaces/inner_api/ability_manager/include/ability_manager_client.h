@@ -504,6 +504,14 @@ public:
     ErrCode TerminateAbility(sptr<IRemoteObject> token, int resultCode, const Want *resultWant);
 
     /**
+     * StartSelf, start the ability itself with token.
+     *
+     * @param token, the token of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartSelf(sptr<IRemoteObject> token);
+
+    /**
      * BackToCallerAbilityWithResult, return to the caller ability.
      *
      * @param token, the token of the ability to terminate.

@@ -66,6 +66,7 @@ ohos_shared_library("ability_runtime") {
     "src/modular_object_connection_manager.cpp",
     "src/modular_object_ability_connection.cpp",
     "src/c_modular_object_utils.cpp",
+    "src/native_ability_wrapper.cpp",
     "src/start_options.cpp",
     "src/start_options_impl.cpp",
     "src/want_utils.cpp",

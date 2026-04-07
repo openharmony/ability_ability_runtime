@@ -280,6 +280,10 @@ class AbilityContext extends Context {
   restartApp(want) {
     return this.__context_impl__.restartApp(want);
   }
+
+  startSelf() {
+    return this.__context_impl__.startSelf();
+  }
 }
 
 export default AbilityContext;

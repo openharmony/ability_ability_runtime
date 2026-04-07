@@ -797,5 +797,10 @@ ErrCode UIAbilityLifecycleManager::QueryCallerTokenIdForAnco(const std::string &
 {
     return ERR_OK;
 }
+
+int32_t UIAbilityLifecycleManager::StartSelf(const UIAbilityRecordPtr &abilityRecord)
+{
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

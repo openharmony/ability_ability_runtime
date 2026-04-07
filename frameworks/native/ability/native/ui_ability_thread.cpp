@@ -153,6 +153,30 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     AttachInner(application, abilityRecord, stageContext);
 }
 
+bool UIAbilityThread::InitNativeThread(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo)
+{
+    auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+    if (abilityInfo == nullptr || appContext == nullptr) {
+        return false;
+    }
+    AAFwk::NativeAbilityMetaData metaData;
+    AAFwk::NativeAbilityMetaData::InitData(*abilityInfo, metaData);
+    if (!metaData.withNativeModule) {
+        return true;
+    }
+    if (!appContext->CreateNativeThread(metaData, abilityInfo->bundleName, abilityInfo->moduleName)) {
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "Loading native module: %{public}s", metaData.nativeModuleSource.c_str());
+    if (currentAbility_ != nullptr) {
+        currentAbility_->SetWithNative(true);
+    }
+    if (abilityImpl_ != nullptr) {
+        abilityImpl_->SetNativeModuleMetaData(metaData);
+    }
+    return true;
+}
+
 void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
     const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
     const std::shared_ptr<Context> &stageContext)
@@ -168,6 +192,12 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
         return;
     }
     abilityImpl_ = uiAbilityImpl;
+
+    if (!InitNativeThread(abilityRecord->GetAbilityInfo())) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "InitNativeThread failed");
+        // return to trigger load
+        return;
+    }
 
     // ability attach : ipc
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
