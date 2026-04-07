@@ -1,3 +1,14 @@
 {
-    "ams_extension_config": []
+    "ams_extension_config": [
+        {
+            "extension_type_name": "service",
+            "auto_disconnect_time": -1,
+            "running_timeout_time": 7200
+        },
+        {
+            "extension_type_name": "dataShare",
+            "auto_disconnect_time": -1,
+            "running_timeout_time": 1800
+        }
+    ]
 }
