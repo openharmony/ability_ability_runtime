@@ -514,7 +514,7 @@ USER_DATA_SIZE:
    FILE_OR_FOLDER_SIZE: {type: UINT64, arrsize: 100, desc: File or folder size}
 
 EXTENSION_RUNNING_TIMEOUT:
-  __BASE: {type: STATISTIC, level: MINOR, tag: STABILITY, desc: extension ability running timeout}
+  __BASE: {type: STATISTIC, level: MINOR, desc: extension ability running timeout}
   EXTENSION_TYPE: {type: INT32_ARRAY, desc: extension type list}
   BUNDLE_NAME: {type: STRING_ARRAY, desc: bundle name list}
   ABILITY_NAME: {type: STRING_ARRAY, desc: ability name list}
