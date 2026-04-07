@@ -1066,5 +1066,33 @@ HWTEST_F(AppUtilsTest, IsSupportAllowDebugPermission_0200, TestSize.Level2)
     appUtils.isSupportAllowDebugPermission_.value = true;
     EXPECT_TRUE(appUtils.IsSupportAllowDebugPermission());
 }
+
+/**
+ * @tc.number: IsSupportNativeAbility_0100
+ * @tc.desc: Test IsSupportNativeAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportNativeAbility_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportNativeAbility_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportNativeAbility_.isLoaded = false;
+    appUtils.IsSupportNativeAbility();
+    EXPECT_TRUE(appUtils.isSupportNativeAbility_.isLoaded);
+}
+
+/**
+ * @tc.number: IsSupportNativeAbility_0200
+ * @tc.desc: Test IsSupportNativeAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportNativeAbility_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportNativeAbility_0200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportNativeAbility_.isLoaded = true;
+    appUtils.isSupportNativeAbility_.value = true;
+    EXPECT_TRUE(appUtils.IsSupportNativeAbility());
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

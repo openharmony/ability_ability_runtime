@@ -587,6 +587,13 @@ public:
 
     void HandleUIAbilityDiedByPid(pid_t pid);
 
+    /**
+     * @brief Start the ability itself
+     * @param abilityRecord The ability record to start
+     * @return Returns ERR_OK on success, others on failure
+     */
+    int32_t StartSelf(const UIAbilityRecordPtr &abilityRecord);
+
 private:
     /**
      * @brief Add starting process ID to tracking list

@@ -168,6 +168,8 @@ public:
      */
     virtual int StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options, uint64_t callbackId) override;
 
+    int StartSelf(sptr<IRemoteObject> token) override;
+
     /**
      * StartAbility with want, send want to ability manager service.
      *

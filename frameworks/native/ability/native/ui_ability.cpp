@@ -38,6 +38,9 @@
 #include "reverse_continuation_scheduler_primary_stage.h"
 #include "runtime.h"
 #include "resource_config_helper.h"
+#include <random>
+#include <sstream>
+#include <iomanip>
 #ifdef WITH_DLP
 #include "set_dlp_config.h"
 #endif // WITH_DLP
@@ -61,6 +64,28 @@ constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 #endif // WITH_DLP
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
+
+std::string GenerateInstanceId()
+{
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
+    uint64_t high = dist(gen);
+    uint64_t low = dist(gen);
+    high = (high & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
+    low = (low & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
+    std::ostringstream oss;
+    oss << std::hex << std::setfill('0')
+        << std::setw(4) << ((high >> 48) & 0xFFFF) << "-"
+        << std::setw(4) << ((high >> 32) & 0xFFFF) << "-"
+        << std::setw(4) << ((high >> 16) & 0xFFFF) << "-"
+        << std::setw(4) << (high & 0xFFFF) << "-"
+        << std::setw(4) << ((low >> 48) & 0xFFFF)
+        << std::setw(4) << ((low >> 32) & 0xFFFF)
+        << std::setw(4) << ((low >> 16) & 0xFFFF)
+        << std::setw(4) << (low & 0xFFFF);
+    return oss.str();
+}
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
@@ -98,6 +123,8 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         TAG_LOGE(AAFwkTag::UIABILITY, "null record");
         return;
     }
+    instanceId_ = GenerateInstanceId();
+    TAG_LOGI(AAFwkTag::UIABILITY, "instanceId: %{public}s", instanceId_.c_str());
     application_ = application;
     abilityInfo_ = record->GetAbilityInfo();
     handler_ = handler;
@@ -521,6 +548,11 @@ std::string UIAbility::GetModuleName()
     }
 
     return abilityInfo_->moduleName;
+}
+
+std::string UIAbility::GetInstanceId() const
+{
+    return instanceId_;
 }
 
 void UIAbility::OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &want)

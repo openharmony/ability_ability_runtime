@@ -41,6 +41,7 @@ public:
     static napi_value ExitMasterProcessRole(napi_env env, napi_callback_info info);
     static napi_value CreatePluginModuleContextForBundle(napi_env env, napi_callback_info info);
     static napi_value GetAppPreloadType(napi_env env, napi_callback_info info);
+    static napi_value GetUIAbilityByInstanceId(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
@@ -60,6 +61,7 @@ private:
     bool VerifyCreatePluginContextParams(napi_env env, NapiCallbackInfo &info, std::string &moduleName,
         std::string &pluginBundleName, std::string &hostBundleName);
     napi_value OnGetAppPreloadType(napi_env env, NapiCallbackInfo &info);
+    napi_value OnGetUIAbilityByInstanceId(napi_env env, NapiCallbackInfo &info);
 };
 
 napi_value ApplicationInit(napi_env env, napi_value exportObj);
