@@ -70,6 +70,11 @@ public:
      */
     void CheckAliveExtensions();
 
+    /**
+     * @brief Dump cached timeout events and running extensions for debugging.
+     */
+    void Dump(std::vector<std::string> &info);
+
 private:
     struct ExtensionStartInfo {
         int32_t extensionType = -1;

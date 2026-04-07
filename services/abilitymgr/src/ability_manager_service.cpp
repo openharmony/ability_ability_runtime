@@ -54,6 +54,7 @@
 #include "hidden_start_observer_manager.h"
 #include "hitrace_meter.h"
 #include "hisysevent_report.h"
+#include "extension_running_timeout_monitor.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_db_cache.h"
 #include "insight_intent_utils.h"
@@ -7299,6 +7300,10 @@ void AbilityManagerService::DumpSysInner(
     DumpSysStateInner(args, info, isClient, isUserID, userId);
     DumpSysPendingInner(args, info, isClient, isUserID, userId);
     DumpSysProcess(args, info, isClient, isUserID, userId);
+    auto timeoutMonitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    if (timeoutMonitor != nullptr) {
+        timeoutMonitor->Dump(info);
+    }
 }
 
 void AbilityManagerService::DumpSysMissionListInner(
