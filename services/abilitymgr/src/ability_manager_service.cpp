@@ -1272,6 +1272,10 @@ int AbilityManagerService::CheckAbilityCallPermission(const AbilityRequest& abil
         TAG_LOGI(AAFwkTag::ABILITYMGR, "call from capi, already checked");
         return ERR_OK;
     }
+    if (abilityRequest.isStartByOEExt) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call from oesa, already checked");
+        return ERR_OK;
+    }
     int result = CheckCallAbilityPermission(abilityRequest, isSelector, specifyTokenId, false, isFreeInstallFromService);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check permission failed");
