@@ -153,32 +153,6 @@ void ExtensionRunningTimeoutMonitor::SubmitPeriodicTask()
     taskHandler->SubmitTask(task, PERIODIC_TASK_NAME, REPORT_INTERVAL_MS);
 }
 
-void ExtensionRunningTimeoutMonitor::BuildReportArrays(
-    const std::list<ExtensionTimeoutEvent> &events,
-    std::vector<int32_t> &extensionTypes, std::vector<char*> &bundleNamePtrs,
-    std::vector<char*> &abilityNamePtrs, std::vector<int32_t> &runningDurations,
-    std::vector<int32_t> &stillAliveFlags, std::vector<int32_t> &cnts)
-{
-    std::vector<std::string> bundleNames;
-    std::vector<std::string> abilityNames;
-    bundleNames.reserve(events.size());
-    abilityNames.reserve(events.size());
-    for (const auto &event : events) {
-        extensionTypes.push_back(event.extensionType);
-        bundleNames.push_back(event.bundleName);
-        abilityNames.push_back(event.abilityName);
-        runningDurations.push_back(event.runningDuration);
-        stillAliveFlags.push_back(event.stillAlive ? 1 : 0);
-        cnts.push_back(event.cnt);
-    }
-    for (auto &name : bundleNames) {
-        bundleNamePtrs.push_back(const_cast<char*>(name.c_str()));
-    }
-    for (auto &name : abilityNames) {
-        abilityNamePtrs.push_back(const_cast<char*>(name.c_str()));
-    }
-}
-
 void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
 {
     std::list<ExtensionTimeoutEvent> eventsToReport;
@@ -192,26 +166,19 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
         cachedEvents_.clear();
     }
 
-    std::vector<int32_t> extensionTypes;
-    std::vector<char*> bundleNamePtrs;
-    std::vector<char*> abilityNamePtrs;
-    std::vector<int32_t> runningDurations;
-    std::vector<int32_t> stillAliveFlags;
-    std::vector<int32_t> cnts;
-    BuildReportArrays(eventsToReport, extensionTypes, bundleNamePtrs,
-        abilityNamePtrs, runningDurations, stillAliveFlags, cnts);
-
-    auto paramCount = static_cast<int32_t>(6 + eventsToReport.size());
-    HisyseventReport report(paramCount);
-    report.InsertParam(EXTENSION_TYPE_KEY, extensionTypes);
-    report.InsertParam(BUNDLE_NAME_KEY, bundleNamePtrs);
-    report.InsertParam(ABILITY_NAME_KEY, abilityNamePtrs);
-    report.InsertParam(RUNNING_DURATION_KEY, runningDurations);
-    report.InsertParam(STILL_ALIVE_KEY, stillAliveFlags);
-    report.InsertParam(CNT_KEY, cnts);
-    int32_t ret = report.Report(DOMAIN, EVENT_NAME, HISYSEVENT_STATISTIC);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "reported %{public}zu timeout events, ret: %{public}d",
-        eventsToReport.size(), ret);
+    int32_t reportCount = 0;
+    for (const auto &event : eventsToReport) {
+        HisyseventReport report(7);
+        report.InsertParam(EXTENSION_TYPE_KEY, event.extensionType);
+        report.InsertParam(BUNDLE_NAME_KEY, event.bundleName);
+        report.InsertParam(ABILITY_NAME_KEY, event.abilityName);
+        report.InsertParam(RUNNING_DURATION_KEY, event.runningDuration);
+        report.InsertParam(STILL_ALIVE_KEY, event.stillAlive ? 1 : 0);
+        report.InsertParam(CNT_KEY, event.cnt);
+        report.Report(DOMAIN, EVENT_NAME, HISYSEVENT_STATISTIC);
+        reportCount++;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "reported %{public}d timeout events", reportCount);
 }
 
 void ExtensionRunningTimeoutMonitor::CheckAliveExtensions()

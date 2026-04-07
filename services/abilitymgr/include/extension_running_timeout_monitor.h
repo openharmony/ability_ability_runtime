@@ -88,10 +88,6 @@ private:
     bool IsDuplicateEvent(const ExtensionTimeoutEvent &event,
         std::list<ExtensionTimeoutEvent>::iterator &dupIter);
     void SubmitPeriodicTask();
-    void BuildReportArrays(const std::list<ExtensionTimeoutEvent> &events,
-        std::vector<int32_t> &extensionTypes, std::vector<char*> &bundleNamePtrs,
-        std::vector<char*> &abilityNamePtrs, std::vector<int32_t> &runningDurations,
-        std::vector<int32_t> &stillAliveFlags, std::vector<int32_t> &cnts);
 
     std::mutex monitorMutex_;
     std::unordered_map<int32_t, ExtensionStartInfo> runningExtensions_;
