@@ -98,7 +98,6 @@ void ExtensionRecordManager::AddExtensionRecord(const int32_t extensionRecordId,
         if (monitor != nullptr) {
             monitor->OnExtensionStarted(extensionRecordId,
                 abilityInfo.extensionTypeName,
-                static_cast<int32_t>(abilityInfo.extensionAbilityType),
                 abilityInfo.bundleName,
                 abilityInfo.name);
         }

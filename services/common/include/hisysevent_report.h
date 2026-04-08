@@ -56,6 +56,8 @@ public:
     void InsertParam(const char* name, const std::vector<int32_t> &value);
     void InsertParam(const char* name, std::vector<char*> &value);
     void InsertParam(const char* name, const std::vector<uint64_t> &value);
+    void InsertParam(const char* name, const std::vector<bool> &value);
+    void InsertParam(const char* name, const std::vector<int64_t> &value);
     int32_t Report(const char* domain, const char* event, HiSysEventEventType type);
 
 private:

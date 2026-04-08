@@ -16,6 +16,7 @@
 #include "extension_running_timeout_monitor.h"
 
 #include <chrono>
+#include <cinttypes>
 #include <functional>
 
 #include "extension_config.h"
@@ -41,7 +42,7 @@ ExtensionRunningTimeoutMonitor::ExtensionRunningTimeoutMonitor() {}
 ExtensionRunningTimeoutMonitor::~ExtensionRunningTimeoutMonitor() {}
 
 void ExtensionRunningTimeoutMonitor::OnExtensionStarted(int32_t extensionRecordId,
-    const std::string &extensionTypeName, int32_t extensionType,
+    const std::string &extensionTypeName,
     const std::string &bundleName, const std::string &abilityName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR,
@@ -53,7 +54,6 @@ void ExtensionRunningTimeoutMonitor::OnExtensionStarted(int32_t extensionRecordI
         std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
     ExtensionStartInfo info;
-    info.extensionType = extensionType;
     info.extensionTypeName = extensionTypeName;
     info.bundleName = bundleName;
     info.abilityName = abilityName;
@@ -92,24 +92,24 @@ void ExtensionRunningTimeoutMonitor::OnExtensionTerminated(int32_t extensionReco
     auto now = std::chrono::steady_clock::now();
     auto nowMillis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     int64_t runningDurationMs = nowMillis - startInfo.startTimeMillis;
-    int32_t runningDurationSec = static_cast<int32_t>(runningDurationMs / 1000);
+    int64_t runningDurationSec = runningDurationMs / 1000;
 
     // runningDuration <= configuredTimeout means within limit, do not track
     if (runningDurationSec <= configuredTimeout) {
         TAG_LOGD(AAFwkTag::ABILITYMGR,
-            "extension %{public}s/%{public}s within timeout, duration: %{public}ds, limit: %{public}ds",
+            "extension %{public}s/%{public}s within timeout, duration: %{public}" PRId64 "s, limit: %{public}ds",
             startInfo.bundleName.c_str(), startInfo.abilityName.c_str(),
             runningDurationSec, configuredTimeout);
         return;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "extension %{public}s/%{public}s exceeded timeout, duration: %{public}ds, limit: %{public}ds",
+        "extension %{public}s/%{public}s exceeded timeout, duration: %{public}" PRId64 "s, limit: %{public}ds",
         startInfo.bundleName.c_str(), startInfo.abilityName.c_str(),
         runningDurationSec, configuredTimeout);
 
     ExtensionTimeoutEvent event;
-    event.extensionType = startInfo.extensionType;
+    event.extensionTypeName = startInfo.extensionTypeName;
     event.bundleName = startInfo.bundleName;
     event.abilityName = startInfo.abilityName;
     event.runningDuration = runningDurationSec;
@@ -166,22 +166,26 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
         cachedEvents_.clear();
     }
 
-    std::vector<int32_t> extensionTypes;
+    std::vector<std::string> extensionTypeNames;
+    std::vector<char*> extensionTypePtrs;
     std::vector<char*> bundleNamePtrs;
     std::vector<char*> abilityNamePtrs;
-    std::vector<int32_t> runningDurations;
-    std::vector<int32_t> stillAliveFlags;
+    std::vector<int64_t> runningDurations;
+    std::vector<bool> stillAliveFlags;
     std::vector<int32_t> cnts;
     std::vector<std::string> bundleNames;
     std::vector<std::string> abilityNames;
 
     for (const auto &event : eventsToReport) {
-        extensionTypes.push_back(event.extensionType);
+        extensionTypeNames.push_back(event.extensionTypeName);
         bundleNames.push_back(event.bundleName);
         abilityNames.push_back(event.abilityName);
         runningDurations.push_back(event.runningDuration);
-        stillAliveFlags.push_back(event.stillAlive ? 1 : 0);
+        stillAliveFlags.push_back(event.stillAlive);
         cnts.push_back(event.cnt);
+    }
+    for (auto &name : extensionTypeNames) {
+        extensionTypePtrs.push_back(const_cast<char*>(name.c_str()));
     }
     for (auto &name : bundleNames) {
         bundleNamePtrs.push_back(const_cast<char*>(name.c_str()));
@@ -191,7 +195,7 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
     }
 
     HisyseventReport report(7);
-    report.InsertParam(EXTENSION_TYPE_KEY, extensionTypes);
+    report.InsertParam(EXTENSION_TYPE_KEY, extensionTypePtrs);
     report.InsertParam(BUNDLE_NAME_KEY, bundleNamePtrs);
     report.InsertParam(ABILITY_NAME_KEY, abilityNamePtrs);
     report.InsertParam(RUNNING_DURATION_KEY, runningDurations);
@@ -224,17 +228,17 @@ void ExtensionRunningTimeoutMonitor::CheckAliveExtensions()
         }
 
         int64_t runningDurationMs = nowMillis - startInfo.startTimeMillis;
-        int32_t runningDurationSec = static_cast<int32_t>(runningDurationMs / 1000);
+        int64_t runningDurationSec = runningDurationMs / 1000;
         if (runningDurationSec <= configuredTimeout) {
             continue;
         }
 
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "alive extension %{public}s/%{public}s exceeded timeout, duration: %{public}ds",
+            "alive extension %{public}s/%{public}s exceeded timeout, duration: %{public}" PRId64 "s",
             startInfo.bundleName.c_str(), startInfo.abilityName.c_str(), runningDurationSec);
 
         ExtensionTimeoutEvent event;
-        event.extensionType = startInfo.extensionType;
+        event.extensionTypeName = startInfo.extensionTypeName;
         event.bundleName = startInfo.bundleName;
         event.abilityName = startInfo.abilityName;
         event.runningDuration = runningDurationSec;
@@ -256,7 +260,7 @@ void ExtensionRunningTimeoutMonitor::Dump(std::vector<std::string> &info)
             auto now = std::chrono::steady_clock::now();
             auto nowMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
                 now.time_since_epoch()).count();
-            int32_t runningSec = static_cast<int32_t>((nowMillis - startInfo.startTimeMillis) / 1000);
+            int64_t runningSec = (nowMillis - startInfo.startTimeMillis) / 1000;
             int32_t timeout = DelayedSingleton<ExtensionConfig>::GetInstance()->
                 GetExtensionRunningTimeoutTime(startInfo.extensionTypeName);
             info.emplace_back("      [" + std::to_string(recordId) + "] " +
@@ -270,7 +274,7 @@ void ExtensionRunningTimeoutMonitor::Dump(std::vector<std::string> &info)
             "/" + std::to_string(MAX_CACHED_EVENTS));
         for (const auto &event : cachedEvents_) {
             info.emplace_back("      " + event.bundleName + "/" + event.abilityName +
-                " type:" + std::to_string(event.extensionType) +
+                " type:" + event.extensionTypeName +
                 " duration:" + std::to_string(event.runningDuration) + "s" +
                 " alive:" + (event.stillAlive ? "yes" : "no") +
                 " cnt:" + std::to_string(event.cnt));
@@ -282,7 +286,7 @@ bool ExtensionRunningTimeoutMonitor::IsDuplicateEvent(const ExtensionTimeoutEven
     std::list<ExtensionTimeoutEvent>::iterator &dupIter)
 {
     for (auto it = cachedEvents_.begin(); it != cachedEvents_.end(); ++it) {
-        if (it->extensionType == event.extensionType &&
+        if (it->extensionTypeName == event.extensionTypeName &&
             it->bundleName == event.bundleName &&
             it->abilityName == event.abilityName) {
             dupIter = it;

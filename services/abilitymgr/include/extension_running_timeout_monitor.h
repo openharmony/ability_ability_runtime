@@ -27,10 +27,10 @@ namespace OHOS {
 namespace AAFwk {
 
 struct ExtensionTimeoutEvent {
-    int32_t extensionType = -1;
+    std::string extensionTypeName;
     std::string bundleName;
     std::string abilityName;
-    int32_t runningDuration = 0; // seconds
+    int64_t runningDuration = 0; // seconds
     bool stillAlive = false;
     int32_t cnt = 1;
 };
@@ -42,7 +42,7 @@ public:
      * @brief Called when an extension ability starts. Records start time.
      */
     void OnExtensionStarted(int32_t extensionRecordId, const std::string &extensionTypeName,
-        int32_t extensionType, const std::string &bundleName, const std::string &abilityName);
+        const std::string &bundleName, const std::string &abilityName);
 
     /**
      * @brief Called when an extension ability ends. Checks if it exceeded configured timeout.
@@ -77,7 +77,6 @@ public:
 
 private:
     struct ExtensionStartInfo {
-        int32_t extensionType = -1;
         std::string extensionTypeName;
         std::string bundleName;
         std::string abilityName;
