@@ -437,7 +437,6 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void ReleaseOnContinueAsset(const napi_env env, napi_value &promise,
         napi_ref &jsWantParamsRef, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
-    void RemoveShareRouterByBundleType(const Want &want);
     void WriteLifecycleSwitchLog(const std::string lifecycleName);
     void HandleAbilityDelegatorStart();
 
