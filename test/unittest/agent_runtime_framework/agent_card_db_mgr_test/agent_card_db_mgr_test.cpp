@@ -47,6 +47,7 @@ AgentCard BuildValidCard(const std::string &agentId)
     skill->description = "Test skill description";
     skill->tags = {"test_tag"};
     card.skills.push_back(skill);
+    card.iconUrl = "http://example.com/icon.png";
     return card;
 }
 } // namespace

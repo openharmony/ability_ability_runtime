@@ -296,7 +296,7 @@ public:
      */
     virtual void StartSpecifiedAbility(
         const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId = 0,
-        const std::string &customProcess = "") override;
+        const std::string &customProcess = "", bool isWindowStagePreload = false) override;
 
     /**
      * Register response of start specified ability.

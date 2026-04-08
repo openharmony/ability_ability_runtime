@@ -247,7 +247,12 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
     }
 
     if (info.needSnapshot && language == OHOS::AbilityRuntime::Runtime::Language::JS) {
-        runtime->DumpHeapSnapshot(info.tid, info.needGc, info.needBinary, info.needClearNodeIdCache);
+        OHOS::AbilityRuntime::Runtime::JsHeapDumpParam param;
+        param.isFullGC = info.needGc;
+        param.isBinary = info.needBinary;
+        param.isClearNodeIdCache = info.needClearNodeIdCache;
+        param.isProcDump = info.needProcDump;
+        runtime->DumpHeapSnapshot(info.tid, param);
         return;
     }
     if (info.needGc) {

@@ -22,9 +22,8 @@
 #include "hilog_tag_wrapper.h"
 
 
-struct OH_AbilityRuntime_ModularObject_AllExtensionInfos {
+struct OH_AbilityRuntime_AllModularObjectExtensionInfos {
     std::vector<OHOS::AAFwk::ModularObjectExtensionInfo> allMoeInfos;
-    size_t count;
 };
 
 using namespace testing::ext;
@@ -59,18 +58,17 @@ void AbilityRuntimeModularObjectExtensionManagerTest::TearDown()
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMode_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info;
     info.launchMode = MoeLaunchMode::IN_PROCESS;
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo = nullptr;
-    auto ret = OH_AbilityRuntime_GetMoeInfoByIndex(allExtensionInfos, 0, &extensionInfo);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo = nullptr;
+    auto ret = OH_AbilityRuntime_GetModObjExtensionInfoByIndex(allExtensionInfos, 0, &extensionInfo);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMode(nullptr, nullptr);
@@ -81,7 +79,7 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMode(extensionInfo, &launchMode);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(launchMode, OH_AbilityRuntime_LaunchMode::OH_ABILITY_RUNTIME_LAUNCH_MODE_IN_PROCESS);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
@@ -93,18 +91,17 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     OH_AbilityRuntime_GetModularObjectExtensionInfoProcessMode_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info;
     info.processMode = MoeProcessMode::BUNDLE;
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo = nullptr;
-    auto ret = OH_AbilityRuntime_GetMoeInfoByIndex(allExtensionInfos, 0, &extensionInfo);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo = nullptr;
+    auto ret = OH_AbilityRuntime_GetModObjExtensionInfoByIndex(allExtensionInfos, 0, &extensionInfo);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoProcessMode(nullptr, nullptr);
@@ -115,7 +112,7 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoProcessMode(extensionInfo, &processMode);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(processMode, OH_AbilityRuntime_ProcessMode::OH_ABILITY_RUNTIME_PROCESS_MODE_BUNDLE);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
@@ -127,18 +124,17 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMode_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info;
     info.threadMode = MoeThreadMode::TYPE;
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo = nullptr;
-    auto ret = OH_AbilityRuntime_GetMoeInfoByIndex(allExtensionInfos, 0, &extensionInfo);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo = nullptr;
+    auto ret = OH_AbilityRuntime_GetModObjExtensionInfoByIndex(allExtensionInfos, 0, &extensionInfo);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMode(nullptr, nullptr);
@@ -149,7 +145,7 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMode(extensionInfo, &threadMode);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(threadMode, OH_AbilityRuntime_ThreadMode::OH_ABILITY_RUNTIME_THREAD_MODE_TYPE);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
@@ -161,8 +157,8 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     OH_AbilityRuntime_GetModularObjectExtensionInfoElementName_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info;
@@ -171,10 +167,9 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     info.abilityName = "abilityName";
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo = nullptr;
-    auto ret = OH_AbilityRuntime_GetMoeInfoByIndex(allExtensionInfos, 0, &extensionInfo);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo = nullptr;
+    auto ret = OH_AbilityRuntime_GetModObjExtensionInfoByIndex(allExtensionInfos, 0, &extensionInfo);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoElementName(nullptr, nullptr);
@@ -187,7 +182,7 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     EXPECT_EQ(std::string(element.bundleName), "bundleName");
     EXPECT_EQ(std::string(element.moduleName), "moduleName");
     EXPECT_EQ(std::string(element.abilityName), "abilityName");
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
@@ -199,18 +194,17 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     OH_AbilityRuntime_GetModularObjectExtensionInfoDisableState_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info;
     info.isDisabled = true;
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo = nullptr;
-    auto ret = OH_AbilityRuntime_GetMoeInfoByIndex(allExtensionInfos, 0, &extensionInfo);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo = nullptr;
+    auto ret = OH_AbilityRuntime_GetModObjExtensionInfoByIndex(allExtensionInfos, 0, &extensionInfo);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoDisableState(nullptr, nullptr);
@@ -221,20 +215,20 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     ret = OH_AbilityRuntime_GetModularObjectExtensionInfoDisableState(extensionInfo, &isDisabled);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(isDisabled);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
 /**
- * @tc.name: OH_AbilityRuntime_GetCountFromAllMoeInfos_001
- * @tc.desc: OH_AbilityRuntime_GetCountFromAllMoeInfos
+ * @tc.name: OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos_001
+ * @tc.desc: OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos
  * @tc.type: FUNC
  */
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
-    OH_AbilityRuntime_GetCountFromAllMoeInfos_001, TestSize.Level1)
+    OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos_001, TestSize.Level1)
 {
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
 
     ModularObjectExtensionInfo info1;
@@ -242,45 +236,43 @@ HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
     ModularObjectExtensionInfo info2;
     dataList.push_back(info2);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = infos.release();
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = infos.release();
 
     size_t count = 0;
-    auto ret = OH_AbilityRuntime_GetCountFromAllMoeInfos(allExtensionInfos, &count);
+    auto ret = OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos(allExtensionInfos, &count);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(count, 2);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 
 /**
- * @tc.name: OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos_001
- * @tc.desc: OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos
+ * @tc.name: OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos_001
+ * @tc.desc: OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos
  * @tc.type: FUNC
  */
 HWTEST_F(AbilityRuntimeModularObjectExtensionManagerTest,
-    OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos_001, TestSize.Level1)
+    OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos_001, TestSize.Level1)
 {
-    auto ret = OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(nullptr);
+    auto ret = OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos(nullptr);
     EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos = nullptr;
-    ret = OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(&allExtensionInfos);
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos = nullptr;
+    ret = OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos(&allExtensionInfos);
     EXPECT_NE(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<ModularObjectExtensionInfo> dataList;
     ModularObjectExtensionInfo info;
     dataList.push_back(info);
     infos->allMoeInfos = dataList;
-    infos->count = dataList.size();
     allExtensionInfos = infos.release();
-    ret = OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos(&allExtensionInfos);
     EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
 
-    ret = OH_AbilityRuntime_DestroyAllExtensionInfos(&allExtensionInfos);
+    ret = OH_AbilityRuntime_ReleaseAllExtensionInfos(&allExtensionInfos);
     ASSERT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 }
 }  // namespace AAFwk

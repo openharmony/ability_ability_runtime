@@ -106,7 +106,8 @@ bool UIAbilityLifecycleManager::ProcessColdStartBranch(AbilityRequest &abilityRe
         return false;
     }
     DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(abilityRequest.want,
-        abilityRequest.abilityInfo, sessionInfo->requestId, abilityRequest.customProcess);
+        abilityRequest.abilityInfo, sessionInfo->requestId, abilityRequest.customProcess,
+        abilityRequest.processOptions ? abilityRequest.processOptions->isPreloadStart : false);
     AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     return true;
@@ -4209,7 +4210,8 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             sessionInfo->want.RemoveAllFd();
         } else {
             DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
-                request.abilityInfo, specifiedRequest.requestId, request.customProcess);
+                request.abilityInfo, specifiedRequest.requestId, request.customProcess,
+                (request.processOptions ? request.processOptions->isPreloadStart : false));
         }
     }
     if (request.want.GetBoolParam("debugApp", false) || request.want.GetBoolParam("nativeDebug", false) ||

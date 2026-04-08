@@ -42,11 +42,12 @@ public:
 private:
     // Event handlers
     void HandleEventUserSwitched(const EventFwk::CommonEventData &data);
+    void HandleBundleScanFinished(const EventFwk::CommonEventData &data);
     void HandleBundleInstall(const EventFwk::CommonEventData &data);
     void HandleBundleRemoved(const EventFwk::CommonEventData &data);
     void HandleBundleChanged(const EventFwk::CommonEventData &data);
 
-    void LoadModularObjectExtensionInfos();
+    void LoadModularObjectExtensionInfos(int32_t userId = -1);
     void InsertModularObjectExtensionInfo(const std::string &bundleName, int32_t userId, int32_t appIndex = 0);
     void UpdateModularObjectExtensionInfos(const std::string &bundleName, int32_t userId, int32_t appIndex = 0);
     void RemoveModularObjectExtensionInfo(const std::string &bundleName, int32_t userId, int32_t appIndex = 0);
@@ -54,6 +55,10 @@ private:
     void GetModularObjectExtensionInfos(const AppExecFwk::BundleInfo &bundleInfo,
         std::vector<AAFwk::ModularObjectExtensionInfo> &infos);
     std::string GenerateModularObjectKey(int32_t userId, const std::string &bundleName, int32_t appIndex);
+
+    int32_t lastUserId_ = 0;
+    std::mutex userIdMutex_;
+    std::mutex loadMoeMutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -253,6 +253,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleIsSpecifiedModuleLoaded(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SIGN_RESTART_PROCESS):
             return HandleSignRestartProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_ABILITY_INFOS):
+            return HandleGetAllAbilityInfos(data, reply);
     }
     return INVALID_FD;
 }
@@ -483,7 +485,11 @@ int32_t AppMgrStub::HandleMakeImage(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string bundleName = Str16ToStr8(data.ReadString16());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     int32_t userId = data.ReadInt32();
     int32_t preloadMode = data.ReadInt32();
     int32_t appIndex = data.ReadInt32();
@@ -496,7 +502,7 @@ int32_t AppMgrStub::HandleMakeImage(MessageParcel &data, MessageParcel &reply)
             return ERR_INVALID_VALUE;
         }
     }
-    auto result = MakeImage(bundleName, userId, static_cast<PreloadMode>(preloadMode),
+    auto result = MakeImage(*want, userId, static_cast<PreloadMode>(preloadMode),
         appIndex, errorHandler);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
@@ -2354,6 +2360,33 @@ int32_t AppMgrStub::HandleSetProcessPrepareExit(MessageParcel &data, MessageParc
     TAG_LOGD(AAFwkTag::APPMGR, "HandleSetProcessPrepareExit call");
     pid_t pid = data.ReadInt32();
     SetProcessPrepareExit(pid);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllAbilityInfos(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleGetAllAbilityInfos call");
+    int32_t pid = data.ReadInt32();
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    int32_t ret = GetAllAbilityInfos(pid, infos);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    if (!reply.WriteInt32(infos.size())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write info size.");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    for (auto &info : infos) {
+        if (!reply.WriteParcelable(&info)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail to write info.");
+            return ERR_APPEXECFWK_PARCEL_ERROR;
+        }
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

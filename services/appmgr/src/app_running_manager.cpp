@@ -2363,5 +2363,27 @@ int32_t AppRunningManager::QueryUIExtensionBindItemById(
     }
     return ERR_INVALID_VALUE;
 }
+
+int32_t AppRunningManager::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    if (pid != -1) {
+        for (const auto &[recordId, appRecord] : appRunningRecordMap_) {
+            if (appRecord != nullptr && appRecord->GetPid() == pid) {
+                appRecord->GetAllAbilityInfos(infos);
+                return ERR_OK;
+            }
+        }
+        TAG_LOGE(AAFwkTag::APPMGR, "not find pid:%{public}d appRecord", pid);
+        return ERR_INVALID_VALUE;
+    } else {
+        for (const auto &[recordId, appRecord] : appRunningRecordMap_) {
+            if (appRecord != nullptr) {
+                appRecord->GetAllAbilityInfos(infos);
+            }
+        }
+    }
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

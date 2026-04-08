@@ -264,7 +264,7 @@ void AppMgrService::PreloadModuleFinished(const int32_t recordId)
     return appMgrServiceInner_->PreloadModuleFinished(IPCSkeleton::GetCallingPid());
 }
 
-int32_t AppMgrService::MakeImage(const std::string &bundleName, int32_t userId,
+int32_t AppMgrService::MakeImage(const AAFwk::Want &want, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex, sptr<IImageErrorHandler> errorHandler)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "MakeImage called");
@@ -277,9 +277,9 @@ int32_t AppMgrService::MakeImage(const std::string &bundleName, int32_t userId,
         TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
         return ERR_PERMISSION_DENIED;
     }
-    auto task = [appMgrServiceInner = appMgrServiceInner_, bundleName, userId, preloadMode,
+    auto task = [appMgrServiceInner = appMgrServiceInner_, want, userId, preloadMode,
         appIndex, errorHandler] () {
-        appMgrServiceInner->MakeImage(bundleName, userId, preloadMode, appIndex, errorHandler);
+        appMgrServiceInner->MakeImage(want, userId, preloadMode, appIndex, errorHandler);
     };
     taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
         .taskName_ = "MakeImageTask",
@@ -2249,6 +2249,22 @@ void AppMgrService::SetProcessPrepareExit(int32_t pid)
         return;
     }
     appMgrServiceInner_->SetProcessPrepareExit(pid);
+}
+
+int32_t AppMgrService::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
+{
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    bool isRssCalling = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
+        BS_PROCESS_NAME) && (callingUid == RESOURCE_MANAGER_UID);
+    if (!isRssCalling) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    return appMgrServiceInner_->GetAllAbilityInfos(pid, infos);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

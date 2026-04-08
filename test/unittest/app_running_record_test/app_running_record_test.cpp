@@ -1857,6 +1857,56 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetKillAppReason_0100, TestSize.
 }
 
 /**
+ * @tc.name: GetAllAbilityInfos_0100
+ * @tc.desc: Test GetAllAbilityInfos with empty ability list
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, GetAllAbilityInfos_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->GetPriorityObject()->SetPid(1001);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    appRunningRecord->GetAllAbilityInfos(infos);
+    EXPECT_TRUE(infos.empty());
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0200
+ * @tc.desc: Test GetAllAbilityInfos with empty ability list
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, GetAllAbilityInfos_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.bundle";
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName = "com.test.bundle";
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->GetPriorityObject()->SetPid(1001);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    ASSERT_NE(moduleRecord, nullptr);
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    ASSERT_NE(token, nullptr);
+    ASSERT_NE(moduleRecord->AddAbility(token, abilityInfo, nullptr, RECORD_ID), nullptr);
+    appRunningRecord->hapModules_[appInfo->bundleName].emplace_back(moduleRecord);
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    appRunningRecord->GetAllAbilityInfos(infos);
+    EXPECT_EQ(infos.size(), 1);
+}
+
+/**
  * @tc.name: AppRunningRecord_GetAbilityRunningRecord_0100
  * @tc.desc: Test GetAbilityRunningRecord returns valid record.
  * @tc.type: FUNC
@@ -2313,6 +2363,7 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetAddStageTimeout_0200, TestSiz
     appRunningRecord->isEmptyKeepAliveApp_ = true;
     auto result = appRunningRecord->GetAddStageTimeout();
     EXPECT_EQ(result, AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT);
+}
 }
 } // namespace AppExecFwk
 } // namespace OHOS
