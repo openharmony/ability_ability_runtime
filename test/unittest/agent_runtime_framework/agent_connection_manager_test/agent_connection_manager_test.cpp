@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #define private public
 #include "agent_connection_manager.h"
@@ -189,13 +189,13 @@ HWTEST_F(AgentConnectionManagerTest, ConnectAgentExtensionAbility_004, TestSize.
 /**
 * @tc.name  : DisconnectAgentExtensionAbility_ShouldReturnError_WhenCallbackIsNull
 * @tc.number: DisconnectAgentExtensionAbility_001
-* @tc.desc  : Test DisconnectAgentExtensionAbility returns ERR_INVALID_VALUE when callback is null
+* @tc.desc  : Test DisconnectAgentExtensionAbility returns INVALID_PARAMETERS_ERR when callback is null
 */
 HWTEST_F(AgentConnectionManagerTest, DisconnectAgentExtensionAbility_001, TestSize.Level1)
 {
     sptr<AbilityConnectCallback> callback = nullptr;
     auto result = AgentConnectionManager::GetInstance().DisconnectAgentExtensionAbility(callback);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, AAFwk::INVALID_PARAMETERS_ERR);
 }
 
 /**

@@ -232,7 +232,7 @@ enum class AbilityErrorCode {
     ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER = 35600006,
 
     // The specified LOW_CODE agent is already active and is not yet completed.
-    ERROR_CODE_LOW_CODE_AGENT_ACTIVE = 35600007,
+    ERROR_CODE_LOW_CODE_AGENT_ALREADY_ACTIVE = 35600007,
 
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
