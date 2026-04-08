@@ -725,5 +725,33 @@ HWTEST_F(AbilityManagerClientTest, QueryCallerTokenIdForAnco_0200, TestSize.Leve
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "QueryCallerTokenIdForAnco_0200 end");
 }
+
+/**
+ * @tc.number: AbilityManagerClient_ConnectAbilityWithIndirectCallerInfo_0100
+ * @tc.name: ConnectAbilityWithIndirectCallerInfo_0100
+ * @tc.desc: Test ConnectAbilityWithIndirectCallerInfo method, passing valid parameters and simulate success return
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_ConnectAbilityWithIndirectCallerInfo_0100,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ConnectAbilityWithIndirectCallerInfo_0100 start");
+
+    Want want;
+    want.SetElementName("com.example.bundle", "com.example.service");
+    sptr<IAbilityConnection> connect = sptr<MockIAbilityConnection>::MakeSptr();
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t userId = 100;
+    auto info = std::make_shared<IndirectCallerInfo>();
+    info->tokenId = 12345;
+    info->callerUid = 10086;
+    info->callerPid = 5678;
+
+    auto result = AbilityManagerClient::GetInstance()->ConnectAbilityWithIndirectCallerInfo(want, connect, callerToken,
+        userId, AppExecFwk::ExtensionAbilityType::UNSPECIFIED, info);
+    EXPECT_EQ(result, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ConnectAbilityWithIndirectCallerInfo_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

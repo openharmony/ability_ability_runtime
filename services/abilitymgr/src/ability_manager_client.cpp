@@ -628,6 +628,19 @@ ErrCode AbilityManagerClient::ConnectAbility(
         false, specifiedFullTokenId);
 }
 
+ErrCode AbilityManagerClient::ConnectAbilityWithIndirectCallerInfo(const Want &want, sptr<IAbilityConnection> connect,
+    sptr<IRemoteObject> callerToken, int32_t userId, AppExecFwk::ExtensionAbilityType extensionType,
+    std::shared_ptr<IndirectCallerInfo> indirectCallerInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "name:%{public}s %{public}s, userId:%{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    return abms->ConnectAbilityCommon(want, connect, callerToken, extensionType, userId, false, 0, 0,
+        indirectCallerInfo);
+}
+
 ErrCode AbilityManagerClient::ConnectAbilityWithExtensionType(
     const Want &want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId,
     AppExecFwk::ExtensionAbilityType extensionType)
