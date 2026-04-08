@@ -286,8 +286,15 @@ void HisyseventReport::InsertParam(const char* name, const std::vector<bool> &va
     };
 
     if (!value.empty()) {
-        param.v.array = static_cast<void*>(const_cast<bool*>(value.data()));
-        param.arraySize = value.size();
+        auto *buf = new (std::nothrow) bool[value.size()];
+        if (buf != nullptr) {
+            for (size_t i = 0; i < value.size(); ++i) {
+                buf[i] = value[i];
+            }
+            param.v.array = static_cast<void*>(buf);
+            param.arraySize = value.size();
+            paramBuffers_.emplace_back(reinterpret_cast<char*>(buf));
+        }
     }
     SetParamName(param, name);
     params_[pos_++] = param;
