@@ -3263,7 +3263,6 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
         if (monitor != nullptr) {
             monitor->OnExtensionStarted(recordId,
                 newAbilityInfo.extensionTypeName,
-                static_cast<int32_t>(newAbilityInfo.extensionAbilityType),
                 newAbilityInfo.bundleName,
                 newAbilityInfo.name);
         }
