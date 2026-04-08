@@ -15,6 +15,7 @@
 
 #include "agent_manager_service.h"
 
+#include <chrono>
 #include <utility>
 
 #include "ability_manager_client.h"
@@ -301,36 +302,46 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
         return AAFwk::NOT_TOP_ABILITY;
     }
 
-    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
-    bool queryResult = IN_PROCESS_CALL(
-        DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryExtensionAbilityInfos(
-            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
-    if (!queryResult || extensionInfos.empty()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "extension ability not exist");
-        return AAFwk::RESOLVE_ABILITY_ERR;
-    }
-    if (extensionInfos[0].type != AppExecFwk::ExtensionAbilityType::AGENT) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "incorrect extension");
-        return AAFwk::ERR_WRONG_INTERFACE_CALL;
-    }
-
-    std::string agentId = want.GetStringParam(AGENTID_KEY);
+    AAFwk::Want connectWant = want;
+    std::string agentId = connectWant.GetStringParam(AGENTID_KEY);
     if (agentId.empty()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "empty agentId");
         return ERR_INVALID_VALUE;
     }
 
     AgentCard card;
-    if (AgentCardMgr::GetInstance().GetAgentCardByAgentId(want.GetBundle(), agentId, card) != ERR_OK) {
+    int32_t cardRet = AgentCardMgr::GetInstance().GetAgentCardByAgentId(connectWant.GetBundle(), agentId, card);
+    if (cardRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "no such card");
         return AAFwk::ERR_INVALID_AGENT_CARD_ID;
     }
-    if (!IsMatchedAgentCardTarget(want, card)) {
+
+    if (!IsMatchedAgentCardTarget(connectWant, card)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "want target does not match agent card");
         return AAFwk::ERR_WRONG_INTERFACE_CALL;
     }
-    TAG_LOGI(AAFwkTag::SER_ROUTER, "connecting %{public}s-%{public}s", want.GetBundle().c_str(), agentId.c_str());
+    bool isAtomicServiceAgent = card.type == AgentCardType::ATOMIC_SERVICE;
+    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    bool queryResult = IN_PROCESS_CALL(
+        DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryExtensionAbilityInfos(
+            connectWant, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
+    if ((!queryResult || extensionInfos.empty()) && !isAtomicServiceAgent) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "extension ability not exist");
+        return AAFwk::RESOLVE_ABILITY_ERR;
+    }
+    if (queryResult && !extensionInfos.empty() && extensionInfos[0].type != AppExecFwk::ExtensionAbilityType::AGENT) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "incorrect extension");
+        return AAFwk::ERR_WRONG_INTERFACE_CALL;
+    }
+    if (isAtomicServiceAgent) {
+        connectWant.AddFlags(AAFwk::Want::FLAG_INSTALL_ON_DEMAND);
+        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+        connectWant.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+    }
+    TAG_LOGI(AAFwkTag::SER_ROUTER, "connecting %{public}s-%{public}s",
+        connectWant.GetBundle().c_str(), agentId.c_str());
 
     {
         std::lock_guard<std::mutex> lock(connectionLock_);
@@ -353,7 +364,7 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     }
 
     ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbilityWithExtensionType(
-        want, serviceConnection, nullptr, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::AGENT);
+        connectWant, serviceConnection, nullptr, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::AGENT);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "ConnectAbilityWithExtensionType failed: %{public}d", ret);
         ReleaseTrackedConnection(connection);

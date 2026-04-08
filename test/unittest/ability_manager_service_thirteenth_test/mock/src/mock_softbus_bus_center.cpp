@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_FLAG_H
-#define MOCK_MY_FLAG_H
+#ifdef SUPPORT_RECORDER_DSOFTBUS
+#include "softbus_bus_center.h"
 
-namespace OHOS {
-namespace AAFwk {
-class MyFlag {
-public:
-    static MyFlag &GetInstance()
-    {
-        static MyFlag instance;
-        return instance;
-    };
+#include "mock_my_status.h"
 
-public:
-    bool isScbEnabled_ = false;
-};
-}  // namespace AAFwk
-}  // namespace OHOS
-#endif // MOCK_MY_FLAG_H
+extern "C" int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
+{
+    if (info != nullptr) {
+        info->networkId[0] = '0';
+        info->networkId[1] = '\0';
+    }
+    return OHOS::AAFwk::MyStatus::GetInstance().softbusGetLocalNodeDeviceInfo_;
+}
+#endif // SUPPORT_RECORDER_DSOFTBUS

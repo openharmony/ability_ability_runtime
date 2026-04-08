@@ -20,6 +20,7 @@ namespace OHOS {
 namespace AgentRuntime {
 int32_t MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
 int32_t MyFlag::retDisconnectAbility = ERR_OK;
+AAFwk::Want MyFlag::lastConnectAbilityWant;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastConnectAbilityConnection = nullptr;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastDisconnectAbilityConnection = nullptr;
 }
@@ -34,6 +35,7 @@ std::shared_ptr<AbilityManagerClient> AbilityManagerClient::GetInstance()
 ErrCode AbilityManagerClient::ConnectAbilityWithExtensionType(const Want &want, sptr<IAbilityConnection> connect,
     sptr<IRemoteObject> callerToken, int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    AgentRuntime::MyFlag::lastConnectAbilityWant = want;
     AgentRuntime::MyFlag::lastConnectAbilityConnection = connect;
     return AgentRuntime::MyFlag::retConnectAbilityWithExtensionType;
 }
