@@ -21,7 +21,7 @@
 #include "hilog_tag_wrapper.h"
 #include "want_manager.h"
 
-struct OH_AbilityRuntime_ModularObject_AllExtensionInfos {
+struct OH_AbilityRuntime_AllModularObjectExtensionInfos {
     std::vector<OHOS::AAFwk::ModularObjectExtensionInfo> allMoeInfos;
 };
 
@@ -29,8 +29,8 @@ struct OH_AbilityRuntime_ModularObject_AllExtensionInfos {
 extern "C" {
 #endif
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_DestroyAllExtensionInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle *allExtensionInfos)
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ReleaseAllExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle *allExtensionInfos)
 {
     if (!allExtensionInfos || !*allExtensionInfos) {
         TAG_LOGD(AAFwkTag::APPKIT, "null parameter");
@@ -42,7 +42,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_DestroyAllExtensionInfos(
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_LaunchMode *launchMode)
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_LaunchMode *launchMode)
 {
     if (!extensionInfo || !launchMode) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -54,7 +54,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoLaunchMo
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoProcessMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_ProcessMode *processMode)
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_ProcessMode *processMode)
 {
     if (!extensionInfo || !processMode) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -66,7 +66,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoProcessM
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMode(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, OH_AbilityRuntime_ThreadMode *threadMode)
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, OH_AbilityRuntime_ThreadMode *threadMode)
 {
     if (!extensionInfo || !threadMode) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -78,7 +78,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoThreadMo
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoElementName(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, AbilityBase_Element *element)
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, AbilityBase_Element *element)
 {
     if (!extensionInfo || !element) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -114,7 +114,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoElementN
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoDisableState(
-    OH_AbilityRuntime_MoeInfoHandle extensionInfo, bool *isDisabled)
+    OH_AbilityRuntime_ModObjExtensionInfoHandle extensionInfo, bool *isDisabled)
 {
     if (!extensionInfo || !isDisabled) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -125,16 +125,16 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModularObjectExtensionInfoDisableS
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle *allExtensionInfos)
+AbilityRuntime_ErrorCode OH_AbilityRuntime_AcquireSelfModularObjectExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle *outOwnedAllExtensionInfos)
 {
-    if (!allExtensionInfos) {
+    if (!outOwnedAllExtensionInfos) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
 
-    std::unique_ptr<OH_AbilityRuntime_ModularObject_AllExtensionInfos> infos =
-        std::make_unique<OH_AbilityRuntime_ModularObject_AllExtensionInfos>();
+    std::unique_ptr<OH_AbilityRuntime_AllModularObjectExtensionInfos> infos =
+        std::make_unique<OH_AbilityRuntime_AllModularObjectExtensionInfos>();
     std::vector<OHOS::AAFwk::ModularObjectExtensionInfo> dataList;
     auto ret = OHOS::AAFwk::AbilityManagerClient::GetInstance()->QuerySelfModularObjectExtensionInfos(dataList);
     if (ret != OHOS::ERR_OK) {
@@ -142,12 +142,12 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_QuerySelfModularObjectExtensionInfos(
         return ConvertToCommonBusinessErrorCode(ret);
     }
     infos->allMoeInfos = dataList;
-    *allExtensionInfos = infos.release();
+    *outOwnedAllExtensionInfos = infos.release();
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllMoeInfos(
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos, size_t *count)
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllModObjExtensionInfos(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos, size_t *count)
 {
     if (!allExtensionInfos || !count) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -157,9 +157,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetCountFromAllMoeInfos(
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_GetMoeInfoByIndex(
-    OH_AbilityRuntime_AllMoeInfosHandle allExtensionInfos, size_t index,
-    OH_AbilityRuntime_MoeInfoHandle *extensionInfo)
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModObjExtensionInfoByIndex(
+    OH_AbilityRuntime_AllModObjExtensionInfosHandle allExtensionInfos, size_t index,
+    OH_AbilityRuntime_ModObjExtensionInfoHandle *extensionInfo)
 {
     if (!allExtensionInfos || !extensionInfo) {
         TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
@@ -169,7 +169,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetMoeInfoByIndex(
         TAG_LOGE(AAFwkTag::APPKIT, "index out of range");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
-    *extensionInfo = reinterpret_cast<OH_AbilityRuntime_MoeInfoHandle>(&(allExtensionInfos->allMoeInfos[index]));
+    *extensionInfo =
+        reinterpret_cast<OH_AbilityRuntime_ModObjExtensionInfoHandle>(&(allExtensionInfos->allMoeInfos[index]));
     if (*extensionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Failed to get extension info for index %zu", index);
         return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;

@@ -60,7 +60,7 @@ public:
      */
     virtual void PreloadModuleFinished(const int32_t recordId) override;
 
-    virtual int32_t MakeImage(const std::string &bundleName, int32_t userId, AppExecFwk::PreloadMode preloadMode,
+    virtual int32_t MakeImage(const AAFwk::Want &want, int32_t userId, AppExecFwk::PreloadMode preloadMode,
         int32_t appIndex = 0, sptr<IImageErrorHandler> errorHandler = nullptr) override;
 
     virtual int32_t DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler = nullptr) override;
@@ -930,6 +930,15 @@ public:
     virtual int32_t PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId) override;
 
     void SetProcessPrepareExit(int32_t pid) override;
+
+    /**
+     * Get all ability infos
+     *
+     * @param pid if pid is -1, query all ability infos, otherwise query ability infos for this pid
+     * @param infos ability infos
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

@@ -158,11 +158,6 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/modular_object/modular_object_event_mgr.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/modular_object/modular_object_event_receiver.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/modular_object/modular_object_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/modular_object/modular_object_rdb_data_mgr.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/modular_object/modular_object_rdb_storage_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/pending_want_common_event.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/pending_want_key.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/pending_want_manager.cpp",
@@ -241,6 +236,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "mock/src/mock_parameters.cpp",
     "mock/src/mock_permission_verification.cpp",
     "mock/src/mock_scene_board_judgement.cpp",
+    "mock/src/mock_softbus_bus_center.cpp",
     "mock/src/mock_sub_managers_helper.cpp",
     "mock/src/mock_ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
@@ -275,6 +271,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:mission_list",
+    "${ability_runtime_services_path}/abilitymgr:modular_object",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:hisysevent_report",
     "${ability_runtime_services_path}/common:perm_verification",
@@ -400,6 +397,10 @@ config("abilityms_config") {
     defines += [
       "ABILITY_RUNTIME_SCREENLOCK_ENABLE"
     ]
+  }
+
+  if (ability_runtime_dsoftbus_enable) {
+    defines += [ "SUPPORT_RECORDER_DSOFTBUS" ]
   }
 
   if (background_task_mgr_continuous_task_enable) {

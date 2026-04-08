@@ -1091,6 +1091,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_001, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     ASSERT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2420,6 +2421,7 @@ HWTEST_F(AgentCardTest, ToAgentCardVec_004, TestSize.Level1)
     agentCard.defaultInputModes = {"input1", "input2"};
     agentCard.defaultOutputModes = {"output1", "output2"};
     agentCard.skills = {skill};
+    agentCard.iconUrl = "http://example.com/icon.png";
 
     AgentCardsRawData rawData;
     std::vector<AgentCard> vec = { agentCard };
@@ -2568,6 +2570,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_006, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2829,6 +2832,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_019, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
         // documentationUrl is missing (optional)
     };
     AgentCard agentCard;
@@ -2862,6 +2866,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_020, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2893,6 +2898,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_021, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2928,6 +2934,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_022, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2961,6 +2968,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_023, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -2993,6 +3001,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_024, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3026,6 +3035,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_025, TestSize.Level1)
             }
         })},
         { "extension", R"({"key":"value"})" },
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3061,6 +3071,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_026, TestSize.Level1)
             }
         })},
         { "extension", validExtension },
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3096,6 +3107,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_027, TestSize.Level1)
             }
         })},
         { "extension", longExtension },
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3127,6 +3139,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_028, TestSize.Level1)
             }
         })},
         { "extension", "" },
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3157,6 +3170,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_029, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3188,6 +3202,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_030, TestSize.Level1)
             }
         })},
         { "extension", 12345 },
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3259,7 +3274,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_031, TestSize.Level1)
 
 /**
  * @tc.name: AgentCardFromJson_032
- * @tc.desc: Test FromJson sets iconUrl to empty when length exceeds 512
+ * @tc.desc: Test FromJson fails when iconUrl length exceeds 512
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -3285,13 +3300,12 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_032, TestSize.Level1)
         { "iconUrl", longIconUrl },
     };
     AgentCard agentCard;
-    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
-    EXPECT_EQ(agentCard.iconUrl, "");
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
 }
 
 /**
  * @tc.name: AgentCardFromJson_033
- * @tc.desc: Test FromJson sets iconUrl to empty when iconUrl is empty string
+ * @tc.desc: Test FromJson fails when iconUrl is empty string
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -3316,13 +3330,12 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_033, TestSize.Level1)
         { "iconUrl", "" },
     };
     AgentCard agentCard;
-    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
-    EXPECT_EQ(agentCard.iconUrl, "");
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
 }
 
 /**
  * @tc.name: AgentCardFromJson_034
- * @tc.desc: Test FromJson ignores iconUrl when it's not a string
+ * @tc.desc: Test FromJson fails when iconUrl is not a string
  * @tc.type: FUNC
  * @tc.require: AR000H1N32
  */
@@ -3347,8 +3360,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_034, TestSize.Level1)
         { "iconUrl", 12345 },
     };
     AgentCard agentCard;
-    EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
-    EXPECT_EQ(agentCard.iconUrl, "");
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
 }
 
 /**
@@ -3375,6 +3387,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_035, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3463,6 +3476,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_039, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3519,6 +3533,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_042, TestSize.Level1)
             { "deviceTypes", nlohmann::json::array({ "phone" }) },
             { "minAppVersion", "1.0.0" },
         }},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3558,6 +3573,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_043, TestSize.Level1)
         { "appInfo", nlohmann::json {
             { "deviceTypes", nlohmann::json::array({ "phone", "tablet" }) },
         }},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3588,6 +3604,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_044, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3619,6 +3636,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_045, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3650,6 +3668,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_046, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3680,6 +3699,7 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_047, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
@@ -3710,10 +3730,41 @@ HWTEST_F(AgentCardTest, AgentCardFromJson_048, TestSize.Level1)
                 { "tags", nlohmann::json::array({ "test" }) }
             }
         })},
+        { "iconUrl", "http://example.com/icon.png" },
     };
     AgentCard agentCard;
     EXPECT_TRUE(AgentCard::FromJson(jsonObject, agentCard));
     EXPECT_EQ(agentCard.type, AgentCardType::LOW_CODE);
+}
+
+/**
+ * @tc.name: AgentCardFromJson_049
+ * @tc.desc: Test FromJson fails when iconUrl is missing (required field)
+ * @tc.type: FUNC
+ * @tc.require: AR000H1N32
+ */
+HWTEST_F(AgentCardTest, AgentCardFromJson_049, TestSize.Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+        { "agentId", "1" },
+        { "name", "test" },
+        { "category", "productivity" },
+        { "description", "test description" },
+        { "version", "1.0" },
+        { "defaultInputModes", nlohmann::json::array({ "text" }) },
+        { "defaultOutputModes", nlohmann::json::array({ "text" }) },
+        { "skills", nlohmann::json::array({
+            nlohmann::json {
+                { "id", "test" },
+                { "name", "test" },
+                { "description", "test" },
+                { "tags", nlohmann::json::array({ "test" }) }
+            }
+        })},
+        // iconUrl is missing (required)
+    };
+    AgentCard agentCard;
+    EXPECT_FALSE(AgentCard::FromJson(jsonObject, agentCard));
 }
 
 /**

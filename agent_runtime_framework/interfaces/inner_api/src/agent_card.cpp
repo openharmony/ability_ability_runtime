@@ -806,13 +806,14 @@ bool AgentCard::FromJson(nlohmann::json jsonObject, AgentCard &agentCard)
         return false;
     }
 
-    // Optional iconUrl field
-    if (jsonObject.contains("iconUrl") && jsonObject["iconUrl"].is_string()) {
-        agentCard.iconUrl = jsonObject["iconUrl"];
-        if (agentCard.iconUrl.length() < 1 || agentCard.iconUrl.length() > LENGTH_512) {
-            TAG_LOGE(AAFwkTag::SER_ROUTER, "iconUrl length is invalid");
-            agentCard.iconUrl = "";
-        }
+    if (!jsonObject.contains("iconUrl") || !jsonObject["iconUrl"].is_string()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "iconUrl is empty");
+        return false;
+    }
+    agentCard.iconUrl = jsonObject["iconUrl"];
+    if (agentCard.iconUrl.length() < 1 || agentCard.iconUrl.length() > LENGTH_512) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "iconUrl length is invalid");
+        return false;
     }
 
     // Optional extension field

@@ -1743,10 +1743,12 @@ HWTEST_F(AppMgrClientTest, MakeImage_001, TestSize.Level2)
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     std::string bundleName = "com.acts.makeImagetest";
+    AAFwk::Want want;
+    want.SetBundle(bundleName);
     int32_t userId = 100;
     PreloadMode preloadMode = PreloadMode::PRE_MAKE;
     int32_t appIndex = 0;
-    int32_t ret = appMgrClient->MakeImage(bundleName, userId, preloadMode, appIndex, nullptr);
+    int32_t ret = appMgrClient->MakeImage(want, userId, preloadMode, appIndex, nullptr);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 

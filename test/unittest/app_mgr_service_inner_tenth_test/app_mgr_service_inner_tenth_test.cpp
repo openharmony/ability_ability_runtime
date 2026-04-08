@@ -2103,9 +2103,11 @@ HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_004, Test
     auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = appRecord;
     appRecord->SetPreForeground(true);
+    appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
     sptr<IRemoteObject> token = new MockAppScheduler();
     auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, false);
     EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(appRecord->GetPreloadMode(), PreloadMode::PRELOAD_NONE);
 
     AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");

@@ -1422,6 +1422,11 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
         }
     }
     StartAbilityInfoWrap threadLocalInfo(param.want, validUserId, appIndex, param.callerToken);
+    // Remove ATOMIC_SERVICE_SHARE_ROUTER if target is not atomic service or caller doesn't have permission
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        StartAbilityUtils::RemoveAtomicServiceShareRouterIfNeeded(param.want,
+            StartAbilityUtils::startAbilityInfo->abilityInfo);
+    }
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(param.want, param.requestCode, validUserId,
         true, nullptr, shouldBlockFunc);
@@ -2218,6 +2223,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return checkRet;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
+    // Remove ATOMIC_SERVICE_SHARE_ROUTER if target is not atomic service or caller doesn't have permission
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        StartAbilityUtils::RemoveAtomicServiceShareRouterIfNeeded(const_cast<Want &>(want),
+            StartAbilityUtils::startAbilityInfo->abilityInfo);
+    }
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, validUserId,
         true, nullptr, shouldBlockFunc);
@@ -3175,6 +3185,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
             return result;
         }
         abilityRequest.userId = currentUserId;
+        abilityRequest.sessionInfo = sessionInfo;
         if (!HandleExecuteSAInterceptor(sessionInfo->want, sessionInfo->callerToken, abilityRequest, result)) {
             return result;
         }
@@ -5562,7 +5573,8 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
             }
             return ERR_INVALID_VALUE;
         }
-        result = freeInstallManager_->ConnectFreeInstall(want, validUserId, callerToken, localDeviceId);
+        result = freeInstallManager_->ConnectFreeInstall(
+            want, validUserId, callerToken, localDeviceId, extensionType);
         if (result != ERR_OK) {
             if (extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
                 eventInfo.errReason = "ConnectFreeInstall error";
