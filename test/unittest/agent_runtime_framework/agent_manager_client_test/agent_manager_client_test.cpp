@@ -60,6 +60,7 @@ void AgentManagerClientTest::SetUp(void)
     MyFlag::retGetCallerAgentCardByAgentId = ERR_OK;
     MyFlag::retConnectAgentExtensionAbility = ERR_OK;
     MyFlag::retDisconnectAgentExtensionAbility = ERR_OK;
+    MyFlag::retNotifyLowCodeAgentComplete = ERR_OK;
     MyFlag::nullSystemAbility = false;
     MyFlag::retRegisterAgentCard = ERR_OK;
     MyFlag::retUpdateAgentCard = ERR_OK;
@@ -855,6 +856,54 @@ HWTEST_F(AgentManagerClientTest, DisconnectAgentExtensionAbility_003, TestSize.L
 
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
     int32_t result = client.DisconnectAgentExtensionAbility(connection);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+* @tc.name  : NotifyLowCodeAgentComplete_001
+* @tc.number: NotifyLowCodeAgentComplete_001
+* @tc.desc  : Test NotifyLowCodeAgentComplete returns ERR_NULL_AGENT_MGR_PROXY when proxy is null
+*/
+HWTEST_F(AgentManagerClientTest, NotifyLowCodeAgentComplete_001, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = true;
+
+    int32_t result = client.NotifyLowCodeAgentComplete("agentA");
+    EXPECT_EQ(result, ERR_NULL_AGENT_MGR_PROXY);
+}
+
+/**
+* @tc.name  : NotifyLowCodeAgentComplete_002
+* @tc.number: NotifyLowCodeAgentComplete_002
+* @tc.desc  : Test NotifyLowCodeAgentComplete returns error when agent mgr call fails
+*/
+HWTEST_F(AgentManagerClientTest, NotifyLowCodeAgentComplete_002, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retNotifyLowCodeAgentComplete = -1;
+
+    int32_t result = client.NotifyLowCodeAgentComplete("agentA");
+    EXPECT_EQ(result, -1);
+}
+
+/**
+* @tc.name  : NotifyLowCodeAgentComplete_003
+* @tc.number: NotifyLowCodeAgentComplete_003
+* @tc.desc  : Test NotifyLowCodeAgentComplete returns ERR_OK when all operations succeed
+*/
+HWTEST_F(AgentManagerClientTest, NotifyLowCodeAgentComplete_003, TestSize.Level1)
+{
+    AgentManagerClient client;
+    MyFlag::nullSystemAbility = false;
+    auto mockAgentMgr = sptr<MockAgentManagerService>::MakeSptr();
+    client.agentMgr_ = mockAgentMgr;
+    MyFlag::retNotifyLowCodeAgentComplete = ERR_OK;
+
+    int32_t result = client.NotifyLowCodeAgentComplete("agentA");
     EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AgentRuntime
