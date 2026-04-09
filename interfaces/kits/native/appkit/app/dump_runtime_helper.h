@@ -57,6 +57,7 @@ private:
     static bool IsFileExists(const std::string &file);
     static bool CreateDir(const std::string &path);
     static void CreateDirDelay(const std::string &path);
+    static void WriteRunningId();
     static bool CheckOomdumpSwitch();
     static bool Check2CQuota();
     static bool Check2DQuota(bool needDecreaseQuota);
