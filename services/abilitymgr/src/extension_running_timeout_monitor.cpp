@@ -194,7 +194,7 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
         abilityNamePtrs.push_back(const_cast<char*>(name.c_str()));
     }
 
-    HisyseventReport report(7);
+    HisyseventReport report(HISEVENT_PARAM_COUNT);
     report.InsertParam(EXTENSION_TYPE_KEY, extensionTypePtrs);
     report.InsertParam(BUNDLE_NAME_KEY, bundleNamePtrs);
     report.InsertParam(ABILITY_NAME_KEY, abilityNamePtrs);

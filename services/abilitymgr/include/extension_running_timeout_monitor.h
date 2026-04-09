@@ -87,6 +87,7 @@ private:
     std::unordered_map<int32_t, ExtensionStartInfo> runningExtensions_;
     std::list<ExtensionTimeoutEvent> cachedEvents_;
 
+    static constexpr int32_t HISEVENT_PARAM_COUNT = 7;
     static constexpr int32_t MAX_CACHED_EVENTS = 5;
     static constexpr int64_t REPORT_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
     static constexpr const char *PERIODIC_TASK_NAME = "ExtensionTimeoutPeriodicTask";
