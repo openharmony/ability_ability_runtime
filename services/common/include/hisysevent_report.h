@@ -33,6 +33,9 @@ public:
             return;
         }
         this->params_ = new (std::nothrow) HiSysEventParam[SYSTEM_PARAM_MAX_LEN];
+        if (this->params_ == nullptr) {
+            length_ = 0;
+        }
     }
     ~HisyseventReport()
     {
