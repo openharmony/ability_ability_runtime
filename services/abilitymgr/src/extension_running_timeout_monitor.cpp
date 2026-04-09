@@ -250,38 +250,6 @@ void ExtensionRunningTimeoutMonitor::CheckAliveExtensions()
     }
 }
 
-void ExtensionRunningTimeoutMonitor::Dump(std::vector<std::string> &info)
-{
-    info.emplace_back("  ExtensionRunningTimeoutMonitor:");
-    {
-        std::lock_guard<std::mutex> lock(monitorMutex_);
-        info.emplace_back("    Running extensions: " + std::to_string(runningExtensions_.size()));
-        for (const auto &[recordId, startInfo] : runningExtensions_) {
-            auto now = std::chrono::steady_clock::now();
-            auto nowMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
-                now.time_since_epoch()).count();
-            int64_t runningSec = (nowMillis - startInfo.startTimeMillis) / 1000;
-            int32_t timeout = DelayedSingleton<ExtensionConfig>::GetInstance()->
-                GetExtensionRunningTimeoutTime(startInfo.extensionTypeName);
-            info.emplace_back("      [" + std::to_string(recordId) + "] " +
-                startInfo.bundleName + "/" + startInfo.abilityName +
-                " type:" + startInfo.extensionTypeName +
-                " running:" + std::to_string(runningSec) + "s" +
-                " limit:" + std::to_string(timeout) + "s" +
-                (timeout > 0 && runningSec > timeout ? " EXCEEDED" : ""));
-        }
-        info.emplace_back("    Cached timeout events: " + std::to_string(cachedEvents_.size()) +
-            "/" + std::to_string(MAX_CACHED_EVENTS));
-        for (const auto &event : cachedEvents_) {
-            info.emplace_back("      " + event.bundleName + "/" + event.abilityName +
-                " type:" + event.extensionTypeName +
-                " duration:" + std::to_string(event.runningDuration) + "s" +
-                " alive:" + (event.stillAlive ? "yes" : "no") +
-                " cnt:" + std::to_string(event.cnt));
-        }
-    }
-}
-
 bool ExtensionRunningTimeoutMonitor::IsDuplicateEvent(const ExtensionTimeoutEvent &event,
     std::list<ExtensionTimeoutEvent>::iterator &dupIter)
 {
