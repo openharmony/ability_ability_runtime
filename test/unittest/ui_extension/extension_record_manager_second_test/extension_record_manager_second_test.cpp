@@ -1114,14 +1114,14 @@ void ExtensionRunningTimeoutMonitorTest::TearDownTestCase()
 
 void ExtensionRunningTimeoutMonitorTest::SetUp()
 {
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     monitor->runningExtensions_.clear();
     monitor->cachedEvents_.clear();
 }
 
 void ExtensionRunningTimeoutMonitorTest::TearDown()
 {
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     monitor->StopMonitor();
     monitor->runningExtensions_.clear();
     monitor->cachedEvents_.clear();
@@ -1136,7 +1136,7 @@ void ExtensionRunningTimeoutMonitorTest::TearDown()
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->OnExtensionStarted(100, "ServiceExtension", "com.test.bundle", "TestAbility");
@@ -1159,7 +1159,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0100, TestSize.L
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->OnExtensionStarted(1, "ServiceExtension", "com.test.a", "AbilityA");
@@ -1183,7 +1183,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0200, TestSize.L
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->OnExtensionStarted(100, "ServiceExtension", "com.test.old", "OldAbility");
@@ -1206,7 +1206,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionStarted_0300, TestSize.L
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->OnExtensionTerminated(9999);
@@ -1225,7 +1225,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0100, TestSiz
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->OnExtensionStarted(100, "ServiceExtension", "com.test.bundle", "TestAbility");
@@ -1247,11 +1247,11 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0200, TestSiz
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     // Configure timeout for this extension type via ExtensionConfig
-    auto config = AAFwk::DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
+    auto config = DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
     ASSERT_NE(config, nullptr);
     AAFwk::ExtensionConfigItem item;
     item.extensionRunningTimeoutTime = 1; // 1 second
@@ -1290,11 +1290,11 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0300, TestSiz
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0400, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     // Configure long timeout
-    auto config = AAFwk::DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
+    auto config = DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
     AAFwk::ExtensionConfigItem item;
     item.extensionRunningTimeoutTime = 3600; // 1 hour
     config->configMap_["TestLongTimeout"] = item;
@@ -1320,7 +1320,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, OnExtensionTerminated_0400, TestSiz
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     AAFwk::ExtensionTimeoutEvent event;
@@ -1346,7 +1346,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0100, TestS
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     AAFwk::ExtensionTimeoutEvent event1;
@@ -1388,7 +1388,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0200, TestS
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     // Fill cache to MAX_CACHED_EVENTS (5)
@@ -1436,7 +1436,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, AddOrUpdateTimeoutEvent_0300, TestS
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, IsDuplicateEvent_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     AAFwk::ExtensionTimeoutEvent event;
@@ -1466,7 +1466,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, IsDuplicateEvent_0100, TestSize.Lev
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, IsDuplicateEvent_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     AAFwk::ExtensionTimeoutEvent event;
@@ -1495,7 +1495,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, IsDuplicateEvent_0200, TestSize.Lev
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, ReportTimeoutEvents_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     AAFwk::ExtensionTimeoutEvent event;
@@ -1523,7 +1523,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, ReportTimeoutEvents_0100, TestSize.
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, ReportTimeoutEvents_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     EXPECT_EQ(monitor->cachedEvents_.size(), static_cast<size_t>(0));
@@ -1542,11 +1542,11 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, ReportTimeoutEvents_0200, TestSize.
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, CheckAliveExtensions_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     // Configure timeout
-    auto config = AAFwk::DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
+    auto config = DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
     AAFwk::ExtensionConfigItem item;
     item.extensionRunningTimeoutTime = 1; // 1 second
     config->configMap_["AliveTestExtension"] = item;
@@ -1582,7 +1582,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, CheckAliveExtensions_0100, TestSize
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, CheckAliveExtensions_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     // No config for "UnconfiguredExtension", default timeout is -1
@@ -1607,7 +1607,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, CheckAliveExtensions_0200, TestSize
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, StartStopMonitor_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     monitor->StartMonitor();
@@ -1628,7 +1628,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, StartStopMonitor_0100, TestSize.Lev
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, ConcurrentAccess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto monitor = AAFwk::DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
     ASSERT_NE(monitor, nullptr);
 
     const int32_t threadCount = 10;
@@ -1668,7 +1668,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, ConcurrentAccess_0100, TestSize.Lev
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, ExtensionConfigGetRunningTimeoutTime_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto config = AAFwk::DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
+    auto config = DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
     ASSERT_NE(config, nullptr);
 
     int32_t timeout = config->GetExtensionRunningTimeoutTime("NonExistentType");
@@ -1686,7 +1686,7 @@ HWTEST_F(ExtensionRunningTimeoutMonitorTest, ExtensionConfigGetRunningTimeoutTim
 HWTEST_F(ExtensionRunningTimeoutMonitorTest, ExtensionConfigGetRunningTimeoutTime_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto config = AAFwk::DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
+    auto config = DelayedSingleton<AAFwk::ExtensionConfig>::GetInstance();
     ASSERT_NE(config, nullptr);
 
     AAFwk::ExtensionConfigItem item;
