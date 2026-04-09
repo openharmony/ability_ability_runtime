@@ -695,6 +695,34 @@ void MainThread::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
 
 /**
  *
+ * @brief application triggerGC and dump memory.
+ *
+ * @param info, pid, tid, needGC, needSnapshot.
+ */
+void MainThread::ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    if (info.isSync) {
+        HandleMem(info, dumpResult);
+    } else {
+        wptr<MainThread> weak = this;
+        auto task = [weak, info]() {
+            auto appThread = weak.promote();
+            if (appThread == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+                return;
+            }
+            // async mode does not return dumpResult to caller
+            std::string asyncResult;
+            appThread->HandleMem(info, asyncResult);
+        };
+        if (!mainHandler_->PostTask(task, "MainThread:HandleMem")) {
+            TAG_LOGE(AAFwkTag::APPKIT, "PostTask HandleMem failed");
+        }
+    }
+}
+
+/**
+ *
  * @brief Schedule the application process exit safely.
  *
  */
@@ -1051,6 +1079,22 @@ void MainThread::HandleCjHeapMemory(const OHOS::AppExecFwk::CjHeapDumpInfo &info
         TAG_LOGE(AAFwkTag::APPKIT, "DumpCjHeap failed: unknown exception");
         return;
     }
+}
+
+void MainThread::HandleMem(const OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (mainHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
+        return;
+    }
+    auto app = applicationForDump_.lock();
+    if (app == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+        return;
+    }
+    auto helper = std::make_shared<DumpRuntimeHelper>(app);
+    helper->DumpMem(info, dumpResult);
 }
 
 /**
