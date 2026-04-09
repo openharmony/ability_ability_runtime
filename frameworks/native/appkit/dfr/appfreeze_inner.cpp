@@ -450,6 +450,14 @@ bool AppfreezeInner::IsAppFreeze(const std::string& name)
     return false;
 }
 
+bool AppfreezeInner::IsAppFreezeWarning(const std::string& name)
+{
+    if (name == AppFreezeType::THREAD_BLOCK_3S || name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        return true;
+    }
+    return false;
+}
+
 int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeInner::AcquireStack name:%s", info.errorObject.name.c_str());
