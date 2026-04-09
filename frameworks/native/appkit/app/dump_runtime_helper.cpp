@@ -48,6 +48,7 @@ static int g_oomDumpProcessQuota = 0;
 static uint64_t g_lastOOMDumpTime = 0;
 static constexpr const char* const EVENT_XATTR_NAME = "user.appevent";
 static constexpr const char* const OOM_QUOTA_XATTR_NAME = "user.oomdump.quota";
+static constexpr const char* const RUNNING_ID_NAME = "user.runningId";
 static constexpr const char* const PROPERTY2C = "user.oomdumptelemetry.quota";
 static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cache/hiappevent";
 static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
@@ -137,6 +138,17 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
     };
     auto vm = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetEcmaVm();
     panda::DFXJSNApi::SetAppFreezeFilterCallback(vm, appfreezeFilterCallback);
+}
+
+void DumpRuntimeHelper::WriteRunningId()
+{
+    std::string curRunningId = DFX_GetAppRunningUniqueId();
+    if (curRunningId.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "curRunningId is empty");
+        return;
+    }
+
+    SetDirXattr(OOM_QUOTA_PATH, RUNNING_ID_NAME, curRunningId);
 }
 
 bool DumpRuntimeHelper::CheckOomdumpSwitch()
@@ -411,9 +423,10 @@ void DumpRuntimeHelper::CreateDirDelay(const std::string &path)
     ffrt::submit([=] {
         if (!CreateDir(path)) {
             TAG_LOGE(AAFwkTag::APPKIT, "failed to create %{public}s", path.c_str());
-            return;
+        } else {
+            TAG_LOGI(AAFwkTag::APPKIT, "success to create %{public}s", path.c_str());
         }
-        TAG_LOGI(AAFwkTag::APPKIT, "success to create %{public}s", path.c_str());
+        WriteRunningId();
         }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
 }
 
