@@ -42,6 +42,8 @@ static ObserverItem g_defaultHandler;
 static std::mutex g_defaultHandlerMtx;
 static std::mutex g_freezeMtx;
 static bool g_freezeCallbackRegistered = false;
+static ObserverItem g_defaultFreezeObserver;
+static std::mutex g_defaultFreezeMtx;
 static std::set<ani_ref> g_unhandledRejectionObservers;
 static std::mutex g_unhandledRejectionMtx;
 static int64_t g_lastWatchTimeReport = 0;
@@ -55,7 +57,7 @@ public:
 
     static void Finalizer(ani_env *env, void* data, void* hint)
     {
-        TAG_LOGI(AAFwkTag::RECOVERY, "finalizer called");
+        TAG_LOGI(AAFwkTag::JSNAPI, "finalizer called");
         std::unique_ptr<ErrorManagerAni>(static_cast<ErrorManagerAni*>(data));
         ClearReference(env);
     }
@@ -73,24 +75,24 @@ public:
     {
         std::lock_guard<std::mutex> lock(g_defaultHandlerMtx);
         if (g_defaultHandler.vm == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null vm or defaultHandler ref.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null vm or defaultHandler ref.");
             return;
         }
         ani_env *env = nullptr;
         bool isAttachThread = false;
         env = AppExecFwk::AttachAniEnv(g_defaultHandler.vm, isAttachThread);
         if (env == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null env");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null env");
             return;
         }
         if (g_defaultHandler.ref == nullptr || IsRefUndefined(env, g_defaultHandler.ref) ||
             IsNull(env, g_defaultHandler.ref)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "invalid defaultHandler ref.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid defaultHandler ref.");
             return;
         }
         ani_object error = CreateErrorObject(env, errorObj.name, errorObj.message, errorObj.stack);
         if (error == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null error param");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null error param");
             return;
         }
         std::vector<ani_ref> args = {error};
@@ -98,10 +100,10 @@ public:
         ani_status status = env->FunctionalObject_Call(
             reinterpret_cast<ani_fn_object>(g_defaultHandler.ref), args.size(), args.data(), &result);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "failed to call default handler function, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::JSNAPI, "failed to call default handler function, status: %{public}d", status);
         }
         AppExecFwk::DetachAniEnv(g_defaultHandler.vm, isAttachThread);
-        TAG_LOGD(AAFwkTag::RECOVERY, "doErrorCallback end.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "doErrorCallback end.");
     }
 
     static void NotifyUnhandledRejectionHandler(ani_env *env, ani_object reason, ani_object promise)
@@ -111,7 +113,7 @@ public:
             ani_object callback = static_cast<ani_object>(iter);
             if (!ValidateFunction(env, callback) || !ValidateFunction(env, promise) ||
                 !ValidateFunction(env, reason)) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "UnhandledRejection callback, promise or reason invalid.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "UnhandledRejection callback, promise or reason invalid.");
                 return;
             }
             std::vector<ani_ref> args = {reason, promise};
@@ -119,7 +121,7 @@ public:
             ani_status status = env->FunctionalObject_Call(
                 reinterpret_cast<ani_fn_object>(callback), args.size(), args.data(), &result);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "failed to call unhandled function, status: %{public}d", status);
+                TAG_LOGE(AAFwkTag::JSNAPI, "failed to call unhandled function, status: %{public}d", status);
             }
         }
     }
@@ -128,12 +130,12 @@ public:
     {
         ani_object result = nullptr;
         if (!AppExecFwk::EventRunner::IsAppMainThread()) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "not mainThread");
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
             EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
             return result;
         }
         if (IsRefUndefined(env, function)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "invalid func");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid func");
             EtsErrorUtil::ThrowInvalidNumParametersError(env);
             return result;
         }
@@ -145,14 +147,14 @@ public:
             ani_wref weakRef;
             auto status = env->WeakReference_Create(g_defaultHandler.ref, &weakRef);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "create weakref failed, status: %{public}d", status);
+                TAG_LOGE(AAFwkTag::JSNAPI, "create weakref failed, status: %{public}d", status);
                 return result;
             }
             ani_boolean released = ANI_FALSE;
             ani_ref weakResult = nullptr;
             status = env->WeakReference_GetReference(weakRef, &released, &weakResult);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "create weakref failed, "
+                TAG_LOGE(AAFwkTag::JSNAPI, "create weakref failed, "
                     "status: %{public}d, released: %{public}d", status, released);
                 return result;
             }
@@ -162,7 +164,7 @@ public:
         if (function) {
             auto status = env->GlobalReference_Create(function, &objectRef);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "create defaultHandler function failed.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "create defaultHandler function failed.");
                 return result;
             }
         }
@@ -175,6 +177,70 @@ public:
         return result;
     }
 
+    static ani_object SetDefaultFreezeObserver(ani_env *env, ani_object function)
+    {
+        ani_object result = nullptr;
+        if (!CheckDefaultFreezeError(env, function)) {
+            return result;
+        }
+        std::lock_guard<std::mutex> lock(g_defaultFreezeMtx);
+        if (g_defaultFreezeObserver.ref) {
+            ani_wref weakRef;
+            auto status = env->WeakReference_Create(g_defaultFreezeObserver.ref, &weakRef);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::JSNAPI, "create weakref failed, status: %{public}d", status);
+                return result;
+            }
+            ani_boolean released = ANI_FALSE;
+            ani_ref weakResult = nullptr;
+            status = env->WeakReference_GetReference(weakRef, &released, &weakResult);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::JSNAPI, "create weakref failed, "
+                    "status: %{public}d, released: %{public}d", status, released);
+                return result;
+            }
+            result = static_cast<ani_object>(weakResult);
+        }
+        ani_ref objectRef = nullptr;
+        if (function) {
+            auto status = env->GlobalReference_Create(function, &objectRef);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::JSNAPI, "create defaultHandler function failed.");
+                return result;
+            }
+        }
+        if (g_defaultFreezeObserver.ref) {
+            env->GlobalReference_Delete(g_defaultFreezeObserver.ref);
+            g_defaultFreezeObserver.ref = nullptr;
+        }
+        g_defaultFreezeObserver.ref = objectRef;
+        g_defaultFreezeObserver.vm = GetAniVm(env);
+        if (!g_freezeCallbackRegistered) {
+            AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(FreezeCallback);
+            g_freezeCallbackRegistered = true;
+            TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback registered to AppRecovery successfully");
+        }
+        return result;
+    }
+
+    static bool CheckDefaultFreezeError(ani_env *env, ani_object function)
+    {
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
+            EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
+            return false;
+        }
+        if (IsNull(env, function)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "func is null.");
+            EtsErrorUtil::ThrowInvalidNumParametersError(env);
+            return false;
+        }
+        if (IsRefUndefined(env, function)) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "func is undefined.");
+        }
+        return true;
+    }
+
     static bool CheckReportDuration()
     {
         int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
@@ -183,27 +249,24 @@ public:
             g_lastWatchTimeReport = now;
             return true;
         } else {
-            TAG_LOGW(AAFwkTag::RECOVERY, "reporting once per minute.");
+            TAG_LOGW(AAFwkTag::JSNAPI, "reporting once per minute.");
             return false;
         }
     }
 
-    static void FreezeCallback()
+    static void OnFreezeCallback()
     {
-        TAG_LOGD(AAFwkTag::RECOVERY, "FreezeCallback begin");
-        if (!CheckReportDuration()) {
-            return;
-        }
+        TAG_LOGD(AAFwkTag::JSNAPI, "FreezeCallback begin");
         std::lock_guard<std::mutex> lock(g_freezeMtx);
         ani_env *env = nullptr;
         bool isAttachThread = false;
         env = AppExecFwk::AttachAniEnv(g_freezeObserver.vm, isAttachThread);
         if (env == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null env");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null env");
             return;
         }
         if (g_freezeObserver.ref == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null freezeObserver ref");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null freezeObserver ref");
             return;
         }
         std::vector<ani_ref> args = {};
@@ -211,22 +274,57 @@ public:
         ani_status status = env->FunctionalObject_Call(
             reinterpret_cast<ani_fn_object>(g_freezeObserver.ref), 0, args.data(), &result);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "failed to call function, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::JSNAPI, "failed to call function, status: %{public}d", status);
         }
         AppExecFwk::DetachAniEnv(g_freezeObserver.vm, isAttachThread);
-        TAG_LOGD(AAFwkTag::RECOVERY, "FreezeCallback end");
+        TAG_LOGD(AAFwkTag::JSNAPI, "FreezeCallback end");
+    }
+
+    static void DefaultFreezeCallback()
+    {
+        TAG_LOGD(AAFwkTag::JSNAPI, "DefaultFreezeCallback begin");
+        std::lock_guard<std::mutex> lock(g_defaultFreezeMtx);
+        ani_env *env = nullptr;
+        bool isAttachThread = false;
+        env = AppExecFwk::AttachAniEnv(g_defaultFreezeObserver.vm, isAttachThread);
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+            return;
+        }
+        if (g_defaultFreezeObserver.ref == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "null freezeObserver ref");
+            return;
+        }
+        std::vector<ani_ref> args = {};
+        ani_ref result{};
+        ani_status status = env->FunctionalObject_Call(
+            reinterpret_cast<ani_fn_object>(g_defaultFreezeObserver.ref), 0, args.data(), &result);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "failed to call function, status: %{public}d", status);
+        }
+        AppExecFwk::DetachAniEnv(g_defaultFreezeObserver.vm, isAttachThread);
+        TAG_LOGD(AAFwkTag::JSNAPI, "DefaultFreezeCallback end");
+    }
+
+    static void FreezeCallback()
+    {
+        if (!CheckReportDuration()) {
+            return;
+        }
+        OnFreezeCallback();
+        DefaultFreezeCallback();
     }
 
     static ani_object OnFreeze(ani_env *env, ani_object function)
     {
         ani_object result{};
         if (!AppExecFwk::EventRunner::IsAppMainThread()) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "not mainThread");
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
             EtsErrorUtil::ThrowInvalidCallerError(env);
             return result;
         }
         if (!ValidateFunction(env, function)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "invalid argc");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
             return result;
         }
         std::lock_guard<std::mutex> lock(g_freezeMtx);
@@ -237,7 +335,7 @@ public:
         if (function) {
             auto status = env->GlobalReference_Create(function, &g_freezeObserver.ref);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "create freeze function failed.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "create freeze function failed.");
                 return result;
             }
         }
@@ -245,7 +343,7 @@ public:
         if (!g_freezeCallbackRegistered) {
             AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(FreezeCallback);
             g_freezeCallbackRegistered = true;
-            TAG_LOGI(AAFwkTag::RECOVERY, "Freeze callback registered to AppRecovery successfully");
+            TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback registered to AppRecovery successfully");
         }
         return result;
     }
@@ -254,13 +352,13 @@ public:
     {
         ani_object result{};
         if (!AppExecFwk::EventRunner::IsAppMainThread()) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "not mainThread");
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
             EtsErrorUtil::ThrowInvalidCallerError(env);
             return result;
         }
         std::lock_guard<std::mutex> lock(g_freezeMtx);
         if (g_freezeObserver.ref == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null freezeObserver");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null freezeObserver");
             return result;
         }
 
@@ -271,7 +369,7 @@ public:
             if (g_freezeCallbackRegistered) {
                 AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(nullptr);
                 g_freezeCallbackRegistered = false;
-                TAG_LOGI(AAFwkTag::RECOVERY, "Freeze callback unregistered from AppRecovery successfully");
+                TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback unregistered from AppRecovery successfully");
             }
             return result;
         }
@@ -288,7 +386,7 @@ public:
             if (g_freezeCallbackRegistered) {
                 AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(nullptr);
                 g_freezeCallbackRegistered = false;
-                TAG_LOGI(AAFwkTag::RECOVERY, "Freeze callback unregistered from AppRecovery successfully");
+                TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback unregistered from AppRecovery successfully");
             }
             return result;
         }
@@ -317,7 +415,7 @@ public:
         if (function) {
             auto status = env->GlobalReference_Create(function, &ref);
             if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::RECOVERY, "create unhandledRejection function failed.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "create unhandledRejection function failed.");
                 return result;
             }
         }
@@ -351,7 +449,7 @@ public:
                 return result;
             }
         }
-        TAG_LOGE(AAFwkTag::RECOVERY, "remove unhandle observer failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "remove unhandle observer failed");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return result;
     }
@@ -359,11 +457,11 @@ public:
     static bool ValidateFunction(ani_env *env, ani_object function)
     {
         if (env == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null env");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null env");
             return false;
         }
         if (function == nullptr || IsRefUndefined(env, function) || IsNull(env, function)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "invalid func");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid func");
             EtsErrorUtil::ThrowInvalidNumParametersError(env);
             return false;
         }
@@ -379,20 +477,20 @@ public:
 
 static void EtsErrorManagerInit(ani_env *env)
 {
-    TAG_LOGD(AAFwkTag::RECOVERY, "ErrorManager ets called.");
+    TAG_LOGD(AAFwkTag::JSNAPI, "ErrorManager ets called.");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "null env");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
         return;
     }
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ResetError failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ResetError failed");
     }
 
     ani_namespace ns;
     status = env->FindNamespace("@ohos.app.ability.errorManager.errorManager", &ns);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "FindNamespace errorManager failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindNamespace errorManager failed status: %{public}d", status);
         return;
     }
 
@@ -407,17 +505,19 @@ static void EtsErrorManagerInit(ani_env *env)
             ErrorManagerAni::OnUnhandledRejectionInner)},
         ani_native_function {"offUnhandledRejection", nullptr, reinterpret_cast<void *>(
             ErrorManagerAni::OffUnhandledRejection)},
+        ani_native_function {"setDefaultFreezeObserver", nullptr, reinterpret_cast<void *>(
+            ErrorManagerAni::SetDefaultFreezeObserver)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Namespace_BindNativeFunctions failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Namespace_BindNativeFunctions failed status: %{public}d", status);
     }
 
     if (env->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ResetError failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ResetError failed");
     }
-    TAG_LOGD(AAFwkTag::RECOVERY, "ErrorManager ets called end");
+    TAG_LOGD(AAFwkTag::JSNAPI, "ErrorManager ets called end");
 }
 
 
@@ -426,16 +526,16 @@ static void EtsErrorManagerInit(ani_env *env)
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    TAG_LOGD(AAFwkTag::RECOVERY, "ANI_Constructor start.");
+    TAG_LOGD(AAFwkTag::JSNAPI, "ANI_Constructor start.");
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     if (vm == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "null vm");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null vm");
         return ANI_ERROR;
     }
     status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "GetEnv failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetEnv failed status: %{public}d", status);
         return ANI_NOT_FOUND;
     }
 
@@ -446,6 +546,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     OHOS::AppExecFwk::ApplicationDataManager::GetInstance().RegisterHasOnErrorCallback(
         OHOS::AbilityRuntime::ErrorManagerAni::IsErrorObserverListNotEmpty);
 
-    TAG_LOGD(AAFwkTag::RECOVERY, "ANI_Constructor finish");
+    TAG_LOGD(AAFwkTag::JSNAPI, "ANI_Constructor finish");
     return ANI_OK;
 }
