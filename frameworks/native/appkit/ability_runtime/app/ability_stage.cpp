@@ -157,5 +157,15 @@ void AbilityStage::MarkAbilityCreated()
 {
     isAbilityCreate_ = true;
 }
+
+void AbilityStage::SetSkipAbilityStageLifecycle(bool skipAbilityStageLifecycle)
+{
+    skipAbilityStageLifecycle_ = skipAbilityStageLifecycle;
+}
+
+bool AbilityStage::IsSkipAbilityStageLifecycle() const
+{
+    return skipAbilityStageLifecycle_;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
