@@ -543,6 +543,11 @@ int32_t AppRunningManager::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &in
     return ERR_OK;
 }
 
+int32_t AppRunningManager::DumpMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    return ERR_OK;
+}
+
 void AppRunningManager::HandleChildRelation(
     std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord)
 {

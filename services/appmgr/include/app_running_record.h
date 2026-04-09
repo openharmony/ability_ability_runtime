@@ -484,6 +484,16 @@ public:
     void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
+     * ScheduleMem, triggerGC and dump application's memory info.
+     *
+     * @param info, pid, tid, needGc, needSnapshot
+     * @param dumpResult The dump result string
+     *
+     * @return
+     */
+    void ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult);
+
+    /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
      *
      * @param token, the unique identification to the ability.

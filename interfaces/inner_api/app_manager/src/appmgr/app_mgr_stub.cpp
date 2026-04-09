@@ -185,6 +185,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleDumpJsHeapMemory(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_CJHEAP_MEMORY_PROCESS):
             return HandleDumpCjHeapMemory(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_MEM_PROCESS):
+            return HandleDumpMem(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME):
             return HandleGetRunningMultiAppInfoByBundleName(data, reply);
     }
@@ -858,6 +860,28 @@ int32_t AppMgrStub::HandleDumpCjHeapMemory(MessageParcel &data, MessageParcel &r
         return ERR_INVALID_VALUE;
     }
     auto result = DumpCjHeapMemory(*info);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleDumpMem(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleDumpMem.");
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::unique_ptr<MemDumpInfo> info(data.ReadParcelable<MemDumpInfo>());
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
+    }
+    std::string dumpResult;
+    auto result = DumpMem(*info, dumpResult);
+    if (!reply.WriteString(dumpResult)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write dumpResult error");
+        return ERR_INVALID_VALUE;
+    }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "write result error");
         return ERR_INVALID_VALUE;
