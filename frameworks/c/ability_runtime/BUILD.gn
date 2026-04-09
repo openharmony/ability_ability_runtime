@@ -16,6 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("ability_runtime_ndk_config") {
   include_dirs = [
+    "include",
     "${ability_runtime_ndk_path}",
     "${ability_runtime_ndk_path}/ability_runtime",
     "${ability_runtime_innerkits_path}",
