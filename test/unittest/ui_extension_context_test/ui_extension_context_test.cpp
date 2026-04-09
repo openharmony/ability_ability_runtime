@@ -1516,5 +1516,27 @@ HWTEST_F(UIExtensionContextTest, SetAbilityConfiguration_0400, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "SetAbilityConfiguration_0400 end");
 }
+
+/**
+ * @tc.number: SetAbilityConfiguration_0500
+ * @tc.name: SetAbilityConfiguration
+ * @tc.desc: Test SetAbilityConfiguration when abilityConfiguration_ is null and fullConfig is null.
+ */
+HWTEST_F(UIExtensionContextTest, SetAbilityConfiguration_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAbilityConfiguration_0500 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    ASSERT_EQ(context->abilityConfiguration_, nullptr);
+
+    AppExecFwk::Configuration config;
+    context->SetAbilityConfiguration(config);
+
+    // 验证 abilityConfiguration_ 被正确创建
+    EXPECT_NE(context->abilityConfiguration_, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "SetAbilityConfiguration_0500 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
