@@ -22,6 +22,7 @@
 #include "app_utils.h"
 #include "render_record.h"
 #include "app_mgr_service_inner.h"
+#include "app_state_observer_manager.h"
 #include "error_msg_util.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
@@ -689,6 +690,13 @@ void AppRunningRecord::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &in
     }
 }
 
+void AppRunningRecord::ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleMem(info, dumpResult);
+    }
+}
+
 void AppRunningRecord::LowMemoryWarning()
 {
     if (appLifeCycleDeal_) {
@@ -1133,6 +1141,11 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
     moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
+
+    if (GetProcessType() == ProcessType::NORMAL && HasOnlyOneExtensionType()) {
+        SetProcessType(ProcessType::EXTENSION);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessTypeChanged(shared_from_this());
+    }
 }
 
 void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
@@ -2265,6 +2278,38 @@ uint64_t AppRunningRecord::GenerateRunningId()
     thread_local std::mt19937_64 engine(std::random_device{}());
     thread_local std::uniform_int_distribution<uint64_t> dist;
     return dist(engine);
+}
+
+bool AppRunningRecord::HasOnlyOneExtensionType()
+{
+    auto abilities = GetAbilities();
+    ExtensionAbilityType firstType = ExtensionAbilityType::UNSPECIFIED;
+    bool hasExtension = false;
+
+    for (const auto &item : abilities) {
+        const auto &ability = item.second;
+        if (!ability) {
+            continue;
+        }
+        auto abilityInfo = ability->GetAbilityInfo();
+        if (!abilityInfo) {
+            continue;
+        }
+
+        if (abilityInfo->type != AbilityType::EXTENSION) {
+            return false;
+        }
+
+        auto currentType = abilityInfo->extensionAbilityType;
+        if (!hasExtension) {
+            firstType = currentType;
+            hasExtension = true;
+        } else if (currentType != firstType) {
+            return false;
+        }
+    }
+
+    return hasExtension;
 }
 
 void AppRunningRecord::SetRequestProcCode(int32_t requestProcCode)

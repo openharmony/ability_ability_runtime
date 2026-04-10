@@ -13,23 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef MADVISE_UTILS_H
-#define MADVISE_UTILS_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MEM_DUMP_INFO_H
+#define OHOS_ABILITY_RUNTIME_APP_MEM_DUMP_INFO_H
 
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "parcel.h"
+#include "iremote_object.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-namespace MadviseUtil {
-bool MadviseSingleLibrary(const char* libName);
+namespace AppExecFwk {
+enum class MemDumpType : uint32_t {
+    INVALID = 0,
+    NATIVE = 1,
+    JSVM = 2,
+};
 
-int32_t MadviseGeneralFiles(const std::vector<std::string>& filenames);
-
-int32_t MadviseWithConfigFile(const char* bundleName);
-
-} // namespace MadviseUtil
-} // namespace AbilityRuntime
+struct MemDumpInfo : public Parcelable {
+    MemDumpType dumpType = MemDumpType::INVALID;
+    bool needLeakobj = false;
+    uint32_t pid = 0;
+    uint32_t tid = 0;
+    bool isSync = true;
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static MemDumpInfo *Unmarshalling(Parcel &parcel);
+};
+} // namespace AppExecFwk
 } // namespace OHOS
-#endif // MADVISE_UTILS_H
+
+#endif // OHOS_ABILITY_RUNTIME_APP_MEM_DUMP_INFO_H

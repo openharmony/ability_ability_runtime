@@ -49,6 +49,7 @@
 #endif
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
+#include "caller_info.h"
 #include "data_ability_manager.h"
 #include "deeplink_reserve/deeplink_reserve_config.h"
 #include "event_report.h"
@@ -740,7 +741,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0) override;
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -2807,7 +2809,8 @@ private:
         bool isQueryExtensionOnly = false,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0);
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
 
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int32_t HandleExtensionConnectionByUserId(sptr<IAbilityConnection> connect, int32_t userId,

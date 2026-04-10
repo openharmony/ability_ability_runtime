@@ -295,6 +295,10 @@ void AppRunningRecord::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &in
 {
 }
 
+void AppRunningRecord::ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpresult)
+{
+}
+
 void AppRunningRecord::LowMemoryWarning()
 {
 }
