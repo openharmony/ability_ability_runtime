@@ -31,6 +31,7 @@
 #include "ability_state_data.h"
 #include "app_debug_listener_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "dms_continueInfo.h"
 #include "exit_reason.h"
 #include "extension_running_info.h"
@@ -757,6 +758,7 @@ public:
      * @param userId, the service user ID.
      * @param specifiedFullTokenId, The specified full token ID.
      * @param loadTimeout, timeout multiply for ability loading stage, range 1-30, not work on asan.
+     * @param indirectCallerInfo, Indirect caller information.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ConnectAbilityCommon(
@@ -767,7 +769,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0)
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr)
     {
         return 0;
     }
