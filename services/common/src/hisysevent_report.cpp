@@ -197,7 +197,7 @@ void HisyseventReport::InsertParam(const char* name, char* value)
     int32_t len = std::strlen(value) + 1;
     auto buffer = std::make_unique<char[]>(len);
     int32_t ret = strcpy_s(buffer.get(), len, value);
-    if (ret != 0) {
+    if (ret != EOK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "InsertParam err %{public}d", ret);
         return;
     }
@@ -286,14 +286,16 @@ void HisyseventReport::InsertParam(const char* name, const std::vector<bool> &va
     };
 
     if (!value.empty()) {
-        auto *buf = new (std::nothrow) bool[value.size()];
+        size_t bufSize = value.size() * sizeof(bool);
+        auto *buf = new (std::nothrow) char[bufSize]();
         if (buf != nullptr) {
+            auto *boolBuf = reinterpret_cast<bool*>(buf);
             for (size_t i = 0; i < value.size(); ++i) {
-                buf[i] = value[i];
+                boolBuf[i] = value[i];
             }
-            param.v.array = static_cast<void*>(buf);
+            param.v.array = static_cast<void*>(boolBuf);
             param.arraySize = value.size();
-            paramBuffers_.emplace_back(reinterpret_cast<char*>(buf));
+            paramBuffers_.emplace_back(buf);
         }
     }
     SetParamName(param, name);
@@ -322,18 +324,38 @@ void HisyseventReport::InsertParam(const char* name, const std::vector<int64_t> 
 
 void HisyseventReport::InsertParam(const char* name, std::string value)
 {
-    this->InsertParam(name, const_cast<char *>(value.c_str()));
+    this->InsertParam(name, value.c_str());
 }
 
 void HisyseventReport::InsertParam(const char* name, const char* value)
 {
-    this->InsertParam(name, const_cast<char *>(value));
+    if (!name || !value || length_ <= pos_) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "param is full");
+        return;
+    }
+    int32_t len = static_cast<int32_t>(std::strlen(value)) + 1;
+    auto buffer = std::make_unique<char[]>(len);
+    int32_t ret = strcpy_s(buffer.get(), len, value);
+    if (ret != EOK) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "InsertParam err %{public}d", ret);
+        return;
+    }
+
+    HiSysEventParam param = {
+        .t = HISYSEVENT_STRING,
+        .v = { .s = buffer.get()},
+        .arraySize = 0,
+    };
+    SetParamName(param, name);
+    params_[pos_++] = param;
+
+    paramBuffers_.emplace_back(std::move(buffer));
 }
 
 void HisyseventReport::SetParamName(HiSysEventParam& param, const char* name)
 {
     int32_t ret = strcpy_s(param.name, sizeof(param.name), name);
-    if (ret != 0) {
+    if (ret != EOK) {
         TAG_LOGE(AAFwkTag::DEFAULT, "SetParamName err %{public}d", ret);
     }
 }

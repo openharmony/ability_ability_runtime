@@ -286,8 +286,7 @@ void AbilityConnectManager::RemoveServiceFromMapSafe(const std::string &serviceK
     std::lock_guard lock(serviceMapMutex_);
     auto it = serviceMap_.find(serviceKey);
     if (it != serviceMap_.end() && it->second != nullptr) {
-        auto &abilityInfo = it->second->GetAbilityInfo();
-        auto recordId = static_cast<int32_t>(std::hash<std::string>{}(serviceKey));
+        auto recordId = it->second->GetRecordId();
         auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
         if (monitor != nullptr) {
             monitor->OnExtensionTerminated(recordId);
@@ -3258,7 +3257,7 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
 
         // Notify running timeout monitor about service extension start
         auto &newAbilityInfo = abilityRequest.abilityInfo;
-        auto recordId = static_cast<int32_t>(std::hash<std::string>{}(serviceKey));
+        auto recordId = targetService->GetRecordId();
         auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
         if (monitor != nullptr) {
             monitor->OnExtensionStarted(recordId,
