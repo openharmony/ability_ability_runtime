@@ -381,13 +381,13 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreeze_001, TestSize.Level1)
  */
 HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreezeWarning_001, TestSize.Level1)
 {
-    bool ret = appfreezeInner->IsAppFreeze(AppFreezeType::THREAD_BLOCK_3S);
+    bool ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::THREAD_BLOCK_3S);
     EXPECT_EQ(ret, true);
-    ret = appfreezeInner->IsAppFreeze(AppFreezeType::THREAD_BLOCK_6S);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::THREAD_BLOCK_6S);
     EXPECT_EQ(ret, false);
-    ret = appfreezeInner->IsAppFreeze(AppFreezeType::LIFECYCLE_HALF_TIMEOUT);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::LIFECYCLE_HALF_TIMEOUT);
     EXPECT_EQ(ret, true);
-    ret = appfreezeInner->IsAppFreeze(AppFreezeType::LIFECYCLE_TIMEOUT);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::LIFECYCLE_TIMEOUT);
     EXPECT_EQ(ret, false);
 }
 
