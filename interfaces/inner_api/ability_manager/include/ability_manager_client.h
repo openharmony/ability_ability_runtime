@@ -23,6 +23,7 @@
 #include "ability_manager_interface.h"
 #include "ability_scheduler_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "iremote_object.h"
 #include "mission_info.h"
 #include "system_memory_attr.h"
@@ -642,6 +643,24 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         uint64_t specifiedFullTokenId = 0);
+
+    /**
+     * ConnectAbilityWithIndirectCallerInfo, connect session with service ability.
+     *
+     * @param want, Special want for service type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be connected.
+     * @param indirectCallerInfo, Indirect caller information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectAbilityWithIndirectCallerInfo(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
     
     /**
      * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.

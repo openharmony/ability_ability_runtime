@@ -18,6 +18,7 @@
 
 #include "ability_manager_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "iremote_proxy.h"
 #include "mission_info.h"
 #include "intent_exemption_info.h"
@@ -563,7 +564,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0) override;
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
