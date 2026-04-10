@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "extension_config.h"
+#include "securec.h"
 #include "hisysevent_report.h"
 #include "hilog_tag_wrapper.h"
 #include "task_handler_wrap.h"
@@ -143,12 +144,12 @@ void ExtensionRunningTimeoutMonitor::SubmitPeriodicTask()
         return;
     }
 
-    auto task = [this]() {
+    auto task = []() {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "extension timeout periodic task triggered");
-        CheckAliveExtensions();
-        ReportTimeoutEvents();
-        // Re-submit for next cycle
-        SubmitPeriodicTask();
+        auto monitor = DelayedSingleton<ExtensionRunningTimeoutMonitor>::GetInstance();
+        monitor->CheckAliveExtensions();
+        monitor->ReportTimeoutEvents();
+        monitor->SubmitPeriodicTask();
     };
     taskHandler->SubmitTask(task, PERIODIC_TASK_NAME, REPORT_INTERVAL_MS);
 }
@@ -166,32 +167,53 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
         cachedEvents_.clear();
     }
 
-    std::vector<std::string> extensionTypeNames;
+    std::vector<std::unique_ptr<char[]>> stringBuffers;
     std::vector<char*> extensionTypePtrs;
     std::vector<char*> bundleNamePtrs;
     std::vector<char*> abilityNamePtrs;
     std::vector<int64_t> runningDurations;
     std::vector<bool> stillAliveFlags;
     std::vector<int32_t> cnts;
-    std::vector<std::string> bundleNames;
-    std::vector<std::string> abilityNames;
 
     for (const auto &event : eventsToReport) {
-        extensionTypeNames.push_back(event.extensionTypeName);
-        bundleNames.push_back(event.bundleName);
-        abilityNames.push_back(event.abilityName);
+        size_t extLen = event.extensionTypeName.size() + 1;
+        auto extBuf = std::make_unique<char[]>(extLen);
+        if (strcpy_s(extBuf.get(), extLen, event.extensionTypeName.c_str()) != EOK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for extensionTypeName");
+            continue;
+        }
+
+        size_t bundleLen = event.bundleName.size() + 1;
+        auto bundleBuf = std::make_unique<char[]>(bundleLen);
+        if (strcpy_s(bundleBuf.get(), bundleLen, event.bundleName.c_str()) != EOK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for bundleName");
+            continue;
+        }
+
+        size_t abilityLen = event.abilityName.size() + 1;
+        auto abilityBuf = std::make_unique<char[]>(abilityLen);
+        if (strcpy_s(abilityBuf.get(), abilityLen, event.abilityName.c_str()) != EOK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for abilityName");
+            continue;
+        }
+
+        extensionTypePtrs.push_back(extBuf.get());
+        stringBuffers.push_back(std::move(extBuf));
+
+        bundleNamePtrs.push_back(bundleBuf.get());
+        stringBuffers.push_back(std::move(bundleBuf));
+
+        abilityNamePtrs.push_back(abilityBuf.get());
+        stringBuffers.push_back(std::move(abilityBuf));
+
         runningDurations.push_back(event.runningDuration);
         stillAliveFlags.push_back(event.stillAlive);
         cnts.push_back(event.cnt);
     }
-    for (auto &name : extensionTypeNames) {
-        extensionTypePtrs.push_back(const_cast<char*>(name.c_str()));
-    }
-    for (auto &name : bundleNames) {
-        bundleNamePtrs.push_back(const_cast<char*>(name.c_str()));
-    }
-    for (auto &name : abilityNames) {
-        abilityNamePtrs.push_back(const_cast<char*>(name.c_str()));
+
+    if (extensionTypePtrs.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no valid events to report after buffer preparation");
+        return;
     }
 
     HisyseventReport report(HISEVENT_PARAM_COUNT);
@@ -220,6 +242,7 @@ void ExtensionRunningTimeoutMonitor::CheckAliveExtensions()
     auto now = std::chrono::steady_clock::now();
     auto nowMillis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
+    std::vector<ExtensionTimeoutEvent> pendingEvents;
     for (auto &[recordId, startInfo] : aliveCopy) {
         int32_t configuredTimeout = DelayedSingleton<ExtensionConfig>::GetInstance()->
             GetExtensionRunningTimeoutTime(startInfo.extensionTypeName);
@@ -244,9 +267,14 @@ void ExtensionRunningTimeoutMonitor::CheckAliveExtensions()
         event.runningDuration = runningDurationSec;
         event.stillAlive = true;
         event.cnt = 1;
+        pendingEvents.push_back(event);
+    }
 
+    if (!pendingEvents.empty()) {
         std::lock_guard<std::mutex> lock(monitorMutex_);
-        AddOrUpdateTimeoutEvent(event);
+        for (auto &event : pendingEvents) {
+            AddOrUpdateTimeoutEvent(event);
+        }
     }
 }
 

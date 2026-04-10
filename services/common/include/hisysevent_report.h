@@ -67,7 +67,7 @@ private:
     void SetParamName(HiSysEventParam& param, const char* name);
 
     std::vector<std::unique_ptr<char[]>> paramBuffers_;
-    HiSysEventParam* params_;
+    HiSysEventParam* params_ = nullptr;
     int32_t length_ = SYSTEM_PARAM_MAX_LEN;
     int32_t pos_ = 0;
 };
