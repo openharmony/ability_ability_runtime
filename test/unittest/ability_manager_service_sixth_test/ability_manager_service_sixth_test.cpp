@@ -2049,6 +2049,68 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_006, TestSize.Leve
 
 /*
  * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: Test ConnectAbilityCommon with indirectCallerInfo when not SA call
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_007 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    MyFlag::flag_ = 0;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->Init(AbilityRequest());
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto indirectCallerInfo = std::make_shared<IndirectCallerInfo>();
+    indirectCallerInfo->tokenId = 12345;
+    indirectCallerInfo->callerUid = 1000;
+    indirectCallerInfo->callerPid = 2000;
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false, 0, 0, indirectCallerInfo);
+    EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: Test ConnectAbilityCommon with indirectCallerInfo when SA call
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_008 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    MyFlag::flag_ = 1;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->Init(AbilityRequest());
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto indirectCallerInfo = std::make_shared<IndirectCallerInfo>();
+    indirectCallerInfo->tokenId = 12345;
+    indirectCallerInfo->callerUid = 1000;
+    indirectCallerInfo->callerPid = 2000;
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false, 0, 0, indirectCallerInfo);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_008 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartExtensionAbilityInner
  * FunctionPoints: AbilityManagerService StartExtensionAbilityInner
  */

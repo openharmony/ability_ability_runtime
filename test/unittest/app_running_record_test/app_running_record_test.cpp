@@ -1907,6 +1907,252 @@ HWTEST_F(AppRunningRecordTest, GetAllAbilityInfos_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0100
+ * @tc.desc: Test HasOnlyOneExtensionType with no abilities.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0100 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0100 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0200
+ * @tc.desc: Test HasOnlyOneExtensionType with a single Page ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0200 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord);
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0200 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0300
+ * @tc.desc: Test HasOnlyOneExtensionType with a single Extension ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0300 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord);
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0300 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0400
+ * @tc.desc: Test HasOnlyOneExtensionType with multiple Extensions of the same type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0400 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+
+    auto abilityInfo1 = std::make_shared<AbilityInfo>();
+    abilityInfo1->type = AbilityType::EXTENSION;
+    abilityInfo1->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token1 = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord1 = std::make_shared<AbilityRunningRecord>(abilityInfo1, token1, 0);
+    moduleRecord->abilities_.emplace(token1, abilityRecord1);
+
+    auto abilityInfo2 = std::make_shared<AbilityInfo>();
+    abilityInfo2->type = AbilityType::EXTENSION;
+    abilityInfo2->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord2 = std::make_shared<AbilityRunningRecord>(abilityInfo2, token2, 0);
+    moduleRecord->abilities_.emplace(token2, abilityRecord2);
+
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0400 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0500
+ * @tc.desc: Test HasOnlyOneExtensionType with Extensions of different types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0500 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+
+    auto abilityInfo1 = std::make_shared<AbilityInfo>();
+    abilityInfo1->type = AbilityType::EXTENSION;
+    abilityInfo1->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> token1 = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord1 = std::make_shared<AbilityRunningRecord>(abilityInfo1, token1, 0);
+    moduleRecord->abilities_.emplace(token1, abilityRecord1);
+
+    auto abilityInfo2 = std::make_shared<AbilityInfo>();
+    abilityInfo2->type = AbilityType::EXTENSION;
+    abilityInfo2->extensionAbilityType = ExtensionAbilityType::DATASHARE;
+    sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
+    auto abilityRecord2 = std::make_shared<AbilityRunningRecord>(abilityInfo2, token2, 0);
+    moduleRecord->abilities_.emplace(token2, abilityRecord2);
+
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0500 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0600
+ * @tc.desc: Test HasOnlyOneExtensionType with a Page and an Extension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0600 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+
+    auto pageInfo = std::make_shared<AbilityInfo>();
+    pageInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> pageToken = new (std::nothrow) MockAbilityToken();
+    auto pageRecord = std::make_shared<AbilityRunningRecord>(pageInfo, pageToken, 0);
+    moduleRecord->abilities_.emplace(pageToken, pageRecord);
+
+    auto extInfo = std::make_shared<AbilityInfo>();
+    extInfo->type = AbilityType::EXTENSION;
+    extInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> extToken = new (std::nothrow) MockAbilityToken();
+    auto extRecord = std::make_shared<AbilityRunningRecord>(extInfo, extToken, 0);
+    moduleRecord->abilities_.emplace(extToken, extRecord);
+
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0600 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0700
+ * @tc.desc: Test HasOnlyOneExtensionType with same-type Extensions and a Page (Page should cause false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0700 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+
+    auto extInfo1 = std::make_shared<AbilityInfo>();
+    extInfo1->type = AbilityType::EXTENSION;
+    extInfo1->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> extToken1 = new (std::nothrow) MockAbilityToken();
+    auto extRecord1 = std::make_shared<AbilityRunningRecord>(extInfo1, extToken1, 0);
+    moduleRecord->abilities_.emplace(extToken1, extRecord1);
+
+    auto extInfo2 = std::make_shared<AbilityInfo>();
+    extInfo2->type = AbilityType::EXTENSION;
+    extInfo2->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> extToken2 = new (std::nothrow) MockAbilityToken();
+    auto extRecord2 = std::make_shared<AbilityRunningRecord>(extInfo2, extToken2, 0);
+    moduleRecord->abilities_.emplace(extToken2, extRecord2);
+
+    auto pageInfo = std::make_shared<AbilityInfo>();
+    pageInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> pageToken = new (std::nothrow) MockAbilityToken();
+    auto pageRecord = std::make_shared<AbilityRunningRecord>(pageInfo, pageToken, 0);
+    moduleRecord->abilities_.emplace(pageToken, pageRecord);
+
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0700 end.");
+}
+
+/**
+ * @tc.name: AppRunningRecord_HasOnlyOneExtensionType_0800
+ * @tc.desc: Test HasOnlyOneExtensionType with Extensions and a null ability (null should be ignored).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_HasOnlyOneExtensionType_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0800 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "test.process");
+    ASSERT_NE(appRecord, nullptr);
+
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+
+    sptr<IRemoteObject> nullToken = new (std::nothrow) MockAbilityToken();
+    moduleRecord->abilities_.emplace(nullToken, nullptr);
+
+    auto extInfo = std::make_shared<AbilityInfo>();
+    extInfo->type = AbilityType::EXTENSION;
+    extInfo->extensionAbilityType = ExtensionAbilityType::SERVICE;
+    sptr<IRemoteObject> extToken = new (std::nothrow) MockAbilityToken();
+    auto extRecord = std::make_shared<AbilityRunningRecord>(extInfo, extToken, 0);
+    moduleRecord->abilities_.emplace(extToken, extRecord);
+
+    appRecord->hapModules_["bundleName"].push_back(moduleRecord);
+
+    bool result = appRecord->HasOnlyOneExtensionType();
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_HasOnlyOneExtensionType_0800 end.");
+}
+
+/**
  * @tc.name: AppRunningRecord_GetAbilityRunningRecord_0100
  * @tc.desc: Test GetAbilityRunningRecord returns valid record.
  * @tc.type: FUNC
@@ -2364,7 +2610,6 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetAddStageTimeout_0200, TestSiz
     appRunningRecord->isEmptyKeepAliveApp_ = true;
     auto result = appRunningRecord->GetAddStageTimeout();
     EXPECT_EQ(result, AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT);
-}
 }
 } // namespace AppExecFwk
 } // namespace OHOS

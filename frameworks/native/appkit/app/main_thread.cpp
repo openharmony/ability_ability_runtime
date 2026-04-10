@@ -186,6 +186,7 @@ constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_
 constexpr const char* PLUGIN_DEFAULT_NAMESPACE_LDDICTIONARY =
     "persist.sys.abilityms.plugin_default_namespace_lddictionary";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
+constexpr const char* KEY_SKIP_ABILITY_STAGE_LIFECYCLE = "ohos.ability.param.skipAbilityStageLifecycle";
 
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
@@ -694,6 +695,34 @@ void MainThread::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
 
 /**
  *
+ * @brief application triggerGC and dump memory.
+ *
+ * @param info, pid, tid, needGC, needSnapshot.
+ */
+void MainThread::ScheduleMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    if (info.isSync) {
+        HandleMem(info, dumpResult);
+    } else {
+        wptr<MainThread> weak = this;
+        auto task = [weak, info]() {
+            auto appThread = weak.promote();
+            if (appThread == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+                return;
+            }
+            // async mode does not return dumpResult to caller
+            std::string asyncResult;
+            appThread->HandleMem(info, asyncResult);
+        };
+        if (!mainHandler_->PostTask(task, "MainThread:HandleMem")) {
+            TAG_LOGE(AAFwkTag::APPKIT, "PostTask HandleMem failed");
+        }
+    }
+}
+
+/**
+ *
  * @brief Schedule the application process exit safely.
  *
  */
@@ -825,12 +854,16 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     TAG_LOGI(AAFwkTag::APPKIT, "%{public}s called, ability %{public}s, type is %{public}d.",
         __func__, info.name.c_str(), info.type);
 
+    bool skipAbilityStageLifecycle = false;
     if (want != nullptr) {
+        skipAbilityStageLifecycle = want->GetBoolParam(KEY_SKIP_ABILITY_STAGE_LIFECYCLE, false);
+        want->RemoveParam(KEY_SKIP_ABILITY_STAGE_LIFECYCLE);
         AAFwk::Want newWant(*want);
         newWant.CloseAllFd();
     }
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>(info);
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, want, abilityRecordId);
+    abilityRecord->SetSkipAbilityStageLifecycle(skipAbilityStageLifecycle);
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog != nullptr) {
         tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
@@ -1046,6 +1079,22 @@ void MainThread::HandleCjHeapMemory(const OHOS::AppExecFwk::CjHeapDumpInfo &info
         TAG_LOGE(AAFwkTag::APPKIT, "DumpCjHeap failed: unknown exception");
         return;
     }
+}
+
+void MainThread::HandleMem(const OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (mainHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
+        return;
+    }
+    auto app = applicationForDump_.lock();
+    if (app == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+        return;
+    }
+    auto helper = std::make_shared<DumpRuntimeHelper>(app);
+    helper->DumpMem(info, dumpResult);
 }
 
 /**

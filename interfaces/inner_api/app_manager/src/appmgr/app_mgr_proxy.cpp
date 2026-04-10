@@ -559,6 +559,22 @@ int32_t AppMgrProxy::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::DumpMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrProxy::DumpMem.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &info);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::DUMP_MEM_PROCESS, data, reply, option);
+    dumpResult = reply.ReadString();
+    return reply.ReadInt32();
+}
+
 bool AppMgrProxy::SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply)
 {
     MessageOption option(MessageOption::TF_SYNC);
