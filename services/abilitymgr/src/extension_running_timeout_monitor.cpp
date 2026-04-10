@@ -36,6 +36,19 @@ constexpr const char *ABILITY_NAME_KEY = "ABILITY_NAME";
 constexpr const char *RUNNING_DURATION_KEY = "RUNNING_DURATION";
 constexpr const char *STILL_ALIVE_KEY = "STILL_ALIVE";
 constexpr const char *CNT_KEY = "CNT";
+
+bool CopyStringParam(const std::string &str, std::vector<std::unique_ptr<char[]>> &buffers,
+    std::vector<char*> &ptrs)
+{
+    size_t len = str.size() + 1;
+    auto buf = std::make_unique<char[]>(len);
+    if (strcpy_s(buf.get(), len, str.c_str()) != EOK) {
+        return false;
+    }
+    ptrs.push_back(buf.get());
+    buffers.push_back(std::move(buf));
+    return true;
+}
 }
 
 ExtensionRunningTimeoutMonitor::ExtensionRunningTimeoutMonitor() {}
@@ -176,36 +189,12 @@ void ExtensionRunningTimeoutMonitor::ReportTimeoutEvents()
     std::vector<int32_t> cnts;
 
     for (const auto &event : eventsToReport) {
-        size_t extLen = event.extensionTypeName.size() + 1;
-        auto extBuf = std::make_unique<char[]>(extLen);
-        if (strcpy_s(extBuf.get(), extLen, event.extensionTypeName.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for extensionTypeName");
+        if (!CopyStringParam(event.extensionTypeName, stringBuffers, extensionTypePtrs) ||
+            !CopyStringParam(event.bundleName, stringBuffers, bundleNamePtrs) ||
+            !CopyStringParam(event.abilityName, stringBuffers, abilityNamePtrs)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for event string");
             continue;
         }
-
-        size_t bundleLen = event.bundleName.size() + 1;
-        auto bundleBuf = std::make_unique<char[]>(bundleLen);
-        if (strcpy_s(bundleBuf.get(), bundleLen, event.bundleName.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for bundleName");
-            continue;
-        }
-
-        size_t abilityLen = event.abilityName.size() + 1;
-        auto abilityBuf = std::make_unique<char[]>(abilityLen);
-        if (strcpy_s(abilityBuf.get(), abilityLen, event.abilityName.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "strcpy_s failed for abilityName");
-            continue;
-        }
-
-        extensionTypePtrs.push_back(extBuf.get());
-        stringBuffers.push_back(std::move(extBuf));
-
-        bundleNamePtrs.push_back(bundleBuf.get());
-        stringBuffers.push_back(std::move(bundleBuf));
-
-        abilityNamePtrs.push_back(abilityBuf.get());
-        stringBuffers.push_back(std::move(abilityBuf));
-
         runningDurations.push_back(event.runningDuration);
         stillAliveFlags.push_back(event.stillAlive);
         cnts.push_back(event.cnt);
