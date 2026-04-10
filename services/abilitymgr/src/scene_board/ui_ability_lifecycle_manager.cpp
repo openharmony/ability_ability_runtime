@@ -2238,6 +2238,10 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const UIAbilityRecordPtr 
     auto timeoutTask = [self = shared_from_this(), abilityRecord]() {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "delay complete terminate task");
         self->CompleteTerminate(abilityRecord);
+        // set apprecord not support cache
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        CHECK_POINTER(appMgr);
+        IN_PROCESS_CALL_WITHOUT_RET(appMgr->SetTerminateOutFlag(abilityRecord->GetToken()));
     };
     int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
     handler->SubmitTaskJust(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
