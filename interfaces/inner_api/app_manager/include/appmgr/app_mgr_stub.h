@@ -204,6 +204,8 @@ private:
         MessageParcel &reply, MessageOption &option);
     int32_t OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerNinth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     int32_t HandleGetSupportedProcessCachePids(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateProcessMemoryState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleLaunchAbility(MessageParcel &data, MessageParcel &reply);
@@ -217,6 +219,7 @@ private:
     int32_t HandleKillChildProcessByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePreloadExtension(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetProcessPrepareExit(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetTerminateTimeOutFlag(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllAbilityInfos(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AppMgrStub);
 };

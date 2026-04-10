@@ -1167,6 +1167,12 @@ public:
     virtual void SetProcessPrepareExit(int32_t pid) {}
 
     /**
+     * @brief set TerminateTimeOut flag.
+     * @param token Ability identify.
+     */
+    virtual void SetTerminateTimeOutFlag(const sptr<IRemoteObject> token) {}
+
+    /**
      * Get all ability infos
      *
      * @param pid if pid is -1, query all ability infos, otherwise query ability infos for this pid

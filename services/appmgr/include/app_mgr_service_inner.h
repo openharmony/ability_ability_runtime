@@ -1729,6 +1729,12 @@ public:
 
     void SetProcessPrepareExit(int32_t pid);
 
+    /**
+     * @brief set TerminateTimeOut flag.
+     * @param token Ability identify.
+     */
+    void SetTerminateTimeOutFlag(const sptr<IRemoteObject> token);
+
     void AllowScbProcessMoveToBackground();
 
     int32_t KillChildProcessByPid(int32_t pid);
