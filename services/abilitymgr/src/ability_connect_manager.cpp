@@ -2194,7 +2194,8 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<BaseExtension
         if ((++sceneBoardCrashCount) >= maxCount) {
             std::string reason = "SceneBoard exits " + std::to_string(sceneBoardCrashCount) +
                 "times in " + std::to_string(maxTime) + "ms";
-            DoRebootExt("panic", reason.c_str());
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "skip reboot ot panic, reboot reason: %{public}s", reason.c_str());
+            // DoRebootExt("panic", reason.c_str());
         }
     }
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
