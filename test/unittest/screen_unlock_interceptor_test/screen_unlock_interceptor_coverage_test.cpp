@@ -257,7 +257,7 @@ HWTEST_F(ScreenUnlockInterceptorCoverageTest,
     LoadTestConfig(configStr);
 
     ScreenUnlockInterceptor screenUnlockInterceptor;
-    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "test_id");
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
     // No defaultInterception and no systemAppInterception, should be blocked
     EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
     GTEST_LOG_(INFO) << "CheckSystemAppExtensionInterception_NoDefaultInterception end";
@@ -285,7 +285,7 @@ HWTEST_F(ScreenUnlockInterceptorCoverageTest,
     LoadTestConfig(configStr);
 
     ScreenUnlockInterceptor screenUnlockInterceptor;
-    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "test_id");
+    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "com.test.bundle");
     // Third-party apps only check defaultInterception, should be blocked
     EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
     GTEST_LOG_(INFO) << "CheckThirdPartyExtensionInterception_NoDefaultInterception end";
@@ -533,6 +533,355 @@ HWTEST_F(ScreenUnlockInterceptorCoverageTest, DoProcess_CompleteFlow_ThirdPartyA
     auto ret = screenUnlockInterceptor.DoProcess(param);
     GTEST_LOG_(INFO) << "DoProcess result: " << ret;
     GTEST_LOG_(INFO) << "DoProcess_CompleteFlow_ThirdPartyApp end";
+}
+
+/**
+ * @tc.name: DoProcess_SystemAppExtension_DefaultInterceptionTrue_NoList
+ * @tc.desc: System app Extension with defaultInterception=true and empty allowlist/blocklist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    DoProcess_SystemAppExtension_DefaultInterceptionTrue_NoList, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DoProcess_SystemAppExtension_DefaultInterceptionTrue_NoList start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": true
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo.type = AbilityType::EXTENSION;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.extensionTypeName = "form";
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo.isSystemApp = true;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked = true;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo.bundleName = "com.test.system.app";
+
+    Want want;
+    AbilityInterceptorParam param(want, 0, 100, true, nullptr, []() { return false; });
+
+    auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    EXPECT_NE(screenLockManager, nullptr);
+    screenLockManager->SetScreenLockedState(true);
+
+    // defaultInterception=true (whitelist mode), allowlist empty → block
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "DoProcess_SystemAppExtension_DefaultInterceptionTrue_NoList end";
+}
+
+/**
+ * @tc.name: DoProcess_ThirdPartyExtension_DefaultInterceptionFalse_NoList
+ * @tc.desc: Third-party Extension with defaultInterception=false and empty allowlist/blocklist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    DoProcess_ThirdPartyExtension_DefaultInterceptionFalse_NoList, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DoProcess_ThirdPartyExtension_DefaultInterceptionFalse_NoList start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": false
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo.type = AbilityType::EXTENSION;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.extensionTypeName = "form";
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo.isSystemApp = false;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo.bundleName = "com.test.third.party";
+
+    Want want;
+    AbilityInterceptorParam param(want, 0, 100, true, nullptr, []() { return false; });
+
+    auto screenLockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    EXPECT_NE(screenLockManager, nullptr);
+    screenLockManager->SetScreenLockedState(true);
+
+    // defaultInterception=false (blocklist mode), blocklist empty → allow
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "DoProcess_ThirdPartyExtension_DefaultInterceptionFalse_NoList end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_SystemAppInterceptionTrue_EmptyAllowList_SkipIPC
+ * @tc.desc: systemAppInterception=true + empty allowlist → skip IPC, directly block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_SystemAppInterceptionTrue_EmptyAllowList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionTrue_EmptyAllowList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "systemAppInterception": true
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionTrue_EmptyAllowList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_SystemAppInterceptionFalse_EmptyBlockList_SkipIPC
+ * @tc.desc: systemAppInterception=false + empty blocklist → skip IPC, directly allow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_SystemAppInterceptionFalse_EmptyBlockList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionFalse_EmptyBlockList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "systemAppInterception": false
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionFalse_EmptyBlockList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC
+ * @tc.desc: no systemAppInterception + defaultInterception=true + empty allowlist → skip IPC, directly block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": true
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC
+ * @tc.desc: no systemAppInterception + defaultInterception=false + empty blocklist → skip IPC, directly allow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": false
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_SystemAppInterceptionTrue_NonEmptyAllowList_NeedIPC
+ * @tc.desc: systemAppInterception=true + non-empty allowlist → IPC called but fails in test env → block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_SystemAppInterceptionTrue_NonEmptyAllowList_NeedIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionTrue_NonEmptyAllowList_NeedIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "systemAppInterception": true,
+                "allowlist": [{"appIdentifier": "app_id"}]
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    // IPC fails in test env, appIdentifier="" not in allowlist → block
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionTrue_NonEmptyAllowList_NeedIPC end";
+}
+
+/**
+ * @tc.name: CheckSystemAppExt_SystemAppInterceptionFalse_NonEmptyBlockList_NeedIPC
+ * @tc.desc: systemAppInterception=false + non-empty blocklist → IPC called but fails in test env → allow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckSystemAppExt_SystemAppInterceptionFalse_NonEmptyBlockList_NeedIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionFalse_NonEmptyBlockList_NeedIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "systemAppInterception": false,
+                "blocklist": [{"appIdentifier": "app_id"}]
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckSystemAppExtensionInterception("form", "com.test.bundle");
+    // IPC fails in test env, appIdentifier="" not in blocklist → allow
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckSystemAppExt_SystemAppInterceptionFalse_NonEmptyBlockList_NeedIPC end";
+}
+
+/**
+ * @tc.name: CheckThirdPartyExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC
+ * @tc.desc: defaultInterception=true + empty allowlist → skip IPC, directly block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckThirdPartyExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": true
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionTrue_EmptyAllowList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckThirdPartyExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC
+ * @tc.desc: defaultInterception=false + empty blocklist → skip IPC, directly allow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckThirdPartyExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": false
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "com.test.bundle");
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionFalse_EmptyBlockList_SkipIPC end";
+}
+
+/**
+ * @tc.name: CheckThirdPartyExt_DefaultInterceptionTrue_NonEmptyAllowList_NeedIPC
+ * @tc.desc: defaultInterception=true + non-empty allowlist → IPC fails in test env → block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckThirdPartyExt_DefaultInterceptionTrue_NonEmptyAllowList_NeedIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionTrue_NonEmptyAllowList_NeedIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": true,
+                "allowlist": [{"appIdentifier": "app_id"}]
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "com.test.bundle");
+    // IPC fails in test env, appIdentifier="" not in allowlist → block
+    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionTrue_NonEmptyAllowList_NeedIPC end";
+}
+
+/**
+ * @tc.name: CheckThirdPartyExt_DefaultInterceptionFalse_NonEmptyBlockList_NeedIPC
+ * @tc.desc: defaultInterception=false + non-empty blocklist → IPC fails in test env → allow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenUnlockInterceptorCoverageTest,
+    CheckThirdPartyExt_DefaultInterceptionFalse_NonEmptyBlockList_NeedIPC, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionFalse_NonEmptyBlockList_NeedIPC start";
+    const std::string configStr = R"({
+        "ams_extension_config": [{
+            "name": "FormExtension",
+            "extension_type_name": "form",
+            "screen_unlock_access": {
+                "defaultInterception": false,
+                "blocklist": [{"appIdentifier": "app_id"}]
+            }
+        }]
+    })";
+    LoadTestConfig(configStr);
+
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    auto ret = screenUnlockInterceptor.CheckThirdPartyExtensionInterception("form", "com.test.bundle");
+    // IPC fails in test env, appIdentifier="" not in blocklist → allow
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckThirdPartyExt_DefaultInterceptionFalse_NonEmptyBlockList_NeedIPC end";
 }
 
 } // namespace AAFwk

@@ -94,6 +94,8 @@ public:
     bool IsInScreenUnlockAccessAllowList(const std::string &extensionTypeName, const std::string &appIdentifier);
     bool IsInScreenUnlockAccessBlockList(const std::string &extensionTypeName, const std::string &appIdentifier);
     bool HasScreenUnlockAccessConfig(const std::string &extensionTypeName);
+    bool HasScreenUnlockAccessAllowList(const std::string &extensionTypeName);
+    bool HasScreenUnlockAccessBlockList(const std::string &extensionTypeName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
