@@ -610,6 +610,26 @@ bool ExtensionConfig::HasScreenUnlockAccessConfig(const std::string &extensionTy
            !screenUnlockAccess.blockList.empty();
 }
 
+bool ExtensionConfig::HasScreenUnlockAccessAllowList(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return !iter->second.screenUnlockAccess.allowList.empty();
+}
+
+bool ExtensionConfig::HasScreenUnlockAccessBlockList(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return !iter->second.screenUnlockAccess.blockList.empty();
+}
+
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {

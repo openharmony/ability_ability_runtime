@@ -96,7 +96,7 @@ ErrCode ScreenUnlockInterceptor::ProcessSystemApp(const AppExecFwk::AbilityInfo 
 {
     bool allowAppRunWhenDeviceFirstLocked = targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked;
     if (!allowAppRunWhenDeviceFirstLocked) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "block sys app %{public}s/%{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "block sys app %{public}s/%{public}s",
             targetAbilityInfo.applicationInfo.bundleName.c_str(), targetAbilityInfo.name.c_str());
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
@@ -108,10 +108,10 @@ ErrCode ScreenUnlockInterceptor::ProcessSystemApp(const AppExecFwk::AbilityInfo 
     }
 
     std::string extensionTypeName = targetAbilityInfo.extensionTypeName;
-    std::string appIdentifier = GetAppIdentifier(targetAbilityInfo.applicationInfo.bundleName);
-    ErrCode result = CheckExtensionInterception(extensionTypeName, appIdentifier, true);
+    std::string bundleName = targetAbilityInfo.applicationInfo.bundleName;
+    ErrCode result = CheckExtensionInterception(extensionTypeName, bundleName, true);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "block sys ext %{public}s/%{public}s, type:%{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "block sys ext %{public}s/%{public}s, type:%{public}s",
             targetAbilityInfo.applicationInfo.bundleName.c_str(),
             targetAbilityInfo.name.c_str(), extensionTypeName.c_str());
     }
@@ -122,16 +122,16 @@ ErrCode ScreenUnlockInterceptor::ProcessNonSystemApp(const AppExecFwk::AbilityIn
 {
     bool isExtension = targetAbilityInfo.type == AppExecFwk::AbilityType::EXTENSION;
     if (!isExtension) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "block uiAbility %{public}s/%{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "block uiAbility %{public}s/%{public}s",
             targetAbilityInfo.applicationInfo.bundleName.c_str(), targetAbilityInfo.name.c_str());
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
 
     std::string extensionTypeName = targetAbilityInfo.extensionTypeName;
-    std::string appIdentifier = GetAppIdentifier(targetAbilityInfo.applicationInfo.bundleName);
-    ErrCode result = CheckExtensionInterception(extensionTypeName, appIdentifier, false);
+    std::string bundleName = targetAbilityInfo.applicationInfo.bundleName;
+    ErrCode result = CheckExtensionInterception(extensionTypeName, bundleName, false);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "block ext %{public}s/%{public}s, type:%{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "block ext %{public}s/%{public}s, type:%{public}s",
             targetAbilityInfo.applicationInfo.bundleName.c_str(),
             targetAbilityInfo.name.c_str(), extensionTypeName.c_str());
     }
@@ -147,46 +147,58 @@ void ScreenUnlockInterceptor::ReportSystemAppUIAbilityEvent(const AppExecFwk::Ab
 }
 
 ErrCode ScreenUnlockInterceptor::CheckExtensionInterception(const std::string &extensionTypeName,
-    const std::string &appIdentifier, bool isSystemApp)
+    const std::string &bundleName, bool isSystemApp)
 {
     auto extensionConfig = DelayedSingleton<ExtensionConfig>::GetInstance();
     if (!extensionConfig->HasScreenUnlockAccessConfig(extensionTypeName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no screen_unlock_access config for extension: %{public}s",
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "no screen_unlock_access config for extension: %{public}s",
             extensionTypeName.c_str());
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
 
     if (isSystemApp) {
-        return CheckSystemAppExtensionInterception(extensionTypeName, appIdentifier);
+        return CheckSystemAppExtensionInterception(extensionTypeName, bundleName);
     }
-    return CheckThirdPartyExtensionInterception(extensionTypeName, appIdentifier);
+    return CheckThirdPartyExtensionInterception(extensionTypeName, bundleName);
 }
 
 ErrCode ScreenUnlockInterceptor::CheckSystemAppExtensionInterception(const std::string &extensionTypeName,
-    const std::string &appIdentifier)
+    const std::string &bundleName)
 {
     auto extensionConfig = DelayedSingleton<ExtensionConfig>::GetInstance();
+    bool interception;
     if (extensionConfig->HasScreenUnlockSystemAppInterception(extensionTypeName)) {
-        bool systemAppInterception = extensionConfig->GetScreenUnlockSystemAppInterception(extensionTypeName);
-        return CheckInterceptionByConfig(extensionTypeName, appIdentifier, systemAppInterception, true);
+        interception = extensionConfig->GetScreenUnlockSystemAppInterception(extensionTypeName);
+    } else if (extensionConfig->HasScreenUnlockDefaultInterception(extensionTypeName)) {
+        interception = extensionConfig->GetScreenUnlockDefaultInterception(extensionTypeName);
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "no interception config for system app extension");
+        return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
-    if (extensionConfig->HasScreenUnlockDefaultInterception(extensionTypeName)) {
-        bool defaultInterception = extensionConfig->GetScreenUnlockDefaultInterception(extensionTypeName);
-        return CheckInterceptionByConfig(extensionTypeName, appIdentifier, defaultInterception, true);
+    bool needAppIdentifier = interception ? extensionConfig->HasScreenUnlockAccessAllowList(extensionTypeName)
+                                          : extensionConfig->HasScreenUnlockAccessBlockList(extensionTypeName);
+    std::string appIdentifier;
+    if (needAppIdentifier) {
+        appIdentifier = GetAppIdentifier(bundleName);
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "no interception config for system app extension");
-    return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
+    return CheckInterceptionByConfig(extensionTypeName, appIdentifier, interception, true);
 }
 
 ErrCode ScreenUnlockInterceptor::CheckThirdPartyExtensionInterception(const std::string &extensionTypeName,
-    const std::string &appIdentifier)
+    const std::string &bundleName)
 {
     auto extensionConfig = DelayedSingleton<ExtensionConfig>::GetInstance();
     if (!extensionConfig->HasScreenUnlockDefaultInterception(extensionTypeName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no defaultInterception config for third-party extension");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "no defaultInterception config for third-party extension");
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
     bool defaultInterception = extensionConfig->GetScreenUnlockDefaultInterception(extensionTypeName);
+    bool needAppIdentifier = defaultInterception ? extensionConfig->HasScreenUnlockAccessAllowList(extensionTypeName)
+                                                 : extensionConfig->HasScreenUnlockAccessBlockList(extensionTypeName);
+    std::string appIdentifier;
+    if (needAppIdentifier) {
+        appIdentifier = GetAppIdentifier(bundleName);
+    }
     return CheckInterceptionByConfig(extensionTypeName, appIdentifier, defaultInterception, false);
 }
 
@@ -199,11 +211,11 @@ ErrCode ScreenUnlockInterceptor::CheckInterceptionByConfig(const std::string &ex
             TAG_LOGD(AAFwkTag::ABILITYMGR, "app in allowlist, allow");
             return ERR_OK;
         }
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "app not in allowlist, block");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "app not in allowlist, block");
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
     if (extensionConfig->IsInScreenUnlockAccessBlockList(extensionTypeName, appIdentifier)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "app in blocklist, block");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "app in blocklist, block");
         return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "app not in blocklist, allow");

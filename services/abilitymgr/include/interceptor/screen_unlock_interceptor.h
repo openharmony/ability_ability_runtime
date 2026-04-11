@@ -36,11 +36,11 @@ private:
     ErrCode ProcessNonSystemApp(const AppExecFwk::AbilityInfo &targetAbilityInfo);
     void ReportSystemAppUIAbilityEvent(const AppExecFwk::AbilityInfo &targetAbilityInfo);
     ErrCode CheckExtensionInterception(const std::string &extensionTypeName,
-        const std::string &appIdentifier, bool isSystemApp);
+        const std::string &bundleName, bool isSystemApp);
     ErrCode CheckSystemAppExtensionInterception(const std::string &extensionTypeName,
-        const std::string &appIdentifier);
+        const std::string &bundleName);
     ErrCode CheckThirdPartyExtensionInterception(const std::string &extensionTypeName,
-        const std::string &appIdentifier);
+        const std::string &bundleName);
     ErrCode CheckInterceptionByConfig(const std::string &extensionTypeName,
         const std::string &appIdentifier, bool interception, bool isSystemApp);
     std::string GetAppIdentifier(const std::string &bundleName);
