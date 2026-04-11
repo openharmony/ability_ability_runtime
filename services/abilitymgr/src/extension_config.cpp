@@ -30,6 +30,7 @@ constexpr const char* EXTENSION_CONFIG_FILE_PATH = "/etc/ams_extension_config.js
 constexpr const char* EXTENSION_CONFIG_NAME = "ams_extension_config";
 constexpr const char* EXTENSION_TYPE_NAME = "extension_type_name";
 constexpr const char* EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
+constexpr const char* EXTENSION_RUNNING_TIMEOUT_TIME = "running_timeout_time";
 
 // old access flag, deprecated
 constexpr const char* EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME = "third_party_app_blocked_flag";
@@ -128,6 +129,7 @@ void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
         std::lock_guard lock(configMapMutex_);
         std::string extensionTypeName = jsonObject.at(EXTENSION_TYPE_NAME).get<std::string>();
         LoadExtensionAutoDisconnectTime(jsonObject, extensionTypeName);
+        LoadExtensionRunningTimeoutTime(jsonObject, extensionTypeName);
         bool hasAbilityAccess = LoadExtensionAbilityAccess(jsonObject, extensionTypeName);
         if (!hasAbilityAccess) {
             LoadExtensionThirdPartyAppBlockedList(jsonObject, extensionTypeName);
@@ -149,6 +151,30 @@ void ExtensionConfig::LoadExtensionAutoDisconnectTime(const nlohmann::json &obje
     }
     int32_t extensionAutoDisconnectTime = object.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
     configMap_[extensionTypeName].extensionAutoDisconnectTime = extensionAutoDisconnectTime;
+}
+
+void ExtensionConfig::LoadExtensionRunningTimeoutTime(const nlohmann::json &object,
+    const std::string &extensionTypeName)
+{
+    if (!object.contains(EXTENSION_RUNNING_TIMEOUT_TIME) ||
+        !object.at(EXTENSION_RUNNING_TIMEOUT_TIME).is_number()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "running timeout time config not set for %{public}s",
+            extensionTypeName.c_str());
+        return;
+    }
+    int32_t extensionRunningTimeoutTime = object.at(EXTENSION_RUNNING_TIMEOUT_TIME).get<int32_t>();
+    configMap_[extensionTypeName].extensionRunningTimeoutTime = extensionRunningTimeoutTime;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "extension %{public}s running timeout time: %{public}d ms",
+        extensionTypeName.c_str(), extensionRunningTimeoutTime);
+}
+
+int32_t ExtensionConfig::GetExtensionRunningTimeoutTime(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].extensionRunningTimeoutTime;
+    }
+    return DEFAULT_EXTENSION_RUNNING_TIMEOUT_TIME;
 }
 
 void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object,
