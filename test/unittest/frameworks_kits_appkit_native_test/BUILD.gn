@@ -1137,6 +1137,43 @@ ohos_unittest("native_lib_util_test") {
   ]
 }
 
+ohos_unittest("ets_native_lib_util_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  include_dirs = []
+  module_out_path = module_output_path
+
+  sources = [
+    "${ability_runtime_native_path}/runtime/ets_native_lib_util.cpp",
+    "ets_native_lib_util_test.cpp",
+  ]
+
+  configs = [ ":module_context_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/common:app_util",
+  ]
+
+  external_deps = [
+    "ability_base:extractresourcemanager",
+    "c_utils:utils",
+    "faultloggerd:libfaultloggerd",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
 ohos_unittest("application_cleaner_test") {
   sanitize = {
     cfi = true
@@ -1374,6 +1411,7 @@ group("unittest") {
     ":idle_time_test",
     ":js_environment_callback_test",
     ":native_lib_util_test",
+    ":ets_native_lib_util_test",
     ":overlay_event_subscriber_test",
     ":startup_manager_mock_test",
     ":startup_manager_test",

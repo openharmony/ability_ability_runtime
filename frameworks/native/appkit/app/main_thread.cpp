@@ -256,6 +256,7 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
     } else {
         TAG_LOGI(AAFwkTag::APPKIT, "NativeLibPath empty");
     }
+    GetLibrarySupportDirectory(bundleInfo.hapModuleInfos, nativeLibraryPath, appLibPaths);
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
         TAG_LOGD(AAFwkTag::APPKIT,
