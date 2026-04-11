@@ -27,8 +27,8 @@ namespace OHOS {
 namespace AgentRuntime {
 enum class AgentCardType: int32_t {
     APP = 0,
-    LOW_CODE = 1,
-    ATOMIC_SERVICE = 2,
+    ATOMIC_SERVICE = 1,
+    LOW_CODE = 2,
 };
 
 struct AgentProvider : public Parcelable {

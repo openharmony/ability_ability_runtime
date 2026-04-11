@@ -73,6 +73,12 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::retDisconnectAbility = ERR_OK;
     MyFlag::retQueryExtensionAbilityInfos = true;
     MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
+    MyFlag::retGetBundleInfo = true;
+    MyFlag::retGetResConfigFile = true;
+    MyFlag::mockApplicationInfoIsSystemApp = true;
+    MyFlag::mockExtensionInfos.clear();
+    MyFlag::mockHapModuleInfos.clear();
+    MyFlag::mockProfileInfos.clear();
     MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
     MyFlag::retGetBundleNameByPid = ERR_OK;
     MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
@@ -85,6 +91,7 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::agentCardType = static_cast<int32_t>(AgentCardType::APP);
     MyFlag::lastConnectAbilityWant = Want();
     MyFlag::shouldFillExtensionAbilityInfos = true;
+    MyFlag::retGetApplicationInfo = false;
     MyFlag::lastConnectAbilityConnection = nullptr;
     MyFlag::lastDisconnectAbilityConnection = nullptr;
     auto service = AgentManagerService::GetInstance();
@@ -1113,6 +1120,7 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_014, TestSize.Lev
     MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
     MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
     MyFlag::retQueryExtensionAbilityInfos = false;
+    MyFlag::retGetBundleInfo = false;
     MyFlag::retGetAgentCardByAgentId = ERR_OK;
     MyFlag::agentCardAgentId = "testAgent";
     MyFlag::agentCardType = static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE);
@@ -1153,7 +1161,8 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_015, TestSize.Lev
 /**
 * @tc.name  : ConnectAgentExtensionAbility_016
 * @tc.number: ConnectAgentExtensionAbility_016
-* @tc.desc  : Test ConnectAgentExtensionAbility allows atomic-service agent when extension query succeeds but is empty
+ * @tc.desc : Test ConnectAgentExtensionAbility returns RESOLVE_ABILITY_ERR for atomic-service when bundle exists but
+ * ability is missing
 */
 HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_016, TestSize.Level1)
 {
@@ -1164,14 +1173,14 @@ HWTEST_F(AgentManagerServiceTest, ConnectAgentExtensionAbility_016, TestSize.Lev
     MyFlag::agentCardType = static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE);
     MyFlag::retQueryExtensionAbilityInfos = true;
     MyFlag::shouldFillExtensionAbilityInfos = false;
+    MyFlag::retGetBundleInfo = true;
     AAFwk::Want want;
     want.SetParam(AGENTID_KEY, std::string("testAgent"));
     want.SetBundle("test.bundle");
     want.SetElementName("test.bundle", "TestAbility");
     sptr<MockAbilityConnection> connection = new MockAbilityConnection();
-    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection), ERR_OK);
-    EXPECT_NE(MyFlag::lastConnectAbilityWant.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND, 0);
-    EXPECT_FALSE(MyFlag::lastConnectAbilityWant.GetStringParam(Want::PARAM_RESV_START_TIME).empty());
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectAgentExtensionAbility(want, connection),
+        AAFwk::RESOLVE_ABILITY_ERR);
 }
 
 /**
