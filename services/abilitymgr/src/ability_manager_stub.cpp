@@ -5071,13 +5071,8 @@ int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, Me
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetAllInsightIntentInfo(flag, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
@@ -5093,13 +5088,8 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByBundleNameInner(MessageParcel 
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
