@@ -39,11 +39,11 @@ constexpr uint32_t LENGTH_5120 = 5120;
 
 namespace {
 constexpr int32_t AGENT_CARD_TYPE_MIN = static_cast<int32_t>(AgentCardType::APP);
-constexpr int32_t AGENT_CARD_TYPE_MAX = static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE);
+constexpr int32_t AGENT_CARD_TYPE_MAX = static_cast<int32_t>(AgentCardType::LOW_CODE);
 const std::map<std::string, AgentCardType> AGENT_CARD_TYPE_NAME_MAP = {
     { "APP", AgentCardType::APP },
-    { "LOW_CODE", AgentCardType::LOW_CODE },
     { "ATOMIC_SERVICE", AgentCardType::ATOMIC_SERVICE },
+    { "LOW_CODE", AgentCardType::LOW_CODE },
 };
 
 bool IsValidAgentCardType(int32_t type)
@@ -520,9 +520,6 @@ bool AgentCard::ReadFromParcel(Parcel &parcel)
     iconUrl = parcel.ReadString();
     extension = parcel.ReadString();
     appInfo.reset(parcel.ReadParcelable<AgentAppInfo>());
-    if (parcel.GetReadableBytes() == 0) {
-        return true;
-    }
     int32_t typeValue = parcel.ReadInt32();
     if (!IsValidAgentCardType(typeValue)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "read invalid type");

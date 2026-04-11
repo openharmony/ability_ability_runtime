@@ -26,10 +26,12 @@ using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace AgentRuntime {
 namespace {
+constexpr size_t MAX_ICON_URL_LENGTH = 512;
+
 bool IsValidAgentCardTypeValue(int32_t type)
 {
     return type >= static_cast<int32_t>(AgentCardType::APP) &&
-        type <= static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE);
+        type <= static_cast<int32_t>(AgentCardType::LOW_CODE);
 }
 
 bool IsObject(napi_env env, napi_value value)
@@ -98,6 +100,18 @@ bool ParseOptionalStringProperty(napi_env env, napi_value object, const char *na
     }
     if (!ConvertFromJsValue(env, property, value)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "bad %{public}s", name);
+        return false;
+    }
+    return true;
+}
+
+bool ParseRequiredIconUrlProperty(napi_env env, napi_value object, std::string &value)
+{
+    if (!ParseRequiredStringProperty(env, object, "iconUrl", value)) {
+        return false;
+    }
+    if (value.length() > MAX_ICON_URL_LENGTH) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "iconUrl too long");
         return false;
     }
     return true;
@@ -540,9 +554,12 @@ bool ParseJsAgentCard(napi_env env, napi_value value, AgentCard &card)
         card.capabilities = capabilities;
     }
     if (!ParseOptionalStringProperty(env, value, "documentationUrl", card.documentationUrl) ||
-        !ParseOptionalStringProperty(env, value, "iconUrl", card.iconUrl) ||
         !ParseOptionalStringProperty(env, value, "extension", card.extension)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "bad card optional string");
+        return false;
+    }
+    if (!ParseRequiredIconUrlProperty(env, value, card.iconUrl)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "bad card.iconUrl");
         return false;
     }
     if (!GetNamedProperty(env, value, "appInfo", property)) {

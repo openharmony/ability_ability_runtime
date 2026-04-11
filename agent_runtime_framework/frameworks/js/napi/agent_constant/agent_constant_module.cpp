@@ -38,8 +38,8 @@ static napi_value InitAgentCardTypeObject(napi_env env)
     napi_value object = nullptr;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "APP", static_cast<int32_t>(AgentCardType::APP)));
-    NAPI_CALL(env, SetEnumItem(env, object, "LOW_CODE", static_cast<int32_t>(AgentCardType::LOW_CODE)));
     NAPI_CALL(env, SetEnumItem(env, object, "ATOMIC_SERVICE", static_cast<int32_t>(AgentCardType::ATOMIC_SERVICE)));
+    NAPI_CALL(env, SetEnumItem(env, object, "LOW_CODE", static_cast<int32_t>(AgentCardType::LOW_CODE)));
     return object;
 }
 }

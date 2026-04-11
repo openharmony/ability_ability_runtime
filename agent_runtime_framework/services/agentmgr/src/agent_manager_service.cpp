@@ -22,6 +22,7 @@
 #include "ability_manager_errors.h"
 #include "agent_bundle_event_callback.h"
 #include "agent_card_mgr.h"
+#include "agent_card_utils.h"
 #include "agent_config.h"
 #include "agent_extension_connection_constants.h"
 #include "agent_service_connection.h"
@@ -326,9 +327,11 @@ int32_t AgentManagerService::ConnectAgentExtensionAbility(const AAFwk::Want &wan
     bool queryResult = IN_PROCESS_CALL(
         DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryExtensionAbilityInfos(
             connectWant, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
-    if ((!queryResult || extensionInfos.empty()) && !isAtomicServiceAgent) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "extension ability not exist");
-        return AAFwk::RESOLVE_ABILITY_ERR;
+    if (!queryResult || extensionInfos.empty()) {
+        if (!isAtomicServiceAgent || AgentCardUtils::BundleExists(connectWant.GetBundle(), userId)) {
+            TAG_LOGE(AAFwkTag::SER_ROUTER, "extension ability not exist");
+            return AAFwk::RESOLVE_ABILITY_ERR;
+        }
     }
     if (queryResult && !extensionInfos.empty() && extensionInfos[0].type != AppExecFwk::ExtensionAbilityType::AGENT) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "incorrect extension");
