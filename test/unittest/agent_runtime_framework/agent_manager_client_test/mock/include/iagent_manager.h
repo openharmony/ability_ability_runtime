@@ -74,6 +74,11 @@ public:
     {
         return 0;
     }
+
+    virtual int32_t NotifyLowCodeAgentComplete(const std::string &agentId)
+    {
+        return 0;
+    }
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS

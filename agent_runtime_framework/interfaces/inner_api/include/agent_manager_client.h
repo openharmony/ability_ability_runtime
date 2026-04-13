@@ -32,7 +32,13 @@ public:
     virtual ~AgentManagerClient() = default;
     static AgentManagerClient &GetInstance();
 
+    /**
+     * @brief Completes asynchronous service-loading and installs the remote agent manager proxy.
+     */
     void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
+    /**
+     * @brief Wakes blocked callers when the agent manager service cannot be loaded.
+     */
     void OnLoadSystemAbilityFail();
 
     int32_t GetAllAgentCards(std::vector<AgentCard> &cards);
@@ -47,6 +53,11 @@ public:
         const sptr<AAFwk::IAbilityConnection> &connection);
 
     int32_t DisconnectAgentExtensionAbility(const sptr<AAFwk::IAbilityConnection> &connection);
+
+    /**
+     * @brief Releases the active LOW_CODE agent marker once the caller reports completion.
+     */
+    int32_t NotifyLowCodeAgentComplete(const std::string &agentId);
 
 private:
     sptr<IAgentManager> GetAgentMgrProxy();
