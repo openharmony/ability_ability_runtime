@@ -244,6 +244,15 @@ public:
     virtual void KillProcessByAbilityToken(const sptr<IRemoteObject> &token);
 
     /**
+     * SetGameSAPrelaunch, set game SA prelaunch flag.
+     *
+     * @param token, the unique identification to the ability.
+     * @param isGameSAPrelaunch, the game SA prelaunch flag to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch);
+
+    /**
      * KillProcessesByUserId, kill the processes by userId.
      * Send appSpawn uninstall debug hap message.
      *

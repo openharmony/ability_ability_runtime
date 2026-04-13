@@ -6576,6 +6576,116 @@ HWTEST_F(AppMgrServiceInnerTest, AfterLoadAbility_0001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGameSAPrelaunch_001
+ * @tc.desc: SetGameSAPrelaunch with null token.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetGameSAPrelaunch_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<IRemoteObject> token = nullptr;
+    bool isGameSAPrelaunch = true;
+    auto result = appMgrServiceInner->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_001 end");
+}
+
+/**
+ * @tc.name: SetGameSAPrelaunch_002
+ * @tc.desc: SetGameSAPrelaunch with token not found in app records.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetGameSAPrelaunch_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    EXPECT_NE(token, nullptr);
+    bool isGameSAPrelaunch = true;
+    auto result = appMgrServiceInner->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_002 end");
+}
+
+/**
+ * @tc.name: SetGameSAPrelaunch_003
+ * @tc.desc: SetGameSAPrelaunch with valid token and isGameSAPrelaunch true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetGameSAPrelaunch_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    // Create app running record with token
+    std::string processName = "testProcess";
+    BundleInfo info;
+    info.name = "com.test.bundle";
+    HapModuleInfo hapModuleInfo;
+    std::shared_ptr<AAFwk::Want> want;
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    EXPECT_NE(token, nullptr);
+    loadParam->token = token;
+
+    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam,
+        applicationInfo_, abilityInfo_, processName, info, hapModuleInfo, want);
+    EXPECT_NE(appRecord, nullptr);
+
+    // Register token by updating ability state
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+
+    bool isGameSAPrelaunch = true;
+    auto result = appMgrServiceInner->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(appRecord->GetPreloadMode(), PreloadMode::GAME_PRELAUNCH);
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_003 end");
+}
+
+/**
+ * @tc.name: SetGameSAPrelaunch_004
+ * @tc.desc: SetGameSAPrelaunch with valid token and isGameSAPrelaunch false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetGameSAPrelaunch_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    // Create app running record with token
+    // Create app running record with token
+    std::string processName = "testProcess";
+    BundleInfo info;
+    info.name = "com.test.bundle";
+    HapModuleInfo hapModuleInfo;
+    std::shared_ptr<AAFwk::Want> want;
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    EXPECT_NE(token, nullptr);
+    loadParam->token = token;
+
+    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam,
+        applicationInfo_, abilityInfo_, processName, info, hapModuleInfo, want);
+    EXPECT_NE(appRecord, nullptr);
+
+    // Register token by updating ability state
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+
+    bool isGameSAPrelaunch = false;
+    auto result = appMgrServiceInner->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(appRecord->GetPreloadMode(), PreloadMode::PRELOAD_NONE);
+    TAG_LOGI(AAFwkTag::TEST, "SetGameSAPrelaunch_004 end");
+}
+
+/**
  * @tc.name: UpdateConfigurationByUserIds_0001
  * @tc.desc: UpdateConfigurationByUserIds
  * @tc.type: FUNC

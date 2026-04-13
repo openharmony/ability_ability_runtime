@@ -42,7 +42,7 @@ public:
     MOCK_METHOD(WSError, PendingSessionToForeground,
         (const sptr<IRemoteObject>& token, int32_t windowMode), (override));
     MOCK_METHOD(WSError, PendingSessionToBackgroundForDelegator,
-        (const sptr<IRemoteObject>& token, bool shouldBackToCaller), (override));
+        (const sptr<IRemoteObject>& token, bool shouldBackToCaller, int32_t reason), (override));
     MOCK_METHOD(WSError, MoveSessionsToForeground,
         (const std::vector<std::int32_t>& sessionIds, int32_t topSessionId), (override));
     MOCK_METHOD(WSError, MoveSessionsToBackground,

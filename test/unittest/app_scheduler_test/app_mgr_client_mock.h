@@ -60,6 +60,7 @@ public:
     MOCK_METHOD1(GetConfiguration, AppMgrResultCode(Configuration& config));
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(
         const int pid, std::vector<sptr<IRemoteObject>> &tokens));
+    MOCK_METHOD2(SetGameSAPrelaunch, AppMgrResultCode(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

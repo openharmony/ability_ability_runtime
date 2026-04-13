@@ -168,6 +168,13 @@ void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
     appMgrClient_->KillProcessByAbilityToken(token);
 }
 
+int32_t AppScheduler::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SetGameSAPrelaunch, isGameSAPrelaunch: %{public}d", isGameSAPrelaunch);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    return appMgrClient_->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+}
+
 void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
     sptr<AAFwk::IUserCallback> callback)
 {

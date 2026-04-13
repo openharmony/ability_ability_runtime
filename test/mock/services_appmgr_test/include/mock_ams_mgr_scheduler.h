@@ -76,6 +76,7 @@ public:
     MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD4(KillProcessesByPids, int32_t(const std::vector<int32_t> &pids, const std::string &reason,
         bool subProcess, bool isKillPrecedeStart));
+    MOCK_METHOD2(SetGameSAPrelaunch, int32_t(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};

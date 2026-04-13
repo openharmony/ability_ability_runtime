@@ -1789,5 +1789,108 @@ HWTEST_F(AppMgrClientTest, DestroyImage_001, TestSize.Level2)
     int32_t ret = appMgrClient->DestroyImage(checkpointId, nullptr);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: AppMgrClient_SetGameSAPrelaunch_001
+ * @tc.desc: SetGameSAPrelaunch with null service.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetGameSAPrelaunch_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    std::string deviceName = "device";
+    std::string abilityName = "TestAbility";
+    std::string appName = "TestApp";
+    std::string bundleName = "com.test.app";
+    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
+    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
+    auto token = record->GetToken();
+
+    bool isGameSAPrelaunch = true;
+    auto result = appMgrClient->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_SetGameSAPrelaunch_002
+ * @tc.desc: SetGameSAPrelaunch with valid service and true value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetGameSAPrelaunch_002, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    if (result != AppMgrResultCode::RESULT_OK) {
+        GTEST_LOG_(INFO) << "Service not available, skipping test";
+        return;
+    }
+
+    std::string deviceName = "device";
+    std::string abilityName = "TestAbility";
+    std::string appName = "TestApp";
+    std::string bundleName = "com.test.app";
+    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
+    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
+    auto token = record->GetToken();
+
+    bool isGameSAPrelaunch = true;
+    result = appMgrClient->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_SetGameSAPrelaunch_003
+ * @tc.desc: SetGameSAPrelaunch with valid service and false value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetGameSAPrelaunch_003, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    if (result != AppMgrResultCode::RESULT_OK) {
+        GTEST_LOG_(INFO) << "Service not available, skipping test";
+        return;
+    }
+
+    std::string deviceName = "device";
+    std::string abilityName = "TestAbility";
+    std::string appName = "TestApp";
+    std::string bundleName = "com.test.app";
+    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
+    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
+    auto token = record->GetToken();
+
+    bool isGameSAPrelaunch = false;
+    result = appMgrClient->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_SetGameSAPrelaunch_004
+ * @tc.desc: SetGameSAPrelaunch with null token.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetGameSAPrelaunch_004, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    if (result != AppMgrResultCode::RESULT_OK) {
+        GTEST_LOG_(INFO) << "Service not available, skipping test";
+        return;
+    }
+
+    sptr<IRemoteObject> token = nullptr;
+    bool isGameSAPrelaunch = true;
+    result = appMgrClient->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
