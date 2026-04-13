@@ -722,6 +722,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 #ifdef SUPPORT_SCREEN
     DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
@@ -788,6 +789,7 @@ int32_t AbilityManagerService::StartAbilityByFreeInstall(const StartAbilityWrapP
     }
     auto flags = param.want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(param.want, param.userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_BY_FREE_INSTALL);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not allow startAbility with continuation flags:%{public}d",
@@ -829,6 +831,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_WITH_SPECIFY_TOKEN_ID_INNER);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed:%{public}d",
@@ -913,6 +916,7 @@ int32_t AbilityManagerService::StartAbilityByOEExt(const Want &want,
     }
 
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_BY_OE_EXT);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityByOEExt: hostPid=%{public}d, specifiedFlag=%{public}s) %{public}s",
@@ -1025,6 +1029,7 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, DEFAULT_INVAL_VALUE);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_ONLY_UI_ABILITY);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility not allowed:%{public}d", ERR_INVALID_CONTINUATION_FLAG);
@@ -1079,6 +1084,7 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
     auto flags = want.GetFlags();
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_AS_CALLER_DETAILS);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed:%{public}d",
@@ -1830,6 +1836,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (IsCrossUserCall(userId)) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_DETAILS);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (!DlpUtils::AccessCheck(callerToken, want) ||
@@ -2181,6 +2188,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_FOR_OPTION_INNER);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     if (!DlpUtils::AccessCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
@@ -3160,6 +3168,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
 
     (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
     EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_UI_ABILITY_BY_SCB_DEFAULT);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     auto requestCode = sessionInfo->requestCode;
@@ -3198,7 +3207,6 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
             return result;
         }
     }
-
     if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         if (sessionInfo->startSetting != nullptr) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Start by scb, last not.");
@@ -4504,6 +4512,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.persistentId = extensionSessionInfo->persistentId;
     eventInfo.lifeCycle = LIFE_CYCLE_START;
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_UI_EXTENSION_ABILITY);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (extensionSessionInfo->want.HasParameter(AAFwk::SCREEN_MODE_KEY)) {
@@ -13742,6 +13751,7 @@ int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentE
     want.SetAction(IParam->GetStringParam(static_cast<std::string>("action")));
 
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_WITH_SERVICE_MATCH);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     StartAbilityWrapParam startAbilityWrapParam = {
         .want = want,
@@ -13896,6 +13906,7 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::START_ABILITY_WITH_INSIGHT);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
     StartAbilityWrapParam startAbilityWrapParam = {
         .want = want,
@@ -15434,6 +15445,7 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
     sptr<IRemoteObject> callerToken = taskInfo.callerToken;
 
     EventInfo eventInfo = BuildEventInfo(want, taskInfo.userId);
+    eventInfo.calleeId = static_cast<int32_t>(CalleeId::PRE_START_INNER);
     SendAbilityEvent(EventName::START_ABILITY, HISYSEVENT_BEHAVIOR, eventInfo);
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
