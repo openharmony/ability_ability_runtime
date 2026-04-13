@@ -352,7 +352,7 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
         return GetPendingRequestWantInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT_FROM_PROXY) {
-        return GetPendingRequestWantInner(data, reply);
+        return GetPendingRequestWantFromProxyInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO) {
         return GetWantSenderInfoInner(data, reply);
