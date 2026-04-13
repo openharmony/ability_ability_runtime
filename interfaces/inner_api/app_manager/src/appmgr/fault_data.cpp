@@ -141,6 +141,7 @@ bool FaultData::ReadLeakContent(Parcel &parcel)
         TAG_LOGE(AAFwkTag::APPMGR, "callback log read string failed.");
         return false;
     }
+    callbackLog = strValue;
 
     uint64_t atltValue = 0;
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadUint64(atltValue), "atLeakType read uint64 failed.");
