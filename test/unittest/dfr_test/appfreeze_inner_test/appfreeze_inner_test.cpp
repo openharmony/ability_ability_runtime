@@ -375,6 +375,24 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreeze_001, TestSize.Level1)
 }
 
 /**
+ * @tc.number: AppfreezeInner_IsAppFreezeWarning_001
+ * @tc.name: IsAppFreezeWarning
+ * @tc.desc: Verify that function IsAppFreezeWarning.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreezeWarning_001, TestSize.Level1)
+{
+    bool ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::THREAD_BLOCK_3S);
+    EXPECT_EQ(ret, true);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::THREAD_BLOCK_6S);
+    EXPECT_EQ(ret, false);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::LIFECYCLE_HALF_TIMEOUT);
+    EXPECT_EQ(ret, true);
+    ret = appfreezeInner->IsAppFreezeWarning(AppFreezeType::LIFECYCLE_TIMEOUT);
+    EXPECT_EQ(ret, false);
+}
+
+
+/**
  * @tc.number: AppfreezeInner_ChangeFaultDateInfo_001
  * @tc.name: ChangeFaultDateInfo
  * @tc.desc: Verify that function ChangeFaultDateInfo.

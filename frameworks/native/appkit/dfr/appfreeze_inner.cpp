@@ -231,7 +231,7 @@ std::string AppfreezeInner::LogFormat(size_t totalSize, size_t objectSize)
 void AppfreezeInner::GetApplicationInfo(FaultData& faultData)
 {
     TAG_LOGD(AAFwkTag::APPDFR, "called");
-    if (!IsAppFreeze(faultData.errorObject.name)) {
+    if (!IsAppFreeze(faultData.errorObject.name) && !IsAppFreezeWarning(faultData.errorObject.name)) {
         TAG_LOGI(AAFwkTag::APPDFR, "not to get application info");
         return;
     }
@@ -445,6 +445,14 @@ bool AppfreezeInner::IsAppFreeze(const std::string& name)
 {
     if (name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
         name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        return true;
+    }
+    return false;
+}
+
+bool AppfreezeInner::IsAppFreezeWarning(const std::string& name)
+{
+    if (name == AppFreezeType::THREAD_BLOCK_3S || name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         return true;
     }
     return false;
