@@ -62,6 +62,7 @@ constexpr const char *EVENT_KEY_REASON = "REASON";
 constexpr const char *EVENT_KEY_SUB_REASON = "SUB_REASON";
 constexpr const char *INVALID_EVENT_NAME = "INVALIDEVENTNAME";
 constexpr const char *EVENT_KEY_APP_INDEX = "APP_INDEX";
+constexpr const char *EVENT_KEY_CALLEE_ID = "CALLEE_ID";
 constexpr const char *EVENT_KEY_ERR_REASON = "ERR_REASON";
 constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
@@ -192,12 +193,13 @@ void EventReport::LogSystemErrorEvent(const std::string &name, HiSysEventEventTy
 
 void EventReport::LogStartAbilityEvent(const std::string &name, HiSysEventEventType type, const EventInfo &eventInfo)
 {
-    auto hisyseventReport = std::make_shared<HisyseventReport>(5);
+    auto hisyseventReport = std::make_shared<HisyseventReport>(6);
     hisyseventReport->InsertParam(EVENT_KEY_USERID, eventInfo.userId);
     hisyseventReport->InsertParam(EVENT_KEY_APP_INDEX, eventInfo.appIndex);
     hisyseventReport->InsertParam(EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
     hisyseventReport->InsertParam(EVENT_KEY_MODULE_NAME, eventInfo.moduleName);
     hisyseventReport->InsertParam(EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+    hisyseventReport->InsertParam(EVENT_KEY_CALLEE_ID, eventInfo.calleeId);
     hisyseventReport->Report("AAFWK", name.c_str(), type);
 }
 
