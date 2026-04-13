@@ -46,6 +46,7 @@ using namespace OHOS::AppExecFwk;
 
 namespace {
 constexpr const char *ON_CREATE_SIGNATURE = "C{@ohos.app.ability.Want.Want}:";
+constexpr const char *ON_AGENT_INVOKED_SIGNATURE = "C{std.core.String}:";
 constexpr const char *ON_DATA_SIGNATURE = "C{application.AgentHostProxy.AgentHostProxy}C{std.core.String}:";
 constexpr const char *ON_AUTH_SIGNATURE = "C{application.AgentHostProxy.AgentHostProxy}C{std.core.String}:";
 constexpr const char *ON_CONNECT_SIGNATURE =
@@ -262,6 +263,13 @@ int32_t EtsAgentExtension::OnAuthorize(const sptr<IRemoteObject> &hostProxy, con
     return static_cast<int32_t>(AbilityErrorCode::ERROR_OK);
 }
 
+int32_t EtsAgentExtension::OnAgentInvoked(const std::string &agentId)
+{
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "OnAgentInvoked call");
+    HandleAgentInvoked(agentId);
+    return static_cast<int32_t>(AbilityErrorCode::ERROR_OK);
+}
+
 void EtsAgentExtension::HandleSendData(sptr<IRemoteObject> hostProxy, const std::string &data)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "HandleSendData call");
@@ -336,6 +344,25 @@ void EtsAgentExtension::HandleAuthorize(sptr<IRemoteObject> hostProxy, const std
         return;
     }
     CallObjectMethod("onAuth", ON_AUTH_SIGNATURE, etsHostProxy, dataRef);
+    AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+}
+
+void EtsAgentExtension::HandleAgentInvoked(const std::string &agentId)
+{
+    bool isAttachThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(etsVm_, isAttachThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null env");
+        return;
+    }
+
+    ani_ref agentIdRef = reinterpret_cast<ani_ref>(AppExecFwk::GetAniString(env, agentId));
+    if (agentIdRef == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null agentIdRef");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return;
+    }
+    CallObjectMethod("onAgentInvoked", ON_AGENT_INVOKED_SIGNATURE, agentIdRef);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
 }
 

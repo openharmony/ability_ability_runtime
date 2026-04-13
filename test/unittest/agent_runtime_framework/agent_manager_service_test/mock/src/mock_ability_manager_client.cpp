@@ -23,6 +23,8 @@ int32_t MyFlag::retDisconnectAbility = ERR_OK;
 AAFwk::Want MyFlag::lastConnectAbilityWant;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastConnectAbilityConnection = nullptr;
 sptr<AAFwk::IAbilityConnection> MyFlag::lastDisconnectAbilityConnection = nullptr;
+int32_t MyFlag::connectAbilityWithExtensionTypeCallCount = 0;
+int32_t MyFlag::disconnectAbilityCallCount = 0;
 }
 
 namespace AAFwk {
@@ -37,12 +39,14 @@ ErrCode AbilityManagerClient::ConnectAbilityWithExtensionType(const Want &want, 
 {
     AgentRuntime::MyFlag::lastConnectAbilityWant = want;
     AgentRuntime::MyFlag::lastConnectAbilityConnection = connect;
+    AgentRuntime::MyFlag::connectAbilityWithExtensionTypeCallCount++;
     return AgentRuntime::MyFlag::retConnectAbilityWithExtensionType;
 }
 
 ErrCode AbilityManagerClient::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     AgentRuntime::MyFlag::lastDisconnectAbilityConnection = connect;
+    AgentRuntime::MyFlag::disconnectAbilityCallCount++;
     return AgentRuntime::MyFlag::retDisconnectAbility;
 }
 }  // namespace AAFwk
