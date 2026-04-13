@@ -15,8 +15,8 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_unittest("agent_service_connection_test") {
-  module_out_path = "ability_runtime/ability_runtime/agent_runtime/agent_service_connection_test"
+ohos_unittest("agent_host_connection_test") {
+  module_out_path = "ability_runtime/ability_runtime/agent_runtime/agent_host_connection_test"
 
   sanitize = {
     cfi = true
@@ -26,14 +26,13 @@ ohos_unittest("agent_service_connection_test") {
   }
 
   sources = [
-    "../agent_manager_service_test/mock/src/bundle_mgr_client.cpp",
     "../agent_manager_service_test/mock/src/mock_ability_manager_client.cpp",
     "../agent_manager_service_test/mock/src/mock_agent_card_mgr.cpp",
     "../agent_manager_service_test/mock/src/mock_app_mgr_client.cpp",
     "../agent_manager_service_test/mock/src/mock_bundle_mgr_helper.cpp",
     "../agent_manager_service_test/mock/src/mock_permission_verification.cpp",
     "../agent_manager_service_test/mock/src/mock_system_ability.cpp",
-    "agent_service_connection_test.cpp",
+    "agent_host_connection_test.cpp",
     "${agent_runtime_framework_path}/services/agentmgr/src/agent_bundle_event_callback.cpp",
     "${agent_runtime_framework_path}/services/agentmgr/src/agent_event_handler.cpp",
     "${agent_runtime_framework_path}/services/agentmgr/src/agent_host_connection.cpp",
@@ -87,5 +86,5 @@ ohos_unittest("agent_service_connection_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":agent_service_connection_test" ]
+  deps = [ ":agent_host_connection_test" ]
 }

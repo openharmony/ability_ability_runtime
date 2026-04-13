@@ -26,6 +26,7 @@ AppExecFwk::AppProcessState AgentRuntime::MyFlag::processState = AppExecFwk::App
 bool AgentRuntime::MyFlag::retQueryExtensionAbilityInfos = true;
 bool AgentRuntime::MyFlag::shouldFillExtensionAbilityInfos = true;
 AppExecFwk::ExtensionAbilityType AgentRuntime::MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
+int32_t AgentRuntime::MyFlag::extensionAbilityUid = 0;
 
 namespace AppExecFwk {
 BundleMgrHelper::BundleMgrHelper()
@@ -52,6 +53,7 @@ bool BundleMgrHelper::QueryExtensionAbilityInfos(const AAFwk::Want &want, const 
     if (AgentRuntime::MyFlag::retQueryExtensionAbilityInfos && AgentRuntime::MyFlag::shouldFillExtensionAbilityInfos) {
         ExtensionAbilityInfo info;
         info.type = AgentRuntime::MyFlag::extensionAbilityType;
+        info.applicationInfo.uid = AgentRuntime::MyFlag::extensionAbilityUid;
         extensionInfos.push_back(info);
     }
     return AgentRuntime::MyFlag::retQueryExtensionAbilityInfos;
