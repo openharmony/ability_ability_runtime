@@ -46,8 +46,10 @@ struct AbilityAccessItem {
 struct ScreenUnlockAccessItem {
     bool intercept = false;
     bool interceptExcludeSystemApp = false;
-    std::unordered_set<std::string> blockList;
-    std::unordered_set<std::string> allowList;
+    std::optional<bool> defaultInterception = std::nullopt;
+    std::optional<bool> systemAppInterception = std::nullopt;
+    std::unordered_set<std::string> allowList;  // Store appIdentifier
+    std::unordered_set<std::string> blockList;  // Store appIdentifier
 };
 
 struct ExtensionConfigItem {
@@ -85,6 +87,15 @@ public:
         const std::string &bundleName);
     bool IsScreenUnlockAllowAbility(const std::string &extensionTypeName, const std::string &bundleName,
         const std::string &abilityName);
+    bool HasScreenUnlockDefaultInterception(const std::string &extensionTypeName);
+    bool HasScreenUnlockSystemAppInterception(const std::string &extensionTypeName);
+    bool GetScreenUnlockDefaultInterception(const std::string &extensionTypeName);
+    bool GetScreenUnlockSystemAppInterception(const std::string &extensionTypeName);
+    bool IsInScreenUnlockAccessAllowList(const std::string &extensionTypeName, const std::string &appIdentifier);
+    bool IsInScreenUnlockAccessBlockList(const std::string &extensionTypeName, const std::string &appIdentifier);
+    bool HasScreenUnlockAccessConfig(const std::string &extensionTypeName);
+    bool HasScreenUnlockAccessAllowList(const std::string &extensionTypeName);
+    bool HasScreenUnlockAccessBlockList(const std::string &extensionTypeName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
@@ -100,6 +111,8 @@ private:
     void LoadExtensionAllowOrBlockedList(const nlohmann::json &object, const std::string &key,
         std::unordered_set<std::string> &list);
     void LoadScreenUnlockAccess(const nlohmann::json &object, const std::string &extensionTypeName);
+    void LoadScreenUnlockAppIdentifierList(const nlohmann::json &object, const std::string &key,
+        std::unordered_set<std::string> &list);
 
     std::optional<bool> GetSingleAccessFlag(const std::string &extensionTypeName,
         std::function<std::optional<bool>(const AbilityAccessItem&)> getAccessFlag);
