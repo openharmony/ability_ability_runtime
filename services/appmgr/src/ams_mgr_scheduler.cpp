@@ -55,6 +55,7 @@ constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPid
 constexpr const char* POWER_OFF_ABILITY = "PoweroffAbility";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
 constexpr int32_t LOAD_TASK_TIMEOUT = 60000; // ms
+constexpr int32_t FOUNDATION_UID = 5523;
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -234,6 +235,21 @@ void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token
         amsMgrServiceInner->KillProcessByAbilityToken(token);
     };
     amsHandler_->SubmitTask(killProcessByAbilityTokenFunc, TASK_KILL_PROCESS_BY_ABILITY_TOKEN);
+}
+
+int32_t AmsMgrScheduler::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrScheduler is not ready");
+        return ERR_INVALID_VALUE;
+    }
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetGameSAPrelaunch: not foundation call, uid: %{public}d",
+            IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+
+    return amsMgrServiceInner_->SetGameSAPrelaunch(token, isGameSAPrelaunch);
 }
 
 void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,

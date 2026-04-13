@@ -2006,6 +2006,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
+        if (appRecord->GetPreloadMode() == AppExecFwk::PreloadMode::GAME_PRELAUNCH) {
+            (void)KillProcessByPid(appRecord->GetPid(), "GameSAPreLaunch kill Process");
+            appRecord = nullptr;
+        }
     }
 
     if (AAFwk::UIExtensionWrapper::IsAgentUIExtension(abilityInfo->extensionAbilityType) &&
@@ -4462,6 +4466,9 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
             appIndex = abilityInfo->appIndex;
         }
         appRecord->SetAppIndex(appIndex);
+        if (want->GetBoolParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH, false)) {
+            appRecord->SetPreloadMode(AppExecFwk::PreloadMode::GAME_PRELAUNCH);
+        }
 #ifdef WITH_DLP
         appRecord->SetSecurityFlag(want->GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
 #endif // WITH_DLP
@@ -4683,6 +4690,27 @@ void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &r
             break;
         }
     }
+}
+
+int32_t AppMgrServiceInner::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPreLaunch)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!token) {
+        TAG_LOGE(AAFwkTag::APPMGR, "token null");
+        return ERR_INVALID_VALUE;
+    }
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord unexist");
+        return ERR_INVALID_VALUE;
+    }
+    if (isGameSAPreLaunch) {
+        appRecord->SetPreloadMode(AppExecFwk::PreloadMode::GAME_PRELAUNCH);
+    } else {
+        appRecord->SetPreloadMode(AppExecFwk::PreloadMode::PRELOAD_NONE);
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "SetGameSAPrelaunch PreloadMode is %{public}d", appRecord->GetPreloadMode());
+    return ERR_OK;
 }
 
 void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)

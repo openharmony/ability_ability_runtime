@@ -379,6 +379,16 @@ UIAbilityRecordPtr UIAbilityLifecycleManager::HandleAbilityRecordReused(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
         return nullptr;
     }
+    if (uiAbilityRecord->IsGameSAPreLaunch()) {
+        // Clear the game SA prelaunch flag in AbilityRecord and AppRecord when reusing AbilityRecord.
+        uiAbilityRecord->SetGameSAPreLaunch(false);
+        int32_t ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->SetGameSAPrelaunch(
+            uiAbilityRecord->GetToken(), false));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityRecordReused Failed to SetGameSAPrelaunch, ret=%{public}d", ret);
+            return nullptr;
+        }
+    }
     abilityRequest.want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr != nullptr && sessionInfo.reuseDelegatorWindow) {
@@ -1126,6 +1136,68 @@ int UIAbilityLifecycleManager::DispatchTerminate(const UIAbilityRecordPtr &abili
     return ERR_OK;
 }
 
+int32_t UIAbilityLifecycleManager::NotifyCancelGamePreLaunch(const sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get ability record by token");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!abilityRecord->IsGameSAPreLaunch()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability is not a game SA prelaunch");
+        return ERR_NOT_GAME_PRELOAD_STATE;
+    }
+
+    // Kill the process
+    auto pid = abilityRecord->GetPid();
+    std::vector<pid_t> pids = { pid };
+    int32_t ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pids));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to kill process, ret=%{public}d", ret);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t UIAbilityLifecycleManager::NotifyCompleteGamePreLaunch(const sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken is null");
+        return ERR_INVALID_VALUE;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get ability record by token");
+        return ERR_INVALID_VALUE;
+    }
+    if (!abilityRecord->IsGameSAPreLaunch()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Ability is not a game SA prelaunch");
+        return ERR_NOT_GAME_PRELOAD_STATE;
+    }
+
+    // Clear the game SA prelaunch flag in AbilityRecord and AppRecord
+    abilityRecord->SetGameSAPreLaunch(false);
+
+    int32_t ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->SetGameSAPrelaunch(callerToken,
+        false));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to SetGameSAPrelaunch, ret=%{public}d", ret);
+        return ret;
+    }
+    // Notification SCB goes to the background
+    int32_t notifyScbBackgroundReason = static_cast<int32_t>(NotifyScbBackgroundReason::GAME_PRELAUNCH_BACKGROUND);
+    ret = NotifySCBToMinimizeUIAbility(callerToken, true, notifyScbBackgroundReason);
+    return ret;
+}
+
 void UIAbilityLifecycleManager::CompleteForegroundSuccess(const UIAbilityRecordPtr &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1145,6 +1217,22 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const UIAbilityRecordP
         TAG_LOGD(AAFwkTag::ABILITYMGR, "call request after completing foreground state");
         abilityRecord->CallRequest();
         abilityRecord->SetStartToForeground(false);
+    }
+    if (abilityRecord->IsGameSAPreLaunch()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Game SA prelaunch detected, schedule NotifyCompleteGamePreLaunch task");
+        auto self(weak_from_this());
+        std::weak_ptr<UIAbilityRecord> weakAbilityRecord(abilityRecord);
+        auto task = [self, weakAbilityRecord]() {
+            auto selfObj = self.lock();
+            auto abilityRecordObj = weakAbilityRecord.lock();
+            if (selfObj == nullptr || abilityRecordObj == nullptr) {
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecord invalid");
+                return;
+            }
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "Execute NotifyCompleteGamePreLaunch for game SA prelaunch");
+            selfObj->NotifyCompleteGamePreLaunch(abilityRecordObj->GetToken());
+        };
+        ffrt::submit(task, ffrt::task_attr().delay(gamePreLaunchCompleteTime_));
     }
 
     if (abilityRecord->HasLastWant()) {
@@ -1277,6 +1365,12 @@ bool UIAbilityLifecycleManager::IsContainsAbilityInner(const sptr<IRemoteObject>
     return false;
 }
 
+int32_t UIAbilityLifecycleManager::SetGamePreLaunchCompleteTime(int64_t completeTime)
+{
+    gamePreLaunchCompleteTime_ = completeTime;
+    return ERR_OK;
+}
+
 void UIAbilityLifecycleManager::EraseAbilityRecord(const UIAbilityRecordPtr &abilityRecord)
 {
     if (abilityRecord == nullptr) {
@@ -1401,13 +1495,15 @@ UIAbilityRecordPtr UIAbilityLifecycleManager::GetUIAbilityRecordBySessionInfo(
     return nullptr;
 }
 
-int32_t UIAbilityLifecycleManager::NotifySCBToMinimizeUIAbility(const sptr<IRemoteObject> token)
+int32_t UIAbilityLifecycleManager::NotifySCBToMinimizeUIAbility(const sptr<IRemoteObject> token,
+    bool shouldBackToCaller, int32_t notifyScbBackgroundReason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "notifySCBToMinimizeUIAbility");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
     CHECK_POINTER_AND_RETURN(sceneSessionManager, ERR_NULL_OBJECT);
-    Rosen::WSError ret = sceneSessionManager->PendingSessionToBackgroundForDelegator(token);
+    Rosen::WSError ret = sceneSessionManager->PendingSessionToBackgroundForDelegator(token, shouldBackToCaller,
+        notifyScbBackgroundReason);
     if (ret != Rosen::WSError::WS_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "call error:%{public}d", ret);
     }

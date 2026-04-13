@@ -630,8 +630,9 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         if (!AAFwk::UIExtensionWrapper::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionWrapper::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
-            TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
-                data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
+            TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d, "
+                "preloadMode:%{public}d",
+                data.bundleName.c_str(), data.uid, data.state, needNotifyApp, data.preloadMode);
             auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
             for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
                 const auto &bundleNames = it->second.bundleNames;
@@ -661,8 +662,8 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     }
     if (state == ApplicationState::APP_STATE_CREATE || state == ApplicationState::APP_STATE_TERMINATED) {
         AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d",
-            data.bundleName.c_str(), data.uid, data.state);
+        TAG_LOGD(AAFwkTag::APPMGR, "OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d, "
+            "preloadMode:%{public}d", data.bundleName.c_str(), data.uid, data.state, data.preloadMode);
         auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
         for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
             const auto &bundleNames = it->second.bundleNames;
@@ -686,12 +687,13 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     TAG_LOGD(AAFwkTag::APPMGR,
         "Handle state change, module:%{public}s, bundle:%{public}s, ability:%{public}s, state:%{public}d,"
         "pid:%{public}d ,uid:%{public}d, abilityType:%{public}d, isAbility:%{public}d, callerBundleName:%{public}s,"
-        "callerAbilityName:%{public}s, isAtomicService:%{public}d, callerUid:%{public}d, callerPid:%{public}d",
+        "callerAbilityName:%{public}s, isAtomicService:%{public}d, callerUid:%{public}d, callerPid:%{public}d"
+        "pleloadMode:%{public}d",
         abilityStateData.moduleName.c_str(), abilityStateData.bundleName.c_str(),
-        abilityStateData.abilityName.c_str(), abilityStateData.abilityState,
-        abilityStateData.pid, abilityStateData.uid, abilityStateData.abilityType, isAbility,
-        abilityStateData.callerBundleName.c_str(), abilityStateData.callerAbilityName.c_str(),
-        abilityStateData.isAtomicService, abilityStateData.callerUid, abilityStateData.callerPid);
+        abilityStateData.abilityName.c_str(), abilityStateData.abilityState, abilityStateData.pid, abilityStateData.uid,
+        abilityStateData.abilityType, isAbility, abilityStateData.callerBundleName.c_str(),
+        abilityStateData.callerAbilityName.c_str(), abilityStateData.isAtomicService, abilityStateData.callerUid,
+        abilityStateData.callerPid, abilityStateData.preloadMode);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
@@ -750,9 +752,9 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
     }
     TAG_LOGI(AAFwkTag::APPMGR,
         "b:%{public}s pid:%{public}d u:%{public}d pt:%{public}d et:%{public}d pName:%{public}s ru:%{public}d "
-        "tMode:%{public}d cPid:%{public}d cU:%{public}d",
+        "tMode:%{public}d cPid:%{public}d cU:%{public}d pm:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.extensionType, data.processName.c_str(),
-        data.renderUid, data.isTestMode, data.callerPid, data.callerUid);
+        data.renderUid, data.isTestMode, data.callerPid, data.callerUid, data.preloadMode);
     auto applicationInfo = appRecord->GetApplicationInfo();
     BundleType bundleType = applicationInfo != nullptr ? applicationInfo->bundleType : BundleType::APP;
     HandleOnProcessCreated(data, bundleType);
@@ -868,8 +870,8 @@ void AppStateObserverManager::HandleOnProcessStateChanged(
     }
     TAG_LOGD(AAFwkTag::APPMGR,
         "bundle:%{public}s, pid:%{public}d, uid:%{public}d, state:%{public}d, "
-        "isContinuousTask:%{public}d, gpuPid:%{public}d",
-        data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
+        "isContinuousTask:%{public}d, gpuPid:%{public}d, preloadMode:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid, data.preloadMode);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
@@ -955,8 +957,9 @@ void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRu
     }
     ProcessData data = WrapProcessData(appRecord);
     TAG_LOGD(AAFwkTag::APPMGR, "Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, renderUid:%{public}d,"
-        " exitReason:%{public}d, exitMsg:%{public}s",
-        data.bundleName.c_str(), data.pid, data.uid, data.renderUid, data.exitReason, data.exitMsg.c_str());
+        " exitReason:%{public}d, exitMsg:%{public}s, pm:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.renderUid, data.exitReason, data.exitMsg.c_str(),
+        data.preloadMode);
     auto applicationInfo = appRecord->GetApplicationInfo();
     BundleType bundleType = applicationInfo != nullptr ? applicationInfo->bundleType : BundleType::APP;
     HandleOnProcessDied(data, bundleType);

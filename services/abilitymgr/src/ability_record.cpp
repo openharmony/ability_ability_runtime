@@ -226,6 +226,11 @@ void AbilityRecord::Init(const AbilityRequest &abilityRequest)
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
         keepAliveBundle_ = true;
     }
+
+    if (abilityRequest.want.GetBoolParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH, false)) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "abilityRecord: Set game prelaunch flag from want");
+        SetGameSAPreLaunch(true);
+    }
 }
 
 AbilityRecordType AbilityRecord::GetAbilityRecordType()
@@ -417,6 +422,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
         want.SetParam(SPECIFIED_ABILITY_FLAG, GetSpecifiedFlag());
     }
     lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
+    want.RemoveParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH);
     SetIsNewWant(false);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         lifeCycleStateInfo_.sceneFlag = 0;

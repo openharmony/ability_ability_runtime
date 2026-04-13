@@ -968,6 +968,18 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     if (interfaceCode == AbilityManagerInterfaceCode::QUERY_CALLER_TOKEN_ID_FOR_ANCO) {
         return QueryCallerTokenIdForAncoInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::LAUNCH_GAME_CUSTOMIZED) {
+        return LaunchGameCustomizedInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::CANCEL_GAME_PRELAUNCH) {
+        return NotifyCancelGamePreLaunchInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::COMPLETE_GAME_PRELAUNCH) {
+        return NotifyCompleteGamePreLaunchInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_GAME_PRELAUNCH_COMPLETE_TIME) {
+        return SetGamePreLaunchCompleteTimeInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
         return ManualStartAutoStartupAppsInner(data, reply);
     }
@@ -4029,6 +4041,63 @@ int32_t AbilityManagerStub::QueryCallerTokenIdForAncoInner(MessageParcel &data, 
     }
     if (!reply.WriteUint32(callerTokenId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerTokenId fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::LaunchGameCustomizedInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    int32_t appIndex = data.ReadInt32();
+    int32_t result = LaunchGameCustomized(bundleName, userId, appIndex);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::NotifyCancelGamePreLaunchInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = NotifyCancelGamePreLaunch(callerToken);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::NotifyCompleteGamePreLaunchInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = NotifyCompleteGamePreLaunch(callerToken);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::SetGamePreLaunchCompleteTimeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    int64_t completeTime = data.ReadInt64();
+    ErrCode result = SetGamePreLaunchCompleteTime(userId, completeTime);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
