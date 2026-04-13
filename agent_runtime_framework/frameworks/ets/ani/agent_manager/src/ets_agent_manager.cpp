@@ -76,6 +76,7 @@ public:
         ani_object callbackObj, ani_object asyncCallback);
     static void DisconnectAgentExtensionAbility(ani_env *env, ani_object agentProxyObj,
         ani_object asyncCallback);
+    static void NotifyLowCodeAgentComplete(ani_env *env, ani_string aniAgentId, ani_object asyncCallback);
 };
 
 void EtsAgentManager::GetAllAgentCards(ani_env *env, ani_object asyncCallback)
@@ -376,6 +377,30 @@ void EtsAgentManager::DisconnectAgentExtensionAbility(ani_env *env, ani_object a
     }
 }
 
+void EtsAgentManager::NotifyLowCodeAgentComplete(ani_env *env, ani_string aniAgentId, ani_object asyncCallback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
+        return;
+    }
+
+    std::string agentId;
+    if (!GetStdString(env, aniAgentId, agentId)) {
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert agentId fail."), nullptr);
+        return;
+    }
+
+    int32_t ret = AgentManagerClient::GetInstance().NotifyLowCodeAgentComplete(agentId);
+    if (ret != ERR_OK) {
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+        return;
+    }
+    AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
 void EtsAgentManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "EtsAgentManagerRegistryInit call");
@@ -420,6 +445,9 @@ void EtsAgentManagerRegistryInit(ani_env *env)
         ani_native_function{ "nativeDisconnectAgentExtensionAbility",
             "C{application.AgentProxy.AgentProxy}C{utils.AgentUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAgentManager::DisconnectAgentExtensionAbility) },
+        ani_native_function{ "nativeNotifyLowCodeAgentComplete",
+            "C{std.core.String}C{utils.AgentUtils.AsyncCallbackWrapper}:",
+            reinterpret_cast<void *>(EtsAgentManager::NotifyLowCodeAgentComplete) },
 	};
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {

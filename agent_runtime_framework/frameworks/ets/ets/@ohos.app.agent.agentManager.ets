@@ -32,6 +32,8 @@ export default namespace agentManager {
     connectCallback: AgentExtensionConnectCallback, asyncCallback: AsyncCallbackWrapper<AgentProxy>): void;
   export native function nativeDisconnectAgentExtensionAbility(proxy: AgentProxy,
     asyncCallback: AsyncCallbackWrapper<void>): void;
+  export native function nativeNotifyLowCodeAgentComplete(agentId: string,
+    asyncCallback: AsyncCallbackWrapper<void>): void;
 
   export function getAllAgentCards(): Promise<Array<AgentCard>> {
     let p: Promise<Array<AgentCard>> = new Promise<Array<AgentCard>>(
@@ -169,6 +171,23 @@ export default namespace agentManager {
       });
       taskpool.execute((): void => {
         agentManager.nativeDisconnectAgentExtensionAbility(proxy, asyncCallbackWrapper);
+      });
+    });
+    return p;
+  }
+
+  export function notifyLowCodeAgentComplete(agentId: string): Promise<void> {
+    let p: Promise<void> = new Promise<void>(
+      (res: (data: undefined) => void, rej: (error: BusinessError) => void): void => {
+      let asyncCallbackWrapper = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          res(undefined);
+        } else {
+          rej(err);
+        }
+      });
+      taskpool.execute((): void => {
+        agentManager.nativeNotifyLowCodeAgentComplete(agentId, asyncCallbackWrapper);
       });
     });
     return p;

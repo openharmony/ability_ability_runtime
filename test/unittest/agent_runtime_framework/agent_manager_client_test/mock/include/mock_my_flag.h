@@ -35,6 +35,7 @@ public:
     static int retToAgentCardVec;
     static int retConnectAgentExtensionAbility;
     static int retDisconnectAgentExtensionAbility;
+    static int retNotifyLowCodeAgentComplete;
     static std::vector<AgentCard> convertedCards;
     static bool nullSystemAbility;
     static int retLoadSystemAbility;

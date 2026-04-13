@@ -64,12 +64,15 @@ public:
     static std::vector<AppExecFwk::ExtensionAbilityInfo> mockExtensionInfos;
     static std::vector<AppExecFwk::HapModuleInfo> mockHapModuleInfos;
     static std::vector<std::string> mockProfileInfos;
+    static int32_t extensionAbilityUid;
     static int32_t retGetProcessRunningInfoByPid;
     static AppExecFwk::AppProcessState processState;
     static int32_t retGetBundleNameByPid;
     static AAFwk::Want lastConnectAbilityWant;
     static sptr<AAFwk::IAbilityConnection> lastConnectAbilityConnection;
     static sptr<AAFwk::IAbilityConnection> lastDisconnectAbilityConnection;
+    static int32_t connectAbilityWithExtensionTypeCallCount;
+    static int32_t disconnectAbilityCallCount;
 };
 }  // namespace AgentRuntime
 }  // namespace OHOS
