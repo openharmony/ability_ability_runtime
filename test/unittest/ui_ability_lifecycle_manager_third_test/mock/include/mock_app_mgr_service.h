@@ -133,7 +133,7 @@ public:
     MOCK_METHOD4(IsSpecifiedModuleLoaded, int32_t(const AAFwk::Want &, const AbilityInfo &, bool &, bool &));
     MOCK_METHOD1(LaunchAbility, int32_t(sptr<IRemoteObject>));
     MOCK_METHOD1(SetProcessPrepareExit, void(int32_t));
-    MOCK_METHOD1(SetTerminateTimeOutFlag, void(sptr<IRemoteObject>));
+    MOCK_METHOD1(SetTerminateTimeOutFlag, int32_t(sptr<IRemoteObject>));
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {

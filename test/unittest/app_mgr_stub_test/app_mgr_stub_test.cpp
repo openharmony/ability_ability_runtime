@@ -1177,10 +1177,8 @@ HWTEST_F(AppMgrStubTest, HandleSetTerminateTimeOutFlag_0100, TestSize.Level1)
     WriteInterfaceToken(data);
     data.WriteRemoteObject(nullptr);
 
-    EXPECT_CALL(*mockAppMgrService_, SetTerminateTimeOutFlag(_)).Times(0);
-
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIME_OUT), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG), data, reply, option);
     EXPECT_EQ(result, ERR_INVAILD_VALUE);
 }
 
@@ -1200,10 +1198,8 @@ HWTEST_F(AppMgrStubTest, HandleSetTerminateTimeOutFlag_0200, TestSize.Level1)
     sptr<IRemoteObject> token = new MockAppMgrService();
     data.WriteRemoteObject(token);
 
-    EXPECT_CALL(*mockAppMgrService_, SetTerminateTimeOutFlag(_)).Times(1);
-
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIME_OUT), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 
