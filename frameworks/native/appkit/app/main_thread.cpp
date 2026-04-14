@@ -2650,8 +2650,44 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         auto delegator = IAbilityDelegator::Create(application_->GetRuntime(), application_->GetAppContext(),
             std::move(testRunner), record->observer);
         AbilityDelegatorRegistry::RegisterInstance(delegator, args, application_->GetRuntime()->GetLanguage());
+        {
+            void *napiEnvVoid = nullptr;
+            void *aniVmVoid = nullptr;
+            auto &curRuntime = application_->GetRuntime();
+            bool isHybrid = applicationInfo_ &&
+                applicationInfo_->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
+            if (isHybrid && curRuntime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+                auto &etsRuntime = static_cast<AbilityRuntime::ETSRuntime &>(*curRuntime);
+                auto aniEnv = etsRuntime.GetAniEnv();
+                if (aniEnv != nullptr) {
+                    aniVmVoid = reinterpret_cast<void *>(aniEnv);
+                }
+                const auto &jsRuntime = etsRuntime.GetJsRuntime();
+                if (jsRuntime) {
+                    napiEnvVoid = reinterpret_cast<void *>(
+                        static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime).GetNapiEnv());
+                }
+            } else if (isHybrid && curRuntime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
+                napiEnvVoid = reinterpret_cast<void *>(
+                    static_cast<AbilityRuntime::JsRuntime &>(*curRuntime).GetNapiEnv());
+            }
+            AbilityDelegatorRegistry::SetRuntimeEnvs(napiEnvVoid, aniVmVoid);
+        }
         delegator->SetApiTargetVersion(targetVersion);
         delegator->Prepare();
+        if (applicationInfo_ && applicationInfo_->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+            auto currentLanguage = application_->GetRuntime()->GetLanguage();
+            auto targetLanguage = AbilityRuntime::Runtime::Language::JS;
+            if (currentLanguage == AbilityRuntime::Runtime::Language::JS) {
+                targetLanguage = AbilityRuntime::Runtime::Language::ETS;
+            }
+            auto interopTestRunner = TestRunner::Create(application_->GetRuntime(), args, false);
+            auto interopDelegator = IAbilityDelegator::Create(application_->GetRuntime(),
+                application_->GetAppContext(), std::move(interopTestRunner), record->observer);
+            AbilityDelegatorRegistry::RegisterInstance(interopDelegator, args, targetLanguage);
+            interopDelegator->SetApiTargetVersion(targetVersion);
+            interopDelegator->Prepare();
+        }
     } else { // FA model
         TAG_LOGD(AAFwkTag::APPKIT, "FA model");
         AbilityRuntime::Runtime::Options options;
