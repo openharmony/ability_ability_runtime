@@ -1179,7 +1179,7 @@ HWTEST_F(AppMgrStubTest, HandleSetTerminateTimeOutFlag_0100, TestSize.Level1)
 
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG), data, reply, option);
-    EXPECT_EQ(result, ERR_INVAILD_VALUE);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 
