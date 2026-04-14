@@ -96,6 +96,8 @@ void AgentManagerServiceTest::SetUp(void)
     MyFlag::shouldFillExtensionAbilityInfos = true;
     MyFlag::retGetApplicationInfo = false;
     MyFlag::lastConnectAbilityConnection = nullptr;
+    MyFlag::lastConnectAbilityCallerToken = nullptr;
+    MyFlag::lastConnectAbilityExtensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     MyFlag::lastDisconnectAbilityConnection = nullptr;
     auto service = AgentManagerService::GetInstance();
     service->trackedConnections_.clear();
@@ -1957,6 +1959,307 @@ HWTEST_F(AgentManagerServiceTest, DisconnectAgentExtensionAbility_006, TestSize.
 }
 
 /**
+* @tc.name  : ConnectServiceExtensionAbility_001
+* @tc.number: ConnectServiceExtensionAbility_001
+* @tc.desc  : Test ConnectServiceExtensionAbility rejects null caller token
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_001, TestSize.Level1)
+{
+    AAFwk::Want want;
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(nullptr, want, connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_002
+* @tc.number: ConnectServiceExtensionAbility_002
+* @tc.desc  : Test ConnectServiceExtensionAbility connects through AMS with explicit caller token and SERVICE type
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_002, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 1);
+    EXPECT_EQ(MyFlag::lastConnectAbilityCallerToken, callerToken);
+    EXPECT_EQ(MyFlag::lastConnectAbilityExtensionType, AppExecFwk::ExtensionAbilityType::SERVICE);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->callerConnectionCounts_.empty());
+    ASSERT_EQ(AgentManagerService::GetInstance()->trackedConnections_.size(), 1);
+    EXPECT_FALSE(AgentManagerService::GetInstance()->trackedConnections_.begin()->second.countTowardsCallerLimit);
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_003
+* @tc.number: ConnectServiceExtensionAbility_003
+* @tc.desc  : Test ConnectServiceExtensionAbility ignores CONNECT_AGENT permission state
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_003, TestSize.Level1)
+{
+    MyFlag::retVerifyConnectAgentPermission = false;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 1);
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_004
+* @tc.number: ConnectServiceExtensionAbility_004
+* @tc.desc  : Test ConnectServiceExtensionAbility rejects non-system-app callers
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_004, TestSize.Level1)
+{
+    MyFlag::retJudgeCallerIsAllowedToUseSystemAPI = false;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_NOT_SYSTEM_APP);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 0);
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_005
+* @tc.number: ConnectServiceExtensionAbility_005
+* @tc.desc  : Test ConnectServiceExtensionAbility rejects null connection
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_005, TestSize.Level1)
+{
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, nullptr),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_006
+* @tc.number: ConnectServiceExtensionAbility_006
+* @tc.desc  : Test ConnectServiceExtensionAbility rejects unresolved service target
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_006, TestSize.Level1)
+{
+    MyFlag::retQueryExtensionAbilityInfos = false;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        RESOLVE_ABILITY_ERR);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 0);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.empty());
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_007
+* @tc.number: ConnectServiceExtensionAbility_007
+* @tc.desc  : Test ConnectServiceExtensionAbility rejects non-service extension targets
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_007, TestSize.Level1)
+{
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_WRONG_INTERFACE_CALL);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 0);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.empty());
+}
+
+/**
+* @tc.name  : ConnectServiceExtensionAbility_008
+* @tc.number: ConnectServiceExtensionAbility_008
+* @tc.desc  : Test ConnectServiceExtensionAbility rolls back tracked state on AMS failure
+*/
+HWTEST_F(AgentManagerServiceTest, ConnectServiceExtensionAbility_008, TestSize.Level1)
+{
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_INVALID_VALUE;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_INVALID_VALUE);
+    EXPECT_EQ(MyFlag::connectAbilityWithExtensionTypeCallCount, 1);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.empty());
+    EXPECT_TRUE(AgentManagerService::GetInstance()->callerConnectionCounts_.empty());
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_001
+* @tc.number: DisconnectServiceExtensionAbility_001
+* @tc.desc  : Test DisconnectServiceExtensionAbility disconnects without caller quota bookkeeping
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_001, TestSize.Level1)
+{
+    MyFlag::retVerifyCallingPermission = true;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retDisconnectAbility = ERR_OK;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    ASSERT_NE(MyFlag::lastConnectAbilityConnection, nullptr);
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection), ERR_OK);
+    EXPECT_EQ(MyFlag::lastDisconnectAbilityConnection, MyFlag::lastConnectAbilityConnection);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->callerConnectionCounts_.empty());
+    ASSERT_EQ(AgentManagerService::GetInstance()->trackedConnections_.size(), 1);
+
+    AppExecFwk::ElementName element;
+    MyFlag::lastConnectAbilityConnection->OnAbilityDisconnectDone(element, ERR_OK);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.empty());
+    EXPECT_TRUE(AgentManagerService::GetInstance()->callerConnectionCounts_.empty());
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_002
+* @tc.number: DisconnectServiceExtensionAbility_002
+* @tc.desc  : Test DisconnectServiceExtensionAbility ignores CONNECT_AGENT permission state
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_002, TestSize.Level1)
+{
+    MyFlag::retVerifyConnectAgentPermission = false;
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retDisconnectAbility = ERR_OK;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection), ERR_OK);
+    EXPECT_EQ(MyFlag::disconnectAbilityCallCount, 1);
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_003
+* @tc.number: DisconnectServiceExtensionAbility_003
+* @tc.desc  : Test DisconnectServiceExtensionAbility rejects non-system-app callers
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_003, TestSize.Level1)
+{
+    MyFlag::retJudgeCallerIsAllowedToUseSystemAPI = false;
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection),
+        ERR_NOT_SYSTEM_APP);
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_004
+* @tc.number: DisconnectServiceExtensionAbility_004
+* @tc.desc  : Test DisconnectServiceExtensionAbility rejects null connection
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_004, TestSize.Level1)
+{
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, nullptr),
+        INVALID_PARAMETERS_ERR);
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_005
+* @tc.number: DisconnectServiceExtensionAbility_005
+* @tc.desc  : Test DisconnectServiceExtensionAbility rejects untracked connection
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_005, TestSize.Level1)
+{
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection),
+        ERR_INVALID_VALUE);
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_006
+* @tc.number: DisconnectServiceExtensionAbility_006
+* @tc.desc  : Test DisconnectServiceExtensionAbility is idempotent while disconnecting
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_006, TestSize.Level1)
+{
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retDisconnectAbility = ERR_OK;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection), ERR_OK);
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection), ERR_OK);
+    ASSERT_EQ(AgentManagerService::GetInstance()->trackedConnections_.size(), 1);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.begin()->second.isDisconnecting);
+}
+
+/**
+* @tc.name  : DisconnectServiceExtensionAbility_007
+* @tc.number: DisconnectServiceExtensionAbility_007
+* @tc.desc  : Test DisconnectServiceExtensionAbility rolls back disconnecting state on AMS failure
+*/
+HWTEST_F(AgentManagerServiceTest, DisconnectServiceExtensionAbility_007, TestSize.Level1)
+{
+    MyFlag::retQueryExtensionAbilityInfos = true;
+    MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    MyFlag::retConnectAbilityWithExtensionType = ERR_OK;
+    MyFlag::retDisconnectAbility = ERR_INVALID_VALUE;
+    AAFwk::Want want;
+    want.SetBundle("test.bundle");
+    auto callerToken = sptr<IRemoteObject>(new IPCObjectStub(u"caller.token"));
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+
+    EXPECT_EQ(AgentManagerService::GetInstance()->ConnectServiceExtensionAbility(callerToken, want, connection),
+        ERR_OK);
+    EXPECT_EQ(AgentManagerService::GetInstance()->DisconnectServiceExtensionAbility(callerToken, connection),
+        ERR_INVALID_VALUE);
+    ASSERT_EQ(AgentManagerService::GetInstance()->trackedConnections_.size(), 1);
+    auto trackedIter = AgentManagerService::GetInstance()->trackedConnections_.find(connection->AsObject());
+    ASSERT_NE(trackedIter, AgentManagerService::GetInstance()->trackedConnections_.end());
+    EXPECT_FALSE(trackedIter->second.isDisconnecting);
+    EXPECT_TRUE(AgentManagerService::GetInstance()->callerConnectionCounts_.empty());
+}
+
+/**
 * @tc.name  : ValidateConnectAgentRequest_001
 * @tc.number: ValidateConnectAgentRequest_001
 * @tc.desc  : Test ValidateConnectAgentRequest rejects non-system-app callers
@@ -2256,12 +2559,111 @@ HWTEST_F(AgentManagerServiceTest, RegisterTrackedConnectionAndGetServiceConnecti
     sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
 
     EXPECT_EQ(AgentManagerService::GetInstance()->RegisterTrackedConnectionAndGetServiceConnection(
-        connection, IPCSkeleton::GetCallingUid(), serviceConnection), ERR_OK);
+        connection, IPCSkeleton::GetCallingUid(), true, serviceConnection), ERR_OK);
     ASSERT_NE(serviceConnection, nullptr);
     ASSERT_EQ(AgentManagerService::GetInstance()->trackedConnections_.size(), 1);
     auto trackedIter = AgentManagerService::GetInstance()->trackedConnections_.find(connection->AsObject());
     ASSERT_NE(trackedIter, AgentManagerService::GetInstance()->trackedConnections_.end());
-    EXPECT_EQ(trackedIter->second.serviceConnection, serviceConnection);
+    EXPECT_EQ(trackedIter->second.serviceConnection->AsObject(), serviceConnection->AsObject());
+}
+
+/**
+* @tc.name  : RegisterTrackedConnectionAndGetServiceConnection_002
+* @tc.number: RegisterTrackedConnectionAndGetServiceConnection_002
+* @tc.desc  : Test RegisterTrackedConnectionAndGetServiceConnection skips caller quota bookkeeping when requested
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterTrackedConnectionAndGetServiceConnection_002, TestSize.Level1)
+{
+    auto service = AgentManagerService::GetInstance();
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+
+    EXPECT_EQ(service->RegisterTrackedConnectionAndGetServiceConnection(connection, callerUid, false,
+        serviceConnection), ERR_OK);
+    ASSERT_NE(serviceConnection, nullptr);
+    ASSERT_EQ(service->trackedConnections_.size(), 1);
+    auto trackedIter = service->trackedConnections_.find(connection->AsObject());
+    ASSERT_NE(trackedIter, service->trackedConnections_.end());
+    EXPECT_EQ(trackedIter->second.callerUid, callerUid);
+    EXPECT_EQ(trackedIter->second.serviceConnection->AsObject(), serviceConnection->AsObject());
+    EXPECT_FALSE(trackedIter->second.countTowardsCallerLimit);
+    EXPECT_NE(trackedIter->second.deathRecipient, nullptr);
+    EXPECT_TRUE(service->callerConnectionCounts_.empty());
+}
+
+/**
+* @tc.name  : RegisterTrackedConnectionAndGetServiceConnection_003
+* @tc.number: RegisterTrackedConnectionAndGetServiceConnection_003
+* @tc.desc  : Test RegisterTrackedConnectionAndGetServiceConnection propagates duplicate registration failure
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterTrackedConnectionAndGetServiceConnection_003, TestSize.Level1)
+{
+    auto service = AgentManagerService::GetInstance();
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    AgentManagerService::TrackedConnectionRecord record;
+    record.callerUid = IPCSkeleton::GetCallingUid();
+    record.callerRemote = connection->AsObject();
+    service->trackedConnections_[connection->AsObject()] = record;
+    sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
+
+    EXPECT_EQ(service->RegisterTrackedConnectionAndGetServiceConnection(
+        connection, IPCSkeleton::GetCallingUid(), true, serviceConnection), ERR_INVALID_VALUE);
+    EXPECT_EQ(serviceConnection, nullptr);
+    EXPECT_EQ(service->trackedConnections_.size(), 1);
+    EXPECT_TRUE(service->callerConnectionCounts_.empty());
+}
+
+/**
+* @tc.name  : RegisterTrackedConnectionAndGetServiceConnection_004
+* @tc.number: RegisterTrackedConnectionAndGetServiceConnection_004
+* @tc.desc  : Test RegisterTrackedConnectionAndGetServiceConnection rejects callers that already hit the quota
+*/
+HWTEST_F(AgentManagerServiceTest, RegisterTrackedConnectionAndGetServiceConnection_004, TestSize.Level1)
+{
+    auto service = AgentManagerService::GetInstance();
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    service->callerConnectionCounts_[callerUid] = AgentManagerService::MAX_CONNECTIONS_PER_CALLER;
+    sptr<AAFwk::IAbilityConnection> serviceConnection = nullptr;
+
+    EXPECT_EQ(service->RegisterTrackedConnectionAndGetServiceConnection(connection, callerUid, true, serviceConnection),
+        AAFwk::ERR_MAX_AGENT_CONNECTIONS_REACHED);
+    EXPECT_EQ(serviceConnection, nullptr);
+    EXPECT_TRUE(service->trackedConnections_.empty());
+    ASSERT_EQ(service->callerConnectionCounts_.size(), 1);
+    EXPECT_EQ(service->callerConnectionCounts_[callerUid], AgentManagerService::MAX_CONNECTIONS_PER_CALLER);
+}
+
+/**
+* @tc.name  : TryRegisterConnectionLocked_002
+* @tc.number: TryRegisterConnectionLocked_002
+* @tc.desc  : Test TryRegisterConnectionLocked stores explicit low-code tracking state without quota bookkeeping
+*/
+HWTEST_F(AgentManagerServiceTest, TryRegisterConnectionLocked_002, TestSize.Level1)
+{
+    auto service = AgentManagerService::GetInstance();
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    auto serviceConnection = sptr<MockAbilityConnection>::MakeSptr();
+    AgentHostKey hostKey;
+    hostKey.userId = 100;
+    hostKey.bundleName = "lowcode.bundle";
+    hostKey.moduleName = "entry";
+    hostKey.abilityName = "LowCodeAbility";
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+
+    EXPECT_EQ(service->TryRegisterConnectionLocked(connection, callerUid, serviceConnection, &hostKey, false), ERR_OK);
+    ASSERT_EQ(service->trackedConnections_.size(), 1);
+    auto trackedIter = service->trackedConnections_.find(connection->AsObject());
+    ASSERT_NE(trackedIter, service->trackedConnections_.end());
+    EXPECT_EQ(trackedIter->second.serviceConnection->AsObject(), serviceConnection->AsObject());
+    EXPECT_TRUE(trackedIter->second.isLowCode);
+    EXPECT_EQ(trackedIter->second.hostKey.userId, hostKey.userId);
+    EXPECT_EQ(trackedIter->second.hostKey.bundleName, hostKey.bundleName);
+    EXPECT_EQ(trackedIter->second.hostKey.moduleName, hostKey.moduleName);
+    EXPECT_EQ(trackedIter->second.hostKey.abilityName, hostKey.abilityName);
+    EXPECT_FALSE(trackedIter->second.countTowardsCallerLimit);
+    EXPECT_TRUE(service->callerConnectionCounts_.empty());
 }
 
 /**
@@ -2892,6 +3294,26 @@ HWTEST_F(AgentManagerServiceTest, ReleaseCallerConnectionCountLocked_004, TestSi
 }
 
 /**
+* @tc.name  : ReleaseCallerConnectionCountLocked_005
+* @tc.number: ReleaseCallerConnectionCountLocked_005
+* @tc.desc  : Test ReleaseCallerConnectionCountLocked ignores non-counted connections
+*/
+HWTEST_F(AgentManagerServiceTest, ReleaseCallerConnectionCountLocked_005, TestSize.Level1)
+{
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    AgentManagerService::TrackedConnectionRecord record;
+    record.callerUid = 100;
+    record.callerRemote = connection->AsObject();
+    record.countTowardsCallerLimit = false;
+    AgentManagerService::GetInstance()->trackedConnections_.emplace(connection->AsObject(), record);
+    AgentManagerService::GetInstance()->callerConnectionCounts_[100] = 2;
+
+    EXPECT_TRUE(AgentManagerService::GetInstance()->ReleaseCallerConnectionCountLocked(connection->AsObject()));
+    ASSERT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_.size(), 1);
+    EXPECT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_[100], 2);
+}
+
+/**
 * @tc.name  : ReleaseTrackedConnection_003
 * @tc.number: ReleaseTrackedConnection_003
 * @tc.desc  : Test ReleaseTrackedConnection ignores null connection
@@ -2921,6 +3343,28 @@ HWTEST_F(AgentManagerServiceTest, ReleaseTrackedConnection_004, TestSize.Level1)
 
     ASSERT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_.size(), 1);
     EXPECT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_[100], 1);
+}
+
+/**
+* @tc.name  : ReleaseTrackedConnection_005
+* @tc.number: ReleaseTrackedConnection_005
+* @tc.desc  : Test ReleaseTrackedConnection erases non-counted tracking without changing caller quota bookkeeping
+*/
+HWTEST_F(AgentManagerServiceTest, ReleaseTrackedConnection_005, TestSize.Level1)
+{
+    auto connection = sptr<MockAbilityConnection>::MakeSptr();
+    AgentManagerService::TrackedConnectionRecord record;
+    record.callerUid = 100;
+    record.callerRemote = connection->AsObject();
+    record.countTowardsCallerLimit = false;
+    AgentManagerService::GetInstance()->trackedConnections_.emplace(connection->AsObject(), record);
+    AgentManagerService::GetInstance()->callerConnectionCounts_[100] = 2;
+
+    AgentManagerService::GetInstance()->ReleaseTrackedConnection(connection);
+
+    EXPECT_TRUE(AgentManagerService::GetInstance()->trackedConnections_.empty());
+    ASSERT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_.size(), 1);
+    EXPECT_EQ(AgentManagerService::GetInstance()->callerConnectionCounts_[100], 2);
 }
 
 /**
