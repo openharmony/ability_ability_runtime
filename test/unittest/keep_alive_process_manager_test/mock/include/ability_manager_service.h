@@ -22,6 +22,7 @@
 
 #include "ability_keep_alive_service.h"
 #include "ability_manager_constants.h"
+#include "exit_reason.h"
 #include "keep_alive_info.h"
 #include "start_options.h"
 #include "want.h"
@@ -81,6 +82,15 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
+
+    /**
+     * Record app exit reason.
+     * @param pid The process id.
+     * @param uid The process uid.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppWithReason(int32_t pid, int32_t uid, const ExitReasonCompability &exitReason);
 
 public:
     static bool isInStatusBarResult;

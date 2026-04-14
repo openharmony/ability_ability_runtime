@@ -263,6 +263,13 @@ void AppScheduler::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &
     callback->OnStartProcessFailed(abilityTokens);
 }
 
+void AppScheduler::NotifyTerminateAbility(const sptr<IRemoteObject> &token)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyTerminateAbility(token);
+}
+
 void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
@@ -317,7 +324,6 @@ int AppScheduler::ForceKillApplication(const std::string &bundleName,
 int AppScheduler::KillApplicationWithUserId(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillApplicationWithUserId(bundleName, userId, appIndex);
     if (ret != ERR_OK) {
@@ -435,10 +441,11 @@ void AppScheduler::StartupResidentProcess(const std::vector<AppExecFwk::BundleIn
 }
 
 void AppScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, const std::string &customProcess)
+    int32_t requestId, const std::string &customProcess, bool isWindowStagePreload)
 {
     CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedAbility(want, abilityInfo, requestId, customProcess));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedAbility(want, abilityInfo, requestId,
+        customProcess, isWindowStagePreload));
 }
 
 void StartSpecifiedAbilityResponse::OnAcceptWantResponse(

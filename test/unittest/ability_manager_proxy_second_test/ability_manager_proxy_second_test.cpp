@@ -973,5 +973,67 @@ HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_IsRestartAppLimit_01
     EXPECT_FALSE(proxy_->IsRestartAppLimit());
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_IsRestartAppLimit_0100 end");
 }
+
+/**
+ * @tc.name: AbilityManagerProxy_StartAbilityByOEExt_0100
+ * @tc.desc: StartAbilityByOEExt with null caller token
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_StartAbilityByOEExt_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0100 start");
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t hostPid = 1001;
+    std::string specifiedFlag = "test_flag";
+    EXPECT_EQ(proxy_->StartAbilityByOEExt(want, callerToken, hostPid, specifiedFlag), INVALID_CALLER_TOKEN);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0100 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_StartAbilityByOEExt_0200
+ * @tc.desc: StartAbilityByOEExt with SendRequest error
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_StartAbilityByOEExt_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0200 start");
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "data.client.bundle";
+    abilityRequest.abilityInfo.name = "ClientAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    
+    Want want;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t hostPid = 1001;
+    std::string specifiedFlag = "test_flag";
+    
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(proxy_->StartAbilityByOEExt(want, callerToken, hostPid, specifiedFlag), INVALID_PARAMETERS_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0200 end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_StartAbilityByOEExt_0300
+ * @tc.desc: StartAbilityByOEExt success case
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_StartAbilityByOEExt_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0300 start");
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "data.client.bundle";
+    abilityRequest.abilityInfo.name = "ClientAbility";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    
+    Want want;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t hostPid = 1001;
+    std::string specifiedFlag = "test_flag";
+    
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    EXPECT_EQ(proxy_->StartAbilityByOEExt(want, callerToken, hostPid, specifiedFlag), NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_StartAbilityByOEExt_0300 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

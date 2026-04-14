@@ -400,6 +400,37 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_0200
+ * @tc.desc: CreateSessionInfo
+ * @tc.type: FUNC condition for isStartByOEExt
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(mgr, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.isStartByOEExt = true;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    std::string testFlag = "testFlag";
+    abilityRequest.specifiedFlag = testFlag;
+    int32_t requestId = 10000;
+    auto sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_EQ(sessionInfo->specifiedFlag, testFlag);
+
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_TRUE(sessionInfo->specifiedFlag.empty());
+
+    abilityRequest.isStartByOEExt = false;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
+    EXPECT_NE(sessionInfo, nullptr);
+    EXPECT_TRUE(sessionInfo->specifiedFlag.empty());
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_AbilityTransactionDone_0100
  * @tc.desc: AbilityTransactionDone
  * @tc.type: FUNC
@@ -2758,6 +2789,27 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsStartSpecifiedProcessRequest_007, Test
     AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
     AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_IsStartSpecifiedProcessRequest_008
+ * @tc.desc: IsStartSpecifiedProcessRequest, test ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsStartSpecifiedProcessRequest_008, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    abilityRequest.isStartByOEExt = true;
+    auto ret = uiAbilityLifecycleManager->IsStartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -6884,6 +6936,18 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsHookModule_0004, TestSize.Level1)
     request.abilityInfo.moduleName = "hook_module";
     bool result = mgr->IsHookModule(request);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsHookModule_0005
+ * @tc.desc: isStartByOEExt return false
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsHookModule_0005, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    AbilityRequest request;
+    request.isStartByOEExt = true;
+    EXPECT_FALSE(mgr->IsHookModule(request));
 }
 
 /**

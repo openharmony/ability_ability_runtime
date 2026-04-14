@@ -21,6 +21,7 @@ ohos_shared_library("quick_fix_manager_ani_kit") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -45,6 +46,7 @@ ohos_shared_library("quick_fix_manager_ani_kit") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ipc:ipc_single",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "runtime_core:ani",

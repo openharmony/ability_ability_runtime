@@ -29,6 +29,7 @@
 #include "perf_profile.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "xcollie/process_kill_reason.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -306,6 +307,10 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
+#ifdef APP_MGR_KILL_REASON_TAG
+    amsMgrServiceInner_->RecordAppWithReasonByUserId(accountId,
+        HiviewDFX::ProcessKillReason::KillEventId::REASON_KILL_PROCESS_WITH_ACCOUNT);
+#endif
     return amsMgrServiceInner_->KillApplicationByUserId(bundleName, appIndex, accountId, clearPageStack,
         "KillProcessWithAccount");
 }
@@ -391,8 +396,6 @@ int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,
 int32_t AmsMgrScheduler::KillApplicationWithUserId(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName=%{public}s,userId=%{public}d,apIndex=%{public}d",
-        bundleName.c_str(), userId, appIndex);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -494,7 +497,7 @@ void AmsMgrScheduler::SetAbilityForegroundingFlagToAppRecord(const pid_t pid)
 }
 
 void AmsMgrScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, const std::string &customProcess)
+    int32_t requestId, const std::string &customProcess, bool isWindowStagePreload)
 {
     if (!IsReady()) {
         return;
@@ -504,7 +507,9 @@ void AmsMgrScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppEx
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
-    auto task = [=]() { amsMgrServiceInner_->StartSpecifiedAbility(want, abilityInfo, requestId, customProcess); };
+    auto task = [=]() {
+        amsMgrServiceInner_->StartSpecifiedAbility(want, abilityInfo, requestId, customProcess, isWindowStagePreload);
+    };
     amsHandler_->SubmitTask(task, {
         .taskName_ = "StartSpecifiedAbility",
         .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE

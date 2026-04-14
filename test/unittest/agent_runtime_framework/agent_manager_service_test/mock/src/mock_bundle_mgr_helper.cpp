@@ -14,7 +14,6 @@
  */
 
 #include "bundle_mgr_helper.h"
-
 #include "extension_ability_info.h"
 #include "mock_my_flag.h"
 
@@ -25,6 +24,7 @@ bool AgentRuntime::MyFlag::isRegisterBundleEventCallbackCalled = false;
 int32_t AgentRuntime::MyFlag::retGetProcessRunningInfoByPid = ERR_OK;
 AppExecFwk::AppProcessState AgentRuntime::MyFlag::processState = AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
 bool AgentRuntime::MyFlag::retQueryExtensionAbilityInfos = true;
+bool AgentRuntime::MyFlag::shouldFillExtensionAbilityInfos = true;
 AppExecFwk::ExtensionAbilityType AgentRuntime::MyFlag::extensionAbilityType = AppExecFwk::ExtensionAbilityType::AGENT;
 
 namespace AppExecFwk {
@@ -49,7 +49,7 @@ bool BundleMgrHelper::GetApplicationInfo(const std::string &appName, const Appli
 bool BundleMgrHelper::QueryExtensionAbilityInfos(const AAFwk::Want &want, const int32_t &flag, const int32_t &userId,
     std::vector<ExtensionAbilityInfo> &extensionInfos)
 {
-    if (AgentRuntime::MyFlag::retQueryExtensionAbilityInfos) {
+    if (AgentRuntime::MyFlag::retQueryExtensionAbilityInfos && AgentRuntime::MyFlag::shouldFillExtensionAbilityInfos) {
         ExtensionAbilityInfo info;
         info.type = AgentRuntime::MyFlag::extensionAbilityType;
         extensionInfos.push_back(info);

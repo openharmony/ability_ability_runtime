@@ -68,6 +68,10 @@ static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeR
 static GlobalObserverItem freezeObserver;
 static GlobalObserverItem defaultHandler;
 static std::mutex defaultHandlerMtx;
+static GlobalObserverItem g_defaultLeakObserver;
+static std::mutex defaultLeakMtx;
+static GlobalObserverItem g_defaulFreezeObserver;
+static std::mutex g_defaultFreezeMtx;
 static std::mutex globalErrorMtx;
 static std::mutex globalPromiseMtx;
 static std::recursive_mutex errorMtx;
@@ -76,8 +80,10 @@ static std::once_flag registerCallbackFlag;
 static std::shared_ptr<JsLoopObserver> loopObserver_;
 static bool freezeCallbackRegistered = false;
 static bool isSetHandler = false;
+static bool g_isSetLeakObserver = false;
 static std::mutex onErrorMtx;
 static std::condition_variable onErrorCv;
+static int64_t g_lastWatchTimeReport = 0;
 constexpr int ON_ERROR_ASYNC_TIMEOUT = 2;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
@@ -94,6 +100,7 @@ constexpr const char* GLOBAL_ON_OFF_TYPE_UNHANDLED_REJECTION = "globalUnhandledR
 constexpr const char* ON_OFF_TYPE_SYNC = "errorEvent";
 constexpr const char* ON_OFF_TYPE_SYNC_LOOP = "loopObserver";
 constexpr uint32_t INITITAL_REFCOUNT_ONE = 1;
+constexpr int64_t ONE_MINUTES_DELAY_TIMER = 60 * 1000;
 
 thread_local std::set<napi_ref> unhandledRejectionObservers;
 thread_local std::set<std::shared_ptr<GlobalUnhandledRejection>> globalUnhandledRejections;
@@ -601,7 +608,7 @@ static void DoErrorHandlerCallback(napi_env env, std::string name, std::string m
     }
 }
 
-static void FreezeCallback()
+static void OnFreezeCallback()
 {
     std::lock_guard<std::mutex> lock(freezeMtx);
     napi_handle_scope scope_ = nullptr;
@@ -639,6 +646,72 @@ static void FreezeCallback()
         return;
     }
     napi_close_handle_scope(freezeObserver.env, scope_);
+}
+
+static void DefaultFreezeCallback()
+{
+    TAG_LOGD(AAFwkTag::JSNAPI, "DefaultFreezeCallback start");
+    std::lock_guard<std::mutex> lock(g_defaultFreezeMtx);
+    napi_handle_scope scope_ = nullptr;
+    napi_status scopeStatus = napi_open_handle_scope(g_defaulFreezeObserver.env, &scope_);
+    if (scopeStatus != napi_ok || scope_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_open_handle_scope failed");
+        return;
+    }
+    if (!g_defaulFreezeObserver.ref) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "not register freeze callback");
+        napi_close_handle_scope(g_defaulFreezeObserver.env, scope_);
+        return;
+    }
+    napi_value global = nullptr;
+    if (napi_get_global(g_defaulFreezeObserver.env, &global) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Global Failed");
+        napi_close_handle_scope(g_defaulFreezeObserver.env, scope_);
+        return;
+    }
+
+    size_t argc = ARGC_ZERO;
+    napi_value args[] = {};
+
+    napi_value function = nullptr;
+    if (napi_get_reference_value(g_defaulFreezeObserver.env, g_defaulFreezeObserver.ref, &function) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Callback Failed");
+        napi_close_handle_scope(g_defaulFreezeObserver.env, scope_);
+        return;
+    }
+
+    napi_value result = nullptr;
+    auto status = napi_ok;
+    if ((status = napi_call_function(
+        g_defaulFreezeObserver.env, global, function, argc, args, &result)) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed, status:%{public}d.", status);
+        napi_close_handle_scope(g_defaulFreezeObserver.env, scope_);
+        return;
+    }
+    napi_close_handle_scope(g_defaulFreezeObserver.env, scope_);
+    TAG_LOGD(AAFwkTag::JSNAPI, "DefaultFreezeCallback success");
+}
+
+static bool CheckReportDuration()
+{
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        steady_clock::now().time_since_epoch()).count();
+    if ((now - g_lastWatchTimeReport > ONE_MINUTES_DELAY_TIMER) || (now - g_lastWatchTimeReport < 0)) {
+        g_lastWatchTimeReport = now;
+        return true;
+    } else {
+        TAG_LOGW(AAFwkTag::JSNAPI, "reporting once per minute.");
+        return false;
+    }
+}
+
+static void FreezeCallback()
+{
+    if (!CheckReportDuration()) {
+        return;
+    }
+    OnFreezeCallback();
+    DefaultFreezeCallback();
 }
 
 static bool ErrorManagerMainWorkerCallback(
@@ -753,6 +826,82 @@ static bool GlobalPromiseManagerCallback(
     return true;
 }
 
+static napi_value CreateDetailInfoObject(napi_env env, AppExecFwk::LeakType leakType,
+                                         const AppExecFwk::LeakDetailInfo &obj)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return nullptr;
+    }
+ 
+    napi_value detailObj = nullptr;
+    if (napi_create_object(env, &detailObj) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Create detailInfo object failed");
+        return nullptr;
+    }
+
+    std::map<const char*, int64_t> fieldMap;
+    if (leakType == AppExecFwk::LeakType::PSS_MEMORY) {
+        fieldMap = {
+            {"arkts", static_cast<int64_t>(obj.arktsSize)},
+            {"native", static_cast<int64_t>(obj.nativeSize)},
+            {"ion", static_cast<int64_t>(obj.ionSize)},
+            {"gpu", static_cast<int64_t>(obj.gpuSize)},
+            {"ashmem", static_cast<int64_t>(obj.ashmemSize)},
+            {"other", static_cast<int64_t>(obj.otherSize)}
+        };
+    }
+
+    for (const auto& [fieldName, fieldValue] : fieldMap) {
+        napi_value jsValue = CreateJsValue(env, fieldValue);
+        if (jsValue != nullptr) {
+            napi_set_named_property(env, detailObj, fieldName, jsValue);
+        }
+    }
+
+    return detailObj;
+}
+
+static bool LeakObserverFunc(const AppExecFwk::LeakObject &obj)
+{
+    std::lock_guard<std::mutex> lock(defaultLeakMtx);
+    if (!g_defaultLeakObserver.ref) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "not register ObserverFunc callback");
+        return false;
+    }
+ 
+    napi_value global = nullptr;
+    if (napi_get_global(g_defaultLeakObserver.env, &global) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Global Failed");
+        return false;
+    }
+ 
+    size_t argc = ARGC_TWO;
+    napi_value args[ARGC_THREE];
+    args[0] = CreateJsValue(g_defaultLeakObserver.env, obj.leakType);
+    args[1] = CreateJsValue(g_defaultLeakObserver.env, static_cast<int64_t>(obj.leakSize));
+ 
+    if (obj.leakType == AppExecFwk::LeakType::PSS_MEMORY) {
+        args[ARGC_TWO] = CreateDetailInfoObject(g_defaultLeakObserver.env, obj.leakType, obj.detailInfo);
+        if (!args[ARGC_TWO]) {
+            napi_get_undefined(g_defaultLeakObserver.env, &args[ARGC_TWO]);
+        }
+        argc = ARGC_THREE;
+    }
+
+    napi_value function = nullptr;
+    if (napi_get_reference_value(g_defaultLeakObserver.env, g_defaultLeakObserver.ref, &function) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Callback Failed");
+        return false;
+    }
+    napi_value result = nullptr;
+    if (napi_call_function(g_defaultLeakObserver.env, global, function, argc, args, &result) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed");
+        return false;
+    }
+    return true;
+}
+
 class JsErrorManager final {
 public:
     JsErrorManager() {}
@@ -776,10 +925,20 @@ public:
     {
         GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSetDefaultErrorHandler);
     }
+ 
+    static napi_value SetDefaultFreezeObserver(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSetDefaultFreezeObserver);
+    }
 
     static napi_value Off(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnOff);
+    }
+
+    static napi_value SetDefaultResourceUsageObserver(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSetDefaultResourceUsageObserver);
     }
 
     napi_value SetRejectionCallback(napi_env env) const
@@ -885,6 +1044,88 @@ private:
         return object;
     }
 
+    napi_value OnOnSetDefaultResourceUsageObserver(napi_env env, napi_value function)
+    {
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "SetDefaultResourceUsageObserver must be called in main thread");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
+            return CreateJsUndefined(env);
+        }
+
+        if (CheckTypeForNapiValue(env, function, napi_null) || CheckTypeForNapiValue(env, function, napi_undefined)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "CheckTypeForNapiValue failed");
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::lock_guard<std::mutex> lock(defaultLeakMtx);
+        napi_value oldObserverFunc = nullptr;
+
+        if (g_defaultLeakObserver.ref == nullptr) {
+            oldObserverFunc = nullptr;
+        } else if (napi_get_reference_value(env, g_defaultLeakObserver.ref, &oldObserverFunc) != napi_ok) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Get old g_defaultLeakObserver Failed");
+        }
+
+        if (g_defaultLeakObserver.ref) {
+            napi_delete_reference(env, g_defaultLeakObserver.ref);
+            g_defaultLeakObserver.ref = nullptr;
+        }
+
+        if (function) {
+            NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &g_defaultLeakObserver.ref));
+        } else {
+            g_defaultLeakObserver.ref = nullptr;
+        }
+        g_defaultLeakObserver.env = env;
+        if (!g_isSetLeakObserver) {
+            g_isSetLeakObserver = true;
+            TAG_LOGI(AAFwkTag::JSNAPI, "change isSetHandler state successfully");
+        }
+        return oldObserverFunc;
+    }
+
+    napi_value OnOnSetDefaultFreezeObserver(napi_env env, napi_value function)
+    {
+        TAG_LOGD(AAFwkTag::JSNAPI, "OnOnSetDefaultFreezeObserver start.");
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
+            return CreateJsUndefined(env);
+        }
+        if (CheckTypeForNapiValue(env, function, napi_null)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "CheckTypeForNapiValue failed, func is null");
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        if (CheckTypeForNapiValue(env, function, napi_undefined)) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "func is undefined.");
+        }
+        std::lock_guard<std::mutex> lock(g_defaultFreezeMtx);
+        napi_value object = nullptr;
+        if (g_defaulFreezeObserver.ref == nullptr) {
+            object = nullptr;
+        } else if (napi_get_reference_value(env, g_defaulFreezeObserver.ref, &object) != napi_ok) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Get g_defaulFreezeObserver Failed");
+        }
+        if (g_defaulFreezeObserver.ref) {
+            napi_delete_reference(env, g_defaulFreezeObserver.ref);
+            g_defaulFreezeObserver.ref = nullptr;
+        }
+        if (function) {
+            NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &g_defaulFreezeObserver.ref));
+        } else {
+            g_defaulFreezeObserver.ref = nullptr;
+        }
+        g_defaulFreezeObserver.env = env;
+        if (!freezeCallbackRegistered) {
+            AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(FreezeCallback);
+            freezeCallbackRegistered = true;
+            TAG_LOGI(AAFwkTag::JSNAPI, "Default Freeze callback registered to AppRecovery successfully");
+        }
+        TAG_LOGD(AAFwkTag::JSNAPI, "OnOnSetDefaultFreezeObserver end.");
+        return object;
+    }
+
     napi_value OnSetDefaultErrorHandler(napi_env env, const size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -896,6 +1137,30 @@ private:
         }
         return argc == ARGC_ONE ?
         OnOnSetDefaultErrorHandler(env, argv[INDEX_ZERO]) : OnOnSetDefaultErrorHandler(env, nullptr);
+    }
+
+    napi_value OnSetDefaultFreezeObserver(napi_env env, const size_t argc, napi_value *argv)
+    {
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
+        std::string type = ParseParamType(env, argc, argv);
+        if (argc != ARGC_ZERO && argc != ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        return argc == ARGC_ONE ?
+        OnOnSetDefaultFreezeObserver(env, argv[INDEX_ZERO]) : OnOnSetDefaultFreezeObserver(env, nullptr);
+    }
+
+    napi_value OnSetDefaultResourceUsageObserver(napi_env env, const size_t argc, napi_value *argv)
+    {
+        if (argc != ARGC_ZERO && argc != ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc: %zu", argc);
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        return argc == ARGC_ONE ?
+        OnOnSetDefaultResourceUsageObserver(env, argv[INDEX_ZERO]) : OnOnSetDefaultResourceUsageObserver(env, nullptr);
     }
 
     napi_value OnOn(napi_env env, const size_t argc, napi_value* argv)
@@ -1521,6 +1786,34 @@ napi_value ErrorManagerInstanceTypeInit(napi_env env)
     napi_set_named_property(env, objValue, "CUSTOM", CreateJsValue(env, InstanceType::CUSTOM));
     return objValue;
 }
+
+napi_value ErrorManagerLeakTypeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    if (napi_create_object(env, &objValue) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "create obj failed");
+        return nullptr;
+    }
+
+    if (objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "PSS_MEMORY", CreateJsValue(env, AppExecFwk::LeakType::PSS_MEMORY));
+    napi_set_named_property(env, objValue, "ION_MEMORY", CreateJsValue(env, AppExecFwk::LeakType::ION_MEMORY));
+    napi_set_named_property(env, objValue, "ASHMEM_MEMORY", CreateJsValue(env, AppExecFwk::LeakType::ASHMEM_MEMORY));
+    napi_set_named_property(env, objValue, "GPU_MEMORY", CreateJsValue(env, AppExecFwk::LeakType::GPU_MEMORY));
+    napi_set_named_property(env, objValue, "FD", CreateJsValue(env, AppExecFwk::LeakType::FD));
+    napi_set_named_property(env, objValue, "THREAD", CreateJsValue(env, AppExecFwk::LeakType::THREAD));
+    return objValue;
+}
+
 napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
@@ -1533,6 +1826,7 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsErrorManager.release(), JsErrorManager::Finalizer, nullptr, nullptr);
 
     std::call_once(registerCallbackFlag, []() {
+        AppExecFwk::ApplicationDataManager::GetInstance().RegisterHasOnErrorCallback(IsErrorObserverListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterHasOnErrorCallback(IsErrorObserverListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterHasAllUnhandledRejectionCallback(IsGlobalPromiseListNotEmpty);
         NapiErrorManager::GetInstance()->RegisterOnErrorCallback(
@@ -1547,8 +1841,14 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsErrorManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsErrorManager::Off);
     BindNativeFunction(env, exportObj, "setDefaultErrorHandler", moduleName, JsErrorManager::SetDefaultErrorHandler);
+    BindNativeFunction(env, exportObj, "setDefaultResourceUsageObserver", moduleName,
+        JsErrorManager::SetDefaultResourceUsageObserver);
+    BindNativeFunction(env, exportObj, "setDefaultFreezeObserver", moduleName,
+        JsErrorManager::SetDefaultFreezeObserver);
 
+    AppExecFwk::ApplicationDataManager::GetInstance().SetLeakObserver(LeakObserverFunc);
     napi_set_named_property(env, exportObj, "InstanceType", ErrorManagerInstanceTypeInit(env));
+    napi_set_named_property(env, exportObj, "ResourceType", ErrorManagerLeakTypeInit(env));
     return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime

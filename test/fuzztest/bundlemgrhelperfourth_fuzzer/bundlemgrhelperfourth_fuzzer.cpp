@@ -57,8 +57,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     std::shared_ptr<BundleMgrHelper> bmHelper = std::make_shared<BundleMgrHelper>();
     FuzzedDataProvider fdp(data, size);
-    std::vector<PluginBundleInfo> pluginBundleInfos;
-    bmHelper->GetPluginInfosForSelf(pluginBundleInfos);
+
+    if (fdp.ConsumeBool()) {
+        std::vector<PluginBundleInfo> pluginBundleInfos;
+        bmHelper->GetPluginInfosForSelf(pluginBundleInfos);
+    }
+
     return true;
 }
 }

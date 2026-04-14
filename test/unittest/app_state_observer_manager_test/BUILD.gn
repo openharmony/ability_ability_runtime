@@ -55,6 +55,7 @@ ohos_unittest("app_state_observer_manager_test") {
     "appspawn:appspawn_client",
     "bundle_framework:appexecfwk_core",
     "ffrt:libffrt",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",

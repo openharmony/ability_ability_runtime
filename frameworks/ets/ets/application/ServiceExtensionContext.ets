@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
 
-class Cleaner {
+export class Cleaner {
   public ptr: long = 0;
 
   constructor(ptr: long) {

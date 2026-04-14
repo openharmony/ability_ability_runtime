@@ -55,6 +55,7 @@ public:
     MOCK_METHOD2(RegisterCancelListener, void(const sptr<IWantSender>& sender, const sptr<IWantReceiver>& receiver));
     MOCK_METHOD2(UnregisterCancelListener, void(const sptr<IWantSender>& sender, const sptr<IWantReceiver>& receiver));
     MOCK_METHOD2(GetPendingRequestWant, int(const sptr<IWantSender>& target, std::shared_ptr<Want>& want));
+    MOCK_METHOD2(GetPendingRequestWantFromProxy, int(const sptr<IWantSender>& target, std::shared_ptr<Want>& want));
     MOCK_METHOD2(GetWantSenderInfo, int(const sptr<IWantSender>& target, std::shared_ptr<WantSenderInfo>& info));
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
@@ -475,6 +476,7 @@ public:
     MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
         int32_t userId));
     MOCK_METHOD1(GetAutoStartupStatusForSelf, int32_t(bool &isAutoStartEnabled));
+    MOCK_METHOD4(StartAbilityByOEExt, int32_t(const Want&, sptr<IRemoteObject>, int32_t, const std::string&));
 
 int32_t GetUserLockedBundleList(int32_t userId, std::unordered_set<std::string> &userLockedBundleList) override
 {

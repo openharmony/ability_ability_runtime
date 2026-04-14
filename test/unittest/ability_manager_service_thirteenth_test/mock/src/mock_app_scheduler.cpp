@@ -21,6 +21,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t MOCK_FAILED_PID = 654321;
+}
 AppScheduler::AppScheduler()
 {
     TAG_LOGI(AAFwkTag::TEST, " Test AppScheduler::AppScheduler()");
@@ -158,6 +161,11 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>>& abili
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppRemoteDied()");
 }
 
+void AppScheduler::NotifyTerminateAbility(const sptr<IRemoteObject> &token)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyTerminateAbility()");
+}
+
 void AppScheduler::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnStartProcessFailed()");
@@ -201,8 +209,13 @@ void AppScheduler::GetRunningProcessInfoByToken(const sptr<IRemoteObject>& token
 
 void AppScheduler::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo& info) const
 {
-    info.isAbilityForegrounding = true;
-    info.isFocused = true;
+    if (pid == MOCK_FAILED_PID) {
+        info.isAbilityForegrounding = false;
+        info.isFocused = false;
+    } else {
+        info.isAbilityForegrounding = true;
+        info.isFocused = true;
+    }
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::GetRunningProcessInfoByPid()");
 }
 
@@ -212,7 +225,7 @@ bool AppScheduler::IsMemorySizeSufficient() const
 }
 
 void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t,
-    const std::string&) {}
+    const std::string&, bool) {}
 
 int AppScheduler::StartUserTest(
     const Want& want, const sptr<IRemoteObject>& observer, const AppExecFwk::BundleInfo& bundleInfo, int32_t userId)

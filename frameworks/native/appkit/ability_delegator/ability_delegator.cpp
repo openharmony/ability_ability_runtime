@@ -703,27 +703,41 @@ void AbilityDelegator::FinishUserTest(const std::string &msg, const int64_t resu
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid observer");
         return;
     }
-
     auto delegatorArgs = AbilityDelegatorRegistry::GetArguments();
     if (!delegatorArgs) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid args");
         return;
     }
-
-    if (testRunner_) {
-        testRunner_->Stop();
-    }
-
     auto realMsg(msg);
     if (realMsg.length() > INFORMATION_MAX_LENGTH) {
         TAG_LOGW(AAFwkTag::DELEGATOR, "too long message");
         realMsg.resize(INFORMATION_MAX_LENGTH);
     }
+    if (!delegatorThread_) {
+        delegatorThread_ = std::make_unique<DelegatorThread>(true);
+        if (!delegatorThread_) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "create delegatorThread failed");
+            return;
+        }
+    }
+    auto runTask = [weak = weak_from_this(), realMsg, resultCode, delegatorArgs]() {
+        auto abilityDelegator = weak.lock();
+        if (!abilityDelegator || !abilityDelegator->testRunner_) {
+            TAG_LOGW(AAFwkTag::DELEGATOR, "invalid TestRunner");
+            return;
+        }
 
-    const auto &bundleName = delegatorArgs->GetTestBundleName();
-    auto err = AAFwk::AbilityManagerClient::GetInstance()->FinishUserTest(realMsg, resultCode, bundleName);
-    if (err) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "call FinishUserTest failed: %{public}d", err);
+        TAG_LOGI(AAFwkTag::DELEGATOR, "call js onStop()");
+        abilityDelegator->testRunner_->Stop();
+        
+        const auto &bundleName = delegatorArgs->GetTestBundleName();
+        auto err = AAFwk::AbilityManagerClient::GetInstance()->FinishUserTest(realMsg, resultCode, bundleName);
+        if (err) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "call FinishUserTest failed: %{public}d", err);
+        }
+    };
+    if (!delegatorThread_->Run(runTask)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "run task on delegatorThread failed");
     }
 }
 

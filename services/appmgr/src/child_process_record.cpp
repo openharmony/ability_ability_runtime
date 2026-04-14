@@ -23,8 +23,9 @@ namespace OHOS {
 namespace AppExecFwk {
 ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest &request,
     const std::shared_ptr<AppRunningRecord> hostRecord)
-    : isStartWithDebug_(request.isStartWithDebug), hostPid_(hostPid), childProcessCount_(request.childProcessCount),
-    childProcessType_(request.childProcessType), hostRecord_(hostRecord)
+    : isStartWithDebug_(request.isStartWithDebug), isStaticChildProcess_(request.isStaticChildProcess),
+    hostPid_(hostPid), childProcessCount_(request.childProcessCount), childProcessType_(request.childProcessType),
+    hostRecord_(hostRecord)
 {
     srcEntry_ = request.srcEntry;
     if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
@@ -248,6 +249,11 @@ void ChildProcessRecord::SetAttachTimeoutStartTime(const std::chrono::system_clo
 std::chrono::system_clock::time_point ChildProcessRecord::GetAttachTimeoutStartTime() const
 {
     return attachTimeoutStartTime_;
+}
+
+bool ChildProcessRecord::IsStatic() const
+{
+    return isStaticChildProcess_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

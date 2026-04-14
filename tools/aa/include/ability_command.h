@@ -78,6 +78,7 @@ const std::string HELP_MSG_START =
     "  [--wt <window-top>] "
     "  [--wh <window-height>] "
     "  [--ww <window-width>] "
+    "  [-u <user-id>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =
@@ -130,6 +131,7 @@ const std::string HELP_MSG_TEST =
     "                  [-s timeout <test-timeout>]\n"
     "                  [-s <any-key> <any-value>]\n"
     "                  [-w <wait-time>]\n"
+    "                  [-u <userId>]                          user id for running test\n"
     "                  [-D]\n";
 
 const std::string HELP_MSG_SEND_MEMORY_LEVEL =
@@ -272,15 +274,17 @@ private:
 #endif
     sptr<IAbilityManager> GetAbilityManagerService();
 
+    ErrCode MakeWantFromCmd(Want& want, std::string& windowMode, int32_t& userId);
     ErrCode MakeWantFromCmd(Want& want, std::string& windowMode);
     ErrCode MakeWantFromCmdForStopService(Want& want);
     ErrCode MakeWantForProcess(Want& want);
     ErrCode RunAsTestCommand();
     ErrCode TestCommandError(const std::string& info);
+    ErrCode ParseTestCommandOption(const std::string &opt, int &i, std::map<std::string, std::string> &params);
     bool MatchOrderString(const std::regex &r, const std::string &orderCmd);
     bool CheckPerfCmdString(const char* optarg, const size_t paramLength, std::string &perfCmd);
     void ParseBundleName(std::string &bundleName);
-    ErrCode StartAbilityWithWait(Want& want);
+    ErrCode StartAbilityWithWait(Want& want, int32_t userId = DEFAULT_INVAL_VALUE);
     void FormatOutputForWithWait(const Want &want, const AbilityStartWithWaitObserverData& data);
     bool IsImplicitStartAction(const Want &want);
     bool startAbilityWithWaitFlag_ = false;

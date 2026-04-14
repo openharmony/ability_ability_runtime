@@ -39,7 +39,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     auto residentProcessManager = std::make_shared<ResidentProcessManager>();
     AppInfo info;
     FuzzedDataProvider fdp(data, size);
-    residentProcessManager->OnAppStateChanged(info);
+
+    if (fdp.ConsumeBool()) {
+        residentProcessManager->OnAppStateChanged(info);
+    }
+
     return true;
 }
 }

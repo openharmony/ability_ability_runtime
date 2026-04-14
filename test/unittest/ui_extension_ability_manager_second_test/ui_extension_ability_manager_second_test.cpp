@@ -1612,5 +1612,187 @@ HWTEST_F(UIExtensionAbilityManagerSecondTest, TerminateAbilityInner_002, TestSiz
     auto ret = connectManager->TerminateAbilityInner(token);
     EXPECT_EQ(ret, ERR_OK); // Should not actually terminate because of connections
 }
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: HandleExtensionAbilityRemove
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleExtensionAbilityRemove when ability is cached
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, HandleExtensionAbilityRemove_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_001 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.test.uiextension";
+    abilityRequest.abilityInfo.name = "TestUIExtension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>(new (std::nothrow) SessionInfo());
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->persistentId = 1;
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new (std::nothrow) Rosen::Session(info));
+    
+    ASSERT_NE(sessionInfo->sessionToken, nullptr);
+    abilityRecord->sessionInfo_ = sessionInfo;
+
+    bool result = connectManager->HandleExtensionAbilityRemove(abilityRecord);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_001 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: HandleExtensionAbilityRemove
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleExtensionAbilityRemove when ability in serviceMap
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, HandleExtensionAbilityRemove_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_002 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.test.uiextension";
+    abilityRequest.abilityInfo.name = "TestUIExtension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    AppExecFwk::ElementName element;
+    element.SetBundleName(abilityRequest.abilityInfo.bundleName);
+    element.SetModuleName(abilityRequest.abilityInfo.moduleName);
+    element.SetAbilityName(abilityRequest.abilityInfo.name);
+    std::string serviceKey = element.GetURI();
+    connectManager->serviceMap_[serviceKey] = abilityRecord;
+
+    bool result = connectManager->HandleExtensionAbilityRemove(abilityRecord);
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_002 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: HandleExtensionAbilityRemove
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleExtensionAbilityRemove when ability not found
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, HandleExtensionAbilityRemove_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_003 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.test.uiextension";
+    abilityRequest.abilityInfo.name = "TestUIExtension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    bool result = connectManager->HandleExtensionAbilityRemove(abilityRecord);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "HandleExtensionAbilityRemove_003 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: CleanupConnectionAndTerminateIfNeeded
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify CleanupConnectionAndTerminateIfNeeded with non-empty connect list
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, CleanupConnectionAndTerminateIfNeeded_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CleanupConnectionAndTerminateIfNeeded_001 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.abilityInfo.bundleName = "com.test.uiextension";
+    abilityRequest.abilityInfo.name = "TestUIExtension";
+    auto abilityRecord = BaseExtensionRecord::CreateBaseExtensionRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo = sptr(new (std::nothrow) SessionInfo());
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->persistentId = 1;
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new (std::nothrow) Rosen::Session(info));
+    ASSERT_NE(sessionInfo->sessionToken, nullptr);
+    abilityRecord->sessionInfo_ = sessionInfo;
+
+    AppExecFwk::ElementName element;
+    element.SetBundleName(abilityRequest.abilityInfo.bundleName);
+    element.SetModuleName(abilityRequest.abilityInfo.moduleName);
+    element.SetAbilityName(abilityRequest.abilityInfo.name);
+    std::string serviceKey = element.GetURI();
+    connectManager->serviceMap_[serviceKey] = abilityRecord;
+
+    int32_t result = connectManager->CleanupConnectionAndTerminateIfNeeded(abilityRecord);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "CleanupConnectionAndTerminateIfNeeded_001 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: HandleCommandDestroy
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleCommandDestroy with valid sessionInfo and sessionToken
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, HandleCommandDestroy_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandDestroy_001 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo = sptr(new (std::nothrow) SessionInfo());
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->persistentId = 1;
+    sessionInfo->sessionToken = sptr<Rosen::Session>(new (std::nothrow) Rosen::Session(info));
+    ASSERT_NE(sessionInfo->sessionToken, nullptr);
+
+    connectManager->HandleCommandDestroy(sessionInfo);
+    EXPECT_EQ(connectManager->uiExtRecipientMap_.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandDestroy_001 end");
+}
+
+/*
+ * Feature: UIExtensionAbilityManager
+ * Function: HandleCommandDestroy
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleCommandDestroy with null sessionInfo
+ */
+HWTEST_F(UIExtensionAbilityManagerSecondTest, HandleCommandDestroy_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandDestroy_002 start");
+    std::shared_ptr<UIExtensionAbilityManager> connectManager = std::make_shared<UIExtensionAbilityManager>(0);
+    EXPECT_NE(connectManager, nullptr);
+
+    sptr<SessionInfo> sessionInfo = nullptr;
+
+    connectManager->HandleCommandDestroy(sessionInfo);
+    EXPECT_EQ(connectManager->uiExtensionMap_.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandDestroy_002 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

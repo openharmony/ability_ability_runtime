@@ -36,6 +36,7 @@ struct AppfreezeEventInfo {
     std::string applicationHeapInfo;
     std::string processLifeTime;
     std::string mainStack;
+    std::string externalLog;
     int32_t markedId = 0;
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
@@ -45,6 +46,7 @@ struct AppfreezeEventInfo {
     int eventId = -1;
     bool foregroundState;
     bool enableFreeze;
+    bool reportLifecycleToFreeze = false;
 };
 
 class AppfreezeEventReport {

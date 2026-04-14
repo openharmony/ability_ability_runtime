@@ -84,6 +84,7 @@ ohos_fuzztest("KeepAliveProcessManagerEleventhFuzzTest") {
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hisysevent:libhisysevent",

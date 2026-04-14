@@ -31,6 +31,8 @@
 #include "iapplication_state_observer.h"
 #include "iapp_state_callback.h"
 #include "iconfiguration_observer.h"
+#include "image_error_handler_interface.h"
+#include "image_process_state_observer_interface.h"
 #include "iremote_object.h"
 #include "irender_scheduler.h"
 #include "irender_state_observer.h"
@@ -376,6 +378,16 @@ public:
     virtual AppMgrResultCode DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
+     * DumpMem, call DumpMem() through proxy project.
+     * triggerGC and dump application's memory info.
+     *
+     * @param info, pid tid needGc needSnapshot
+     * @param dumpResult, the dump result string
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual AppMgrResultCode DumpMem(OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult);
+
+    /**
      * GetConfiguration
      *
      * @param info to retrieve configuration data.
@@ -507,7 +519,7 @@ public:
      * @param requestId request id to callback
      */
     virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0, const std::string &customProcess = "");
+        int32_t requestId = 0, const std::string &customProcess = "", bool isWindowStagePreload = false);
 
     /**
      * Register response of start specified ability.
@@ -779,6 +791,10 @@ public:
      */
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
 
+    int32_t RegisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer);
+
+    int32_t UnregisterImageProcessStateObserver(const sptr<IImageProcessStateObserver> &observer);
+
     /**
      * Register native child exit notify.
      * @param notify, callback to notify.
@@ -937,6 +953,13 @@ public:
      */
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0);
+
+    int32_t MakeImage(const AAFwk::Want &want, int32_t userId,
+        AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0, sptr<IImageErrorHandler> errorHandler = nullptr);
+
+    int32_t DestroyImage(uint64_t checkpointId, sptr<IImageErrorHandler> errorHandler = nullptr);
+
+    int32_t NotifyTemplateProcessDeepFrozen(int32_t pid);
 
     /**
      * @brief set support process cache by self
@@ -1099,6 +1122,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t PreloadExtension(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
+
+    /**
+     * Get all ability infos
+     *
+     * @param pid if pid is -1, query all ability infos, otherwise query ability infos for this pid
+     * @param infos ability infos
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

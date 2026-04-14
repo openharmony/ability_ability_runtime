@@ -427,6 +427,9 @@ enum class AbilityManagerInterfaceCode {
 
     START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE = 1074,
 
+    // ipc id for get want from proxy
+    GET_PENDING_REQUEST_WANT_FROM_PROXY = 1075,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -553,6 +556,7 @@ enum class AbilityManagerInterfaceCode {
     KILL_APP_WITH_REASON = 6007,
     KILL_BUNDLE_WITH_REASON = 6008,
     RECORD_APP_WITH_REASON = 6009,
+    RECORD_APP_WITH_REASON_BY_USERID = 6010,
 
     // ipc id for register auto startup system callback
     REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6101,
@@ -714,6 +718,12 @@ enum class AbilityManagerInterfaceCode {
 
     // set app recovery flag
     SET_APP_RECOVERY_FLAG  = 6160,
+
+    // start ability by oe extension
+    START_ABILITY_BY_OE_EXT = 6161,
+
+    // query self modular object Extension infos
+    QUERY_SELF_MODULAR_OBJECT_EXTENSION_INFOS = 6162,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

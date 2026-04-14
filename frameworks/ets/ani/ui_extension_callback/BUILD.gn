@@ -20,6 +20,7 @@ ohos_shared_library("ani_ui_extension_callback") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -42,6 +43,7 @@ ohos_shared_library("ani_ui_extension_callback") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "image_framework:image_native",
     "runtime_core:ani",
   ]

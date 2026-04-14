@@ -57,8 +57,15 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     std::shared_ptr<BundleMgrHelper> bmHelper = std::make_shared<BundleMgrHelper>();
     FuzzedDataProvider fdp(data, size);
-    bmHelper->RegisterPluginEventCallback(nullptr);
-    bmHelper->UnregisterPluginEventCallback(nullptr);
+
+    if (fdp.ConsumeBool()) {
+        bmHelper->RegisterPluginEventCallback(nullptr);
+    }
+
+    if (fdp.ConsumeBool()) {
+        bmHelper->UnregisterPluginEventCallback(nullptr);
+    }
+
     return true;
 }
 }

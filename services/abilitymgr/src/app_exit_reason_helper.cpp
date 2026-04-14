@@ -28,6 +28,8 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int32_t INVALID_KILLID = -2;
+constexpr int32_t DEFAULT_KILL_ID = -1;
+constexpr int32_t DEFAULT_PROCESS_RUNNING_INFO_PID = 0;
 }
 
 AppExitReasonHelper::AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper)
@@ -42,7 +44,7 @@ int32_t AppExitReasonHelper::RecordAppWithReason(int32_t pid, int32_t uid, const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetNameAndIndexForUid failed, ret: %{public}d", ret);
         return ret;
     }
-    
+
     AppExecFwk::RunningProcessInfo processInfo;
     int32_t userId = -1;
     int32_t getOsAccountRet = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
@@ -52,14 +54,38 @@ int32_t AppExitReasonHelper::RecordAppWithReason(int32_t pid, int32_t uid, const
         return getOsAccountRet;
     }
     GetRunningProcessInfo(pid, userId, bundleName, processInfo);
-    ExitReason tmpReason(exitReason.reason, exitReason.subReason, exitReason.exitMsg);
-    tmpReason.killId = exitReason.killId;
-    int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, tmpReason, processInfo, false);
-    if (resultCode != ERR_OK) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "RecordAppWithReason inPid: %{public}d, processPid: %{public}d",
+        pid, processInfo.pid_);
+
+    AppReasonInfo appInfo(userId, bundleName, appIndex);
+    return RecordAppWithReasonInner(appInfo, exitReason, processInfo);
+}
+
+int32_t AppExitReasonHelper::RecordAppWithReasonInner(const AppReasonInfo &appInfo,
+    const ExitReasonCompability &exitReasonCompability, const AppExecFwk::RunningProcessInfo &processInfo)
+{
+    if (processInfo.pid_ <= 0 && processInfo.uid_ <= 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "processInfo is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    ExitReason exitReason(exitReasonCompability.reason, exitReasonCompability.subReason,
+        exitReasonCompability.exitMsg);
+    exitReason.killId = exitReasonCompability.killId;
+
+    int32_t extensionResultCode = RecordProcessExtensionExitReason(
+        processInfo.pid_, appInfo.bundleName, exitReason, processInfo, false);
+    if (extensionResultCode != ERR_OK) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", extensionResultCode);
+    }
+
+    int32_t ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReasonCompability(
+        processInfo.pid_, exitReasonCompability.killId, exitReasonCompability.killMsg,
+        exitReasonCompability.innerMsg);
+    if (ret != ERR_OK) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "notify failed: %{public}d", ret);
     }
     std::vector<std::string> abilityList;
-    int32_t getActiveAbilityListRet = GetActiveAbilityListWithPid(uid, abilityList, pid);
+    int32_t getActiveAbilityListRet = GetActiveAbilityListWithPid(processInfo.uid_, abilityList, processInfo.pid_);
     if (getActiveAbilityListRet != ERR_OK) {
         return getActiveAbilityListRet;
     }
@@ -67,16 +93,95 @@ int32_t AppExitReasonHelper::RecordAppWithReason(int32_t pid, int32_t uid, const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityLists empty");
         return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
     }
-    ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReasonCompability(
-        pid, exitReason.killId, exitReason.killMsg, exitReason.innerMsg);
-    if (ret != ERR_OK) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "notify failed: %{public}d", ret);
-    }
+    uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(appInfo.userId, appInfo.bundleName,
+        appInfo.appIndex);
     TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
-    uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
-    return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
-        accessTokenId, abilityList, tmpReason, processInfo, false);
+        "userId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
+        appInfo.userId, appInfo.bundleName.c_str(), accessTokenId);
+
+    return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        appInfo.bundleName, accessTokenId, abilityList, exitReason, processInfo, false);
+}
+
+void AppExitReasonHelper::RecordAppsWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason,
+    const std::vector<AppExecFwk::RunningProcessInfo> &processInfoList)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d, processInfo count: %{public}zu",
+        userId, processInfoList.size());
+    
+    int32_t appIndex;
+    int32_t uid;
+    int32_t pid;
+    int32_t innerResult = ERR_OK;
+    std::string bundleName;
+    for (const auto &processInfo : processInfoList) {
+        if (processInfo.pid_ <= 0 && processInfo.uid_ <= 0) {
+            continue;
+        }
+        uid = processInfo.uid_;
+        pid = processInfo.pid_;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "RecordAppsWithReasonByUserId uid: %{public}d, pid: %{public}d", uid, pid);
+        auto ret = IN_PROCESS_CALL(AbilityUtil::GetBundleManagerHelper()->GetNameAndIndexForUid(
+            uid, bundleName, appIndex));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetNameAndIndexForUid failed, ret: %{public}d", ret);
+            continue;
+        }
+    
+        AppReasonInfo appInfo(userId, bundleName, appIndex);
+        innerResult = RecordAppWithReasonInner(appInfo, exitReason, processInfo);
+        if (innerResult != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppWithReasonInner failed for uid:%{public}d, userId:%{public}d,"
+                " ret: %{public}d",
+                uid, userId, innerResult);
+            continue;
+        }
+    }
+}
+
+int32_t AppExitReasonHelper::RecordAppWithReasonByAccessTokenId(int32_t userId, uint32_t accessTokenId,
+    const ExitReasonCompability &exitReasonCompability,
+    const std::vector<AppExecFwk::RunningProcessInfo> &processInfoList)
+{
+    std::string bundleName;
+    int32_t appIndex;
+    int32_t uid;
+    int32_t pid;
+    int32_t innerResult = ERR_OK;
+    for (const auto &processInfo : processInfoList) {
+        if (processInfo.pid_ <= 0 && processInfo.uid_ <= 0) {
+            continue;
+        }
+        uid = processInfo.uid_;
+        pid = processInfo.pid_;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "RecordAppWithReasonByAccessTokenId uid: %{public}d, pid: %{public}d", uid, pid);
+        innerResult = IN_PROCESS_CALL(AbilityUtil::GetBundleManagerHelper()->GetNameAndIndexForUid(
+            uid, bundleName, appIndex));
+        if (innerResult != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetNameAndIndexForUid failed, ret: %{public}d", innerResult);
+            continue;
+        }
+
+        uint32_t currentAccessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(uid, bundleName, appIndex);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "process uid: %{public}d, calculated accessTokenId: %{public}u, "
+            "expected accessTokenId: %{public}u", uid, currentAccessTokenId, accessTokenId);
+
+        if (currentAccessTokenId != accessTokenId) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "accessTokenId mismatch, skip process");
+            continue;
+        }
+
+        AppReasonInfo appInfo(userId, bundleName, appIndex);
+        innerResult = RecordAppWithReasonInner(appInfo, exitReasonCompability, processInfo);
+        if (innerResult != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppWithReasonInner failed for uid:%{public}d, userId:%{public}d, "
+                "ret: %{public}d", uid, userId, innerResult);
+            continue;
+        }
+    }
+
+    return innerResult;
 }
 
 int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
@@ -180,7 +285,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const Ex
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
         application, debug));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed: %{public}d", ret);
         return ret;
     }
     auto bundleName = application.bundleName;
@@ -214,7 +319,8 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, 
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     AppExecFwk::RunningProcessInfo processInfo;
     GetRunningProcessInfo(NO_PID, userId, bundleName, processInfo);
-    return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason, processInfo, false);
+    int32_t pid = processInfo.pid_ == DEFAULT_PROCESS_RUNNING_INFO_PID ? NO_PID : processInfo.pid_;
+    return RecordProcessExitReason(pid, bundleName, uid, accessTokenId, exitReason, processInfo, false);
 }
 
 int32_t AppExitReasonHelper::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
@@ -252,6 +358,15 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
         GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);
     } else  {
         GetActiveAbilityList(uid, abilityLists, pid);
+    }
+
+    if (exitReason.killId != DEFAULT_KILL_ID) {
+        ExitReasonCompability exitReasonCompability(exitReason);
+        int32_t ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReasonCompability(
+            pid, exitReasonCompability.killId, exitReasonCompability.killMsg, exitReasonCompability.innerMsg);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "notify compability failed: %{public}d", ret);
+        }
     }
 
     auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReason(pid, exitReason.reason,
@@ -347,7 +462,14 @@ int32_t AppExitReasonHelper::AddBundleExitReason(
         return ret;
     }
     AppExecFwk::RunningProcessInfo processInfo;
-    GetRunningProcessInfo(NO_PID, userId, bundleName, processInfo);
+    auto processInfos = GetRunningProcessInfos(userId, bundleName);
+    for (const auto& info : processInfos) {
+        if (info.appCloneIndex == appIndex || info.appCloneIndex == -1) {
+            processInfo = info;
+            break;
+        }
+    }
+
     RecordExitReasonParams params;
     params.pid = processInfo.pid_;
     params.uid = bundleInfo.uid;
@@ -448,7 +570,7 @@ int32_t AppExitReasonHelper::RecordUIAbilityExitReason(const pid_t pid, const st
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
         application, debug));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed: %{public}d", ret);
         return ret;
     }
     auto bundleName = application.bundleName;
@@ -461,6 +583,14 @@ int32_t AppExitReasonHelper::RecordUIAbilityExitReason(const pid_t pid, const st
         GetRecordAppAbilityNames(application.accessTokenId, abilityLists);
     bool isAbilityListsEmpty = abilityLists.empty();
     abilityLists.emplace_back(abilityName);
+
+    ExitReasonCompability exitReasonCompability(exitReason);
+    ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReasonCompability(
+        pid, exitReasonCompability.killId, exitReasonCompability.killMsg, exitReasonCompability.innerMsg);
+    if (ret != ERR_OK) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "notify failed: %{public}d", ret);
+    }
+
     if (isAbilityListsEmpty) {
         return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
             application.accessTokenId, abilityLists, exitReason, processInfo, false);
@@ -479,19 +609,26 @@ void AppExitReasonHelper::GetRunningProcessInfo(int32_t pid, int32_t userId, con
             processInfo);
         return;
     }
+    std::vector<AppExecFwk::RunningProcessInfo> infoList = GetRunningProcessInfos(userId, bundleName);
+    if (infoList.size() == 1) {
+        processInfo = infoList.front();
+    }
+}
+
+std::vector<AppExecFwk::RunningProcessInfo> AppExitReasonHelper::GetRunningProcessInfos(
+    int32_t userId, const std::string &bundleName)
+{
+    std::vector<AppExecFwk::RunningProcessInfo> infoList;
     if (userId == -1 || bundleName.empty()) {
-        return;
+        return infoList;
     }
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
-        return;
+        return infoList;
     }
-    std::vector<AppExecFwk::RunningProcessInfo> infoList;
     IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, userId, infoList));
-    if (infoList.size() == 1) {
-        processInfo = infoList.front();
-    }
+    return infoList;
 }
 
 int32_t AppExitReasonHelper::AddProcessExitReason(const RecordExitReasonParams &params)
@@ -503,11 +640,6 @@ int32_t AppExitReasonHelper::AddProcessExitReason(const RecordExitReasonParams &
     } else {
         GetActiveAbilityList(params.uid, abilityLists, params.pid);
     }
-
-    if (abilityLists.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "active abilityLists empty");
-        return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
-    }
     ExitReasonCompability exitReason = params.exitReason;
     auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReasonCompability(
         params.pid, exitReason.killId, exitReason.killMsg, exitReason.innerMsg);
@@ -516,6 +648,10 @@ int32_t AppExitReasonHelper::AddProcessExitReason(const RecordExitReasonParams &
     }
     ExitReason tmpReason(exitReason.reason, exitReason.subReason, exitReason.exitMsg);
     tmpReason.killId = exitReason.killId;
+    if (abilityLists.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ui abilityLists empty");
+        return RecordProcessExtensionExitReason(params.pid, params.bundleName, tmpReason, params.processInfo, false);
+    }
     return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
         params.bundleName, params.accessTokenId, abilityLists, tmpReason, params.processInfo,
         params.fromKillWithReason);

@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_TEST_RUNNER_H
 #define OHOS_ABILITY_RUNTIME_JS_TEST_RUNNER_H
 
+#include <mutex>
+
 #include "bundle_info.h"
 #include "js_runtime.h"
 #include "test_runner.h"
@@ -75,6 +77,8 @@ private:
     std::string srcPath_;
     std::string hapPath_;
     bool isFaJsModel_ = false;
+    bool hasStop_ = true;
+    std::mutex mutexHasStop_;
     std::string GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args);
 };
 }  // namespace RunnerRuntime

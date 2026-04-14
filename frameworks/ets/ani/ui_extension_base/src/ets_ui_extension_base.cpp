@@ -709,6 +709,10 @@ sptr<Rosen::WindowOption> EtsUIExtensionBase::CreateWindowOption(const sptr<AAFw
         TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
         option->SetConstrainedModal(isNotAllow);
     }
+    if (context_->GetAbilityInfo()->extensionAbilityType ==
+        AppExecFwk::ExtensionAbilityType::AGENT_UI) {
+        option->SetIsBlockSubwindow(true);
+    }
     return option;
 }
 

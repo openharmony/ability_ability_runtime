@@ -644,6 +644,7 @@ sptr<Rosen::Window> EtsUIExtension::CreateUIWindow(const std::shared_ptr<UIExten
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(
+        option,
         GetContext(),
         sessionInfo->sessionToken,
         Rosen::DefaultCreateErrCode,

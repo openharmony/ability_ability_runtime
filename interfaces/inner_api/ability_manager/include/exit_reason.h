@@ -44,10 +44,14 @@ struct ExitReasonCompability : public Parcelable {
     ExitReasonCompability() = default;
     ExitReasonCompability(const Reason reason, const std::string &exitMsg);
     ExitReasonCompability(const Reason &reason, int32_t subReason, const std::string &exitMsg);
+    ExitReasonCompability(int32_t killId);
+    ExitReasonCompability(const ExitReason &exitReason);
 
     Reason reason = Reason::REASON_UNKNOWN;
     std::string exitMsg = "";
     int32_t subReason = -1;
+    bool shouldKillForeground = true;
+    bool shouldSkipKillInStartup = false;
 
     int32_t killId = -1;
     std::string killMsg = "";

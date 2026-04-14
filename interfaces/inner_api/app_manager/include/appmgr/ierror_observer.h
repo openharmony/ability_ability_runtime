@@ -27,6 +27,45 @@ struct ErrorObject {
     std::string mainStack;
 };
 
+enum class LeakType {
+    PSS_MEMORY = 1,
+    ION_MEMORY = 2,
+    ASHMEM_MEMORY = 3,
+    GPU_MEMORY = 4,
+    FD = 5,
+    THREAD = 6,
+    RSS_ARK_TS = 7,
+    RSS_NATIVE_HEAP = 8,
+};
+ 
+enum AppTelemetryLeakType {
+    ATLT_PSS = 1 << static_cast<int>(LeakType::PSS_MEMORY),
+    ATLT_GPU = 1 << static_cast<int>(LeakType::GPU_MEMORY),
+    ATLT_FD = 1 << static_cast<int>(LeakType::FD),
+    ATLT_RSS_ARK_TS = 1 << static_cast<int>(LeakType::RSS_ARK_TS),
+    ATLT_RSS_NATIVE_HEAP = 1 << static_cast<int>(LeakType::RSS_NATIVE_HEAP),
+};
+
+struct LeakDetailInfo {
+    unsigned long arktsSize = 0;
+    unsigned long nativeSize = 0;
+    unsigned long ionSize = 0;
+    unsigned long gpuSize = 0;
+    unsigned long ashmemSize = 0;
+    unsigned long otherSize = 0;
+};
+
+struct LeakObject {
+    LeakType leakType;
+    unsigned long leakSize = 0;
+    LeakDetailInfo detailInfo;
+};
+
+struct AppTelemetryObject {
+    AppTelemetryLeakType atLeakType;
+    std::string runningId;
+};
+
 class IErrorObserver {
 public:
     IErrorObserver() = default;

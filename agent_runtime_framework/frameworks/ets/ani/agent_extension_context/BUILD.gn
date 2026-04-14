@@ -60,6 +60,7 @@ ohos_shared_library("ets_agent_extension_context") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
   ]

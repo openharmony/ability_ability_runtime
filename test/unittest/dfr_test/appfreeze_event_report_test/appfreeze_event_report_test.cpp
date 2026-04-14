@@ -227,6 +227,7 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_005, TestSize.Level1)
     eventInfo.enableFreeze = false;
     eventInfo.applicationHeapInfo = "size1:1234,size2:1234";
     eventInfo.processLifeTime = "21s";
+    eventInfo.reportLifecycleToFreeze = true;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         HISYSEVENT_FAULT, eventInfo);
     EXPECT_EQ(ret, 0);

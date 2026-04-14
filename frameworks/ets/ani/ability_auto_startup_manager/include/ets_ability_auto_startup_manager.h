@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@ public:
     static void SetApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     static void CancelApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     static void QueryAllAutoStartupApplications(ani_env *env, ani_object callback);
+    static void GetAutoStartupStatusForSelf(ani_env *env, ani_object callback);
+    static ani_boolean IsAutoStartupSupported(ani_env *env);
     static void AutoStartupInfoCheck(ani_env *env, ani_object info);
     static void NativeCheckCallerIsSystemApp(ani_env *env);
 
@@ -39,6 +41,7 @@ private:
     void OnSetApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     void OnCancelApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     void OnQueryAllAutoStartupApplications(ani_env *env, ani_object callback);
+    void OnGetAutoStartupStatusForSelf(ani_env *env, ani_object callback);
     void OnAutoStartupInfoCheck(ani_env *env, ani_object info);
     void OnNativeCheckCallerIsSystemApp(ani_env *env);
 

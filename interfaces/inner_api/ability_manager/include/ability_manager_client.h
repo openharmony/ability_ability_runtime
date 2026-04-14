@@ -23,6 +23,7 @@
 #include "ability_manager_interface.h"
 #include "ability_scheduler_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "iremote_object.h"
 #include "mission_info.h"
 #include "system_memory_attr.h"
@@ -198,6 +199,21 @@ public:
         uint64_t intentId,
         int32_t userId = DEFAULT_INVAL_VALUE);
 
+     /**
+      * Starts a new ability by oe extension.
+      *
+      * @param want Indicates the ability to start.
+      * @param callerToken Indicates the caller ability token.
+      * @param hostPid Indicates the host process ID.
+      * @param specifiedFlag Indicates the specified flag for the target UIAbility for specified mode.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    ErrCode StartAbilityByOEExt(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int32_t hostPid,
+        const std::string &specifiedFlag);
+
     /**
      * Starts a new ability with specific start settings.
      *
@@ -320,6 +336,15 @@ public:
      */
     ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
         const std::string &requestKey, sptr<IRemoteObject> callerToken);
+
+    /**
+     * RecordAppWithReasonByUserId, record app exit reason by userId.
+     *
+     * @param userId The user id.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason);
 
     /**
      * Start ui session ability with extension session info, send session info to ability manager service.
@@ -618,6 +643,24 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         uint64_t specifiedFullTokenId = 0);
+
+    /**
+     * ConnectAbilityWithIndirectCallerInfo, connect session with service ability.
+     *
+     * @param want, Special want for service type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be connected.
+     * @param indirectCallerInfo, Indirect caller information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectAbilityWithIndirectCallerInfo(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
     
     /**
      * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.
@@ -918,6 +961,18 @@ public:
     ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo);
 
     /**
+     * @brief Get mission info by id.
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param missionInfo mission info of target mission.
+     * @param displayInfo display info of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetMissionInfo(const std::string& deviceId, int32_t missionId, MissionInfo &missionInfo,
+        DisplayInfo &displayInfo);
+
+    /**
      * @brief Get the Mission Snapshot Info object
      * @param deviceId local or remote deviceId.
      * @param missionId Id of target mission.
@@ -1200,7 +1255,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ManualStartAutoStartupApps(int32_t userId);
-    
+
     /**
      * @brief Query the caller's Token ID for anco.
      * @param userId Indicates the user ID.
@@ -2078,6 +2133,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE);
+
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QuerySelfModularObjectExtensionInfos(std::vector<ModularObjectExtensionInfo> &extensionInfos);
 
     /**
      * @brief Get list of applications launched before the first unlock.
