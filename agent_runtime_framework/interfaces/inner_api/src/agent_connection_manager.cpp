@@ -169,6 +169,26 @@ ErrCode AgentConnectionManager::DisconnectAgentExtensionAbility(const sptr<Abili
     return AAFwk::CONNECTION_NOT_EXIST;
 }
 
+ErrCode AgentConnectionManager::ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const AAFwk::Want &want, const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    if (callerToken == nullptr || connection == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null callerToken or connection");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    return AgentManagerClient::GetInstance().ConnectServiceExtensionAbility(callerToken, want, connection);
+}
+
+ErrCode AgentConnectionManager::DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+    const sptr<AAFwk::IAbilityConnection> &connection)
+{
+    if (callerToken == nullptr || connection == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "null callerToken or connection");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    return AgentManagerClient::GetInstance().DisconnectServiceExtensionAbility(callerToken, connection);
+}
+
 bool AgentConnectionManager::RemoveConnection(const sptr<AgentConnection> &connection)
 {
     std::lock_guard<std::mutex> lock(connectionsLock_);

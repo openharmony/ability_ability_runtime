@@ -210,6 +210,10 @@ public:
      * @return Returns ERR_OK on success, error code otherwise.
      */
     ErrCode DisconnectAgentExtensionAbility(const sptr<AbilityRuntime::AbilityConnectCallback> &connection);
+    ErrCode ConnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken, const AAFwk::Want &want,
+        const sptr<AAFwk::IAbilityConnection> &connection);
+    ErrCode DisconnectServiceExtensionAbility(const sptr<IRemoteObject> &callerToken,
+        const sptr<AAFwk::IAbilityConnection> &connection);
 
     /**
      * @brief Remove a connection when the agent extension dies.

@@ -15,6 +15,7 @@
 
 sequenceable AgentCard..OHOS.AgentRuntime.AgentCard;
 sequenceable OHOS.AAFwk.Want;
+sequenceable OHOS.IRemoteObject;
 interface OHOS.AAFwk.IAbilityConnection;
 rawdata AgentCard..OHOS.AgentRuntime.AgentCardsRawData;
 interface OHOS.AgentRuntime.IAgentManager {
@@ -27,5 +28,7 @@ interface OHOS.AgentRuntime.IAgentManager {
     void DeleteAgentCard([in] String bundleName, [in] String agentId);
     void ConnectAgentExtensionAbility([in] Want want, [in] IAbilityConnection connect);
     void DisconnectAgentExtensionAbility([in] IAbilityConnection connect);
+    void ConnectServiceExtensionAbility([in] IRemoteObject callerToken, [in] Want want, [in] IAbilityConnection connect);
+    void DisconnectServiceExtensionAbility([in] IRemoteObject callerToken, [in] IAbilityConnection connect);
     void NotifyLowCodeAgentComplete([in] String agentId);
 }
