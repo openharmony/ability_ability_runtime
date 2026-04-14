@@ -21,6 +21,10 @@ interface OHOS.AgentRuntime.IAgentManager {
     void GetAllAgentCards([out] AgentCardsRawData cards);
     void GetAgentCardsByBundleName([in] String bundleName, [out] AgentCard[] cards);
     void GetAgentCardByAgentId([in] String bundleName, [in] String agentId, [out] AgentCard card);
+    void GetCallerAgentCardByAgentId([in] String agentId, [out] AgentCard card);
+    void RegisterAgentCard([in] AgentCard card);
+    void UpdateAgentCard([in] AgentCard card);
+    void DeleteAgentCard([in] String bundleName, [in] String agentId);
     void ConnectAgentExtensionAbility([in] Want want, [in] IAbilityConnection connect);
     void DisconnectAgentExtensionAbility([in] IAbilityConnection connect);
 }

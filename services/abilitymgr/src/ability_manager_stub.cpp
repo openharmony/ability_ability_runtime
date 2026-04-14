@@ -137,6 +137,9 @@ int AbilityManagerStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_BY_INSIGHT_INTENT) {
         return StartAbilityByInsightIntentInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_BY_OE_EXT) {
+        return StartAbilityByOEExtInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::CONNECT_ABILITY) {
         return ConnectAbilityInner(data, reply);
     }
@@ -348,6 +351,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT) {
         return GetPendingRequestWantInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT_FROM_PROXY) {
+        return GetPendingRequestWantInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO) {
         return GetWantSenderInfoInner(data, reply);
     }
@@ -491,6 +497,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEleventh(uint32_t code, MessageParce
     }
     if (interfaceCode == AbilityManagerInterfaceCode::IS_RESTART_APP_LIMIT) {
         return IsRestartAppLimitInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::RECORD_APP_WITH_REASON_BY_USERID) {
+        return RecordAppWithReasonByUserIdInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -961,6 +970,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     }
     if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
         return ManualStartAutoStartupAppsInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::QUERY_SELF_MODULAR_OBJECT_EXTENSION_INFOS) {
+        return QuerySelfModularObjectExtensionInfosInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_USER_LOCKED_BUNDLE_LIST) {
         return GetUserLockedBundleListInner(data, reply);
@@ -1854,8 +1866,9 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     bool isQueryExtensionOnly = data.ReadBool();
     uint64_t specifiedFullTokenId = data.ReadUint64();
     int32_t loadTimeout = data.ReadInt32();
+    std::shared_ptr<IndirectCallerInfo> indirectCallerInfo(data.ReadParcelable<IndirectCallerInfo>());
     int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly,
-        specifiedFullTokenId, loadTimeout);
+        specifiedFullTokenId, loadTimeout, indirectCallerInfo);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -2208,6 +2221,25 @@ int AbilityManagerStub::GetPendingRequestWantInner(MessageParcel &data, MessageP
 
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     int32_t result = GetPendingRequestWant(wantSender, want);
+    if (result != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getPendingRequestWant fail");
+        return ERR_INVALID_VALUE;
+    }
+    reply.WriteParcelable(want.get());
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::GetPendingRequestWantFromProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    sptr<IWantSender> wantSender = iface_cast<IWantSender>(data.ReadRemoteObject());
+    if (wantSender == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSender null");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    int32_t result = GetPendingRequestWantFromProxy(wantSender, want);
     if (result != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getPendingRequestWant fail");
         return ERR_INVALID_VALUE;
@@ -4184,6 +4216,21 @@ int32_t AbilityManagerStub::StartUIAbilitiesInner(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+ErrCode AbilityManagerStub::RecordAppWithReasonByUserIdInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    std::unique_ptr<ExitReasonCompability> exitReason(data.ReadParcelable<ExitReasonCompability>());
+    if (!exitReason) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "exitReason null");
+        return ERR_READ_EXIT_REASON_FAILED;
+    }
+    if (!reply.WriteInt32(RecordAppWithReasonByUserId(userId, *exitReason))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::StartAbilityForResultAsCallerForOptionsInner(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -4246,6 +4293,28 @@ int32_t AbilityManagerStub::StartAbilityByInsightIntentInner(MessageParcel &data
     int32_t userId = data.ReadInt32();
     int32_t result = StartAbilityByInsightIntent(*want, callerToken, intentId, userId);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartAbilityByOEExtInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (!data.ReadBool()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid caller token flag");
+        return ERR_INVALID_VALUE;
+    }
+    callerToken = data.ReadRemoteObject();
+
+    int32_t hostPid = data.ReadInt32();
+    std::string specifiedFlag = data.ReadString();
+
+    reply.WriteInt32(StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag));
     return NO_ERROR;
 }
 
@@ -5002,13 +5071,8 @@ int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, Me
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetAllInsightIntentInfo(flag, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
@@ -5024,13 +5088,8 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByBundleNameInner(MessageParcel 
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
@@ -5305,6 +5364,27 @@ int32_t AbilityManagerStub::UnRegisterPreloadUIExtensionHostClientInner(MessageP
     int32_t callerPid = data.ReadInt32();
     int32_t result = UnRegisterPreloadUIExtensionHostClient(callerPid);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::QuerySelfModularObjectExtensionInfosInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::vector<ModularObjectExtensionInfo> extensionInfos;
+    int32_t result = QuerySelfModularObjectExtensionInfos(extensionInfos);
+    if (!reply.WriteInt32(result)) {
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "QuerySelfModularObjectExtensionInfos failed, result: %{public}d", result);
+        return NO_ERROR;
+    }
+    reply.WriteInt32(extensionInfos.size());
+    for (auto &it : extensionInfos) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
     return NO_ERROR;
 }
 

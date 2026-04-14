@@ -68,6 +68,10 @@ public:
     static void GetAgentCardsByBundleName(ani_env *env, ani_string aniBundleName, ani_object asyncCallback);
     static void GetAgentCardByAgentId(ani_env *env, ani_string aniBundleName, ani_string aniAgentId,
         ani_object asyncCallback);
+    static void RegisterAgentCard(ani_env *env, ani_object aniCard, ani_object asyncCallback);
+    static void UpdateAgentCard(ani_env *env, ani_object aniCard, ani_object asyncCallback);
+    static void DeleteAgentCard(ani_env *env, ani_string aniBundleName, ani_string aniAgentId,
+        ani_object asyncCallback);
     static void ConnectAgentExtensionAbility(ani_env *env, ani_object aniWant, ani_string aniAgentId,
         ani_object callbackObj, ani_object asyncCallback);
     static void DisconnectAgentExtensionAbility(ani_env *env, ani_object agentProxyObj,
@@ -80,13 +84,6 @@ void EtsAgentManager::GetAllAgentCards(ani_env *env, ani_object asyncCallback)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     std::vector<AgentCard> cards;
     int32_t ret = AgentManagerClient::GetInstance().GetAllAgentCards(cards);
     if (ret != ERR_OK) {
@@ -109,12 +106,6 @@ void EtsAgentManager::GetAgentCardsByBundleName(ani_env *env, ani_string aniBund
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
-        return;
-    }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
         return;
     }
     std::string bundleName;
@@ -151,12 +142,6 @@ void EtsAgentManager::GetAgentCardByAgentId(ani_env *env, ani_string aniBundleNa
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
     std::string bundleName;
     if (!GetStdString(env, aniBundleName, bundleName)) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "param bundlename err");
@@ -185,6 +170,93 @@ void EtsAgentManager::GetAgentCardByAgentId(ani_env *env, ani_string aniBundleNa
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), CreateEtsAgentCard(env, card));
 }
 
+void EtsAgentManager::RegisterAgentCard(ani_env *env, ani_object aniCard, ani_object asyncCallback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
+        return;
+    }
+
+    AgentCard card;
+    if (!ParseEtsAgentCard(env, aniCard, card)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "param card err");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert card fail."), nullptr);
+        return;
+    }
+
+    int32_t ret = AgentManagerClient::GetInstance().RegisterAgentCard(card);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "register card failed: %{public}d", ret);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        return;
+    }
+    AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
+void EtsAgentManager::UpdateAgentCard(ani_env *env, ani_object aniCard, ani_object asyncCallback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
+        return;
+    }
+
+    AgentCard card;
+    if (!ParseEtsAgentCard(env, aniCard, card)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "param card err");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert card fail."), nullptr);
+        return;
+    }
+
+    int32_t ret = AgentManagerClient::GetInstance().UpdateAgentCard(card);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "update card failed: %{public}d", ret);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        return;
+    }
+    AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
+void EtsAgentManager::DeleteAgentCard(ani_env *env, ani_string aniBundleName, ani_string aniAgentId,
+    ani_object asyncCallback)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
+        return;
+    }
+
+    std::string bundleName;
+    if (!GetStdString(env, aniBundleName, bundleName)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "param bundlename err");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert bundleName fail."), nullptr);
+        return;
+    }
+
+    std::string agentId;
+    if (!GetStdString(env, aniAgentId, agentId)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "param agentId err");
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateInvalidParamError(env, "Parameter error. Convert agentId fail."), nullptr);
+        return;
+    }
+
+    int32_t ret = AgentManagerClient::GetInstance().DeleteAgentCard(bundleName, agentId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "delete card failed: %{public}d", ret);
+        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        return;
+    }
+    AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
 void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniWant, ani_string aniAgentId,
     ani_object callbackObj, ani_object asyncCallback)
 {
@@ -192,13 +264,6 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     // Extract want
     AAFwk::Want want;
     if (!UnwrapWant(env, aniWant, want)) {
@@ -223,14 +288,6 @@ void EtsAgentManager::ConnectAgentExtensionAbility(ani_env *env, ani_object aniW
     // Check for duplicate connection
     if (CheckConnectAlreadyExist(env, want, callbackObj, asyncCallback)) {
         TAG_LOGI(AAFwkTag::SER_ROUTER, "Duplicate connection found");
-        return;
-    }
-
-    // Check if maximum connections reached
-    if (AgentConnectionUtils::IsMaxConnectionsReached()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "Maximum agent connections reached");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED), nullptr);
         return;
     }
 
@@ -282,13 +339,6 @@ void EtsAgentManager::DisconnectAgentExtensionAbility(ani_env *env, ani_object a
         TAG_LOGE(AAFwkTag::SER_ROUTER, "env is null");
         return;
     }
-    if (!AppExecFwk::CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::SER_ROUTER, "not system app");
-        AsyncCallback(env, SIGNATURE_AGENT_ASYNC_CALLBACK_WRAPPER, asyncCallback,
-            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
-        return;
-    }
-
     // Get the proxy using GetEtsAgentReceiverProxy (similar to GetEtsUIServiceProxy)
     EtsAgentReceiverProxy* proxy = EtsAgentReceiverProxy::GetEtsAgentReceiverProxy(env, agentProxyObj);
     if (proxy == nullptr) {
@@ -353,6 +403,15 @@ void EtsAgentManagerRegistryInit(ani_env *env)
         ani_native_function{ "nativeGetAgentCardByAgentId",
             "C{std.core.String}C{std.core.String}C{utils.AgentUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAgentManager::GetAgentCardByAgentId) },
+        ani_native_function{ "nativeRegisterAgentCard",
+            "C{application.AgentCard.AgentCard}C{utils.AgentUtils.AsyncCallbackWrapper}:",
+            reinterpret_cast<void *>(EtsAgentManager::RegisterAgentCard) },
+        ani_native_function{ "nativeUpdateAgentCard",
+            "C{application.AgentCard.AgentCard}C{utils.AgentUtils.AsyncCallbackWrapper}:",
+            reinterpret_cast<void *>(EtsAgentManager::UpdateAgentCard) },
+        ani_native_function{ "nativeDeleteAgentCard",
+            "C{std.core.String}C{std.core.String}C{utils.AgentUtils.AsyncCallbackWrapper}:",
+            reinterpret_cast<void *>(EtsAgentManager::DeleteAgentCard) },
         ani_native_function{ "nativeConnectAgentExtensionAbility",
             "C{@ohos.app.ability.Want.Want}C{std.core.String}"
             "C{application.AgentExtensionConnectCallback.AgentExtensionConnectCallback}"

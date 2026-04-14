@@ -31,6 +31,7 @@
 #include "ability_state_data.h"
 #include "app_debug_listener_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "dms_continueInfo.h"
 #include "exit_reason.h"
 #include "extension_running_info.h"
@@ -44,6 +45,7 @@
 #include "iprepare_terminate_callback_interface.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
+#include "modular_object_extension_info.h"
 #include "query_erms_observer_interface.h"
 #include "remote_mission_listener_interface.h"
 #include "remote_on_listener_interface.h"
@@ -210,6 +212,24 @@ public:
         uint64_t intentId,
         int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
+     /**
+      * Starts a new ability by oe extension.
+      *
+      * @param want Indicates the ability to start.
+      * @param callerToken Indicates the caller ability token.
+      * @param hostPid Indicates the host process ID.
+      * @param specifiedFlag Indicates the specified flag for the target UIAbility for specified mode.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    virtual int32_t StartAbilityByOEExt(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int32_t hostPid,
+        const std::string &specifiedFlag)
+    {
+        return 0;
+    }
+
     /**
      * Starts a new ability with specific start settings.
      *
@@ -347,6 +367,18 @@ public:
      */
     virtual ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
         const std::string &requestKey, sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
+     * RecordAppWithReasonByUserId, record app exit reason by userId.
+     *
+     * @param userId The user id.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason)
     {
         return 0;
     }
@@ -726,6 +758,7 @@ public:
      * @param userId, the service user ID.
      * @param specifiedFullTokenId, The specified full token ID.
      * @param loadTimeout, timeout multiply for ability loading stage, range 1-30, not work on asan.
+     * @param indirectCallerInfo, Indirect caller information.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ConnectAbilityCommon(
@@ -736,7 +769,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0)
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr)
     {
         return 0;
     }
@@ -980,6 +1014,11 @@ public:
     virtual void UnregisterCancelListener(const sptr<IWantSender> &sender, const sptr<IWantReceiver> &receiver) = 0;
 
     virtual int GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) = 0;
+
+    virtual int GetPendingRequestWantFromProxy(const sptr<IWantSender> &target, std::shared_ptr<Want> &want)
+    {
+        return 0;
+    }
 
     virtual int GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info) = 0;
 
@@ -2575,6 +2614,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QuerySelfModularObjectExtensionInfos(std::vector<ModularObjectExtensionInfo> &extensionInfos)
     {
         return 0;
     }

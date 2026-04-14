@@ -447,6 +447,21 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_003, TestSize.Le
 }
 
 /**
+ * @tc.number: AppfreezeInner_ChangeFaultDateInfo_004
+ * @tc.name: ChangeFaultDateInfo
+ * @tc.desc: Verify that function ChangeFaultDateInfo.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ChangeFaultDateInfo_004, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string msgContent = "AppfreezeInner_ChangeFaultDateInfo_004";
+    faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
+    appfreezeInner->ChangeFaultDateInfo(faultData, msgContent);
+    EXPECT_TRUE(!faultData.errorObject.message.empty());
+    EXPECT_TRUE(faultData.forceExit);
+}
+
+/**
  * @tc.number: AppfreezeInnerTest
  * @tc.name: add test
  * @tc.desc: Verify that function SetMainHandler.
@@ -601,6 +616,30 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_GetApplicationInfo_002, TestSize
     faultData.pid = getpid();
     appfreezeInner->GetApplicationInfo(faultData);
     EXPECT_TRUE(!faultData.timeoutMarkers.empty());
+}
+
+/**
+ * @tc.number: AppfreezeInnerTest
+ * @tc.name: add test
+ * @tc.desc: TransformHicollieFaultNumber Test.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInnerTest_TransformHicollieFaultNumber_001, TestSize.Level1)
+{
+    const int businessInputBlockType = 7;
+    int ret = appfreezeInner->TransformHicollieFaultNumber(AppFreezeType::BUSINESS_INPUT_BLOCK);
+    EXPECT_EQ(ret, businessInputBlockType);
+}
+
+/**
+ * @tc.number: AppfreezeInner_ReportLifeCycleAsAppfreeze_001
+ * @tc.name: SetReportLifeCycleAsAppfreeze and GetReportLifeCycleAsAppfreeze
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_ReportLifeCycleAsAppfreeze_001, TestSize.Level1)
+{
+    appfreezeInner->SetReportLifeCycleAsAppfreeze(true);
+    EXPECT_TRUE(appfreezeInner->GetReportLifeCycleAsAppfreeze());
+    appfreezeInner->SetReportLifeCycleAsAppfreeze(false);
+    EXPECT_TRUE(!appfreezeInner->GetReportLifeCycleAsAppfreeze());
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

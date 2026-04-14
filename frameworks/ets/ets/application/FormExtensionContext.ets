@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import { ConnectOptions } from 'ability.connectOptions';
 import ExtensionContext from 'application.ExtensionContext';
 import Want from '@ohos.app.ability.Want';
 
-class Cleaner {
+export class Cleaner {
   public ptr: long = 0;
 
   constructor(ptr: long) {
@@ -38,6 +38,10 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export default class FormExtensionContext extends ExtensionContext {
+  static {
+    loadLibrary("form_extension_context_ani_kit.z");
+  }
+
   constructor(context: long) {
     if (this.nativeEtsContext == 0) {
       this.nativeEtsContext = context;
@@ -56,6 +60,25 @@ export default class FormExtensionContext extends ExtensionContext {
 
   nativeEtsContext: long = 0;
   private cleaner: Cleaner | null = null;
+
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'FormExtensionContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return FormExtensionContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return FormExtensionContext.nativeTransferDynamic(input).unwrap();
+  }
 
   native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
 

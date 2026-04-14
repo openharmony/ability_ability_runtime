@@ -49,6 +49,7 @@
 #endif
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
+#include "caller_info.h"
 #include "data_ability_manager.h"
 #include "deeplink_reserve/deeplink_reserve_config.h"
 #include "event_report.h"
@@ -60,6 +61,8 @@
 #include "iremote_object.h"
 #include "kiosk_manager.h"
 #include "mission_list_manager_interface.h"
+#include "modular_object_event_mgr.h"
+#include "modular_object_manager.h"
 #include "parameter.h"
 #include "pending_want_manager.h"
 #include "permission_verification.h"
@@ -276,6 +279,21 @@ public:
         uint64_t intentId,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
+     /**
+      * Starts a new ability by oe extension.
+      *
+      * @param want Indicates the ability to start.
+      * @param callerToken Indicates the caller ability token.
+      * @param hostPid Indicates the host process ID.
+      * @param specifiedFlag Indicates the specified flag for the target UIAbility for specified mode.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    int32_t StartAbilityByOEExt(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int32_t hostPid,
+        const std::string &specifiedFlag) override;
+
     /**
      * Starts a new ability with specific start settings.
      *
@@ -398,6 +416,15 @@ public:
      */
     ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
         const std::string &requestKey, sptr<IRemoteObject> callerToken) override;
+    
+    /**
+     * RecordAppWithReasonByUserId, record app exit reason by userId.
+     *
+     * @param userId The user id.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppWithReasonByUserId(int32_t userId, const ExitReasonCompability &exitReason) override;
 
     /**
      * Start ui session ability with extension session info, send session info to ability manager service.
@@ -714,7 +741,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0) override;
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -1096,6 +1124,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
+
+    /**
+     * @brief Get the pending want from a want sender from want.
+     * @param target The target want sender.
+     * @param want The output pending want.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int GetPendingRequestWantFromProxy(const sptr<IWantSender> &target, std::shared_ptr<Want> &want) override;
 
     /**
      * @brief Get the want sender information.
@@ -2599,6 +2635,12 @@ protected:
     void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     /**
+     * @brief Notify one ability is being terminated.
+     * @param token ability token.
+     */
+    void NotifyTerminateAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * @brief Notify abilityms process info when an app dies
      * @param accessTokenId app accessTokenId.
      * @param exitInfo process running info.
@@ -2675,6 +2717,15 @@ protected:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnRegisterPreloadUIExtensionHostClient(int32_t callerPid = DEFAULT_INVAL_VALUE) override;
+    
+    /**
+ 	 * @brief Queries self modular object extension information.
+     * @param extensionInfos get the queried extensionInfos.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QuerySelfModularObjectExtensionInfos(
+        std::vector<ModularObjectExtensionInfo> &extensionInfos) override;
 
     /**
      * @brief Get list of applications launched before the first unlock.
@@ -2690,6 +2741,14 @@ private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
+
+    /**
+     * @brief Parse and validate userId from want parameters.
+     * @param want The want containing userId parameter.
+     * @param userId Output userId after parsing and validation.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int ParseAndValidateUserId(const Want &want, int32_t &userId);
 
     /**
      * @brief Checks and submits hidden auto-startup status bar check task.
@@ -2750,7 +2809,8 @@ private:
         bool isQueryExtensionOnly = false,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0);
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
 
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int32_t HandleExtensionConnectionByUserId(sptr<IAbilityConnection> connect, int32_t userId,
@@ -3155,7 +3215,8 @@ private:
         const int32_t oriValidUserId);
 
     void InitInterceptor();
-    void InitInterceptorForScreenUnlock(int32_t userId = DEFAULT_INVAL_VALUE);
+    void InitInterceptorForScreenUnlock();
+    void UpdateScreenUnlockInterceptor(int32_t userId);
     void InitPushTask();
     void InitAppSpawnMsgPipe();
     void InitDeepLinkReserve();
@@ -3163,6 +3224,9 @@ private:
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
 
     int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, int32_t appIndex, const bool isUpgrade,
+        const std::string &exitMsg);
+
+    void HandleAppUpgradeProcess(const std::string &bundleName, const int32_t uid, int32_t appIndex,
         const std::string &exitMsg);
 
     int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);
@@ -3319,6 +3383,8 @@ private:
 
     std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
+    std::shared_ptr<AbilityRuntime::ModularObjectExtensionEventMgr> modularObjectExtensionEventMgr_;
+
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
     void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
@@ -3333,6 +3399,8 @@ private:
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
+
+    bool CheckSupportVpn(const AppExecFwk::AbilityInfo& abilityInfo);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
@@ -3352,6 +3420,9 @@ private:
         AbilityRuntime::ExtractInsightIntentGenericInfo &linkInfo, const int32_t userId);
  
     AbilityRuntime::ExtractInsightIntentGenericInfo GetInsightIntentGenericInfo(const InsightIntentExecuteParam &param);
+
+    int32_t RecordAppWithReasonByAccessTokenId(uint32_t accessTokenId,
+        const ExitReasonCompability &exitReasonCompability);
  
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);

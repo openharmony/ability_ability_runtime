@@ -34,6 +34,7 @@
 #include "system_ability_definition.h"
 #include "test_observer.h"
 #include "app_mem_info.h"
+#include "xcollie/process_kill_reason.h"
 
 using namespace OHOS::AppExecFwk;
 
@@ -68,8 +69,8 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNR";
-const std::string SHORT_OPTION_CHARS = "chdabetpsmAUCDESNR";
+const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:u:A:U:CDESNR";
+const std::string SHORT_OPTION_CHARS = "chdabetpsmuAUCDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
@@ -133,6 +134,8 @@ const std::string ERR_INVALID_PID_VALUE_SOLUTION_ONE =
     "Check if the pid specified by the application exists.";
 const std::string ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE =
     "Check if the value range of level is [0, 1, 2, 3, 4, 5, 6].";
+const std::string ERR_INVALID_USERID_VALUE_SOLUTION_ONE =
+    "Check if the userId is a foreground user. Only foreground users can run tests.";
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
@@ -414,6 +417,9 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_INVALID_OPERATION] = GetAaToolErrorInfo("10105002", "Failed to obtain ability information.",
         "The abilityInfo is empty when generating the Ability request through BMS",
         {GET_ABILITY_SERVICE_FAILED_SOLUTION_ONE});
+    messageMap_[INVALID_USERID_VALUE] = GetAaToolErrorInfo("10104005", "The specified userId is not a foreground user.",
+        "The userId specified by the aa test command is not currently a foreground user.",
+        {ERR_INVALID_USERID_VALUE_SOLUTION_ONE});
     return OHOS::ERR_OK;
 }
 
@@ -446,19 +452,20 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
 {
     Want want;
     std::string windowMode;
-    ErrCode result = MakeWantFromCmd(want, windowMode);
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    ErrCode result = MakeWantFromCmd(want, windowMode, userId);
     if (result == OHOS::ERR_OK) {
         int windowModeKey = std::atoi(windowMode.c_str());
         if (windowModeKey > 0) {
             auto setting = AbilityStartSetting::GetEmptySetting();
             if (setting != nullptr) {
                 setting->AddProperty(AbilityStartSetting::WINDOW_MODE_KEY, windowMode);
-                result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1);
+                result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1, userId);
             }
         } else if (startAbilityWithWaitFlag_) {
-            result = StartAbilityWithWait(want);
+            result = StartAbilityWithWait(want, userId);
         } else {
-            result = AbilityManagerClient::GetInstance()->StartAbility(want);
+            result = AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_INVAL_VALUE, userId);
         }
         if (result == OHOS::ERR_OK) {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_START_ABILITY_OK.c_str());
@@ -784,9 +791,9 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
     TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}s", pid, inputReason.c_str());
     if (pid != 0 && reason != Reason::REASON_UNKNOWN) {
         ExitReason exitReason = {reason, "aa force-stop"};
+        exitReason.killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_AA_FORCE_STOP;
         if (AbilityManagerClient::GetInstance()->RecordProcessExitReason(pid, exitReason) != ERR_OK) {
-            TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s record reason %{public}d failed",
-                bundleName.c_str(), reason);
+            TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s save reason %{public}d failed", bundleName.c_str(), reason);
         }
     }
 
@@ -1616,6 +1623,12 @@ ErrCode AbilityManagerShellCommand::RunForceTimeoutForTest()
 
 ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& windowMode)
 {
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    return MakeWantFromCmd(want, windowMode, userId);
+}
+
+ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& windowMode, int32_t& userId)
+{
     int result = OHOS::ERR_OK;
 
     int option = -1;
@@ -1873,6 +1886,17 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'U': {
                     // 'aa start -U' with no argument
                     TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -U' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+
+                    break;
+                }
+                case 'u': {
+                    // 'aa start -u' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -u' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -2154,6 +2178,24 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 TAG_LOGD(AAFwkTag::AA_TOOL, "isMultiThread");
                 break;
             }
+            case 'u': {
+                // 'aa start -u <user-id>'
+                // save user id
+                if (optarg != nullptr) {
+                    int32_t tempUserId = DEFAULT_INVAL_VALUE;
+                    if (!StrToInt(optarg, tempUserId) || tempUserId < 0) {
+                        // 'aa start -u' with invalid argument
+                        TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -u' invalid arg: %{public}s", cmd_.c_str(), optarg);
+
+                        resultReceiver_.append("error: invalid user id: ");
+                        resultReceiver_.append(optarg).append("\n");
+                        return OHOS::ERR_INVALID_VALUE;
+                    }
+                    userId = tempUserId;
+                }
+                TAG_LOGD(AAFwkTag::AA_TOOL, "userId: %{public}d", userId);
+                break;
+            }
             case 0: {
                 // 'aa start' with an unknown option: aa start -x
                 // 'aa start' with an unknown option: aa start -xxx
@@ -2427,34 +2469,11 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
         if ((opt == "-h") || (opt == "--help")) {
             resultReceiver_.append(HELP_MSG_TEST);
             return OHOS::ERR_OK;
-        } else if ((opt == "-b") || (opt == "-p") || (opt == "-m")) {
-            if (i >= argc_ - 1) {
-                return TestCommandError("error: option [" + opt + "] requires a value.\n");
-            }
-            std::string argv = argv_[++i];
-            params[opt] = argv;
-        } else if (opt == "-w") {
-            if (i >= argc_ - 1) {
-                return TestCommandError("error: option [" + opt + "] requires a value.\n");
-            }
+        }
 
-            std::string argv = argv_[++i];
-            if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
-                return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
-            }
-
-            params[opt] = argv;
-        } else if (opt == "-s") {
-            if (i >= argc_ - USER_TEST_COMMAND_PARAMS_NUM) {
-                return TestCommandError("error: option [-s] is incorrect.\n");
-            }
-            std::string argKey = argv_[++i];
-            std::string argValue = argv_[++i];
-            params[opt + " " + argKey] = argValue;
-        } else if (opt == "-D") {
-            params[opt] = DEBUG_VALUE;
-        } else if (opt.at(0) == '-') {
-            return TestCommandError("error: unknown option: " + opt + "\n");
+        auto ret = ParseTestCommandOption(opt, i, params);
+        if (ret != OHOS::ERR_OK) {
+            return ret;
         }
     }
 
@@ -2463,6 +2482,48 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
     }
 
     return StartUserTest(params);
+}
+
+ErrCode AbilityManagerShellCommand::ParseTestCommandOption(const std::string &opt, int &i,
+    std::map<std::string, std::string> &params)
+{
+    if ((opt == "-b") || (opt == "-p") || (opt == "-m")) {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        params[opt] = argv;
+    } else if (opt == "-w") {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+            return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
+        }
+        params[opt] = argv;
+    } else if (opt == "-u" || opt == "--userId") {
+        if (i >= argc_ - 1) {
+            return TestCommandError("error: option [" + opt + "] requires a value.\n");
+        }
+        std::string argv = argv_[++i];
+        if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+            return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
+        }
+        params["-u"] = argv;
+    } else if (opt == "-s") {
+        if (i >= argc_ - USER_TEST_COMMAND_PARAMS_NUM) {
+            return TestCommandError("error: option [-s] is incorrect.\n");
+        }
+        std::string argKey = argv_[++i];
+        std::string argValue = argv_[++i];
+        params[opt + " " + argKey] = argValue;
+    } else if (opt == "-D") {
+        params[opt] = DEBUG_VALUE;
+    } else if (opt.at(0) == '-') {
+        return TestCommandError("error: unknown option: " + opt + "\n");
+    }
+    return OHOS::ERR_OK;
 }
 
 bool AbilityManagerShellCommand::IsTestCommandIntegrity(const std::map<std::string, std::string>& params)
@@ -2553,15 +2614,18 @@ sptr<IAbilityManager> AbilityManagerShellCommand::GetAbilityManagerService()
     return iface_cast<IAbilityManager>(remoteObject);
 }
 
-ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want)
+ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want, int32_t userId)
 {
     if (IsImplicitStartAction(want)) {
-        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want);
+        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_INVAL_VALUE, userId);
         if (ret != ERR_OK) {
             return ret;
         }
         resultReceiver_.append(STRING_IMPLICT_START_WITH_WAIT_NG + "\n");
         return ret;
+    }
+    if (userId != DEFAULT_INVAL_VALUE) {
+        TAG_LOGW(AAFwkTag::AA_TOOL, "userId %{public}d is ignored when using -W option", userId);
     }
     auto observer = sptr<AbilityStartWithWaitObserver>::MakeSptr();
     if (!observer) {

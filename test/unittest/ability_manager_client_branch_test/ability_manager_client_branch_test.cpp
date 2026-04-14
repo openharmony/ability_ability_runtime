@@ -2767,6 +2767,17 @@ HWTEST_F(AbilityManagerClientBranchTest, StartSelfUIAbilityInCurrentProcess_0100
     EXPECT_EQ(client_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr), ERR_OK);
 }
 
+/**
+ * @tc.name: QuerySelfModularObjectExtensionInfos_0100
+ * @tc.desc: QuerySelfModularObjectExtensionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, QuerySelfModularObjectExtensionInfos_0100, TestSize.Level1)
+{
+    std::vector<ModularObjectExtensionInfo> infos;
+    EXPECT_EQ(client_->QuerySelfModularObjectExtensionInfos(infos), ERR_OK);
+}
+
 /*
  * Feature: AbilityManagerClient
  * Function: StartAbilityForPrelaunch

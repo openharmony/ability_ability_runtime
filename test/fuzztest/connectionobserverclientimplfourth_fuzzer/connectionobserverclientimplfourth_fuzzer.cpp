@@ -46,15 +46,38 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::shared_ptr<ConnectionObserver> observer;
     std::shared_ptr<ServiceProxyAdapter> proxy;
     FuzzedDataProvider fdp(data, size);
-    connectionObserverClientImpl->RegisterObserver(observer);
-    connectionObserverClientImpl->UnregisterObserver(observer);
-    connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
-    connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
-    connectionObserverClientImpl->AddObserversLocked(observer);
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->RegisterObserver(observer);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->UnregisterObserver(observer);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->AddObserversLocked(observer);
+    }
+
     sptr<IRemoteObject> remoteObj;
     proxy = std::make_shared<ServiceProxyAdapter>(remoteObj);
-    connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
-    connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
+    }
+
+    if (fdp.ConsumeBool()) {
+        connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
+    }
+
     return true;
 }
 }

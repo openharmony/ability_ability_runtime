@@ -83,7 +83,7 @@ class RecordWriter {
     } else if (obj instanceof Object) {
       const objCls = Class.of(obj);
       if (objCls.isFixedArray()) {
-        this.writeBuildArray(RecordWriter.asFixedArray(obj));
+        this.writeBuildArray(RecordWriter.asFixedArray<Any>(obj));
       }
     } else {
         this.buffer.append('null');
@@ -390,6 +390,9 @@ class RecordWriter {
           complexArray.boolList.push((element as Boolean));
           break;
         case 'number':
+        case 'int':
+        case 'long':
+        case 'float':
           try {
             this.unwrapArrayElementNumber(element, complexArray);
           } catch (err) {

@@ -772,5 +772,360 @@ HWTEST_F(AppRunningManagerTest, HandleChildRelation_0100, TestSize.Level1)
     auto record = appRunningManager->GetAppRunningRecordByChildProcessPid(childPid);
     EXPECT_NE(record, nullptr);
 }
+
+/**
+ * @tc.name: AppRunningManager_IsAppExist_0100
+ * @tc.desc: Test IsAppExist with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_IsAppExist_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    uint32_t accessTokenId = 1000;
+    bool result = appRunningManager->IsAppExist(accessTokenId);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AppRunningManager_IsAppExist_0200
+ * @tc.desc: Test IsAppExist with existing app
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_IsAppExist_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->accessTokenId = 1000;
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    bool result = appRunningManager->IsAppExist(1000);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AppRunningManager_IsAppExist_0300
+ * @tc.desc: Test IsAppExist with non-existing token
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_IsAppExist_0300, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->accessTokenId = 1000;
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    bool result = appRunningManager->IsAppExist(2000);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordByPid_0200
+ * @tc.desc: Test GetAppRunningRecordByPid with existing record
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordByPid_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    auto priorityObj = appRecord->GetPriorityObject();
+    ASSERT_NE(priorityObj, nullptr);
+    appRecord->GetPriorityObject()->SetPid(1000);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    auto result = appRunningManager->GetAppRunningRecordByPid(1000);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetPid(), 1000);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordByPid_0300
+ * @tc.desc: Test GetAppRunningRecordByPid with non-existing pid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordByPid_0300, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    auto priorityObj = appRecord->GetPriorityObject();
+    ASSERT_NE(priorityObj, nullptr);
+    priorityObj->SetPid(1000);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    auto result = appRunningManager->GetAppRunningRecordByPid(2000);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordMap_0100
+ * @tc.desc: Test GetAppRunningRecordMap with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordMap_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto result = appRunningManager->GetAppRunningRecordMap();
+    EXPECT_EQ(result.empty(), true);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordMap_0200
+ * @tc.desc: Test GetAppRunningRecordMap with existing records
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordMap_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    int32_t recordId1 = 1;
+    int32_t recordId2 = 2;
+    std::string processName = "test.process";
+    auto appRecord1 = std::make_shared<AppRunningRecord>(appInfo, recordId1, processName);
+    auto appRecord2 = std::make_shared<AppRunningRecord>(appInfo, recordId2, processName);
+    appRunningManager->appRunningRecordMap_.emplace(recordId1, appRecord1);
+    appRunningManager->appRunningRecordMap_.emplace(recordId2, appRecord2);
+
+    auto result = appRunningManager->GetAppRunningRecordMap();
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: AppRunningManager_ClearAppRunningRecordMap_0100
+ * @tc.desc: Test ClearAppRunningRecordMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_ClearAppRunningRecordMap_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    EXPECT_EQ(appRunningManager->appRunningRecordMap_.size(), 1);
+    appRunningManager->ClearAppRunningRecordMap();
+    EXPECT_EQ(appRunningManager->appRunningRecordMap_.empty(), true);
+}
+
+/////
+/**
+ * @tc.name: AppRunningManager_ClipStringContent_0100
+ * @tc.desc: Test ClipStringContent with regex match
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_ClipStringContent_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::regex rule("[a-zA-Z.]+[-_#]{1}");
+    std::string source = "test.value-123";
+    std::string afterCutStr;
+    appRunningManager->ClipStringContent(rule, source, afterCutStr);
+    EXPECT_NE(afterCutStr.empty(), true);
+}
+
+/**
+ * @tc.name: AppRunningManager_ClipStringContent_0200
+ * @tc.desc: Test ClipStringContent without regex match
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_ClipStringContent_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::regex rule("[a-zA-Z.]+[-_#]{1}");
+    std::string source = "testvalue123";
+    std::string afterCutStr;
+    appRunningManager->ClipStringContent(rule, source, afterCutStr);
+    EXPECT_EQ(afterCutStr.empty(), true);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetForegroundApplications_0100
+ * @tc.desc: Test GetForegroundApplications with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetForegroundApplications_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::vector<AppStateData> list;
+    appRunningManager->GetForegroundApplications(list);
+    EXPECT_EQ(list.empty(), true);
+}
+
+/**
+ * @tc.name: AppRunningManager_GetForegroundApplications_0200
+ * @tc.desc: Test GetForegroundApplications with foreground app
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetForegroundApplications_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.app";
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRecord->curState_ = ApplicationState::APP_STATE_FOREGROUND;
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    std::vector<AppStateData> list;
+    appRunningManager->GetForegroundApplications(list);
+    EXPECT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0].bundleName, "com.test.app");
+}
+
+/**
+ * @tc.name: AppRunningManager_GetForegroundApplications_0300
+ * @tc.desc: Test GetForegroundApplications with background app only
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_GetForegroundApplications_0300, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.test.app";
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.process";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRecord->curState_ = ApplicationState::APP_STATE_BACKGROUND;
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    std::vector<AppStateData> list;
+    appRunningManager->GetForegroundApplications(list);
+    EXPECT_EQ(list.empty(), true);
+}
+
+/**
+ * @tc.name: AppRunningManager_ProcessExitByBundleNameAndUid_0100
+ * @tc.desc: Test ProcessExitByBundleNameAndUid with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_ProcessExitByBundleNameAndUid_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::string bundleName = "com.test.app";
+    int32_t uid = 1000;
+    std::list<pid_t> pids;
+    KillProcessConfig config;
+    bool result = appRunningManager->ProcessExitByBundleNameAndUid(bundleName, uid, pids, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0100
+ * @tc.desc: Test GetAllAbilityInfos with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAbilityInfos_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    auto ret = appRunningManager->GetAllAbilityInfos(-1, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(infos.empty());
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0200
+ * @tc.desc: Test GetAllAbilityInfos with specific pid not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAbilityInfos_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    int32_t pid = 1001;
+    auto ret = appRunningManager->GetAllAbilityInfos(pid, infos);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0300
+ * @tc.desc: Test GetAllAbilityInfos with specific pid found
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAbilityInfos_0300, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = "test.app";
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.app";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRecord->GetPriorityObject()->SetPid(1001);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    int32_t pid = 1001;
+    auto ret = appRunningManager->GetAllAbilityInfos(pid, infos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetAllAbilityInfos_0400
+ * @tc.desc: Test GetAllAbilityInfos with pid=-1 to get all
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAbilityInfos_0400, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = "test.app";
+    int32_t recordId = RECORD_ID;
+    std::string processName = "test.app";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRecord->GetPriorityObject()->SetPid(1001);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    std::vector<AppExecFwk::AbilityStateData> infos;
+    auto ret = appRunningManager->GetAllAbilityInfos(-1, infos);
+    EXPECT_EQ(ret, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -38,7 +38,8 @@ enum class FaultDataType {
     CPU_LOAD,
     SLEEP_CLEAN,
     PERFORMANCE_CONTROL,
-    RESOURCE_CONTROL
+    RESOURCE_CONTROL,
+    APP_TELEMETRY
 };
 
 enum AppStatus {
@@ -71,6 +72,8 @@ struct FaultData : public Parcelable {
     bool ReadContent(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     bool WriteContent(Parcel &parcel) const;
+    bool ReadLeakContent(Parcel &parcel);
+    bool WriteLeakContent(Parcel &parcel) const;
     static FaultData *Unmarshalling(Parcel &parcel);
     // error object
     ErrorObject errorObject;
@@ -97,11 +100,15 @@ struct FaultData : public Parcelable {
     std::string procStatm;
     bool isInForeground;
     bool isEnableMainThreadSample;
+    bool reportLifecycleToFreeze = false;
     std::string applicationHeapInfo;
     std::string processLifeTime;
     int32_t markedId = 0;
     int32_t processedId = 0;
     int32_t dispatchedEventId = 0;
+    LeakObject leakObject;
+    std::string callbackLog;
+    AppTelemetryLeakType atLeakType;
 };
 
 /**
@@ -111,9 +118,11 @@ struct FaultData : public Parcelable {
 struct AppFaultDataBySA : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     bool ReadContent(Parcel &parcel);
+    bool ReadLeakContent(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     bool WriteErrorObject(Parcel &parcel) const;
     bool WriteContent(Parcel &parcel) const;
+    bool WriteLeakContent(Parcel &parcel) const;
     static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
     bool waitSaveState = false;
     bool notifyApp = false;
@@ -135,8 +144,11 @@ struct AppFaultDataBySA : public Parcelable {
     std::string procStatm;
     bool isInForeground;
     bool isEnableMainThreadSample;
+    bool reportLifecycleToFreeze = false;
     std::string applicationHeapInfo;
     std::string processLifeTime;
+    LeakObject leakObject;
+    AppTelemetryLeakType atLeakType;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

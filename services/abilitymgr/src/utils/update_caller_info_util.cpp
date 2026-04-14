@@ -56,7 +56,18 @@ UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
     return instance;
 }
 
-void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
+void UpdateCallerInfoUtil::UpdateByIndirectCallerInfo(std::shared_ptr<IndirectCallerInfo> indirectCallerInfo,
+    int32_t &tokenId, int32_t &callerUid, int32_t &callerPid)
+{
+    if (indirectCallerInfo != nullptr) {
+        tokenId = indirectCallerInfo->tokenId;
+        callerUid = indirectCallerInfo->callerUid;
+        callerPid = indirectCallerInfo->callerPid;
+    }
+}
+
+void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken,
+    std::shared_ptr<IndirectCallerInfo> indirectCallerInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
@@ -68,6 +79,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
+    UpdateByIndirectCallerInfo(indirectCallerInfo, tokenId, callerUid, callerPid);
     want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
     want.RemoveParam(Want::PARAM_RESV_CALLER_UID);

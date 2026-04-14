@@ -72,5 +72,10 @@ int32_t AbilityManagerService::StartExtensionAbility(const Want &want, const spt
     usedStartExtensionAbilityTimes++;
     return startExtensionAbilityResult;
 }
+
+ErrCode AbilityManagerService::RecordAppWithReason(int32_t pid, int32_t uid, const ExitReasonCompability &exitReason)
+{
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

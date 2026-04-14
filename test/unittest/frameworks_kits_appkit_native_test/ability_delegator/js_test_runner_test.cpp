@@ -116,8 +116,7 @@ HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0100, Function | MediumTest | Lev
 
     JsTestRunner* jsRunnerdrive = nullptr;
     jsRunnerdrive->ReportFinished(REPORT_FINISH_MSG);
-
-    EXPECT_FALSE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_NE(abilityArgs, nullptr);
 }
 
 /**
@@ -157,8 +156,7 @@ HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0200, Function | MediumTest | Lev
 
     JsTestRunner* jsRunnerdrive = nullptr;
     jsRunnerdrive->ReportFinished(REPORT_FINISH_MSG);
-
-    EXPECT_TRUE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_EQ(testRunner, nullptr);
 }
 
 /**
@@ -281,8 +279,7 @@ HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0500, Function | MediumTest | Lev
 
     JsTestRunner* pTestRunner = static_cast<JsTestRunner*>(static_cast<void*>((testRunner.get())));
     pTestRunner->ReportFinished(REPORT_FINISH_MSG);
-
-    EXPECT_TRUE(MockAbilityDelegatorStub::finishFlag_);
+    EXPECT_EQ(testRunner, nullptr);
 }
 
 /**

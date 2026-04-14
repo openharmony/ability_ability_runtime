@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <unordered_map>
 
 #define private public
 #include "insight_intent_rdb_data_mgr.h"
@@ -35,10 +36,47 @@ constexpr size_t STRING_MAX_LENGTH = 128;
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider fdp(data, size);
-    std::unordered_map<std::string, std::string> datas;
-    DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->QueryAllData(datas);
+    auto rdbDataMgr = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance();
+
+    std::string key = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::string value = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+
+    if (fdp.ConsumeBool()) {
+        rdbDataMgr->InsertData(key, value);
+    }
+
+    if (fdp.ConsumeBool()) {
+        rdbDataMgr->UpdateData(key, value);
+    }
+
+    if (fdp.ConsumeBool()) {
+        rdbDataMgr->DeleteData(key);
+    }
+
+    if (fdp.ConsumeBool()) {
+        rdbDataMgr->DeleteDataBeginWithKey(key);
+    }
+
+    if (fdp.ConsumeBool()) {
+        std::string queryValue;
+        rdbDataMgr->QueryData(key, queryValue);
+    }
+
+    if (fdp.ConsumeBool()) {
+        std::unordered_map<std::string, std::string> datas;
+        rdbDataMgr->QueryDataBeginWithKey(key, datas);
+    }
+
+    if (fdp.ConsumeBool()) {
+        std::unordered_map<std::string, std::string> datas;
+        rdbDataMgr->QueryAllData(datas);
+    }
+
+    if (fdp.ConsumeBool()) {
+        rdbDataMgr->BackupRdb();
+    }
+
     return true;
-}
 }
 
 /* Fuzzer entry point */
@@ -48,3 +86,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
+} // namespace OHOS

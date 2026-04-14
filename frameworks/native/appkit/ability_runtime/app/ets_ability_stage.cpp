@@ -394,6 +394,28 @@ void ETSAbilityStage::OnMemoryLevel(int32_t level)
     TAG_LOGD(AAFwkTag::APPKIT, "end");
 }
 
+void ETSAbilityStage::OnLaunchFromHyperSnap()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPKIT, "OnLaunchFromHyperSnap called");
+    AbilityStage::OnLaunchFromHyperSnap();
+
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnLaunchFromHyperSnap begin");
+    CallObjectMethod(false, "onLaunchFromHyperSnap", ":");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnLaunchFromHyperSnap end");
+}
+
+void ETSAbilityStage::OnAboutToCreateAbility()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPKIT, "OnAboutToCreateAbility called");
+    AbilityStage::OnAboutToCreateAbility();
+
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnAboutToCreateAbility begin");
+    CallObjectMethod(false, "onAboutToCreateAbility", ":");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnAboutToCreateAbility end");
+}
+
 bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);

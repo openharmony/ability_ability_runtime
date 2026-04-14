@@ -22,6 +22,7 @@ ohos_shared_library("insightintentprovider_napi") {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
+    cfi_policy = "adaptive"
     debug = false
   }
 
@@ -39,7 +40,11 @@ ohos_shared_library("insightintentprovider_napi") {
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
   ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]

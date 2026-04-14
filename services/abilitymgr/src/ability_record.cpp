@@ -56,6 +56,7 @@
 #include "uri_utils.h"
 #include "user_controller/user_controller.h"
 #include "utils/state_utils.h"
+#include "utils/ability_event_util.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
 #endif
@@ -268,6 +269,10 @@ void AbilityRecord::LoadUIAbility()
         TAG_LOGI(AAFwkTag::ABILITYMGR, "preload, no event sent");
         return;
     }
+    if (isPrelaunch_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "prelaunch, no event sent");
+        return;
+    }
     SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
     SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout);
     std::string methodName = "LoadAbility";
@@ -335,6 +340,17 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     if (result == ERR_OK) {
         AbilityRuntime::UserController::GetInstance().AddToUserLockedBundleList(abilityInfo_.bundleName, userId);
     }
+
+    // Handle bundle first launch event via posttask
+    if (abilityInfo_.type == AppExecFwk::AbilityType::PAGE &&
+        !abilityInfo_.applicationInfo.isBundleFirstLaunched) {
+        auto userId = abilityInfo_.uid / BASE_USER_RANGE;
+        std::string callerBundleName = firstCallerBundleName_.empty() ? "_system" : firstCallerBundleName_;
+        ffrt::submit([this, appInfo = abilityInfo_.applicationInfo, userId, callerBundleName]() {
+                AbilityEventUtil::HandleBundleFirstLaunch(appInfo, userId, callerBundleName);
+            }, ffrt::task_attr().name("HandleBundleFirstLaunch"));
+    }
+
     return result;
 }
 
@@ -1900,8 +1916,9 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         CHECK_POINTER_LOG(ability, "ability nullptr");
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
+    std::string typeName = abilityInfo_.type == AppExecFwk::AbilityType::PAGE ? "(uiability)" : "(extension)";
     handler->SubmitTask(task, AAFwk::TaskAttribute{
-        .taskName_ = "OnSchedulerDied",
+        .taskName_ = "OnSchedulerDied" + typeName,
         .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
     });
     auto resultTask = [want = GetWant(), ability = shared_from_this()]() {
@@ -2750,6 +2767,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     grantInfo.userId = GetOwnerMissionUserId();
     grantInfo.flag = want.GetFlags();
     grantInfo.isNotifyCollaborator = isNotifyCollaborator;
+    grantInfo.targetUid = uid_;
     grantInfo.callerUid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
     if (!isNotifyCollaborator) {
         grantInfo.targetAbilityName = abilityInfo_.name;

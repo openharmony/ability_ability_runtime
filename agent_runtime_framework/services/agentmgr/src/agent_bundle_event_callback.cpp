@@ -16,10 +16,14 @@
 #include "agent_bundle_event_callback.h"
 
 #include "agent_card_mgr.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AgentRuntime {
+namespace {
+constexpr const char* APP_INDEX = "appIndex";
+}
 
 void AgentBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
 {
@@ -29,6 +33,7 @@ void AgentBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData ev
     std::string bundleName = want.GetElement().GetBundleName();
     int32_t userId = want.GetIntParam("userId", 0);
     int32_t uid = want.GetIntParam("uid", 0);
+    int32_t appIndex = want.GetIntParam(APP_INDEX, 0);
     // verify data
     if (action.empty()) {
         TAG_LOGE(AAFwkTag::SER_ROUTER, "OnReceiveEvent failed, empty action");
@@ -40,8 +45,15 @@ void AgentBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData ev
         return;
     }
 
-    TAG_LOGI(AAFwkTag::SER_ROUTER, "bundleName:%{public}s, action:%{public}s, userId:%{public}d, uid:%{public}d",
-        bundleName.c_str(), action.c_str(), userId, uid);
+    TAG_LOGI(AAFwkTag::SER_ROUTER,
+        "bundleName:%{public}s, action:%{public}s, userId:%{public}d, uid:%{public}d, appIndex:%{public}d",
+        bundleName.c_str(), action.c_str(), userId, uid, appIndex);
+
+    if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        TAG_LOGI(AAFwkTag::SER_ROUTER, "ignore clone bundle event, bundleName:%{public}s, appIndex:%{public}d",
+            bundleName.c_str(), appIndex);
+        return;
+    }
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
         AgentCardMgr::GetInstance().HandleBundleInstall(bundleName, userId);

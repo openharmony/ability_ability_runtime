@@ -60,6 +60,7 @@ public:
     void SetAppDebug(bool isAppDebug);
     void SetAppInForeground(bool isInForeground);
     void SetMainThreadSample(bool isEnableMainThreadSample);
+    void SetReportLifeCycleAsAppfreeze(bool reportLifecycleToFreeze);
     void SetAppfreezeApplication(const std::shared_ptr<OHOSApplication> &application);
     std::string GetProcessLifeCycle();
 
@@ -74,18 +75,21 @@ private:
     std::string GetProcStatm(int32_t pid);
     bool GetAppInForeground();
     bool GetMainThreadSample();
+    bool GetReportLifeCycleAsAppfreeze();
     void EnableFreezeSample(FaultData& newFaultData);
     void ReportAppfreezeTask(const FaultData& faultData, bool onlyMainThread);
     std::string LogFormat(size_t totalSize, size_t objectSize);
     void GetApplicationInfo(FaultData& faultData);
     bool GetProcessStartTime(pid_t tid, unsigned long long &startTime);
     bool ReadFdToString(int fd, std::string& content);
+    int TransformHicollieFaultNumber(const std::string& faultName);
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
     bool isAppDebug_ = false;
     bool isInForeground_ = true;
     bool isEnableMainThreadSample_ = false;
+    bool reportLifecycleToFreeze_ = false;
     std::mutex handlingMutex_;
     std::list<FaultData> handlinglist_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> appfreezeInnerTaskHandler_;

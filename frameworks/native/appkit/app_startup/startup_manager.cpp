@@ -63,6 +63,7 @@ constexpr const char* PRELOAD_SYSTEM_SO_STARTUP_TASKS = "systemPreloadHintStartu
 constexpr const char* PRELOAD_SYSTEM_SO_ALLOWLIST_FILE_PATH = "/etc/ability_runtime_app_startup.json";
 constexpr const char* SYSTEM_PRELOAD_SO_ALLOW_LIST = "systemPreloadSoAllowList";
 constexpr const char* ARK_TS_MODE = "arkTSMode";
+constexpr const int32_t PRIORITY_PRELOAD_SO = -20;
 
 struct StartupTaskResultCallbackInfo {
     std::unique_ptr<StartupTaskResultCallback> callback_;
@@ -133,6 +134,10 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
             TAG_LOGE(AAFwkTag::STARTUP, "self is null");
             return;
         }
+        auto ret = setpriority(PRIO_PROCESS, gettid(), PRIORITY_PRELOAD_SO);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::STARTUP, "setpriority fail, ret:%{public}d, err:%{public}d", ret, errno);
+        }
         self->PreloadAppHintStartupTask(data);
     });
     return ERR_OK;
@@ -185,7 +190,9 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<AAFwk::Wa
     TAG_LOGD(AAFwkTag::STARTUP, "autoStartupTasksManager build, id: %{public}u, tasks num: %{public}zu",
         startupTaskManagerId, autoStartupTasks.size());
     startupTaskManager = std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
-    startupTaskManager->SetConfig(startupConfig);
+    if (startupConfig != nullptr) {
+        startupTaskManager->SetConfig(startupConfig);
+    }
     startupTaskManagerMap_.emplace(startupTaskManagerId, startupTaskManager);
     startupTaskManagerId++;
     return ERR_OK;
@@ -283,7 +290,9 @@ int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string
     TAG_LOGD(AAFwkTag::STARTUP, "startupTasksManager build, id: %{public}u, tasks num: %{public}zu",
         startupTaskManagerId, currentStartupTasks.size());
     startupTaskManager = std::make_shared<StartupTaskManager>(startupTaskManagerId, currentStartupTasks);
-    startupTaskManager->SetConfig(defaultConfig_);
+    if (defaultConfig_ != nullptr) {
+        startupTaskManager->SetConfig(defaultConfig_);
+    }
     startupTaskManagerMap_.emplace(startupTaskManagerId, startupTaskManager);
     startupTaskManagerId++;
     return ERR_OK;

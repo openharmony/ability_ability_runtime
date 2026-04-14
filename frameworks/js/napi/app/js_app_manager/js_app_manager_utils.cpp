@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,6 +162,7 @@ napi_value CreateJsRunningProcessInfo(napi_env env, const RunningProcessInfo &in
     if (info.appCloneIndex != -1) {
         napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, info.appCloneIndex));
     }
+    napi_set_named_property(env, object, "isPreload", CreateJsValue(env, info.isPreload));
     return handleEscape.Escape(object);
 }
 

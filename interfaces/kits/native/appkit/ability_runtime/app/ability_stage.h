@@ -60,6 +60,8 @@ public:
         AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn);
     virtual std::string OnNewProcessRequest(const AAFwk::Want &want,
         AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn);
+    virtual void OnLaunchFromHyperSnap();
+    virtual void OnAboutToCreateAbility();
     virtual void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application);
     virtual void LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo);
@@ -72,6 +74,11 @@ public:
     virtual void OnMemoryLevel(int level);
     virtual int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
         bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad);
+    bool IsAbilityCreated() const;
+    void MarkAbilityCreated();
+
+    void SetSkipAbilityStageLifecycle(bool skipAbilityStageLifecycle);
+    bool IsSkipAbilityStageLifecycle() const;
 
 private:
     friend class JsAbilityStage;
@@ -79,6 +86,8 @@ private:
     std::shared_ptr<Context> context_;
     std::map<sptr<IRemoteObject>, std::shared_ptr<AppExecFwk::AbilityLocalRecord>> abilityRecords_;
     std::weak_ptr<AppExecFwk::OHOSApplication> application_;
+    bool isAbilityCreate_ = false;
+    bool skipAbilityStageLifecycle_ = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

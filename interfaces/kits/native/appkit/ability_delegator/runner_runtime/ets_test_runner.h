@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_TEST_RUNNER_H
 #define OHOS_ABILITY_RUNTIME_ETS_TEST_RUNNER_H
 
+#include <mutex>
+
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
 #include "bundle_info.h"
@@ -67,6 +69,8 @@ private:
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsTestRunnerObj_;
     std::string srcPath_;
     std::string hapPath_;
+    bool hasStop_ = true;
+    std::mutex mutexHasStop_;
 };
 }  // namespace RunnerRuntime
 }  // namespace OHOS

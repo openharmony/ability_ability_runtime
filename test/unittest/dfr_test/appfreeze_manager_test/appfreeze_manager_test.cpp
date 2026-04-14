@@ -143,7 +143,11 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_003, TestSize.Level1)
         .bundleName = "AppfreezeManagerTest_003",
         .processName = "AppfreezeManagerTest_003",
     };
+    faultData.reportLifecycleToFreeze = true;
     int ret = appfreezeManager->NotifyANR(faultData, appInfo, "", "");
+    EXPECT_EQ(ret, 0);
+    faultData.reportLifecycleToFreeze = false;
+    ret = appfreezeManager->NotifyANR(faultData, appInfo, "", "");
     EXPECT_EQ(ret, 0);
 }
 
@@ -246,6 +250,39 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
     str = "123:456";
     ret = appfreezeManager->StrSplit(str, index);
     EXPECT_EQ(ret, "456");
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_IsHalfTimeout_001
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_IsHalfTimeout_001, TestSize.Level1)
+{
+    bool ret = appfreezeManager->IsHalfTimeout("THREAD_BLOCK_3S");
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_IsHalfTimeout_002
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_IsHalfTimeout_002, TestSize.Level1)
+{
+    bool ret = appfreezeManager->IsHalfTimeout("LIFECYCLE_HALF_TIMEOUT");
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_IsHalfTimeout_003
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_IsHalfTimeout_003, TestSize.Level1)
+{
+    bool ret = appfreezeManager->IsHalfTimeout("APP_INPUT_BLOCK");
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -776,6 +813,8 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetProcessKillReason_Test001
     printf("killInfo killId: %d", killInfo.killId);
     killId = 0;
     appfreezeManager->GetProcessKillReason(killId, pid, killMsg);
+    killId = 4000;
+    appfreezeManager->GetProcessKillReason(killId, pid, killMsg);
 }
 
 /**
@@ -803,6 +842,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetExitKernelReason_Test001,
     appfreezeManager->GetExitKernelReason(pid, killInfo);
     printf("killInfo killId: %d", killInfo.killId);
     pid = -1;
+    appfreezeManager->GetExitKernelReason(pid, killInfo);
+    printf("killInfo killId: %d", killInfo.killId);
+    killInfo.killId = 4000;
     appfreezeManager->GetExitKernelReason(pid, killInfo);
     printf("killInfo killId: %d", killInfo.killId);
 }
