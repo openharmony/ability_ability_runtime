@@ -1062,14 +1062,19 @@ HWTEST_F(AgentCardMgrTest, RegisterAgentCard_007, TestSize.Level1)
 
 /**
  * @tc.name: RegisterAgentCard_008
- * @tc.desc: RegisterAgentCard returns RESOLVE_ABILITY_ERR when atomic-service ability does not exist
+ * @tc.desc: RegisterAgentCard skips ability validation for uninstalled atomic-service bundles
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, RegisterAgentCard_008, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
+    MyFlag::retGetBundleInfo = false;
     AgentCard card = BuildCard("testAgent", "1.0.0", "test.bundle", "MissingAbility", AgentCardType::ATOMIC_SERVICE);
-    EXPECT_EQ(agentCardMgr.RegisterAgentCard(card), AAFwk::RESOLVE_ABILITY_ERR);
+
+    int ret = agentCardMgr.RegisterAgentCard(card);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::ATOMIC_SERVICE);
 }
 
 /**
@@ -1133,15 +1138,22 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateAgentCard_003
- * @tc.desc: UpdateAgentCard returns ERR_BUNDLE_NOT_EXIST when bundle does not exist
+ * @tc.desc: UpdateAgentCard skips ability validation for uninstalled atomic-service bundles
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, UpdateAgentCard_003, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
+    MyFlag::retQueryData = ERR_OK;
+    MyFlag::queryDataCards = { BuildCard("testAgent", "1.0.0", "test.bundle", "TestAgent",
+        AgentCardType::ATOMIC_SERVICE) };
     MyFlag::retGetBundleInfo = false;
-    AgentCard card = BuildCard("testAgent", "1.0.0");
-    EXPECT_EQ(agentCardMgr.UpdateAgentCard(card), AAFwk::ERR_BUNDLE_NOT_EXIST);
+    AgentCard card = BuildCard("testAgent", "1.0.0", "test.bundle", "TestAgent", AgentCardType::ATOMIC_SERVICE);
+
+    int ret = agentCardMgr.UpdateAgentCard(card);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::ATOMIC_SERVICE);
 }
 
 /**
