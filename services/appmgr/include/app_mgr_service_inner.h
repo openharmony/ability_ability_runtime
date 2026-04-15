@@ -204,7 +204,8 @@ public:
      *
      * @return
      */
-    virtual void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state);
+    virtual void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+        bool isFromScreenOffBackground = false);
 
     /**
      * UpdateExtensionState, call UpdateExtensionState() through the proxy object, update the extension status.

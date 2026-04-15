@@ -155,7 +155,8 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int MinimizeUIAbility(const UIAbilityRecordPtr &abilityRecord, bool fromUser, uint32_t sceneFlag);
+    int MinimizeUIAbility(const UIAbilityRecordPtr &abilityRecord, bool fromUser, uint32_t sceneFlag,
+        int32_t backgroundReason = 0);
 
     /**
      * GetUIAbilityRecordBySessionInfo.

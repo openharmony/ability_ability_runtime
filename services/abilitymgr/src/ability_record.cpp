@@ -2402,6 +2402,16 @@ void AbilityRecord::SetSceneFlag(uint32_t sceneFlag)
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
 }
 
+void AbilityRecord::SetIsFromScreenOffBackground(bool isFromScreenOffBackground)
+{
+    isFromScreenOffBackground_ = isFromScreenOffBackground;
+}
+
+bool AbilityRecord::IsFromScreenOffBackground() const
+{
+    return isFromScreenOffBackground_;
+}
+
 void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;
