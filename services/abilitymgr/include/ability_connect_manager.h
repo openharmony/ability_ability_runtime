@@ -389,6 +389,7 @@ protected:
     * @param serviceKey The service key to remove.
     */
     void RemoveServiceFromMapSafe(const std::string &serviceKey);
+    void NotifyExtensionTerminated(const std::shared_ptr<BaseExtensionRecord> &record);
 
     /**
     * Load ability with optional callback.
