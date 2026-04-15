@@ -118,6 +118,19 @@ HWTEST_F(AgentCardUtilsTest, ShouldValidateAppInfo_001, TestSize.Level1)
     EXPECT_TRUE(AgentCardUtils::ShouldValidateAppInfo(BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE)));
 }
 
+HWTEST_F(AgentCardUtilsTest, ShouldValidateBundleAbility_001, TestSize.Level1)
+{
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(BuildCard("app", "1.0.0", AgentCardType::APP), 100));
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("lowCode", "1.0.0", AgentCardType::LOW_CODE), 100));
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE), 100));
+
+    MyFlag::retGetBundleInfo = false;
+    EXPECT_FALSE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE), 100));
+}
+
 HWTEST_F(AgentCardUtilsTest, ValidateSystemAppRequirement_001, TestSize.Level1)
 {
     EXPECT_EQ(AgentCardUtils::ValidateSystemAppRequirement(

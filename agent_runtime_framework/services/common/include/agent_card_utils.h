@@ -33,6 +33,7 @@ public:
     static bool HasRequiredRegisterFields(const AgentCard &card);
     static bool HasValidIconUrl(const std::string &iconUrl);
     static bool ShouldValidateAppInfo(const AgentCard &card);
+    static bool ShouldValidateBundleAbility(const AgentCard &card, int32_t userId);
     static bool BundleExists(const std::string &bundleName, int32_t userId);
     static int32_t ValidateSystemAppRequirement(const AgentCard &card, int32_t userId);
     static void ApplyDeviceTypes(const std::vector<std::string> &hapDeviceTypes, AgentCard &card);
