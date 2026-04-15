@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -770,6 +770,71 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2600, TestSize.Level1)
     int32_t appIndex;
     int32_t ret = pendingWantRecord->GetAppIndexbyUid(pendingWantRecord->GetUid(), bundleName, appIndex);
     EXPECT_NE(ret, NO_ERROR);
+}
+
+/*
+ * @tc.number    : PendingWantRecordTest_IsBundleNotExistForUser0_0100
+ * @tc.name      : IsBundleNotExistForUser0
+ * @tc.desc      : 1. userId != 0, return false
+ */
+HWTEST_F(PendingWantRecordTest, IsBundleNotExistForUser0_0100, TestSize.Level1)
+{
+    Want want;
+    ElementName element("device", "com.example.notexist", "TestAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 100);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetUserId(100);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    bool result = pendingWantRecord->IsBundleNotExistForUser0(want);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.number    : IsBundleNotExistForUser0_NullKey_0100
+ * @tc.name      : IsBundleNotExistForUser0
+ * @tc.desc      : key_ is nullptr, should return false
+ */
+HWTEST_F(PendingWantRecordTest, IsBundleNotExistForUser0_NullKey_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsBundleNotExistForUser0_NullKey_0100 start");
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, nullptr);
+
+    bool result = pendingWantRecord->IsBundleNotExistForUser0(want);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsBundleNotExistForUser0_NullKey_0100 end");
+}
+
+/*
+ * @tc.number    : IsBundleNotExistForUser0_NonZeroUser_0100
+ * @tc.name      : IsBundleNotExistForUser0
+ * @tc.desc      : userId is not 0, should return false without query
+ */
+HWTEST_F(PendingWantRecordTest, IsBundleNotExistForUser0_NonZeroUser_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsBundleNotExistForUser0_NonZeroUser_0100 start");
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 100);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+
+    bool result = pendingWantRecord->IsBundleNotExistForUser0(want);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "IsBundleNotExistForUser0_NonZeroUser_0100 end");
 }
 
 /*
