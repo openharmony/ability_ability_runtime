@@ -761,6 +761,7 @@ int32_t PendingWantManager::GetWantSenderInfo(const sptr<IWantSender> &target, s
     wantSenderInfo.flags = (uint32_t)(record->GetKey()->GetFlags());
     wantSenderInfo.allWants = record->GetKey()->GetAllWantsInfos();
     wantSenderInfo.appIndex = record->GetKey()->GetAppIndex();
+    wantSenderInfo.userId = record->GetKey()->GetUserId();
     info.reset(new (std::nothrow) WantSenderInfo(wantSenderInfo));
     return NO_ERROR;
 }
