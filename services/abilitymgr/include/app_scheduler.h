@@ -274,7 +274,7 @@ public:
      *
      * @param token, the token of ability.
      */
-    void MoveToBackground(const sptr<IRemoteObject> &token);
+    void MoveToBackground(const sptr<IRemoteObject> &token, bool isFromScreenOffBackground = false);
 
     /**
      * Update ability state.
