@@ -29,6 +29,7 @@
 #include "configuration_convertor.h"
 #include "connection_state_manager.h"
 #include "common_event_manager.h"
+#include "dms_util.h"
 #include "error_msg_util.h"
 #include "foreground_app_connection_manager.h"
 #include "freeze_util.h"
@@ -1477,7 +1478,7 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
         return;
     }
     std::string srcDeviceId = data[0];
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", srcDeviceId.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", DmsUtil::AnonymizeDeviceId(srcDeviceId).c_str());
     int missionId = atoi(data[1].c_str());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "get missionId: %{public}d", missionId);
     resultWant.SetParam(DMS_SRC_NETWORK_ID, srcDeviceId);
