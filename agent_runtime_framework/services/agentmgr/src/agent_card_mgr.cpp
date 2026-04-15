@@ -240,7 +240,7 @@ int32_t AgentCardMgr::RegisterAgentCard(const AgentCard &card)
     }
 
     int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    if (AgentCardUtils::ShouldValidateAppInfo(registerCard)) {
+    if (AgentCardUtils::ShouldValidateBundleAbility(registerCard, userId)) {
         auto validationRet = AgentCardUtils::ValidateBundleAbility(registerCard.appInfo->bundleName,
             registerCard.appInfo->abilityName, userId);
         if (validationRet != ERR_OK) {
@@ -284,10 +284,13 @@ int32_t AgentCardMgr::UpdateAgentCard(const AgentCard &card)
     }
 
     int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    auto validationRet = AgentCardUtils::ValidateBundleAbility(card.appInfo->bundleName,
-        card.appInfo->abilityName, userId);
-    if (validationRet != ERR_OK) {
-        return validationRet;
+    int32_t validationRet = ERR_OK;
+    if (AgentCardUtils::ShouldValidateBundleAbility(card, userId)) {
+        validationRet = AgentCardUtils::ValidateBundleAbility(card.appInfo->bundleName,
+            card.appInfo->abilityName, userId);
+        if (validationRet != ERR_OK) {
+            return validationRet;
+        }
     }
 
     std::vector<StoredAgentCardEntry> entries;
