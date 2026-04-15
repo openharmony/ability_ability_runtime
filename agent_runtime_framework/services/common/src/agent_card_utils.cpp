@@ -112,6 +112,17 @@ bool AgentCardUtils::ShouldValidateAppInfo(const AgentCard &card)
         card.type == AgentCardType::LOW_CODE;
 }
 
+bool AgentCardUtils::ShouldValidateBundleAbility(const AgentCard &card, int32_t userId)
+{
+    if (!ShouldValidateAppInfo(card)) {
+        return false;
+    }
+    if (card.type != AgentCardType::ATOMIC_SERVICE) {
+        return true;
+    }
+    return card.appInfo != nullptr && BundleExists(card.appInfo->bundleName, userId);
+}
+
 bool AgentCardUtils::BundleExists(const std::string &bundleName, int32_t userId)
 {
     if (bundleName.empty()) {
