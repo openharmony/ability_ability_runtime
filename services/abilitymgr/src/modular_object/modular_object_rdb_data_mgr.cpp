@@ -118,6 +118,18 @@ int32_t ModularObjectExtensionRdbDataMgr::UpdateData(const std::string& key, con
         TAG_LOGE(AAFwkTag::EXT, "Update data error ret:%{public}d", ret);
         return ret;
     }
+
+    if (rowAffected == 0) {
+        NativeRdb::ValuesBucket insertBucket;
+        insertBucket.PutString(MOE_KEY, key);
+        insertBucket.PutString(MOE_VALUE, value);
+        int64_t rowId = -1;
+        ret = InsertWithRetry(rdbStore_, rowId, insertBucket);
+        if (ret != NativeRdb::E_OK) {
+            TAG_LOGE(AAFwkTag::EXT, "Insert data on update-miss error ret:%{public}d", ret);
+            return ret;
+        }
+    }
     return NativeRdb::E_OK;
 }
 

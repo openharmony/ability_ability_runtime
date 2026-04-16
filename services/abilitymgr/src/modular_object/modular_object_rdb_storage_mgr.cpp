@@ -48,6 +48,9 @@ int32_t ModularObjectExtensionRdbStorageMgr::InsertData(
 int32_t ModularObjectExtensionRdbStorageMgr::UpdateData(
     const std::string& key, const std::vector<AAFwk::ModularObjectExtensionInfo> &infos, uint32_t versionCode)
 {
+    if (infos.empty()) {
+        return DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->DeleteData(key);
+    }
     std::string jsonString = ToJsonString(infos, versionCode);
     return DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->UpdateData(key, jsonString);
 }
