@@ -823,6 +823,7 @@ bool OHOSApplication::AddAbilityStage(
     stageContext->SetParentContext(abilityRuntimeContext_);
     stageContext->InitHapModuleInfo(hapModuleInfo);
     stageContext->SetConfiguration(GetConfiguration());
+    stageContext->SetProcessName(GetProcessName());
     auto moduleInfo = stageContext->GetHapModuleInfo();
     if (moduleInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null moduleInfo");
