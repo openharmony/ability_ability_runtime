@@ -63,6 +63,8 @@ struct VerificationInfo {
 
     bool VerifyMissionPermission() const;
 
+    bool VerifyContinuationNotifyPermission() const;
+
     int VerifyAppStateObserverPermission() const;
 
     int32_t VerifyUpdateConfigurationPerm() const;

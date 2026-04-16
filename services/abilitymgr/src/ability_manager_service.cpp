@@ -6355,7 +6355,8 @@ int AbilityManagerService::RegisterOnListener(const std::string &type,
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     CHECK_POINTER_AND_RETURN(listener, ERR_INVALID_VALUE);
-    if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
+    if (!PermissionVerification::GetInstance()->VerifyMissionPermission() &&
+        !PermissionVerification::GetInstance()->VerifyContinuationNotifyPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
