@@ -693,6 +693,7 @@ ohos_shared_library("mission_list") {
     "src/mission/mission_list.cpp",
     "src/mission/mission_list_manager.cpp",
     "src/task_data_persistence_mgr.cpp",
+    "src/utils/dms_util.cpp",
   ]
 
   deps = [
