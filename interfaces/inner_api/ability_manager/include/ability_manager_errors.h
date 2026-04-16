@@ -1410,6 +1410,11 @@ enum NativeFreeInstallError {
      */
     ERR_NOT_GAME_PRELOAD_STATE = 29360227,
 
+    /*
+     * Result (29360228) for Connect: An error of the get cli tool mgr service.
+     */
+    GET_CLI_TOOL_MGR_SERVICE_FAILED = 29360228,
+
     /**
      * Undefine error code.
      */
