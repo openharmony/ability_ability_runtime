@@ -24,6 +24,7 @@
 #include "app_exit_reason_data_manager.h"
 #include "app_mgr_util.h"
 #include "app_utils.h"
+#include "dms_util.h"
 #include "display_util.h"
 #include "ffrt.h"
 #include "foreground_app_connection_manager.h"
@@ -526,8 +527,8 @@ void UIAbilityLifecycleManager::AddCallerRecord(AbilityRequest &abilityRequest, 
     if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         std::string srcDeviceId = abilityRequest.want.GetStringParam(DMS_SRC_NETWORK_ID);
         int missionId = abilityRequest.want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcNetWorkId = %{public}s, missionId = %{public}d", srcDeviceId.c_str(),
-            missionId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcNetWorkId = %{public}s, missionId = %{public}d",
+            DmsUtil::AnonymizeDeviceId(srcDeviceId).c_str(), missionId);
         Want *newWant = const_cast<Want*>(&abilityRequest.want);
         newWant->RemoveParam(DMS_SRC_NETWORK_ID);
         newWant->RemoveParam(DMS_MISSION_ID);
