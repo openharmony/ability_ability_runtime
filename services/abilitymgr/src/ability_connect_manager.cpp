@@ -281,16 +281,24 @@ int AbilityConnectManager::StopServiceAbilityLocked(const AbilityRequest &abilit
     return ERR_OK;
 }
 
+void AbilityConnectManager::NotifyExtensionTerminated(const std::shared_ptr<BaseExtensionRecord> &record)
+{
+    if (record == nullptr) {
+        return;
+    }
+    auto recordId = record->GetRecordId();
+    auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
+    if (monitor != nullptr) {
+        monitor->OnExtensionTerminated(recordId);
+    }
+}
+
 void AbilityConnectManager::RemoveServiceFromMapSafe(const std::string &serviceKey)
 {
     std::lock_guard lock(serviceMapMutex_);
     auto it = serviceMap_.find(serviceKey);
-    if (it != serviceMap_.end() && it->second != nullptr) {
-        auto recordId = it->second->GetRecordId();
-        auto monitor = DelayedSingleton<AAFwk::ExtensionRunningTimeoutMonitor>::GetInstance();
-        if (monitor != nullptr) {
-            monitor->OnExtensionTerminated(recordId);
-        }
+    if (it != serviceMap_.end()) {
+        NotifyExtensionTerminated(it->second);
     }
     serviceMap_.erase(serviceKey);
     TAG_LOGD(AAFwkTag::EXT, "ServiceMap remove, size:%{public}zu", serviceMap_.size());
@@ -2394,6 +2402,7 @@ void AbilityConnectManager::CloseAssertDialog(const std::string &assertSessionId
             auto assertSessionStr = item.second->GetWant().GetStringParam(Want::PARAM_ASSERT_FAULT_SESSION_ID);
             if (assertSessionStr == assertSessionId) {
                 abilityRecord = item.second;
+                NotifyExtensionTerminated(abilityRecord);
                 serviceMap_.erase(item.first);
                 TAG_LOGD(AAFwkTag::EXT, "ServiceMap remove, size:%{public}zu", serviceMap_.size());
                 break;
@@ -2666,6 +2675,7 @@ void AbilityConnectManager::PauseExtensions()
             if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION &&
                 (IsLauncher(targetExtension) || targetExtension->IsSceneBoard() ||
                 (targetExtension->GetKeepAlive() && userId_ != U0_USER_ID))) {
+                NotifyExtensionTerminated(targetExtension);
                 terminatingExtensionList_.push_back(it->second);
                 it = serviceMap_.erase(it);
                 TAG_LOGI(AAFwkTag::EXT, "terminate ability:%{public}s, serviceMap size:%{public}zu",
@@ -2878,6 +2888,7 @@ void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<BaseExten
     std::lock_guard lock(serviceMapMutex_);
     terminatingExtensionList_.push_back(abilityRecord);
     std::string serviceKey = GetServiceKey(abilityRecord);
+    NotifyExtensionTerminated(abilityRecord);
     if (serviceMap_.erase(serviceKey) == 0) {
         TAG_LOGW(AAFwkTag::EXT, "Unknown: %{public}s/%{public}s",
             abilityRecord->GetElementName().GetBundleName().c_str(),
