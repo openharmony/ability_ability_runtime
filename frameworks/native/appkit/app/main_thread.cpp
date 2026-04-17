@@ -2178,7 +2178,15 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         ProcessExit(info);
 
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
-        auto mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
+        napi_env mainEnv = nullptr;
+        auto &runtime = appThread->application_->GetRuntime();
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+            auto& etsRuntime = static_cast<AbilityRuntime::ETSRuntime&>(*runtime);
+            auto& jsRuntime = static_cast<AbilityRuntime::JsRuntime&>(*etsRuntime.GetJsRuntime());
+            mainEnv = jsRuntime.GetNapiEnv();
+        } else {
+            mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNapiEnv();
+        }
         ApplicationDataManager::ExceptionParams params = {env, mainEnv, exception, summary, isUncatchable};
         if (ApplicationDataManager::NotifyUncaughtException(params, appExecErrorObj)) {
             return;
@@ -4460,11 +4468,11 @@ void MainThread::RegisterHybridException(const std::unique_ptr<AbilityRuntime::R
 
             InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);
             (static_cast<AbilityRuntime::JsRuntime&>(*jsRuntime)).RegisterUncaughtExceptionHandler(
-                uncaughtExceptionInfo);
+                uncaughtExceptionInfo, true);
             JsEnv::UncatchableTask uncatchableTask;
             InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
             (static_cast<AbilityRuntime::JsRuntime&>(*jsRuntime)).RegisterUncatchableExceptionHandler(
-                uncatchableTask);
+                uncatchableTask, true);
         }
     }
 }
