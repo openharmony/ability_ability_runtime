@@ -19,6 +19,7 @@
 #include "ability_manager_service.h"
 #include "session_info.h"
 #include "sub_managers_helper.h"
+#include "insight_intent_query_param.h"
 #undef private
 #undef protected
 #include "ability_manager_errors.h"
@@ -371,6 +372,121 @@ HWTEST_F(AbilityManagerServiceMockTest, StartUIExtensionAbility_0300, TestSize.L
     sessionInfo->want = want;
     auto ret = abilityMs->StartUIExtensionAbility(sessionInfo, 1);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: QueryEntityInfo_0100
+ * @tc.desc: Test QueryEntityInfo with executeManager nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, QueryEntityInfo_0100, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = nullptr;
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.class";
+    param.userId_ = 100;
+
+    auto ret = abilityMs->QueryEntityInfo(key, callerToken, param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: QueryEntityInfo_0200
+ * @tc.desc: Test QueryEntityInfo with empty bundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, QueryEntityInfo_0200, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = nullptr;
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.class";
+    param.userId_ = 100;
+
+    auto ret = abilityMs->QueryEntityInfo(key, callerToken, param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: QueryEntityInfo_0300
+ * @tc.desc: Test QueryEntityInfo with empty moduleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, QueryEntityInfo_0300, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = nullptr;
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.class";
+    param.userId_ = 100;
+
+    auto ret = abilityMs->QueryEntityInfo(key, callerToken, param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: QueryEntityInfo_0400
+ * @tc.desc: Test QueryEntityInfo with empty intentName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, QueryEntityInfo_0400, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = nullptr;
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "";
+    param.className_ = "test.class";
+    param.userId_ = 100;
+
+    auto ret = abilityMs->QueryEntityInfo(key, callerToken, param);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: QueryEntityInfo_0500
+ * @tc.desc: Test QueryEntityInfo with empty className
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceMockTest, QueryEntityInfo_0500, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = nullptr;
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "";
+    param.userId_ = 100;
+
+    auto ret = abilityMs->QueryEntityInfo(key, callerToken, param);
+    EXPECT_NE(ret, ERR_OK);
 }
 }
 }

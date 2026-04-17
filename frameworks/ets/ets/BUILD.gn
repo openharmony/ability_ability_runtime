@@ -1037,7 +1037,10 @@ ohos_prebuilt_etc("ability_runtime_insight_intent_driver_abc_etc") {
 
 generate_static_abc("ability_runtime_insight_intent_executor_abc") {
   base_url = "./"
-  files = [ "./@ohos.app.ability.InsightIntentExecutor.ets" ]
+  files = [
+    "./@ohos.app.ability.InsightIntentEntryExecutor.ets",
+    "./@ohos.app.ability.InsightIntentExecutor.ets",
+  ]
 
   is_boot_abc = "True"
   device_dst_file =

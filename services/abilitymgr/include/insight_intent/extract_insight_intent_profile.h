@@ -156,8 +156,12 @@ struct InsightIntentEntityInfo {
     std::string entityCategory;
     std::string parameters;
     std::string parentClassName;
-
+    std::vector<std::string> supportedQueryProperties;
     InsightIntentEntityInfo() = default;
+    bool isQueryable() const
+    {
+        return parentClassName.compare("insightIntent.AppIntentEntity") == 0;
+    }
 };
 
 // 全量信息
@@ -175,6 +179,7 @@ struct ExtractInsightIntentInfo {
     std::string llmDescription;
     std::string result;
     std::string example;
+    std::string arkTSMode;
 
     ExtractInsightIntentInfo() = default;
 };
@@ -216,6 +221,7 @@ struct ExtractInsightIntentProfileInfo {
     std::string abilityName;
     std::string functionName;
     std::string formName;
+    std::string arkTSMode;
 };
 
 struct ExtractInsightIntentProfileInfoVec {

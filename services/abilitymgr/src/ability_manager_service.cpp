@@ -13869,6 +13869,61 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     return ret;
 }
 
+ErrCode AbilityManagerService::QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+    const InsightIntentQueryParam &param)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "QueryEntityInfo called, key=%{public}" PRIu64 ", bundleName=%{public}s,"
+        "moduleName=%{public}s, intentName=%{public}s, className=%{public}s, userId=%{public}d, queryType=%{public}s",
+        key, param.bundleName_.c_str(), param.moduleName_.c_str(), param.intentName_.c_str(),
+        param.className_.c_str(), param.userId_, param.queryEntityParam_.queryType_.c_str());
+
+    if (IsCrossUserCall(param.userId_)) {
+        if (VerifyAccountPermission(param.userId_) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verification failed");
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (!JudgeMultiUserConcurrency(param.userId_)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
+            return ERR_CROSS_USER;
+        }
+    }
+
+    auto executeManager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    if (executeManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "executeManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto callerBundlename = InsightIntentGetcallerBundleName();
+    auto paramPtr = std::make_shared<InsightIntentQueryParam>(param);
+    int32_t ret = executeManager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundlename);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAndUpdateQueryEntityParam error:%{public}d", ret);
+        return ret;
+    }
+
+    Want want;
+    ret = InsightIntentExecuteManager::GenerateQueryEntityWant(paramPtr, want);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GenerateQueryEntityWant error:%{public}d", ret);
+        return ret;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Start execute intent, want: %{public}s", want.ToString().c_str());
+
+    int32_t callerUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    EventInfo eventInfo = BuildEventInfo(want, callerUserId);
+    InsightIntentExecuteParam executeParam;
+    executeParam.userId_ = paramPtr->userId_;
+    ret = StartAbilityByCallWithInsightIntent(want, callerToken, executeParam);
+    if (ret != ERR_OK) {
+        eventInfo.errReason = "StartAbilityByCallWithInsightIntent error";
+        SendIntentReport(eventInfo, ret, paramPtr->intentName_);
+        DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->RemoveExecuteIntent(paramPtr->intentId_);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityByCallWithInsightIntent error:%{public}d", ret);
+    }
+    return ret;
+}
+
 bool AbilityManagerService::IsAbilityStarted(AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> &targetRecord, const int32_t oriValidUserId)
 {

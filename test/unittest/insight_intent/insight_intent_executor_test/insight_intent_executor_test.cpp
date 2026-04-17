@@ -164,6 +164,134 @@ HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageCreate_006, TestSize.Leve
 }
 
 /*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_NONE type
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_001, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_NONE);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_ENTRY type
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_002, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_ENTRY);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_FUNC type
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_003, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_FUNC);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_QUERY_ENTITY type
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_004, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_QUERY_ENTITY);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_PAGE type (returns nullptr)
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_005, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_PAGE);
+    EXPECT_EQ(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_LINK type (returns nullptr)
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_006, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_LINK);
+    EXPECT_EQ(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test ETS language with DECOR_FORM type (returns nullptr)
+*/
+HWTEST_F(InsightIntentExecutorTest, ETSInsightIntentExecutorCreate_007, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::ETS);
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_FORM);
+    EXPECT_EQ(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test JS language with DECOR_QUERY_ENTITY type
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentExecutorCreate_001, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_QUERY_ENTITY);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test JS language with DECOR_FORM type (returns nullptr)
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentExecutorCreate_002, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_FORM);
+    EXPECT_EQ(res, nullptr);
+}
+
+/*
+* Feature: InsightIntentExecutor
+* Function: Create
+* SubFunction: Test default language (returns nullptr)
+*/
+HWTEST_F(InsightIntentExecutorTest, DefaultLanguageCreate_001, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    runtime->SetLanguage(Runtime::Language::CJ);  // CJ is not supported, returns nullptr
+    auto res = InsightIntentExecutor::Create(*runtime, InsightIntentType::DECOR_NONE);
+    EXPECT_EQ(res, nullptr);
+}
+
+/*
 * Feature: JsInsightIntentFunc
 * Function: Init
 * SubFunction: NA
