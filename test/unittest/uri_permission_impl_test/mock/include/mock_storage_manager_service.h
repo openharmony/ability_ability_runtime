@@ -540,6 +540,16 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t Eject(const std::string &volumeId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetOpticalDriveOpsProgress(const std::string &volumeId, int32_t &progress) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
