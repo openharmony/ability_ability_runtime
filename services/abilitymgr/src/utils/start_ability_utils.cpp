@@ -480,7 +480,7 @@ std::string StartAbilityUtils::GenerateAsCallerForAncoSessionId()
 }
 
 void StartAbilityUtils::RemoveAtomicServiceShareRouterIfNeeded(Want &want,
-    const AppExecFwk::AbilityInfo &targetAbilityInfo)
+    const AppExecFwk::AbilityInfo &targetAbilityInfo, uint32_t callerTokenId)
 {
     if (!want.HasParameter(Want::ATOMIC_SERVICE_SHARE_ROUTER)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No ATOMIC_SERVICE_SHARE_ROUTER parameter, skip check");
@@ -495,7 +495,7 @@ void StartAbilityUtils::RemoveAtomicServiceShareRouterIfNeeded(Want &want,
     }
 
     bool hasStartAbilityToPagePermission = PermissionVerification::GetInstance()->VerifyCallingPermission(
-        PermissionConstants::PERMISSION_START_ABILITY_TO_PAGE);
+        PermissionConstants::PERMISSION_START_ABILITY_TO_PAGE, callerTokenId);
     if (!hasStartAbilityToPagePermission) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Remove ATOMIC_SERVICE_SHARE_ROUTER: hasPermission=%{public}d",
             hasStartAbilityToPagePermission);
