@@ -12563,7 +12563,7 @@ void AppMgrServiceInner::SetTerminateTimeOutFlag(const sptr<IRemoteObject> token
     TAG_LOGI(AAFwkTag::APPMGR, "SetTerminateTimeOutFlag");
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
     CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
-    SetProcessCacheBlocked(true)
+    appRecord->SetProcessCacheBlocked(true);
 }
 
 void AppMgrServiceInner::PostRenderAttachTimeoutTask(std::shared_ptr<RenderRecord> renderRecord)
