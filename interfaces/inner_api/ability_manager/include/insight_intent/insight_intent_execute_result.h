@@ -39,6 +39,8 @@ public:
     std::vector<std::string> uris;
     bool isDecorator = false;
     bool isNeedDelayResult = false;
+    bool isQueryEntity = false;
+    std::vector<std::shared_ptr<WantParams>> queryResults;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;

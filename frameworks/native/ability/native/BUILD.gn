@@ -734,6 +734,7 @@ ohos_shared_library("insight_intent_executor") {
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_func.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_page.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_query_entity.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_utils.cpp",
   ]
 
@@ -790,7 +791,11 @@ ohos_shared_library("insight_intent_executor_ani") {
   include_dirs = [ "${ability_runtime_path}/frameworks/ets/ani/enum_convert" ]
 
   sources = [
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_entry.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_func.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_query_entity.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_utils.cpp",
     "${ability_runtime_path}/frameworks/native/insight_intent/insight_intent_context/ets_insight_intent_context.cpp",
   ]
 

@@ -734,6 +734,9 @@ enum class AbilityManagerInterfaceCode {
 
     // complete game prelaunch
     COMPLETE_GAME_PRELAUNCH = 6164,
+
+    // query entity
+    INSIGHT_INTENT_QUERY_ENTITY = 6165,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

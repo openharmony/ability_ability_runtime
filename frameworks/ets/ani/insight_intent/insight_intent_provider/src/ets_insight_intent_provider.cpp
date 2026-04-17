@@ -39,14 +39,30 @@ public:
     static void OnSendExecuteResult(ani_env *env, ani_int intentId, ani_object aniResult, ani_object callback)
     {
         TAG_LOGD(AAFwkTag::INTENT, "OnSendExecuteResult called");
+        HandleSendExecuteResultCommon(env, intentId, aniResult, callback, false);
+    }
+
+    static void OnSendIntentResult(ani_env *env, ani_int intentId, ani_object aniResult, ani_object callback)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "OnSendIntentResult called");
+        HandleSendExecuteResultCommon(env, intentId, aniResult, callback, true);
+    }
+
+private:
+    static void HandleSendExecuteResultCommon(
+        ani_env *env, ani_int intentId, ani_object aniResult, ani_object callback, bool isDecorator)
+    {
         auto nativeResult = std::make_shared<AppExecFwk::InsightIntentExecuteResult>();
         ani_object errorObject = nullptr;
-        if (!UnwrapExecuteResult(env, aniResult, *nativeResult)) {
+        if (!UnwrapExecuteResult(env, aniResult, *nativeResult, isDecorator)) {
             TAG_LOGE(AAFwkTag::INTENT, " failed to UnwrapExecuteResult");
-            errorObject = EtsErrorUtil::CreateErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
+            errorObject =
+                EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
+            AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
+            return;
         }
-        auto errCode = InsightIntentDelayResultCallbackMgr::GetInstance().HandleExecuteDone(intentId, *nativeResult);
+        auto errCode =
+            InsightIntentDelayResultCallbackMgr::GetInstance().HandleExecuteDone(intentId, *nativeResult, isDecorator);
         errorObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(errCode));
         AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
     }
@@ -68,8 +84,10 @@ void EtsInsightIntentProviderInit(ani_env *env)
     }
 
     std::array nativeFunctions = {
-        ani_native_function {"nativeSendExecuteResult", nullptr,
-            reinterpret_cast<void *>(EtsInsightIntentProvider::OnSendExecuteResult)},
+        ani_native_function { "nativeSendExecuteResult", nullptr,
+            reinterpret_cast<void *>(EtsInsightIntentProvider::OnSendExecuteResult) },
+        ani_native_function {
+            "nativeSendIntentResult", nullptr, reinterpret_cast<void *>(EtsInsightIntentProvider::OnSendIntentResult) },
     };
 
     status = env->Namespace_BindNativeFunctions(ns, nativeFunctions.data(), nativeFunctions.size());

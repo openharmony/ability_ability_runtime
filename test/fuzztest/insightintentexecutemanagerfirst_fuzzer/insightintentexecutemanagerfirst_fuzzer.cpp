@@ -83,7 +83,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     param->moduleName_ = "mainModule";
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GenerateWant(param, decoratorInfo, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateFuncDecoratorParams(param, info, want);
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetMainElementName(param);
+    InsightIntentExecuteManager::GetMainElementName(param->bundleName_, param->moduleName_);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdatePageDecoratorParams(param, info, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->UpdateEntryDecoratorParams(param, info, want);
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateDecoratorParams(param,

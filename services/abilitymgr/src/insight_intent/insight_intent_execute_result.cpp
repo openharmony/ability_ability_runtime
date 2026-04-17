@@ -28,6 +28,11 @@ bool InsightIntentExecuteResult::ReadFromParcel(Parcel &parcel)
     }
     flags = parcel.ReadInt32();
     isDecorator = parcel.ReadBool();
+    isQueryEntity = parcel.ReadBool();
+    queryResults.resize(parcel.ReadInt32());
+    for (size_t i = 0; i < queryResults.size(); i++) {
+        queryResults[i] = std::shared_ptr<WantParams>(parcel.ReadParcelable<WantParams>());
+    }
     return true;
 }
 
@@ -50,6 +55,17 @@ bool InsightIntentExecuteResult::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteBool(isDecorator)) {
         return false;
+    }
+    if (!parcel.WriteBool(isQueryEntity)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(queryResults.size())) {
+        return false;
+    }
+    for (const auto &item : queryResults) {
+        if (!parcel.WriteParcelable(item.get())) {
+            return false;
+        }
     }
     return true;
 }
