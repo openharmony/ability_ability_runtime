@@ -60,7 +60,8 @@ void ModularObjectRdbDataManagerTest::TearDown()
  */
 HWTEST_F(ModularObjectRdbDataManagerTest, ModularObjectRdbDataManager_0100, Function | SmallTest | Level1)
 {
-    auto res = DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->InsertData(KEY_ONE, VALUE_ONE);
+    auto res =
+        DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->InsertOrUpdateData(KEY_ONE, VALUE_ONE);
     EXPECT_EQ(res, NativeRdb::E_OK);
 
     std::string value;
@@ -68,10 +69,7 @@ HWTEST_F(ModularObjectRdbDataManagerTest, ModularObjectRdbDataManager_0100, Func
     EXPECT_EQ(res, NativeRdb::E_OK);
     EXPECT_TRUE(value == VALUE_ONE);
 
-    res = DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->UpdateData(KEY_ONE, VALUE_TWO);
-    EXPECT_EQ(res, NativeRdb::E_OK);
-
-    res = DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->UpdateData(KEY_TWO, VALUE_TWO);
+    res = DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->InsertOrUpdateData(KEY_ONE, VALUE_TWO);
     EXPECT_EQ(res, NativeRdb::E_OK);
 
     res = DelayedSingleton<ModularObjectExtensionRdbDataMgr>::GetInstance()->QueryData(KEY_ONE, value);
@@ -112,12 +110,13 @@ HWTEST_F(ModularObjectRdbDataManagerTest, ModularObjectRdbDataManager_0300, Func
 {
     std::vector<AAFwk::ModularObjectExtensionInfo> infos;
     uint32_t versionCode = 1;
-    auto ret = DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->UpdateData(
+    auto ret = DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertOrUpdateData(
         KEY_ONE, infos, versionCode);
     EXPECT_EQ(ret, NativeRdb::E_OK);
     AAFwk::ModularObjectExtensionInfo info;
     infos.push_back(info);
-    ret = DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->UpdateData(KEY_ONE, infos, versionCode);
+    ret = DelayedSingleton<ModularObjectExtensionRdbStorageMgr>::GetInstance()->InsertOrUpdateData(
+        KEY_ONE, infos, versionCode);
     EXPECT_EQ(ret, NativeRdb::E_OK);
 }
 }  // namespace
