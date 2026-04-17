@@ -16,29 +16,32 @@
 #ifndef OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
-#include "cli_tool_mgr_stub.h"
+#include "cli_tool_manager_stub.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
 namespace CliTool {
-class CliSaMGRService : public SystemAbility,
-                        public CliToolMGRStub,
-                        public std::enable_shared_from_this<CliSaMGRService> {
-    DECLARE_SYSTEM_ABILITY(CliSaMGRService);
+namespace {
+constexpr int32_t CLI_TOOL_MGR_SERVICE_ID = 186;
+}
+class CliToolManagerService : public SystemAbility,
+                        public CliToolManagerStub,
+                        public std::enable_shared_from_this<CliToolManagerService> {
+    DECLARE_SYSTEM_ABILITY(CliToolManagerService);
 
 public:
-    static sptr<CliSaMGRService> GetInstance();
-    virtual ~CliSaMGRService() = default;
+    static sptr<CliToolManagerService> GetInstance();
+    virtual ~CliToolManagerService() = default;
 
 protected:
     void OnStart() override;
     void OnStop() override;
 
 private:
-    CliSaMGRService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, true) {};
-    DISALLOW_COPY_AND_MOVE(CliSaMGRService);
-    static sptr<CliSaMGRService> instance_;
+    CliToolManagerService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, true) {};
+    DISALLOW_COPY_AND_MOVE(CliToolManagerService);
+    static sptr<CliToolManagerService> instance_;
 };
 
 } // namespace CliTool
