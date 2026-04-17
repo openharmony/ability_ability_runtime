@@ -1725,6 +1725,16 @@ public:
         const InsightIntentExecuteParam &param);
 
     /**
+     * @brief Query entity info.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param);
+
+    /**
      * @brief Called when insight intent execute finished.
      *
      * @param token ability's token.

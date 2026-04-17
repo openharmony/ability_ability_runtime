@@ -53,6 +53,10 @@ constexpr char INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS[] = "ohos.insightIntent.fu
 constexpr char INSIGHT_INTENT_PAGE_PARAM_PAGEPATH[] = "ohos.insightIntent.pageParam.pagePath";
 constexpr char INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME[] = "ohos.insightIntent.pageParam.navDestinationName";
+constexpr char INSIGHT_INTENT_DECORATOR_CLASS[] = "ohos.insightIntent.decoratorClass";
+constexpr char INSIGHT_INTENT_QUERY_ENTITY_CLASS_NAME[] = "ohos.insightIntent.queryEntity.className";
+constexpr char INSIGHT_INTENT_QUERY_TYPE[] = "ohos.insightIntent.queryEntity.queryType";
+constexpr char INSIGHT_INTENT_QUERY_ENTITY_PARAM_PARAM[] = "ohos.insightIntent.queryEntity.param";
 
 constexpr int32_t INVALID_DISPLAY_ID = -1;
 
@@ -95,6 +99,11 @@ public:
     std::string pagePath_;
     std::string navigationId_;
     std::string navDestinationName_;
+
+    // params below belongs to InsightIntentQueryEntity
+    std::string queryType_;
+    std::string queryEntityClassName_;
+    std::shared_ptr<WantParams> queryParams_;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

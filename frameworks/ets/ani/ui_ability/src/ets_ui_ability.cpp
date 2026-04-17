@@ -37,14 +37,15 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "insight_intent_delay_result_callback_mgr.h"
+#include "insight_intent_execute_param.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
-#include "insight_intent_execute_param.h"
 #include "interop_object_instance.h"
+#include "js_insight_intent_utils.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
-#include "napi_common_want.h"
 #include "napi/native_api.h"
+#include "napi_common_want.h"
 #include "ohos_application.h"
 #include "page_switch_log.h"
 #include "string_wrapper.h"
@@ -1610,6 +1611,7 @@ bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
 
     const WantParams &wantParams = want.GetParams();
     executeInfo.srcEntry = wantParams.GetStringParam("ohos.insightIntent.srcEntry");
+    executeInfo.decoratorClass = wantParams.GetStringParam("ohos.insightIntent.decoratorClass");
     executeInfo.hapPath = abilityInfo_->hapPath;
     executeInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     executeInfo.windowMode = windowMode_;

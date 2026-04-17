@@ -2117,6 +2117,15 @@ ErrCode AbilityManagerClient::ExecuteIntent(uint64_t key, sptr<IRemoteObject> ca
     return abms->ExecuteIntent(key, callerToken, param);
 }
 
+ErrCode AbilityManagerClient::QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+    const InsightIntentQueryParam &param)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->QueryEntityInfo(key, callerToken, param);
+}
+
 bool AbilityManagerClient::IsAbilityControllerStart(const Want &want)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");

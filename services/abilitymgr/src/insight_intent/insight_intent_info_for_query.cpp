@@ -213,6 +213,14 @@ void from_json(const nlohmann::json &jsonObject, EntityInfoForQuery &entityInfo)
         entityInfo.parentClassName,
         false,
         g_parseResult);
+    AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES,
+        entityInfo.supportedQueryProperties,
+        JsonType::ARRAY,
+        false,
+        g_parseResult,
+        ArrayType::STRING);
 }
 
 void to_json(nlohmann::json& jsonObject, const EntityInfoForQuery &info)
@@ -223,7 +231,8 @@ void to_json(nlohmann::json& jsonObject, const EntityInfoForQuery &info)
         {INSIGHT_INTENT_ENTITY_ID, info.entityId},
         {INSIGHT_INTENT_ENTITY_CATEGORY, info.entityCategory},
         {INSIGHT_INTENT_PARAMETERS, info.parameters},
-        {INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, info.parentClassName}
+        {INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, info.parentClassName},
+        {INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES, info.supportedQueryProperties},
     };
 }
 
