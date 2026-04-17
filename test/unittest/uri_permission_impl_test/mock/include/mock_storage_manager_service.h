@@ -546,7 +546,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetOpticalDriveOpsProgress(const std::string &volumeId, int32_t &progress) override
+    virtual int32_t GetOpticalDriveOpsProgress(const std::string &volumeId, uint32_t &progress) override
     {
         return E_OK;
     }
