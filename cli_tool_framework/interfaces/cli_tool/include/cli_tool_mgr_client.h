@@ -17,12 +17,8 @@
 #define OHOS_ABILITY_RUNTIME_CLI_SA_CLIENT_H
 
 #include <mutex>
-#include <string>
 
-#include "ability_manager_errors.h"
-#include "cli_tool_interface.h"
-#include "iremote_object.h"
-#include "singleton.h"
+#include "icli_tool_manager.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -58,7 +54,7 @@ private:
         DISALLOW_COPY_AND_MOVE(CliSaDeathRecipient);
     };
     
-    sptr<ICliToolInterface> GetCliToolManager();
+    sptr<ICliToolManager> GetCliToolManager();
     ErrCode Connect();
     /**
      * @brief Reset the proxy when service dies.
@@ -67,7 +63,7 @@ private:
     void ResetProxy(const wptr<IRemoteObject>& remote);
 
     std::recursive_mutex mutex_;
-    sptr<ICliToolInterface> proxy_;
+    sptr<ICliToolManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
 };
 
