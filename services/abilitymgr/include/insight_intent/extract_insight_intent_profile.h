@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "insight_intent_execute_param.h"
-
+#include "nlohmann/json.hpp"
 namespace OHOS {
 namespace AbilityRuntime {
 using ExecuteMode = AppExecFwk::ExecuteMode;
