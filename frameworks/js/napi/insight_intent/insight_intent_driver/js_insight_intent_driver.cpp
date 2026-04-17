@@ -29,6 +29,7 @@
 #include "js_ui_extension_callback.h"
 #include "napi_common_execute_param.h"
 #include "napi_common_intent_info_filter.h"
+#include "napi_common_query_entity_param.h"
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
 #include "string_wrapper.h"
@@ -122,6 +123,11 @@ public:
     static napi_value GetInsightIntentInfoByFilter(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetInsightIntentInfoByFilter);
+    }
+
+    static napi_value QueryEntityInfo(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnQueryEntityInfo);
     }
 
 private:
@@ -477,6 +483,61 @@ private:
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
         return handleEscape.Escape(result);
     }
+
+    napi_value OnQueryEntityInfo(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGD(AAFwkTag::INTENT, "called");
+        HandleEscape handleEscape(env);
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        InsightIntentQueryParam param;
+        if (!UnwrapQueryEntityParam(env, info.argv[INDEX_ZERO], param)) {
+            TAG_LOGE(AAFwkTag::INTENT, "parse param failed");
+            ThrowInvalidParamError(env, "Parameter error: Parse param failed, param must be a QueryEntityParam.");
+            return CreateJsUndefined(env);
+        }
+
+        TAG_LOGD(AAFwkTag::INTENT, "UnwrapQueryParam, bundleName %{public}s, moduleName %{public}s,"
+            "intentName %{public}s, className %{public}s, userId %{public}d, queryType %{public}s",
+            param.bundleName_.c_str(), param.moduleName_.c_str(), param.intentName_.c_str(), param.className_.c_str(),
+            param.userId_, param.queryEntityParam_.queryType_.c_str());
+
+        if (param.queryEntityParam_.queryType_.compare("byProperty") == 0 &&
+            param.queryEntityParam_.parameters_ == nullptr) {
+            TAG_LOGE(AAFwkTag::INTENT, "byProperty queryType must have parameters.");
+            ThrowInvalidParamError(env, "Parameter error: byProperty queryType must have parameters.");
+            return CreateJsUndefined(env);
+        }
+
+        napi_value result = nullptr;
+        napi_deferred nativeDeferred = nullptr;
+        napi_ref callbackRef = nullptr;
+        std::unique_ptr<NapiAsyncTask> asyncTask = nullptr;
+        napi_create_promise(env, &nativeDeferred, &result);
+        asyncTask = std::make_unique<NapiAsyncTask>(nativeDeferred, nullptr, nullptr);
+
+        if (asyncTask == nullptr) {
+            TAG_LOGE(AAFwkTag::INTENT, "null asyncTask");
+            return CreateJsUndefined(env);
+        }
+        auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
+        uint64_t key = InsightIntentHostClient::GetInstance()->AddInsightIntentExecute(client);
+        auto err = AbilityManagerClient::GetInstance()->QueryEntityInfo(key,
+            InsightIntentHostClient::GetInstance(), param);
+        if (err == INTENT_NOT_EXIST) {
+            std::vector<std::shared_ptr<AAFwk::WantParams>> queryResults;
+            asyncTask->ResolveWithNoError(env, CreateQueryEntityResult(env, queryResults));
+            InsightIntentHostClient::GetInstance()->RemoveInsightIntentExecute(key);
+        } else if (err != 0) {
+            asyncTask->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(err)));
+            InsightIntentHostClient::GetInstance()->RemoveInsightIntentExecute(key);
+        }
+        return handleEscape.Escape(result);
+    }
 };
 
 static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, int32_t value)
@@ -576,6 +637,8 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
         "getInsightIntentInfoByIntentName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByIntentName);
     BindNativeFunction(env, exportObj,
         "getInsightIntentInfoByFilter", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByFilter);
+    BindNativeFunction(env, exportObj,
+        "queryEntityInfo", moduleName, JsInsightIntentDriver::QueryEntityInfo);
     napi_value getInsightIntentFlag = InitGetInsightIntentFlagObject(env);
     NAPI_ASSERT(env, getInsightIntentFlag != nullptr, "failed to create getInsightIntent flag object");
     napi_value insightIntentType = InitInsightIntentTypeObject(env);

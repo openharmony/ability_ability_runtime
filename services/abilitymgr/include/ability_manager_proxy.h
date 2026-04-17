@@ -1510,6 +1510,16 @@ public:
         const InsightIntentExecuteParam &param) override;
 
     /**
+     * @brief Query entity.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param) override;
+
+    /**
      * @brief Check if ability controller can start.
      * @param want The want of ability to start.
      * @return Return true to allow ability to start, or false to reject.
