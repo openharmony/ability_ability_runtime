@@ -13,21 +13,5 @@
  * limitations under the License.
  */
 
-#include "cli_tool_mgr_stub.h"
-
-#include "ipc_types.h"
-
-namespace OHOS {
-namespace CliTool {
-int32_t CliToolMGRStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
-{
-    switch (code) {
-        case 1: {
-            return ERR_OK;
-        }
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
+interface OHOS.CliTool.ICliToolManager {
 }
-} // namespace CliTool
-} // namespace OHOS

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "cli_tool_mgr_service.h"
+#include "cli_tool_manager_service.h"
 
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -23,30 +23,35 @@
 namespace OHOS {
 namespace CliTool {
 std::mutex g_mutex;
-sptr<CliSaMGRService> CliSaMGRService::instance_ = nullptr;
-const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(CliSaMGRService::GetInstance().GetRefPtr());
+sptr<CliToolManagerService> CliToolManagerService::instance_ = nullptr;
+const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(CliToolManagerService::GetInstance().GetRefPtr());
 
-sptr<CliSaMGRService> CliSaMGRService::GetInstance()
+sptr<CliToolManagerService> CliToolManagerService::GetInstance()
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     if (instance_ != nullptr) {
         return instance_;
     }
-    instance_ = new (std::nothrow) CliSaMGRService();
+    instance_ = new (std::nothrow) CliToolManagerService();
     return instance_;
 }
 
-void CliSaMGRService::OnStart()
+void CliToolManagerService::OnStart()
 {
     TAG_LOGI(AAFwkTag::CLI_TOOL, "climgr start");
     // Publish the service
-    if (!Publish(CliSaMGRService::GetInstance())) {
+    auto cliService = CliToolManagerService::GetInstance();
+    if (cliService == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "cli service is nullptr");
+        return;
+    }
+    if (!Publish(cliService)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Publish failed");
         return;
     }
 }
 
-void CliSaMGRService::OnStop()
+void CliToolManagerService::OnStop()
 {
 }
 } // namespace CliTool

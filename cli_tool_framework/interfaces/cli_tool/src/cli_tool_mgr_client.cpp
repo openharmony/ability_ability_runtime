@@ -15,6 +15,7 @@
 
 #include "cli_tool_mgr_client.h"
 
+#include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
@@ -23,13 +24,17 @@
 
 namespace OHOS {
 namespace CliTool {
+namespace {
+constexpr int32_t CLI_TOOL_MGR_SERVICE_ID = 186;
+}
+
 CliToolMGRClient& CliToolMGRClient::GetInstance()
 {
     static CliToolMGRClient instance;
     return instance;
 }
 
-sptr<ICliToolInterface> CliToolMGRClient::GetCliToolManager()
+sptr<ICliToolManager> CliToolMGRClient::GetCliToolManager()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -68,7 +73,11 @@ ErrCode CliToolMGRClient::Connect()
         return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
     }
 
-    proxy_ = iface_cast<ICliToolInterface>(remoteObj);
+    proxy_ = iface_cast<ICliToolManager>(remoteObj);
+    if (proxy_ == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "iface_cast failed");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
     TAG_LOGD(AAFwkTag::CLI_TOOL, "Connect cli manager service success.");
     return ERR_OK;
 }

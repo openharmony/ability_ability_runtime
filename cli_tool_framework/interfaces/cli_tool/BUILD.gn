@@ -11,8 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+idl_interface_sources = [
+  "${target_gen_dir}/cli_tool_manager_proxy.cpp",
+  "${target_gen_dir}/cli_tool_manager_stub.cpp",
+]
+
+idl_gen_interface("cli_tool_manager_interface") {
+  src_idl = rebase_path("ICliToolManager.idl")
+  dst_file = string_join(",", idl_interface_sources)
+  hitrace = "HITRACE_TAG_ABILITY_MANAGER"
+  log_domainid = "0xD001365"
+  log_tag = "CliToolManager"
+}
 
 config("cli_tool_client_config") {
   visibility = [ ":*" ]
@@ -20,6 +34,7 @@ config("cli_tool_client_config") {
     "include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
+    "${target_gen_dir}",
   ]
 }
 
@@ -30,14 +45,14 @@ ohos_shared_library("cli_tool_client") {
     debug = false
   }
 
-  configs = [ ":cli_tool_client_config" ]
+  public_configs = [ ":cli_tool_client_config" ]
 
-  sources = [
-    "src/cli_tool_mgr_client.cpp",
-    "src/cli_tool_mgr_proxy.cpp",
-  ]
+  output_values = get_target_outputs(":cli_tool_manager_interface")
+  sources = [ "src/cli_tool_mgr_client.cpp" ]
+  sources += filter_include(output_values, [ "*.cpp" ])
+  defines = [ "AMS_LOG_TAG = \"CliToolManager\"" ]
 
-  deps = []
+  deps = [ ":cli_tool_manager_interface" ]
 
   external_deps = [
     "c_utils:utils",
