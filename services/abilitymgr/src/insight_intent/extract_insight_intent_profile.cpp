@@ -557,7 +557,7 @@ bool CheckProfileInfo(const ExtractInsightIntentProfileInfo &insightIntent)
     }
 
     for (const auto &entity: insightIntent.entities) {
-        if (entity.className.empty() || entity.entityId.empty()) {
+        if (entity.className.empty() || (entity.entityId.empty() && !entity.isQueryable())) {
             TAG_LOGE(AAFwkTag::INTENT, "entity exist empty param, intentName: %{public}s, "
                 "className: %{public}s, entityId: %{public}s",
                 insightIntent.intentName.c_str(), entity.className.c_str(), entity.entityId.c_str());
