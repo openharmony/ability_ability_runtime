@@ -488,6 +488,8 @@ enum class AbilityManagerInterfaceCode {
     RESUME_EXTENSION_ABILITY = 1142,
     //ipc for prelaunch
     START_PRELAUNCH_ABILITY = 1143,
+    // ipc for request modal UIExtension with account
+    REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT = 1144,
 
     // ipc id 2001-3000 for tools
     // ipc id for dumping state (2001)

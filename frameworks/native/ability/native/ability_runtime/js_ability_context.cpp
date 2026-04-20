@@ -442,6 +442,11 @@ napi_value JsAbilityContext::RequestModalUIExtension(napi_env env, napi_callback
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnRequestModalUIExtension);
 }
 
+napi_value JsAbilityContext::RequestModalUIExtensionWithAccount(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnRequestModalUIExtensionWithAccount);
+}
+
 napi_value JsAbilityContext::ShowAbility(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnShowAbility);
@@ -2445,6 +2450,8 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::StartAbilityByType);
     BindNativeFunction(env, object, "requestModalUIExtension", moduleName,
         JsAbilityContext::RequestModalUIExtension);
+    BindNativeFunction(env, object, "requestModalUIExtensionWithAccount", moduleName,
+        JsAbilityContext::RequestModalUIExtensionWithAccount);
     BindNativeFunction(env, object, "showAbility", moduleName,
         JsAbilityContext::ShowAbility);
     BindNativeFunction(env, object, "hideAbility", moduleName,
@@ -3113,6 +3120,51 @@ napi_value JsAbilityContext::OnRequestModalUIExtension(napi_env env, NapiCallbac
     napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnRequestModalUIExtension",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityContext::OnRequestModalUIExtensionWithAccount(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    if (info.argc < ARGC_TWO) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse want failed");
+        ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return CreateJsUndefined(env);
+    }
+    int32_t accountId = 0;
+    if (!AppExecFwk::UnwrapInt32FromJS2(env, info.argv[1], accountId)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse accountId failed");
+        ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
+        return CreateJsUndefined(env);
+    }
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [abilityContext = context_, want, accountId, innerErrCode]() {
+        auto context = abilityContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        *innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->RequestModalUIExtensionWithAccount(want, accountId);
+    };
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        HandleScope handleScope(env);
+        if (*innerErrCode == ERR_OK) {
+            task.Resolve(env, CreateJsUndefined(env));
+        } else {
+            TAG_LOGE(AAFwkTag::CONTEXT, "complete failed %{public}d", *innerErrCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+        }
+    };
+    napi_value lastParam = (info.argc > ARGC_TWO) ? info.argv[ARGC_TWO] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnRequestModalUIExtensionWithAccount",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }

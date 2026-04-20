@@ -223,6 +223,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnRequestModalUIExtension);
     }
 
+    static napi_value RequestModalUIExtensionWithAccount(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnRequestModalUIExtensionWithAccount);
+    }
+
     static napi_value PreStartMission(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnPreStartMission);
@@ -1503,6 +1508,56 @@ private:
         return result;
     }
 
+    napi_value OnRequestModalUIExtensionWithAccount(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+        if (info.argc < ARGC_TWO) {
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        AAFwk::Want want;
+        if (!AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "parse want failed");
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
+            return CreateJsUndefined(env);
+        }
+
+        int32_t accountId = 0;
+        if (!AppExecFwk::UnwrapInt32FromJS2(env, info.argv[1], accountId)) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "parse accountId failed");
+            ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
+            return CreateJsUndefined(env);
+        }
+
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute = [serviceContext = context_, want, accountId, innerErrCode]() {
+            auto context = serviceContext.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::APPKIT, "context released");
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
+                return;
+            }
+            auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+            *innerErrCode = abilityMgr->RequestModalUIExtensionWithAccount(want, accountId);
+        };
+        NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            HandleScope handleScope(env);
+            if (*innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                TAG_LOGE(AAFwkTag::APPKIT, "OnRequestModalUIExtensionWithAccount failed %{public}d", *innerErrCode);
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+        };
+
+        napi_value lastParam = (info.argc > ARGC_TWO) ? info.argv[ARGC_TWO] : nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnRequestModalUIExtensionWithAccount",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
     bool ParsePreStartMissionArgs(const napi_env &env, const NapiCallbackInfo &info, std::string& bundleName,
         std::string& moduleName, std::string& abilityName, std::string& startTime)
     {
@@ -1649,7 +1704,6 @@ private:
 
 napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<ServiceExtensionContext> context)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     HandleEscape handleEscape(env);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     if (context) {
@@ -1698,6 +1752,8 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
         JsServiceExtensionContext::StartRecentAbility);
     BindNativeFunction(env, object, "requestModalUIExtension", moduleName,
         JsServiceExtensionContext::RequestModalUIExtension);
+    BindNativeFunction(env, object, "requestModalUIExtensionWithAccount", moduleName,
+        JsServiceExtensionContext::RequestModalUIExtensionWithAccount);
     BindNativeFunction(env, object, "preStartMission", moduleName, JsServiceExtensionContext::PreStartMission);
     BindNativeFunction(env, object, "openAtomicService", moduleName, JsServiceExtensionContext::OpenAtomicService);
     return handleEscape.Escape(object);

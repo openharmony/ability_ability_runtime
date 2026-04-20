@@ -393,6 +393,13 @@ ErrCode AbilityManagerClient::RequestModalUIExtension(const Want &want)
     return abms->RequestModalUIExtension(want);
 }
 
+ErrCode AbilityManagerClient::RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RequestModalUIExtensionWithAccount(want, accountId);
+}
+
 ErrCode AbilityManagerClient::PreloadUIExtensionAbility(
     const Want &want, std::string &hostBundleName, int32_t userId, int32_t hostPid, int32_t requestCode)
 {
