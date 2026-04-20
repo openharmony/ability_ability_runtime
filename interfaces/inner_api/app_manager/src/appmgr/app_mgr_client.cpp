@@ -1174,6 +1174,16 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
     return service->SetAppFreezeFilter(pid);
 }
 
+void AppMgrClient::UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "service is null");
+        return;
+    }
+    service->UpdateFreezeExcludedPid(isAdd, targetPid, profilerPid);
+}
+
 int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}" PRIu64, tid);
