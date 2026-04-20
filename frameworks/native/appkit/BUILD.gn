@@ -627,6 +627,7 @@ ohos_shared_library("appkit_delegator") {
     "${ability_runtime_native_path}/appkit/ability_delegator/delegator_thread.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_delegator.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_monitor.cpp",
+    "${ability_runtime_native_path}/appkit/ability_delegator/iinterop_ability_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_stage_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/ets_test_runner_instance.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/js_test_runner.cpp",
