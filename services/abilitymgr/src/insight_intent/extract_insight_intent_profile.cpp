@@ -67,7 +67,7 @@ const std::string INSIGHT_INTENT_ENTITY_ID = "entityId";
 const std::string INSIGHT_INTENT_ENTITY_CATEGORY = "entityCategory";
 const std::string INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME = "parentClassName";
 const std::string INSIGHT_INTENT_ENTITY_PARAMETERS = "parameters";
-const std::string INSIGHT_INTENT_ARKTS_MODE = "arkTsMode";
+const std::string INSIGHT_INTENT_ARKTS_MODE = "arkTSMode";
 const std::string INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES = "supportedQueryProperties";
 
 enum DecoratorType {
