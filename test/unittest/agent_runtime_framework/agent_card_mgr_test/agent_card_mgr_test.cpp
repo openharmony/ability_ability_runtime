@@ -68,6 +68,14 @@ AppExecFwk::ExtensionAbilityInfo BuildAgentExtensionInfo(const std::string &bund
     extensionInfo.type = AppExecFwk::ExtensionAbilityType::AGENT;
     return extensionInfo;
 }
+
+AppExecFwk::HapModuleInfo BuildHapModuleInfo(const AppExecFwk::ExtensionAbilityInfo &extensionInfo)
+{
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = extensionInfo.moduleName;
+    hapModuleInfo.extensionInfos.push_back(extensionInfo);
+    return hapModuleInfo;
+}
 }
 
 class AgentCardMgrTest : public testing::Test {
@@ -249,12 +257,7 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_007, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
 
-    AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    extensionInfo.bundleName = "test.bundle";
-    extensionInfo.moduleName = "testModule";
-    extensionInfo.name = "TestAgent";
-    extensionInfo.type = AppExecFwk::ExtensionAbilityType::AGENT;
-    MyFlag::mockExtensionInfos.push_back(extensionInfo);
+    MyFlag::mockHapModuleInfos.push_back(BuildHapModuleInfo(BuildAgentExtensionInfo()));
 
     MyFlag::retGetResConfigFile = false;
     int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
