@@ -531,6 +531,15 @@ public:
      */
     int RequestModalUIExtension(const Want &want) override;
 
+    /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want contains ability info about caller and called.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId) override;
+
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
         int32_t requestCode = DEFAULT_INVAL_VALUE) override;
@@ -2781,6 +2790,32 @@ protected:
 
 private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
+
+    /**
+     * @brief Get the top ability token for specified user.
+     * @param token Output parameter for the top ability token.
+     * @param userId The target user ID.
+     * @param displayId The display ID (default 0).
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int GetTopAbilityByUserId(sptr<IRemoteObject> &token, int32_t userId, uint64_t displayId = 0);
+
+    /**
+     * @brief Get display ID by account ID.
+     * @param accountId The account ID.
+     * @param displayId Output parameter for the display ID.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int GetDisplayIdByAccount(int32_t accountId, uint64_t &displayId);
+
+    /**
+     * @brief Request modal UIExtension with account ID (inner implementation).
+     * @param want The want contains ability info about caller and called.
+     * @param accountId The account ID for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int RequestModalUIExtensionWithAccountInner(Want want, int32_t accountId);
+
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
 
