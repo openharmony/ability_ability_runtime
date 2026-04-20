@@ -447,6 +447,8 @@ public:
      */
     virtual bool SetAppFreezeFilter(int32_t pid) override;
 
+    virtual void UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid) override;
+
     virtual int32_t GetConfiguration(Configuration& config) override;
 
     virtual int32_t GetConfiguration(Configuration& config, int32_t userid) override;

@@ -263,6 +263,11 @@ public:
         return false;
     }
 
+    virtual void UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid)
+    {
+        return;
+    }
+
     virtual int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0)
     {
         return 0;
