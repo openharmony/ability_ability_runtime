@@ -126,6 +126,7 @@ private:
     int StartAbilityForSettingsInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityForOptionsInner(MessageParcel &data, MessageParcel &reply);
     int RequestModalUIExtensionInner(MessageParcel &data, MessageParcel &reply);
+    int RequestModalUIExtensionWithAccountInner(MessageParcel &data, MessageParcel &reply);
     int ChangeAbilityVisibilityInner(MessageParcel &data, MessageParcel &reply);
     int ChangeUIAbilityVisibilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int PreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);

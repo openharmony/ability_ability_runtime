@@ -4094,6 +4094,33 @@ int AbilityManagerService::RequestModalUIExtension(const Want &want)
     return RequestModalUIExtensionInner(want);
 }
 
+int AbilityManagerService::RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    return RequestModalUIExtensionWithAccountInner(want, accountId);
+}
+
+int AbilityManagerService::GetDisplayIdByAccount(int32_t accountId, uint64_t &displayId)
+{
+    auto permissionResult = VerifyAccountPermission(accountId);
+    if (permissionResult != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission failed, accountId=%{public}d", accountId);
+        return ERR_INVALID_VALUE;
+    }
+
+    bool foundDisplay = AbilityRuntime::UserController::GetInstance()
+        .GetDisplayIdByForegroundUserId(accountId, displayId);
+
+    if (!foundDisplay) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no display found for accountId=%{public}d", accountId);
+        return ERR_INVALID_VALUE;
+    }
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "accountId=%{public}d -> displayId=%{public}" PRIu64,
+        accountId, displayId);
+    return ERR_OK;
+}
+
 int AbilityManagerService::RequestModalUIExtensionInner(Want want)
 {
     sptr<IRemoteObject> token = nullptr;
@@ -4132,6 +4159,62 @@ int AbilityManagerService::RequestModalUIExtensionInner(Want want)
     want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
+}
+
+int AbilityManagerService::RequestModalUIExtensionWithAccountInner(Want want, int32_t accountId)
+{
+    sptr<IRemoteObject> token = nullptr;
+    int32_t finalUserId = INVALID_USER_ID;
+    int ret = ERR_OK;
+
+    // Directly use the passed accountId parameter, not from want
+    uint64_t displayId = 0;
+    ret = GetDisplayIdByAccount(accountId, displayId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetDisplayIdByAccount failed, accountId=%{public}d", accountId);
+        return ret;
+    }
+
+    finalUserId = accountId;
+    ret = GetTopAbilityByUserId(token, accountId, displayId);
+
+    if (ret == ERR_OK && token != nullptr) {
+        // Gets the record corresponding to the current focus application
+        auto record = Token::GetAbilityRecordByToken(token);
+        if (!record) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+            return ERR_INVALID_VALUE;
+        }
+
+        // Gets the bundleName corresponding to the
+        // current focus application
+        std::string focusName = record->GetAbilityInfo().bundleName;
+
+        // Gets the bundleName corresponding to the
+        // current focus application
+        std::string callerName = want.GetParams().GetStringParam("bundleName");
+
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+               "focusbundlename: %{public}s, callerbundlename: %{public}s, accountId=%{public}d",
+               focusName.c_str(), callerName.c_str(), accountId);
+
+        // Compare
+        if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
+            focusName == callerName) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension with accountId is called!");
+            return record->CreateModalUIExtension(want);
+        }
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "token null or ret failed, accountId=%{public}d", accountId);
+    }
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension with accountId is called!");
+    want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
+    auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Rosen::CreateModalUIExtension with userId=%{public}d for SCB instance selection",
+        finalUserId);
+    return connection->CreateModalUIExtension(want, finalUserId) ? ERR_OK : INNER_ERR;
 }
 
 int AbilityManagerService::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
@@ -11072,6 +11155,53 @@ int AbilityManagerService::GetTopAbilityInner(sptr<IRemoteObject> &token, uint64
         return ERR_INVALID_VALUE;
     }
 #endif
+    return ERR_OK;
+}
+
+int AbilityManagerService::GetTopAbilityByUserId(sptr<IRemoteObject> &token, int32_t userId, uint64_t displayId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+
+    CHECK_CALLER_IS_SYSTEM_APP;
+
+    auto accountPermissionResult = VerifyAccountPermission(userId);
+    if (accountPermissionResult == CHECK_PERMISSION_FAILED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "account permission verification failed, userId=%{public}d", userId);
+        return CHECK_PERMISSION_FAILED;
+    }
+
+#ifdef SUPPORT_SCREEN
+    int32_t validUserId = GetValidUserId(userId);
+    if (validUserId < 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid userId: %{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = Rosen::MockSessionManagerService::GetInstance()
+            .GetSceneSessionManagerLiteBySA(validUserId);
+        if (!sceneSessionManager) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneSessionManager is null for userId=%{public}d", validUserId);
+            return ERR_INVALID_VALUE;
+        }
+
+        Rosen::FocusChangeInfo focusChangeInfo;
+        sceneSessionManager->GetFocusWindowInfo(focusChangeInfo, displayId);
+        token = focusChangeInfo.abilityToken_;
+    } else {
+        if (!GetWMSHandler()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "wmsHandler_ null");
+            return ERR_INVALID_VALUE;
+        }
+        GetWMSHandler()->GetFocusWindow(token);
+    }
+
+    if (!token) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token null");
+        return ERR_INVALID_VALUE;
+    }
+#endif
+
     return ERR_OK;
 }
 

@@ -473,6 +473,18 @@ public:
     }
 
     /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want of the modal UIExtension to request.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+    {
+        return 0;
+    }
+
+    /**
      * Preload UIExtension with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
