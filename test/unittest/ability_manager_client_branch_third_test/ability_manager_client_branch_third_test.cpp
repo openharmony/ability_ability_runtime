@@ -1344,5 +1344,24 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, MissionInfoTest_0100, TestSize.Lev
     EXPECT_EQ(missionInfo.time, newMissionInfo->time);
     delete newMissionInfo;
 }
+
+/**
+ * @tc.name: DisplayInfoTest_0100
+ * @tc.desc: DisplayInfoTest_0100
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, DisplayInfoTest_0100, TestSize.Level1)
+{
+    DisplayInfo displayInfo;
+    displayInfo.id = 1;
+    displayInfo.displayName = "test";
+    Parcel parcel;
+    displayInfo.Marshalling(parcel);
+    DisplayInfo* newDisplayInfo = DisplayInfo::Unmarshalling(parcel);
+    EXPECT_NE(newDisplayInfo, nullptr);
+    EXPECT_EQ(displayInfo.id, newDisplayInfo->id);
+    EXPECT_EQ(displayInfo.displayName, newDisplayInfo->displayName);
+    delete newDisplayInfo;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
