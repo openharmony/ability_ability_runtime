@@ -3144,16 +3144,19 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
     bool isColdStart = true;
     int32_t pid = 0;
     int32_t preloadMode = -1;
+    bool isSuggestCache = false;
     for (auto const &info : runningProcessInfos) {
         if (info.uid_ == abilityInfo.applicationInfo.uid) {
             isColdStart = false;
             pid = info.pid_;
+            isSuggestCache = info.isCached;
             preloadMode = static_cast<int32_t>(info.preloadMode_);
             break;
         }
     }
     TAG_LOGI(AAFwkTag::EXT, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
-    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, false, preloadMode);
+    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, false, preloadMode,
+        isSuggestCache);
     return ERR_OK;
 }
 
