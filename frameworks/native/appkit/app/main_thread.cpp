@@ -2216,6 +2216,14 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
 }
 
+class CustomizedBufferConsumerListener : public IBufferConsumerListener {
+public:
+    CustomizedBufferConsumerListener() {}
+    ~CustomizedBufferConsumerListener() {}
+
+    void OnBufferAvailable() override {}
+};
+
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 void MainThread::HandleNWebPreload()
 {
@@ -2229,21 +2237,13 @@ void MainThread::HandleNWebPreload()
             TAG_LOGE(AAFwkTag::APPKIT, "init NWebEngine failed");
             return;
         }
-        Rosen::RSSurfaceNodeConfig config;
-        config.SurfaceNodeName = NWEB_SURFACE_NODE_NAME;
-        preloadSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, false);
-        if (!preloadSurfaceNode_) {
-            TAG_LOGE(AAFwkTag::APPKIT, "preload surface node is nullptr");
-            return;
-        }
-        auto surface = preloadSurfaceNode_->GetSurface();
-        if (!surface) {
-            TAG_LOGE(AAFwkTag::APPKIT, "preload surface is nullptr");
-            preloadSurfaceNode_ = nullptr;
-            return;
-        }
+        cSurface_ = IConsumerSurface::Create(NWEB_SURFACE_NODE_NAME);
+        auto producer = cSurface_->GetProducer();
+        pSurface_ = Surface::CreateSurfaceAsProducer(producer);
+        sptr<IBufferConsumerListener> listener = sptr<CustomizedBufferConsumerListener>::MakeSptr();
+        cSurface_->RegisterConsumerListener(listener);
         auto initArgs = std::make_shared<NWeb::NWebEngineInitArgsImpl>();
-        preloadNWeb_ = NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs,
+        preloadNWeb_ = NWeb::NWebAdapterHelper::Instance().CreateNWeb(pSurface_, initArgs,
             NWEB_SURFACE_SIZE, NWEB_SURFACE_SIZE, false);
         if (!preloadNWeb_) {
             TAG_LOGE(AAFwkTag::APPKIT, "create preLoadNWeb failed");
