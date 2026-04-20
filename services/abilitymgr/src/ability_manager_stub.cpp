@@ -594,6 +594,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_MODAL_UIEXTENSION) {
         return RequestModalUIExtensionInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT) {
+        return RequestModalUIExtensionWithAccountInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO) {
         return GetUIExtensionRootHostInfoInner(data, reply);
     }
@@ -1615,6 +1618,19 @@ int AbilityManagerStub::RequestModalUIExtensionInner(MessageParcel &data, Messag
         return ERR_INVALID_VALUE;
     }
     int32_t result = RequestModalUIExtension(*want);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::RequestModalUIExtensionWithAccountInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t accountId = data.ReadInt32();
+    int32_t result = RequestModalUIExtensionWithAccount(*want, accountId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

@@ -937,6 +937,36 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+{
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(accountId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "accountId write fail");
+        return INNER_ERR;
+    }
+
+    int error;
+    MessageParcel reply;
+    MessageOption option;
+    error = SendRequest(AbilityManagerInterfaceCode::REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::PreloadUIExtensionAbility(
     const Want &want, std::string &hostBundleName, int32_t userId, int32_t hostPid, int32_t requestCode)
 {

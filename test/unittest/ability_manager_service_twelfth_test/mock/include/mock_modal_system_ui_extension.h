@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_FLAG_H
-#define MOCK_MY_FLAG_H
+#ifndef MOCK_MODAL_SYSTEM_UI_EXTENSION_H
+#define MOCK_MODAL_SYSTEM_UI_EXTENSION_H
+
+#include "want.h"
+
 namespace OHOS {
-namespace AAFwk {
-class MyFlag {
+namespace Rosen {
+class ModalSystemUiExtension {
 public:
-    enum FLAG {
-        IS_SA_CALL = 1,
-        IS_SHELL_CALL,
-        IS_SA_AND_SHELL_CALL,
-    };
-    static int flag_;
-    static bool retCreateModalUIExtension_;  // Control ModalSystemUiExtension mock return value
+    ModalSystemUiExtension();
+    ~ModalSystemUiExtension();
+
+    bool CreateModalUIExtension(const AAFwk::Want &want);
+    bool CreateModalUIExtension(const AAFwk::Want &want, int32_t userId);
 };
-} // namespace AAFwk
+} // namespace Rosen
 } // namespace OHOS
-#endif // MOCK_MY_FLAG_H
+
+#endif // MOCK_MODAL_SYSTEM_UI_EXTENSION_H
