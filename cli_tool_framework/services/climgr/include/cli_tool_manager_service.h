@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
 #include "cli_tool_manager_stub.h"
+#include "cli_tool_data_manager.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
 
@@ -33,6 +34,26 @@ class CliToolManagerService : public SystemAbility,
 public:
     static sptr<CliToolManagerService> GetInstance();
     virtual ~CliToolManagerService() = default;
+
+    /**
+     * @brief Query all available tools
+     */
+    int32_t QueryTools(std::vector<ToolInfo> &tools);
+
+    /**
+     * @brief Query tool summaries (lightweight for listing)
+     */
+    int32_t QueryToolSummaries(std::vector<ToolSummary> &summaries);
+
+    /**
+     * @brief Get tool information by name
+     */
+    int32_t GetToolInfoByName(const std::string &name, ToolInfo &tool);
+
+    /**
+     * @brief Register a CLI tool
+     */
+    int32_t RegisterCliTool(const ToolInfo &tool);
 
 protected:
     void OnStart() override;
