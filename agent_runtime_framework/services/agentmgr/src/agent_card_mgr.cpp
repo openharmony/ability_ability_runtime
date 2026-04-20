@@ -157,6 +157,7 @@ int32_t AgentCardMgr::HandleBundleInstall(const std::string &bundleName, int32_t
         }
         auto &storedEntry = finalEntries[storedIt->second];
         if (ShouldKeepStoredBundleEntry(entry.second, storedEntry)) {
+            storedEntry.card.type = entry.second.type;
             continue;
         }
         storedEntry.card = entry.second;
@@ -315,9 +316,7 @@ int32_t AgentCardMgr::UpdateAgentCard(const AgentCard &card)
         TAG_LOGE(AAFwkTag::SER_ROUTER, "stored card owner invalid");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
-    AgentCard validationCard = card;
-    validationCard.type = it->card.type;
-    validationRet = AgentCardUtils::ValidateSystemAppRequirement(validationCard, userId);
+    validationRet = AgentCardUtils::ValidateSystemAppRequirement(card, userId);
     if (validationRet != ERR_OK) {
         return validationRet;
     }
@@ -335,9 +334,7 @@ int32_t AgentCardMgr::UpdateAgentCard(const AgentCard &card)
         }
     }
 
-    AgentCard updatedCard = card;
-    updatedCard.type = it->card.type;
-    it->card = updatedCard;
+    it->card = card;
     it->source = AgentCardUpdateSource::API;
     return AgentCardDbMgr::GetInstance().InsertData(card.appInfo->bundleName, userId, entries);
 }
