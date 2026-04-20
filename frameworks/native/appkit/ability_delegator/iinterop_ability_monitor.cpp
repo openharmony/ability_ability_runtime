@@ -46,14 +46,6 @@ bool IInteropAbilityMonitor::Match(const std::shared_ptr<BaseDelegatorAbilityPro
         return false;
     }
 
-    const auto &aModuleName = ability->moduleName_;
-
-    if (!moduleName_.empty() && moduleName_.compare(aModuleName) != 0) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "different moduleName, %{public}s and %{public}s",
-            moduleName_.c_str(), aModuleName.c_str());
-        return false;
-    }
-
     TAG_LOGI(AAFwkTag::DELEGATOR, "ability name : %{public}s, isNotify : %{public}s",
         abilityName_.data(), (isNotify ? "true" : "false"));
 
