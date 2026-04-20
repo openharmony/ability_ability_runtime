@@ -22,9 +22,6 @@
 
 namespace OHOS {
 namespace CliTool {
-namespace {
-constexpr int32_t CLI_TOOL_MGR_SERVICE_ID = 186;
-}
 class CliToolManagerService : public SystemAbility,
                         public CliToolManagerStub,
                         public std::enable_shared_from_this<CliToolManagerService> {
@@ -39,7 +36,7 @@ protected:
     void OnStop() override;
 
 private:
-    CliToolManagerService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, true) {};
+    CliToolManagerService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, false) {};
     DISALLOW_COPY_AND_MOVE(CliToolManagerService);
     static sptr<CliToolManagerService> instance_;
 };

@@ -24,10 +24,6 @@
 
 namespace OHOS {
 namespace CliTool {
-namespace {
-constexpr int32_t CLI_TOOL_MGR_SERVICE_ID = 186;
-}
-
 CliToolMGRClient& CliToolMGRClient::GetInstance()
 {
     static CliToolMGRClient instance;
