@@ -21,27 +21,17 @@
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
-
 namespace AppExecFwk {
 class BundleMgrHelper {
 public:
     DISALLOW_COPY_AND_MOVE(BundleMgrHelper);
 
-    static std::shared_ptr<BundleMgrHelper> GetInstance();
-
-    bool RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback);
-
-    bool GetApplicationInfo(const std::string &appName, const ApplicationFlag flag, const int32_t userId,
-        ApplicationInfo &appInfo);
-
     ErrCode GetBundleInfoV9(const std::string &bundleName, int32_t flags, BundleInfo &bundleInfo, int32_t userId);
-
-    bool QueryExtensionAbilityInfos(const AAFwk::Want &want, const int32_t &flag, const int32_t &userId,
-        std::vector<ExtensionAbilityInfo> &extensionInfos);
 
 private:
     DECLARE_DELAYED_SINGLETON(BundleMgrHelper)
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
+
 #endif  // OHOS_ABILITY_RUNTIME_BUNDLE_MGR_HELPER_H
