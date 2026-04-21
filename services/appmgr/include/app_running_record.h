@@ -232,6 +232,13 @@ public:
     int32_t GetUid() const;
 
     /**
+     * @brief Obtains the application accessTokenId.
+     *
+     * @return Returns the application accessTokenId.
+     */
+    uint32_t GetAccessTokenId() const;
+
+    /**
      * @brief Setting the application uid.
      *
      * @param state, the application uid.
