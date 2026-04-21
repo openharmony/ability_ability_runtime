@@ -31,6 +31,7 @@
 #include "ability_state_data.h"
 #include "app_debug_listener_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "dms_continueInfo.h"
 #include "exit_reason.h"
 #include "extension_running_info.h"
@@ -41,6 +42,7 @@
 #include "insight_intent/insight_intent_execute_param.h"
 #include "insight_intent/insight_intent_execute_result.h"
 #include "insight_intent/insight_intent_info_for_query.h"
+#include "insight_intent/insight_intent_query_param.h"
 #include "iprepare_terminate_callback_interface.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
@@ -89,6 +91,7 @@ using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
+using InsightIntentQueryParam = AppExecFwk::InsightIntentQueryParam;
 using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 using UIExtensionHostInfo = AbilityRuntime::UIExtensionHostInfo;
 using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
@@ -470,6 +473,18 @@ public:
     }
 
     /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want of the modal UIExtension to request.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+    {
+        return 0;
+    }
+
+    /**
      * Preload UIExtension with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -724,10 +739,11 @@ public:
      *
      * @param sessionInfo the session info of the ability to minimize.
      * @param fromUser, Whether form user.
+     * @param backgroundReason The reason for moving to background (3: screen off).
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false,
-        uint32_t sceneFlag = 0)
+        uint32_t sceneFlag = 0, int32_t backgroundReason = 0)
     {
         return 0;
     };
@@ -757,6 +773,7 @@ public:
      * @param userId, the service user ID.
      * @param specifiedFullTokenId, The specified full token ID.
      * @param loadTimeout, timeout multiply for ability loading stage, range 1-30, not work on asan.
+     * @param indirectCallerInfo, Indirect caller information.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t ConnectAbilityCommon(
@@ -767,7 +784,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0)
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr)
     {
         return 0;
     }
@@ -1888,6 +1906,29 @@ public:
     }
 
     /**
+     * @brief Launch game customized with game SA verification.
+     * @param bundleName Name of the game application.
+     * @param userId Indicates the user ID.
+     * @param appIndex app clone index. Currently, only appIndex = 0 is supported.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t LaunchGameCustomized(const std::string &bundleName, int32_t userId, int32_t appIndex = 0)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Set game prelaunch complete time.
+     * @param userId Indicates the user ID.
+     * @param completeTime The complete time for game prelaunch.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetGamePreLaunchCompleteTime(int32_t userId, int64_t completeTime)
+    {
+        return ERR_OK;
+    }
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
@@ -2454,6 +2495,19 @@ public:
     }
 
     /**
+     * @brief Query entity.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param)
+    {
+        return 0;
+    };
+
+    /**
      * StartAbilityWithWait, send want and abilityStartWithWaitObserver to abms.
      *
      * @param want Ability want.
@@ -2555,6 +2609,26 @@ public:
      */
     virtual ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken)
+    {
+        return ERR_OK;
+    }
+
+    /**
+     * @brief Notify cancel game prelaunch and kill the process.
+     * @param callerToken Indicates the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyCancelGamePreLaunch(const sptr<IRemoteObject> callerToken)
+    {
+        return ERR_OK;
+    }
+
+    /**
+     * @brief Notify complete game prelaunch and clear the flag.
+     * @param callerToken Indicates the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyCompleteGamePreLaunch(const sptr<IRemoteObject> callerToken)
     {
         return ERR_OK;
     }

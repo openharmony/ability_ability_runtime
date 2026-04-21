@@ -44,6 +44,7 @@
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
 #include "uri_permission_manager_client.h"
+#include "appfreeze_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -64,6 +65,7 @@ constexpr const int MAX_DUMP_FFRT_PID_NUMBER = 3;
 constexpr const int BASE_TEN = 10;
 constexpr const char SIGN_TERMINAL = '\0';
 constexpr int32_t DEFAULT_CONCURRENT_NUMBER = 1;
+constexpr int32_t HIPROFILER_UID = 3063;
 namespace {
 #define CHECK_CALLER_IS_SYSTEM_APP                                                             \
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) { \
@@ -1512,6 +1514,19 @@ bool AppMgrService::SetAppFreezeFilter(int32_t pid)
         TAG_LOGE(AAFwkTag::APPMGR, "SetAppFreezeFilter fail");
     }
     return ret;
+}
+
+void AppMgrService::UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return;
+    }
+    if (IPCSkeleton::GetCallingUid() != HIPROFILER_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not hiprofiler call.");
+        return;
+    }
+    AppfreezeManager::GetInstance()->UpdateFreezeExcludedPid(isAdd, targetPid, profilerPid);
 }
 
 int32_t AppMgrService::GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize)

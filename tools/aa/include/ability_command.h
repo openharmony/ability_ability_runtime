@@ -142,6 +142,15 @@ const std::string HELP_MSG_SEND_MEMORY_LEVEL =
     "Optional:\n"
     "  -h, --help              Show this help message\n";
 
+const std::string HELP_MSG_PRESTART =
+    "Usage: aa pre-start -m <MODE> -b <BUNDLE-NAME> -u <USER-ID>\n"
+    "Mandatory Options:\n"
+    "  -m, --mode <MODE>           Prestart mode (currently only supports 1 for Specific stage prelaunch)\n"
+    "  -b, --bundle <BUNDLE>   Bundle name of the application\n"
+    "  -u, --user <USER-ID>    User ID (integer)\n\n"
+    "Optional:\n"
+    "  -h, --help              Show this help message\n";
+
 const std::string HELP_MSG_ATTACH_APP_DEBUG =
     "usage: aa attach <options>\n"
     "options list:\n"
@@ -189,6 +198,9 @@ const std::string STRING_DETACH_APP_DEBUG_NG = "error: failed to detach app debu
 
 const std::string STRING_SEND_MEMORY_LEVEL_OK = "send memory level successfully.";
 const std::string STRING_SEND_MEMORY_LEVEL_NG = "error: failed to send memory level.";
+
+const std::string STRING_PRESTART_OK = "prestart successfully.";
+const std::string STRING_PRESTART_NG = "error: failed to prestart.";
 
 const std::string STRING_START_USER_TEST_NG = "error: failed to start user test.";
 const std::string STRING_USER_TEST_STARTED = "user test started.";
@@ -252,6 +264,8 @@ private:
     ErrCode RunAsAttachDebugCommand();
     ErrCode RunAsDetachDebugCommand();
     ErrCode RunAsSendMemoryLevelCommand();
+    ErrCode RunAsPreStartCommand();
+    ErrCode ParsePreStartOptions(int32_t& mode, std::string& bundleName, int32_t& userId);
     ErrCode ParsePidMemoryLevel(std::string& pidParse, std::string& memoryLevelParse);
     bool IsLongStartOption(const std::string &argv);
     bool IsShortStartOption(const std::string &argv);

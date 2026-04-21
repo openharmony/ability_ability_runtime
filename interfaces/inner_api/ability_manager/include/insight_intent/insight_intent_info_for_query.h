@@ -54,6 +54,11 @@ struct EntityInfoForQuery {
     std::string entityCategory;
     std::string parameters;
     std::string parentClassName;
+    std::vector<std::string> supportedQueryProperties {};
+    bool isQueryable() const
+    {
+        return parentClassName.compare("insightIntent.AppIntentEntity") == 0;
+    }
 };
 
 struct UIAbilityIntentInfoForQuery {
@@ -109,6 +114,8 @@ struct InsightIntentInfoForQuery : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static InsightIntentInfoForQuery *Unmarshalling(Parcel &parcel);
+    static bool MarshallingVector(Parcel &parcel, const std::vector<InsightIntentInfoForQuery> &infos);
+    static bool UnmarshallingVector(Parcel &parcel, std::vector<InsightIntentInfoForQuery> &infos);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

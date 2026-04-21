@@ -23,6 +23,7 @@
 #include "ability_manager_interface.h"
 #include "ability_scheduler_interface.h"
 #include "auto_startup_info.h"
+#include "caller_info.h"
 #include "iremote_object.h"
 #include "mission_info.h"
 #include "system_memory_attr.h"
@@ -416,6 +417,15 @@ public:
     ErrCode RequestModalUIExtension(const Want &want);
 
     /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want of the modal UIExtension to request.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId);
+
+    /**
      * Preload UIExtension with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -603,9 +613,11 @@ public:
      *
      * @param sessionInfo the session info of the ability to minimize.
      * @param fromUser, Whether form user.
+     * @param backgroundReason The reason for moving to background (3: screen off).
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool fromUser = false, uint32_t sceneFlag = 0);
+    ErrCode MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool fromUser = false, uint32_t sceneFlag = 0,
+        int32_t backgroundReason = 0);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -642,6 +654,24 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         uint64_t specifiedFullTokenId = 0);
+
+    /**
+     * ConnectAbilityWithIndirectCallerInfo, connect session with service ability.
+     *
+     * @param want, Special want for service type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be connected.
+     * @param indirectCallerInfo, Indirect caller information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectAbilityWithIndirectCallerInfo(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
     
     /**
      * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.
@@ -1248,6 +1278,24 @@ public:
         uint32_t &callerTokenId);
 
     /**
+     * @brief Launch game customized with game SA verification.
+     * @param bundleName Name of the game application.
+     * @param userId Indicates the user ID.
+     * @param appIndex app clone index. Currently, only appIndex = 0 is supported.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode LaunchGameCustomized(const std::string &bundleName, int32_t userId, int32_t appIndex = 0);
+    
+    /**
+     * SetGamePreLaunchCompleteTime, set the complete time (in milliseconds) for the game pre-launch.
+     *
+     * @param userId Indicates the user ID.
+     * @param completeTime The complete time (in milliseconds) for the game pre-launch.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetGamePreLaunchCompleteTime(int32_t userId, int64_t completeTime);
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
@@ -1688,6 +1736,16 @@ public:
         const InsightIntentExecuteParam &param);
 
     /**
+     * @brief Query entity info.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param);
+
+    /**
      * @brief Called when insight intent execute finished.
      *
      * @param token ability's token.
@@ -2076,6 +2134,20 @@ public:
      */
     ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken);
+
+    /**
+     * @brief Notify cancel game prelaunch and kill the process.
+     * @param callerToken Indicates the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode NotifyCancelGamePreLaunch(const sptr<IRemoteObject> callerToken);
+
+    /**
+     * @brief Notify complete game prelaunch and clear the flag.
+     * @param callerToken Indicates the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode NotifyCompleteGamePreLaunch(const sptr<IRemoteObject> callerToken);
 
     /**
      * Check if the app is restart-limited.

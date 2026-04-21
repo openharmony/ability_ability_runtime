@@ -22,6 +22,7 @@
 #include "app_utils.h"
 #include "render_record.h"
 #include "app_mgr_service_inner.h"
+#include "app_state_observer_manager.h"
 #include "error_msg_util.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
@@ -904,7 +905,8 @@ bool AppRunningRecord::UpdateAbilityFocusState(const sptr<IRemoteObject> &token,
     }
 }
 
-void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
+void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+    bool isFromScreenOffBackground)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "state is :%{public}d", static_cast<int32_t>(state));
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
@@ -925,7 +927,7 @@ void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, cons
     if (state == AbilityState::ABILITY_STATE_FOREGROUND) {
         AbilityForeground(abilityRecord);
     } else if (state == AbilityState::ABILITY_STATE_BACKGROUND) {
-        AbilityBackground(abilityRecord);
+        AbilityBackground(abilityRecord, isFromScreenOffBackground);
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "wrong state");
     }
@@ -938,7 +940,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null ability");
         return;
     }
-
+    SetIsFromScreenOffBackground(false);
     AbilityState curAbilityState = ability->GetState();
     if (curAbilityState != AbilityState::ABILITY_STATE_READY &&
         curAbilityState != AbilityState::ABILITY_STATE_BACKGROUND) {
@@ -985,7 +987,8 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
     }
 }
 
-void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability)
+void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability,
+    bool isFromScreenOffBackground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ability) {
@@ -1025,6 +1028,10 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
             foregroundSize++;
             break;
         }
+    }
+    
+    if (foregroundSize == 0 && (mainBundleName_ != LAUNCHER_NAME || IsAllowScbProcessMoveToBackground())) {
+        isFromScreenOffBackground_ = isFromScreenOffBackground;
     }
 
     // Then schedule application background when all ability is not foreground.
@@ -1140,6 +1147,11 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
     moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
+
+    if (GetProcessType() == ProcessType::NORMAL && HasOnlyOneExtensionType()) {
+        SetProcessType(ProcessType::EXTENSION);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessTypeChanged(shared_from_this());
+    }
 }
 
 void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
@@ -2272,6 +2284,38 @@ uint64_t AppRunningRecord::GenerateRunningId()
     thread_local std::mt19937_64 engine(std::random_device{}());
     thread_local std::uniform_int_distribution<uint64_t> dist;
     return dist(engine);
+}
+
+bool AppRunningRecord::HasOnlyOneExtensionType()
+{
+    auto abilities = GetAbilities();
+    ExtensionAbilityType firstType = ExtensionAbilityType::UNSPECIFIED;
+    bool hasExtension = false;
+
+    for (const auto &item : abilities) {
+        const auto &ability = item.second;
+        if (!ability) {
+            continue;
+        }
+        auto abilityInfo = ability->GetAbilityInfo();
+        if (!abilityInfo) {
+            continue;
+        }
+
+        if (abilityInfo->type != AbilityType::EXTENSION) {
+            return false;
+        }
+
+        auto currentType = abilityInfo->extensionAbilityType;
+        if (!hasExtension) {
+            firstType = currentType;
+            hasExtension = true;
+        } else if (currentType != firstType) {
+            return false;
+        }
+    }
+
+    return hasExtension;
 }
 
 void AppRunningRecord::SetRequestProcCode(int32_t requestProcCode)

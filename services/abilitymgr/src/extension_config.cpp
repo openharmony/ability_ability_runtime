@@ -30,6 +30,7 @@ constexpr const char* EXTENSION_CONFIG_FILE_PATH = "/etc/ams_extension_config.js
 constexpr const char* EXTENSION_CONFIG_NAME = "ams_extension_config";
 constexpr const char* EXTENSION_TYPE_NAME = "extension_type_name";
 constexpr const char* EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
+constexpr const char* EXTENSION_RUNNING_TIMEOUT_TIME = "running_timeout_time";
 
 // old access flag, deprecated
 constexpr const char* EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME = "third_party_app_blocked_flag";
@@ -48,6 +49,9 @@ constexpr const char* SA_ACCESS_ENABLE_FLAG = "sa_access_enable_flag";
 constexpr const char* SCREEN_UNLOCK_ACCESS = "screen_unlock_access";
 constexpr const char* INTERCEPT = "intercept";
 constexpr const char* INTERCEPT_EXCLUDE_SYSTEM_APP = "intercept_exclude_system_app";
+constexpr const char* DEFAULT_INTERCEPTION = "defaultInterception";
+constexpr const char* SYSTEM_APP_INTERCEPTION = "systemAppInterception";
+constexpr const char* APP_IDENTIFIER = "appIdentifier";
 }
 
 std::string ExtensionConfig::GetExtensionConfigPath() const
@@ -62,7 +66,7 @@ std::string ExtensionConfig::GetExtensionConfigPath() const
 
 void ExtensionConfig::LoadExtensionConfiguration()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "load begin");
     nlohmann::json jsonBuf;
     if (!ReadFileInfoJson(GetExtensionConfigPath().c_str(), jsonBuf)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse file failed");
@@ -70,6 +74,7 @@ void ExtensionConfig::LoadExtensionConfiguration()
     }
 
     LoadExtensionConfig(jsonBuf);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "load end");
 }
 
 int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const std::string &extensionTypeName)
@@ -116,7 +121,7 @@ bool ExtensionConfig::IsExtensionStartServiceEnable(const std::string &extension
 void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
 {
     if (!object.contains(EXTENSION_CONFIG_NAME) || !object.at(EXTENSION_CONFIG_NAME).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "extension config null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "extension config null");
         return;
     }
 
@@ -128,6 +133,7 @@ void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
         std::lock_guard lock(configMapMutex_);
         std::string extensionTypeName = jsonObject.at(EXTENSION_TYPE_NAME).get<std::string>();
         LoadExtensionAutoDisconnectTime(jsonObject, extensionTypeName);
+        LoadExtensionRunningTimeoutTime(jsonObject, extensionTypeName);
         bool hasAbilityAccess = LoadExtensionAbilityAccess(jsonObject, extensionTypeName);
         if (!hasAbilityAccess) {
             LoadExtensionThirdPartyAppBlockedList(jsonObject, extensionTypeName);
@@ -144,11 +150,35 @@ void ExtensionConfig::LoadExtensionAutoDisconnectTime(const nlohmann::json &obje
 {
     if (!object.contains(EXTENSION_AUTO_DISCONNECT_TIME) ||
         !object.at(EXTENSION_AUTO_DISCONNECT_TIME).is_number()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "auto disconnect time config null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "auto disconnect time config null");
         return;
     }
     int32_t extensionAutoDisconnectTime = object.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
     configMap_[extensionTypeName].extensionAutoDisconnectTime = extensionAutoDisconnectTime;
+}
+
+void ExtensionConfig::LoadExtensionRunningTimeoutTime(const nlohmann::json &object,
+    const std::string &extensionTypeName)
+{
+    if (!object.contains(EXTENSION_RUNNING_TIMEOUT_TIME) ||
+        !object.at(EXTENSION_RUNNING_TIMEOUT_TIME).is_number()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "running timeout time config not set for %{public}s",
+            extensionTypeName.c_str());
+        return;
+    }
+    int32_t extensionRunningTimeoutTime = object.at(EXTENSION_RUNNING_TIMEOUT_TIME).get<int32_t>();
+    configMap_[extensionTypeName].extensionRunningTimeoutTime = extensionRunningTimeoutTime;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "extension %{public}s running timeout time: %{public}d ms",
+        extensionTypeName.c_str(), extensionRunningTimeoutTime);
+}
+
+int32_t ExtensionConfig::GetExtensionRunningTimeoutTime(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].extensionRunningTimeoutTime;
+    }
+    return DEFAULT_EXTENSION_RUNNING_TIMEOUT_TIME;
 }
 
 void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object,
@@ -157,7 +187,7 @@ void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     if (!object.contains(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME) ||
         !object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).is_boolean()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "third Party config null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "third Party config null");
         return;
     }
     bool flag = object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).get<bool>();
@@ -171,7 +201,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     if (!object.contains(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG) ||
         !object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).is_boolean()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "service enable config null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "service enable config null");
         return;
     }
     bool serviceEnableFlag = object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).get<bool>();
@@ -182,7 +212,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
     }
     if (!object.contains(EXTENSION_SERVICE_BLOCKED_LIST_NAME) ||
         !object.at(EXTENSION_SERVICE_BLOCKED_LIST_NAME).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "service config null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "service config null");
         return;
     }
     std::unordered_set<std::string> serviceBlockedList;
@@ -205,7 +235,7 @@ bool ExtensionConfig::LoadExtensionAbilityAccess(const nlohmann::json &object, c
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     if (!object.contains(ABILITY_ACCESS) || !object.at(ABILITY_ACCESS).is_object()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse ability_access failed");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "parse ability_access failed");
         configMap_[extensionTypeName].hasAbilityAccess = false;
         return false;
     }
@@ -242,7 +272,7 @@ void ExtensionConfig::LoadExtensionAllowOrBlockedList(const nlohmann::json &obje
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionAllowOrBlockedList.");
     if (!object.contains(key) || !object.at(key).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s config null", key.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s config null", key.c_str());
         return;
     }
     list.clear();
@@ -263,7 +293,7 @@ void ExtensionConfig::LoadExtensionNetworkEnable(const nlohmann::json &object,
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionNetworkEnable call");
     if (!object.contains(NETWORK_ACCESS_ENABLE_FLAG) || !object.at(NETWORK_ACCESS_ENABLE_FLAG).is_boolean()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "network enable flag null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "network enable flag null");
         return;
     }
     bool flag = object.at(NETWORK_ACCESS_ENABLE_FLAG).get<bool>();
@@ -277,7 +307,7 @@ void ExtensionConfig::LoadExtensionSAEnable(const nlohmann::json &object,
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionSAEnable call");
     if (!object.contains(SA_ACCESS_ENABLE_FLAG) || !object.at(SA_ACCESS_ENABLE_FLAG).is_boolean()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "sa enable flag null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "sa enable flag null");
         return;
     }
     bool flag = object.at(SA_ACCESS_ENABLE_FLAG).get<bool>();
@@ -299,11 +329,46 @@ void ExtensionConfig::LoadScreenUnlockAccess(const nlohmann::json &object,
     screenUnlockAccess.intercept = JsonUtils::GetInstance().JsonToBool(accessJson, INTERCEPT, false);
     screenUnlockAccess.interceptExcludeSystemApp =
         JsonUtils::GetInstance().JsonToBool(accessJson, INTERCEPT_EXCLUDE_SYSTEM_APP, false);
-    JsonUtils::GetInstance().JsonToUnorderedStrSet(accessJson, BLOCK_LIST, screenUnlockAccess.blockList);
-    JsonUtils::GetInstance().JsonToUnorderedStrSet(accessJson, ALLOW_LIST, screenUnlockAccess.allowList);
+    screenUnlockAccess.defaultInterception = JsonUtils::GetInstance().JsonToOptionalBool(accessJson,
+        DEFAULT_INTERCEPTION);
+    screenUnlockAccess.systemAppInterception = JsonUtils::GetInstance().JsonToOptionalBool(accessJson,
+        SYSTEM_APP_INTERCEPTION);
+    LoadScreenUnlockAppIdentifierList(accessJson, ALLOW_LIST, screenUnlockAccess.allowList);
+    LoadScreenUnlockAppIdentifierList(accessJson, BLOCK_LIST, screenUnlockAccess.blockList);
     TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "The %{public}s extension's screen_unlock_access, intercept:%{public}d, excludeSystemApp:%{public}d",
-        extensionTypeName.c_str(), screenUnlockAccess.intercept, screenUnlockAccess.interceptExcludeSystemApp);
+        "The %{public}s extension's screen_unlock_access, intercept:%{public}d, excludeSystemApp:%{public}d, "
+        "defaultInterception:%{public}s, systemAppInterception:%{public}s, allowList size:%{public}zu, "
+        "blockList size:%{public}zu",
+        extensionTypeName.c_str(), screenUnlockAccess.intercept, screenUnlockAccess.interceptExcludeSystemApp,
+        FormatAccessFlag(screenUnlockAccess.defaultInterception).c_str(),
+        FormatAccessFlag(screenUnlockAccess.systemAppInterception).c_str(),
+        screenUnlockAccess.allowList.size(), screenUnlockAccess.blockList.size());
+}
+
+void ExtensionConfig::LoadScreenUnlockAppIdentifierList(const nlohmann::json &object, const std::string &key,
+    std::unordered_set<std::string> &list)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadScreenUnlockAppIdentifierList call, key: %{public}s", key.c_str());
+    if (!object.contains(key) || !object.at(key).is_array()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s config null or not array", key.c_str());
+        return;
+    }
+    list.clear();
+    for (auto &item : object.at(key).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_object()) {
+            continue;
+        }
+        if (!jsonObject.contains(APP_IDENTIFIER) || !jsonObject.at(APP_IDENTIFIER).is_string()) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "appIdentifier not found or not string");
+            continue;
+        }
+        std::string appIdentifier = jsonObject.at(APP_IDENTIFIER).get<std::string>();
+        if (!appIdentifier.empty()) {
+            list.emplace(appIdentifier);
+        }
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Loaded %{public}zu items for %{public}s", list.size(), key.c_str());
 }
 
 bool ExtensionConfig::HasAbilityAccess(const std::string &extensionTypeName)
@@ -466,6 +531,104 @@ bool ExtensionConfig::IsScreenUnlockAllowAbility(const std::string &extensionTyp
         return screenUnlockAccess.allowList.find(bundleName + "/" + abilityName) != screenUnlockAccess.allowList.end();
     }
     return false;
+}
+
+bool ExtensionConfig::HasScreenUnlockDefaultInterception(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return iter->second.screenUnlockAccess.defaultInterception.has_value();
+}
+
+bool ExtensionConfig::HasScreenUnlockSystemAppInterception(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return iter->second.screenUnlockAccess.systemAppInterception.has_value();
+}
+
+bool ExtensionConfig::GetScreenUnlockDefaultInterception(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end() || !iter->second.screenUnlockAccess.defaultInterception.has_value()) {
+        return true;
+    }
+    return iter->second.screenUnlockAccess.defaultInterception.value();
+}
+
+bool ExtensionConfig::GetScreenUnlockSystemAppInterception(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end() || !iter->second.screenUnlockAccess.systemAppInterception.has_value()) {
+        return true;
+    }
+    return iter->second.screenUnlockAccess.systemAppInterception.value();
+}
+
+bool ExtensionConfig::IsInScreenUnlockAccessAllowList(const std::string &extensionTypeName,
+    const std::string &appIdentifier)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    const auto &allowList = iter->second.screenUnlockAccess.allowList;
+    return allowList.find(appIdentifier) != allowList.end();
+}
+
+bool ExtensionConfig::IsInScreenUnlockAccessBlockList(const std::string &extensionTypeName,
+    const std::string &appIdentifier)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    const auto &blockList = iter->second.screenUnlockAccess.blockList;
+    return blockList.find(appIdentifier) != blockList.end();
+}
+
+bool ExtensionConfig::HasScreenUnlockAccessConfig(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    const auto &screenUnlockAccess = iter->second.screenUnlockAccess;
+    return screenUnlockAccess.defaultInterception.has_value() ||
+           screenUnlockAccess.systemAppInterception.has_value() ||
+           !screenUnlockAccess.allowList.empty() ||
+           !screenUnlockAccess.blockList.empty();
+}
+
+bool ExtensionConfig::HasScreenUnlockAccessAllowList(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return !iter->second.screenUnlockAccess.allowList.empty();
+}
+
+bool ExtensionConfig::HasScreenUnlockAccessBlockList(const std::string &extensionTypeName)
+{
+    std::lock_guard lock(configMapMutex_);
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
+    }
+    return !iter->second.screenUnlockAccess.blockList.empty();
 }
 
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)

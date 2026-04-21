@@ -14,7 +14,6 @@
  */
 
 #include "agent_card_mgr.h"
-
 #include "mock_my_flag.h"
 
 namespace OHOS {

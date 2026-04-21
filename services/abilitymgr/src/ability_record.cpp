@@ -29,6 +29,7 @@
 #include "configuration_convertor.h"
 #include "connection_state_manager.h"
 #include "common_event_manager.h"
+#include "dms_util.h"
 #include "error_msg_util.h"
 #include "foreground_app_connection_manager.h"
 #include "freeze_util.h"
@@ -226,6 +227,11 @@ void AbilityRecord::Init(const AbilityRequest &abilityRequest)
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
         keepAliveBundle_ = true;
     }
+
+    if (abilityRequest.want.GetBoolParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH, false)) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "abilityRecord: Set game prelaunch flag from want");
+        SetGameSAPreLaunch(true);
+    }
 }
 
 AbilityRecordType AbilityRecord::GetAbilityRecordType()
@@ -417,6 +423,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
         want.SetParam(SPECIFIED_ABILITY_FLAG, GetSpecifiedFlag());
     }
     lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
+    want.RemoveParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH);
     SetIsNewWant(false);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         lifeCycleStateInfo_.sceneFlag = 0;
@@ -1489,7 +1496,7 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
         return;
     }
     std::string srcDeviceId = data[0];
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", srcDeviceId.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", DmsUtil::AnonymizeDeviceId(srcDeviceId).c_str());
     int missionId = atoi(data[1].c_str());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "get missionId: %{public}d", missionId);
     resultWant.SetParam(DMS_SRC_NETWORK_ID, srcDeviceId);
@@ -2393,6 +2400,16 @@ void AbilityRecord::SetMinimizeReason(bool fromUser)
 void AbilityRecord::SetSceneFlag(uint32_t sceneFlag)
 {
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
+}
+
+void AbilityRecord::SetIsFromScreenOffBackground(bool isFromScreenOffBackground)
+{
+    isFromScreenOffBackground_ = isFromScreenOffBackground;
+}
+
+bool AbilityRecord::IsFromScreenOffBackground() const
+{
+    return isFromScreenOffBackground_;
 }
 
 void AbilityRecord::SetAppIndex(const int32_t appIndex)

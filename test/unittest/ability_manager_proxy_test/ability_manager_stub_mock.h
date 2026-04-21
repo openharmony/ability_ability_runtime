@@ -54,6 +54,17 @@ public:
         return UNKNOWN_ERROR;
     }
 
+    int InvokeInsightIntentSendRequest(uint32_t code, MessageParcel& data,
+        MessageParcel& reply, MessageOption& option)
+    {
+        code_ = code;
+        std::string emptyArray = "[]";
+        reply.WriteUint32(emptyArray.size() + 1);
+        reply.WriteRawData(emptyArray.c_str(), emptyArray.size() + 1);
+        reply.WriteInt32(NO_ERROR);
+        return 0;
+    }
+
     int code_ = 0;
 
     virtual int StartAbility(

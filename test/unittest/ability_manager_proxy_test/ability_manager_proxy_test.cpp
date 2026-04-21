@@ -3168,7 +3168,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetAllInsightIntentInfo_00
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeInsightIntentSendRequest));
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t userId = 1;
@@ -3188,7 +3188,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetInsightIntentInfoByBund
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeInsightIntentSendRequest));
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
@@ -3687,6 +3687,223 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_007, Test
     sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
     EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: LaunchGameCustomized
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy LaunchGameCustomized
+ * EnvConditions: NA
+ * CaseDescription: Verify LaunchGameCustomized with valid parameters
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_LaunchGameCustomized_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    std::string bundleName = "com.test.game";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    auto res = proxy_->LaunchGameCustomized(bundleName, userId, appIndex);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: LaunchGameCustomized
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy LaunchGameCustomized
+ * EnvConditions: NA
+ * CaseDescription: Verify LaunchGameCustomized with empty bundleName
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_LaunchGameCustomized_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    std::string bundleName = "";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    auto res = proxy_->LaunchGameCustomized(bundleName, userId, appIndex);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetGamePreLaunchCompleteTime
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy SetGamePreLaunchCompleteTime
+ * EnvConditions: NA
+ * CaseDescription: Verify SetGamePreLaunchCompleteTime with valid parameters
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_SetGamePreLaunchCompleteTime_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    int32_t userId = 100;
+    int64_t completeTime = 1000;
+    auto res = proxy_->SetGamePreLaunchCompleteTime(userId, completeTime);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyCancelGamePreLaunch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy NotifyCancelGamePreLaunch
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCancelGamePreLaunch with null token
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_NotifyCancelGamePreLaunch_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(0);
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto res = proxy_->NotifyCancelGamePreLaunch(callerToken);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyCancelGamePreLaunch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy NotifyCancelGamePreLaunch
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCancelGamePreLaunch with valid token
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_NotifyCancelGamePreLaunch_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->NotifyCancelGamePreLaunch(callerToken);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyCompleteGamePreLaunch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy NotifyCompleteGamePreLaunch
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCompleteGamePreLaunch with null token
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_NotifyCompleteGamePreLaunch_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(0);
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto res = proxy_->NotifyCompleteGamePreLaunch(callerToken);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyCompleteGamePreLaunch
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy NotifyCompleteGamePreLaunch
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCompleteGamePreLaunch with valid token
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_NotifyCompleteGamePreLaunch_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->NotifyCompleteGamePreLaunch(callerToken);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: QueryEntityInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy QueryEntityInfo
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of QueryEntityInfo
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_QueryEntityInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_QueryEntityInfo_001 start");
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.class";
+
+    auto res = proxy_->QueryEntityInfo(key, callerToken, param);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::INSIGHT_INTENT_QUERY_ENTITY), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_QueryEntityInfo_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: QueryEntityInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy QueryEntityInfo
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal process of QueryEntityInfo with SendRequest error
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_QueryEntityInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_QueryEntityInfo_002 start");
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+
+    uint64_t key = 123;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundle";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.class";
+
+    auto res = proxy_->QueryEntityInfo(key, callerToken, param);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::INSIGHT_INTENT_QUERY_ENTITY), mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_QueryEntityInfo_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RequestModalUIExtensionWithAccount
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerProxy RequestModalUIExtensionWithAccount
+ * EnvConditions: NA
+ * CaseDescription: Verify RequestModalUIExtensionWithAccount with empty Want
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RequestModalUIExtensionWithAccount_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RequestModalUIExtensionWithAccount_001 start");
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    Want want;  // Empty want
+    int32_t accountId = 100;
+
+    auto res = proxy_->RequestModalUIExtensionWithAccount(want, accountId);
+
+    EXPECT_EQ(static_cast<uint32_t>(
+        AbilityManagerInterfaceCode::REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_RequestModalUIExtensionWithAccount_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

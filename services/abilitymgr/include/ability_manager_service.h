@@ -49,6 +49,7 @@
 #endif
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
+#include "caller_info.h"
 #include "data_ability_manager.h"
 #include "deeplink_reserve/deeplink_reserve_config.h"
 #include "event_report.h"
@@ -530,6 +531,15 @@ public:
      */
     int RequestModalUIExtension(const Want &want) override;
 
+    /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want contains ability info about caller and called.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId) override;
+
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE,
         int32_t requestCode = DEFAULT_INVAL_VALUE) override;
@@ -712,10 +722,11 @@ public:
      *
      * @param sessionInfo the extension session info of the ability to minimize.
      * @param fromUser, Whether form user.
+     * @param backgroundReason The reason for moving to background (3: screen off).
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false,
-        uint32_t sceneFlag = 0) override;
+        uint32_t sceneFlag = 0, int32_t backgroundReason = 0) override;
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -740,7 +751,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isQueryExtensionOnly = false,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0) override;
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -2061,6 +2073,38 @@ public:
         uint32_t &callerTokenId) override;
 
     /**
+     * @brief Launch game customized with game SA verification.
+     * @param bundleName Name of the game application.
+     * @param userId Indicates the user ID.
+     * @param appIndex app clone index. Currently, only appIndex = 0 is supported.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t LaunchGameCustomized(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) override;
+
+    /**
+     * @brief Cancel game prelaunch and kill the game process.
+     * @param callerToken Token of the caller ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyCancelGamePreLaunch(const sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * @brief Complete game prelaunch and clear the flag.
+     * @param callerToken Token of the caller ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyCompleteGamePreLaunch(const sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * @brief Set game prelaunch complete time.
+     *
+     * @param userId Indicates the user ID.
+     * @param completeTime The complete time for game prelaunch.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetGamePreLaunchCompleteTime(int32_t userId, int64_t completeTime) override;
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
@@ -2106,6 +2150,16 @@ public:
      */
     int32_t ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
         const InsightIntentExecuteParam &param) override;
+
+    /**
+     * @brief Query entity.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param) override;
 
     /**
      * @brief Execute intent.
@@ -2737,6 +2791,32 @@ protected:
 
 private:
     int GetTopAbilityInner(sptr<IRemoteObject> &token, uint64_t displayId = 0);
+
+    /**
+     * @brief Get the top ability token for specified user.
+     * @param token Output parameter for the top ability token.
+     * @param userId The target user ID.
+     * @param displayId The display ID (default 0).
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int GetTopAbilityByUserId(sptr<IRemoteObject> &token, int32_t userId, uint64_t displayId = 0);
+
+    /**
+     * @brief Get display ID by account ID.
+     * @param accountId The account ID.
+     * @param displayId Output parameter for the display ID.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    int GetDisplayIdByAccount(int32_t accountId, uint64_t &displayId);
+
+    /**
+     * @brief Request modal UIExtension with account ID (inner implementation).
+     * @param want The want contains ability info about caller and called.
+     * @param accountId The account ID for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int RequestModalUIExtensionWithAccountInner(Want want, int32_t accountId);
+
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
 
@@ -2807,7 +2887,8 @@ private:
         bool isQueryExtensionOnly = false,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr,
         uint64_t specifiedFullTokenId = 0,
-        int32_t loadTimeout = 0);
+        int32_t loadTimeout = 0,
+        std::shared_ptr<IndirectCallerInfo> indirectCallerInfo = nullptr);
 
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int32_t HandleExtensionConnectionByUserId(sptr<IAbilityConnection> connect, int32_t userId,
@@ -2994,7 +3075,7 @@ private:
 
     void UnsubscribeBundleEventCallback();
 
-    void ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+    void ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, bool gamePrelaunchFlag = false);
 
     void ReportAbilityAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
         const sptr<IRemoteObject> &callerToken);

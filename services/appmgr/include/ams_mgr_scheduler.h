@@ -79,7 +79,8 @@ public:
      * @param state, ability status that needs to be updated.
      * @return
      */
-    virtual void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state) override;
+    virtual void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+        bool isFromScreenOffBackground = false) override;
 
     /**
      * UpdateExtensionState, call UpdateExtensionState() through the proxy object, update the extension status.
@@ -106,6 +107,15 @@ public:
      * @return
      */
     virtual void KillProcessByAbilityToken(const sptr<IRemoteObject> &token) override;
+
+    /**
+     * SetGameSAPrelaunch, set game SA prelaunch flag through proxy object.
+     *
+     * @param token, the unique identification to the ability.
+     * @param isGameSAPrelaunch, the game SA prelaunch flag to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch) override;
 
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,

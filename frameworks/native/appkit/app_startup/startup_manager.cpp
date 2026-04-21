@@ -134,6 +134,7 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
             TAG_LOGE(AAFwkTag::STARTUP, "self is null");
             return;
         }
+        TAG_LOGD(AAFwkTag::STARTUP, "setpriority:%{public}d", PRIORITY_PRELOAD_SO);
         auto ret = setpriority(PRIO_PROCESS, gettid(), PRIORITY_PRELOAD_SO);
         if (ret != ERR_OK) {
             TAG_LOGW(AAFwkTag::STARTUP, "setpriority fail, ret:%{public}d, err:%{public}d", ret, errno);

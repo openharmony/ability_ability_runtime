@@ -586,6 +586,8 @@ public:
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
     void SetSceneFlag(uint32_t sceneFlag);
+    void SetIsFromScreenOffBackground(bool isFromScreenOffBackground);
+    bool IsFromScreenOffBackground() const;
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
     bool IsClearMissionFlag();
@@ -595,6 +597,7 @@ public:
     void SetWindowMode(int32_t windowMode);
     void RemoveWindowMode();
     LifeCycleStateInfo lifeCycleStateInfo_;                // target life state info
+    bool isFromScreenOffBackground_ = false;              // mark if background caused by screen off
 
     bool CanRestartRootLauncher();
 
@@ -713,6 +716,16 @@ public:
     bool IsPluginAbility() const
     {
         return isPluginAbility_;
+    }
+
+    bool IsGameSAPreLaunch() const
+    {
+        return isGameSAPreLaunch_;
+    }
+
+    void SetGameSAPreLaunch(bool isGameSAPreLaunch)
+    {
+        isGameSAPreLaunch_ = isGameSAPreLaunch;
     }
 
     // Host-Plugin relationship management
@@ -952,6 +965,7 @@ protected:
     bool isHook_ = false;
     bool isPluginAbility_ = false;
     bool isPrelaunch_ = false;
+    std::atomic<bool> isGameSAPreLaunch_ = false;
 
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     int32_t uid_ = 0;

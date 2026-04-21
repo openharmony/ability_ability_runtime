@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import insightIntent from '@ohos.app.ability.insightIntent';
+import { IntentResultWrapper } from './utils/AbilityUtils';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace insightIntentProvider {
@@ -22,6 +23,7 @@ export default namespace insightIntentProvider {
   loadLibraryWithPermissionCheck("insight_intent_provider_ani_kit.z", "@ohos.app.ability.insightIntentProvider")
 
   export native function nativeSendExecuteResult(instanceId: int, result: insightIntent.ExecuteResult, callback: AsyncCallbackWrapper<void>): void;
+  export native function nativeSendIntentResult(instanceId: int, result: Record<string, RecordData>, callback: AsyncCallbackWrapper<void>): void;
 
   export function sendExecuteResult(instanceId: int, result: insightIntent.ExecuteResult): Promise<void> {
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
@@ -34,6 +36,22 @@ export default namespace insightIntentProvider {
       });
       taskpool.execute((): void => {
         insightIntentProvider.nativeSendExecuteResult(instanceId, result, asyncCall);
+      });
+    });
+  }
+
+  export function sendIntentResult<T>(instanceId: int, result: insightIntent.IntentResult<T>): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        let recordResult: Record<string, RecordData> = IntentResultWrapper.toRecord(result);
+        insightIntentProvider.nativeSendIntentResult(instanceId, recordResult, asyncCall);
       });
     });
   }

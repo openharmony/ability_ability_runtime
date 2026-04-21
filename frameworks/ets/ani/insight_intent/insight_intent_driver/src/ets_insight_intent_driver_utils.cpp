@@ -112,6 +112,12 @@ ani_object CreateEtsEntityInfo(ani_env *env, const EntityInfoForQuery &info)
     env->Object_SetPropertyByName_Ref(objValue, "entityCategory", AppExecFwk::GetAniString(env, info.entityCategory));
     env->Object_SetPropertyByName_Ref(objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
     env->Object_SetPropertyByName_Ref(objValue, "parentClassName", AppExecFwk::GetAniString(env, info.parentClassName));
+    env->Object_SetPropertyByName_Ref(objValue, "isQueryable", AppExecFwk::CreateBoolean(env, info.isQueryable()));
+    if (!info.supportedQueryProperties.empty()) {
+        ani_object stringArray = nullptr;
+        AppExecFwk::WrapArrayString(env, stringArray, info.supportedQueryProperties);
+        env->Object_SetPropertyByName_Ref(objValue, "supportedQueryProperties", stringArray);
+    }
     return objValue;
 }
 

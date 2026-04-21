@@ -93,9 +93,11 @@ public:
      *
      * @param token Ability identify.
      * @param state Ability running state.
+     * @param isFromScreenOffBackground Whether from screen off background.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state);
+    virtual AppMgrResultCode UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+        bool isFromScreenOffBackground = false);
 
     /**
      * UpdateExtensionState, call UpdateExtensionState() through the proxy object, update the extension status.
@@ -129,6 +131,15 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode KillProcessByAbilityToken(const sptr<IRemoteObject> &token);
+
+    /**
+     * SetGameSAPrelaunch, set game SA prelaunch flag through proxy object.
+     *
+     * @param token, the unique identification to the ability.
+     * @param isGameSAPrelaunch, the game SA prelaunch flag to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch);
 
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,
@@ -659,6 +670,14 @@ public:
      * @return Returns true on success, others on failure.
      */
     bool SetAppFreezeFilter(int32_t pid);
+
+    /**
+     * @brief Update freeze excluded pid set.
+     * @param isAdd true to add pid, false to remove pid.
+     * @param targetPid The target process id to be added or removed.
+     * @param profilerPid The profiler process id.
+     */
+    void UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid);
 
     /**
      * Set AbilityForegroundingFlag of an app-record to true.

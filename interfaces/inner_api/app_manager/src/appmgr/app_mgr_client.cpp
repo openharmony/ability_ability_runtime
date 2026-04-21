@@ -202,13 +202,14 @@ AppMgrResultCode AppMgrClient::TerminateAbility(const sptr<IRemoteObject> &token
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
+AppMgrResultCode AppMgrClient::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+    bool isFromScreenOffBackground)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->UpdateAbilityState(token, state);
+            amsService->UpdateAbilityState(token, state, isFromScreenOffBackground);
             return AppMgrResultCode::RESULT_OK;
         }
     }
@@ -249,6 +250,22 @@ AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObjec
         if (amsService != nullptr) {
             amsService->KillProcessByAbilityToken(token);
             return AppMgrResultCode::RESULT_OK;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            int32_t result = amsService->SetGameSAPrelaunch(token, isGameSAPrelaunch);
+            if (result == ERR_OK) {
+                return AppMgrResultCode::RESULT_OK;
+            }
+            return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
@@ -1156,6 +1173,16 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
         return false;
     }
     return service->SetAppFreezeFilter(pid);
+}
+
+void AppMgrClient::UpdateFreezeExcludedPid(bool isAdd, int32_t targetPid, int32_t profilerPid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "service is null");
+        return;
+    }
+    service->UpdateFreezeExcludedPid(isAdd, targetPid, profilerPid);
 }
 
 int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)

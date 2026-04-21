@@ -59,6 +59,29 @@ HWTEST_F(AbilityBusinessErrorTest, GetErrorMsg_0100, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetErrorMsg_3560000X
+ * @tc.desc: Verify 356xxxx agent runtime error messages align with the API contract
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityBusinessErrorTest, GetErrorMsg_3560000X, TestSize.Level2)
+{
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_AGENT_ID_NOT_EXIST),
+        "The specified agentId does not exist.");
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED),
+        "Maximum connections from the same caller have been reached. "
+        "Please disconnect at least one agent extension beforehand.");
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_TOO_OLD),
+        "The specified agent card version is older than the current version.");
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID),
+        "The specified agent card version is invalid.");
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER),
+        "The specified agent card has already been registered. Use updateAgentCard instead.");
+    EXPECT_EQ(GetErrorMsg(AbilityErrorCode::ERROR_CODE_LOW_CODE_AGENT_ALREADY_ACTIVE),
+        "The specified LOW_CODE agent is already active and is not yet completed.");
+}
+
+/**
  * @tc.name: GetJsErrorCodeByNativeError_0100
  * @tc.desc: GetJsErrorCodeByNativeError_0100 Test
  * @tc.type: FUNC
@@ -75,11 +98,17 @@ HWTEST_F(AbilityBusinessErrorTest, GetJsErrorCodeByNativeError_0100, TestSize.Le
     result = GetJsErrorCodeByNativeError(AAFwk::ERR_MAX_AGENT_CONNECTIONS_REACHED);
     EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_MAX_CONNECTIONS_REACHED);
 
+    result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_AGENT_CARD_VERSION_TOO_OLD);
+    EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_TOO_OLD);
+
     result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_INVALID_AGENT_CARD_VERSION);
     EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_AGENT_CARD_VERSION_INVALID);
 
     result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_AGENT_CARD_DUPLICATE_REGISTER);
     EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_AGENT_CARD_DUPLICATE_REGISTER);
+
+    result = GetJsErrorCodeByNativeError(OHOS::AAFwk::ERR_LOW_CODE_AGENT_ALREADY_ACTIVE);
+    EXPECT_TRUE(result == AbilityErrorCode::ERROR_CODE_LOW_CODE_AGENT_ALREADY_ACTIVE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

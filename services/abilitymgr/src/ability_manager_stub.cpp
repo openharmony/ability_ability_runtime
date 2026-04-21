@@ -14,6 +14,7 @@
  */
 
 #include "ability_manager_stub.h"
+#include "insight_intent_query_param.h"
 
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
@@ -352,7 +353,7 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
         return GetPendingRequestWantInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT_FROM_PROXY) {
-        return GetPendingRequestWantInner(data, reply);
+        return GetPendingRequestWantFromProxyInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO) {
         return GetWantSenderInfoInner(data, reply);
@@ -592,6 +593,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_MODAL_UIEXTENSION) {
         return RequestModalUIExtensionInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT) {
+        return RequestModalUIExtensionWithAccountInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO) {
         return GetUIExtensionRootHostInfoInner(data, reply);
@@ -968,6 +972,18 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     if (interfaceCode == AbilityManagerInterfaceCode::QUERY_CALLER_TOKEN_ID_FOR_ANCO) {
         return QueryCallerTokenIdForAncoInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::LAUNCH_GAME_CUSTOMIZED) {
+        return LaunchGameCustomizedInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::CANCEL_GAME_PRELAUNCH) {
+        return NotifyCancelGamePreLaunchInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::COMPLETE_GAME_PRELAUNCH) {
+        return NotifyCompleteGamePreLaunchInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_GAME_PRELAUNCH_COMPLETE_TIME) {
+        return SetGamePreLaunchCompleteTimeInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::MANUAL_START_AUTO_STARTUP_APPS) {
         return ManualStartAutoStartupAppsInner(data, reply);
     }
@@ -979,6 +995,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentySecond(uint32_t code, MessageP
     }
     if (interfaceCode == AbilityManagerInterfaceCode::SET_APP_RECOVERY_FLAG) {
         return SetAppRecoveryFlagInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::INSIGHT_INTENT_QUERY_ENTITY) {
+        return QueryEntityInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -1309,7 +1328,8 @@ int AbilityManagerStub::MinimizeUIAbilityBySCBInner(MessageParcel &data, Message
     }
     bool fromUser = data.ReadBool();
     uint32_t sceneFlag = data.ReadUint32();
-    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
+    int32_t backgroundReason = data.ReadInt32();
+    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag, backgroundReason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1603,6 +1623,19 @@ int AbilityManagerStub::RequestModalUIExtensionInner(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
+int AbilityManagerStub::RequestModalUIExtensionWithAccountInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t accountId = data.ReadInt32();
+    int32_t result = RequestModalUIExtensionWithAccount(*want, accountId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::PreloadUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
@@ -1866,8 +1899,9 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     bool isQueryExtensionOnly = data.ReadBool();
     uint64_t specifiedFullTokenId = data.ReadUint64();
     int32_t loadTimeout = data.ReadInt32();
+    std::shared_ptr<IndirectCallerInfo> indirectCallerInfo(data.ReadParcelable<IndirectCallerInfo>());
     int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly,
-        specifiedFullTokenId, loadTimeout);
+        specifiedFullTokenId, loadTimeout, indirectCallerInfo);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -4033,6 +4067,63 @@ int32_t AbilityManagerStub::QueryCallerTokenIdForAncoInner(MessageParcel &data, 
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::LaunchGameCustomizedInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    int32_t appIndex = data.ReadInt32();
+    int32_t result = LaunchGameCustomized(bundleName, userId, appIndex);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::NotifyCancelGamePreLaunchInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = NotifyCancelGamePreLaunch(callerToken);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::NotifyCompleteGamePreLaunchInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = NotifyCompleteGamePreLaunch(callerToken);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::SetGamePreLaunchCompleteTimeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    int64_t completeTime = data.ReadInt64();
+    ErrCode result = SetGamePreLaunchCompleteTime(userId, completeTime);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> handler = data.ReadRemoteObject();
@@ -4138,6 +4229,27 @@ int32_t AbilityManagerStub::ExecuteIntentInner(MessageParcel &data, MessageParce
         return ERR_INVALID_VALUE;
     }
     auto result = ExecuteIntent(key, callerToken, *param);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::QueryEntityInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t key = data.ReadUint64();
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+    std::unique_ptr<InsightIntentQueryParam> param(data.ReadParcelable<InsightIntentQueryParam>());
+    if (param == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "param null");
+        return ERR_INVALID_VALUE;
+    }
+    auto result = QueryEntityInfo(key, callerToken, *param);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
@@ -5070,13 +5182,8 @@ int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, Me
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetAllInsightIntentInfo(flag, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
@@ -5092,13 +5199,8 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByBundleNameInner(MessageParcel 
     auto userId = data.ReadInt32();
     std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos, userId);
-    if (!reply.WriteInt32(infos.size())) {
+    if (!InsightIntentInfoForQuery::MarshallingVector(reply, infos)) {
         return INNER_ERR;
-    }
-    for (auto &info: infos) {
-        if (!reply.WriteParcelable(&info)) {
-            return INNER_ERR;
-        }
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");

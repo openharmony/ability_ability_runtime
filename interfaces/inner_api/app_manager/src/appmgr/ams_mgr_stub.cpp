@@ -99,6 +99,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleRegisterAppStateCallback(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PEOCESS_BY_ABILITY_TOKEN):
             return HandleKillProcessByAbilityToken(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::SET_GAME_SA_PRELAUNCH):
+            return HandleSetGameSAPrelaunch(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_USERID):
             return HandleKillProcessesByUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESS_WITH_ACCOUNT):
@@ -298,7 +300,8 @@ ErrCode AmsMgrStub::HandleUpdateAbilityState(MessageParcel &data, MessageParcel 
     HITRACE_METER(HITRACE_TAG_APP);
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     int32_t state = data.ReadInt32();
-    UpdateAbilityState(token, static_cast<AbilityState>(state));
+    bool isFromScreenOffBackground = data.ReadBool();
+    UpdateAbilityState(token, static_cast<AbilityState>(state), isFromScreenOffBackground);
     return NO_ERROR;
 }
 
@@ -328,6 +331,20 @@ ErrCode AmsMgrStub::HandleKillProcessByAbilityToken(MessageParcel &data, Message
     sptr<IRemoteObject> token = data.ReadRemoteObject();
 
     KillProcessByAbilityToken(token);
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleSetGameSAPrelaunch(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    bool isGameSAPrelaunch = data.ReadBool();
+
+    ErrCode result = SetGameSAPrelaunch(token, isGameSAPrelaunch);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write result");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 

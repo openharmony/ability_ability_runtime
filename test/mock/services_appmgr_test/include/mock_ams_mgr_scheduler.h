@@ -30,7 +30,8 @@ public:
         void(const std::shared_ptr<AbilityInfo>& abilityInfo, const std::shared_ptr<ApplicationInfo>& appInfo,
             const std::shared_ptr<AAFwk::Want>& want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam));
     MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
-    MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
+    MOCK_METHOD3(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state,
+        bool isFromScreenOffBackground));
     MOCK_METHOD0(Reset, void());
     MOCK_METHOD1(KillProcessByAbilityToken, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD3(KillProcessesByUserId, void(int32_t userId, bool isNeedSendAppSpawnMsg,
@@ -76,6 +77,7 @@ public:
     MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD4(KillProcessesByPids, int32_t(const std::vector<int32_t> &pids, const std::string &reason,
         bool subProcess, bool isKillPrecedeStart));
+    MOCK_METHOD2(SetGameSAPrelaunch, int32_t(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};
