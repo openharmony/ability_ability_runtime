@@ -512,7 +512,8 @@ public:
      *
      * @return
      */
-    void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state);
+    void UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+        bool isFromScreenOffBackground = false);
 
     /**
      * PopForegroundingAbilityTokens, Extract the token record from the foreground tokens list.
@@ -1271,6 +1272,16 @@ public:
         return isAllowScbProcessMoveToBackground_.load();
     }
 
+    inline void SetIsFromScreenOffBackground(bool isFromScreenOffBackground)
+    {
+        isFromScreenOffBackground_ = isFromScreenOffBackground;
+    }
+
+    inline bool IsFromScreenOffBackground() const
+    {
+        return isFromScreenOffBackground_;
+    }
+
     bool IsLastAgentExtensionAbility(const sptr<IRemoteObject> &token);
 
 private:
@@ -1297,7 +1308,8 @@ private:
      *
      * @return
      */
-    void AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability);
+    void AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability,
+        bool isFromScreenOffBackground = false);
     // drive application state changes when ability state changes.
 
     bool AbilityFocused(const std::shared_ptr<AbilityRunningRecord> &ability);
@@ -1331,6 +1343,8 @@ private:
      * - Collision probability is extremely low (approximately 2^-64)
      */
     uint64_t GenerateRunningId();
+
+    bool HasOnlyOneExtensionType();
 
     bool IsWindowIdsEmpty();
 
@@ -1479,6 +1493,7 @@ private:
     bool saEnableFlags_ = true;
     bool processCacheBlocked = false; // temporarily block process cache feature
     bool reasonExist_ = false;
+    bool isFromScreenOffBackground_ = false;
 
     ffrt::mutex appInfosLock_;
     ffrt::mutex renderRecordMapLock_; // render record lock

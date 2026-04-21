@@ -68,6 +68,14 @@ AppExecFwk::ExtensionAbilityInfo BuildAgentExtensionInfo(const std::string &bund
     extensionInfo.type = AppExecFwk::ExtensionAbilityType::AGENT;
     return extensionInfo;
 }
+
+AppExecFwk::HapModuleInfo BuildHapModuleInfo(const AppExecFwk::ExtensionAbilityInfo &extensionInfo)
+{
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = extensionInfo.moduleName;
+    hapModuleInfo.extensionInfos.push_back(extensionInfo);
+    return hapModuleInfo;
+}
 }
 
 class AgentCardMgrTest : public testing::Test {
@@ -90,8 +98,11 @@ void AgentCardMgrTest::SetUp(void)
     MyFlag::retDeleteData = 0;
     MyFlag::retQueryData = 0;
     MyFlag::retQueryAllData = 0;
+    MyFlag::insertedEntries.clear();
     MyFlag::insertedCards.clear();
+    MyFlag::queryDataEntries.clear();
     MyFlag::queryDataCards.clear();
+    MyFlag::queryAllDataEntries.clear();
     MyFlag::queryAllDataCards.clear();
     MyFlag::retGetBundleInfo = true;
     MyFlag::retGetResConfigFile = true;
@@ -246,12 +257,7 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_007, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
 
-    AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    extensionInfo.bundleName = "test.bundle";
-    extensionInfo.moduleName = "testModule";
-    extensionInfo.name = "TestAgent";
-    extensionInfo.type = AppExecFwk::ExtensionAbilityType::AGENT;
-    MyFlag::mockExtensionInfos.push_back(extensionInfo);
+    MyFlag::mockHapModuleInfos.push_back(BuildHapModuleInfo(BuildAgentExtensionInfo()));
 
     MyFlag::retGetResConfigFile = false;
     int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
@@ -774,8 +780,43 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleBundleInstallTest_0171
+ * @tc.desc: HandleBundleInstall keeps stored API-originated card payload on equal version but updates type
+ * @tc.type: FUNC
+ */
+HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_0171, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    MyFlag::mockExtensionInfos.push_back(BuildAgentExtensionInfo());
+    MyFlag::mockProfileInfoContent = R"({
+        "agentCards": [{
+            "agentId": "testAgent",
+            "type": "LOW_CODE",
+            "name": "Incoming Agent",
+            "description": "Incoming Description",
+            "version": "2.0.0",
+            "category": "productivity",
+            "defaultInputModes": ["text"],
+            "defaultOutputModes": ["text"],
+            "appInfo": {}
+        }]
+    })";
+    MyFlag::retQueryData = ERR_OK;
+    auto storedCard = BuildCard("testAgent", "2.0.0");
+    storedCard.description = "stored api payload";
+    MyFlag::queryDataEntries = { { storedCard, AgentCardUpdateSource::API } };
+
+    int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedEntries.size(), 1);
+    EXPECT_EQ(MyFlag::insertedEntries[0].card.description, "stored api payload");
+    EXPECT_EQ(MyFlag::insertedEntries[0].card.type, AgentCardType::LOW_CODE);
+    EXPECT_EQ(MyFlag::insertedEntries[0].source, AgentCardUpdateSource::API);
+}
+
+/**
  * @tc.name: HandleBundleInstallTest_018
- * @tc.desc: HandleBundleInstall removes cards absent from the new package
+ * @tc.desc: HandleBundleInstall retains cards absent from the new package
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_018, TestSize.Level1)
@@ -799,8 +840,9 @@ HWTEST_F(AgentCardMgrTest, HandleBundleInstallTest_018, TestSize.Level1)
 
     int ret = agentCardMgr.HandleBundleInstall("test.bundle", 100);
     EXPECT_EQ(ret, ERR_OK);
-    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
-    EXPECT_EQ(MyFlag::insertedCards[0].agentId, "incomingOnly");
+    ASSERT_EQ(MyFlag::insertedCards.size(), 2);
+    EXPECT_EQ(MyFlag::insertedCards[0].agentId, "storedOnly");
+    EXPECT_EQ(MyFlag::insertedCards[1].agentId, "incomingOnly");
 }
 
 /**
@@ -901,6 +943,19 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAgentCard_0011
+ * @tc.desc: UpdateAgentCard returns INVALID_PARAMETERS_ERR when iconUrl is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AgentCardMgrTest, UpdateAgentCard_0011, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    AgentCard card = BuildCard("testAgent", "1.0.0");
+    card.iconUrl.clear();
+    EXPECT_EQ(agentCardMgr.UpdateAgentCard(card), AAFwk::INVALID_PARAMETERS_ERR);
+}
+
+/**
  * @tc.name: RegisterAgentCard_001
  * @tc.desc: RegisterAgentCard returns INVALID_PARAMETERS_ERR when required fields are missing
  * @tc.type: FUNC
@@ -909,6 +964,19 @@ HWTEST_F(AgentCardMgrTest, RegisterAgentCard_001, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
     AgentCard card;
+    EXPECT_EQ(agentCardMgr.RegisterAgentCard(card), AAFwk::INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: RegisterAgentCard_0011
+ * @tc.desc: RegisterAgentCard returns INVALID_PARAMETERS_ERR when iconUrl is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AgentCardMgrTest, RegisterAgentCard_0011, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    AgentCard card = BuildCard("testAgent", "1.0.0");
+    card.iconUrl.clear();
     EXPECT_EQ(agentCardMgr.RegisterAgentCard(card), AAFwk::INVALID_PARAMETERS_ERR);
 }
 
@@ -999,14 +1067,31 @@ HWTEST_F(AgentCardMgrTest, RegisterAgentCard_007, TestSize.Level1)
 
 /**
  * @tc.name: RegisterAgentCard_008
- * @tc.desc: RegisterAgentCard skips ability validation for atomic service cards
+ * @tc.desc: RegisterAgentCard skips ability validation for uninstalled atomic-service bundles
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, RegisterAgentCard_008, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
-    AgentCard card = BuildCard("testAgent", "1.0.0", "", "");
-    card.type = AgentCardType::ATOMIC_SERVICE;
+    MyFlag::retGetBundleInfo = false;
+    AgentCard card = BuildCard("testAgent", "1.0.0", "test.bundle", "MissingAbility", AgentCardType::ATOMIC_SERVICE);
+
+    int ret = agentCardMgr.RegisterAgentCard(card);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::ATOMIC_SERVICE);
+}
+
+/**
+ * @tc.name: RegisterAgentCard_0081
+ * @tc.desc: RegisterAgentCard succeeds for atomic-service cards when ability is a valid AGENT extension
+ * @tc.type: FUNC
+ */
+HWTEST_F(AgentCardMgrTest, RegisterAgentCard_0081, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    MyFlag::mockExtensionInfos.push_back(BuildAgentExtensionInfo());
+    AgentCard card = BuildCard("testAgent", "1.0.0", "test.bundle", "TestAgent", AgentCardType::ATOMIC_SERVICE);
 
     int ret = agentCardMgr.RegisterAgentCard(card);
     EXPECT_EQ(ret, ERR_OK);
@@ -1058,15 +1143,22 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateAgentCard_003
- * @tc.desc: UpdateAgentCard returns ERR_BUNDLE_NOT_EXIST when bundle does not exist
+ * @tc.desc: UpdateAgentCard skips ability validation for uninstalled atomic-service bundles
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, UpdateAgentCard_003, TestSize.Level1)
 {
     AgentCardMgr agentCardMgr;
+    MyFlag::retQueryData = ERR_OK;
+    MyFlag::queryDataCards = { BuildCard("testAgent", "1.0.0", "test.bundle", "TestAgent",
+        AgentCardType::ATOMIC_SERVICE) };
     MyFlag::retGetBundleInfo = false;
-    AgentCard card = BuildCard("testAgent", "1.0.0");
-    EXPECT_EQ(agentCardMgr.UpdateAgentCard(card), AAFwk::ERR_BUNDLE_NOT_EXIST);
+    AgentCard card = BuildCard("testAgent", "1.0.0", "test.bundle", "TestAgent", AgentCardType::ATOMIC_SERVICE);
+
+    int ret = agentCardMgr.UpdateAgentCard(card);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::ATOMIC_SERVICE);
 }
 
 /**
@@ -1117,7 +1209,7 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_0042, TestSize.Level1)
 
 /**
  * @tc.name: UpdateAgentCard_0043
- * @tc.desc: UpdateAgentCard rejects low-code cards for non-system target apps using stored card type
+ * @tc.desc: UpdateAgentCard validates system-app requirement using incoming card type
  * @tc.type: FUNC
  */
 HWTEST_F(AgentCardMgrTest, UpdateAgentCard_0043, TestSize.Level1)
@@ -1130,7 +1222,9 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_0043, TestSize.Level1)
         AgentCardType::LOW_CODE) };
     AgentCard card = BuildCard("testAgent", "1.0.0");
 
-    EXPECT_EQ(agentCardMgr.UpdateAgentCard(card), AAFwk::ERR_NOT_SYSTEM_APP);
+    EXPECT_EQ(agentCardMgr.UpdateAgentCard(card), ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::APP);
 }
 
 /**
@@ -1199,6 +1293,26 @@ HWTEST_F(AgentCardMgrTest, UpdateAgentCard_006, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
     ASSERT_EQ(MyFlag::insertedCards.size(), 1);
     EXPECT_EQ(MyFlag::insertedCards[0].description, "updated");
+}
+
+/**
+ * @tc.name: UpdateAgentCard_0061
+ * @tc.desc: UpdateAgentCard persists incoming type instead of keeping stored type
+ * @tc.type: FUNC
+ */
+HWTEST_F(AgentCardMgrTest, UpdateAgentCard_0061, TestSize.Level1)
+{
+    AgentCardMgr agentCardMgr;
+    MyFlag::mockExtensionInfos.push_back(BuildAgentExtensionInfo());
+    MyFlag::retQueryData = ERR_OK;
+    MyFlag::queryDataCards = { BuildCard("testAgent", "2.0.0", "test.bundle", "TestAgent",
+        AgentCardType::LOW_CODE) };
+    AgentCard card = BuildCard("testAgent", "2.0.0");
+
+    int ret = agentCardMgr.UpdateAgentCard(card);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(MyFlag::insertedCards.size(), 1);
+    EXPECT_EQ(MyFlag::insertedCards[0].type, AgentCardType::APP);
 }
 
 /**

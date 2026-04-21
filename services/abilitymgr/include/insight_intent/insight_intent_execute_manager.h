@@ -23,6 +23,7 @@
 #include "extract_insight_intent_profile.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
+#include "insight_intent_query_param.h"
 #include "iremote_object.h"
 #include "singleton.h"
 
@@ -107,6 +108,12 @@ public:
     static int32_t CheckGetInsightIntenInfoPermission();
 
     void OnInsightAppDied(const std::string &bundleName);
+
+    int32_t CheckAndUpdateQueryEntityParam(uint64_t key, const sptr<IRemoteObject> &callerToken,
+        std::shared_ptr<OHOS::AppExecFwk::InsightIntentQueryParam> &param, const std::string& callerBundleName);
+
+    static int32_t GenerateQueryEntityWant(const std::shared_ptr<AppExecFwk::InsightIntentQueryParam> &param,
+        Want &want);
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
@@ -132,7 +139,10 @@ private:
     static int32_t UpdateEntryDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
     static int32_t UpdateEntryDecoratorParams(Want &want, AppExecFwk::ExecuteMode executeMode, int32_t userId);
-    static std::string GetMainElementName(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param);
+    static std::string GetMainElementName(const std::string &bundleName, const std::string &moduleName);
+    static std::shared_ptr<AbilityRuntime::InsightIntentEntityInfo> CheckEntityQueryable(
+        const AbilityRuntime::ExtractInsightIntentInfo& intentInfo, const std::string& className,
+        const AppExecFwk::InsightIntentQueryEntityParam& queryParams);
 
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);
 };

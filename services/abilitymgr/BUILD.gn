@@ -693,6 +693,7 @@ ohos_shared_library("mission_list") {
     "src/mission/mission_list.cpp",
     "src/mission/mission_list_manager.cpp",
     "src/task_data_persistence_mgr.cpp",
+    "src/utils/dms_util.cpp",
   ]
 
   deps = [
@@ -803,5 +804,6 @@ group("ams_service_config") {
     ":deeplink_reserve_config.json",
     ":start_ability_without_caller_token.json",
     ":uiextension_picker_config.json",
+    ":ams_extension_config.json",
   ]
 }

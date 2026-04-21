@@ -62,8 +62,7 @@ public:
 class MockIRemoteOnListener : public IRemoteOnListener {
 public:
     virtual ~MockIRemoteOnListener() {}
-    void OnCallback(const uint32_t ContinueState, const std::string& srcDeviceId, const std::string& bundleName,
-        const std::string& continueType, const std::string& srcBundleName) override
+    void OnCallback(const OnCallbackInfo &info) override
     {}
     sptr<IRemoteObject> AsObject() override
     {
@@ -259,6 +258,30 @@ HWTEST_F(AbilityManagerServiceElevenTest, RegisterOnListener_0001, TestSize.Leve
     MyFlag::flag_ = 0;
 
     GTEST_LOG_(INFO) << "RegisterOnListener_0001 end";
+}
+
+/*
+ * Feature: RegisterOnListener_0002
+ * Function: RegisterOnListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterOnListener
+ * EnvConditions: permission flag toggled
+ * CaseDescription: Test ContinuationNotifyPermission
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, RegisterOnListener_0002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterOnListener_0002 start";
+
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    sptr<MockIRemoteOnListener> listener = new (std::nothrow) MockIRemoteOnListener();
+    ASSERT_NE(listener, nullptr);
+    MyFlag::flag_ = 1;
+    auto result = abilityMs->RegisterOnListener("test", listener);
+    EXPECT_NE(result, CHECK_PERMISSION_FAILED);
+    MyFlag::flag_ = 0;
+
+    GTEST_LOG_(INFO) << "RegisterOnListener_0002 end";
 }
 
 /*

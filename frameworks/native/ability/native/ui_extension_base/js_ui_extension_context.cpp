@@ -69,6 +69,19 @@ bool IsEmbeddableStart(int32_t screenMode)
         screenMode == AAFwk::EMBEDDED_HALF_SCREEN_MODE;
 }
 
+bool IsContextEmbeddable(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    if (!context) {
+        return false;
+    }
+    auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
+    if (!extensionContext) {
+        return false;
+    }
+    int32_t screenMode = extensionContext->GetScreenMode();
+    return IsEmbeddableStart(screenMode);
+}
+
 } // namespace
 
 static std::map<UIExtensionConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
@@ -472,33 +485,21 @@ napi_value JsUIExtensionContext::OnOpenLinkInner(napi_env env, const AAFwk::Want
 napi_value JsUIExtensionContext::OnTerminateSelf(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "called");
-    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, innerErrCode]() {
-        auto context = weak.lock();
-        if (!context) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "null context");
-            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-            return;
-        }
-        context->SetTerminating(true);
-        *innerErrCode = context->TerminateSelf();
-    };
-    NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK) {
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-            } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-            }
-        };
+
+    // Check if embeddable mode
+    auto context = context_.lock();
+    bool isEmbeddable = IsContextEmbeddable(context);
 
     napi_value lastParam = (info.argc == ARGC_ZERO) ? nullptr : info.argv[INDEX_ZERO];
-    napi_value result = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JSUIExtensionContext OnTerminateSelf",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+
+    // Route to appropriate handler based on mode
+    if (isEmbeddable) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Embeddable mode: use TerminateSelfWithAnimation");
+        return HandleTerminateSelfInEmbeddableMode(env, lastParam, context);
+    } else {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Non-embeddable mode: use ScheduleHighQos pattern");
+        return HandleTerminateSelfInNonEmbeddableMode(env, lastParam);
+    }
 }
 
 napi_value JsUIExtensionContext::OnStartAbilityForResult(napi_env env, NapiCallbackInfo& info)
@@ -572,26 +573,18 @@ napi_value JsUIExtensionContext::OnTerminateSelfWithResult(napi_env env, NapiCal
 
     // Check if embeddable mode
     auto context = context_.lock();
-    bool isEmbeddable = false;
-    if (context) {
-        auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
-        if (extensionContext) {
-            int32_t screenMode = extensionContext->GetScreenMode();
-            isEmbeddable = IsEmbeddableStart(screenMode);
-        }
-    }
-
+    bool isEmbeddable = IsContextEmbeddable(context);
     // Route to appropriate handler based on mode
     if (isEmbeddable) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "Embedded mode: use async callback pattern");
-        return HandleTerminateSelfWithResultInEmbeddedMode(env, lastParam, context, resultCode, want);
+        TAG_LOGI(AAFwkTag::UI_EXT, "Embeddable mode: use async callback pattern");
+        return HandleTerminateSelfWithResultInEmbeddableMode(env, lastParam, context, resultCode, want);
     } else {
-        TAG_LOGI(AAFwkTag::UI_EXT, "Non-embedded mode: use ScheduleHighQos pattern");
-        return HandleTerminateSelfWithResultInNonEmbeddedMode(env, lastParam, resultCode, want);
+        TAG_LOGI(AAFwkTag::UI_EXT, "Non-embeddable mode: use ScheduleHighQos pattern");
+        return HandleTerminateSelfWithResultInNonEmbeddableMode(env, lastParam, resultCode, want);
     }
 }
 
-napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInEmbeddedMode(napi_env env, napi_value lastParam,
+napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInEmbeddableMode(napi_env env, napi_value lastParam,
     const std::shared_ptr<AbilityRuntime::Context>& context, int32_t resultCode, const AAFwk::Want& want)
 {
     napi_value result = nullptr;
@@ -611,28 +604,28 @@ napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInEmbeddedMode(nap
     auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
     if (!extensionContext) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null extensionContext");
-        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
         return result;
     }
 
     // Create callback with shared_ptr capture to extend lifetime
     auto callback = [env, asyncTask](ErrCode errCode) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "TerminateSelfWithResult callback called, errCode=%{public}d", errCode);
+        TAG_LOGI(AAFwkTag::UI_EXT, "terminateSelfWithResult callback (embeddable mode), errCode=%{public}d", errCode);
         if (errCode == ERR_OK) {
-            asyncTask->ResolveWithNoError(env, CreateJsUndefined(env));
+            asyncTask->Resolve(env, CreateJsUndefined(env));
         } else {
             asyncTask->Reject(env, CreateJsErrorByNativeErr(env, errCode));
         }
     };
 
-    // Call C++ layer directly without ScheduleHighQos (supports async animation)
-    extensionContext->TerminateSelfWithResult(resultCode, want, std::move(callback));
+    // Call C++ layer new method for embeddable mode
+    extensionContext->TerminateSelfWithResultAndAnimation(resultCode, want, std::move(callback));
 
-    TAG_LOGI(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInEmbeddedMode end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInEmbeddableMode end");
     return result;
 }
 
-napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInNonEmbeddedMode(napi_env env, napi_value lastParam,
+napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInNonEmbeddableMode(napi_env env, napi_value lastParam,
     int32_t resultCode, AAFwk::Want& want)
 {
     napi_value result = nullptr;
@@ -642,7 +635,73 @@ napi_value JsUIExtensionContext::HandleTerminateSelfWithResultInNonEmbeddedMode(
     NapiAsyncTask::ScheduleHighQos("JsUIExtensionContext::OnTerminateSelfWithResult",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
 
-    TAG_LOGD(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInNonEmbeddedMode end");
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandleTerminateSelfWithResultInNonEmbeddableMode end");
+    return result;
+}
+
+napi_value JsUIExtensionContext::HandleTerminateSelfInEmbeddableMode(napi_env env, napi_value lastParam,
+    const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    napi_value result = nullptr;
+
+    std::unique_ptr<NapiAsyncTask> uasyncTask =
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
+
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return result;
+    }
+
+    auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
+    if (!extensionContext) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null extensionContext");
+        asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return result;
+    }
+
+    auto callback = [env, asyncTask](ErrCode errCode) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "terminateSelf callback (embeddable mode), errCode=%{public}d", errCode);
+        if (errCode == ERR_OK) {
+            asyncTask->Resolve(env, CreateJsUndefined(env));
+        } else {
+            asyncTask->Reject(env, CreateJsErrorByNativeErr(env, errCode));
+        }
+    };
+
+    extensionContext->TerminateSelfWithAnimation(std::move(callback));
+
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandleTerminateSelfInEmbeddableMode end");
+    return result;
+}
+
+napi_value JsUIExtensionContext::HandleTerminateSelfInNonEmbeddableMode(napi_env env, napi_value lastParam)
+{
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, innerErrCode]() {
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
+        *innerErrCode = context->TerminateSelf();
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+        };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JSUIExtensionContext OnTerminateSelf",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 

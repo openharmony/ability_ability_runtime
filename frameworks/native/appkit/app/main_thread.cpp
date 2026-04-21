@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <map>
 
 #include "resource_config_helper.h"
 #include "ability_manager_client.h"
@@ -256,6 +257,7 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
     } else {
         TAG_LOGI(AAFwkTag::APPKIT, "NativeLibPath empty");
     }
+    GetLibrarySupportDirectory(bundleInfo.hapModuleInfos, nativeLibraryPath, appLibPaths);
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
         TAG_LOGD(AAFwkTag::APPKIT,
@@ -1483,6 +1485,44 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
         };
     return uncaughtExceptionInfo;
 }
+
+CJEventReportInfo MainThread::CreateCjEventReportInfo(const std::string &bundleName,
+    uint32_t versionCode, const std::string &hapPath, std::string &appRunningId)
+{
+    CJEventReportInfo reportInfo;
+    wptr<MainThread> weak_this = this;
+    reportInfo.hapPath = hapPath.c_str();
+    std::string processName = processInfo_ != nullptr ? processInfo_->GetProcessName() : "unknown";
+    reportInfo.reportInfoTask = [weak_this, bundleName, versionCode, processName, appRunningId =
+        std::move(appRunningId)](const char* domain,
+        const char* event, size_t hiSysEventType, const std::map<std::string, std::string>& params) {
+            auto shared_this = weak_this.promote();
+            if (shared_this == nullptr) {
+                return;
+            }
+            time_t timet;
+            time(&timet);
+            auto hisyseventReport = std::make_shared<HisyseventReport>(10);
+            hisyseventReport->InsertParam("PID", std::to_string(getpid()));
+            hisyseventReport->InsertParam("TID", std::to_string(gettid()));
+            hisyseventReport->InsertParam("PROCESS_NAME", processName);
+            hisyseventReport->InsertParam("APP_RUNNING_UNIQUE_ID", appRunningId);
+            for (const auto& [key, value] : params) {
+                hisyseventReport->InsertParam(key.c_str(), value);
+            }
+            int32_t ret = hisyseventReport->Report(domain, event, static_cast<HiSysEventEventType>(hiSysEventType));
+            auto it = params.find("DUMP_LOG_PATH");
+            if (it != params.end() && it->second == "EMPTY") {
+                TAG_LOGI(AAFwkTag::APPKIT, "DUMP_LOG_PATH is EMPTY, trigger CJ heap dump");
+                OHOS::AppExecFwk::CjHeapDumpInfo cjHeapInfo;
+                cjHeapInfo.needSnapshot = true;
+                cjHeapInfo.needGc = false;
+                cjHeapInfo.pid = getpid();
+                shared_this->HandleCjHeapMemory(cjHeapInfo);
+            }
+        };
+    return reportInfo;
+}
 #endif
 
 bool MainThread::GetBundleAndHspListForUpdateRuntime(BundleInfo &bundleInfo, std::string bundleName, HspList &hspList)
@@ -1933,6 +1973,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 auto expectionInfo =
                     CreateEtsExceptionInfo(bundleName, versionCode, hapPath, appRunningId, pid, processName);
                 (static_cast<AbilityRuntime::ETSRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
+                UncatchableTaskInfo uncatchableTaskInfo = {bundleName, versionCode, appRunningId, pid, processName};
+                RegisterHybridException(runtime, appInfo, hapPath, uncatchableTaskInfo);
             } else {
                 JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
                 uncaughtExceptionInfo.hapPath = hapPath;
@@ -1952,6 +1994,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         } else {
             auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
             (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
+            auto reportInfo = CreateCjEventReportInfo(bundleName, versionCode, hapPath, appRunningId);
+            (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterEventHandler(reportInfo);
         }
 #endif
         wptr<MainThread> weak = this;
@@ -2175,7 +2219,15 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
         ProcessExit(info);
 
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
-        auto mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
+        napi_env mainEnv = nullptr;
+        auto &runtime = appThread->application_->GetRuntime();
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+            auto& etsRuntime = static_cast<AbilityRuntime::ETSRuntime&>(*runtime);
+            auto& jsRuntime = static_cast<AbilityRuntime::JsRuntime&>(*etsRuntime.GetJsRuntime());
+            mainEnv = jsRuntime.GetNapiEnv();
+        } else {
+            mainEnv = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNapiEnv();
+        }
         ApplicationDataManager::ExceptionParams params = {env, mainEnv, exception, summary, isUncatchable};
         if (ApplicationDataManager::NotifyUncaughtException(params, appExecErrorObj)) {
             return;
@@ -2647,8 +2699,44 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         auto delegator = IAbilityDelegator::Create(application_->GetRuntime(), application_->GetAppContext(),
             std::move(testRunner), record->observer);
         AbilityDelegatorRegistry::RegisterInstance(delegator, args, application_->GetRuntime()->GetLanguage());
+        {
+            void *napiEnvVoid = nullptr;
+            void *aniVmVoid = nullptr;
+            auto &curRuntime = application_->GetRuntime();
+            bool isHybrid = applicationInfo_ &&
+                applicationInfo_->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
+            if (isHybrid && curRuntime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+                auto &etsRuntime = static_cast<AbilityRuntime::ETSRuntime &>(*curRuntime);
+                auto aniEnv = etsRuntime.GetAniEnv();
+                if (aniEnv != nullptr) {
+                    aniVmVoid = reinterpret_cast<void *>(aniEnv);
+                }
+                const auto &jsRuntime = etsRuntime.GetJsRuntime();
+                if (jsRuntime) {
+                    napiEnvVoid = reinterpret_cast<void *>(
+                        static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime).GetNapiEnv());
+                }
+            } else if (isHybrid && curRuntime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
+                napiEnvVoid = reinterpret_cast<void *>(
+                    static_cast<AbilityRuntime::JsRuntime &>(*curRuntime).GetNapiEnv());
+            }
+            AbilityDelegatorRegistry::SetRuntimeEnvs(napiEnvVoid, aniVmVoid);
+        }
         delegator->SetApiTargetVersion(targetVersion);
         delegator->Prepare();
+        if (applicationInfo_ && applicationInfo_->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+            auto currentLanguage = application_->GetRuntime()->GetLanguage();
+            auto targetLanguage = AbilityRuntime::Runtime::Language::JS;
+            if (currentLanguage == AbilityRuntime::Runtime::Language::JS) {
+                targetLanguage = AbilityRuntime::Runtime::Language::ETS;
+            }
+            auto interopTestRunner = TestRunner::Create(application_->GetRuntime(), args, false);
+            auto interopDelegator = IAbilityDelegator::Create(application_->GetRuntime(),
+                application_->GetAppContext(), std::move(interopTestRunner), record->observer);
+            AbilityDelegatorRegistry::RegisterInstance(interopDelegator, args, targetLanguage);
+            interopDelegator->SetApiTargetVersion(targetVersion);
+            interopDelegator->Prepare();
+        }
     } else { // FA model
         TAG_LOGD(AAFwkTag::APPKIT, "FA model");
         AbilityRuntime::Runtime::Options options;
@@ -3855,25 +3943,7 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
 
 void MainThread::NotifyAppFault(const FaultData &faultData)
 {
-    if (faultData.notifyApp) {
-        ErrorObject faultErrorObj = {
-            .name = faultData.errorObject.name,
-            .message = faultData.errorObject.message,
-            .stack = faultData.errorObject.stack
-        };
-
-        LeakObject leakObj = {
-            .leakType = faultData.leakObject.leakType,
-            .leakSize = faultData.leakObject.leakSize,
-            .detailInfo = faultData.leakObject.detailInfo,
-        };
-
-        if (faultData.faultType == FaultDataType::RESOURCE_CONTROL) {
-            ApplicationDataManager::GetInstance().NotifyLeakObject(leakObj);
-        } else {
-            ApplicationDataManager::GetInstance().NotifyExceptionObject(faultErrorObj);
-        }
-    }
+    ApplicationDataManager::GetInstance().NotifyAppFault(faultData);
 }
 
 void MainThread::LoadExtensionBlockList(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
@@ -4462,6 +4532,26 @@ bool MainThread::GetTestRunnerTypeAndPath(const std::string bundleName, const st
         return false;
     }
     return true;
+}
+
+void MainThread::RegisterHybridException(const std::unique_ptr<AbilityRuntime::Runtime> &runtime,
+    const ApplicationInfo &appInfo, const std::string &hapPath, const UncatchableTaskInfo &uncatchableTaskInfo)
+{
+    if (appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        auto &jsRuntime = (static_cast<AbilityRuntime::ETSRuntime&>(*runtime)).GetJsRuntime();
+        if (jsRuntime != nullptr) {
+            JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+            uncaughtExceptionInfo.hapPath = hapPath;
+
+            InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);
+            (static_cast<AbilityRuntime::JsRuntime&>(*jsRuntime)).RegisterUncaughtExceptionHandler(
+                uncaughtExceptionInfo, true);
+            JsEnv::UncatchableTask uncatchableTask;
+            InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
+            (static_cast<AbilityRuntime::JsRuntime&>(*jsRuntime)).RegisterUncatchableExceptionHandler(
+                uncatchableTask, true);
+        }
+    }
 }
 
 void MainThread::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)

@@ -48,6 +48,7 @@
 #include "js_window_stage.h"
 #include "scene_board_judgement.h"
 #endif
+#include "global_constant.h"
 #include "ohos_application.h"
 #include "madvise/madvise_utils.h"
 #include "napi_common_configuration.h"
@@ -492,6 +493,10 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnStart(want, sessionInfo);
+    if (want.GetBoolParam(AbilityRuntime::GlobalConstant::GAME_PRELAUNCH, false)) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "OnStart: Set game prelaunch flag from want");
+        isGamePreLaunch_ = true;
+    }
 
     CHECK_POINTER(abilityInfo_);
     if (!jsAbilityObj_) {
@@ -549,12 +554,20 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 
 void JsUIAbility::HandleAbilityDelegatorStart()
 {
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
+    if (!CreateProperty(abilityContext_, property)) {
+        return;
+    }
+    property->object_ = jsAbilityObj_;
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
-        property->object_ = jsAbilityObj_;
         delegator->PostPerformStart(property);
+    }
+    auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::ETS);
+    if (etsDelegator && etsDelegator != delegator) {
+        etsDelegator->PostPerformStart(property);
     }
 }
 
@@ -679,12 +692,19 @@ void JsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackI
 
 void JsUIAbility::OnStopCallback()
 {
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformStop(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
+            delegator->PostPerformStop(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformStop(property);
+        }
     }
 
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(AbilityContext::token_);
@@ -732,12 +752,19 @@ void JsUIAbility::OnSceneCreated()
         AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformSceneCreated");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformScenceCreated(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformSceneCreated");
+            delegator->PostPerformScenceCreated(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformScenceCreated(property);
+        }
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -776,12 +803,19 @@ void JsUIAbility::OnSceneRestored()
         applicationContext->DispatchOnWindowStageRestore(ability, stage);
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceRestored");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformScenceRestored(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceRestored");
+            delegator->PostPerformScenceRestored(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformScenceRestored(property);
+        }
     }
 }
 
@@ -825,12 +859,19 @@ void JsUIAbility::onSceneDestroyed()
         }
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformScenceDestroyed(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
+            delegator->PostPerformScenceDestroyed(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformScenceDestroyed(property);
+        }
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -894,12 +935,19 @@ void JsUIAbility::CallOnForegroundFunc(const Want &want)
     CallObjectMethod("onForeground", &jsWant, 1);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformForeground(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
+            delegator->PostPerformForeground(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformForeground(property);
+        }
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -929,12 +977,19 @@ void JsUIAbility::OnBackground()
 
     UIAbility::OnBackground();
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
+    if (CreateProperty(abilityContext_, property)) {
         property->object_ = jsAbilityObj_;
-        delegator->PostPerformBackground(property);
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+        if (delegator) {
+            TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
+            delegator->PostPerformBackground(property);
+        }
+        auto etsDelegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::ETS);
+        if (etsDelegator && etsDelegator != delegator) {
+            etsDelegator->PostPerformBackground(property);
+        }
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -987,7 +1042,13 @@ void JsUIAbility::OnDidForeground()
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     if (scene_ != nullptr) {
-        scene_->GoResume();
+        bool isGamePreLaunch = (goResumeCalledFlag_ == 0) ? isGamePreLaunch_ : false;
+        scene_->GoResume(isGamePreLaunch);
+        if (isGamePreLaunch) {
+            scene_->GoPause(isGamePreLaunch);
+        }
+        goResumeCalledFlag_ = 1;
+        isGamePreLaunch_ = false;
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -1197,10 +1258,12 @@ void JsUIAbility::DoOnForeground(const Want &want)
 
     OnWillForeground();
 
-    TAG_LOGD(AAFwkTag::UIABILITY, "move scene to foreground, sceneFlag_: %{public}d", UIAbility::sceneFlag_);
+    TAG_LOGD(AAFwkTag::UIABILITY, "move scene to foreground, sceneFlag_: %{public}d, isGamePreLaunch_: %{public}d",
+        UIAbility::sceneFlag_, isGamePreLaunch_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->GoForeground");
-    scene_->GoForeground(UIAbility::sceneFlag_);
+
+    scene_->GoForeground(UIAbility::sceneFlag_, isGamePreLaunch_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 

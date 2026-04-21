@@ -31,6 +31,11 @@ napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentEx
     HandleEscape handleEscape(env);
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+
+    if (result.isQueryEntity) {
+        return CreateQueryEntityResult(env, result.queryResults);
+    }
+
     if (result.isDecorator) {
         return result.result ? OHOS::AppExecFwk::CreateJsWantParams(env, *result.result) : objValue;
     }
@@ -179,7 +184,11 @@ napi_value CreateJsEntityInfo(napi_env env, const EntityInfoForQuery &info)
     napi_set_named_property(env, objValue, "entityCategory", CreateJsValue(env, info.entityCategory));
     napi_set_named_property(env, objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
     napi_set_named_property(env, objValue, "parentClassName", CreateJsValue(env, info.parentClassName));
-
+    napi_set_named_property(env, objValue, "isQueryable", CreateJsValue(env, info.isQueryable()));
+    if (!info.supportedQueryProperties.empty()) {
+        napi_set_named_property(env, objValue, "supportedQueryProperties",
+            CreateNativeArray(env, info.supportedQueryProperties));
+    }
     return handleEscape.Escape(objValue);
 }
 
@@ -389,6 +398,22 @@ napi_value CreateInsightIntentInfoForQueryArray(napi_env env, const std::vector<
     uint32_t index = 0;
     for (const auto &info : infos) {
         napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoForQuery(env, info));
+    }
+    return handleEscape.Escape(arrayValue);
+}
+
+napi_value CreateQueryEntityResult(napi_env env, const std::vector<std::shared_ptr<AAFwk::WantParams>> &queryResults)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "called");
+    HandleEscape handleEscape(env);
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, queryResults.size(), &arrayValue);
+    uint32_t index = 0;
+    for (const auto &item : queryResults) {
+        if (item == nullptr) {
+            continue;
+        }
+        napi_set_element(env, arrayValue, index++, OHOS::AppExecFwk::CreateJsWantParams(env, *item));
     }
     return handleEscape.Escape(arrayValue);
 }

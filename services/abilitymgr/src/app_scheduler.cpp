@@ -134,13 +134,15 @@ void AppScheduler::MoveToForeground(const sptr<IRemoteObject> &token)
         appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND));
 }
 
-void AppScheduler::MoveToBackground(const sptr<IRemoteObject> &token)
+void AppScheduler::MoveToBackground(const sptr<IRemoteObject> &token, bool isFromScreenOffBackground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Move the app to background.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Move the app to background, isFromScreenOffBackground:%{public}d",
+        isFromScreenOffBackground);
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(
-        appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND));
+        appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND,
+            isFromScreenOffBackground));
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AppExecFwk::AbilityState state)
@@ -166,6 +168,13 @@ void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "kill process");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessByAbilityToken(token);
+}
+
+int32_t AppScheduler::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SetGameSAPrelaunch, isGameSAPrelaunch: %{public}d", isGameSAPrelaunch);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    return appMgrClient_->SetGameSAPrelaunch(token, isGameSAPrelaunch);
 }
 
 void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,

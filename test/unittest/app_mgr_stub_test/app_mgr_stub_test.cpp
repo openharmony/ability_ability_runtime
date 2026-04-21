@@ -1411,5 +1411,24 @@ HWTEST_F(AppMgrStubTest, HandleGetAllAbilityInfos_0400, TestSize.Level1)
     int32_t infoSize = reply.ReadInt32();
     EXPECT_EQ(infoSize, 1);
 }
+
+/**
+ * @tc.name: HandleUpdateFreezeExcludedPid_001
+ * @tc.desc: Handle Update Freeze Excluded Pid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUpdateFreezeExcludedPid_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    data.WriteBool(true);
+    data.WriteInt32(1);
+    data.WriteInt32(2);
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_FREEZE_EXCLUDED_PID), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

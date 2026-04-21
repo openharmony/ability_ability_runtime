@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "agent_card.h"
-#include "bundle_mgr_client.h"
+#include "bundle_mgr_helper.h"
 
 namespace OHOS {
 namespace AgentRuntime {
@@ -31,7 +31,10 @@ public:
     static bool IsCardOwnedByAbility(const AgentCard &card, const std::string &bundleName,
         const std::string &abilityName);
     static bool HasRequiredRegisterFields(const AgentCard &card);
+    static bool HasValidIconUrl(const std::string &iconUrl);
     static bool ShouldValidateAppInfo(const AgentCard &card);
+    static bool ShouldValidateBundleAbility(const AgentCard &card, int32_t userId);
+    static bool BundleExists(const std::string &bundleName, int32_t userId);
     static int32_t ValidateSystemAppRequirement(const AgentCard &card, int32_t userId);
     static void ApplyDeviceTypes(const std::vector<std::string> &hapDeviceTypes, AgentCard &card);
     static bool ShouldKeepStoredCard(const AgentCard &incomingCard, const AgentCard &storedCard);

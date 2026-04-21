@@ -1125,6 +1125,9 @@ enum {
     // Result (2099217) for duplicate register of an existing agent card.
     ERR_AGENT_CARD_DUPLICATE_REGISTER = 2099217,
 
+    // Result (2099218) for duplicate active LOW_CODE agent invocation.
+    ERR_LOW_CODE_AGENT_ALREADY_ACTIVE = 2099218,
+
     /**
      * Result (2099220) for pid has been reused.
      */
@@ -1401,6 +1404,16 @@ enum NativeFreeInstallError {
      * Result (29360226) Invalid pid.
      */
     ERR_INVALID_PID = 29360226,
+
+    /*
+     * Result (29360227) The current application is not in a game preloading state.
+     */
+    ERR_NOT_GAME_PRELOAD_STATE = 29360227,
+
+    /*
+     * Result (29360228) for Connect: An error of the get cli tool mgr service.
+     */
+    GET_CLI_TOOL_MGR_SERVICE_FAILED = 29360228,
 
     /**
      * Undefine error code.

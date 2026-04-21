@@ -116,10 +116,15 @@ private:
         const std::shared_ptr<NativeReference> &onRequestSuccRef,
         const std::shared_ptr<NativeReference> &onRequestFailRef);
 
+    // Helper methods for TerminateSelf in different modes
+    napi_value HandleTerminateSelfInEmbeddableMode(napi_env env, napi_value lastParam,
+        const std::shared_ptr<AbilityRuntime::Context>& context);
+    napi_value HandleTerminateSelfInNonEmbeddableMode(napi_env env, napi_value lastParam);
+
     // Helper methods for TerminateSelfWithResult in different modes
-    napi_value HandleTerminateSelfWithResultInEmbeddedMode(napi_env env, napi_value lastParam,
+    napi_value HandleTerminateSelfWithResultInEmbeddableMode(napi_env env, napi_value lastParam,
         const std::shared_ptr<AbilityRuntime::Context>& context, int32_t resultCode, const AAFwk::Want& want);
-    napi_value HandleTerminateSelfWithResultInNonEmbeddedMode(napi_env env, napi_value lastParam,
+    napi_value HandleTerminateSelfWithResultInNonEmbeddableMode(napi_env env, napi_value lastParam,
         int32_t resultCode, AAFwk::Want& want);
 
 #ifdef SUPPORT_SCREEN

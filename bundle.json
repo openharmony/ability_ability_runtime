@@ -116,7 +116,8 @@
             "webview",
             "window_manager",
             "zlib",
-            "hiperf"
+            "hiperf",
+            "hiprofiler"
   ],
           "third_party": [
             "libjpeg-turbo"
@@ -126,6 +127,10 @@
         "sub_component": [
           "//foundation/ability/ability_runtime/agent_runtime_framework/interfaces/inner_api:agent_fwk",
           "//foundation/ability/ability_runtime/agent_runtime_framework/services:agent_services_target",
+          "//foundation/ability/ability_runtime/cli_tool_framework/interfaces/cli_tool:cli_tool_client",
+          "//foundation/ability/ability_runtime/cli_tool_framework/services/climgr:climgr",
+          "//foundation/ability/ability_runtime/cli_tool_framework/etc/profile:aimgr_cfg",
+          "//foundation/ability/ability_runtime/cli_tool_framework/etc/profile:aimgr_trust",
           "//foundation/ability/ability_runtime/services:ams_target",
           "//foundation/ability/ability_runtime/services/sa_profile:ams_sa_profile",
           "//foundation/ability/ability_runtime/services/quickfixmgr:quick_fix.cfg",

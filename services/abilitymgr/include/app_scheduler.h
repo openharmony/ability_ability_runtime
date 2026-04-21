@@ -274,7 +274,7 @@ public:
      *
      * @param token, the token of ability.
      */
-    void MoveToBackground(const sptr<IRemoteObject> &token);
+    void MoveToBackground(const sptr<IRemoteObject> &token, bool isFromScreenOffBackground = false);
 
     /**
      * Update ability state.
@@ -300,6 +300,15 @@ public:
      * @param token, the unique identification to the ability.
      */
     void KillProcessByAbilityToken(const sptr<IRemoteObject> &token);
+
+    /**
+     * SetGameSAPrelaunch, set game SA prelaunch flag through proxy object.
+     *
+     * @param token, the unique identification to the ability.
+     * @param isGameSAPrelaunch, the game SA prelaunch flag to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch);
 
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,

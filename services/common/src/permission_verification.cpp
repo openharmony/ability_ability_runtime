@@ -205,6 +205,15 @@ bool PermissionVerification::VerifyMissionPermission() const
     return false;
 }
 
+bool PermissionVerification::VerifyContinuationNotifyPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_CONTINUATION_NOTIFY)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    return false;
+}
+
 int PermissionVerification::VerifyAppStateObserverPermission() const
 {
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {

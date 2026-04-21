@@ -55,6 +55,7 @@ constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPid
 constexpr const char* POWER_OFF_ABILITY = "PoweroffAbility";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
 constexpr int32_t LOAD_TASK_TIMEOUT = 60000; // ms
+constexpr int32_t FOUNDATION_UID = 5523;
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -147,7 +148,8 @@ void AmsMgrScheduler::NotifyLoadAbilityFinished(pid_t callingPid, pid_t targetPi
     });
 }
 
-void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
+void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+    bool isFromScreenOffBackground)
 {
     if (!IsReady()) {
         return;
@@ -157,8 +159,9 @@ void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
-    std::function<void()> updateAbilityStateFunc = [amsMgrServiceInner = amsMgrServiceInner_, token, state] () {
-        amsMgrServiceInner->UpdateAbilityState(token, state);
+    std::function<void()> updateAbilityStateFunc = [amsMgrServiceInner = amsMgrServiceInner_, token, state,
+        isFromScreenOffBackground] () {
+        amsMgrServiceInner->UpdateAbilityState(token, state, isFromScreenOffBackground);
     };
     amsHandler_->SubmitTask(updateAbilityStateFunc, AAFwk::TaskAttribute{
         .taskName_ = TASK_UPDATE_ABILITY_STATE,
@@ -234,6 +237,21 @@ void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token
         amsMgrServiceInner->KillProcessByAbilityToken(token);
     };
     amsHandler_->SubmitTask(killProcessByAbilityTokenFunc, TASK_KILL_PROCESS_BY_ABILITY_TOKEN);
+}
+
+int32_t AmsMgrScheduler::SetGameSAPrelaunch(const sptr<IRemoteObject> &token, bool isGameSAPrelaunch)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrScheduler is not ready");
+        return ERR_INVALID_VALUE;
+    }
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetGameSAPrelaunch: not foundation call, uid: %{public}d",
+            IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+
+    return amsMgrServiceInner_->SetGameSAPrelaunch(token, isGameSAPrelaunch);
 }
 
 void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,

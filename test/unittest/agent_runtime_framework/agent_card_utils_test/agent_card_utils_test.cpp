@@ -61,6 +61,14 @@ AppExecFwk::ExtensionAbilityInfo BuildExtensionInfo(AppExecFwk::ExtensionAbility
     info.type = type;
     return info;
 }
+
+AppExecFwk::HapModuleInfo BuildHapModuleInfo(AppExecFwk::ExtensionAbilityType type)
+{
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "testModule";
+    hapModuleInfo.extensionInfos.push_back(BuildExtensionInfo(type));
+    return hapModuleInfo;
+}
 }
 
 class AgentCardUtilsTest : public testing::Test {
@@ -91,13 +99,13 @@ HWTEST_F(AgentCardUtilsTest, ValidateBundleAbility_002, TestSize.Level1)
 
 HWTEST_F(AgentCardUtilsTest, ValidateBundleAbility_003, TestSize.Level1)
 {
-    MyFlag::mockExtensionInfos.push_back(BuildExtensionInfo(AppExecFwk::ExtensionAbilityType::SERVICE));
+    MyFlag::mockHapModuleInfos.push_back(BuildHapModuleInfo(AppExecFwk::ExtensionAbilityType::SERVICE));
     EXPECT_EQ(AgentCardUtils::ValidateBundleAbility("test.bundle", "TestAgent", 100), AAFwk::ERR_WRONG_INTERFACE_CALL);
 }
 
 HWTEST_F(AgentCardUtilsTest, ValidateBundleAbility_004, TestSize.Level1)
 {
-    MyFlag::mockExtensionInfos.push_back(BuildExtensionInfo(AppExecFwk::ExtensionAbilityType::AGENT));
+    MyFlag::mockHapModuleInfos.push_back(BuildHapModuleInfo(AppExecFwk::ExtensionAbilityType::AGENT));
     EXPECT_EQ(AgentCardUtils::ValidateBundleAbility("test.bundle", "TestAgent", 100), ERR_OK);
 }
 
@@ -106,13 +114,29 @@ HWTEST_F(AgentCardUtilsTest, HasRequiredRegisterFields_001, TestSize.Level1)
     AgentCard card;
     EXPECT_FALSE(AgentCardUtils::HasRequiredRegisterFields(card));
     EXPECT_TRUE(AgentCardUtils::HasRequiredRegisterFields(BuildCard("testAgent", "1.0.0")));
+    auto invalidIconCard = BuildCard("invalidIcon", "1.0.0");
+    invalidIconCard.iconUrl.clear();
+    EXPECT_FALSE(AgentCardUtils::HasRequiredRegisterFields(invalidIconCard));
 }
 
 HWTEST_F(AgentCardUtilsTest, ShouldValidateAppInfo_001, TestSize.Level1)
 {
     EXPECT_TRUE(AgentCardUtils::ShouldValidateAppInfo(BuildCard("app", "1.0.0", AgentCardType::APP)));
     EXPECT_TRUE(AgentCardUtils::ShouldValidateAppInfo(BuildCard("lowCode", "1.0.0", AgentCardType::LOW_CODE)));
-    EXPECT_FALSE(AgentCardUtils::ShouldValidateAppInfo(BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE)));
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateAppInfo(BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE)));
+}
+
+HWTEST_F(AgentCardUtilsTest, ShouldValidateBundleAbility_001, TestSize.Level1)
+{
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(BuildCard("app", "1.0.0", AgentCardType::APP), 100));
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("lowCode", "1.0.0", AgentCardType::LOW_CODE), 100));
+    EXPECT_TRUE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE), 100));
+
+    MyFlag::retGetBundleInfo = false;
+    EXPECT_FALSE(AgentCardUtils::ShouldValidateBundleAbility(
+        BuildCard("atomic", "1.0.0", AgentCardType::ATOMIC_SERVICE), 100));
 }
 
 HWTEST_F(AgentCardUtilsTest, ValidateSystemAppRequirement_001, TestSize.Level1)

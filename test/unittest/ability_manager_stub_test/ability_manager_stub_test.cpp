@@ -1352,6 +1352,30 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RequestModalUIExtensionInner
 }
 
 /*
+ * Feature: AbilityManagerStub
+ * Function: RequestModalUIExtensionWithAccountInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub RequestModalUIExtensionWithAccountInner
+ * EnvConditions: NA
+ * CaseDescription: Verify RequestModalUIExtensionWithAccountInner with null Want
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RequestModalUIExtensionWithAccountInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerStub_RequestModalUIExtensionWithAccountInner_001 start");
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write accountId (but no Want)
+    data.WriteInt32(100);
+
+    auto res = stub_->RequestModalUIExtensionWithAccountInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerStub_RequestModalUIExtensionWithAccountInner_001 end");
+}
+
+/*
  * Feature: AbilityManagerService
  * Function: PreloadUIExtensionAbilityInner
  * SubFunction: NA
@@ -4999,6 +5023,165 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByOEExtInner_004
     auto res = stub_->StartAbilityByOEExtInner(data, reply);
     EXPECT_EQ(res, NO_ERROR);
     
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: LaunchGameCustomizedInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub LaunchGameCustomizedInner
+ * EnvConditions: NA
+ * CaseDescription: Verify LaunchGameCustomizedInner with valid parameters
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_LaunchGameCustomizedInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write bundleName
+    data.WriteString("com.test.game");
+
+    // Write userId
+    data.WriteInt32(100);
+
+    // Write appIndex
+    data.WriteInt32(0);
+
+    auto res = stub_->LaunchGameCustomizedInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: NotifyCancelGamePreLaunchInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub NotifyCancelGamePreLaunchInner
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCancelGamePreLaunchInner with null token
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_NotifyCancelGamePreLaunchInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write token flag as false (null token)
+    data.WriteBool(false);
+
+    auto res = stub_->NotifyCancelGamePreLaunchInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: NotifyCancelGamePreLaunchInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub NotifyCancelGamePreLaunchInner
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCancelGamePreLaunchInner with valid token
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_NotifyCancelGamePreLaunchInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write token flag as true
+    data.WriteBool(true);
+
+    // Write valid token
+    sptr<AppExecFwk::MockAbilityToken> token = new (std::nothrow) AppExecFwk::MockAbilityToken();
+    data.WriteRemoteObject(token);
+
+    auto res = stub_->NotifyCancelGamePreLaunchInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: NotifyCompleteGamePreLaunchInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub NotifyCompleteGamePreLaunchInner
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCompleteGamePreLaunchInner with null token
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_NotifyCompleteGamePreLaunchInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write token flag as false (null token)
+    data.WriteBool(false);
+
+    auto res = stub_->NotifyCompleteGamePreLaunchInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: NotifyCompleteGamePreLaunchInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub NotifyCompleteGamePreLaunchInner
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyCompleteGamePreLaunchInner with valid token
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_NotifyCompleteGamePreLaunchInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write token flag as true
+    data.WriteBool(true);
+    // Write valid token
+    sptr<AppExecFwk::MockAbilityToken> token = new (std::nothrow) AppExecFwk::MockAbilityToken();
+    data.WriteRemoteObject(token);
+    auto res = stub_->NotifyCompleteGamePreLaunchInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    // Verify the result was written to reply
+    int32_t result = reply.ReadInt32();
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerStub
+ * Function: SetGamePreLaunchCompleteTimeInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub SetGamePreLaunchCompleteTimeInner
+ * EnvConditions: NA
+ * CaseDescription: Verify SetGamePreLaunchCompleteTimeInner with valid parameters
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_SetGamePreLaunchCompleteTimeInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write userId
+    data.WriteInt32(100);
+
+    // Write completeTime
+    data.WriteInt64(1000);
+
+    auto res = stub_->SetGamePreLaunchCompleteTimeInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+
     // Verify the result was written to reply
     int32_t result = reply.ReadInt32();
     EXPECT_EQ(result, NO_ERROR);
