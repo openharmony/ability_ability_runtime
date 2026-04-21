@@ -226,7 +226,7 @@ class ApplicationContext {
     this.__context_impl__.eventHub = eventHub;
   }
 
-  contextType(contextType) {
+  isContextOf(contextType) {
     if (typeof (contextType) !== 'number') {
       return false;
     }
