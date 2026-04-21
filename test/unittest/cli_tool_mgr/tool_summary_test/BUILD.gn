@@ -14,13 +14,32 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-group("unittest") {
-  testonly = true
-  deps = [
-    "cli_tool_mgr_client_test:cli_tool_mgr_client_test",
-    "cli_tool_mgr_service_test:cli_tool_mgr_service_test",
-    "cli_tool_data_manager_test:cli_tool_data_manager_test",
-    "tool_summary_test:tool_summary_test",
+module_output_path = "ability_runtime/ability_runtime/clitool"
+
+ohos_unittest("tool_summary_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [ "${cli_tool_framework_path}/interfaces/cli_tool/include" ]
+
+  sources = [ "tool_summary_test.cpp" ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-BINDER_IPC_32BIT" ]
+  }
+
+  deps = [ "${cli_tool_framework_path}/interfaces/cli_tool:cli_tool_client" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 }
 
+group("unittest") {
+  testonly = true
+  deps = [ ":tool_summary_test" ]
+}
