@@ -116,7 +116,8 @@
             "webview",
             "window_manager",
             "zlib",
-            "hiperf"
+            "hiperf",
+            "hiprofiler"
   ],
           "third_party": [
             "libjpeg-turbo"
