@@ -219,6 +219,18 @@ public:
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) override;
 
     /**
+     * GetProcessRunningInfosByAccessTokenId, call GetProcessRunningInfosByAccessTokenId()
+     * through proxy project. Obtains information about application processes
+     * that are running on the device by accessTokenId.
+     *
+     * @param accessTokenId, accessTokenId.
+     * @param info, Running process information list.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+        std::vector<RunningProcessInfo> &info) override;
+
+    /**
      * GetProcessRunningInformation, call GetProcessRunningInformation() through proxy project.
      * Obtains information about current application process which is running on the device.
      *

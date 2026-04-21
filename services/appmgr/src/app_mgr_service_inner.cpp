@@ -3952,6 +3952,21 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+    std::vector<RunningProcessInfo> &info)
+{
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (!appRecord || !appRecord->GetSpawned()) {
+            continue;
+        }
+        if (appRecord->GetAccessTokenId() == accessTokenId) {
+            GetRunningProcesses(appRecord, info);
+        }
+    }
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &info)
 {
     if (!appRunningManager_) {
@@ -4153,6 +4168,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.processName_ = appRecord->GetProcessName();
     info.pid_ = appRecord->GetPid();
     info.uid_ = appRecord->GetUid();
+    info.accessTokenId_ = appRecord->GetAccessTokenId();
     info.state_ = static_cast<AppProcessState>(appRecord->GetState());
     info.isContinuousTask = appRecord->IsContinuousTask();
     info.isKeepAlive = appRecord->IsKeepAliveApp();
@@ -9060,12 +9076,6 @@ void AppMgrServiceInner::RecordAppfreezeKillReason(int32_t pid, const FaultData 
     exitReason.killMsg = reason;
     exitReason.innerMsg = reason;
     AbilityManagerClient::GetInstance()->KillAppWithReason(pid, exitReason);
-}
-
-void AppMgrServiceInner::RecordAppWithReason(int32_t pid, int32_t uid, int32_t killId)
-{
-    AAFwk::ExitReasonCompability exitReasonCompability(killId);
-    AbilityManagerClient::GetInstance()->RecordAppWithReason(pid, uid, exitReasonCompability);
 }
 
 void AppMgrServiceInner::RecordAppWithReasonByUserId(int32_t userId, int32_t killId)

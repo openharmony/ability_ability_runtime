@@ -338,6 +338,12 @@ int AppScheduler::GetProcessRunningInfosByUserId(std::vector<AppExecFwk::Running
     return 0;
 }
 
+int AppScheduler::GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+    std::vector<AppExecFwk::RunningProcessInfo> &info)
+{
+    return 0;
+}
+
 std::string AppScheduler::ConvertAppState(const AppState &state)
 {
     return "INVALIDSTATE";
