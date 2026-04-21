@@ -1328,7 +1328,8 @@ int AbilityManagerStub::MinimizeUIAbilityBySCBInner(MessageParcel &data, Message
     }
     bool fromUser = data.ReadBool();
     uint32_t sceneFlag = data.ReadUint32();
-    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
+    int32_t backgroundReason = data.ReadInt32();
+    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag, backgroundReason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
