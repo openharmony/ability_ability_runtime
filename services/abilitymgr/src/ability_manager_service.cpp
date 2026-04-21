@@ -4105,7 +4105,7 @@ int AbilityManagerService::GetDisplayIdByAccount(int32_t accountId, uint64_t &di
     auto permissionResult = VerifyAccountPermission(accountId);
     if (permissionResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission failed, accountId=%{public}d", accountId);
-        return ERR_INVALID_VALUE;
+        return CHECK_PERMISSION_FAILED;
     }
 
     bool foundDisplay = AbilityRuntime::UserController::GetInstance()
