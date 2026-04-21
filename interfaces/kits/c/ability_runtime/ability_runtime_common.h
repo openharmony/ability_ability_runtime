@@ -72,6 +72,21 @@ typedef enum {
      */
     ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE = 16000002,
     /**
+     * @error Cannot start an invisible component.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_VISIBILITY_VERIFICATION_FAILED = 16000004,
+    /**
+     * @error The specified process does not have the permission.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_STATIC_CFG_PERMISSION = 16000005,
+    /**
+     * @error Cross-user operations are not allowed.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_CROSS_USER_OPERATION = 16000006,
+    /**
      * @error The crowdtesting application expires.
      * @since 15
      */
@@ -153,6 +168,26 @@ typedef enum {
      * @since 21
      */
     ABILITY_RUNTIME_ERROR_CODE_MAIN_THREAD_NOT_SUPPORTED = 16000134,
+    /**
+     * @error The target application does not have running abilities with UI.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_NO_RUNNING_ABILITIES_WITH_UI = 16000160,
+    /**
+     * @error The API call frequency is too high and exceeds the rate control limit.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_UPPER_RATE_LIMIT = 16000161,
+    /**
+     * @error The number of connection exceeds limit.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_UPPER_CONNECTION_NUMBER_LIMIT = 16000162,
+    /**
+     * @error The modular object extension is disabled.
+     * @since 26.0.0
+     */
+    ABILITY_RUNTIME_ERROR_CODE_MODULAR_OBJECT_EXTENSION_DISABLED = 16000163,
 } AbilityRuntime_ErrorCode;
 
 #ifdef __cplusplus
