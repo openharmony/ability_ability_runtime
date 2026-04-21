@@ -63,6 +63,7 @@ constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension"
 constexpr static char ASSET_ACCELERATION_EXTENSION[] = "AssetAccelerationExtension";
 constexpr static char SELECTION_EXTENSION[] = "SelectionExtensionAbility";
 constexpr static char CONTENT_EMBED_EXTENSION[] = "ContentEmbedExtension";
+constexpr static char MODULAR_OBJECT_EXTENSION[] = "ModularObjectExtension";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -183,6 +184,8 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
 #endif // SUPPORT_GRAPHICS
     else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CONTENT_EMBED) {
         abilityName = CONTENT_EMBED_EXTENSION;
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::MODULAR_OBJECT) {
+        abilityName = MODULAR_OBJECT_EXTENSION;
     }
 }
 
