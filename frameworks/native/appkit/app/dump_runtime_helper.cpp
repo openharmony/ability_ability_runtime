@@ -349,6 +349,9 @@ void DumpRuntimeHelper::DumpMem(const OHOS::AppExecFwk::MemDumpInfo &info, std::
     if (info.dumpType == MemDumpType::KMP_KOTLIN) {
         DumpKmpKotlinHeap(info);
     }
+    if (info.dumpType == MemDumpType::JSVM) {
+        DumpJsvmHeap(info);
+    }
 }
 
 void DumpRuntimeHelper::DumpNativeHeap(const OHOS::AppExecFwk::MemDumpInfo &info, std::string &dumpResult)
@@ -451,6 +454,11 @@ void DumpRuntimeHelper::DumpKmpKotlinHeap(const OHOS::AppExecFwk::MemDumpInfo &i
         return;
     }
     close(fd);
+}
+
+void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
+{
+    TAG_LOGE(AAFwkTag::APPKIT, "DumpJsvmHeap DumpJsvmHeap");
 }
 
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
