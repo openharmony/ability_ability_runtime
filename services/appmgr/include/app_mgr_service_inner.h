@@ -2139,6 +2139,8 @@ private:
 
     void AppRecoveryNotifyApp(int32_t pid, const std::string& bundleName,
         FaultDataType faultType, const std::string& markers, int32_t recordId);
+    
+    void RecordAppRecoveryNotifyAppReason(int32_t pid);
 
     void ProcessAppDebug(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
     AppDebugInfo MakeAppDebugInfo(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
