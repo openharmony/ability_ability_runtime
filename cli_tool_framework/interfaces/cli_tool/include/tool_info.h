@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 #define OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 
+#include "tool_summary.h"
+
 #include <iremote_broker.h>
 #include <iremote_object.h>
 #include <map>
@@ -53,22 +55,6 @@ public:
         }
         return rawdata;
     }
-};
-
-/**
- * @brief Tool summary information (lightweight for listing)
- */
-class ToolSummary : public Parcelable {
-public:
-    std::string name;
-    std::string version;
-    std::string description;
-
-    ToolSummary() = default;
-    ~ToolSummary() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static ToolSummary *Unmarshalling(Parcel &parcel);
 };
 
 /**
