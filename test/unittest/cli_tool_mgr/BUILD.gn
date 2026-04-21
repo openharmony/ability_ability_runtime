@@ -19,6 +19,7 @@ group("unittest") {
   deps = [
     "cli_tool_mgr_client_test:cli_tool_mgr_client_test",
     "cli_tool_mgr_service_test:cli_tool_mgr_service_test",
+    "cli_tool_data_manager_test:cli_tool_data_manager_test",
   ]
 }
 

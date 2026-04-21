@@ -49,10 +49,41 @@ void CliToolManagerService::OnStart()
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Publish failed");
         return;
     }
+
+    int32_t ret = CliToolDataManager::GetInstance().EnsureToolsLoaded();
+    if (ret != 0) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Failed to load: %{public}d", ret);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Successfully loaded");
+    }
 }
 
 void CliToolManagerService::OnStop()
 {
+}
+
+int32_t CliToolManagerService::QueryTools(std::vector<ToolInfo> &tools)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "QueryTools called");
+    return CliToolDataManager::GetInstance().GetAllTools(tools);
+}
+
+int32_t CliToolManagerService::QueryToolSummaries(std::vector<ToolSummary> &summaries)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "QueryToolSummaries called");
+    return CliToolDataManager::GetInstance().QueryToolSummaries(summaries);
+}
+
+int32_t CliToolManagerService::GetToolInfoByName(const std::string &name, ToolInfo &tool)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "GetToolInfoByName called, name='%{public}s'", name.c_str());
+    return CliToolDataManager::GetInstance().GetToolByName(name, tool);
+}
+
+int32_t CliToolManagerService::RegisterCliTool(const ToolInfo &tool)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "RegisterCliTool called, tool name='%{public}s'", tool.name.c_str());
+    return CliToolDataManager::GetInstance().RegisterTool(tool);
 }
 } // namespace CliTool
 } // namespace OHOS
