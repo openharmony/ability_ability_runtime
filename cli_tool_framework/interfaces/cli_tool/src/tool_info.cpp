@@ -17,30 +17,6 @@
 
 namespace OHOS {
 namespace CliTool {
-// ToolSummary implementation
-bool ToolSummary::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteString(name) &&
-           parcel.WriteString(version) &&
-           parcel.WriteString(description);
-}
-
-ToolSummary *ToolSummary::Unmarshalling(Parcel &parcel)
-{
-    auto *summary = new (std::nothrow) ToolSummary();
-    if (summary == nullptr) {
-        return nullptr;
-    }
-
-    if (!parcel.ReadString(summary->name) ||
-        !parcel.ReadString(summary->version) ||
-        !parcel.ReadString(summary->description)) {
-        delete summary;
-        return nullptr;
-    }
-
-    return summary;
-}
 
 // ToolInfo implementation
 bool ToolInfo::Marshalling(Parcel &parcel) const
