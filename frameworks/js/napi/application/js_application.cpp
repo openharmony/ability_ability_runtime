@@ -713,55 +713,6 @@ napi_value JsApplication::OnGetAppPreloadType(napi_env env, NapiCallbackInfo& in
     return handleEscape.Escape(CreateJsValue(env, appPreloadType));
 }
 
-napi_value JsApplication::GetUIAbilityByInstanceId(napi_env env, napi_callback_info info)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "GetUIAbilityByInstanceId");
-    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnGetUIAbilityByInstanceId);
-}
-
-napi_value JsApplication::OnGetUIAbilityByInstanceId(napi_env env, NapiCallbackInfo& info)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "OnGetUIAbilityByInstanceId");
-    auto applicationContext = ApplicationContext::GetInstance();
-    if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-        return CreateJsUndefined(env);
-    }
-
-    if (info.argc == 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not enough arguments");
-        ThrowInvalidParamError(env, "Not enough params.");
-        return CreateJsUndefined(env);
-    }
-
-    std::string instanceId;
-    if (!ConvertFromJsValue(env, info.argv[0], instanceId)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Parse instanceId failed");
-        ThrowInvalidParamError(env, "Parse param instanceId failed, instanceId must be string.");
-        return CreateJsUndefined(env);
-    }
-
-    // Get NativeAbilityWrapper from ApplicationContext
-    auto nativeAbility = applicationContext->GetNativeAbility(instanceId);
-    if (nativeAbility == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "NativeAbility not found for instanceId: %{public}s", instanceId.c_str());
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID);
-        return CreateJsUndefined(env);
-    }
-
-    // Return the jsAbilityObj from NativeAbilityWrapper
-    if (nativeAbility->jsAbilityObj == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "jsAbilityObj is null for instanceId: %{public}s", instanceId.c_str());
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID);
-        return CreateJsUndefined(env);
-    }
-
-    napi_value result = nativeAbility->jsAbilityObj;
-    TAG_LOGD(AAFwkTag::APPKIT, "Get UIAbility for instanceId: %{public}s", instanceId.c_str());
-    return result;
-}
-
 napi_value ApplicationInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
@@ -805,9 +756,6 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 
     BindNativeFunction(env, exportObj, "getAppPreloadType", moduleName,
         JsApplication::GetAppPreloadType);
-
-    BindNativeFunction(env, exportObj, "getUIAbilityByInstanceId", moduleName,
-        JsApplication::GetUIAbilityByInstanceId);
 
     return CreateJsUndefined(env);
 }

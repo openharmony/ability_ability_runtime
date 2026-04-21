@@ -370,13 +370,13 @@ HWTEST_F(UIAbilityRecordTest, CreateAbilityRecord_NativeStateTransition_0100, Te
 
 /**
  * @tc.name: CreateAbilityRecord_NativeDisabled_0100
- * @tc.desc: Simulates IsSupportNativeAbility=false via mock: state remains NONE,
+ * @tc.desc: Simulates IsSupportNativeUIAbility=false via mock: state remains NONE,
  *           SetNativeState still works independently.
  * @tc.type: FUNC
  */
 HWTEST_F(UIAbilityRecordTest, CreateAbilityRecord_NativeDisabled_0100, TestSize.Level1)
 {
-    // Simulate IsSupportNativeAbility=false: InitData sets withNativeModule=false
+    // Simulate IsSupportNativeUIAbility=false: InitData sets withNativeModule=false
     NativeAbilityMetaData::SetMockInitData(false);
 
     AbilityRequest abilityRequest;

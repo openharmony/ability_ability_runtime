@@ -75,15 +75,19 @@ std::string GenerateInstanceId()
     high = (high & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
     low = (low & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
     std::ostringstream oss;
-    oss << std::hex << std::setfill('0')
-        << std::setw(4) << ((high >> 48) & 0xFFFF) << "-"
-        << std::setw(4) << ((high >> 32) & 0xFFFF) << "-"
-        << std::setw(4) << ((high >> 16) & 0xFFFF) << "-"
-        << std::setw(4) << (high & 0xFFFF) << "-"
-        << std::setw(4) << ((low >> 48) & 0xFFFF)
-        << std::setw(4) << ((low >> 32) & 0xFFFF)
-        << std::setw(4) << ((low >> 16) & 0xFFFF)
-        << std::setw(4) << (low & 0xFFFF);
+    constexpr int32_t digSize = 4;
+    constexpr uint8_t bitMoveSize1 = 48;
+    constexpr uint8_t bitMoveSize2 = 32;
+    constexpr uint8_t bitMoveSize3 = 16;
+    oss << std::hex << std::setfill('0') <<
+        std::setw(digSize) << ((high >> bitMoveSize1) & 0xFFFF) << "-" <<
+        std::setw(digSize) << ((high >> bitMoveSize2) & 0xFFFF) << "-" <<
+        std::setw(digSize) << ((high >> bitMoveSize3) & 0xFFFF) << "-" <<
+        std::setw(digSize) << (high & 0xFFFF) << "-" <<
+        std::setw(digSize) << ((low >> bitMoveSize1) & 0xFFFF) <<
+        std::setw(digSize) << ((low >> bitMoveSize2) & 0xFFFF) <<
+        std::setw(digSize) << ((low >> bitMoveSize3) & 0xFFFF) <<
+        std::setw(digSize) << (low & 0xFFFF);
     return oss.str();
 }
 #ifdef SUPPORT_SCREEN

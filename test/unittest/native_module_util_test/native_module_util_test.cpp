@@ -596,16 +596,16 @@ HWTEST_F(NativeModuleUtilTest, InitData_2900, TestSize.Level1)
     EXPECT_EQ(data.startupPhase, StartupPhase::PRE_WINDOW);
 }
 
-// ==================== InitData IsSupportNativeAbility Gate ====================
+// ==================== InitData IsSupportNativeUIAbility Gate ====================
 
 /**
  * @tc.number: InitData_3000
  * @tc.name: NativeAbilityMetaData::InitData
- * @tc.desc: IsSupportNativeAbility disabled, all metadata should be ignored, defaults returned
+ * @tc.desc: IsSupportNativeUIAbility disabled, all metadata should be ignored, defaults returned
  */
 HWTEST_F(NativeModuleUtilTest, InitData_3000, TestSize.Level1)
 {
-    AppUtils::SetSupportNativeAbility(false);
+    AppUtils::SetSupportNativeUIAbility(false);
 
     AddMetadata("ohos.ability.withNativeModule", "true");
     AddMetadata("ohos.ability.startupPhase", "foreground");
@@ -620,17 +620,17 @@ HWTEST_F(NativeModuleUtilTest, InitData_3000, TestSize.Level1)
     EXPECT_TRUE(data.nativeModuleSource.empty());
     EXPECT_TRUE(data.nativeModuleFunc.empty());
 
-    AppUtils::SetSupportNativeAbility(true);
+    AppUtils::SetSupportNativeUIAbility(true);
 }
 
 /**
  * @tc.number: InitData_3100
  * @tc.name: NativeAbilityMetaData::InitData
- * @tc.desc: IsSupportNativeAbility disabled, pre-initialized data should be reset to defaults
+ * @tc.desc: IsSupportNativeUIAbility disabled, pre-initialized data should be reset to defaults
  */
 HWTEST_F(NativeModuleUtilTest, InitData_3100, TestSize.Level1)
 {
-    AppUtils::SetSupportNativeAbility(false);
+    AppUtils::SetSupportNativeUIAbility(false);
 
     NativeAbilityMetaData data;
     data.withNativeModule = true;
@@ -645,7 +645,7 @@ HWTEST_F(NativeModuleUtilTest, InitData_3100, TestSize.Level1)
     EXPECT_TRUE(data.nativeModuleSource.empty());
     EXPECT_TRUE(data.nativeModuleFunc.empty());
 
-    AppUtils::SetSupportNativeAbility(true);
+    AppUtils::SetSupportNativeUIAbility(true);
 }
 
 // ==================== HideWindowOnStartup ====================

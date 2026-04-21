@@ -99,7 +99,7 @@ void NativeAbilityMetaData::InitData(
     data.startupPhase = StartupPhase::PRE_WINDOW;
     data.nativeModuleSource.clear();
     data.nativeModuleFunc.clear();
-    if (!AppUtils::GetInstance().IsSupportNativeAbility()) {
+    if (!AppUtils::GetInstance().IsSupportNativeUIAbility()) {
         return;
     }
 

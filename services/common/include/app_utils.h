@@ -372,11 +372,11 @@ public:
     bool IsHybridSpawnUnified();
 
     /**
-     * IsSupportNativeAbility, check if it supports native ability.
+     * IsSupportNativeUIAbility, check if it supports native UI ability.
      *
-     * @return Whether it supports native ability.
+     * @return Whether it supports native UI ability.
      */
-    bool IsSupportNativeAbility();
+    bool IsSupportNativeUIAbility();
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -468,7 +468,7 @@ private:
     volatile DeviceConfiguration<bool> isSupportModularObjectExtension_ = {false, false};
     volatile DeviceConfiguration<bool> isProductAppbootSettingEnabled_ = {false, false};
     volatile DeviceConfiguration<bool> isHybridSpawnUnified_ = {false, false};
-    volatile DeviceConfiguration<bool> isSupportNativeAbility_ = {false, false};
+    volatile DeviceConfiguration<bool> isSupportNativeUIAbility_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;

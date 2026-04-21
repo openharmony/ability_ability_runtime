@@ -17,7 +17,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-bool AppUtils::isSupportNativeAbility_ = true;
+bool AppUtils::isSupportNativeUIAbility_ = true;
 
 AppUtils::~AppUtils() {}
 
@@ -29,14 +29,14 @@ AppUtils &AppUtils::GetInstance()
     return utils;
 }
 
-bool AppUtils::IsSupportNativeAbility()
+bool AppUtils::IsSupportNativeUIAbility()
 {
-    return isSupportNativeAbility_;
+    return isSupportNativeUIAbility_;
 }
 
-void AppUtils::SetSupportNativeAbility(bool value)
+void AppUtils::SetSupportNativeUIAbility(bool value)
 {
-    isSupportNativeAbility_ = value;
+    isSupportNativeUIAbility_ = value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

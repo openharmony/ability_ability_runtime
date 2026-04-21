@@ -25,13 +25,13 @@ public:
     static AppUtils &GetInstance();
     ~AppUtils();
 
-    bool IsSupportNativeAbility();
+    bool IsSupportNativeUIAbility();
 
-    static void SetSupportNativeAbility(bool value);
+    static void SetSupportNativeUIAbility(bool value);
 
 private:
     AppUtils();
-    static bool isSupportNativeAbility_;
+    static bool isSupportNativeUIAbility_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
