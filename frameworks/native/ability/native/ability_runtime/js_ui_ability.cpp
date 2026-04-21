@@ -1045,7 +1045,7 @@ void JsUIAbility::OnDidForeground()
         bool isGamePreLaunch = (goResumeCalledFlag_ == 0) ? isGamePreLaunch_ : false;
         scene_->GoResume(isGamePreLaunch);
         if (isGamePreLaunch) {
-            scene_->GoPause();
+            scene_->GoPause(isGamePreLaunch);
         }
         goResumeCalledFlag_ = 1;
         isGamePreLaunch_ = false;

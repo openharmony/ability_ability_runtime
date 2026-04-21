@@ -202,13 +202,14 @@ AppMgrResultCode AppMgrClient::TerminateAbility(const sptr<IRemoteObject> &token
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
+AppMgrResultCode AppMgrClient::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state,
+    bool isFromScreenOffBackground)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->UpdateAbilityState(token, state);
+            amsService->UpdateAbilityState(token, state, isFromScreenOffBackground);
             return AppMgrResultCode::RESULT_OK;
         }
     }

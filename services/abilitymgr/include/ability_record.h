@@ -586,6 +586,8 @@ public:
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
     void SetSceneFlag(uint32_t sceneFlag);
+    void SetIsFromScreenOffBackground(bool isFromScreenOffBackground);
+    bool IsFromScreenOffBackground() const;
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
     bool IsClearMissionFlag();
@@ -595,6 +597,7 @@ public:
     void SetWindowMode(int32_t windowMode);
     void RemoveWindowMode();
     LifeCycleStateInfo lifeCycleStateInfo_;                // target life state info
+    bool isFromScreenOffBackground_ = false;              // mark if background caused by screen off
 
     bool CanRestartRootLauncher();
 

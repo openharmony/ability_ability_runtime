@@ -161,9 +161,11 @@ public:
      *
      * @param abilityRecord, the ability to minimize.
      * @param fromUser, Whether form user.
+     * @param backgroundReason The reason for moving to background (3: screen off).
      * @return Returns ERR_OK on success, others on failure.
      */
-    int MinimizeUIAbility(const UIAbilityRecordPtr &abilityRecord, bool fromUser, uint32_t sceneFlag);
+    int MinimizeUIAbility(const UIAbilityRecordPtr &abilityRecord, bool fromUser, uint32_t sceneFlag,
+        int32_t backgroundReason = 0);
 
     /**
      * GetUIAbilityRecordBySessionInfo.

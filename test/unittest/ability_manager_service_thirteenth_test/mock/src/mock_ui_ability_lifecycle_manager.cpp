@@ -242,7 +242,7 @@ int32_t UIAbilityLifecycleManager::NotifyCompleteGamePreLaunch(const sptr<IRemot
 }
 
 int UIAbilityLifecycleManager::MinimizeUIAbility(const UIAbilityRecordPtr &abilityRecord, bool fromUser,
-    uint32_t sceneFlag)
+    uint32_t sceneFlag, int32_t backgroundReason)
 {
     return ERR_OK;
 }
