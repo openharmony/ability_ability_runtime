@@ -3857,6 +3857,7 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         int32_t pid = 0;
         bool supportWarmSmartGC = false;
         int32_t preloadMode = -1;
+        bool isSuggestCache = false;
         if (gamePrelaunchFlag) {
             preloadMode = static_cast<int32_t>(AppExecFwk::PreloadMode::GAME_PRELAUNCH);
         }
@@ -3870,7 +3871,7 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
                 if (info.preloadMode_ != AppExecFwk::PreloadMode::GAME_PRELAUNCH) {
                     preloadMode = static_cast<int32_t>(info.preloadMode_);
                 }
-                bool isSuggestCache = info.isCached;
+                isSuggestCache = info.isCached;
                 bool supportWarmSmartGC = (isSuggestCache ||
                     info.preloadMode_ == AppExecFwk::PreloadMode::PRE_MAKE ||
                     info.preloadMode_ == AppExecFwk::PreloadMode::PRELOAD_MODULE);
@@ -3880,7 +3881,8 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
             }
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS,  start type: %{public}d", preloadMode);
-        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, supportWarmSmartGC, preloadMode);
+        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, supportWarmSmartGC,
+            preloadMode, isSuggestCache);
     }
 }
 
