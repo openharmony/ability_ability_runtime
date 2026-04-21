@@ -7820,24 +7820,43 @@ void AppMgrServiceInner::SubmitDestroyImageTask(const std::shared_ptr<AppRunning
     const int32_t reason, const std::string &exitMsg)
 {
     if (taskHandler_ == nullptr || appRecord == nullptr) {
-        return;
-    }
-    if (reason != static_cast<int>(OHOS::AAFwk::Reason::REASON_JS_ERROR) &&
-        reason != static_cast<int>(OHOS::AAFwk::Reason::REASON_APP_FREEZE)) {
+        TAG_LOGD(AAFwkTag::APPMGR, "submit DestroyImageTask invalid args.");
         return;
     }
     const std::string& bundleName = appRecord->GetBundleName();
     const int32_t userId = appRecord->GetUserId();
     const int32_t appIndex = appRecord->GetAppIndex();
     if (!IsImageInfoExist(bundleName, userId, appIndex)) {
+        TAG_LOGD(AAFwkTag::APPMGR, "submit DestroyImageTask image not exist.");
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "submit DestroyImageTask, %{public}s_%{public}d_%{public}d, reason=%{public}d "
+    TAG_LOGI(AAFwkTag::APPMGR, "submit DestroyImageTask, %{public}s_%{public}d_%{public}d, reason=%{public}d "
             "exitMsg=%{public}s", bundleName.c_str(), userId, appIndex, reason, exitMsg.c_str());
     auto task = [bundleName, userId, appIndex, innerService = shared_from_this()]() {
         innerService->DestroyImageForFault(bundleName, userId, appIndex);
     };
     taskHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+}
+
+void AppMgrServiceInner::DestroyImageForAppExit(const std::shared_ptr<AppRunningRecord> appRecord,
+    const int32_t reason, const std::string &exitMsg)
+{
+    if (reason != static_cast<int>(OHOS::AAFwk::Reason::REASON_JS_ERROR) &&
+        reason != static_cast<int>(OHOS::AAFwk::Reason::REASON_APP_FREEZE) &&
+        reason != static_cast<int>(OHOS::AAFwk::Reason::REASON_CPP_CRASH)) {
+        return;
+    }
+    SubmitDestroyImageTask(appRecord, reason, exitMsg);
+}
+
+void AppMgrServiceInner::DestroyImageForAppExitCompatibility(const std::shared_ptr<AppRunningRecord> appRecord,
+    const int32_t killId, const std::string &exitMsg)
+{
+    if (killId < static_cast<int>(OHOS::HiviewDFX::ProcessKillReason::KillEventId::REASON_THREAD_BLOCK_6S) ||
+        killId > static_cast<int>(OHOS::HiviewDFX::ProcessKillReason::KillEventId::REASON_CPP_CRASH)) {
+        return;
+    }
+    SubmitDestroyImageTask(appRecord, killId, exitMsg);
 }
 
 int32_t AppMgrServiceInner::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
@@ -7854,7 +7873,7 @@ int32_t AppMgrServiceInner::NotifyAppMgrRecordExitReason(int32_t pid, int32_t re
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord for pid:%{public}d", pid);
         return ERR_NAME_NOT_FOUND;
     }
-    SubmitDestroyImageTask(appRecord, reason, exitMsg);
+    DestroyImageForAppExit(appRecord, reason, exitMsg);
     appRecord->SetExitReason(reason);
     appRecord->SetExitMsg(exitMsg);
     appRecord->SetReasonExist(true);
@@ -7876,6 +7895,7 @@ int32_t AppMgrServiceInner::NotifyAppMgrRecordExitReasonCompability(
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord for pid:%{public}d", pid);
         return ERR_NAME_NOT_FOUND;
     }
+    DestroyImageForAppExitCompatibility(appRecord, killId, innerMsg);
     appRecord->SetKillId(killId);
     appRecord->SetKillMsg(killMsg);
     appRecord->SetInnerMsg(innerMsg);
