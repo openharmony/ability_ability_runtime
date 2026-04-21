@@ -320,6 +320,10 @@ constexpr const char* MAKE_IMAGE_TIMEOUT_EVENT = "MakeImageTimeout";
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
 constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
 
+// AppRecovery notify app over limit
+constexpr int32_t APPRECOVERY_NOTIFYAPP_OVER_LIMIT_ID = 3041;
+constexpr const char* REASON_APPRECOVERY_NOTIFYAPP_OVER_LIMIT = "AppRecoveryNotifyAppOverLimit";
+
 #define CHECKPOINT_IOCTL_KILL_ALL                _IOR(0xE0, 0x4, int)
 #define CHECKPOINT_MONITOR_IOCTL_MARK_TEMPLATE   _IOR(0xE0, 0x7, struct HMCheckpointMarkS)
 #define CHECKPOINT_MONITOR_IOCTL_UNMARK_TEMPLATE _IOR(0xE0, 0x8, struct HMCheckpointUnMarkS)
@@ -8814,6 +8818,19 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
     return appRunningManager_->NotifyUnLoadRepairPatch(bundleName, callback);
 }
 
+void AppMgrServiceInner::RecordAppRecoveryNotifyAppReason(int32_t pid)
+{
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord for pid:%{public}d", pid);
+        return;
+    }
+    appRecord->SetKillId(APPRECOVERY_NOTIFYAPP_OVER_LIMIT_ID);
+    appRecord->SetKillMsg(REASON_APPRECOVERY_NOTIFYAPP_OVER_LIMIT);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "AppRecoveryNotifyApp Reason pid=%{public}d, killId=%{public}d, innerMsg=%{public}s",
+        pid, APPRECOVERY_NOTIFYAPP_OVER_LIMIT_ID, REASON_APPRECOVERY_NOTIFYAPP_OVER_LIMIT);
+}
+
 void AppMgrServiceInner::AppRecoveryNotifyApp(int32_t pid, const std::string& bundleName,
     FaultDataType faultType, const std::string& markers, int32_t recordId)
 {
@@ -8821,6 +8838,7 @@ void AppMgrServiceInner::AppRecoveryNotifyApp(int32_t pid, const std::string& bu
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill appRecovery NotifyApp bundleName: %{public}s, faultType: "
             "%{public}d, pid: %{public}d", bundleName.c_str(), faultType, pid);
+        RecordAppRecoveryNotifyAppReason(pid);
         KillProcessByPid(pid, "AppRecoveryNotifyApp");
         return;
     }
@@ -8848,6 +8866,7 @@ void AppMgrServiceInner::AppRecoveryNotifyApp(int32_t pid, const std::string& bu
             TAG_LOGI(AAFwkTag::APPMGR,
                 "waitSaveTask timeout %{public}s,pid: %{public}d will exit",
                 bundleName.c_str(), pid);
+            innerService->RecordAppRecoveryNotifyAppReason(pid);
             innerService->KillProcessByPid(pid, "AppRecoveryNotifyApp", false, recordId);
         }
     };
