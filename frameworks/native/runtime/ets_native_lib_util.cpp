@@ -53,6 +53,11 @@ void GetEtsHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, b
     TAG_LOGD(
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
+    for (const auto &dir : hapInfo.librarySupportDirectory) {
+        std::string supportLibPath = libPath + "/" + dir;
+        TAG_LOGD(AAFwkTag::APPKIT, "supportLibPath: %{public}s", supportLibPath.c_str());
+        appLibPaths[appLibPathKey].emplace_back(supportLibPath);
+    }
 
     std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
     abcPathsToBundleModuleNameMap[appLibAbcPathKey] = appLibPathKey;
@@ -123,6 +128,11 @@ void GetEtsPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNa
     TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(),
         patchLibPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(patchLibPath);
+    for (const auto &dir : hapInfo.librarySupportDirectory) {
+        std::string supportLibPath = patchLibPath + "/" + dir;
+        TAG_LOGD(AAFwkTag::APPKIT, "supportLibPath: %{public}s", supportLibPath.c_str());
+        appLibPaths[appLibPathKey].emplace_back(supportLibPath);
+    }
     std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
     abcPathsToBundleModuleNameMap[appLibAbcPathKey] = appLibPathKey;
 }
