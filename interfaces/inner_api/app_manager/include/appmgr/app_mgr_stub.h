@@ -76,6 +76,7 @@ private:
     int32_t HandleGetAllRunningProcesses(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningProcessesByBundleType(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetProcessRunningInfosByAccessTokenId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePreloadModuleFinished(MessageParcel &data, MessageParcel &reply);

@@ -208,6 +208,14 @@ int32_t AppRunningRecord::GetUid() const
     return mainUid_;
 }
 
+uint32_t AppRunningRecord::GetAccessTokenId() const
+{
+    if (appInfo_ != nullptr) {
+        return appInfo_->accessTokenId;
+    }
+    return 0;
+}
+
 void AppRunningRecord::SetUid(const int32_t uid)
 {
     mainUid_ = uid;
