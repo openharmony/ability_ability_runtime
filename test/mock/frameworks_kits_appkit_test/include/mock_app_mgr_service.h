@@ -45,6 +45,8 @@ public:
     MOCK_METHOD1(NotifyProcMemoryLevel, int32_t(const std::map<pid_t, MemoryLevel> &procLevelMap));
     MOCK_METHOD2(DumpHeapMemory, int(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, int(std::vector<RunningProcessInfo>& info, int32_t userId));
+    MOCK_METHOD2(GetProcessRunningInfosByAccessTokenId, int32_t(uint32_t accessTokenId,
+        std::vector<RunningProcessInfo>& info));
     MOCK_METHOD4(StartUserTestProcess, int(const AAFwk::Want& want, const sptr<IRemoteObject>& observer,
         const BundleInfo& bundleInfo, int32_t userId));
     MOCK_METHOD3(FinishUserTest, int(const std::string& msg, const int64_t& resultCode,

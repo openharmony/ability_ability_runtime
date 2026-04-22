@@ -510,6 +510,13 @@ int AppScheduler::GetProcessRunningInfosByUserId(std::vector<AppExecFwk::Running
     return static_cast<int>(appMgrClient_->GetProcessRunningInfosByUserId(info, userId));
 }
 
+int AppScheduler::GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+    std::vector<AppExecFwk::RunningProcessInfo> &info)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    return static_cast<int>(appMgrClient_->GetProcessRunningInfosByAccessTokenId(accessTokenId, info));
+}
+
 std::string AppScheduler::ConvertAppState(const AppState &state)
 {
     return StateUtils::AppStateToStrMap(state);

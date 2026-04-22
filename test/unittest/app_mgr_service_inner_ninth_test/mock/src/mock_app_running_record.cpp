@@ -1178,6 +1178,11 @@ void AppRunningRecord::SetAssignTokenId(int32_t assignTokenId)
     assignTokenId_ = assignTokenId;
 }
 
+uint32_t AppRunningRecord::GetAccessTokenId() const
+{
+    return 0;
+}
+
 void AppRunningRecord::SetRestartAppFlag(bool isRestartApp)
 {
     isRestartApp_ = isRestartApp;
