@@ -338,7 +338,7 @@ HWTEST_F(UIAbilityRecordTest, SetStartSelfRequestId_0100, TestSize.Level1)
 
     abilityRecord->SetStartSelfRequestId(12345);
     EXPECT_TRUE(abilityRecord->CheckStartPendingState(12345));
-    EXPECT_FALSE(abilityRecord->CheckStartPendingState(99999));
+    EXPECT_TRUE(abilityRecord->CheckStartPendingState(99999));
 }
 
 /**

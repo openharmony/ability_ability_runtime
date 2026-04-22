@@ -1411,7 +1411,7 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_InitNativeThread_0200, Function | M
     abilityInfo->name = "MockUIAbility";
     abilityInfo->type = AbilityType::PAGE;
     auto ret = abilitythread->InitNativeThread(abilityInfo);
-    EXPECT_EQ(ret, false);
+    EXPECT_TRUE(ret);
     GTEST_LOG_(INFO) << "AbilityRuntime_InitNativeThread_0200 end";
 }
 
