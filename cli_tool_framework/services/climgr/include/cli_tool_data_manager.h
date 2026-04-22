@@ -102,13 +102,6 @@ public:
     int32_t JsonToToolInfo(const std::string &jsonStr, ToolInfo &tool);
 
     /**
-     * @brief Convert vector to JSON array string
-     * @param tools Input ToolInfo vector
-     * @return std::string JSON array string
-     */
-    std::string ToolsToJsonArray(const std::vector<ToolInfo> &tools);
-
-    /**
      * @brief Convert JSON array string to ToolInfo vector
      * @param jsonStr Input JSON array string
      * @param tools Output ToolInfo vector
