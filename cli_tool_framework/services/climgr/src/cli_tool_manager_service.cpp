@@ -52,9 +52,9 @@ void CliToolManagerService::OnStart()
 
     int32_t ret = CliToolDataManager::GetInstance().EnsureToolsLoaded();
     if (ret != 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "Failed to load: %{public}d", ret);
+        TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to load: %{public}d", ret);
     } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Successfully loaded");
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "Successfully loaded");
     }
 }
 
