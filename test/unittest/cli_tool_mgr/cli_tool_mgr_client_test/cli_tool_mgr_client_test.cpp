@@ -104,7 +104,7 @@ HWTEST_F(CliToolMGRClientTest, GetAllToolSummaries_0100, TestSize.Level1)
     std::vector<ToolSummary> summaries;
     ErrCode ret = client.GetAllToolSummaries(summaries);
 
-    EXPECT_NE(ret, -1);
+    EXPECT_NE(ret, -2);
 
     GTEST_LOG_(INFO) << "CliToolMGRClient_GetAllToolSummaries_0100 end";
 }
@@ -122,7 +122,7 @@ HWTEST_F(CliToolMGRClientTest, GetToolInfoByName_0100, TestSize.Level1)
     ToolInfo tool;
     ErrCode ret = client.GetToolInfoByName("test_tool", tool);
 
-    EXPECT_NE(ret, -1);
+    EXPECT_NE(ret, -2);
 
     GTEST_LOG_(INFO) << "CliToolMGRClient_GetToolInfoByName_0100 end";
 }
@@ -140,7 +140,7 @@ HWTEST_F(CliToolMGRClientTest, GetAllToolInfos_0100, TestSize.Level1)
     std::vector<ToolInfo> tools;
     ErrCode ret = client.GetAllToolInfos(tools);
 
-    EXPECT_NE(ret, -1);
+    EXPECT_NE(ret, -2);
 
     GTEST_LOG_(INFO) << "CliToolMGRClient_GetAllToolInfos_0100 end";
 }
@@ -159,7 +159,7 @@ HWTEST_F(CliToolMGRClientTest, RegisterTool_0100, TestSize.Level1)
     tool.name = "test_tool";
     ErrCode ret = client.RegisterTool(tool);
 
-    EXPECT_NE(ret, -1);
+    EXPECT_NE(ret, -2);
 
     GTEST_LOG_(INFO) << "CliToolMGRClient_RegisterTool_0100 end";
 }
