@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -19,35 +19,6 @@
 
 namespace OHOS {
 namespace CliTool {
-
-// ArgMapping implementation
-bool ArgMapping::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteInt32(static_cast<int32_t>(type)) &&
-           parcel.WriteString(separator) &&
-           parcel.WriteString(order) &&
-           parcel.WriteString(templates);
-}
-
-ArgMapping *ArgMapping::Unmarshalling(Parcel &parcel)
-{
-    auto *mapping = new (std::nothrow) ArgMapping();
-    if (mapping == nullptr) {
-        return nullptr;
-    }
-
-    int32_t typeValue = 0;
-    if (!parcel.ReadInt32(typeValue) ||
-        !parcel.ReadString(mapping->separator) ||
-        !parcel.ReadString(mapping->order) ||
-        !parcel.ReadString(mapping->templates)) {
-        delete mapping;
-        return nullptr;
-    }
-
-    mapping->type = static_cast<ArgMappingType>(typeValue);
-    return mapping;
-}
 
 // SubCommandInfo implementation
 bool SubCommandInfo::Marshalling(Parcel &parcel) const
