@@ -43,6 +43,7 @@ namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
 constexpr int32_t MAX_BACKGROUND_APP_COUNT = 1000;
+constexpr int32_t MAX_PROCESS_INFO_COUNT = 1024;
 
 AppMgrStub::AppMgrStub() {}
 
@@ -133,6 +134,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleNotifyProcMemoryLevel(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_USER_ID):
             return HandleGetProcessRunningInfosByUserId(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_RUNNING_INFOS_BY_ACCESS_TOKEN_ID):
+            return HandleGetProcessRunningInfosByAccessTokenId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_ADD_ABILITY_STAGE_INFO_DONE):
             return HandleAddAbilityStageDone(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::STARTUP_RESIDENT_PROCESS):
@@ -733,6 +736,26 @@ int32_t AppMgrStub::HandleGetProcessRunningInfosByUserId(MessageParcel &data, Me
         return ERR_INVALID_VALUE;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleGetAllRunningProcesses end");
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetProcessRunningInfosByAccessTokenId(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    uint32_t accessTokenId = data.ReadUint32();
+    std::vector<RunningProcessInfo> info;
+    auto result = GetProcessRunningInfosByAccessTokenId(accessTokenId, info);
+    int32_t writeSize = std::min(static_cast<int32_t>(info.size()), MAX_PROCESS_INFO_COUNT);
+    reply.WriteInt32(writeSize);
+    for (int32_t i = 0; i < writeSize; ++i) {
+        if (!reply.WriteParcelable(&info[i])) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleGetProcessRunningInfosByAccessTokenId end");
     return NO_ERROR;
 }
 

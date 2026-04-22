@@ -60,17 +60,18 @@ void CliToolManagerService::OnStart()
 
 void CliToolManagerService::OnStop()
 {
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "climgr stop");
 }
 
-int32_t CliToolManagerService::QueryTools(std::vector<ToolInfo> &tools)
+int32_t CliToolManagerService::GetAllToolInfos(std::vector<ToolInfo> &tools)
 {
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "QueryTools called");
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "GetAllToolInfos called");
     return CliToolDataManager::GetInstance().GetAllTools(tools);
 }
 
-int32_t CliToolManagerService::QueryToolSummaries(std::vector<ToolSummary> &summaries)
+int32_t CliToolManagerService::GetAllToolSummaries(std::vector<ToolSummary> &summaries)
 {
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "QueryToolSummaries called");
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "GetAllToolSummaries called");
     return CliToolDataManager::GetInstance().QueryToolSummaries(summaries);
 }
 
@@ -80,10 +81,20 @@ int32_t CliToolManagerService::GetToolInfoByName(const std::string &name, ToolIn
     return CliToolDataManager::GetInstance().GetToolByName(name, tool);
 }
 
-int32_t CliToolManagerService::RegisterCliTool(const ToolInfo &tool)
+int32_t CliToolManagerService::RegisterTool(const ToolInfo &tool)
 {
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "RegisterCliTool called, tool name='%{public}s'", tool.name.c_str());
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "RegisterTool called, tool name='%{public}s'", tool.name.c_str());
     return CliToolDataManager::GetInstance().RegisterTool(tool);
+}
+
+int32_t CliToolManagerService::ExecTool(const std::string &cliName,
+    const std::map<std::string, std::string> &args,
+    const std::string &challenge,
+    const ExecOptions &options,
+    CliSessionInfo &session)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: %{public}s", cliName.c_str());
+    return 0;
 }
 } // namespace CliTool
 } // namespace OHOS

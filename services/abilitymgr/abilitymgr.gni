@@ -190,6 +190,9 @@ abilityms_files = [
   "src/kiosk_status.cpp",
   "src/kiosk_manager.cpp",
   "src/utils/udmf_utils.cpp",
+
+  #modular_object utils
+  "src/modular_object_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {

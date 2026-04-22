@@ -81,6 +81,8 @@
 #include "mock_session_manager_service.h"
 #include "modal_system_dialog/modal_system_dialog_ui_extension.h"
 #include "modal_system_ui_extension.h"
+#include "modular_object_manager.h"
+#include "modular_object_utils.h"
 #include "multi_app_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
@@ -235,6 +237,7 @@ constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t INDEX_FOUR = 4;
+constexpr int32_t DEFAULT_KILL_ID = -1;
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
 constexpr const char* WANT_PARAMS_HOST_WINDOW_ID_KEY = "ohos.extra.param.key.hostwindowid";
 
@@ -3592,7 +3595,7 @@ int32_t AbilityManagerService::RecordAppWithReasonByUserId(int32_t userId,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_APP_EXIT_REASON_HELPER);
     if (IPCSkeleton::GetCallingPid() != getprocpid()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: calling pid is not local process", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "calling pid is not local process");
         return CHECK_PERMISSION_FAILED;
     }
     if (!IsExitReasonValid(exitReasonCompability)) {
@@ -3612,7 +3615,7 @@ int32_t AbilityManagerService::RecordAppWithReasonByUserId(int32_t userId,
         return ERR_OK;
     }
 
-    appExitReasonHelper_->RecordAppsWithReasonByUserId(userId, exitReasonCompability, processInfoList);
+    appExitReasonHelper_->RecordAppsWithReasonByProcessInfoList(exitReasonCompability, processInfoList);
     return ERR_OK;
 }
 
@@ -3625,28 +3628,20 @@ int32_t AbilityManagerService::RecordAppWithReasonByAccessTokenId(uint32_t acces
         TAG_LOGE(AAFwkTag::ABILITYMGR, "exit reason is invalid");
         return ERR_INVALID_VALUE;
     }
-    Security::AccessToken::HapTokenInfo hapInfo;
-    int32_t ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(accessTokenId, hapInfo);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetHapTokenInfo failed: %{public}d", ret);
-        return ret;
-    }
-    int32_t userId = hapInfo.userID;
 
     std::vector<AppExecFwk::RunningProcessInfo> processInfoList;
-    ret = IN_PROCESS_CALL(GetProcessRunningInfosByUserId(processInfoList, userId));
+    int32_t ret = IN_PROCESS_CALL(GetProcessRunningInfosByAccessTokenId(accessTokenId, processInfoList));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetProcessRunningInfosByUserId failed: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetProcessRunningInfosByAccessTokenId failed: %{public}d", ret);
         return ret;
     }
 
     if (processInfoList.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "no process info for userId: %{public}d", userId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no process info for accessTokenId: %{public}d", accessTokenId);
         return ERR_OK;
     }
 
-    appExitReasonHelper_->RecordAppWithReasonByAccessTokenId(userId, accessTokenId, exitReasonCompability,
-        processInfoList);
+    appExitReasonHelper_->RecordAppsWithReasonByProcessInfoList(exitReasonCompability, processInfoList);
     return ERR_OK;
 }
 
@@ -8707,8 +8702,9 @@ bool AbilityManagerService::CheckPermissionForKillCollaborator()
 int AbilityManagerService::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex,
     const std::string& reason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
-        bundleName.c_str(), clearPageStack);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d"
+        "callingUid: %{public}d, callingPid: %{public}d", bundleName.c_str(), clearPageStack,
+        IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
     // check permission first
     auto isAllowKillProcessForCollaborator = CheckPermissionForKillCollaborator();
     if (!isAllowKillProcessForCollaborator &&
@@ -10406,6 +10402,12 @@ int AbilityManagerService::GetProcessRunningInfosByUserId(
     std::vector<AppExecFwk::RunningProcessInfo> &info, int32_t userId)
 {
     return DelayedSingleton<AppScheduler>::GetInstance()->GetProcessRunningInfosByUserId(info, userId);
+}
+
+int AbilityManagerService::GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+    std::vector<AppExecFwk::RunningProcessInfo> &info)
+{
+    return DelayedSingleton<AppScheduler>::GetInstance()->GetProcessRunningInfosByAccessTokenId(accessTokenId, info);
 }
 
 void AbilityManagerService::ClearUserData(int32_t userId)
@@ -12425,6 +12427,9 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
         return CheckCallerInfoQueryExtensionPermission(abilityRequest);
     }
+    if (extensionType == AppExecFwk::ExtensionAbilityType::MODULAR_OBJECT) {
+        return ModularObjectUtils::CheckPermission(abilityRequest);
+    }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "not SA, can't start other extension");
     return CHECK_PERMISSION_FAILED;
 }
@@ -13543,7 +13548,12 @@ int32_t AbilityManagerService::KillProcessWithReasonInner(int32_t pid, const Exi
         return ERR_KILL_APP_WHILE_STARTING;
     }
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    auto ret = IN_PROCESS_CALL(appExitReasonHelper_->RecordProcessExitReason(pid, reason, true));
+    ExitReason modifiedReason(reason.reason, reason.subReason, reason.exitMsg);
+    modifiedReason.killId = (reason.killId == DEFAULT_KILL_ID) ?
+        HiviewDFX::ProcessKillReason::KillEventId::REASON_KILL_APPLICATION : reason.killId;
+    modifiedReason.shouldKillForeground = reason.shouldKillForeground;
+    modifiedReason.shouldSkipKillInStartup = reason.shouldSkipKillInStartup;
+    auto ret = IN_PROCESS_CALL(appExitReasonHelper_->RecordProcessExitReason(pid, modifiedReason, true));
     if (ret != ERR_OK) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
     }
@@ -14913,19 +14923,14 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
     return ERR_OK;
 }
 
-void AbilityManagerService::RecordRecoveryExitReason(bool isAppRecovery, int32_t callerPid, int32_t callerUid)
+void AbilityManagerService::RecordAppRestartExitReason(bool isAppRecovery, int32_t callerPid, int32_t callerUid)
 {
-    if (!isAppRecovery) {
+    if (isAppRecovery) {
         return;
     }
     int32_t killId = HiviewDFX::ProcessKillReason::KillEventId::REASON_RESTART;
-    std::string killReason = HiviewDFX::ProcessKillReason::GetKillReason(killId);
-    AAFwk::ExitReasonCompability exitReason = {REASON_JS_ERROR, "Kill Reason:" + killReason};
-    exitReason.killId = killId;
+    AAFwk::ExitReasonCompability exitReason(killId);
     auto result = IN_PROCESS_CALL(RecordAppWithReason(callerPid, callerUid, exitReason));
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Record result=%{public}d, send event [FRAMEWORK,PROCESS_KILL,APP_RECOVERY], "
-        "callerPid=%{public}d, callerUid=%{public}d, killReason=%{public}s",
-        result, callerPid, callerUid, killReason.c_str());
 }
 
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
@@ -14955,6 +14960,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
 
     SignRestartAppFlagParam param =
         { userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery, false };
+    RecordAppRestartExitReason(isAppRecovery, callerPid, callerUid);
     result = SignRestartAppFlag(param);
     if (!isAppRecovery && result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");

@@ -84,6 +84,20 @@ void CliToolMGRClient::CliSaDeathRecipient::OnRemoteDied(const wptr<IRemoteObjec
     CliToolMGRClient::GetInstance().ResetProxy(remote);
 }
 
+int32_t CliToolMGRClient::ExecTool(const std::string &name,
+    const std::map<std::string, std::string> &args,
+    const std::string &challenge,
+    const ExecOptions &options,
+    CliSessionInfo &session)
+{
+    auto proxy = GetCliToolManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "connect failed");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
+    return proxy->ExecTool(name, args, challenge, options, session);
+}
+
 void CliToolMGRClient::ResetProxy(const wptr<IRemoteObject>& remote)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -97,6 +111,50 @@ void CliToolMGRClient::ResetProxy(const wptr<IRemoteObject>& remote)
         serviceRemote->RemoveDeathRecipient(deathRecipient_);
         proxy_ = nullptr;
     }
+}
+
+ErrCode CliToolMGRClient::GetAllToolSummaries(std::vector<ToolSummary> &summaries)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto proxy = GetCliToolManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "proxy is null");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
+    return proxy->GetAllToolSummaries(summaries);
+}
+
+ErrCode CliToolMGRClient::GetToolInfoByName(const std::string &name, ToolInfo &tool)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto proxy = GetCliToolManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "proxy is null");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
+    return proxy->GetToolInfoByName(name, tool);
+}
+
+ErrCode CliToolMGRClient::GetAllToolInfos(std::vector<ToolInfo> &tools)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto proxy = GetCliToolManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "proxy is null");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
+    return proxy->GetAllToolInfos(tools);
+}
+
+ErrCode CliToolMGRClient::RegisterTool(const ToolInfo &tool)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto proxy = GetCliToolManager();
+    if (proxy == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "proxy is null");
+        return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
+    }
+    return proxy->RegisterTool(tool);
 }
 } // namespace CliTool
 } // namespace OHOS
