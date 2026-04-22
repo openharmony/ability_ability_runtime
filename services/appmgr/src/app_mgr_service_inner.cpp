@@ -859,7 +859,7 @@ ImageError AppMgrServiceInner::DestroyImageForFault(const std::string& bundleNam
     return ImageError::ERR_OK;
 }
 
-#define CHECKPOINT_NAME_LEN 64
+#define CHECKPOINT_NAME_LEN 256
 constexpr int32_t CHECKPOINT_MONITOR_APP_TYPE = 1;
 
 struct HMCheckpointMarkS {
