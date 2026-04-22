@@ -35,22 +35,32 @@ public:
     /**
      * @brief Query all available tools
      */
-    int32_t QueryTools(std::vector<ToolInfo> &tools);
+    int32_t GetAllToolInfos(std::vector<ToolInfo> &tools) override;
 
     /**
      * @brief Query tool summaries (lightweight for listing)
      */
-    int32_t QueryToolSummaries(std::vector<ToolSummary> &summaries);
+    int32_t GetAllToolSummaries(std::vector<ToolSummary> &summaries) override;
 
     /**
      * @brief Get tool information by name
      */
-    int32_t GetToolInfoByName(const std::string &name, ToolInfo &tool);
+    int32_t GetToolInfoByName(const std::string &name, ToolInfo &tool) override;
 
     /**
      * @brief Register a CLI tool
      */
-    int32_t RegisterCliTool(const ToolInfo &tool);
+    int32_t RegisterTool(const ToolInfo &tool) override;
+
+    /**
+     * @brief Execute a CLI tool.
+     * Implements the ICliToolManager interface method.
+     */
+    int32_t ExecTool(const std::string &cliName,
+        const std::map<std::string, std::string> &args,
+        const std::string &challenge,
+        const ExecOptions &options,
+        CliSessionInfo &session) override;
 
 protected:
     void OnStart() override;

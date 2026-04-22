@@ -134,12 +134,12 @@ public:
             EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
             return result;
         }
-        if (IsRefUndefined(env, function)) {
+        if (IsNull(env, function)) {
             TAG_LOGE(AAFwkTag::JSNAPI, "invalid func");
             EtsErrorUtil::ThrowInvalidNumParametersError(env);
             return result;
         }
-        if (IsNull(env, function)) {
+        if (IsRefUndefined(env, function)) {
             function = nullptr;
         }
         std::lock_guard<std::mutex> lock(g_defaultHandlerMtx);
@@ -362,7 +362,7 @@ public:
             return result;
         }
 
-        if (function == nullptr) {
+        if (IsRefUndefined(env, function)) {
             env->GlobalReference_Delete(g_freezeObserver.ref);
             g_freezeObserver.ref = nullptr;
             g_freezeObserver = {};
@@ -373,7 +373,9 @@ public:
             }
             return result;
         }
-        if (!ValidateFunction(env, function)) {
+        if (IsNull(env, function)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid func");
+            EtsErrorUtil::ThrowInvalidNumParametersError(env);
             return result;
         }
         ani_object observer = static_cast<ani_object>(g_freezeObserver.ref);
@@ -427,7 +429,7 @@ public:
     {
         ani_object result{};
         std::lock_guard<std::mutex> lock(g_unhandledRejectionMtx);
-        if (function == nullptr) {
+        if (IsRefUndefined(env, function)) {
             for (auto& iter : g_unhandledRejectionObservers) {
                 env->GlobalReference_Delete(iter);
             }
@@ -435,7 +437,9 @@ public:
             return result;
         }
 
-        if (!ValidateFunction(env, function)) {
+        if (IsNull(env, function)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid func");
+            EtsErrorUtil::ThrowInvalidNumParametersError(env);
             return result;
         }
 

@@ -562,6 +562,18 @@ public:
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId);
 
     /**
+     * GetProcessRunningInfosByAccessTokenId, Obtains information about application processes
+     * that are running on the device by accessTokenId.
+     *
+     * @param accessTokenId, accessTokenId.
+     * @param info, Running process information list.
+     *
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+        std::vector<RunningProcessInfo> &info);
+
+    /**
      * GetProcessRunningInformation, Obtains information about current application process
      * which is running on the device.
      * @param info, app name in Application record.
@@ -1084,7 +1096,6 @@ public:
     int32_t NotifyAppMgrRecordExitReasonCompability(
         int32_t pid, int32_t killId, const std::string &killMsg, const std::string &innerMsg);
 #ifdef APP_MGR_KILL_REASON_TAG
-    void RecordAppWithReason(int32_t pid, int32_t uid, int32_t killId);
     void RecordAppWithReasonByUserId(int32_t userId, int32_t killId);
 #endif
 

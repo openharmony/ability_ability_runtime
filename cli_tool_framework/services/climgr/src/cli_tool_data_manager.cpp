@@ -35,9 +35,9 @@ constexpr int32_t CHECK_INTERVAL = 100000; // 100ms
 constexpr int32_t MAX_TIMES = 5;           // 5 * 100ms = 500ms
 
 constexpr const char* DEFAULT_REGISTRY_PATH = "/system/bin/cli_tool/cli_tool.json";
-constexpr const char* KV_STORE_APP_ID = "cli_tools_storage";
+constexpr const char* KV_STORE_APP_ID = "cli_tools_db";
 constexpr const char* KV_STORE_STORE_ID = "cli_tools_store";
-constexpr const char* CLI_TOOLS_STORAGE_DIR = "/data/service/el1/public/database/ability_manager_service";
+constexpr const char* CLI_TOOLS_STORAGE_DIR = "/data/service/el1/public/database/cli_tool";
 
 const DistributedKv::AppId APP_ID { KV_STORE_APP_ID };
 const DistributedKv::StoreId STORE_ID { KV_STORE_STORE_ID };

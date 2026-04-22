@@ -17,30 +17,6 @@
 
 namespace OHOS {
 namespace CliTool {
-// ToolSummary implementation
-bool ToolSummary::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteString(name) &&
-           parcel.WriteString(version) &&
-           parcel.WriteString(description);
-}
-
-ToolSummary *ToolSummary::Unmarshalling(Parcel &parcel)
-{
-    auto *summary = new (std::nothrow) ToolSummary();
-    if (summary == nullptr) {
-        return nullptr;
-    }
-
-    if (!parcel.ReadString(summary->name) ||
-        !parcel.ReadString(summary->version) ||
-        !parcel.ReadString(summary->description)) {
-        delete summary;
-        return nullptr;
-    }
-
-    return summary;
-}
 
 // ToolInfo implementation
 bool ToolInfo::Marshalling(Parcel &parcel) const
@@ -89,105 +65,6 @@ ToolInfo *ToolInfo::Unmarshalling(Parcel &parcel)
     }
 
     return tool;
-}
-
-// ExecOptions implementation
-bool ExecOptions::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteBool(background) &&
-           parcel.WriteInt32(yieldMs) &&
-           parcel.WriteInt32(timeout) &&
-           parcel.WriteString(workingDir);
-}
-
-ExecOptions *ExecOptions::Unmarshalling(Parcel &parcel)
-{
-    auto *options = new (std::nothrow) ExecOptions();
-    if (options == nullptr) {
-        return nullptr;
-    }
-
-    if (!parcel.ReadBool(options->background) ||
-        !parcel.ReadInt32(options->yieldMs) ||
-        !parcel.ReadInt32(options->timeout) ||
-        !parcel.ReadString(options->workingDir)) {
-        delete options;
-        return nullptr;
-    }
-
-    return options;
-}
-
-// ExecResult implementation
-bool ExecResult::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteInt32(exitCode) &&
-           parcel.WriteString(outputText) &&
-           parcel.WriteString(errorText) &&
-           parcel.WriteInt32(signalNumber) &&
-           parcel.WriteBool(timedOut) &&
-           parcel.WriteInt64(executionTime);
-}
-
-ExecResult *ExecResult::Unmarshalling(Parcel &parcel)
-{
-    auto *result = new (std::nothrow) ExecResult();
-    if (result == nullptr) {
-        return nullptr;
-    }
-
-    if (!parcel.ReadInt32(result->exitCode) ||
-        !parcel.ReadString(result->outputText) ||
-        !parcel.ReadString(result->errorText) ||
-        !parcel.ReadInt32(result->signalNumber) ||
-        !parcel.ReadBool(result->timedOut) ||
-        !parcel.ReadInt64(result->executionTime)) {
-        delete result;
-        return nullptr;
-    }
-
-    return result;
-}
-
-// SessionInfo implementation
-bool SessionInfo::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteString(sessionId) &&
-           parcel.WriteString(toolName) &&
-           parcel.WriteString(status) &&
-           parcel.WriteInt64(startTime) &&
-           parcel.WriteInt64(endTime) &&
-           parcel.WriteBool(result != nullptr) &&
-           (result == nullptr || parcel.WriteParcelable(result.get()));
-}
-
-SessionInfo *SessionInfo::Unmarshalling(Parcel &parcel)
-{
-    auto *session = new (std::nothrow) SessionInfo();
-    if (session == nullptr) {
-        return nullptr;
-    }
-
-    bool hasResult = false;
-    if (!parcel.ReadString(session->sessionId) ||
-        !parcel.ReadString(session->toolName) ||
-        !parcel.ReadString(session->status) ||
-        !parcel.ReadInt64(session->startTime) ||
-        !parcel.ReadInt64(session->endTime) ||
-        !parcel.ReadBool(hasResult)) {
-        delete session;
-        return nullptr;
-    }
-
-    if (hasResult) {
-        session->result.reset(ExecResult::Unmarshalling(parcel));
-        if (session->result == nullptr) {
-            delete session;
-            return nullptr;
-        }
-    }
-
-    return session;
 }
 
 // ToolEvent implementation

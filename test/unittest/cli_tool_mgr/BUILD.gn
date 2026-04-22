@@ -20,6 +20,7 @@ group("unittest") {
     "cli_tool_mgr_client_test:cli_tool_mgr_client_test",
     "cli_tool_mgr_service_test:cli_tool_mgr_service_test",
     "cli_tool_data_manager_test:cli_tool_data_manager_test",
+    "tool_summary_test:tool_summary_test",
   ]
 }
 

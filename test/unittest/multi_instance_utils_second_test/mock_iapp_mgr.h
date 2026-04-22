@@ -131,6 +131,12 @@ public:
         return 0;
     }
 
+    virtual int32_t GetProcessRunningInfosByAccessTokenId(uint32_t accessTokenId,
+        std::vector<RunningProcessInfo>& info)
+    {
+        return 0;
+    }
+
     virtual int32_t GetProcessRunningInformation(RunningProcessInfo& info)
     {
         return 0;

@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 #define OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 
+#include "tool_summary.h"
+
 #include <iremote_broker.h>
 #include <iremote_object.h>
 #include <map>
@@ -23,6 +25,8 @@
 #include <parcel.h>
 #include <string>
 #include <vector>
+
+#include "exec_result.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -56,22 +60,6 @@ public:
 };
 
 /**
- * @brief Tool summary information (lightweight for listing)
- */
-class ToolSummary : public Parcelable {
-public:
-    std::string name;
-    std::string version;
-    std::string description;
-
-    ToolSummary() = default;
-    ~ToolSummary() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static ToolSummary *Unmarshalling(Parcel &parcel);
-};
-
-/**
  * @brief Tool information structure (full version)
  */
 class ToolInfo : public Parcelable {
@@ -97,62 +85,6 @@ public:
 
     bool Marshalling(Parcel &parcel) const override;
     static ToolInfo *Unmarshalling(Parcel &parcel);
-};
-
-/**
- * @brief Tool execution options
- */
-class ExecOptions : public Parcelable {
-public:
-    bool background = false;       // true: async, false: sync with yieldMs timeout
-    int32_t yieldMs = 30000;       // foreground wait timeout (only when background=false)
-    int32_t timeout = 0;           // total execution timeout (0 = use tool default)
-    std::map<std::string, std::string> env;
-    std::string workingDir;
-
-    ExecOptions() = default;
-    ~ExecOptions() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static ExecOptions *Unmarshalling(Parcel &parcel);
-};
-
-/**
- * @brief Tool execution result
- */
-class ExecResult : public Parcelable {
-public:
-    int32_t exitCode = 0;
-    std::string outputText;
-    std::string errorText;
-    int32_t signalNumber = 0;
-    bool timedOut = false;
-    int64_t executionTime = 0;
-
-    ExecResult() = default;
-    ~ExecResult() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static ExecResult *Unmarshalling(Parcel &parcel);
-};
-
-/**
- * @brief Session information
- */
-class SessionInfo : public Parcelable {
-public:
-    std::string sessionId;
-    std::string toolName;
-    std::string status;            // "running", "completed", "failed"
-    int64_t startTime = 0;
-    int64_t endTime = 0;
-    std::shared_ptr<ExecResult> result;  // optional, only when status="completed"
-
-    SessionInfo() = default;
-    ~SessionInfo() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static SessionInfo *Unmarshalling(Parcel &parcel);
 };
 
 /**

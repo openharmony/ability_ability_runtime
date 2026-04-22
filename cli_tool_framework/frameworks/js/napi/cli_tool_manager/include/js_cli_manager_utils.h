@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef OHOS_CLI_TOOL_JS_CLI_MANAGER_UTILS_H
+#define OHOS_CLI_TOOL_JS_CLI_MANAGER_UTILS_H
+
+#include <map>
+#include <string>
+
+#include "cli_session_info.h"
+#include "exec_options.h"
+#include "exec_result.h"
+#include "native_engine/native_engine.h"
+
+namespace OHOS {
+namespace CliTool {
+
+/**
+ * @brief Unwrap a string map from JavaScript object.
+ * @param env The N-API environment.
+ * @param obj The JavaScript object.
+ * @param values Output key-value pairs.
+ * @return Returns true on success, false otherwise.
+ */
+bool UnwrapStringMap(napi_env env, napi_value obj,
+    std::map<std::string, std::string> &values);
+
+/**
+ * @brief Unwrap ExecOptions from JavaScript object.
+ * @param env The N-API environment.
+ * @param obj The JavaScript object.
+ * @param options Output ExecOptions.
+ * @return Returns true on success, false otherwise.
+ */
+bool UnwrapExecOptions(napi_env env, napi_value obj, ExecOptions &options);
+
+/**
+ * @brief Create JavaScript CliSessionInfo object.
+ * @param env The N-API environment.
+ * @param session The CliSessionInfo structure.
+ * @return Returns the JavaScript object.
+ */
+napi_value CreateJsCliSessionInfo(napi_env env, const CliSessionInfo &session);
+
+/**
+ * @brief Create JavaScript error from native error code.
+ * @param env The N-API environment.
+ * @param errCode The native error code.
+ * @return Returns the JavaScript error object.
+ */
+napi_value CreateCliJsErrorByNativeErr(napi_env env, int32_t errCode);
+
+} // namespace CliTool
+} // namespace OHOS
+
+#endif // OHOS_CLI_TOOL_JS_CLI_MANAGER_UTILS_H
