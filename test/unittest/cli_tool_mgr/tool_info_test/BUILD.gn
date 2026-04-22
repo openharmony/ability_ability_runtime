@@ -36,6 +36,7 @@ ohos_unittest("tool_info_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
   ]
 }
 

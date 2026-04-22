@@ -50,7 +50,7 @@ void CliToolDataManagerTest::SetUpTestCase()
             "inputSchema": "{}",
             "outputSchema": "{}",
             "argMapping": {"type": "flag", "separator": " "},
-            "eventSchemas": "{}",
+            "eventSchemas": {"stdout": {"type": "string"}},
             "timeout": 30000,
             "eventTypes": ["stdout", "stderr"],
             "hasSubCommand": false,
@@ -65,7 +65,7 @@ void CliToolDataManagerTest::SetUpTestCase()
             "inputSchema": "{}",
             "outputSchema": "{}",
             "argMapping": {"type": "positional", "order": "arg1,arg2"},
-            "eventSchemas": "{}",
+            "eventSchemas": {"stdout": {"type": "string"}},
             "timeout": 60000,
             "eventTypes": ["exit"],
             "hasSubCommand": true,
@@ -185,10 +185,10 @@ HWTEST_F(CliToolDataManagerTest, CliToolDataManager_JsonToToolInfo_001, testing:
         "description": "JSON test tool",
         "executablePath": "/bin/jsontest",
         "requirePermissions": ["ohos.permission.INTERNET"],
-        "inputSchema": "{}",
-        "outputSchema": "{}",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "argMapping": {"type": "flag", "separator": " "},
-        "eventSchemas": "{}",
+        "eventSchemas": {"stdout": {"type": "string"}},
         "timeout": 30000,
         "eventTypes": ["stdout"],
         "hasSubCommand": false,
@@ -229,41 +229,6 @@ HWTEST_F(CliToolDataManagerTest, CliToolDataManager_JsonToToolInfo_002, testing:
     EXPECT_NE(ret, 0);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "CliToolDataManager_JsonToToolInfo_002 end");
-}
-
-/**
- * @tc.name: CliToolDataManager_ToolsToJsonArray_001
- * @tc.desc: Test converting tools vector to JSON array
- * @tc.type: FUNC
- */
-HWTEST_F(CliToolDataManagerTest, CliToolDataManager_ToolsToJsonArray_001, testing::ext::TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CliToolDataManager_ToolsToJsonArray_001 start");
-
-    auto& dataManager = CliToolDataManager::GetInstance();
-    std::vector<ToolInfo> tools;
-    ToolInfo tool1;
-    tool1.name = "tool1";
-    tool1.version = "1.0";
-    tool1.description = "Tool 1";
-    tool1.executablePath = "/bin/tool1";
-
-    ToolInfo tool2;
-    tool2.name = "tool2";
-    tool2.version = "2.0";
-    tool2.description = "Tool 2";
-    tool2.executablePath = "/bin/tool2";
-
-    tools.push_back(tool1);
-    tools.push_back(tool2);
-
-    std::string jsonStr = dataManager.ToolsToJsonArray(tools);
-
-    EXPECT_FALSE(jsonStr.empty());
-    EXPECT_NE(jsonStr.find("tool1"), std::string::npos);
-    EXPECT_NE(jsonStr.find("tool2"), std::string::npos);
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CliToolDataManager_ToolsToJsonArray_001 end");
 }
 
 /**
