@@ -1256,7 +1256,8 @@ void EtsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
             TAG_LOGD(AAFwkTag::UIABILITY, "SetNavDestinationInfo :%{public}s", navDestinationInfo.c_str());
             scene_->SetNavDestinationInfo(navDestinationInfo);
         }
-        ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken);
+        ret = scene_->Init(
+            displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken, "", false, renderSession_);
     } else {
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
     }
