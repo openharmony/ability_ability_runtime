@@ -2341,6 +2341,7 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const UIAbilityRecordPtr 
         // set apprecord not support cache
         auto appMgr = AppMgrUtil::GetAppMgr();
         CHECK_POINTER(appMgr);
+        CHECK_POINTER(abilityRecord);
         IN_PROCESS_CALL_WITHOUT_RET(appMgr->SetTerminateTimeOutFlag(abilityRecord->GetToken()));
     };
     int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
