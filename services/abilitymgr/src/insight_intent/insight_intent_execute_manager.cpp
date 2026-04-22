@@ -688,13 +688,6 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateQueryEntityParam(uint64_t key
         TAG_LOGE(AAFwkTag::INTENT, "null callerToken or param");
         return ERR_INVALID_VALUE;
     }
-    if (param->bundleName_.empty() || param->moduleName_.empty() || param->intentName_.empty() ||
-        param->className_.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "invalid param, bundle:%{public}s, module:%{public}s, intent:%{public}s,"
-            "className:%{public}s", param->bundleName_.c_str(), param->moduleName_.c_str(), param->intentName_.c_str(),
-            param->className_.c_str());
-        return ERR_INVALID_VALUE;
-    }
 
     if (param->userId_ == DEFAULT_INVAL_VALUE) {
         param->userId_ = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
