@@ -2882,7 +2882,7 @@ void AppRunningRecord::SetProcessCacheBlocked(bool isBlocked)
 
 bool AppRunningRecord::GetProcessCacheBlocked()
 {
-    return processCacheBlocked_.load();;
+    return processCacheBlocked_.load();
 }
 
 void AppRunningRecord::SetProcessCacheLocked(bool isLock)
