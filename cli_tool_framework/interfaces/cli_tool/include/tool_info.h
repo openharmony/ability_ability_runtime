@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 #define OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 
+#include "arg_mapping.h"
 #include "tool_summary.h"
 
 #include <iremote_broker.h>
@@ -30,34 +31,6 @@
 
 namespace OHOS {
 namespace CliTool {
-
-/**
- * @brief Enum for argument mapping type
- */
-enum class ArgMappingType {
-    FLAG = 0,
-    POSITIONAL = 1,
-    FLATTENED = 2,
-    JSONSTRING = 3,
-    MIXED = 4
-};
-
-/**
- * @brief Argument mapping structure
- */
-class ArgMapping : public Parcelable {
-public:
-    ArgMappingType type = ArgMappingType::FLAG;
-    std::string separator;
-    std::string order;
-    std::string templates;      // JSON string
-
-    ArgMapping() = default;
-    ~ArgMapping() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static ArgMapping *Unmarshalling(Parcel &parcel);
-};
 
 /**
  * @brief Subcommand information structure

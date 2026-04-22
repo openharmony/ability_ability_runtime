@@ -20,6 +20,7 @@
 #include <nlohmann/json.hpp>
 #include <unistd.h>
 
+#include "arg_mapping.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -41,80 +42,6 @@ constexpr const char* CLI_TOOLS_STORAGE_DIR = "/data/service/el1/public/database
 
 const DistributedKv::AppId APP_ID { KV_STORE_APP_ID };
 const DistributedKv::StoreId STORE_ID { KV_STORE_STORE_ID };
-
-/**
- * @brief Parse ArgMapping from JSON object
- */
-std::shared_ptr<ArgMapping> ParseArgMapping(const nlohmann::json &json)
-{
-    auto argMapping = std::make_shared<ArgMapping>();
-    if (json.contains("type") && json["type"].is_string()) {
-        std::string typeStr = json["type"];
-        if (typeStr == "flag") {
-            argMapping->type = ArgMappingType::FLAG;
-        } else if (typeStr == "positional") {
-            argMapping->type = ArgMappingType::POSITIONAL;
-        } else if (typeStr == "flattened") {
-            argMapping->type = ArgMappingType::FLATTENED;
-        } else if (typeStr == "jsonString") {
-            argMapping->type = ArgMappingType::JSONSTRING;
-        } else if (typeStr == "mixed") {
-            argMapping->type = ArgMappingType::MIXED;
-        }
-    }
-    if (json.contains("separator") && json["separator"].is_string()) {
-        argMapping->separator = json["separator"];
-    }
-    if (json.contains("order") && json["order"].is_string()) {
-        argMapping->order = json["order"];
-    }
-    if (json.contains("templates") && json["templates"].is_object()) {
-        argMapping->templates = json["templates"].dump();
-    } else if (json.contains("templates") && json["templates"].is_string()) {
-        argMapping->templates = json["templates"];
-    }
-    return argMapping;
-}
-
-/**
- * @brief Convert ArgMapping to JSON object
- */
-nlohmann::json ArgMappingToJson(const ArgMapping &argMapping)
-{
-    nlohmann::json j;
-    switch (argMapping.type) {
-        case ArgMappingType::FLAG:
-            j["type"] = "flag";
-            break;
-        case ArgMappingType::POSITIONAL:
-            j["type"] = "positional";
-            break;
-        case ArgMappingType::FLATTENED:
-            j["type"] = "flattened";
-            break;
-        case ArgMappingType::JSONSTRING:
-            j["type"] = "jsonString";
-            break;
-        case ArgMappingType::MIXED:
-            j["type"] = "mixed";
-            break;
-    }
-    if (!argMapping.separator.empty()) {
-        j["separator"] = argMapping.separator;
-    }
-    if (!argMapping.order.empty()) {
-        j["order"] = argMapping.order;
-    }
-    if (!argMapping.templates.empty()) {
-        nlohmann::json templatesJson = nlohmann::json::parse(argMapping.templates, nullptr, false);
-        if (!templatesJson.is_discarded()) {
-            j["templates"] = templatesJson;
-        } else {
-            j["templates"] = argMapping.templates;
-        }
-    }
-    return j;
-}
 }
 
 CliToolDataManager &CliToolDataManager::GetInstance()
@@ -351,17 +278,17 @@ int32_t CliToolDataManager::ParseJsonFile(const std::string &filePath, std::vect
         if (item.contains("executablePath") && item["executablePath"].is_string()) {
             tool.executablePath = item["executablePath"];
         }
-        if (item.contains("inputSchema") && item["inputSchema"].is_string()) {
-            tool.inputSchema = item["inputSchema"];
+        if (item.contains("inputSchema") && item["inputSchema"].is_object()) {
+            tool.inputSchema = item["inputSchema"].dump();
         }
-        if (item.contains("outputSchema") && item["outputSchema"].is_string()) {
-            tool.outputSchema = item["outputSchema"];
+        if (item.contains("outputSchema") && item["outputSchema"].is_object()) {
+            tool.outputSchema = item["outputSchema"].dump();
         }
         if (item.contains("argMapping") && item["argMapping"].is_object()) {
-            tool.argMapping = ParseArgMapping(item["argMapping"]);
+            tool.argMapping = ArgMapping::ParseFromJson(item["argMapping"]);
         }
-        if (item.contains("eventSchemas") && item["eventSchemas"].is_string()) {
-            tool.eventSchemas = item["eventSchemas"];
+        if (item.contains("eventSchemas") && item["eventSchemas"].is_object()) {
+            tool.eventSchemas = item["eventSchemas"].dump();
         }
         if (item.contains("timeout") && item["timeout"].is_number()) {
             tool.timeout = item["timeout"];
@@ -392,14 +319,14 @@ int32_t CliToolDataManager::ParseJsonFile(const std::string &filePath, std::vect
                         }
                     }
                 }
-                if (subJson.contains("inputSchema") && subJson["inputSchema"].is_string()) {
-                    subCmd.inputSchema = subJson["inputSchema"];
+                if (subJson.contains("inputSchema") && subJson["inputSchema"].is_object()) {
+                    subCmd.inputSchema = subJson["inputSchema"].dump();
                 }
-                if (subJson.contains("outputSchema") && subJson["outputSchema"].is_string()) {
-                    subCmd.outputSchema = subJson["outputSchema"];
+                if (subJson.contains("outputSchema") && subJson["outputSchema"].is_object()) {
+                    subCmd.outputSchema = subJson["outputSchema"].dump();
                 }
                 if (subJson.contains("argMapping") && subJson["argMapping"].is_object()) {
-                    subCmd.argMapping = ParseArgMapping(subJson["argMapping"]);
+                    subCmd.argMapping = ArgMapping::ParseFromJson(subJson["argMapping"]);
                 }
                 if (subJson.contains("eventTypes") && subJson["eventTypes"].is_array()) {
                     for (const auto &evt : subJson["eventTypes"]) {
@@ -408,8 +335,8 @@ int32_t CliToolDataManager::ParseJsonFile(const std::string &filePath, std::vect
                         }
                     }
                 }
-                if (subJson.contains("eventSchemas") && subJson["eventSchemas"].is_string()) {
-                    subCmd.eventSchemas = subJson["eventSchemas"];
+                if (subJson.contains("eventSchemas") && subJson["eventSchemas"].is_object()) {
+                    subCmd.eventSchemas = subJson["eventSchemas"].dump();
                 }
                 tool.subcommands[it.key()] = subCmd;
             }
@@ -435,7 +362,7 @@ std::string CliToolDataManager::ToolInfoToJson(const ToolInfo &tool)
     j["outputSchema"] = tool.outputSchema;
     // Convert argMapping to JSON object
     if (tool.argMapping != nullptr) {
-        j["argMapping"] = ArgMappingToJson(*tool.argMapping);
+        j["argMapping"] = tool.argMapping->ParseToJson();
     }
     j["eventSchemas"] = tool.eventSchemas;
     j["timeout"] = tool.timeout;
@@ -453,7 +380,7 @@ std::string CliToolDataManager::ToolInfoToJson(const ToolInfo &tool)
             subCmdJson["eventTypes"] = pair.second.eventTypes;
             subCmdJson["eventSchemas"] = pair.second.eventSchemas;
             if (pair.second.argMapping != nullptr) {
-                subCmdJson["argMapping"] = ArgMappingToJson(*pair.second.argMapping);
+                subCmdJson["argMapping"] = pair.second.argMapping->ParseToJson();
             }
             subcommandsJson[pair.first] = subCmdJson;
         }
@@ -485,17 +412,17 @@ int32_t CliToolDataManager::JsonToToolInfo(const std::string &jsonStr, ToolInfo 
     if (j.contains("requirePermissions") && j["requirePermissions"].is_array()) {
         tool.requirePermissions = j["requirePermissions"];
     }
-    if (j.contains("inputSchema") && j["inputSchema"].is_string()) {
-        tool.inputSchema = j["inputSchema"];
+    if (j.contains("inputSchema") && j["inputSchema"].is_object()) {
+        tool.inputSchema = j["inputSchema"].dump();
     }
-    if (j.contains("outputSchema") && j["outputSchema"].is_string()) {
-        tool.outputSchema = j["outputSchema"];
+    if (j.contains("outputSchema") && j["outputSchema"].is_object()) {
+        tool.outputSchema = j["outputSchema"].dump();
     }
     if (j.contains("argMapping") && j["argMapping"].is_object()) {
-        tool.argMapping = ParseArgMapping(j["argMapping"]);
+        tool.argMapping = ArgMapping::ParseFromJson(j["argMapping"]);
     }
-    if (j.contains("eventSchemas") && j["eventSchemas"].is_string()) {
-        tool.eventSchemas = j["eventSchemas"];
+    if (j.contains("eventSchemas") && j["eventSchemas"].is_object()) {
+        tool.eventSchemas = j["eventSchemas"].dump();
     }
     if (j.contains("timeout") && j["timeout"].is_number()) {
         tool.timeout = j["timeout"];
@@ -520,14 +447,14 @@ int32_t CliToolDataManager::JsonToToolInfo(const std::string &jsonStr, ToolInfo 
                     }
                 }
             }
-            if (subJson.contains("inputSchema") && subJson["inputSchema"].is_string()) {
-                subCmd.inputSchema = subJson["inputSchema"];
+            if (subJson.contains("inputSchema") && subJson["inputSchema"].is_object()) {
+                subCmd.inputSchema = subJson["inputSchema"].dump();
             }
-            if (subJson.contains("outputSchema") && subJson["outputSchema"].is_string()) {
-                subCmd.outputSchema = subJson["outputSchema"];
+            if (subJson.contains("outputSchema") && subJson["outputSchema"].is_object()) {
+                subCmd.outputSchema = subJson["outputSchema"].dump();
             }
             if (subJson.contains("argMapping") && subJson["argMapping"].is_object()) {
-                subCmd.argMapping = ParseArgMapping(subJson["argMapping"]);
+                subCmd.argMapping = ArgMapping::ParseFromJson(subJson["argMapping"]);
             }
             if (subJson.contains("eventTypes") && subJson["eventTypes"].is_array()) {
                 for (const auto &evt : subJson["eventTypes"]) {
@@ -544,49 +471,6 @@ int32_t CliToolDataManager::JsonToToolInfo(const std::string &jsonStr, ToolInfo 
     }
 
     return ERR_OK;
-}
-
-std::string CliToolDataManager::ToolsToJsonArray(const std::vector<ToolInfo> &tools)
-{
-    nlohmann::json j = nlohmann::json::array();
-    for (const auto &tool : tools) {
-        nlohmann::json item;
-        item["name"] = tool.name;
-        item["version"] = tool.version;
-        item["description"] = tool.description;
-        item["executablePath"] = tool.executablePath;
-        item["requirePermissions"] = tool.requirePermissions;
-        item["inputSchema"] = tool.inputSchema;
-        item["outputSchema"] = tool.outputSchema;
-        // Convert argMapping to JSON object
-        if (tool.argMapping != nullptr) {
-            item["argMapping"] = ArgMappingToJson(*tool.argMapping);
-        }
-        item["eventSchemas"] = tool.eventSchemas;
-        item["timeout"] = tool.timeout;
-        item["eventTypes"] = tool.eventTypes;
-        item["hasSubCommand"] = tool.hasSubCommand;
-        // Convert subcommands map to JSON object
-        if (!tool.subcommands.empty()) {
-            nlohmann::json subcommandsJson;
-            for (const auto &pair : tool.subcommands) {
-                nlohmann::json subCmdJson;
-                subCmdJson["description"] = pair.second.description;
-                subCmdJson["requirePermissions"] = pair.second.requirePermissions;
-                subCmdJson["inputSchema"] = pair.second.inputSchema;
-                subCmdJson["outputSchema"] = pair.second.outputSchema;
-                subCmdJson["eventTypes"] = pair.second.eventTypes;
-                subCmdJson["eventSchemas"] = pair.second.eventSchemas;
-                if (pair.second.argMapping != nullptr) {
-                    subCmdJson["argMapping"] = ArgMappingToJson(*pair.second.argMapping);
-                }
-                subcommandsJson[pair.first] = subCmdJson;
-            }
-            item["subcommands"] = subcommandsJson;
-        }
-        j.push_back(item);
-    }
-    return j.dump();
 }
 
 int32_t CliToolDataManager::JsonArrayToTools(const std::string &jsonStr, std::vector<ToolInfo> &tools)
