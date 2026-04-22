@@ -1098,6 +1098,10 @@ public:
 #ifdef APP_MGR_KILL_REASON_TAG
     void RecordAppWithReasonByUserId(int32_t userId, int32_t killId);
 #endif
+    void DestroyImageForAppExitCompatibility(const std::shared_ptr<AppRunningRecord> appRecord,
+        const int32_t killId, const std::string &exitMsg);
+    void DestroyImageForAppExit(const std::shared_ptr<AppRunningRecord> appRecord,
+        const int32_t reason, const std::string &exitMsg);
 
     /**
      * Notify application status.
