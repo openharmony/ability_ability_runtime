@@ -17,12 +17,12 @@ sequenceable ToolInfo..OHOS.CliTool.ToolInfo;
 sequenceable OHOS.CliTool.ToolSummary;
 sequenceable ExecOptions..OHOS.CliTool.ExecOptions;
 sequenceable CliSessionInfo..OHOS.CliTool.CliSessionInfo;
+sequenceable ExecToolParam..OHOS.CliTool.ExecToolParam;
 
 interface OHOS.CliTool.ICliToolManager {
     void GetAllToolSummaries([out] ToolSummary[] summaries);
     void GetToolInfoByName([in] String name, [out] ToolInfo tool);
     void GetAllToolInfos([out] ToolInfo[] tools);
     void RegisterTool([in] ToolInfo tool);
-    void ExecTool([in] String cliName, [in] OrderedMap<String, String> args,
-        [in] String challenge, [in] ExecOptions options, [out] CliSessionInfo session);
+    void ExecTool([in] ExecToolParam param, [in] OrderedMap<String, String> args, [out] CliSessionInfo session);
 }

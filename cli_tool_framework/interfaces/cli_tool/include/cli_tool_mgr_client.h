@@ -74,17 +74,12 @@ public:
 
     /**
      * @brief Execute a CLI tool with key-value pairs (convenience method).
-     * @param name The CLI tool name.
+     * @param param The CLI tool param.
      * @param args The tool arguments as key-value pairs.
-     * @param challenge Optional challenge string.
-     * @param options Execution options.
      * @param session Output session information.
      * @return Returns ERR_OK on success, error code otherwise.
      */
-    int32_t ExecTool(const std::string &name,
-        const std::map<std::string, std::string> &args,
-        const std::string &challenge,
-        const ExecOptions &options,
+    int32_t ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
         CliSessionInfo &session);
 
 private:
