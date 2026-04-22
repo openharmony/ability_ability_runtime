@@ -84,10 +84,7 @@ void CliToolMGRClient::CliSaDeathRecipient::OnRemoteDied(const wptr<IRemoteObjec
     CliToolMGRClient::GetInstance().ResetProxy(remote);
 }
 
-int32_t CliToolMGRClient::ExecTool(const std::string &name,
-    const std::map<std::string, std::string> &args,
-    const std::string &challenge,
-    const ExecOptions &options,
+int32_t CliToolMGRClient::ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
     CliSessionInfo &session)
 {
     auto proxy = GetCliToolManager();
@@ -95,7 +92,7 @@ int32_t CliToolMGRClient::ExecTool(const std::string &name,
         TAG_LOGE(AAFwkTag::CLI_TOOL, "connect failed");
         return AAFwk::GET_CLI_TOOL_MGR_SERVICE_FAILED;
     }
-    return proxy->ExecTool(name, args, challenge, options, session);
+    return proxy->ExecTool(param, args, session);
 }
 
 void CliToolMGRClient::ResetProxy(const wptr<IRemoteObject>& remote)
