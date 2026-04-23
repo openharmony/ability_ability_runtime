@@ -2877,12 +2877,12 @@ bool AppRunningRecord::IsAttachedToStatusBar()
 
 void AppRunningRecord::SetProcessCacheBlocked(bool isBlocked)
 {
-    processCacheBlocked = isBlocked;
+    processCacheBlocked_.store(isBlocked);
 }
 
 bool AppRunningRecord::GetProcessCacheBlocked()
 {
-    return processCacheBlocked;
+    return processCacheBlocked_.load();
 }
 
 void AppRunningRecord::SetProcessCacheLocked(bool isLock)

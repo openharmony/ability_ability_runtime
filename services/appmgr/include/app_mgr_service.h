@@ -1146,6 +1146,12 @@ private:
     virtual void PreloadModuleFinished(const int32_t recordId) override;
 
     void SetProcessPrepareExit(int32_t pid) override;
+    
+    /**
+     * @brief set TerminateTimeOut flag.
+     * @param token Ability identify.
+     */
+    void SetTerminateTimeOutFlag(const sptr<IRemoteObject> token) override;
 
     enum DumpIpcKey {
         KEY_DUMP_IPC_START = 0,

@@ -2287,6 +2287,18 @@ void AppMgrService::SetProcessPrepareExit(int32_t pid)
     appMgrServiceInner_->SetProcessPrepareExit(pid);
 }
 
+void AppMgrService::SetTerminateTimeOutFlag(const sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not process call");
+        return;
+    }
+    appMgrServiceInner_->SetTerminateTimeOutFlag(token);
+}
+
 int32_t AppMgrService::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();

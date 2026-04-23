@@ -1164,6 +1164,46 @@ HWTEST_F(AppMgrStubTest, SetProcessPrepareExit_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSetTerminateTimeOutFlag_0100
+ * @tc.desc: Test HandleSetTerminateTimeOutFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleSetTerminateTimeOutFlag_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteRemoteObject(nullptr);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG), data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+
+/**
+ * @tc.name: HandleSetTerminateTimeOutFlag_0200
+ * @tc.desc: Test HandleSetTerminateTimeOutFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleSetTerminateTimeOutFlag_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    sptr<IRemoteObject> token = new MockAppMgrService();
+    data.WriteRemoteObject(token);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
  * @tc.name: HandleMakeImage_ShouldReturnInvalidValueWhenFlagIsTrueAndHandlerIsNullptr
  * @tc.desc: handle make image.
  * @tc.type: FUNC
