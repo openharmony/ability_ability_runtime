@@ -98,6 +98,10 @@ int32_t AppMgrStub::OnRemoteRequestInner(uint32_t code, MessageParcel &data,
     if (retCode != INVALID_FD) {
         return retCode;
     }
+    retCode = OnRemoteRequestInnerNinth(code, data, reply, option);
+    if (retCode != INVALID_FD) {
+        return retCode;
+    }
     TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
@@ -446,8 +450,18 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleNotifyTemplateProcessDeepFrozen(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_IMAGE_PROCESS_STATE_OBSERVER):
             return HandleRegisterImageProcessStateObserver(data, reply);
+    }
+    return INVALID_FD;
+}
+
+int32_t AppMgrStub::OnRemoteRequestInnerNinth(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    switch (static_cast<uint32_t>(code)) {
         case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_IMAGE_PROCESS_STATE_OBSERVER):
             return HandleUnregisterImageProcessStateObserver(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_TERMINATE_TIMEOUT_FLAG):
+            return HandleSetTerminateTimeOutFlag(data, reply);
     }
     return INVALID_FD;
 }
@@ -2418,6 +2432,18 @@ int32_t AppMgrStub::HandleSetProcessPrepareExit(MessageParcel &data, MessageParc
     TAG_LOGD(AAFwkTag::APPMGR, "HandleSetProcessPrepareExit call");
     pid_t pid = data.ReadInt32();
     SetProcessPrepareExit(pid);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetTerminateTimeOutFlag(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleSetTerminateTimeOutFlag call");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "token is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    SetTerminateTimeOutFlag(token);
     return NO_ERROR;
 }
 

@@ -1498,7 +1498,7 @@ private:
     bool enableProcessCache_ = true;
     bool networkEnableFlags_ = true;
     bool saEnableFlags_ = true;
-    bool processCacheBlocked = false; // temporarily block process cache feature
+    std::atomic<bool>  processCacheBlocked_ = false; // temporarily block process cache feature
     bool reasonExist_ = false;
     bool isFromScreenOffBackground_ = false;
 

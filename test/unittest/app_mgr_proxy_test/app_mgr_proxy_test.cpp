@@ -1372,6 +1372,20 @@ HWTEST_F(AppMgrProxyTest, SetProcessPrepareExit_001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: SetTerminateTimeOutFlag_001
+ * @tc.desc: SetTerminateTimeOutFlag.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, SetTerminateTimeOutFlag_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetTerminateTimeOutFlag_001 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
+    sptr<IRemoteObject> token = new MockAppMgrService();
+    appMgrProxy_->SetTerminateTimeOutFlag(token);
+}
+
+/**
  * @tc.name: RegisterImageProcessStateObserver_0100
  * @tc.desc: Verify that the RegisterImageProcessStateObserver parameter of the function is null.
  * @tc.type: FUNC

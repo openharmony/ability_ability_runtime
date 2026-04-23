@@ -2936,6 +2936,20 @@ void AppMgrProxy::SetProcessPrepareExit(int32_t pid)
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT, data, reply, option);
 }
 
+void AppMgrProxy::SetTerminateTimeOutFlag(const sptr<IRemoteObject> token)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return;
+    }
+    PARCEL_UTIL_WRITE_NORET(data, RemoteObject, token.GetRefPtr());
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_PROCESS_PREPARE_EXIT, data, reply, option);
+}
+
 int32_t AppMgrProxy::GetAllAbilityInfos(const int32_t pid, std::vector<AppExecFwk::AbilityStateData> &infos)
 {
     MessageParcel data;
