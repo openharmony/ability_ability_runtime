@@ -665,6 +665,16 @@ public:
 
     void SetKeepAliveAppService(bool isKeepAliveAppService);
 
+    inline void SetStartedByCallStatus(int32_t byCallStatus)
+    {
+        byCallStatus_ = byCallStatus;
+    }
+
+    inline int32_t GetStartedByCallStatus() const
+    {
+        return byCallStatus_;
+    }
+
     /**
      * @brief roughly considered as a value from the process's bundle info.
      *
@@ -1440,6 +1450,7 @@ private:
     int32_t killId_ = -1;
     int restartResidentProcCount_ = 0;
     pid_t gpuPid_ = 0;
+    int32_t byCallStatus_ = 0;
 
     std::string processName_;  // name of this process
     std::string specifiedProcessFlag_; // flag of specified Process
