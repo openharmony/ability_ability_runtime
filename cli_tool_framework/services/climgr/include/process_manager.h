@@ -13,32 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
-#define OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_PROCESS_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_PROCESS_MANAGER_H
 
+#include <map>
 #include <string>
-
-#include "exec_result.h"
-#include "parcel.h"
 
 namespace OHOS {
 namespace CliTool {
-/**
- * @struct CliSessionInfo
- * @brief Information about a CLI tool execution session.
- */
-class CliSessionInfo : public Parcelable {
+class ExecToolParam;
+class ProcessManager {
 public:
-    std::string sessionId;
-    std::string toolName;
-    std::string status;            // "running", "completed", "failed"
-    std::shared_ptr<ExecResult> result = nullptr;  // optional, only when status="completed"
+    static ProcessManager &GetInstance();
 
-    CliSessionInfo() = default;
+    ProcessManager(const ProcessManager &) = delete;
+    ProcessManager &operator=(const ProcessManager &) = delete;
+    ProcessManager(ProcessManager &&) = delete;
+    ProcessManager &operator=(ProcessManager &&) = delete;
 
-    bool Marshalling(Parcel &parcel) const;
-    static CliSessionInfo *Unmarshalling(Parcel &parcel);
+    int32_t CreateChildProcess(const ExecToolParam &param, const std::string &sandboxConfig,
+        const std::map<std::string, std::string> &args) const;
+
+private:
+    ProcessManager() = default;
+    ~ProcessManager() = default;
 };
+
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+
+#endif // OHOS_ABILITY_RUNTIME_PROCESS_MANAGER_H

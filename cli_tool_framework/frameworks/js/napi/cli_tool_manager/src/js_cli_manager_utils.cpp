@@ -15,14 +15,11 @@
 
 #include "js_cli_manager_utils.h"
 
-#include <map>
 #include <nlohmann/json.hpp>
 
-#include "ability_runtime_error_util.h"
+#include "cli_session_info.h"
+#include "exec_options.h"
 #include "hilog_tag_wrapper.h"
-#include "js_error_utils.h"
-#include "js_runtime_utils.h"
-#include "napi/native_api.h"
 #include "napi_common_util.h"
 
 using namespace OHOS::AbilityRuntime;
@@ -30,8 +27,6 @@ using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace CliTool {
 namespace {
-constexpr int32_t TIME_OUT = 30 * 1000;
-
 const std::string ARG_MAPPING_TYPE_FLAG = "flag";
 const std::string ARG_MAPPING_TYPE_POSITIONAL = "positional";
 const std::string ARG_MAPPING_TYPE_FLATTENED = "flattened";
@@ -174,11 +169,6 @@ bool UnwrapStringMap(napi_env env, napi_value obj,
 bool UnwrapExecOptions(napi_env env, napi_value obj, ExecOptions &options)
 {
     if (obj == nullptr) {
-        // Use default options
-        options.background = false;
-        options.yieldMs = 0;
-        options.timeout = TIME_OUT;
-        options.workingDir = "";
         return true;
     }
 
@@ -221,100 +211,49 @@ bool UnwrapExecOptions(napi_env env, napi_value obj, ExecOptions &options)
         TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap timeout failed");
         return false;
     }
-
-    // Extract workingDir (optional)
-    napi_value workingDirProp = nullptr;
-    if (napi_get_named_property(env, obj, "workingDir", &workingDirProp) != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid workingDir property");
-        return false;
-    }
-    if (!AppExecFwk::UnwrapStringFromJS2(env, workingDirProp, options.workingDir)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap workingDir failed");
-        return false;
-    }
-
-    // Extract env (optional)
-    napi_value envProp = nullptr;
-    if (napi_get_named_property(env, obj, "env", &envProp) != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid env property");
-        return false;
-    }
-    if (!UnwrapStringMap(env, envProp, options.env)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap env failed");
-        return false;
-    }
-
     return true;
 }
 
 napi_value CreateJsCliSessionInfo(napi_env env, const CliSessionInfo &session)
 {
+    AbilityRuntime::HandleEscape handleEscape(env);
     napi_value jsObj = nullptr;
     napi_status status = napi_create_object(env, &jsObj);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create JS object");
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create JS CliSessionInfo");
         return nullptr;
     }
 
-    // Set sessionId
-    napi_value jsSessionId = AppExecFwk::WrapStringToJS(env, session.sessionId);
-    napi_set_named_property(env, jsObj, "sessionId", jsSessionId);
-
-    // Set toolName
-    napi_value jsToolName = AppExecFwk::WrapStringToJS(env, session.toolName);
-    napi_set_named_property(env, jsObj, "toolName", jsToolName);
-
-    // Set status
-    napi_value jsStatus = AppExecFwk::WrapStringToJS(env, session.status);
-    napi_set_named_property(env, jsObj, "status", jsStatus);
-
-    // Set startTime
-    napi_value jsStartTime = AppExecFwk::WrapInt64ToJS(env, session.startTime);
-    napi_set_named_property(env, jsObj, "startTime", jsStartTime);
-
-    // Set endTime
-    napi_value jsEndTime = AppExecFwk::WrapInt64ToJS(env, session.endTime);
-    napi_set_named_property(env, jsObj, "endTime", jsEndTime);
+    napi_set_named_property(env, jsObj, "sessionId", AppExecFwk::WrapStringToJS(env, session.sessionId));
+    napi_set_named_property(env, jsObj, "toolName", AppExecFwk::WrapStringToJS(env, session.toolName));
+    napi_set_named_property(env, jsObj, "status", AppExecFwk::WrapStringToJS(env, session.status));
 
     // Set result if present
     if (session.result != nullptr) {
         napi_value jsResult = nullptr;
         status = napi_create_object(env, &jsResult);
-        if (status == napi_ok) {
-            // Set exitCode
-            napi_value jsExitCode = AppExecFwk::WrapInt32ToJS(env, session.result->exitCode);
-            napi_set_named_property(env, jsResult, "exitCode", jsExitCode);
-
-            // Set outputText
-            napi_value jsOutputText = AppExecFwk::WrapStringToJS(env, session.result->outputText);
-            napi_set_named_property(env, jsResult, "outputText", jsOutputText);
-
-            // Set errorText
-            napi_value jsErrorText = AppExecFwk::WrapStringToJS(env, session.result->errorText);
-            napi_set_named_property(env, jsResult, "errorText", jsErrorText);
-
-            // Set signalNumber
-            napi_value jsSignalNumber = AppExecFwk::WrapInt32ToJS(env, session.result->signalNumber);
-            napi_set_named_property(env, jsResult, "signalNumber", jsSignalNumber);
-
-            // Set timedOut
-            napi_value jsTimedOut = AppExecFwk::WrapBoolToJS(env, session.result->timedOut);
-            napi_set_named_property(env, jsResult, "timedOut", jsTimedOut);
-
-            // Set executionTime
-            napi_value jsExecutionTime = AppExecFwk::WrapInt64ToJS(env, session.result->executionTime);
-            napi_set_named_property(env, jsResult, "executionTime", jsExecutionTime);
-
-            napi_set_named_property(env, jsObj, "result", jsResult);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create JS ExecResult");
+            return nullptr;
         }
+        napi_set_named_property(env, jsResult, "exitCode", AppExecFwk::WrapInt32ToJS(env, session.result->exitCode));
+        // Set outputText
+        napi_value jsOutputText = AppExecFwk::WrapStringToJS(env, session.result->outputText);
+        napi_set_named_property(env, jsResult, "outputText", jsOutputText);
+        // Set errorText
+        napi_set_named_property(env, jsResult, "errorText", AppExecFwk::WrapStringToJS(env, session.result->errorText));
+        // Set signalNumber
+        napi_value jsSignalNumber = AppExecFwk::WrapInt32ToJS(env, session.result->signalNumber);
+        napi_set_named_property(env, jsResult, "signalNumber", jsSignalNumber);
+        // Set timedOut
+        napi_set_named_property(env, jsResult, "timedOut", AppExecFwk::WrapBoolToJS(env, session.result->timedOut));
+        // Set executionTime
+        napi_value jsExecutionTime = AppExecFwk::WrapInt64ToJS(env, session.result->executionTime);
+        napi_set_named_property(env, jsResult, "executionTime", jsExecutionTime);
+        napi_set_named_property(env, jsObj, "result", jsResult);
     }
 
-    return jsObj;
-}
-
-napi_value CreateCliJsErrorByNativeErr(napi_env env, int32_t errCode)
-{
-    return CreateJsErrorByNativeErr(env, errCode);
+    return handleEscape.Escape(jsObj);
 }
 
 napi_value CreateJsArgMapping(napi_env env, const ArgMapping &argMapping)
