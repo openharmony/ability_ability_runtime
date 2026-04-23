@@ -2238,8 +2238,16 @@ void MainThread::HandleNWebPreload()
             return;
         }
         cSurface_ = IConsumerSurface::Create(NWEB_SURFACE_NODE_NAME);
+        if (cSurface_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "create cSurface failed");
+            return;
+        }
         auto producer = cSurface_->GetProducer();
         pSurface_ = Surface::CreateSurfaceAsProducer(producer);
+        if (pSurface_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "create pSurface failed");
+            return;
+        }
         sptr<IBufferConsumerListener> listener = sptr<CustomizedBufferConsumerListener>::MakeSptr();
         cSurface_->RegisterConsumerListener(listener);
         auto initArgs = std::make_shared<NWeb::NWebEngineInitArgsImpl>();

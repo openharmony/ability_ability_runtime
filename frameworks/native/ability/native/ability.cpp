@@ -2115,7 +2115,6 @@ void Ability::SetSessionToken(sptr<IRemoteObject> sessionToken, sptr<IRemoteObje
 
 void Ability::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
 {
-    TAG_LOGE(AAFwkTag::ABILITY, "Ability UpdateSessionToken");
     SetSessionToken(sessionToken, nullptr);
     if (abilityWindow_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "null Ability window");
