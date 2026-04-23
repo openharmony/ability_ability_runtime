@@ -19,10 +19,12 @@
 #include <map>
 #include <string>
 
+#include "arg_mapping.h"
 #include "cli_session_info.h"
 #include "exec_options.h"
 #include "exec_result.h"
 #include "native_engine/native_engine.h"
+#include "tool_info.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -61,6 +63,30 @@ napi_value CreateJsCliSessionInfo(napi_env env, const CliSessionInfo &session);
  * @return Returns the JavaScript error object.
  */
 napi_value CreateCliJsErrorByNativeErr(napi_env env, int32_t errCode);
+
+/**
+ * @brief Create JavaScript ArgMapping object.
+ * @param env The N-API environment.
+ * @param argMapping The ArgMapping structure.
+ * @return Returns the JavaScript object.
+ */
+napi_value CreateJsArgMapping(napi_env env, const ArgMapping &argMapping);
+
+/**
+ * @brief Create JavaScript SubCommandInfo object.
+ * @param env The N-API environment.
+ * @param subcmd The SubCommandInfo structure.
+ * @return Returns the JavaScript object.
+ */
+napi_value CreateJsSubCommandInfo(napi_env env, const SubCommandInfo &subcmd);
+
+/**
+ * @brief Create JavaScript ToolInfo object.
+ * @param env The N-API environment.
+ * @param tool The ToolInfo structure.
+ * @return Returns the JavaScript object.
+ */
+napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool);
 
 } // namespace CliTool
 } // namespace OHOS
