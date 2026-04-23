@@ -58,18 +58,7 @@ bool ParseBool(const std::string& value, bool defaultValue)
         return defaultValue;
     }
 
-    std::string lowerValue = value;
-    std::transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-
-    if (lowerValue == "true" || lowerValue == "1") {
-        return true;
-    } else if (lowerValue == "false" || lowerValue == "0") {
-        return false;
-    }
-
-    TAG_LOGW(AAFwkTag::ABILITY, "Invalid boolean value: %{public}s, using default: %{public}s",
-        value.c_str(), defaultValue ? "true" : "false");
-    return defaultValue;
+    return value == "true";
 }
 
 // Helper function to parse StartupPhase
@@ -94,6 +83,7 @@ void NativeAbilityMetaData::InitData(
     const AppExecFwk::AbilityInfo& abilityInfo,
     NativeAbilityMetaData& data)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // Initialize with default values
     data.withNativeModule = false;
     data.startupPhase = StartupPhase::PRE_WINDOW;
@@ -152,7 +142,6 @@ void NativeAbilityMetaData::InitData(
 
 bool NativeAbilityMetaData::HideWindowOnStartup(const AppExecFwk::AbilityInfo& abilityInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     NativeAbilityMetaData data;
     InitData(abilityInfo, data);
 
@@ -162,6 +151,13 @@ bool NativeAbilityMetaData::HideWindowOnStartup(const AppExecFwk::AbilityInfo& a
 
     return data.startupPhase == StartupPhase::PRE_WINDOW ||
            data.startupPhase == StartupPhase::PRE_FOREGROUND;
+}
+
+bool NativeAbilityMetaData::IsWithNative(const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    NativeAbilityMetaData data;
+    InitData(abilityInfo, data);
+    return data.withNativeModule;
 }
 } // namespace AAFwk
 } // namespace OHOS

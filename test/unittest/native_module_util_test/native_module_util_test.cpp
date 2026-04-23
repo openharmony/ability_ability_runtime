@@ -120,7 +120,7 @@ HWTEST_F(NativeModuleUtilTest, InitData_0400, TestSize.Level1)
 /**
  * @tc.number: InitData_0500
  * @tc.name: NativeAbilityMetaData::InitData
- * @tc.desc: withNativeModule="1", should enable native module
+ * @tc.desc: withNativeModule="1", ParseBool only accepts "true", should disable native module
  */
 HWTEST_F(NativeModuleUtilTest, InitData_0500, TestSize.Level1)
 {
@@ -131,13 +131,13 @@ HWTEST_F(NativeModuleUtilTest, InitData_0500, TestSize.Level1)
     NativeAbilityMetaData data;
     NativeAbilityMetaData::InitData(abilityInfo_, data);
 
-    EXPECT_TRUE(data.withNativeModule);
+    EXPECT_FALSE(data.withNativeModule);
 }
 
 /**
  * @tc.number: InitData_0600
  * @tc.name: NativeAbilityMetaData::InitData
- * @tc.desc: withNativeModule="TRUE" (uppercase), should enable native module (case-insensitive)
+ * @tc.desc: withNativeModule="TRUE" (uppercase), ParseBool only accepts lowercase "true", should disable
  */
 HWTEST_F(NativeModuleUtilTest, InitData_0600, TestSize.Level1)
 {
@@ -148,13 +148,13 @@ HWTEST_F(NativeModuleUtilTest, InitData_0600, TestSize.Level1)
     NativeAbilityMetaData data;
     NativeAbilityMetaData::InitData(abilityInfo_, data);
 
-    EXPECT_TRUE(data.withNativeModule);
+    EXPECT_FALSE(data.withNativeModule);
 }
 
 /**
  * @tc.number: InitData_0700
  * @tc.name: NativeAbilityMetaData::InitData
- * @tc.desc: withNativeModule="True" (mixed case), should enable native module (case-insensitive)
+ * @tc.desc: withNativeModule="True" (mixed case), ParseBool only accepts "true", should disable
  */
 HWTEST_F(NativeModuleUtilTest, InitData_0700, TestSize.Level1)
 {
@@ -165,7 +165,7 @@ HWTEST_F(NativeModuleUtilTest, InitData_0700, TestSize.Level1)
     NativeAbilityMetaData data;
     NativeAbilityMetaData::InitData(abilityInfo_, data);
 
-    EXPECT_TRUE(data.withNativeModule);
+    EXPECT_FALSE(data.withNativeModule);
 }
 
 /**
@@ -715,6 +715,57 @@ HWTEST_F(NativeModuleUtilTest, HideWindowOnStartup_0500, TestSize.Level1)
     AddMetadata("ohos.ability.nativeModuleFun", "OHMain");
 
     EXPECT_FALSE(NativeAbilityMetaData::HideWindowOnStartup(abilityInfo_));
+}
+
+// ==================== IsWithNative ====================
+
+/**
+ * @tc.number: IsWithNative_0100
+ * @tc.name: NativeAbilityMetaData::IsWithNative
+ * @tc.desc: No metadata, should return false
+ */
+HWTEST_F(NativeModuleUtilTest, IsWithNative_0100, TestSize.Level1)
+{
+    EXPECT_FALSE(NativeAbilityMetaData::IsWithNative(abilityInfo_));
+}
+
+/**
+ * @tc.number: IsWithNative_0200
+ * @tc.name: NativeAbilityMetaData::IsWithNative
+ * @tc.desc: withNativeModule="true" with valid source and func, should return true
+ */
+HWTEST_F(NativeModuleUtilTest, IsWithNative_0200, TestSize.Level1)
+{
+    AddMetadata("ohos.ability.withNativeModule", "true");
+    AddMetadata("ohos.ability.nativeModuleSource", "libtest.so");
+    AddMetadata("ohos.ability.nativeModuleFun", "OHMain");
+
+    EXPECT_TRUE(NativeAbilityMetaData::IsWithNative(abilityInfo_));
+}
+
+/**
+ * @tc.number: IsWithNative_0300
+ * @tc.name: NativeAbilityMetaData::IsWithNative
+ * @tc.desc: withNativeModule="true" but missing source, should return false
+ */
+HWTEST_F(NativeModuleUtilTest, IsWithNative_0300, TestSize.Level1)
+{
+    AddMetadata("ohos.ability.withNativeModule", "true");
+    AddMetadata("ohos.ability.nativeModuleFun", "OHMain");
+
+    EXPECT_FALSE(NativeAbilityMetaData::IsWithNative(abilityInfo_));
+}
+
+/**
+ * @tc.number: IsWithNative_0400
+ * @tc.name: NativeAbilityMetaData::IsWithNative
+ * @tc.desc: withNativeModule="false", should return false
+ */
+HWTEST_F(NativeModuleUtilTest, IsWithNative_0400, TestSize.Level1)
+{
+    AddMetadata("ohos.ability.withNativeModule", "false");
+
+    EXPECT_FALSE(NativeAbilityMetaData::IsWithNative(abilityInfo_));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

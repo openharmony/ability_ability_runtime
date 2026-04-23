@@ -2841,13 +2841,13 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_LoadNativeModule_0400, Test
 /**
  * @tc.number: AbilityNativeThread_RunMain_0100
  * @tc.name: AbilityNativeThread RunMain
- * @tc.desc: OHMain_ is null, should not create thread
+ * @tc.desc: ohMainFun_ is null, should not create thread
  */
 HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityNativeThread_RunMain_0100 start";
     auto thread = std::make_shared<AppExecFwk::AbilityNativeThread>();
-    thread->OHMain_ = nullptr;
+    thread->ohMainFun_ = nullptr;
     thread->RunMain();
     EXPECT_FALSE(thread->nativeThread_.joinable());
     GTEST_LOG_(INFO) << "AbilityNativeThread_RunMain_0100 end";
@@ -2856,7 +2856,7 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0100, TestSize.Leve
 /**
  * @tc.number: AbilityNativeThread_RunMain_0200
  * @tc.name: AbilityNativeThread RunMain
- * @tc.desc: OHMain_ is set, should create and run thread
+ * @tc.desc: ohMainFun_ is set, should create and run thread
  */
 HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0200, TestSize.Level1)
 {
@@ -2866,7 +2866,7 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0200, TestSize.Leve
     std::atomic<bool> mainCalled{false};
     // Use a static variable to pass the flag pointer to the lambda
     static std::atomic<bool>* flagPtr = &mainCalled;
-    thread->OHMain_ = []() {
+    thread->ohMainFun_ = []() {
         if (flagPtr) {
             flagPtr->store(true);
         }
@@ -2879,9 +2879,42 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0200, TestSize.Leve
     thread->nativeThread_.join();
     EXPECT_TRUE(mainCalled.load());
 
-    // Clear OHMain_ so destructor won't try to detach a joined thread
-    thread->OHMain_ = nullptr;
+    // Clear ohMainFun_ so destructor won't try to detach a joined thread
+    thread->ohMainFun_ = nullptr;
     GTEST_LOG_(INFO) << "AbilityNativeThread_RunMain_0200 end";
+}
+
+/**
+ * @tc.number: AbilityNativeThread_RunMain_0300
+ * @tc.name: AbilityNativeThread RunMain
+ * @tc.desc: Calling RunMain twice should be no-op on second call (joinable guard)
+ */
+HWTEST_F(ApplicationContextTest, AbilityNativeThread_RunMain_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityNativeThread_RunMain_0300 start";
+    auto thread = std::make_shared<AppExecFwk::AbilityNativeThread>();
+
+    std::atomic<int> callCount{0};
+    static std::atomic<int>* countPtr = &callCount;
+    thread->ohMainFun_ = []() {
+        if (countPtr) {
+            countPtr->fetch_add(1);
+        }
+    };
+
+    thread->RunMain();
+    EXPECT_TRUE(thread->nativeThread_.joinable());
+
+    // Second call should be no-op due to joinable guard
+    thread->RunMain();
+    EXPECT_TRUE(thread->nativeThread_.joinable());
+
+    thread->nativeThread_.join();
+    // Should only have been called once
+    EXPECT_EQ(callCount.load(), 1);
+
+    thread->ohMainFun_ = nullptr;
+    GTEST_LOG_(INFO) << "AbilityNativeThread_RunMain_0300 end";
 }
 
 /**
@@ -2941,7 +2974,7 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_PostAbility_0300, TestSize.
 
     // Cleanup
     thread->postAbilityFunc_ = nullptr;
-    thread->OHMain_ = nullptr;
+    thread->ohMainFun_ = nullptr;
     GTEST_LOG_(INFO) << "AbilityNativeThread_PostAbility_0300 end";
 }
 
@@ -3076,7 +3109,7 @@ HWTEST_F(ApplicationContextTest, AbilityNativeThread_Destructor_0200, TestSize.L
         // Set up a long-running main function
         std::atomic<bool> keepRunning{true};
         static std::atomic<bool>* runFlag = &keepRunning;
-        thread->OHMain_ = []() {
+        thread->ohMainFun_ = []() {
             if (runFlag) {
                 while (runFlag->load()) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
