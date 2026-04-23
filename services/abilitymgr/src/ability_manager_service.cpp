@@ -4167,6 +4167,9 @@ int AbilityManagerService::RequestModalUIExtensionWithAccountInner(Want want, in
     int32_t finalUserId = INVALID_USER_ID;
     int ret = ERR_OK;
 
+    if (accountId == DEFAULT_INVAL_VALUE) {
+        accountId = GetValidUserId(accountId);
+    }
     // Directly use the passed accountId parameter, not from want
     uint64_t displayId = 0;
     ret = GetDisplayIdByAccount(accountId, displayId);
