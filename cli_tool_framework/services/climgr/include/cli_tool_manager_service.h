@@ -16,6 +16,11 @@
 #ifndef OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "cli_tool_manager_stub.h"
 #include "cli_tool_data_manager.h"
 #include "system_ability.h"
@@ -56,10 +61,7 @@ public:
      * @brief Execute a CLI tool.
      * Implements the ICliToolManager interface method.
      */
-    int32_t ExecTool(const std::string &cliName,
-        const std::map<std::string, std::string> &args,
-        const std::string &challenge,
-        const ExecOptions &options,
+    int32_t ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
         CliSessionInfo &session) override;
 
 protected:
