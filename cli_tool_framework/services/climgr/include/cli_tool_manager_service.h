@@ -17,7 +17,6 @@
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -72,6 +71,7 @@ private:
     CliToolManagerService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, false) {};
     DISALLOW_COPY_AND_MOVE(CliToolManagerService);
     static sptr<CliToolManagerService> instance_;
+    std::atomic<int32_t> activeSessionCount_ = 0;
 };
 
 } // namespace CliTool

@@ -28,6 +28,7 @@ ohos_shared_library("climanager_napi") {
   ]
 
   sources = [
+    "src/cli_manager_error_utils.cpp",
     "src/cli_tool_manager_module.cpp",
     "src/js_cli_manager.cpp",
     "src/js_cli_manager_utils.cpp",

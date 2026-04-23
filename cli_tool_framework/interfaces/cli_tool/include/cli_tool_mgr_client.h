@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_CLI_SA_CLIENT_H
 #define OHOS_ABILITY_RUNTIME_CLI_SA_CLIENT_H
 
+#include <condition_variable>
+#include <functional>
 #include <mutex>
 
 #include "cli_session_info.h"
@@ -24,6 +26,8 @@
 
 namespace OHOS {
 namespace CliTool {
+
+using ClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
 
 /**
  * @class CliToolMGRClient
@@ -82,30 +86,42 @@ public:
     int32_t ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
         CliSessionInfo &session);
 
+    /**
+     * @brief On load system ability success.
+     * @param remoteObject The remote object of system ability.
+     */
+    void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
+
+    /**
+     * @brief On load system ability fail.
+     */
+    void OnLoadSystemAbilityFail();
+
 private:
     CliToolMGRClient() = default;
     DISALLOW_COPY_AND_MOVE(CliToolMGRClient);
-    
-    class CliSaDeathRecipient : public IRemoteObject::DeathRecipient {
-        public:
-        CliSaDeathRecipient() = default;
-        ~CliSaDeathRecipient() = default;
-        void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-        private:
-        DISALLOW_COPY_AND_MOVE(CliSaDeathRecipient);
+
+    class CliMgrDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit CliMgrDeathRecipient(const ClearProxyCallback &callback) : callback_(callback) {}
+        ~CliMgrDeathRecipient() override = default;
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+
+    private:
+        ClearProxyCallback callback_;
     };
 
-    sptr<ICliToolManager> GetCliToolManager();
-    ErrCode Connect();
-    /**
-     * @brief Reset the proxy when service dies.
-     * @param remote The remote object that died.
-     */
-    void ResetProxy(const wptr<IRemoteObject>& remote);
+    sptr<ICliToolManager> GetCliToolMgrProxy();
+    bool LoadCliToolMgrService();
+    void ClearProxy();
+    void SetCliToolMgr(const sptr<IRemoteObject> &remoteObject);
+    sptr<ICliToolManager> GetCliToolMgr();
 
-    std::recursive_mutex mutex_;
-    sptr<ICliToolManager> proxy_;
-    sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    std::condition_variable loadSaCondation_;
+    std::mutex loadSaMutex_;
+    bool loadSaFinished_;
+    std::mutex proxyMutex_;
+    sptr<ICliToolManager> cliToolMgr_ = nullptr;
 };
 
 } // namespace CliTool

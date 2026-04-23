@@ -40,6 +40,7 @@ ohos_shared_library("climgr") {
   sources = [
     "src/cli_tool_data_manager.cpp",
     "src/cli_tool_manager_service.cpp",
+    "src/process_manager.cpp",
     "src/tool_util.cpp",
   ]
   defines = [ "AMS_LOG_TAG = \"CliToolManager\"" ]
