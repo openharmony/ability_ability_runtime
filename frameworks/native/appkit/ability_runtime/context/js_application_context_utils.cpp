@@ -2048,7 +2048,7 @@ napi_value JsApplicationContextUtils::OnGetUIAbilityByInstanceId(napi_env env, N
     auto applicationContext = applicationContext_.lock();
     if (!applicationContext) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
         return CreateJsUndefined(env);
     }
 
@@ -2068,13 +2068,13 @@ napi_value JsApplicationContextUtils::OnGetUIAbilityByInstanceId(napi_env env, N
     auto nativeAbility = applicationContext->GetNativeAbility(instanceId);
     if (nativeAbility == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "NativeAbility not found for instanceId: %{public}s", instanceId.c_str());
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID);
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_ID);
         return CreateJsUndefined(env);
     }
 
     if (nativeAbility->jsAbilityObj == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "jsAbilityObj is null for instanceId: %{public}s", instanceId.c_str());
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID);
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
 

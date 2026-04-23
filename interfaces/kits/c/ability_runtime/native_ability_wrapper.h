@@ -45,13 +45,14 @@
 extern "C" {
 #endif
 
-struct NativeAbilityWrapper;
+typedef struct NativeAbilityWrapper NativeAbilityWrapper;
 
 /**
  * @brief Get ability instance ID from NativeAbilityWrapper.
  *
  * @param nativeAbilityWrapper The native ability wrapper pointer.
- * @param buffer A pointer to a buffer that receives the instance ID string (UUID format, 36 chars including '\0').
+ * @param buffer A pointer to a buffer that receives the instance ID string which is UUID format,
+ *               an amount of 37 bytes, 36 chars plus an ending '\0'.
  * @param bufferSize The length of the buffer, must be at least 37.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
