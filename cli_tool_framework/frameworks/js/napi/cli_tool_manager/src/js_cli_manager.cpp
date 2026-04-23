@@ -15,16 +15,15 @@
 
 #include "js_cli_manager.h"
 
-#include <ctime>
 #include <map>
 #include <string>
 
+#include "cli_error_code.h"
+#include "cli_manager_error_utils.h"
 #include "cli_tool_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "js_cli_manager_utils.h"
 #include "js_error_utils.h"
-#include "js_runtime_utils.h"
-#include "napi/native_api.h"
 #include "napi_common_util.h"
 
 using namespace OHOS::AbilityRuntime;
@@ -36,6 +35,7 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
+constexpr int32_t INDEX_FOUR = 4;
 } // namespace
 
 void JSCliManager::Finalizer(napi_env env, void *data, void *hint)
@@ -58,7 +58,7 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
 {
     TAG_LOGD(AAFwkTag::CLI_TOOL, "JSCliManager::OnExecTool called");
     HandleEscape handleEscape(env);
-    if (argc < INDEX_THREE) {
+    if (argc < INDEX_FOUR) {
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -69,19 +69,24 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         return CreateJsUndefined(env);
     }
 
+    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_ONE], param.subcommand)) {
+        ThrowInvalidParamError(env, "Tool subcommand is required");
+        return CreateJsUndefined(env);
+    }
+
     std::map<std::string, std::string> args;
-    if (!UnwrapStringMap(env, argv[INDEX_ONE], args)) {
+    if (!UnwrapStringMap(env, argv[INDEX_TWO], args)) {
         ThrowInvalidParamError(env, "Tool args is required");
         return CreateJsUndefined(env);
     }
 
-    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_TWO], param.challenge)) {
+    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_THREE], param.challenge)) {
         ThrowInvalidParamError(env, "Tool challenge is required");
         return CreateJsUndefined(env);
     }
 
-    if (argc > INDEX_THREE && argv[INDEX_THREE] != nullptr) {
-        if (!UnwrapExecOptions(env, argv[INDEX_THREE], param.options)) {
+    if (argc > INDEX_FOUR && argv[INDEX_FOUR] != nullptr) {
+        if (!UnwrapExecOptions(env, argv[INDEX_FOUR], param.options)) {
             ThrowInvalidParamError(env, "Tool options is required");
             return CreateJsUndefined(env);
         }
@@ -104,7 +109,8 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
 
         napi_value jsSession = CreateJsCliSessionInfo(env, *session);
         if (jsSession == nullptr) {
-            task.Reject(env, CreateJsUndefined(env));
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "Fail to create js CliSessionInfo");
+            task.Reject(env, CreateCliJsErrorByNativeErr(env, ERR_CREATE_CLI_SESSION_INFO));
             return;
         }
 

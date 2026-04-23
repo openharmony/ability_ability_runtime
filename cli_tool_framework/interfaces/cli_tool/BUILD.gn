@@ -50,6 +50,7 @@ ohos_shared_library("cli_tool_client") {
   output_values = get_target_outputs(":cli_tool_manager_interface")
   sources = [
     "src/arg_mapping.cpp",
+    "src/cli_mgr_load_callback.cpp",
     "src/cli_session_info.cpp",
     "src/cli_tool_mgr_client.cpp",
     "src/exec_options.cpp",

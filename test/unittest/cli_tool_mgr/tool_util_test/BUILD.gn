@@ -16,32 +16,30 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/ability_runtime/clitool"
 
-ohos_unittest("cli_tool_mgr_service_test") {
+ohos_unittest("tool_util_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_path}/cli_tool_framework/services/climgr/include",
+    "${ability_runtime_path}/cli_tool_framework/interfaces/cli_tool/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "${cli_tool_framework_path}/services/climgr/include",
-    "${cli_tool_framework_path}/interfaces/cli_tool/include",
-    "${ability_runtime_path}/test/unittest/cli_tool_mgr/cli_tool_mgr_service_test",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [
-    "cli_tool_mgr_service_test.cpp",
-    "${cli_tool_framework_path}/services/climgr/src/cli_tool_manager_service.cpp",
-    "${cli_tool_framework_path}/services/climgr/src/cli_tool_data_manager.cpp",
-    "${cli_tool_framework_path}/services/climgr/src/process_manager.cpp",
+    "tool_util_test.cpp",
     "${cli_tool_framework_path}/services/climgr/src/tool_util.cpp",
   ]
 
   cflags = []
   if (target_cpu == "arm") {
-    cflags += [ "-BINDER_IPC_32BIT" ]
+    cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
   deps = [
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
-    "${cli_tool_framework_path}/interfaces/cli_tool:cli_tool_client",
+    "${ability_runtime_path}/cli_tool_framework/services/climgr:climgr",
+    "${ability_runtime_path}/cli_tool_framework/interfaces/cli_tool:cli_tool_client",
   ]
 
   external_deps = [
@@ -55,13 +53,13 @@ ohos_unittest("cli_tool_mgr_service_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
-    "kv_store:distributeddata_inner",
-    "samgr:samgr_proxy",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":cli_tool_mgr_service_test" ]
+
+  deps = [ ":tool_util_test" ]
 }

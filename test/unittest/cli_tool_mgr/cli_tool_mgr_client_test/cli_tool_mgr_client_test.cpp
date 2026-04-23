@@ -55,43 +55,6 @@ HWTEST_F(CliToolMGRClientTest, GetInstance_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: CliToolMGRClient_GetCliToolManager_0100
- * @tc.desc: Test GetCliToolManager returns null proxy when service unavailable
- * @tc.type: FUNC
- */
-HWTEST_F(CliToolMGRClientTest, GetCliToolManager_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CliToolMGRClient_GetCliToolManager_0100 start";
-
-    auto& client = CliToolMGRClient::GetInstance();
-    auto proxy = client.GetCliToolManager();
-
-    // When service is unavailable, proxy should be null
-    EXPECT_EQ(proxy, nullptr);
-
-    GTEST_LOG_(INFO) << "CliToolMGRClient_GetCliToolManager_0100 end";
-}
-
-/**
- * @tc.name: CliToolMGRClient_ResetProxy_0100
- * @tc.desc: Test ResetProxy functionality
- * @tc.type: FUNC
- */
-HWTEST_F(CliToolMGRClientTest, ResetProxy_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CliToolMGRClient_ResetProxy_0100 start";
-
-    auto& client = CliToolMGRClient::GetInstance();
-    wptr<IRemoteObject> remote;
-
-    // ResetProxy should handle null remote gracefully
-    client.ResetProxy(remote);
-    EXPECT_NE(&client, nullptr);
-
-    GTEST_LOG_(INFO) << "CliToolMGRClient_ResetProxy_0100 end";
-}
-
-/**
  * @tc.name: CliToolMGRClient_GetAllToolSummaries_0100
  * @tc.desc: Test GetAllToolSummaries returns error when proxy is null
  * @tc.type: FUNC

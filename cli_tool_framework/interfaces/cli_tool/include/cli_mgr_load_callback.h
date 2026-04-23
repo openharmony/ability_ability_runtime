@@ -13,32 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
-#define OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_CLI_MGR_LOAD_CALLBACK_H
+#define OHOS_ABILITY_RUNTIME_CLI_MGR_LOAD_CALLBACK_H
 
-#include <string>
-
-#include "exec_result.h"
-#include "parcel.h"
+#include "iremote_object.h"
+#include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
 namespace CliTool {
-/**
- * @struct CliSessionInfo
- * @brief Information about a CLI tool execution session.
- */
-class CliSessionInfo : public Parcelable {
+class CliMgrLoadCallback : public SystemAbilityLoadCallbackStub {
 public:
-    std::string sessionId;
-    std::string toolName;
-    std::string status;            // "running", "completed", "failed"
-    std::shared_ptr<ExecResult> result = nullptr;  // optional, only when status="completed"
+    CliMgrLoadCallback() = default;
+    virtual ~CliMgrLoadCallback() = default;
 
-    CliSessionInfo() = default;
-
-    bool Marshalling(Parcel &parcel) const;
-    static CliSessionInfo *Unmarshalling(Parcel &parcel);
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
 };
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_CLI_MGR_LOAD_CALLBACK_H

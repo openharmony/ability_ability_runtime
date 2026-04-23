@@ -28,20 +28,6 @@ bool ExecOptions::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(timeout)) {
         return false;
     }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(env.size()))) {
-        return false;
-    }
-    for (const auto &[key, value] : env) {
-        if (!parcel.WriteString(key)) {
-            return false;
-        }
-        if (!parcel.WriteString(value)) {
-            return false;
-        }
-    }
-    if (!parcel.WriteString(workingDir)) {
-        return false;
-    }
     return true;
 }
 
@@ -57,28 +43,6 @@ ExecOptions *ExecOptions::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     if (!parcel.ReadInt32(options->timeout)) {
-        delete options;
-        return nullptr;
-    }
-    uint32_t envSize = 0;
-    if (!parcel.ReadUint32(envSize)) {
-        delete options;
-        return nullptr;
-    }
-    for (uint32_t i = 0; i < envSize; i++) {
-        std::string key;
-        std::string value;
-        if (!parcel.ReadString(key)) {
-            delete options;
-            return nullptr;
-        }
-        if (!parcel.ReadString(value)) {
-            delete options;
-            return nullptr;
-        }
-        options->env[key] = value;
-    }
-    if (!parcel.ReadString(options->workingDir)) {
         delete options;
         return nullptr;
     }

@@ -20,15 +20,13 @@
 #include <string>
 
 #include "arg_mapping.h"
-#include "cli_session_info.h"
-#include "exec_options.h"
-#include "exec_result.h"
 #include "native_engine/native_engine.h"
 #include "tool_info.h"
 
 namespace OHOS {
 namespace CliTool {
-
+class CliSessionInfo;
+class ExecOptions;
 /**
  * @brief Unwrap a string map from JavaScript object.
  * @param env The N-API environment.
@@ -55,14 +53,6 @@ bool UnwrapExecOptions(napi_env env, napi_value obj, ExecOptions &options);
  * @return Returns the JavaScript object.
  */
 napi_value CreateJsCliSessionInfo(napi_env env, const CliSessionInfo &session);
-
-/**
- * @brief Create JavaScript error from native error code.
- * @param env The N-API environment.
- * @param errCode The native error code.
- * @return Returns the JavaScript error object.
- */
-napi_value CreateCliJsErrorByNativeErr(napi_env env, int32_t errCode);
 
 /**
  * @brief Create JavaScript ArgMapping object.
