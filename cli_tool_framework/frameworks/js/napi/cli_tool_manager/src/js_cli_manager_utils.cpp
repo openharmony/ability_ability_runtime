@@ -484,5 +484,29 @@ napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool)
     return jsObj;
 }
 
+napi_value CreateJsToolSummary(napi_env env, const ToolSummary &summary)
+{
+    napi_value jsObj = nullptr;
+    napi_status status = napi_create_object(env, &jsObj);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create JS object");
+        return nullptr;
+    }
+
+    // Set name
+    napi_value jsName = AppExecFwk::WrapStringToJS(env, summary.name);
+    napi_set_named_property(env, jsObj, "name", jsName);
+
+    // Set version
+    napi_value jsVersion = AppExecFwk::WrapStringToJS(env, summary.version);
+    napi_set_named_property(env, jsObj, "version", jsVersion);
+
+    // Set description
+    napi_value jsDescription = AppExecFwk::WrapStringToJS(env, summary.description);
+    napi_set_named_property(env, jsObj, "description", jsDescription);
+
+    return jsObj;
+}
+
 } // namespace CliTool
 } // namespace OHOS

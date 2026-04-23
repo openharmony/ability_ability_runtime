@@ -25,6 +25,7 @@
 #include "exec_result.h"
 #include "native_engine/native_engine.h"
 #include "tool_info.h"
+#include "tool_summary.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -87,6 +88,14 @@ napi_value CreateJsSubCommandInfo(napi_env env, const SubCommandInfo &subcmd);
  * @return Returns the JavaScript object.
  */
 napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool);
+
+/**
+ * @brief Create JavaScript ToolSummary object.
+ * @param env The N-API environment.
+ * @param summary The ToolSummary structure.
+ * @return Returns the JavaScript object.
+ */
+napi_value CreateJsToolSummary(napi_env env, const ToolSummary &summary);
 
 } // namespace CliTool
 } // namespace OHOS
