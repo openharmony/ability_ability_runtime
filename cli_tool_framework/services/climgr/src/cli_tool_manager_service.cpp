@@ -59,16 +59,17 @@ void CliToolManagerService::OnStart()
         TAG_LOGE(AAFwkTag::CLI_TOOL, "cli service is nullptr");
         return;
     }
-    if (!Publish(cliService)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Publish failed");
-        return;
-    }
 
     int32_t ret = CliToolDataManager::GetInstance().EnsureToolsLoaded();
     if (ret != 0) {
         TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to load: %{public}d", ret);
     } else {
         TAG_LOGI(AAFwkTag::CLI_TOOL, "Successfully loaded");
+    }
+
+    if (!Publish(cliService)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Publish failed");
+        return;
     }
 }
 

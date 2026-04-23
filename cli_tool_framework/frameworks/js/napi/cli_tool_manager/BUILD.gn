@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("clitoolmanager_napi") {
+ohos_shared_library("climanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -47,7 +47,7 @@ ohos_shared_library("clitoolmanager_napi") {
     "napi:ace_napi",
   ]
 
-  relative_install_dir = "module/app/cli_tool"
+  relative_install_dir = "module/app/ability"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
