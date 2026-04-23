@@ -84,6 +84,7 @@
 #include "modular_object_manager.h"
 #include "modular_object_utils.h"
 #include "multi_app_utils.h"
+#include "native_ability_util.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
 #include "preload_manager_service.h"
@@ -12781,6 +12782,11 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
     if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::PAGE ||
         abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "called ability not common ability");
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+
+    if (NativeAbilityMetaData::IsWithNative(abilityRequest.abilityInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Native ability not supported");
         return RESOLVE_CALL_ABILITY_TYPE_ERR;
     }
 

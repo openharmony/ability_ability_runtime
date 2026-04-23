@@ -71,7 +71,7 @@ bool AbilityNativeThread::LoadNativeModule(const AAFwk::NativeAbilityMetaData& m
         moduleHandle_ = nullptr;
         return false;
     }
-    OHMain_ = rawMain;
+    ohMainFun_ = rawMain;
 
     TAG_LOGI(AAFwkTag::ABILITY, "OHMain function found: %{public}s", metaData.nativeModuleFunc.c_str());
 
@@ -101,13 +101,18 @@ bool AbilityNativeThread::LoadNativeModule(const AAFwk::NativeAbilityMetaData& m
 
 void AbilityNativeThread::RunMain()
 {
-    if (OHMain_ == nullptr) {
+    if (ohMainFun_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "OHMain function is null, cannot run native thread");
         return;
     }
 
-    // Capture OHMain_ by value to avoid capturing this
-    auto mainFunc = OHMain_;
+    if (nativeThread_.joinable()) {
+        TAG_LOGW(AAFwkTag::ABILITY, "Native thread running");
+        return;
+    }
+
+    // Capture ohMainFun_ by value to avoid capturing this
+    auto mainFunc = ohMainFun_;
     nativeThread_ = std::thread([mainFunc]() {
         pthread_setname_np(pthread_self(), "native_main");
         TAG_LOGI(AAFwkTag::ABILITY, "Native thread started");

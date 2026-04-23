@@ -2078,7 +2078,7 @@ napi_value JsApplicationContextUtils::OnGetUIAbilityByInstanceId(napi_env env, N
         return CreateJsUndefined(env);
     }
 
-    napi_value result = nativeAbility->jsAbilityObj;
+    napi_value result = nativeAbility->jsAbilityObj->GetNapiValue();
     TAG_LOGD(AAFwkTag::APPKIT, "Get UIAbility for instanceId: %{public}s", instanceId.c_str());
     return result;
 }

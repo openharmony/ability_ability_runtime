@@ -25,6 +25,8 @@ typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 typedef class __ani_object* ani_object;
 
+class NativeReference;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,7 +34,7 @@ struct NativeAbilityWrapper {
     std::string instanceId;
     std::string abilityName;
     napi_env env = nullptr;
-    napi_value jsAbilityObj = nullptr;
+    std::shared_ptr<NativeReference> jsAbilityObj;
     ani_object etsAbilityObj = nullptr;
 };
 
@@ -92,7 +94,7 @@ public:
     static void* OpenNativeLibrary(const std::string& bundleModuleName, const std::string& fileName);
 private:
     void *moduleHandle_ = nullptr;
-    std::function<void()> OHMain_;
+    std::function<void()> ohMainFun_;
     std::function<void(const NativeAbilityWrapper*)> postAbilityFunc_;
     std::function<void(const NativeAbilityWrapper*)> destroyAbilityFunc_;
     std::function<void()> notifyProcessExitFunc_;

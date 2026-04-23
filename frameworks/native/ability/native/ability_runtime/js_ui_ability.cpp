@@ -2542,18 +2542,12 @@ void JsUIAbility::HandleNativeModule(napi_env env)
         return;
     }
 
-    napi_value jsAbilityObj = jsAbilityObj_->GetNapiValue();
-    if (!CheckTypeForNapiValue(env, jsAbilityObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "jsAbilityObj is not an object");
-        return;
-    }
-
     // Create NativeAbilityWrapper
     auto wrapper = std::make_shared<NativeAbilityWrapper>();
     wrapper->instanceId = GetInstanceId();
     wrapper->abilityName = GetAbilityName();
     wrapper->env = env;
-    wrapper->jsAbilityObj = jsAbilityObj;
+    wrapper->jsAbilityObj = jsAbilityObj_;
 
     // Get ApplicationContext
     auto appContext = AbilityRuntime::Context::GetApplicationContext();
