@@ -58,9 +58,9 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         return CreateJsUndefined(env);
     }
 
-    std::string name;
-    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_ZERO], name) || name.empty()) {
-        ThrowInvalidParamError(env, "Tool name is required");
+    ExecToolParam param;
+    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_ZERO], param.toolName) || param.toolName.empty()) {
+        ThrowInvalidParamError(env, "Tool toolName is required");
         return CreateJsUndefined(env);
     }
 
@@ -70,15 +70,13 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         return CreateJsUndefined(env);
     }
 
-    std::string challenge;
-    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_TWO], challenge)) {
+    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_TWO], param.challenge)) {
         ThrowInvalidParamError(env, "Tool challenge is required");
         return CreateJsUndefined(env);
     }
 
-    ExecOptions options;
     if (argc > INDEX_THREE && argv[INDEX_THREE] != nullptr) {
-        if (!UnwrapExecOptions(env, argv[INDEX_THREE], options)) {
+        if (!UnwrapExecOptions(env, argv[INDEX_THREE], param.options)) {
             ThrowInvalidParamError(env, "Tool options is required");
             return CreateJsUndefined(env);
         }
@@ -87,8 +85,8 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
     auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
     auto session = std::make_shared<CliSessionInfo>();
 
-    NapiAsyncTask::ExecuteCallback execute = [innerErrCode, name, args, challenge, options, session]() {
-        *innerErrCode = CliToolMGRClient::GetInstance().ExecTool(name, args, challenge, options, *session);
+    NapiAsyncTask::ExecuteCallback execute = [innerErrCode, param, args, session]() {
+        *innerErrCode = CliToolMGRClient::GetInstance().ExecTool(param, args, *session);
     };
 
     NapiAsyncTask::CompleteCallback complete = [innerErrCode, session](

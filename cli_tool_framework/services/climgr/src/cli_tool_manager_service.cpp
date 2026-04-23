@@ -15,14 +15,28 @@
 
 #include "cli_tool_manager_service.h"
 
+#include <atomic>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "tool_util.h"
 
 namespace OHOS {
 namespace CliTool {
+namespace {
+constexpr int32_t ERR_OK = 0;
+constexpr int32_t ERR_NO_INIT = -1;
+constexpr int32_t ERR_INVALID_PARAM = -2;
+constexpr int32_t ERR_SESSION_LIMIT_EXCEEDED = -100;
+constexpr int32_t MAX_CONCURRENT_SESSIONS = 10;
+} // namespace
+
 std::mutex g_mutex;
+static std::atomic<int32_t> g_activeSessionCount{0};
 sptr<CliToolManagerService> CliToolManagerService::instance_ = nullptr;
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(CliToolManagerService::GetInstance().GetRefPtr());
 
@@ -87,14 +101,77 @@ int32_t CliToolManagerService::RegisterTool(const ToolInfo &tool)
     return CliToolDataManager::GetInstance().RegisterTool(tool);
 }
 
-int32_t CliToolManagerService::ExecTool(const std::string &cliName,
-    const std::map<std::string, std::string> &args,
-    const std::string &challenge,
-    const ExecOptions &options,
+int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
     CliSessionInfo &session)
 {
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: %{public}s", cliName.c_str());
-    return 0;
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: toolName=%{public}s, subcommand=%{public}s",
+        param.toolName.c_str(), param.subcommand.c_str());
+    if (g_activeSessionCount.load() >= MAX_CONCURRENT_SESSIONS) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Session limit exceeded: %{public}d/%{public}d",
+            g_activeSessionCount.load(), MAX_CONCURRENT_SESSIONS);
+        return ERR_SESSION_LIMIT_EXCEEDED;
+    }
+
+    ToolInfo toolInfo;
+    if (GetToolInfoByName(param.toolName, toolInfo) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Tool not found");
+        return ERR_INVALID_PARAM;
+    }
+
+    auto &toolUtil = ToolUtil::GetInstance();
+    if (!toolUtil.ValidateInputSchemaProperties(toolInfo.inputSchema, param.toolName, param.subcommand, args)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Input schema validation failed");
+        return ERR_INVALID_PARAM;
+    }
+
+    int32_t counter = g_activeSessionCount.fetch_add(1, std::memory_order_relaxed) + 1;
+    toolUtil.ConstructSessionInfo(session, param.toolName, counter);
+
+    std::string sandboxConfig;
+    if (!toolUtil.GenerateSandboxConfig(param.challenge, sandboxConfig)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "caller is not hap");
+        return ERR_INVALID_PARAM;
+    }
+
+    int stdoutPipe[2] = {-1, -1};
+    int stderrPipe[2] = {-1, -1};
+
+    if (!toolUtil.CreatePipe(stdoutPipe)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create stdout pipe");
+        return ERR_NO_INIT;
+    }
+
+    if (!toolUtil.CreatePipe(stderrPipe)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create stderr pipe");
+        close(stdoutPipe[0]);
+        close(stdoutPipe[1]);
+        return ERR_NO_INIT;
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to fork: %{public}d", errno);
+        close(stdoutPipe[0]);
+        close(stdoutPipe[1]);
+        close(stderrPipe[0]);
+        close(stderrPipe[1]);
+        return ERR_NO_INIT;
+    }
+
+    if (pid == 0) {
+        std::string cmdLine = param.toolName;
+        if (!param.subcommand.empty()) {
+            cmdLine += " " + param.subcommand;
+        }
+        toolUtil.ExecuteChildProcess(cmdLine, sandboxConfig, args, stdoutPipe, stderrPipe);
+        _exit(EXIT_FAILURE);
+    }
+
+    close(stdoutPipe[1]);
+    close(stderrPipe[1]);
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "Tool executed successfully: pid=%{public}d, sessionId=%{public}s",
+        pid, session.sessionId.c_str());
+    return ERR_OK;
 }
 } // namespace CliTool
 } // namespace OHOS
