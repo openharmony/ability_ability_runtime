@@ -31,6 +31,7 @@ enum class MemDumpType : uint32_t {
 struct MemDumpInfo : public Parcelable {
     MemDumpType dumpType = MemDumpType::INVALID;
     bool needLeakobj = false;
+    bool needRaw = false;
     uint32_t pid = 0;
     uint32_t tid = 0;
     bool isSync = false;
