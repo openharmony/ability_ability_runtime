@@ -16,12 +16,7 @@
 #ifndef OHOS_CLI_TOOL_JS_CLI_MANAGER_H
 #define OHOS_CLI_TOOL_JS_CLI_MANAGER_H
 
-#include <map>
-#include <memory>
-#include <string>
-
 #include "native_engine/native_engine.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace CliTool {

@@ -15,6 +15,8 @@
 
 #include "cli_session_info.h"
 
+#include "hilog_tag_wrapper.h"
+
 namespace OHOS {
 namespace CliTool {
 bool CliSessionInfo::Marshalling(Parcel &parcel) const
@@ -28,18 +30,9 @@ bool CliSessionInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(status)) {
         return false;
     }
-    if (!parcel.WriteInt64(startTime)) {
-        return false;
-    }
-    if (!parcel.WriteInt64(endTime)) {
-        return false;
-    }
-    // Write result presence flag
-    bool hasResult = (result != nullptr);
-    if (!parcel.WriteBool(hasResult)) {
-        return false;
-    }
-    if (hasResult && !result->Marshalling(parcel)) {
+
+    if (!parcel.WriteParcelable(result.get())) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Write result failed.");
         return false;
     }
     return true;
@@ -60,27 +53,13 @@ CliSessionInfo *CliSessionInfo::Unmarshalling(Parcel &parcel)
         delete info;
         return nullptr;
     }
-    if (!parcel.ReadInt64(info->startTime)) {
+
+    std::shared_ptr<ExecResult> execResult(parcel.ReadParcelable<ExecResult>());
+    if (execResult == nullptr) {
         delete info;
         return nullptr;
     }
-    if (!parcel.ReadInt64(info->endTime)) {
-        delete info;
-        return nullptr;
-    }
-    bool hasResult = false;
-    if (!parcel.ReadBool(hasResult)) {
-        delete info;
-        return nullptr;
-    }
-    if (hasResult) {
-        ExecResult *resultPtr = ExecResult::Unmarshalling(parcel);
-        if (resultPtr == nullptr) {
-            delete info;
-            return nullptr;
-        }
-        info->result = std::shared_ptr<ExecResult>(resultPtr);
-    }
+    info->result = execResult;
     return info;
 }
 } // namespace CliTool

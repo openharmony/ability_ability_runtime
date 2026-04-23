@@ -13,31 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_TOOL_UTIL_H
-#define OHOS_ABILITY_RUNTIME_TOOL_UTIL_H
+#ifndef OHOS_ABILITY_RUNTIME_CLI_MANAGER_ERROR_UTILS_H
+#define OHOS_ABILITY_RUNTIME_CLI_MANAGER_ERROR_UTILS_H
 
-#include <map>
+#include <native_engine/native_engine.h>
 #include <string>
 
 namespace OHOS {
-namespace AppExecFwk {
-struct BundleInfo;
-}
 namespace CliTool {
-class ToolUtil {
-public:
-    static int32_t ValidateInputSchemaProperties(const std::string &inputSchema, const std::string &subcommand,
-        const std::map<std::string, std::string> &args);
 
-    static std::string GenerateCliSessionId(const std::string &name);
+enum class CliManagerErrorCode {
+    ERROR_INVALID_PARAM = 401,
 
-    static bool GenerateSandboxConfig(const std::string &challenge, std::string &sandboxConfig);
+    ERROR_TOOL_NOT_FOUND = 35600030,
+    ERROR_REACH_LIMIT = 35600031,
 
-private:
-    static bool GetBundleInfoByTokenId(AppExecFwk::BundleInfo &bundleInfo);
+    ERROR_INNER = 35600050,
 };
 
-} // namespace CliTool
-} // namespace OHOS
+napi_value CreateCliManagerError(napi_env env, int32_t errCode, const std::string& errMsg = "");
 
-#endif // OHOS_ABILITY_RUNTIME_TOOL_UTIL_H
+napi_value CreateCliJsErrorByNativeErr(napi_env env, int32_t nativeErr);
+
+}  // namespace CliTool
+}  // namespace OHOS
+
+#endif  // OHOS_ABILITY_RUNTIME_CLI_MANAGER_ERROR_UTILS_H
