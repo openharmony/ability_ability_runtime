@@ -16,9 +16,9 @@
 #ifndef OHOS_CLI_TOOL_JS_CLI_MANAGER_H
 #define OHOS_CLI_TOOL_JS_CLI_MANAGER_H
 
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
 
 #include "native_engine/native_engine.h"
 #include "refbase.h"
@@ -55,6 +55,15 @@ public:
      */
     static napi_value ExecTool(napi_env env, napi_callback_info info);
 
+    /**
+     * @brief Native method for getting tool info by name.
+     *
+     * @param env The N-API environment.
+     * @param info The N-API callback info.
+     * @return Returns the N-API value.
+     */
+    static napi_value GetToolInfoByName(napi_env env, napi_callback_info info);
+
 private:
     /**
      * @brief Implementation for executing a CLI tool.
@@ -65,6 +74,16 @@ private:
      * @return Returns the N-API value.
      */
     napi_value OnExecTool(napi_env env, size_t argc, napi_value *argv);
+
+    /**
+     * @brief Implementation for getting tool info by name.
+     *
+     * @param env The N-API environment.
+     * @param argc The argument count.
+     * @param argv The argument values.
+     * @return Returns the N-API value.
+     */
+    napi_value OnGetToolInfoByName(napi_env env, size_t argc, napi_value *argv);
 };
 
 /**
