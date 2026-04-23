@@ -458,7 +458,26 @@ void DumpRuntimeHelper::DumpKmpKotlinHeap(const OHOS::AppExecFwk::MemDumpInfo &i
 
 void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
 {
-    TAG_LOGE(AAFwkTag::APPKIT, "DumpJsvmHeap DumpJsvmHeap");
+    TAG_LOGE(AAFwkTag::APPKIT, "dump jsvm heap, tid:%{public}d", info.tid);
+    void* jsvmHandle = dlopen("libjsvm.so", RTLD_LAZY);
+    if (jsvmHandle == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "jsvm dlopen failed");
+        return;
+    }
+    using jsvmFunc = int (*)(uint32_t);
+    auto jsvmDump = reinterpret_cast<jsvmFunc>(dlsym(jsvmHandle, "jsvm_dump_heapsnapshot"));
+    if (jsvmFunc == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "jsvm dlsym failed");
+        dlclose(jsvmHandle);
+        return;
+    }
+    int ret = jsvmDump(info.tid);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "jsvm dump failed");
+        dlclose(jsvmHandle);
+        return;
+    }
+    dlclose(jsvmHandle);
 }
 
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
