@@ -2216,6 +2216,7 @@ void MainThread::ProcessExit(const ProcessExitInfo& info)
         result, info.pid, info.processName.c_str(), KILL_REASON, info.foreground, info.isUncatchable);
 }
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
 class CustomizedBufferConsumerListener : public IBufferConsumerListener {
 public:
     CustomizedBufferConsumerListener() {}
@@ -2223,8 +2224,6 @@ public:
 
     void OnBufferAvailable() override {}
 };
-
-#if defined(NWEB) && defined(NWEB_GRAPHIC)
 void MainThread::HandleNWebPreload()
 {
     if (!mainHandler_) {

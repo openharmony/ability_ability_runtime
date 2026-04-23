@@ -1257,7 +1257,7 @@ void EtsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
             scene_->SetNavDestinationInfo(navDestinationInfo);
         }
         ret = scene_->Init(
-            displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken, "", false, renderSession_);
+            displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken, false, renderSession_);
     } else {
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
     }
