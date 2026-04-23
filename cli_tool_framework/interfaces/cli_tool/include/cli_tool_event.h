@@ -13,32 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
-#define OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_CLI_TOOL_EVENT_H
+#define OHOS_ABILITY_RUNTIME_CLI_TOOL_EVENT_H
 
 #include <string>
 
-#include "exec_result.h"
 #include "parcel.h"
 
 namespace OHOS {
 namespace CliTool {
+
 /**
- * @struct CliSessionInfo
- * @brief Information about a CLI tool execution session.
+ * @brief Tool event (for async mode)
  */
-class CliSessionInfo : public Parcelable {
+class CliToolEvent : public Parcelable {
 public:
-    std::string sessionId;
-    std::string toolName;
-    std::string status;            // "running", "completed", "failed"
-    std::shared_ptr<ExecResult> result = nullptr;  // optional, only when status="completed"
+    std::string type;              // "stdout", "stderr", "exit", "error"
+    std::string eventData;
+    int32_t exitCode = 0;
+    int64_t timestamp = 0;
 
-    CliSessionInfo() = default;
+    CliToolEvent() = default;
+    ~CliToolEvent() = default;
 
-    bool Marshalling(Parcel &parcel) const;
-    static CliSessionInfo *Unmarshalling(Parcel &parcel);
+    bool Marshalling(Parcel &parcel) const override;
+    static CliToolEvent *Unmarshalling(Parcel &parcel);
 };
+
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_CLI_SESSION_INFO_H
+
+#endif // OHOS_ABILITY_RUNTIME_CLI_TOOL_EVENT_H

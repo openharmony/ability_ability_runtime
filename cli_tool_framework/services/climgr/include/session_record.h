@@ -16,51 +16,195 @@
 #ifndef OHOS_ABILITY_RUNTIME_SESSION_RECORD_H
 #define OHOS_ABILITY_RUNTIME_SESSION_RECORD_H
 
+#include <atomic>
 #include <memory>
+#include <mutex>
+#include <string>
+#include <chrono>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <condition_variable>
 
 #include "cli_session_info.h"
-#include "iremote_object.h"
 
 namespace OHOS {
 namespace CliTool {
+
+enum class SessionState {
+    SPAWNING = 0,
+    RUNNING,
+    CANCELLING,
+};
+
 class SessionRecord {
 public:
-    SessionRecord(std::shared_ptr<CliSessionInfo> sessinInfo, pid_t cliPid, sptr<IRemoteObject> callback)
-        : callBack_(callback),
-          cliPid_(cliPid),
-          sessinInfo_(sessinInfo) {}
+    SessionRecord() = default;
     ~SessionRecord() = default;
 
-    inline void AddStartTime(int64_t startTime)
+    int32_t callerPid = -1;
+    std::string sessionId;
+    std::string toolName;
+    std::string eventId;
+    pid_t processId = -1;
+    int64_t startTime = 0;
+    int32_t timeoutMs = 0;
+    int32_t stdinPipe[2] = {-1, -1};        // [0]=read, [1]=write
+    int32_t stdoutPipe[2] = {-1, -1};       // [0]=read, [1]=write
+    int32_t stderrPipe[2] = {-1, -1};
+
+    void SetState(SessionState state)
     {
-        startTime_ = startTime;
+        state_.store(state, std::memory_order_release);
     }
 
-    inline sptr<IRemoteObject> GetCallback()
+    SessionState GetState() const
     {
-        return callBack_;
+        return state_.load(std::memory_order_acquire);
     }
 
-    inline std::shared_ptr<CliSessionInfo> GetCliSessionInfo()
+    void SetTerminalResult(int status)
     {
-        return sessinInfo_;
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        terminalStatus_ = status;
+        endTimeMs_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        processExited_.store(true, std::memory_order_release);
     }
 
-    inline int64_t GetStartTime()
+    int GetTerminalStatus() const
     {
-        return startTime_;
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        return terminalStatus_;
     }
 
-    inline pid_t GetPid()
+    void SetTimedOut(bool timedOut)
     {
-        return cliPid_;
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        timedOut_ = timedOut;
+    }
+
+    bool TimedOut() const
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        return timedOut_;
+    }
+
+    int64_t GetEndTimeMs() const
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        return endTimeMs_;
+    }
+
+    bool HasProcessExited() const
+    {
+        return processExited_.load(std::memory_order_acquire);
+    }
+
+    void MarkStdoutClosed()
+    {
+        stdoutClosed_.store(true, std::memory_order_release);
+    }
+
+    void MarkStderrClosed()
+    {
+        stderrClosed_.store(true, std::memory_order_release);
+    }
+
+    bool OutputDrained() const
+    {
+        return stdoutClosed_.load(std::memory_order_acquire) &&
+            stderrClosed_.load(std::memory_order_acquire);
+    }
+
+    bool BeginCleanup()
+    {
+        bool expected = false;
+        return cleanupStarted_.compare_exchange_strong(expected, true, std::memory_order_acq_rel);
+    }
+
+    void AppendOutput(bool isStdout, const std::string &data)
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        if (isStdout) {
+            stdoutText_ += data;
+            TrimBufferedOutput(stdoutText_);
+            return;
+        }
+        stderrText_ += data;
+        TrimBufferedOutput(stderrText_);
+    }
+
+    bool SetBackground(bool background)
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        bool oldBackground = background_;
+        background_ = background;
+        return oldBackground;
+    }
+
+    bool Background() const
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        return background_;
+    }
+
+    void BuildSessionInfo(CliSessionInfo &session) const
+    {
+        session.sessionId = sessionId;
+        session.toolName = toolName;
+
+        if (!HasProcessExited() || !OutputDrained()) {
+            session.result = nullptr;
+            session.status = "running";
+        } else {
+            session.result = BuildExecResult();
+            session.status =
+                (!session.result || session.result->timedOut || session.result->exitCode != 0) ?
+                "failed" : "completed";
+        }
     }
 
 private:
-    sptr<IRemoteObject> callBack_;
-    pid_t cliPid_;
-    std::shared_ptr<CliSessionInfo> sessinInfo_;
-    int64_t startTime_ = 0;
+    void TrimBufferedOutput(std::string &buffer)
+    {
+        if (buffer.size() <= MAX_BUFFERED_OUTPUT_BYTES) {
+            return;
+        }
+        buffer.erase(0, buffer.size() - MAX_BUFFERED_OUTPUT_BYTES);
+    }
+
+    std::shared_ptr<ExecResult> BuildExecResult() const
+    {
+        auto result = std::make_shared<ExecResult>();
+        if (result == nullptr) {
+            return nullptr;
+        }
+
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        result->exitCode = WIFEXITED(terminalStatus_) ? WEXITSTATUS(terminalStatus_) : -1;
+        result->outputText = stdoutText_;
+        result->errorText = stderrText_;
+        result->signalNumber = WIFSIGNALED(terminalStatus_) ? WTERMSIG(terminalStatus_) : 0;
+        result->timedOut = timedOut_;
+        result->executionTime = (endTimeMs_ > startTime) ? (endTimeMs_ - startTime) : 0;
+        return result;
+    }
+
+private:
+    std::atomic<SessionState> state_ {SessionState::SPAWNING};
+    std::atomic<bool> processExited_ {false};
+    std::atomic<bool> stdoutClosed_ {false};
+    std::atomic<bool> stderrClosed_ {false};
+    std::atomic<bool> cleanupStarted_ {false};
+    mutable std::mutex resultMutex_;
+    int terminalStatus_ = 0;
+    bool timedOut_ = false;
+    bool background_ = true;
+    int64_t endTimeMs_ = 0;
+    std::string stdoutText_ = "";
+    std::string stderrText_ = "";
+
+    static constexpr size_t MAX_BUFFERED_OUTPUT_BYTES = 64 * 1024;
 };
 
 } // namespace CliTool

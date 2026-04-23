@@ -66,6 +66,10 @@ enum {
      * Result (35700009): The caller is not system hap.
      */
     ERR_NOT_SYSTEM_APP = 35700008,
+
+    ERR_CLI_SESSION_NOT_FOUND = 35700009,
+
+    ERR_CLI_SEND_MESSAGE = 35700010,
 };
 
 } // namespace CliTool
