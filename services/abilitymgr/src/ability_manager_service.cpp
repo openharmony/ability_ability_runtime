@@ -280,6 +280,7 @@ constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig.screenmode";
 constexpr const char* UD_KEY = "ability.want.params.udKey";
 constexpr const char* UI_EXTENSION_CONTEXT_TRANSFER_ROOT_HOST_TOKEN = "ohos.ability.params.transferRootHostToken";
+constexpr const char* UI_EXTENSION_TARGET_USER_ID = "ohos.ability.params.uiExtensionTargetUserId";
 constexpr int32_t INSTALL_TYPE_UPGRADE = 2;
 constexpr int64_t CLEAR_USER_LOCKED_BUNDLE_LIST_KEY_DELAY_TIME = 60 * 1000; // 60s
 constexpr const char* VPN_PERMISSION_IF = "libnet_vpn_permission_if.z.so";
@@ -4204,6 +4205,10 @@ int AbilityManagerService::RequestModalUIExtensionWithAccountInner(Want want, in
         // Compare
         if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
             focusName == callerName) {
+            int32_t focusUserId = record->GetUid() / BASE_USER_RANGE;
+            if(focusUserId == U0_USER_ID){
+                want.SetParam(UI_EXTENSION_TARGET_USER_ID, accountId);
+            }
             TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension with accountId is called!");
             return record->CreateModalUIExtension(want);
         }
@@ -4759,6 +4764,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     }
 
     result = CheckOptExtensionAbility(extensionSessionInfo->want, abilityRequest, validUserId, extensionType);
+    abilityRequest.want.RemoveParam(UI_EXTENSION_TARGET_USER_ID);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "checkOptExtensionAbility error");
         eventInfo.errReason = "checkOptExtensionAbility error";
@@ -12612,6 +12618,13 @@ bool AbilityManagerService::CheckUIExtensionCallerPidByHostWindowId(const Abilit
     CHECK_POINTER_AND_RETURN(sessionInfo, false);
     auto hostWindowId = sessionInfo->hostWindowId;
     auto callerUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerUser = callerUid / BASE_USER_RANGE;
+    
+    if(callerUser == U0_USER_ID && abilityRequest.want.HasParameter(UI_EXTENSION_TARGET_USER_ID)){
+        int32_t uiExtensionTargetUserId = abilityRequest.want.GetIntParam(UI_EXTENSION_TARGET_USER_ID, -1);
+        callerUserId = uiExtensionTargetUserId == -1 ? callerUserId : uiExtensionTargetUserId;
+    }
     auto sceneSessionManager = Rosen::MockSessionManagerService::GetInstance().GetSceneSessionManagerLiteBySA(callerUserId);
     CHECK_POINTER_AND_RETURN(sceneSessionManager, false);
     pid_t hostPid = 0;
