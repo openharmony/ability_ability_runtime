@@ -56,6 +56,7 @@ ohos_shared_library("cli_tool_client") {
     "src/exec_options.cpp",
     "src/exec_result.cpp",
     "src/exec_tool_param.cpp",
+    "src/sub_command_info.cpp",
     "src/tool_info.cpp",
     "src/tool_summary.cpp",
   ]
