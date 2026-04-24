@@ -31,15 +31,14 @@ CliToolMGRClient& CliToolMGRClient::GetInstance()
     return instance;
 }
 
-int32_t CliToolMGRClient::ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
-    CliSessionInfo &session)
+int32_t CliToolMGRClient::ExecTool(const ExecToolParam &param, sptr<IRemoteObject> callback)
 {
     auto proxy = GetCliToolMgrProxy();
     if (proxy == nullptr) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "connect failed");
         return GET_CLI_TOOL_MGR_SERVICE_FAILED;
     }
-    return proxy->ExecTool(param, args, session);
+    return proxy->ExecTool(param, callback);
 }
 
 ErrCode CliToolMGRClient::GetAllToolSummaries(std::vector<ToolSummary> &summaries)

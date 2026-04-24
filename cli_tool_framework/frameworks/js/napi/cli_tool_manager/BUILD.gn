@@ -45,6 +45,7 @@ ohos_shared_library("climanager_napi") {
     "ability_base:base",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
