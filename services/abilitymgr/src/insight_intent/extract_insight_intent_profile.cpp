@@ -15,6 +15,8 @@
 
 #include "extract_insight_intent_profile.h"
 
+#include <algorithm>
+
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
 
@@ -52,6 +54,7 @@ const std::string INSIGHT_INTENT_NAVIGATION_ID = "navigationId";
 const std::string INSIGHT_INTENT_NAV_DESTINATION_NAME = "navDestinationName";
 const std::string INSIGHT_INTENT_ABILITY_NAME = "abilityName";
 const std::string INSIGHT_INTENT_FUNCTION_NAME = "functionName";
+const std::string INSIGHT_INTENT_FUNCTION_RETURN_TYPE = "functionReturnType";
 const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParamList";
 const std::string INSIGHT_INTENT_PARAM_NAME = "paramName";
 const std::string INSIGHT_INTENT_PARAM_MAPPING_NAME = "paramMappingName";
@@ -337,6 +340,12 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         insightIntentInfo.functionName,
         false,
         g_extraParseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FUNCTION_RETURN_TYPE,
+        insightIntentInfo.functionReturnType,
+        false,
+        g_extraParseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_FUNCTION_PARAMS,
@@ -461,6 +470,7 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
         {INSIGHT_INTENT_EXECUTE_MODE, info.executeMode},
         {INSIGHT_INTENT_FUNCTION_NAME, info.functionName},
+        {INSIGHT_INTENT_FUNCTION_RETURN_TYPE, info.functionReturnType},
         {INSIGHT_INTENT_FUNCTION_PARAMS, info.functionParams},
         {INSIGHT_INTENT_FORM_NAME, info.formName},
         {INSIGHT_INTENT_ENTITES, info.entities},
@@ -628,6 +638,8 @@ bool TransformToFunctionInfo(const ExtractInsightIntentProfileInfo &insightInten
 {
     info.functionName = insightIntent.functionName;
     TAG_LOGD(AAFwkTag::INTENT, "functionName: %{public}s", info.functionName.c_str());
+    info.functionReturnType = insightIntent.functionReturnType;
+    TAG_LOGD(AAFwkTag::INTENT, "functionReturnType: %{public}s", info.functionReturnType.c_str());
     info.functionParams.assign(insightIntent.functionParams.begin(), insightIntent.functionParams.end());
     for (size_t i = 0; i < info.functionParams.size(); i++) {
         TAG_LOGD(AAFwkTag::INTENT, "functionParams[%{public}zu]: %{public}s", i, info.functionParams[i].c_str());
