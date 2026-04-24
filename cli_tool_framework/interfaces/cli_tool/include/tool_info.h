@@ -17,12 +17,14 @@
 #define OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 
 #include "arg_mapping.h"
+#include "sub_command_info.h"
 #include "tool_summary.h"
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
 #include <map>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <parcel.h>
 #include <string>
 #include <vector>
@@ -31,26 +33,6 @@
 
 namespace OHOS {
 namespace CliTool {
-
-/**
- * @brief Subcommand information structure
- */
-class SubCommandInfo : public Parcelable {
-public:
-    std::string description;
-    std::vector<std::string> requirePermissions;
-    std::string inputSchema;    // JSON string
-    std::string outputSchema;   // JSON string
-    std::shared_ptr<ArgMapping> argMapping;
-    std::vector<std::string> eventTypes;
-    std::string eventSchemas;   // JSON string
-
-    SubCommandInfo() = default;
-    ~SubCommandInfo() = default;
-
-    bool Marshalling(Parcel &parcel) const override;
-    static SubCommandInfo *Unmarshalling(Parcel &parcel);
-};
 
 /**
  * @brief Raw data type for IDL serialization
@@ -105,6 +87,16 @@ public:
 
     bool Marshalling(Parcel &parcel) const override;
     static ToolInfo *Unmarshalling(Parcel &parcel);
+
+    /**
+     * @brief Parse ToolInfo from JSON object
+     */
+    static ToolInfo ParseFromJson(const nlohmann::json &json);
+
+    /**
+     * @brief Convert ToolInfo to JSON object
+     */
+    nlohmann::json ParseToJson() const;
 };
 } // namespace CliTool
 } // namespace OHOS

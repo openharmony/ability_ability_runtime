@@ -20,53 +20,6 @@
 namespace OHOS {
 namespace CliTool {
 
-// SubCommandInfo implementation
-bool SubCommandInfo::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteString(description) &&
-           parcel.WriteStringVector(requirePermissions) &&
-           parcel.WriteString(inputSchema) &&
-           parcel.WriteString(outputSchema) &&
-           parcel.WriteBool(argMapping != nullptr) &&
-           (argMapping == nullptr || argMapping->Marshalling(parcel)) &&
-           parcel.WriteStringVector(eventTypes) &&
-           parcel.WriteString(eventSchemas);
-}
-
-SubCommandInfo *SubCommandInfo::Unmarshalling(Parcel &parcel)
-{
-    auto *subCmd = new (std::nothrow) SubCommandInfo();
-    if (subCmd == nullptr) {
-        return nullptr;
-    }
-
-    bool hasArgMapping = false;
-    if (!parcel.ReadString(subCmd->description) ||
-        !parcel.ReadStringVector(&subCmd->requirePermissions) ||
-        !parcel.ReadString(subCmd->inputSchema) ||
-        !parcel.ReadString(subCmd->outputSchema) ||
-        !parcel.ReadBool(hasArgMapping)) {
-        delete subCmd;
-        return nullptr;
-    }
-
-    if (hasArgMapping) {
-        subCmd->argMapping.reset(ArgMapping::Unmarshalling(parcel));
-        if (subCmd->argMapping == nullptr) {
-            delete subCmd;
-            return nullptr;
-        }
-    }
-
-    if (!parcel.ReadStringVector(&subCmd->eventTypes) ||
-        !parcel.ReadString(subCmd->eventSchemas)) {
-        delete subCmd;
-        return nullptr;
-    }
-
-    return subCmd;
-}
-
 // ToolInfo implementation
 bool ToolInfo::Marshalling(Parcel &parcel) const
 {
@@ -238,5 +191,84 @@ ToolInfo *ToolInfo::Unmarshalling(Parcel &parcel)
 
     return tool;
 }
+
+ToolInfo ToolInfo::ParseFromJson(const nlohmann::json &json)
+{
+    ToolInfo tool;
+
+    if (json.contains("name") && json["name"].is_string()) {
+        tool.name = json["name"];
+    }
+    if (json.contains("version") && json["version"].is_string()) {
+        tool.version = json["version"];
+    }
+    if (json.contains("description") && json["description"].is_string()) {
+        tool.description = json["description"];
+    }
+    if (json.contains("executablePath") && json["executablePath"].is_string()) {
+        tool.executablePath = json["executablePath"];
+    }
+    if (json.contains("requirePermissions") && json["requirePermissions"].is_array()) {
+        tool.requirePermissions = json["requirePermissions"];
+    }
+    if (json.contains("inputSchema") && json["inputSchema"].is_object()) {
+        tool.inputSchema = json["inputSchema"].dump();
+    }
+    if (json.contains("outputSchema") && json["outputSchema"].is_object()) {
+        tool.outputSchema = json["outputSchema"].dump();
+    }
+    if (json.contains("argMapping") && json["argMapping"].is_object()) {
+        tool.argMapping = ArgMapping::ParseFromJson(json["argMapping"]);
+    }
+    if (json.contains("eventSchemas") && json["eventSchemas"].is_object()) {
+        tool.eventSchemas = json["eventSchemas"].dump();
+    }
+    if (json.contains("timeout") && json["timeout"].is_number()) {
+        tool.timeout = json["timeout"];
+    }
+    if (json.contains("eventTypes") && json["eventTypes"].is_array()) {
+        tool.eventTypes = json["eventTypes"];
+    }
+    if (json.contains("hasSubCommand") && json["hasSubCommand"].is_boolean()) {
+        tool.hasSubCommand = json["hasSubCommand"];
+    }
+    if (json.contains("subcommands") && json["subcommands"].is_object()) {
+        for (auto it = json["subcommands"].begin(); it != json["subcommands"].end(); ++it) {
+            tool.subcommands[it.key()] = SubCommandInfo::ParseFromJson(it.value());
+        }
+    }
+
+    return tool;
+}
+
+nlohmann::json ToolInfo::ParseToJson() const
+{
+    nlohmann::json j;
+
+    j["name"] = name;
+    j["version"] = version;
+    j["description"] = description;
+    j["executablePath"] = executablePath;
+    j["requirePermissions"] = requirePermissions;
+    j["inputSchema"] = inputSchema;
+    j["outputSchema"] = outputSchema;
+    if (argMapping != nullptr) {
+        j["argMapping"] = argMapping->ParseToJson();
+    }
+    j["eventSchemas"] = eventSchemas;
+    j["timeout"] = timeout;
+    j["eventTypes"] = eventTypes;
+    j["hasSubCommand"] = hasSubCommand;
+    if (!subcommands.empty()) {
+        nlohmann::json subcommandsJson;
+        for (const auto &pair : subcommands) {
+            subcommandsJson[pair.first] = pair.second.ParseToJson();
+        }
+        j["subcommands"] = subcommandsJson;
+    }
+
+    return j;
+}
+
 } // namespace CliTool
 } // namespace OHOS
