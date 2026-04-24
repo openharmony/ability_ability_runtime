@@ -1303,6 +1303,7 @@ private:
     bool ExactSpecified(const AbilityRequest &abilityRequest);
     bool CheckStartByOEExt(const AbilityRequest &abilityRequest, int32_t requestId,
         int32_t &persistentId, bool &reuse);
+    bool CalcHideNativeWindow(int32_t persistentId, const AppExecFwk::AbilityInfo& abilityInfo);
     
     struct CallerInfo {
         uint32_t callerTokenId = 0;
