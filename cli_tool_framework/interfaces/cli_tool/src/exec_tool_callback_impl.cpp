@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-sequenceable ExecToolParam..OHOS.CliTool.ExecToolParam;
-sequenceable OHOS.CliTool.ToolSummary;
-sequenceable OHOS.IRemoteObject;
-sequenceable ToolInfo..OHOS.CliTool.ToolInfo;
+#include "exec_tool_callback_impl.h"
 
-interface OHOS.CliTool.ICliToolManager {
-    void GetAllToolSummaries([out] ToolSummary[] summaries);
-    void GetToolInfoByName([in] String name, [out] ToolInfo tool);
-    void GetAllToolInfos([out] ToolInfo[] tools);
-    void RegisterTool([in] ToolInfo tool);
-    void ExecTool([in] ExecToolParam param, [in] IRemoteObject objectCallback);
+#include "hilog_tag_wrapper.h"
+
+namespace OHOS {
+namespace CliTool {
+int32_t ExecToolCallbackImpl::SendResult(const CliSessionInfo &session)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecToolCallbackImpl send result, sessionId=%{public}s, status=%{public}s",
+        session.sessionId.c_str(), session.status.c_str());
+    if (task_) {
+        TAG_LOGD(AAFwkTag::CLI_TOOL, "ExecToolCallbackImpl invoke callback");
+        task_(session);
+    }
+    return ERR_OK;
 }
+}  // namespace CliTool
+}  // namespace OHOS

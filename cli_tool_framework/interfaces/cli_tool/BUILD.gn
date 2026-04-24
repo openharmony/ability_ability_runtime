@@ -28,6 +28,19 @@ idl_gen_interface("cli_tool_manager_interface") {
   log_tag = "CliToolManager"
 }
 
+idl_callback_sources = [
+  "${target_gen_dir}/exec_tool_callback_proxy.cpp",
+  "${target_gen_dir}/exec_tool_callback_stub.cpp",
+]
+
+idl_gen_interface("exec_tool_callback") {
+  src_idl = rebase_path("IExecToolCallback.idl")
+  dst_file = string_join(",", idl_callback_sources)
+  hitrace = "HITRACE_TAG_ABILITY_MANAGER"
+  log_domainid = "0xD001365"
+  log_tag = "CliToolManager"
+}
+
 config("cli_tool_client_config") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -47,7 +60,6 @@ ohos_shared_library("cli_tool_client") {
 
   public_configs = [ ":cli_tool_client_config" ]
 
-  output_values = get_target_outputs(":cli_tool_manager_interface")
   sources = [
     "src/arg_mapping.cpp",
     "src/cli_mgr_load_callback.cpp",
@@ -55,20 +67,28 @@ ohos_shared_library("cli_tool_client") {
     "src/cli_tool_mgr_client.cpp",
     "src/exec_options.cpp",
     "src/exec_result.cpp",
+    "src/exec_tool_callback_impl.cpp",
     "src/exec_tool_param.cpp",
     "src/tool_info.cpp",
     "src/tool_summary.cpp",
   ]
+  output_values = get_target_outputs(":cli_tool_manager_interface")
   sources += filter_include(output_values, [ "*.cpp" ])
+  callback_values = get_target_outputs(":exec_tool_callback")
+  sources += filter_include(callback_values, [ "*.cpp" ])
   defines = [ "AMS_LOG_TAG = \"CliToolManager\"" ]
 
-  deps = [ ":cli_tool_manager_interface" ]
+  deps = [
+    ":cli_tool_manager_interface",
+    ":exec_tool_callback",
+  ]
 
   external_deps = [
+    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
