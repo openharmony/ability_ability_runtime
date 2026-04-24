@@ -789,7 +789,8 @@ private:
     std::string pluginDefaultNamespaceLdDictionary_ = "";
     RuntimeUpdateParam runtimeUpdateParam_;
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
-    Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
+    sptr<OHOS::IConsumerSurface> cSurface_ = nullptr;
+    sptr<OHOS::Surface> pSurface_ = nullptr;
     std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
 #endif
 
