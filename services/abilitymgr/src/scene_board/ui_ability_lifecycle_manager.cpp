@@ -1972,8 +1972,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0),
         (sessionInfo->supportWindowModes).size(), abilityRequest.startOptions.GetSplitRatioPreference(),
         sessionInfo->specifiedFlag.c_str());
-    sessionInfo->nativeHideWindow = (sessionInfo->persistentId == 0 &&
-        NativeAbilityMetaData::HideWindowOnStartup(abilityRequest.abilityInfo));
+    sessionInfo->nativeHideWindow = CalcHideNativeWindow(sessionInfo->persistentId, abilityRequest.abilityInfo);
     if (abilityRequest.isStartInSplitMode) {
         return NotifySCBPendingActivationInSplitMode(sessionInfo, abilityRequest);
     }
@@ -2040,6 +2039,21 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         TAG_LOGE(AAFwkTag::ABILITYMGR, "PendingSessionActivation failed:%{public}d", ret);
     }
     return ret;
+}
+
+bool UIAbilityLifecycleManager::CalcHideNativeWindow(int32_t persistentId,
+    const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (persistentId == 0) {
+        return NativeAbilityMetaData::HideWindowOnStartup(abilityInfo);
+    }
+    auto iter = sessionAbilityMap_.find(persistentId);
+    if (iter != sessionAbilityMap_.end() && iter->second != nullptr) {
+        auto nativeState = iter->second->GetNativeState();
+        return nativeState != AbilityNativeState::NONE &&
+               nativeState != AbilityNativeState::NORMAL;
+    }
+    return false;
 }
 
 bool UIAbilityLifecycleManager::IsHookModule(const AbilityRequest &abilityRequest) const
@@ -2999,6 +3013,7 @@ int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &sp
     sessionInfo->startWindowOption = nullptr;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
     sessionInfo->userId = userId_;
+    sessionInfo->nativeHideWindow = CalcHideNativeWindow(sessionInfo->persistentId, abilityRequest.abilityInfo);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveAbilityToFront: %{public}d-%{public}s", requestId,
         abilityRequest.specifiedFlag.c_str());
     if (requestListId != REQUEST_LIST_ID_INIT) {

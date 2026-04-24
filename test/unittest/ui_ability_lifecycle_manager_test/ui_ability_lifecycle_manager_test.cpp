@@ -8518,5 +8518,141 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DispatchForeground_NativeModuleOnForegro
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(abilityRecord->GetNativeState(), AbilityNativeState::NORMAL);
 }
+
+/**
+ * @tc.name: CalcHideNativeWindow_0002
+ * @tc.desc: persistentId is 0, HideWindowOnStartup returns false (no native module metadata).
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    EXPECT_FALSE(mgr->CalcHideNativeWindow(0, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0003
+ * @tc.desc: persistentId != 0 but record not found in sessionAbilityMap_, should return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0003, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    EXPECT_FALSE(mgr->CalcHideNativeWindow(100, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0004
+ * @tc.desc: persistentId != 0, record exists with nativeState=NONE, should return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0004, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_EQ(abilityRecord->GetNativeState(), AbilityNativeState::NONE);
+    EXPECT_FALSE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0005
+ * @tc.desc: persistentId != 0, record exists with nativeState=NORMAL, should return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0005, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->SetNativeState(AbilityNativeState::NORMAL);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_FALSE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0006
+ * @tc.desc: persistentId != 0, record exists with nativeState=INIT, should return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0006, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->SetNativeState(AbilityNativeState::INIT);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_TRUE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0007
+ * @tc.desc: persistentId != 0, record exists with nativeState=ATTACHED, should return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0007, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->SetNativeState(AbilityNativeState::ATTACHED);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_TRUE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0008
+ * @tc.desc: persistentId != 0, record exists with nativeState=CREATED, should return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0008, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->SetNativeState(AbilityNativeState::CREATED);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_TRUE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0009
+ * @tc.desc: persistentId != 0, record exists with nativeState=ON_FOREGROUND, should return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0009, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->SetNativeState(AbilityNativeState::ON_FOREGROUND);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
+
+    EXPECT_TRUE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
+
+/**
+ * @tc.name: CalcHideNativeWindow_0010
+ * @tc.desc: persistentId != 0, record exists but is nullptr, should return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CalcHideNativeWindow_0010, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    mgr->sessionAbilityMap_[1] = nullptr;
+
+    EXPECT_FALSE(mgr->CalcHideNativeWindow(1, abilityInfo));
+}
 }  // namespace AAFwk
 }  // namespace OHOS
