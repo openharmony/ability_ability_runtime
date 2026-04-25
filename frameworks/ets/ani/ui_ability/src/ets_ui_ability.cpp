@@ -581,6 +581,10 @@ void EtsUIAbility::OnStartInner(ani_env *env, const Want &want, sptr<AAFwk::Sess
         return;
     }
     SetSelfSpecifiedId(env, sessionInfo);
+
+    // Handle NativeModule: Create NativeAbilityWrapper and call PostAbility
+    HandleNativeModule();
+
     auto launchParam = GetLaunchParam();
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
@@ -647,6 +651,34 @@ void EtsUIAbility::SetSelfSpecifiedId(ani_env *env, sptr<AAFwk::SessionInfo> ses
             TAG_LOGE(AAFwkTag::UIABILITY, "specifiedId Object_SetFieldByName_Ref status: %{public}d", status);
             return;
         }
+    }
+}
+
+void EtsUIAbility::HandleNativeModule()
+{
+    if (!IsWithNative()) {
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::UIABILITY, "Creating NativeAbilityWrapper for native module");
+
+    if (etsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "etsAbilityObj_ is null");
+        return;
+    }
+
+    // Create NativeAbilityWrapper
+    auto wrapper = std::make_shared<NativeAbilityWrapper>();
+    wrapper->instanceId = GetInstanceId();
+    wrapper->abilityName = GetAbilityName();
+    wrapper->etsAbilityObj = reinterpret_cast<ani_object>(etsAbilityObj_->aniRef);
+
+    // Get ApplicationContext
+    auto appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext != nullptr) {
+        appContext->PostAbility(wrapper->instanceId, wrapper);
+    } else {
+        TAG_LOGE(AAFwkTag::UIABILITY, "ApplicationContext is null");
     }
 }
 
@@ -754,6 +786,10 @@ void EtsUIAbility::OnStopCallback()
         EtsAbilityLifecycleCallbackArgs ability(etsAbilityObj_);
         applicationContext->DispatchOnAbilityDestroy(ability);
         DISPATCH_ABILITY_INTEROP(OnAbilityDestroy, applicationContext, etsRuntime_, ability);
+    }
+
+    if (IsWithNative() && applicationContext != nullptr) {
+        applicationContext->DestroyAbility(GetInstanceId());
     }
 }
 

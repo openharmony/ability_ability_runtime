@@ -141,6 +141,9 @@ int AbilityManagerStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_BY_OE_EXT) {
         return StartAbilityByOEExtInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_SELF) {
+        return StartSelfInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::CONNECT_ABILITY) {
         return ConnectAbilityInner(data, reply);
     }
@@ -4426,6 +4429,15 @@ int32_t AbilityManagerStub::StartAbilityByOEExtInner(MessageParcel &data, Messag
     std::string specifiedFlag = data.ReadString();
 
     reply.WriteInt32(StartAbilityByOEExt(*want, callerToken, hostPid, specifiedFlag));
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartSelfInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+
+    int32_t result = StartSelf(token);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 

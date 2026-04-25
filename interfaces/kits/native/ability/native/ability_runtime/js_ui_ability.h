@@ -84,6 +84,12 @@ public:
     void OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
 
     /**
+     * @brief Handle Native Module: Create NativeAbilityWrapper and call PostAbility
+     * @param env The napi environment
+     */
+    void HandleNativeModule(napi_env env);
+
+    /**
      * @brief Called when this ability enters the <b>STATE_STOP</b> state.
      * The ability in the <b>STATE_STOP</b> is being destroyed.
      * You can override this function to implement your own processing logic.

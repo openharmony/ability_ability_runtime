@@ -381,6 +381,10 @@ class ApplicationContext {
     return this.__context_impl__.getAllWindowStages();
   }
 
+  getUIAbilityByInstanceId(instanceId) {
+    return this.__context_impl__.getUIAbilityByInstanceId(instanceId);
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }

@@ -358,6 +358,7 @@ private:
         std::function<void(const std::shared_ptr<AppExecFwk::AbilityDelegator> &,
             const std::shared_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &)> notifyFunc);
     bool SetLastRequestWant(ani_env *env, ani_ref wantRef);
+    void HandleNativeModule();
     int32_t CallSaveState(ani_value args[], WantParams &wantParams, AppExecFwk::StateReason stateReason,
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo);
 

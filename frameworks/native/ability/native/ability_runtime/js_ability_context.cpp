@@ -527,6 +527,11 @@ napi_value JsAbilityContext::StartSelfUIAbilityInCurrentProcess(napi_env env, na
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnStartSelfUIAbilityInCurrentProcess);
 }
 
+napi_value JsAbilityContext::StartSelf(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnStartSelf);
+}
+
 napi_value JsAbilityContext::RestartAppWithWindow(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnRestartAppWithWindow);
@@ -2235,6 +2240,42 @@ napi_value JsAbilityContext::OnReportDrawnCompleted(napi_env env, NapiCallbackIn
     return result;
 }
 
+napi_value JsAbilityContext::OnStartSelf(napi_env env, NapiCallbackInfo &info)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnStartSelf called");
+
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, innerErrCode]() {
+        TAG_LOGI(AAFwkTag::CONTEXT, "OnStartSelf async execute");
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+            *innerErrCode = static_cast<int32_t>(AAFwk::ERR_INVALID_CONTEXT);
+            return;
+        }
+
+        *innerErrCode = context->StartSelf();
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        HandleScope handleScope(env);
+        (*innerErrCode == ERR_OK) ? task.ResolveWithNoError(env, CreateJsUndefined(env)) :
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartSelf",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsAbilityContext::OnStartSelfUIAbilityInCurrentProcess(napi_env env, NapiCallbackInfo &info)
 {
     if (info.argc < ARGC_TWO) {
@@ -2485,6 +2526,8 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::SetOnNewWantSkipScenarios);
     BindNativeFunction(env, object, "startSelfUIAbilityInCurrentProcess", moduleName,
         JsAbilityContext::StartSelfUIAbilityInCurrentProcess);
+    BindNativeFunction(env, object, "startSelf", moduleName,
+        JsAbilityContext::StartSelf);
     BindNativeFunction(env, object, "restartApp", moduleName,
         JsAbilityContext::RestartAppWithWindow);
     BindNativeFunction(env, object, "setMissionWindowIcon", moduleName, JsAbilityContext::SetMissionWindowIcon);

@@ -739,6 +739,9 @@ enum class AbilityManagerInterfaceCode {
 
     // query entity
     INSIGHT_INTENT_QUERY_ENTITY = 6165,
+
+    // start self ability with token
+    START_SELF = 6166,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
