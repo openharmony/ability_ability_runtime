@@ -78,7 +78,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnConnectCallback(
     OH_AbilityRuntime_ConnectOptions_OnConnectCallback onConnectCallback)
 {
     auto state = GetState(connectOptions);
-    if (state == nullptr || onConnectCallback == nullptr) {
+    if (state == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "invalid params");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
@@ -96,7 +96,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnDisconnectCallbac
     OH_AbilityRuntime_ConnectOptions_OnDisconnectCallback onDisconnectCallback)
 {
     auto state = GetState(connectOptions);
-    if (state == nullptr || onDisconnectCallback == nullptr) {
+    if (state == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "invalid params");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
@@ -114,7 +114,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnFailedCallback(
     OH_AbilityRuntime_ConnectOptions_OnFailedCallback onFailedCallback)
 {
     auto state = GetState(connectOptions);
-    if (state == nullptr || onFailedCallback == nullptr) {
+    if (state == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "invalid params");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }

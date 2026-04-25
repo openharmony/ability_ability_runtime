@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "ability_record/ability_request.h"
+#include "iremote_object.h"
 #include "modular_object_extension_info.h"
 
 namespace OHOS {
@@ -30,6 +31,8 @@ public:
     ModularObjectUtils() = delete;
 
     static int32_t CheckPermission(const AbilityRequest &abilityRequest);
+    static int32_t CheckRateLimit();
+    static bool GetPidToCheckByCallerToken(sptr<IRemoteObject> callerToken, pid_t &outPid);
 
     static int32_t CheckExtensionEnabled(const ModularObjectExtensionInfo &info,
         const AbilityRequest &abilityRequest);
@@ -43,6 +46,7 @@ public:
         const std::string &abilityName, int32_t appIndex, int32_t validUserId,
         ModularObjectExtensionInfo &targetExtensionInfo);
     static int32_t GetCallerAppInfo(AppExecFwk::ApplicationInfo &callerAppInfo);
+    static int32_t VerifyExported(const AbilityRequest &abilityRequest);
 };
 
 }  // namespace AAFwk

@@ -393,6 +393,11 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     CHECK_POINTER_AND_RETURN(connectRecord, ERR_INVALID_VALUE);
     connectRecord->AttachCallerInfo(indirectCallerInfo);
     connectRecord->SetConnectState(ConnectionState::CONNECTING);
+    if (targetService->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::MODULAR_OBJECT) {
+        auto callerPid = connectRecord->GetCallerPid();
+        targetService->SetClientPid(callerPid);
+        TAG_LOGD(AAFwkTag::EXT, "MOE: store client pid=%{public}d", callerPid);
+    }
     if (targetService->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE ||
         targetService->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::AGENT) {
         connectRecord->SetConnectWant(abilityRequest.want);

@@ -27,14 +27,15 @@ const size_t ModularObjectExtensionContext::CONTEXT_TYPE_ID(
 ErrCode ModularObjectExtensionContext::StartSelfUIAbility(const AAFwk::Want &want) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return AAFwk::AbilityManagerClient::GetInstance()->StartSelfUIAbility(want);
+    return AAFwk::AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithToken(want, token_);
 }
 
 ErrCode ModularObjectExtensionContext::StartSelfUIAbilityWithStartOptions(const AAFwk::Want &want,
     const AAFwk::StartOptions &startOptions) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return AAFwk::AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptions(want, startOptions);
+    return AAFwk::AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptionsAndToken(
+        want, startOptions, token_);
 }
 
 ErrCode ModularObjectExtensionContext::TerminateSelf()

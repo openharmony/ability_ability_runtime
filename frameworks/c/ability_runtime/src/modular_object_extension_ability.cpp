@@ -45,10 +45,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnCrea
     OH_AbilityRuntime_ModObjExtensionInstanceHandle instance,
     OH_AbilityRuntime_ModObjExtensionAbility_OnCreateFunc onCreateFunc)
 {
-    if (onCreateFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null onCreateFunc");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
-    }
     OH_AbilityRuntime_ModularObjectExtensionInstance *inner = nullptr;
     auto ret = CheckMoeInstance(instance, &inner);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
@@ -62,10 +58,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDest
     OH_AbilityRuntime_ModObjExtensionInstanceHandle instance,
     OH_AbilityRuntime_ModObjExtensionAbility_OnDestroyFunc onDestroyFunc)
 {
-    if (onDestroyFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null onDestroyFunc");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
-    }
     OH_AbilityRuntime_ModularObjectExtensionInstance *inner = nullptr;
     auto ret = CheckMoeInstance(instance, &inner);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
@@ -79,10 +71,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnConn
     OH_AbilityRuntime_ModObjExtensionInstanceHandle instance,
     OH_AbilityRuntime_ModObjExtensionAbility_OnConnectFunc onConnectFunc)
 {
-    if (onConnectFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null onConnectFunc");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
-    }
     OH_AbilityRuntime_ModularObjectExtensionInstance *inner = nullptr;
     auto ret = CheckMoeInstance(instance, &inner);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
@@ -96,10 +84,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDisc
     OH_AbilityRuntime_ModObjExtensionInstanceHandle instance,
     OH_AbilityRuntime_ModObjExtensionAbility_OnDisconnectFunc onDisconnectFunc)
 {
-    if (onDisconnectFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null onDisconnectFunc");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
-    }
     OH_AbilityRuntime_ModularObjectExtensionInstance *inner = nullptr;
     auto ret = CheckMoeInstance(instance, &inner);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {

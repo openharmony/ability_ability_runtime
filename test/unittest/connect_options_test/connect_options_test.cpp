@@ -103,7 +103,8 @@ HWTEST_F(ConnectOptionsTest, SetOnConnectCallback_002, TestSize.Level1)
     auto *opts = OH_AbilityRuntime_CreateConnectOptions();
     ASSERT_NE(opts, nullptr);
     auto ret = OH_AbilityRuntime_ConnectOptions_SetOnConnectCallback(opts, nullptr);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(opts->state->onConnectCallback, nullptr);
     OH_AbilityRuntime_DestroyConnectOptions(opts);
     GTEST_LOG_(INFO) << "SetOnConnectCallback_002 end";
 }
@@ -158,7 +159,8 @@ HWTEST_F(ConnectOptionsTest, SetOnDisconnectCallback_002, TestSize.Level1)
     auto *opts = OH_AbilityRuntime_CreateConnectOptions();
     ASSERT_NE(opts, nullptr);
     auto ret = OH_AbilityRuntime_ConnectOptions_SetOnDisconnectCallback(opts, nullptr);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(opts->state->onDisconnectCallback, nullptr);
     OH_AbilityRuntime_DestroyConnectOptions(opts);
     GTEST_LOG_(INFO) << "SetOnDisconnectCallback_002 end";
 }
@@ -213,7 +215,8 @@ HWTEST_F(ConnectOptionsTest, SetOnFailedCallback_002, TestSize.Level1)
     auto *opts = OH_AbilityRuntime_CreateConnectOptions();
     ASSERT_NE(opts, nullptr);
     auto ret = OH_AbilityRuntime_ConnectOptions_SetOnFailedCallback(opts, nullptr);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(opts->state->onFailedCallback, nullptr);
     OH_AbilityRuntime_DestroyConnectOptions(opts);
     GTEST_LOG_(INFO) << "SetOnFailedCallback_002 end";
 }

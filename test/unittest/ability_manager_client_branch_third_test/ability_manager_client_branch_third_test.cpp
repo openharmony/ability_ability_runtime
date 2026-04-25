@@ -1326,6 +1326,64 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, StartAbilityByOEExt_0300, TestSize
 
 
 /**
+ * @tc.name: AbilityManagerClient_StartSelfUIAbilityWithToken_0100
+ * @tc.desc: StartSelfUIAbilityWithToken with proxy null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartSelfUIAbilityWithToken_0100, TestSize.Level1)
+{
+    ErrorTestBoardDisable();
+    Want want;
+    sptr<IRemoteObject> callerToken = new IRemoteObjectMocker();
+    auto result = client_->StartSelfUIAbilityWithToken(want, callerToken);
+    EXPECT_EQ(result, ABILITY_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartSelfUIAbilityWithToken_0200
+ * @tc.desc: StartSelfUIAbilityWithToken normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartSelfUIAbilityWithToken_0200, TestSize.Level1)
+{
+    NormalTestBoardDisable();
+    Want want;
+    sptr<IRemoteObject> callerToken = new IRemoteObjectMocker();
+    auto result = client_->StartSelfUIAbilityWithToken(want, callerToken);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartSelfUIAbilityWithStartOptionsAndToken_0100
+ * @tc.desc: StartSelfUIAbilityWithStartOptionsAndToken with proxy null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartSelfUIAbilityWithStartOptionsAndToken_0100, TestSize.Level1)
+{
+    ErrorTestBoardDisable();
+    Want want;
+    StartOptions options;
+    sptr<IRemoteObject> callerToken = new IRemoteObjectMocker();
+    auto result = client_->StartSelfUIAbilityWithStartOptionsAndToken(want, options, callerToken);
+    EXPECT_EQ(result, ABILITY_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartSelfUIAbilityWithStartOptionsAndToken_0200
+ * @tc.desc: StartSelfUIAbilityWithStartOptionsAndToken normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, StartSelfUIAbilityWithStartOptionsAndToken_0200, TestSize.Level1)
+{
+    NormalTestBoardDisable();
+    Want want;
+    StartOptions options;
+    sptr<IRemoteObject> callerToken = new IRemoteObjectMocker();
+    auto result = client_->StartSelfUIAbilityWithStartOptionsAndToken(want, options, callerToken);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: MissionInfoTest_0100
  * @tc.desc: MissionInfoTest_0100
  * @tc.type: FUNC
