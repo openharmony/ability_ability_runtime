@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <nlohmann/json.hpp>
 #include <parcel.h>
 
 #include "tool_info.h"
@@ -36,150 +37,6 @@ void ToolInfoTest::SetUpTestCase(void) {}
 void ToolInfoTest::TearDownTestCase(void) {}
 void ToolInfoTest::SetUp() {}
 void ToolInfoTest::TearDown() {}
-
-// ==================== SubCommandInfo Tests ====================
-
-/**
- * @tc.name: SubCommandInfo_Marshalling_0100
- * @tc.desc: Test SubCommandInfo Marshalling with argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, SubCommandInfo_Marshalling_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SubCommandInfo_Marshalling_0100 start";
-
-    SubCommandInfo subCmd;
-    subCmd.description = "Test subcommand";
-    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
-    subCmd.inputSchema = "{}";
-    subCmd.outputSchema = "{}";
-    subCmd.argMapping = std::make_shared<ArgMapping>();
-    subCmd.argMapping->type = ArgMappingType::FLAG;
-    subCmd.eventTypes = {"stdout", "stderr"};
-    subCmd.eventSchemas = "{}";
-
-    Parcel parcel;
-    bool ret = subCmd.Marshalling(parcel);
-
-    EXPECT_TRUE(ret);
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_Marshalling_0100 end";
-}
-
-/**
- * @tc.name: SubCommandInfo_Marshalling_0200
- * @tc.desc: Test SubCommandInfo Marshalling without argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, SubCommandInfo_Marshalling_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SubCommandInfo_Marshalling_0200 start";
-
-    SubCommandInfo subCmd;
-    subCmd.description = "Test subcommand without argMapping";
-    subCmd.requirePermissions = {};
-    subCmd.inputSchema = "{}";
-    subCmd.outputSchema = "{}";
-    subCmd.argMapping = nullptr;
-    subCmd.eventTypes = {};
-    subCmd.eventSchemas = "{}";
-
-    Parcel parcel;
-    bool ret = subCmd.Marshalling(parcel);
-
-    EXPECT_TRUE(ret);
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_Marshalling_0200 end";
-}
-
-/**
- * @tc.name: SubCommandInfo_Unmarshalling_0100
- * @tc.desc: Test SubCommandInfo Unmarshalling with argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, SubCommandInfo_Unmarshalling_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0100 start";
-
-    SubCommandInfo original;
-    original.description = "Original subcommand";
-    original.requirePermissions = {"ohos.permission.READ_STORAGE"};
-    original.inputSchema = R"({"type": "object"})";
-    original.outputSchema = R"({"type": "string"})";
-    original.argMapping = std::make_shared<ArgMapping>();
-    original.argMapping->type = ArgMappingType::JSONSTRING;
-    original.argMapping->separator = "";
-    original.argMapping->order = "";
-    original.argMapping->templates = "{}";
-    original.eventTypes = {"exit"};
-    original.eventSchemas = R"({"exit": {"type": "object"}})";
-
-    Parcel parcel;
-    ASSERT_TRUE(original.Marshalling(parcel));
-
-    parcel.RewindRead(0);
-    SubCommandInfo *result = SubCommandInfo::Unmarshalling(parcel);
-
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->description, "Original subcommand");
-    EXPECT_EQ(result->requirePermissions.size(), 1u);
-    EXPECT_TRUE(result->argMapping != nullptr);
-    EXPECT_EQ(result->argMapping->type, ArgMappingType::JSONSTRING);
-
-    delete result;
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0100 end";
-}
-
-/**
- * @tc.name: SubCommandInfo_Unmarshalling_0200
- * @tc.desc: Test SubCommandInfo Unmarshalling without argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, SubCommandInfo_Unmarshalling_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0200 start";
-
-    SubCommandInfo original;
-    original.description = "No argMapping";
-    original.requirePermissions = {};
-    original.inputSchema = "{}";
-    original.outputSchema = "{}";
-    original.argMapping = nullptr;
-    original.eventTypes = {};
-    original.eventSchemas = "{}";
-
-    Parcel parcel;
-    ASSERT_TRUE(original.Marshalling(parcel));
-
-    parcel.RewindRead(0);
-    SubCommandInfo *result = SubCommandInfo::Unmarshalling(parcel);
-
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->description, "No argMapping");
-    EXPECT_TRUE(result->argMapping == nullptr);
-
-    delete result;
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0200 end";
-}
-
-/**
- * @tc.name: SubCommandInfo_Unmarshalling_0300
- * @tc.desc: Test SubCommandInfo Unmarshalling fail with empty parcel
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, SubCommandInfo_Unmarshalling_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0300 start";
-
-    Parcel parcel;
-    SubCommandInfo *result = SubCommandInfo::Unmarshalling(parcel);
-
-    EXPECT_EQ(result, nullptr);
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_Unmarshalling_0300 end";
-}
 
 // ==================== ToolInfo Tests ====================
 
@@ -450,6 +307,236 @@ HWTEST_F(ToolInfoTest, ToolsRawData_Unmarshalling_0200, TestSize.Level1)
     delete result;
 
     GTEST_LOG_(INFO) << "ToolsRawData_Unmarshalling_0200 end";
+}
+
+// ==================== ToolInfo ParseToJson Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0100
+ * @tc.desc: Test ToolInfo ParseToJson with full data
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0100 start";
+
+    ToolInfo tool;
+    tool.name = "json_tool";
+    tool.version = "1.0.0";
+    tool.description = "JSON test tool";
+    tool.executablePath = "/bin/json";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
+    tool.inputSchema = R"({"type": "object"})";
+    tool.outputSchema = R"({"type": "string"})";
+    tool.argMapping = std::make_shared<ArgMapping>();
+    tool.argMapping->type = ArgMappingType::FLAG;
+    tool.eventSchemas = R"({"stdout": {"type": "string"}})";
+    tool.timeout = 30000;
+    tool.eventTypes = {"stdout", "stderr"};
+    tool.hasSubCommand = false;
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "json_tool");
+    EXPECT_EQ(json["version"], "1.0.0");
+    EXPECT_EQ(json["description"], "JSON test tool");
+    EXPECT_EQ(json["executablePath"], "/bin/json");
+    EXPECT_EQ(json["timeout"], 30000);
+    EXPECT_TRUE(json.contains("argMapping"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0200
+ * @tc.desc: Test ToolInfo ParseToJson without argMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0200 start";
+
+    ToolInfo tool;
+    tool.name = "no_arg_tool";
+    tool.argMapping = nullptr;
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "no_arg_tool");
+    EXPECT_FALSE(json.contains("argMapping"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0300
+ * @tc.desc: Test ToolInfo ParseToJson with subcommands
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0300 start";
+
+    ToolInfo tool;
+    tool.name = "tool_with_subs";
+    tool.hasSubCommand = true;
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Test subcommand";
+    subCmd.inputSchema = R"({"type": "object"})";
+    tool.subcommands["sub1"] = subCmd;
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_TRUE(json.contains("subcommands"));
+    EXPECT_TRUE(json["subcommands"].contains("sub1"));
+    EXPECT_EQ(json["subcommands"]["sub1"]["description"], "Test subcommand");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0300 end";
+}
+
+// ==================== ToolInfo ParseFromJson Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_0100
+ * @tc.desc: Test ToolInfo ParseFromJson with full data
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0100 start";
+
+    nlohmann::json json = R"({
+        "name": "parsed_tool",
+        "version": "2.0.0",
+        "description": "Parsed from JSON",
+        "executablePath": "/bin/parsed",
+        "requirePermissions": ["ohos.permission.CAMERA"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "array"},
+        "argMapping": {"type": "positional", "order": "arg1,arg2"},
+        "eventSchemas": {"exit": {"type": "number"}},
+        "timeout": 60000,
+        "eventTypes": ["stdout", "exit"],
+        "hasSubCommand": false
+    })"_json;
+
+    ToolInfo tool = ToolInfo::ParseFromJson(json);
+
+    EXPECT_EQ(tool.name, "parsed_tool");
+    EXPECT_EQ(tool.version, "2.0.0");
+    EXPECT_EQ(tool.description, "Parsed from JSON");
+    EXPECT_EQ(tool.executablePath, "/bin/parsed");
+    EXPECT_EQ(tool.requirePermissions.size(), 1u);
+    EXPECT_EQ(tool.timeout, 60000);
+    EXPECT_FALSE(tool.hasSubCommand);
+    ASSERT_NE(tool.argMapping, nullptr);
+    EXPECT_EQ(tool.argMapping->type, ArgMappingType::POSITIONAL);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_0200
+ * @tc.desc: Test ToolInfo ParseFromJson with subcommands
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0200 start";
+
+    nlohmann::json json = R"({
+        "name": "tool_with_subcommands",
+        "version": "1.0.0",
+        "hasSubCommand": true,
+        "subcommands": {
+            "build": {
+                "description": "Build the project",
+                "inputSchema": {"type": "object"},
+                "outputSchema": {"type": "string"}
+            },
+            "run": {
+                "description": "Run the project"
+            }
+        }
+    })"_json;
+
+    ToolInfo tool = ToolInfo::ParseFromJson(json);
+
+    EXPECT_EQ(tool.name, "tool_with_subcommands");
+    EXPECT_TRUE(tool.hasSubCommand);
+    EXPECT_EQ(tool.subcommands.size(), 2u);
+    EXPECT_EQ(tool.subcommands["build"].description, "Build the project");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_0300
+ * @tc.desc: Test ToolInfo ParseFromJson with empty JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0300 start";
+
+    nlohmann::json json;
+
+    ToolInfo tool = ToolInfo::ParseFromJson(json);
+
+    EXPECT_TRUE(tool.name.empty());
+    EXPECT_TRUE(tool.version.empty());
+    EXPECT_EQ(tool.argMapping, nullptr);
+    EXPECT_FALSE(tool.hasSubCommand);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0300 end";
+}
+
+// ==================== ToolInfo ParseFromJson/ParseToJson Round Trip Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100
+ * @tc.desc: Test ToolInfo ParseFromJson and ParseToJson round trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100 start";
+
+    nlohmann::json originalJson = R"({
+        "name": "roundtrip_tool",
+        "version": "3.0.0",
+        "description": "Round trip test",
+        "executablePath": "/bin/roundtrip",
+        "requirePermissions": ["ohos.permission.INTERNET", "ohos.permission.CAMERA"],
+        "inputSchema": {"type": "object", "properties": {"input": {"type": "string"}}},
+        "outputSchema": {"type": "array"},
+        "argMapping": {"type": "mixed", "separator": ",", "order": "a,b"},
+        "eventSchemas": {"stdout": {"type": "string"}},
+        "timeout": 45000,
+        "eventTypes": ["stdout", "stderr"],
+        "hasSubCommand": true,
+        "subcommands": {
+            "sub1": {
+                "description": "Sub 1",
+                "inputSchema": {"type": "object"},
+                "outputSchema": {"type": "string"}
+            }
+        }
+    })"_json;
+
+    ToolInfo tool = ToolInfo::ParseFromJson(originalJson);
+    nlohmann::json resultJson = tool.ParseToJson();
+
+    EXPECT_EQ(resultJson["name"], originalJson["name"]);
+    EXPECT_EQ(resultJson["version"], originalJson["version"]);
+    EXPECT_EQ(resultJson["description"], originalJson["description"]);
+    EXPECT_EQ(resultJson["executablePath"], originalJson["executablePath"]);
+    EXPECT_EQ(resultJson["timeout"], originalJson["timeout"]);
+    EXPECT_EQ(resultJson["hasSubCommand"], originalJson["hasSubCommand"]);
+    EXPECT_EQ(resultJson["eventTypes"], originalJson["eventTypes"]);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100 end";
 }
 
 } // namespace CliTool
