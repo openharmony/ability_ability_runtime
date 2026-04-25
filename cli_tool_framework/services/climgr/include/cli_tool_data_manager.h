@@ -87,21 +87,6 @@ public:
     int32_t ParseJsonFile(const std::string &filePath, std::vector<ToolInfo> &tools);
 
     /**
-     * @brief Convert ToolInfo to JSON string
-     * @param tool Input ToolInfo
-     * @return std::string JSON string
-     */
-    std::string ToolInfoToJson(const ToolInfo &tool);
-
-    /**
-     * @brief Convert JSON string to ToolInfo
-     * @param jsonStr Input JSON string
-     * @param tool Output ToolInfo
-     * @return int32_t ERR_OK on success, error code otherwise
-     */
-    int32_t JsonToToolInfo(const std::string &jsonStr, ToolInfo &tool);
-
-    /**
      * @brief Convert JSON array string to ToolInfo vector
      * @param jsonStr Input JSON array string
      * @param tools Output ToolInfo vector
