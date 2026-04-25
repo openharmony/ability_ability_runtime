@@ -1230,8 +1230,10 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const UIAbilityRecordP
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "UIAbilityLifecycleManager or abilityRecord invalid");
                 return;
             }
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Execute NotifyCompleteGamePreLaunch for game SA prelaunch");
-            selfObj->NotifyCompleteGamePreLaunch(abilityRecordObj->GetToken());
+            if (abilityRecordObj->IsGameSAPreLaunch()) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "Execute NotifyCompleteGamePreLaunch for game SA prelaunch");
+                selfObj->NotifyCompleteGamePreLaunch(abilityRecordObj->GetToken());
+            }
         };
         ffrt::submit(task, ffrt::task_attr().delay(gamePreLaunchCompleteTime_));
     }
