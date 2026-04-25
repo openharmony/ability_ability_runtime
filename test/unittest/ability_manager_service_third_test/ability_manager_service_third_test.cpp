@@ -790,6 +790,10 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckWindowMode_001, TestSize.Level1)
 
     windowMode = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_FULLSCREEN;
     EXPECT_FALSE(abilityMs_->CheckWindowMode(windowMode, windowModes));
+
+    windowModes.emplace_back(AppExecFwk::SupportWindowMode::SPLIT);
+    windowMode = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SPLIT;
+    EXPECT_TRUE(abilityMs_->CheckWindowMode(windowMode, windowModes));
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckWindowMode_001 end");
 }
 
