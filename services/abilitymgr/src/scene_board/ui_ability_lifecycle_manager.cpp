@@ -912,9 +912,10 @@ int32_t UIAbilityLifecycleManager::BatchNotifySCBPendingActivations(const Abilit
         std::string backgroundColor =
             hasStartWindowOption ? sessionInfo->startWindowOption->startWindowBackgroundColor : "";
         TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s, "
-            "hasStartWindow:%{public}d, backgroundColor:%{public}s",
+            "hasStartWindow:%{public}d, backgroundColor:%{public}s, windowMode:%{public}d",
             (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str(),
-            hasStartWindow, backgroundColor.c_str());
+            hasStartWindow, backgroundColor.c_str(), sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+                AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     }
 
     auto callerAbilityRecord = GetAbilityRecordByToken(abilitiesRequest.callerToken);
@@ -1983,9 +1984,11 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     sessionInfo->hideStartWindow = abilityRequest.hideStartWindow;
     sessionInfo->windowCreateParams = abilityRequest.startOptions.windowCreateParams_;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s, hasStartWindow:%{public}d, "
-        "backgroundColor:%{public}s, hideStartWindow: %{public}d, splitRatio:%{public}d",
+        "backgroundColor:%{public}s, hideStartWindow: %{public}d, splitRatio:%{public}d, windowMode:%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str(),
-        hasStartWindow, backgroundColor.c_str(), sessionInfo->hideStartWindow, sessionInfo->splitRatioPreference);
+        hasStartWindow, backgroundColor.c_str(), sessionInfo->hideStartWindow, sessionInfo->splitRatioPreference,
+        sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     if (abilityRequest.isTargetPlugin) {
         sessionInfo->isTargetPlugin = abilityRequest.isTargetPlugin;
         auto callerRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
@@ -2007,8 +2010,10 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         }
         const_cast<AbilityRequest &>(abilityRequest).want.RemoveParam(KEY_REQUEST_ID);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s"
-            "requestId:%{public}s, splitRatio:%{public}d", sessionInfo->want.GetElement().GetAbilityName().c_str(),
-            requestId.c_str(), sessionInfo->splitRatioPreference);
+            "requestId:%{public}s, splitRatio:%{public}d, windowMode:%{public}d",
+            sessionInfo->want.GetElement().GetAbilityName().c_str(), requestId.c_str(),
+            sessionInfo->splitRatioPreference, sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+                AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
         auto ret = static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "PendingSessionActivation failed:%{public}d", ret);
@@ -2032,8 +2037,11 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     }
     sessionInfo->canStartAbilityFromBackground = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s, splitRatio:%{public}d",
-        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference);
+        "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s, "
+        "splitRatio:%{public}d, windowMode:%{public}d",
+        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference,
+        sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     auto ret = static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "PendingSessionActivation failed:%{public}d", ret);
@@ -2323,7 +2331,9 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResultLocked(sptr<Sess
     newSessionInfo->isBackTransition = true;
     newSessionInfo->want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
     newSessionInfo->scenarios = ServerConstant::SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, backToCaller");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, backToCaller, windowMode:%{public}d",
+        newSessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     auto ret = static_cast<int>(currentSession->PendingSessionActivation(newSessionInfo));
     return ret;
 }
@@ -3059,8 +3069,10 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(UIAbilityRecordPtr &callerAb
         }
         sessionInfo->want.RemoveParam(KEY_REQUEST_ID);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, "
-            "target: %{public}s, splitRatio:%{public}d",
-            sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference);
+            "target: %{public}s, splitRatio:%{public}d, windowMode:%{public}d",
+            sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference,
+            sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+                AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
         callerSession->PendingSessionActivation(sessionInfo);
         return ERR_OK;
     }
@@ -3076,8 +3088,10 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(UIAbilityRecordPtr &callerAb
         sessionInfo->want.RemoveParam(KEY_REQUEST_ID);
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, "
-        "target: %{public}s, splitRatio:%{public}d",
-        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference);
+        "target: %{public}s, splitRatio:%{public}d, windowMode:%{public}d",
+        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference,
+        sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     tmpSceneSession->PendingSessionActivation(sessionInfo);
     return ERR_OK;
 }
@@ -3107,8 +3121,10 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCBInSplitMode(int primaryWindow
     for (auto &sessionInfo : sessionInfoList) {
         sessionInfo->canStartAbilityFromBackground = true;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
-        sessionInfo->want.GetElement().GetAbilityName().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, "
+        "target: %{public}s, windowMode:%{public}d", sessionInfo->want.GetElement().GetAbilityName().c_str(),
+        sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     tmpSceneSession->BatchPendingSessionsActivation(sessionInfoList, configList);
     return ERR_OK;
 }
@@ -3737,8 +3753,9 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     if (startOptions != nullptr) {
         abilityRecord->SetWindowMode(startOptions->GetWindowMode());
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveMissionToFront, setting displayId=%{public}d, splitRatio:%{public}d",
-            startOptions->GetDisplayID(), startOptions->GetSplitRatioPreference());
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "MoveMissionToFront, setting displayId=%{public}d, splitRatio:%{public}d, windowMode:%{public}d",
+            startOptions->GetDisplayID(), startOptions->GetSplitRatioPreference(), startOptions->GetWindowMode());
         (sessionInfo->want).SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions->GetDisplayID());
         (sessionInfo->want).SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions->GetWindowMode());
         if (startOptions->GetDisplayID() == 0) {
@@ -3751,11 +3768,13 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
     sessionInfo->startWindowOption = nullptr;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call PendingSessionActivation by rootSceneSession"
         "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d",
+        "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
+            AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     sessionInfo->canStartAbilityFromBackground = true;
     sessionInfo->scenarios = ServerConstant::SCENARIO_MOVE_MISSION_TO_FRONT;
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));

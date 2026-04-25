@@ -3080,7 +3080,8 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, Ab
         wantParams.HasParam(EXPECT_WINDOW_MODE) &&
         (windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_FLOATING ||
         windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
-        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY)) {
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY ||
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SPLIT)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "App start ability from with no fullscreen.");
         Memory::MemMgrProcessStateInfo info;
         info.noFullScreenStart = 1;
