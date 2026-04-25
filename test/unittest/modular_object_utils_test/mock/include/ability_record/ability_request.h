@@ -23,9 +23,19 @@ namespace OHOS {
 namespace AppExecFwk {
 struct ApplicationInfo {
     std::string appDistributionType;
+    uint32_t accessTokenId = 0;
     int32_t uid = 0;
 };
-struct AbilityInfo {};
+enum ExtensionAbilityType {
+    UNSPECIFIED = 0,
+    SERVICE = 1,
+    MODULAR_OBJECT = 99,
+};
+
+struct AbilityInfo {
+    ExtensionAbilityType extensionAbilityType = UNSPECIFIED;
+    bool visible = false;
+};
 } // namespace AppExecFwk
 
 namespace AAFwk {

@@ -6981,6 +6981,86 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityWithPidResult(const Want &want, S
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerProxy::StartSelfUIAbilityWithToken(const Want &want, sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_CODE;
+    }
+
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want fail");
+        return ERR_WRITE_WANT;
+    }
+
+    if (callerToken != nullptr) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+            return ERR_INVALID_VALUE;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write bool fail");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_TOKEN,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::StartSelfUIAbilityWithStartOptionsAndToken(const Want &want,
+    const StartOptions &options, sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_CODE;
+    }
+
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want fail");
+        return ERR_WRITE_WANT;
+    }
+
+    if (!data.WriteParcelable(&options)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write startOptions fail");
+        return ERR_WRITE_START_OPTIONS;
+    }
+
+    if (callerToken != nullptr) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+            return ERR_INVALID_VALUE;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write bool fail");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_OPTIONS_AND_TOKEN,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 void AbilityManagerProxy::PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate)
 {
     MessageParcel data;

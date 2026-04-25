@@ -255,26 +255,29 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetModObjExtensionInfoByIndex(
  * @param connectOptions Indicates the connection options.
  * @param connectionId Indicates the connection id that is a output param.
  * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - if the call is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} - if the caller has no correct permission.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - if the arguments provided are invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - if the device does not support connecting modular
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} if the caller has no correct permission.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support connecting modular
  *          object extension ability.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} - if the target ability does not exist.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} - if the ability type is incorrect.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} if the target ability does not exist.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability type is incorrect.
  *          {@link ABILITY_RUNTIME_ERROR_CODE_VISIBILITY_VERIFICATION_FAILED} - Cannot start an invisible component.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_STATIC_CFG_PERMISSION} - The specified process does not have
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_STATIC_CFG_PERMISSION} The specified process does not have
             the permission.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_USER_OPERATION} - Cross-user operations are not allowed.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} - if the crowdtesting application expires.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} - if an internal error occurs.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} - if the caller is not a foreground process.
- *          {@lin ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} - The number of ability instances is more than five.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_RUNNING_ABILITIES_WITH_UI} - if the target application does not have
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_USER_OPERATION} Cross-user operations are not allowed.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} if the crowdtesting application expires.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if an internal error occurs.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not a foreground process.
+ *          {@lin ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} The number of ability instances is
+ *          more than twenty.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_RUNNING_ABILITIES_WITH_UI} if the target application does not have
  *          running abilities with UI.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_RATE_LIMIT} - The API call frequency is too high and
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_RATE_LIMIT} The API call frequency is too high and
  *          exceeds 20 times per second.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_CONNECTION_NUMBER_LIMIT} - The number of connections exceeds five.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_CONNECTION_NUMBER_LIMIT} The number of connections exceeds five.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_DISTRIBUTION_TYPE} The distribution type of
+ *          application is invalid.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectModularObjectExtensionAbility(AbilityBase_Want *want,
@@ -285,11 +288,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectModularObjectExtensionAbility(
  *
  * @param connectionId Indicates the connection ID.
  * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - if the call is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - if the arguments provided are invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - if the device does not support disconnecting modular
- *          object extension ability.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} - if an internal error occurs.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if an internal error occurs.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_DisconnectModularObjectExtensionAbility(int64_t connectionId);
