@@ -24,20 +24,13 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using ExecuteMode = AppExecFwk::ExecuteMode;
+using ParamType = AppExecFwk::ParamType;
 
 const std::string INSIGHT_INTENTS_DECORATOR_TYPE_LINK = "@InsightIntentLink";
 const std::string INSIGHT_INTENTS_DECORATOR_TYPE_PAGE = "@InsightIntentPage";
 const std::string INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY = "@InsightIntentEntry";
 const std::string INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION = "@InsightIntentFunctionMethod";
 const std::string INSIGHT_INTENTS_DECORATOR_TYPE_FORM = "@InsightIntentForm";
-
-struct InsightIntentParam {
-    std::string paramName;
-    std::string paramSchema;
-    bool isRequired = false;
-
-    InsightIntentParam() = default;
-};
 
 struct LinkIntentParamMapping {
     std::string paramName;
@@ -75,6 +68,7 @@ struct InsightIntentEntryInfo {
 
 struct InsightIntentFunctionInfo {
     std::string functionName;
+    std::string functionReturnType;
     std::vector<std::string> functionParams;
     std::string parameters;
 
@@ -220,6 +214,7 @@ struct ExtractInsightIntentProfileInfo {
     std::string navDestinationName;
     std::string abilityName;
     std::string functionName;
+    std::string functionReturnType;
     std::string formName;
     std::string arkTSMode;
 };

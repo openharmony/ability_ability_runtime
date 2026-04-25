@@ -15,6 +15,9 @@
 
 #include "insight_intent_execute_manager.h"
 
+#include <algorithm>
+#include <unordered_map>
+
 #include "ability_config.h"
 #include "ability_util.h"
 #include "ability_manager_errors.h"
@@ -27,14 +30,89 @@
 #include "want_params_wrapper.h"
 #include "time_util.h"
 #include "res_sched_util.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace AAFwk {
+using AppExecFwk::InsightIntentParam;
+using AppExecFwk::ParamType;
+
 namespace {
 constexpr size_t INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE = 256;
 constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_INSIGHT_INTENT";
 constexpr char PERMISSION_GET_BUNDLE_INFO_PRIVILEGED[] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 constexpr int32_t OPERATION_DURATION = 10000;
+
+ParamType StringToParamType(const std::string &typeStr)
+{
+    static const std::unordered_map<std::string, ParamType> typeMapping = {
+        {"string", ParamType::STRING},
+        {"number", ParamType::NUMBER},
+        {"integer", ParamType::INTEGER},
+        {"boolean", ParamType::BOOLEAN},
+        {"object", ParamType::OBJECT},
+        {"array", ParamType::ARRAY}
+    };
+    auto it = typeMapping.find(typeStr);
+    return (it != typeMapping.end()) ? it->second : ParamType::UNKNOWN;
+}
+
+void GetMethodParamRequiredList(const nlohmann::json &jsonObj, std::vector<std::string> &requiredList)
+{
+    if (!jsonObj.contains("required") || !jsonObj["required"].is_array()) {
+        return;
+    }
+    for (const auto &item : jsonObj["required"]) {
+        if (item.is_string()) {
+            requiredList.emplace_back(item.get<std::string>());
+        }
+    }
+}
+
+void GetMethodParamTypeMap(const nlohmann::json &jsonObj, std::unordered_map<std::string, ParamType> &typeMap)
+{
+    if (!jsonObj.contains("properties") || !jsonObj["properties"].is_object()) {
+        return;
+    }
+    const auto &properties = jsonObj["properties"];
+    for (auto it = properties.begin(); it != properties.end(); ++it) {
+        if (!it.value().is_object() || !it.value().contains("type") || !it.value()["type"].is_string()) {
+            typeMap[it.key()] = ParamType::UNKNOWN;
+            continue;
+        }
+        typeMap[it.key()] = StringToParamType(it.value()["type"].get<std::string>());
+    }
+}
+
+bool GetMethodParamNamesFromSchema(const std::vector<std::string> &methodParams, const std::string &parameters,
+    std::vector<std::string> &encodedMethodParams)
+{
+    encodedMethodParams.clear();
+    encodedMethodParams.reserve(methodParams.size());
+    std::unordered_map<std::string, ParamType> typeMap;
+    std::vector<std::string> requiredList;
+    if (!parameters.empty()) {
+        auto jsonObj = nlohmann::json::parse(parameters, nullptr, false);
+        if (jsonObj.is_discarded() || !jsonObj.is_object()) {
+            TAG_LOGW(AAFwkTag::INTENT, "parameters parse failed or not object");
+        } else {
+            GetMethodParamTypeMap(jsonObj, typeMap);
+            GetMethodParamRequiredList(jsonObj, requiredList);
+        }
+    }
+    for (const auto &methodParamName : methodParams) {
+        InsightIntentParam methodParamInfo;
+        methodParamInfo.paramName = methodParamName;
+        auto typeIt = typeMap.find(methodParamName);
+        if (typeIt != typeMap.end()) {
+            methodParamInfo.type = typeIt->second;
+        }
+        methodParamInfo.isRequired = std::find(requiredList.begin(), requiredList.end(), methodParamName) !=
+            requiredList.end();
+        encodedMethodParams.emplace_back(EncodeMethodParam(methodParamInfo));
+    }
+    return true;
+}
 }
 using namespace AppExecFwk;
 using InsightIntentType = AbilityRuntime::InsightIntentType;
@@ -42,7 +120,6 @@ using ExtractInsightIntentInfo = AbilityRuntime::ExtractInsightIntentInfo;
 using InsightIntentPageInfo = AbilityRuntime::InsightIntentPageInfo;
 using InsightIntentFunctionInfo = AbilityRuntime::InsightIntentFunctionInfo;
 using InsightIntentEntryInfo = AbilityRuntime::InsightIntentEntryInfo;
-
 void InsightIntentExecuteRecipient::OnRemoteDied(const wptr<OHOS::IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentExecuteRecipient OnRemoteDied, %{public}" PRIu64, intentId_);
@@ -340,13 +417,24 @@ int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(
 
     std::string className = info.decoratorClass;
     std::string methodName = info.genericInfo.get<InsightIntentFunctionInfo>().functionName;
+    std::string methodReturnType = info.genericInfo.get<InsightIntentFunctionInfo>().functionReturnType;
     std::vector<std::string> methodParams = info.genericInfo.get<InsightIntentFunctionInfo>().functionParams;
+    const auto &parameters = info.genericInfo.get<InsightIntentFunctionInfo>().parameters;
     if (className.empty() || methodName.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid func param");
         return ERR_INVALID_VALUE;
     }
+    if (!parameters.empty()) {
+        std::vector<std::string> encodedMethodParams;
+        if (!GetMethodParamNamesFromSchema(methodParams, parameters, encodedMethodParams)) {
+            TAG_LOGE(AAFwkTag::INTENT, "encode method params from schema failed");
+            return ERR_INVALID_VALUE;
+        }
+        methodParams = std::move(encodedMethodParams);
+    }
     want.SetParam(INSIGHT_INTENT_FUNC_PARAM_CLASSNAME, className);
     want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODNAME, methodName);
+    want.SetParam(INSIGHT_INTENT_FUNC_PARAM_RETURNTYPE, methodReturnType);
     want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS, methodParams);
     want.SetParam(INSIGHT_INTENT_ARKTS_MODE, info.arkTSMode);
     return ERR_OK;
