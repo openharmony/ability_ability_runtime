@@ -539,5 +539,336 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSi
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100 end";
 }
 
+/**
+ * @tc.name: ToolInfo_ParseToJson_0400
+ * @tc.desc: Test ToolInfo ParseToJson with invalid inputSchema JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0400 start";
+
+    ToolInfo tool;
+    tool.name = "invalid_input_schema";
+    tool.description = "Invalid inputSchema test";
+    tool.inputSchema = "not a valid json";
+    tool.outputSchema = R"({"type": "string"})";
+    tool.eventSchemas = R"({"stdout": {"type": "string"}})";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "invalid_input_schema");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"], "not a valid json");
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json.contains("eventSchemas"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0400 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0500
+ * @tc.desc: Test ToolInfo ParseToJson with invalid outputSchema JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0500 start";
+
+    ToolInfo tool;
+    tool.name = "invalid_output_schema";
+    tool.description = "Invalid outputSchema test";
+    tool.inputSchema = R"({"type": "object"})";
+    tool.outputSchema = "{broken json}";
+    tool.eventSchemas = "{}";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "invalid_output_schema");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"], "{broken json}");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0500 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0600
+ * @tc.desc: Test ToolInfo ParseToJson with invalid eventSchemas JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0600 start";
+
+    ToolInfo tool;
+    tool.name = "invalid_event_schemas";
+    tool.description = "Invalid eventSchemas test";
+    tool.inputSchema = R"({"type": "object"})";
+    tool.outputSchema = R"({"type": "string"})";
+    tool.eventSchemas = "invalid event schemas";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "invalid_event_schemas");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_EQ(json["eventSchemas"], "invalid event schemas");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0600 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0700
+ * @tc.desc: Test ToolInfo ParseToJson with complex valid schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0700 start";
+
+    ToolInfo tool;
+    tool.name = "complex_schemas";
+    tool.description = "Complex schema test";
+    tool.inputSchema = R"({
+        "type": "object",
+        "properties": {
+            "command": {"type": "string", "enum": ["start", "stop", "restart"]},
+            "options": {
+                "type": "array",
+                "items": {"type": "string"}
+            },
+            "config": {
+                "type": "object",
+                "properties": {
+                    "debug": {"type": "boolean"},
+                    "verbose": {"type": "boolean"}
+                }
+            }
+        },
+        "required": ["command"]
+    })";
+    tool.outputSchema = R"({
+        "type": "object",
+        "properties": {
+            "success": {"type": "boolean"},
+            "message": {"type": "string"},
+            "data": {"type": "array", "items": {"type": "object"}}
+        }
+    })";
+    tool.eventSchemas = R"({
+        "stdout": {"type": "string", "description": "Standard output"},
+        "stderr": {"type": "string", "description": "Standard error"},
+        "exit": {"type": "number", "description": "Exit code"},
+        "progress": {"type": "object", "properties": {"percent": {"type": "number"}}}
+    })";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json["inputSchema"].is_object());
+    EXPECT_TRUE(json["inputSchema"].contains("properties"));
+    EXPECT_TRUE(json["inputSchema"]["properties"].contains("command"));
+    EXPECT_TRUE(json["inputSchema"]["properties"]["command"].contains("enum"));
+
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json["outputSchema"].is_object());
+    EXPECT_TRUE(json["outputSchema"]["properties"].contains("success"));
+
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_TRUE(json["eventSchemas"].is_object());
+    EXPECT_TRUE(json["eventSchemas"].contains("stdout"));
+    EXPECT_TRUE(json["eventSchemas"].contains("progress"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0700 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0800
+ * @tc.desc: Test ToolInfo ParseToJson with all invalid schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0800 start";
+
+    ToolInfo tool;
+    tool.name = "all_invalid_schemas";
+    tool.description = "All invalid schemas test";
+    tool.inputSchema = "invalid input";
+    tool.outputSchema = "invalid output";
+    tool.eventSchemas = "invalid events";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "all_invalid_schemas");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"], "invalid input");
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"], "invalid output");
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_EQ(json["eventSchemas"], "invalid events");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0800 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_0900
+ * @tc.desc: Test ToolInfo ParseToJson with empty inputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0900 start";
+
+    ToolInfo tool;
+    tool.name = "empty_input_schema";
+    tool.description = "Empty inputSchema test";
+    tool.inputSchema = "";
+    tool.outputSchema = R"({"type": "string"})";
+    tool.eventSchemas = "{}";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "empty_input_schema");
+    EXPECT_FALSE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0900 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_1000
+ * @tc.desc: Test ToolInfo ParseToJson with empty outputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1000 start";
+
+    ToolInfo tool;
+    tool.name = "empty_output_schema";
+    tool.description = "Empty outputSchema test";
+    tool.inputSchema = R"({"type": "object"})";
+    tool.outputSchema = "";
+    tool.eventSchemas = "{}";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "empty_output_schema");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_FALSE(json.contains("outputSchema"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1000 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_1100
+ * @tc.desc: Test ToolInfo ParseToJson with empty eventSchemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1100 start";
+
+    ToolInfo tool;
+    tool.name = "empty_event_schemas";
+    tool.description = "Empty eventSchemas test";
+    tool.inputSchema = R"({"type": "object"})";
+    tool.outputSchema = R"({"type": "string"})";
+    tool.eventSchemas = "";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_EQ(json["name"], "empty_event_schemas");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_FALSE(json.contains("eventSchemas"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_1200
+ * @tc.desc: Test ToolInfo ParseToJson with subcommands containing schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_1200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1200 start";
+
+    ToolInfo tool;
+    tool.name = "tool_with_subcmd_schemas";
+    tool.hasSubCommand = true;
+
+    SubCommandInfo subCmd1;
+    subCmd1.description = "Subcommand with valid schemas";
+    subCmd1.inputSchema = R"({"type": "object", "properties": {"arg": {"type": "string"}}})";
+    subCmd1.outputSchema = R"({"type": "number"})";
+    subCmd1.eventSchemas = R"({"result": {"type": "string"}})";
+
+    SubCommandInfo subCmd2;
+    subCmd2.description = "Subcommand with invalid schemas";
+    subCmd2.inputSchema = "invalid";
+    subCmd2.outputSchema = "also invalid";
+    subCmd2.eventSchemas = "invalid too";
+
+    tool.subcommands["valid"] = subCmd1;
+    tool.subcommands["invalid"] = subCmd2;
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_TRUE(json.contains("subcommands"));
+    EXPECT_TRUE(json["subcommands"].contains("valid"));
+    EXPECT_TRUE(json["subcommands"].contains("invalid"));
+
+    EXPECT_TRUE(json["subcommands"]["valid"].contains("inputSchema"));
+    EXPECT_TRUE(json["subcommands"]["valid"]["inputSchema"].is_object());
+    EXPECT_TRUE(json["subcommands"]["valid"].contains("outputSchema"));
+    EXPECT_TRUE(json["subcommands"]["valid"].contains("eventSchemas"));
+
+    EXPECT_TRUE(json["subcommands"]["invalid"].contains("inputSchema"));
+    EXPECT_EQ(json["subcommands"]["invalid"]["inputSchema"], "invalid");
+    EXPECT_TRUE(json["subcommands"]["invalid"].contains("outputSchema"));
+    EXPECT_EQ(json["subcommands"]["invalid"]["outputSchema"], "also invalid");
+    EXPECT_TRUE(json["subcommands"]["invalid"].contains("eventSchemas"));
+    EXPECT_EQ(json["subcommands"]["invalid"]["eventSchemas"], "invalid too");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseToJson_1300
+ * @tc.desc: Test ToolInfo ParseToJson with primitive type schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_1300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1300 start";
+
+    ToolInfo tool;
+    tool.name = "primitive_schemas";
+    tool.description = "Primitive type schema test";
+    tool.inputSchema = R"({"type": "string", "minLength": 1, "maxLength": 100})";
+    tool.outputSchema = R"({"type": "number", "minimum": 0, "maximum": 100})";
+    tool.eventSchemas = R"({"status": {"type": "boolean"}})";
+
+    nlohmann::json json = tool.ParseToJson();
+
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"]["type"], "string");
+    EXPECT_TRUE(json["inputSchema"].contains("minLength"));
+
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"]["type"], "number");
+    EXPECT_TRUE(json["outputSchema"].contains("minimum"));
+
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_EQ(json["eventSchemas"]["status"]["type"], "boolean");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_1300 end";
+}
+
 } // namespace CliTool
 } // namespace OHOS
