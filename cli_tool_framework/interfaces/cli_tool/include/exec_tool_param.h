@@ -16,11 +16,11 @@
 #ifndef OHOS_ABILITY_RUNTIME_EXEC_TOOL_PARAM_H
 #define OHOS_ABILITY_RUNTIME_EXEC_TOOL_PARAM_H
 
-#include <map>
 #include <string>
 
 #include "exec_options.h"
 #include "parcel.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -33,6 +33,7 @@ public:
     std::string subcommand;
     std::string challenge;
     ExecOptions options;
+    AAFwk::WantParams args;
 
     bool Marshalling(Parcel &parcel) const;
     static ExecToolParam *Unmarshalling(Parcel &parcel);

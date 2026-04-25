@@ -34,6 +34,10 @@ bool ExecToolParam::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Write options failed.");
         return false;
     }
+    if (!parcel.WriteParcelable(&args)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Write args failed.");
+        return false;
+    }
     return true;
 }
 
@@ -56,12 +60,20 @@ ExecToolParam *ExecToolParam::Unmarshalling(Parcel &parcel)
         delete result;
         return nullptr;
     }
+
     std::unique_ptr<ExecOptions> execOptions(parcel.ReadParcelable<ExecOptions>());
     if (execOptions == nullptr) {
         delete result;
         return nullptr;
     }
     result->options = *execOptions;
+
+    std::unique_ptr<AAFwk::WantParams> args(parcel.ReadParcelable<AAFwk::WantParams>());
+    if (args == nullptr) {
+        delete result;
+        return nullptr;
+    }
+    result->args = *args;
     return result;
 }
 } // namespace CliTool

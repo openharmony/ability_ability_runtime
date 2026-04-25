@@ -17,6 +17,7 @@
 
 #include "cli_error_code.h"
 #include "hilog_tag_wrapper.h"
+#include "iexec_tool_callback.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "process_manager.h"
@@ -94,12 +95,15 @@ int32_t CliToolManagerService::RegisterTool(const ToolInfo &tool)
     return CliToolDataManager::GetInstance().RegisterTool(tool);
 }
 
-int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
-    CliSessionInfo &session)
+int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const sptr<IRemoteObject> &objectCallback)
 {
     TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: toolName=%{public}s, subcommand=%{public}s",
         param.toolName.c_str(), param.subcommand.c_str());
-    //todo: check permission
+
+    if (objectCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "objectCallback is null");
+        return ERR_INNER_PARAM_INVALID;
+    }
 
     if (activeSessionCount_.load() >= MAX_CONCURRENT_SESSIONS) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Session limit exceeded: %{public}d", MAX_CONCURRENT_SESSIONS);
@@ -112,7 +116,7 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::m
         return ERR_TOOL_NOT_EXIST;
     }
 
-    auto checkPramRet = ToolUtil::ValidateInputSchemaProperties(toolInfo.inputSchema, param.subcommand, args);
+    auto checkPramRet = ToolUtil::ValidateProperties(toolInfo, param.subcommand, param.args);
     if (checkPramRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Input schema validation failed");
         return checkPramRet;
@@ -124,16 +128,29 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::m
         return ERR_NOT_HAP;
     }
 
-    session.toolName = param.toolName;
-    auto createRet = ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, args);
+    pid_t childPid = -1;
+    auto createRet = ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, childPid);
     if (createRet != ERR_OK) {
-        session.status = "failed";
         return createRet;
     }
-    
+    activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
+    CliSessionInfo session;
+    session.toolName = param.toolName;
     session.sessionId = ToolUtil::GenerateCliSessionId(param.toolName);
     session.status = "running";
-    activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
+
+    if (param.options.background) {
+        auto cbProxy = sptr<IExecToolCallback>(iface_cast<IExecToolCallback>(objectCallback));
+        if (cbProxy != nullptr) {
+            cbProxy->SendResult(session);
+        }
+    } else {
+        // Store objectCallback for session completion notification
+        std::lock_guard<std::mutex> lock(callbackMutex_);
+        sessionCallbacks_[session.sessionId] = objectCallback;
+        sessionPidMap_[session.sessionId] = childPid;
+    }
+
     TAG_LOGI(AAFwkTag::CLI_TOOL, "Tool executed successfully: sessionId=%{public}s", session.sessionId.c_str());
     return ERR_OK;
 }
