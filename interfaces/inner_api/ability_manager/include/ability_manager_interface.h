@@ -592,6 +592,17 @@ public:
     }
 
     /**
+     * StartSelf, start the ability itself with token.
+     *
+     * @param token, the token of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelf(sptr<IRemoteObject> token)
+    {
+        return 0;
+    }
+
+    /**
      * TerminateAbility, terminate the special ability.
      *
      * @param token, the token of the ability to terminate.

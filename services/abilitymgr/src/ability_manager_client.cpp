@@ -482,6 +482,14 @@ ErrCode AbilityManagerClient::TerminateAbility(sptr<IRemoteObject> token, int re
     return abms->TerminateAbility(token, resultCode, resultWant);
 }
 
+ErrCode AbilityManagerClient::StartSelf(sptr<IRemoteObject> token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartSelf call");
+    return abms->StartSelf(token);
+}
+
 ErrCode AbilityManagerClient::BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
     const Want *resultWant, int64_t callerRequestCode)
 {

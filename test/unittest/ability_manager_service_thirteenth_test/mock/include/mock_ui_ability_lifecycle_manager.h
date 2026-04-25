@@ -426,6 +426,7 @@ public:
     ErrCode IsUIAbilityAlreadyExist(const Want &want, const std::string &specifiedFlag,
         int32_t appIndex, const std::string &instanceKey, AppExecFwk::LaunchMode launchMode);
     void HandleUIAbilityDiedByPid(pid_t pid);
+    int32_t StartSelf(const UIAbilityRecordPtr &abilityRecord);
 
 private:
     void AddStartingPid(pid_t pid);

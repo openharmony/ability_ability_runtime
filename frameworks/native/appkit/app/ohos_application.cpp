@@ -392,7 +392,11 @@ void OHOSApplication::OnStart()
  * @brief Will be called the application ends
  */
 void OHOSApplication::OnTerminate()
-{}
+{
+    if (abilityRuntimeContext_ != nullptr) {
+        abilityRuntimeContext_->NotifyProcessExit();
+    }
+}
 
 void OHOSApplication::OnHyperSnapUpdate()
 {

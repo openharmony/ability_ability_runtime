@@ -84,6 +84,7 @@
 #include "modular_object_manager.h"
 #include "modular_object_utils.h"
 #include "multi_app_utils.h"
+#include "native_ability_util.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
 #include "preload_manager_service.h"
@@ -5034,6 +5035,39 @@ int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, in
         return ERR_OK;
     }
     return TerminateAbilityWithFlag(token, resultCode, resultWant, true);
+}
+
+int AbilityManagerService::StartSelf(sptr<IRemoteObject> token)
+{
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSelf called");
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    // Check ability record type
+    auto abilityType = abilityRecord->GetAbilityRecordType();
+    if (abilityType == AbilityRecordType::UI_ABILITY) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSelf for UIAbility");
+        auto uiAbilityRecord = std::static_pointer_cast<UIAbilityRecord>(abilityRecord);
+        auto manager = GetUIAbilityManagerByUserId(uiAbilityRecord->GetOwnerMissionUserId());
+        if (manager) {
+            return manager->StartSelf(uiAbilityRecord);
+        }
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get UIAbilityLifecycleManager for userId: %{public}d",
+            uiAbilityRecord->GetOwnerMissionUserId());
+        return ERR_INVALID_VALUE;
+    }
+
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "StartSelf not supported for type: %{public}d", static_cast<int>(abilityType));
+    return ERR_INVALID_VALUE;
 }
 
 int32_t AbilityManagerService::TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
@@ -12748,6 +12782,11 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
     if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::PAGE ||
         abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "called ability not common ability");
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+
+    if (NativeAbilityMetaData::IsWithNative(abilityRequest.abilityInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Native ability not supported");
         return RESOLVE_CALL_ABILITY_TYPE_ERR;
     }
 
