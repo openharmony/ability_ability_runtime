@@ -23,6 +23,10 @@
 
 namespace OHOS {
 namespace CliTool {
+class CliSessionInfo;
+namespace {
+using ExecToolResultTask = std::function<void(const CliSessionInfo &session)>;
+}
 /**
  * @struct CliSessionInfo
  * @brief Information about a CLI tool execution session.
@@ -33,6 +37,7 @@ public:
     std::string toolName;
     std::string status;            // "running", "completed", "failed"
     std::shared_ptr<ExecResult> result = nullptr;  // optional, only when status="completed"
+    ExecToolResultTask task;
 
     CliSessionInfo() = default;
 

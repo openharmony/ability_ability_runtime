@@ -24,34 +24,54 @@
 #include "cli_error_code.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
+#include "string_wrapper.h"
+#include "tool_info.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace CliTool {
-int32_t ToolUtil::ValidateInputSchemaProperties(const std::string &inputSchema, const std::string &subcommand,
-    const std::map<std::string, std::string> &args)
+int32_t ToolUtil::ValidateProperties(const ToolInfo &toolInfo, const std::string &subcommand,
+    const AAFwk::WantParams &args)
 {
+    if (!subcommand.empty()) {
+        if (!toolInfo.hasSubCommand) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "not have subcommand");
+            return ERR_INVALID_PARAM;
+        }
+
+        if (toolInfo.subcommands.find(subcommand) == toolInfo.subcommands.end()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "not have subcommand");
+            return ERR_INVALID_PARAM;
+        }
+    }
+
+    return ValidateInputSchemaProperties(toolInfo.inputSchema, args);
+}
+
+int32_t ToolUtil::ValidateInputSchemaProperties(const std::string &inputSchema,
+    const AAFwk::WantParams &args)
+{
+    if (args.IsEmpty()) {
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "args is empty");
+        return ERR_OK;
+    }
+
     if (inputSchema.empty()) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "inputSchema is empty");
-        return ERR_TOOL_NOT_EXIST;
+        return ERR_INVALID_PARAM;
     }
 
     nlohmann::json schema = nlohmann::json::parse(inputSchema, nullptr, false);
     if (schema.is_discarded()) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "discarded error");
-        return ERR_TOOL_NOT_EXIST;
+        return ERR_NO_INIT;
     }
     if (!schema.contains("properties") || !schema["properties"].is_object()) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "properties not found or invalid");
-        return ERR_TOOL_NOT_EXIST;
+        return ERR_INVALID_PARAM;
     }
     auto properties = schema["properties"];
-
-    if (!subcommand.empty() && !properties.contains(subcommand)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "subcommand not found in properties");
-        return ERR_TOOL_NOT_EXIST;
-    }
-
-    for (auto &[key, vlue] : args) {
+    for (auto &[key, vlue] : args.GetParams()) {
         if (!properties.contains(key)) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "args key not found in properties");
             return ERR_INVALID_PARAM;
@@ -110,12 +130,31 @@ bool ToolUtil::GetBundleInfoByTokenId(AppExecFwk::BundleInfo &bundleInfo)
         return false;
     }
     auto flag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (hapInfo.instIndex == 0) {
+        if (bundleMgrHelper->GetBundleInfo(hapInfo.bundleName, flag, bundleInfo, hapInfo.userID) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "Fail to get bundle info");
+            return false;
+        }
+        return true;
+    }
     if (bundleMgrHelper->GetCloneBundleInfo(hapInfo.bundleName, flag, hapInfo.instIndex, bundleInfo, hapInfo.userID) !=
         ERR_OK) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Fail to get bundle info");
         return false;
     }
     return true;
+}
+
+void ToolUtil::TransferToCmdParam(const AAFwk::WantParams &args, std::string &cmdLine)
+{
+    for (const auto &[key, value] : args.GetParams()) {
+        if (AAFwk::IString::Query(value) != nullptr) {
+            AAFwk::IString *ao = AAFwk::IString::Query(value);
+            if (ao != nullptr) {
+                cmdLine += " " + key + " " + AAFwk::String::Unbox(ao);
+            }
+        }
+    }
 }
 
 } // namespace CliTool

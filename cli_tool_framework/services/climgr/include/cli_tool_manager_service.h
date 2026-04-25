@@ -17,11 +17,13 @@
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
 #include "cli_tool_manager_stub.h"
 #include "cli_tool_data_manager.h"
+#include "iremote_object.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
 
@@ -57,11 +59,12 @@ public:
     int32_t RegisterTool(const ToolInfo &tool) override;
 
     /**
-     * @brief Execute a CLI tool.
-     * Implements the ICliToolManager interface method.
+     * @brief Execute a CLI tool with key-value pairs (convenience method).
+     * @param param The CLI tool param.
+     * @param objectCallback The callback RemoteObject.
+     * @return Returns ERR_OK on success, error code otherwise.
      */
-    int32_t ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
-        CliSessionInfo &session) override;
+    int32_t ExecTool(const ExecToolParam &param, const sptr<IRemoteObject> &objectCallback) override;
 
 protected:
     void OnStart() override;
@@ -72,6 +75,9 @@ private:
     DISALLOW_COPY_AND_MOVE(CliToolManagerService);
     static sptr<CliToolManagerService> instance_;
     std::atomic<int32_t> activeSessionCount_ = 0;
+    std::mutex callbackMutex_;
+    std::map<std::string, sptr<IRemoteObject>> sessionCallbacks_;
+    std::map<std::string, pid_t> sessionPidMap_;
 };
 
 } // namespace CliTool

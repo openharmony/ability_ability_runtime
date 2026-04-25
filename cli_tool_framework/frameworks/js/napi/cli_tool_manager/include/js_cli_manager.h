@@ -117,6 +117,8 @@ private:
      * @return Returns the N-API value.
      */
     napi_value OnQueryTools(napi_env env, size_t argc, napi_value *argv);
+
+    static void ExecToolResultJSThreadWorker(uv_work_t* work, int status);
 };
 
 /**

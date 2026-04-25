@@ -179,37 +179,53 @@ bool UnwrapExecOptions(napi_env env, napi_value obj, ExecOptions &options)
         return false;
     }
 
-    // Extract background (optional)
-    napi_value backgroundProp = nullptr;
-    if (napi_get_named_property(env, obj, "background", &backgroundProp) != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid background property");
+    bool hasProperty = false;
+    if (napi_has_named_property(env, obj, "background", &hasProperty) != napi_ok) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "has background failed");
         return false;
     }
-    if (!AppExecFwk::UnwrapBoolFromJS2(env, backgroundProp, options.background)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap background failed");
-        return false;
-    }
-
-    // Extract yieldMs (optional)
-    napi_value yieldMsProp = nullptr;
-    if (napi_get_named_property(env, obj, "yieldMs", &yieldMsProp) != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid yieldMs property");
-        return false;
-    }
-    if (!AppExecFwk::UnwrapInt32FromJS2(env, yieldMsProp, options.yieldMs)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap yieldMs failed");
-        return false;
+    if (hasProperty) {
+        napi_value backgroundProp = nullptr;
+        if (napi_get_named_property(env, obj, "background", &backgroundProp) != napi_ok) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid background property");
+            return false;
+        }
+        if (!AppExecFwk::UnwrapBoolFromJS2(env, backgroundProp, options.background)) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap background failed");
+            return false;
+        }
     }
 
-    // Extract timeout (optional)
-    napi_value timeoutProp = nullptr;
-    if (napi_get_named_property(env, obj, "timeout", &timeoutProp) != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid timeout property");
+    if (napi_has_named_property(env, obj, "yieldMs", &hasProperty) != napi_ok) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "has yieldMs failed");
         return false;
     }
-    if (!AppExecFwk::UnwrapInt32FromJS2(env, timeoutProp, options.timeout)) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap timeout failed");
+    if (hasProperty) {
+        napi_value yieldMsProp = nullptr;
+        if (napi_get_named_property(env, obj, "yieldMs", &yieldMsProp) != napi_ok) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid yieldMs property");
+            return false;
+        }
+        if (!AppExecFwk::UnwrapInt32FromJS2(env, yieldMsProp, options.yieldMs)) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap yieldMs failed");
+            return false;
+        }
+    }
+
+    if (napi_has_named_property(env, obj, "timeout", &hasProperty) != napi_ok) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "has timeout failed");
         return false;
+    }
+    if (hasProperty) {
+        napi_value timeoutProp = nullptr;
+        if (napi_get_named_property(env, obj, "timeout", &timeoutProp) != napi_ok) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid timeout property");
+            return false;
+        }
+        if (!AppExecFwk::UnwrapInt32FromJS2(env, timeoutProp, options.timeout)) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "unwrap timeout failed");
+            return false;
+        }
     }
     return true;
 }

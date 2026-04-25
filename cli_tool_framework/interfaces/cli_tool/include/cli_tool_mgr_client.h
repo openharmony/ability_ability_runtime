@@ -79,12 +79,10 @@ public:
     /**
      * @brief Execute a CLI tool with key-value pairs (convenience method).
      * @param param The CLI tool param.
-     * @param args The tool arguments as key-value pairs.
-     * @param session Output session information.
+     * @param callback The callback RemoteObject.
      * @return Returns ERR_OK on success, error code otherwise.
      */
-    int32_t ExecTool(const ExecToolParam &param, const std::map<std::string, std::string> &args,
-        CliSessionInfo &session);
+    int32_t ExecTool(const ExecToolParam &param, sptr<IRemoteObject> callback);
 
     /**
      * @brief On load system ability success.

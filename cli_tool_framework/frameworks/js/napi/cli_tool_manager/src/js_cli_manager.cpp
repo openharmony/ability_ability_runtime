@@ -20,11 +20,14 @@
 
 #include "cli_error_code.h"
 #include "cli_manager_error_utils.h"
+#include "cli_session_info.h"
 #include "cli_tool_mgr_client.h"
+#include "exec_tool_callback_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "js_cli_manager_utils.h"
 #include "js_error_utils.h"
 #include "napi_common_util.h"
+#include "napi_common_want.h"
 
 using namespace OHOS::AbilityRuntime;
 
@@ -84,8 +87,7 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         return CreateJsUndefined(env);
     }
 
-    std::map<std::string, std::string> args;
-    if (!UnwrapStringMap(env, argv[INDEX_TWO], args)) {
+    if (!AppExecFwk::UnwrapWantParams(env, argv[INDEX_TWO], param.args)) {
         ThrowInvalidParamError(env, "Tool args is required");
         return CreateJsUndefined(env);
     }
@@ -102,35 +104,100 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         }
     }
 
-    auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
-    auto session = std::make_shared<CliSessionInfo>();
+    napi_value result = nullptr;
+    auto uasyncTask = CreateAsyncTaskWithLastParam(env, nullptr, nullptr, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
 
-    NapiAsyncTask::ExecuteCallback execute = [innerErrCode, param, args, session]() {
-        *innerErrCode = CliToolMGRClient::GetInstance().ExecTool(param, args, *session);
-    };
-
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode, session](
-        napi_env env, NapiAsyncTask &task, int32_t status) {
+    // Create callback task that will be invoked when ExecTool completes
+    ExecToolResultTask task = [env, asyncTask](const CliSessionInfo &session) {
         HandleScope handleScope(env);
-        if (*innerErrCode != ERR_OK) {
-            task.Reject(env, CreateCliJsErrorByNativeErr(env, *innerErrCode));
-            return;
-        }
-
-        napi_value jsSession = CreateJsCliSessionInfo(env, *session);
+        napi_value jsSession = CreateJsCliSessionInfo(env, session);
         if (jsSession == nullptr) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "Fail to create js CliSessionInfo");
-            task.Reject(env, CreateCliJsErrorByNativeErr(env, ERR_CREATE_CLI_SESSION_INFO));
+        } else {
+            asyncTask->Resolve(env, jsSession);
+        }
+        TAG_LOGD(AAFwkTag::CLI_TOOL, "ExecTool async callback completed");
+    };
+
+    // Wrap task for cross-thread communication
+    auto wrappedTask = [env, outTask = std::move(task)](const CliSessionInfo &session) {
+        auto sessionData = new (std::nothrow) CliSessionInfo(session);
+        if (sessionData == nullptr) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "null sessionData");
+            return;
+        }
+        sessionData->task = std::move(outTask);
+
+        uv_loop_s* loop = nullptr;
+        napi_get_uv_event_loop(env, &loop);
+        if (loop == nullptr) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "null loop");
+            delete sessionData;
             return;
         }
 
-        task.ResolveWithNoError(env, jsSession);
+        auto work = new (std::nothrow) uv_work_t;
+        if (work == nullptr) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "null work");
+            delete sessionData;
+            return;
+        }
+
+        work->data = static_cast<void*>(sessionData);
+        int32_t rev = uv_queue_work_with_qos(
+            loop,
+            work,
+            [](uv_work_t* work) {},
+            ExecToolResultJSThreadWorker,
+            uv_qos_user_initiated);
+        if (rev != 0) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "uv_queue_work_with_qos failed: %{public}d", rev);
+            delete sessionData;
+            delete work;
+        }
     };
 
-    napi_value asyncResult = nullptr;
-    NapiAsyncTask::Schedule("JsCliManager::OnExecTool", env,
-        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &asyncResult));
-    return handleEscape.Escape(asyncResult);
+    // Create RemoteObject callback
+    sptr<IRemoteObject> remoteObject = sptr<ExecToolCallbackImpl>::MakeSptr(std::move(wrappedTask));
+    auto errCode = CliToolMGRClient::GetInstance().ExecTool(param, remoteObject);
+    if (errCode != ERR_OK) {
+        asyncTask->Reject(env, CreateCliJsErrorByNativeErr(env, errCode));
+    }
+
+    TAG_LOGD(AAFwkTag::CLI_TOOL, "JSCliManager::OnExecTool end");
+    return handleEscape.Escape(result);
+}
+
+void JSCliManager::ExecToolResultJSThreadWorker(uv_work_t* work, int32_t status)
+{
+    TAG_LOGD(AAFwkTag::CLI_TOOL, "called");
+    if (work == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "null work");
+        return;
+    }
+    if (work->data == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "null work data");
+        delete work;
+        work = nullptr;
+        return;
+    }
+    CliSessionInfo* retCB = static_cast<CliSessionInfo*>(work->data);
+    if (retCB == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "null retCB");
+        delete work;
+        work = nullptr;
+        return;
+    }
+
+    if (retCB->task) {
+        retCB->task(*retCB);
+    }
+
+    delete retCB;
+    retCB = nullptr;
+    delete work;
+    work = nullptr;
 }
 
 napi_value JSCliManager::OnGetToolInfoByName(napi_env env, size_t argc, napi_value *argv)
