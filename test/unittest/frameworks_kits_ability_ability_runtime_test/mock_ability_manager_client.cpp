@@ -1079,6 +1079,17 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &wan
     return ERR_OK;
 }
 
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithToken(const Want &want, sptr<IRemoteObject> callerToken)
+{
+    return ERR_OK;
+}
+
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptionsAndToken(const Want &want,
+    const StartOptions &options, sptr<IRemoteObject> callerToken)
+{
+    return ERR_OK;
+}
+
 int AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
     uint64_t callbackId)
 {

@@ -64,7 +64,8 @@ HWTEST_F(ModularObjectExtensionAbilityTest, RegisterOnCreateFunc_002, TestSize.L
     GTEST_LOG_(INFO) << "RegisterOnCreateFunc_002 start";
     auto *inst = CreateValidInstance();
     auto ret = OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnCreateFunc(inst, nullptr);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(inst->onCreateFunc, nullptr);
     DestroyInstance(inst);
     GTEST_LOG_(INFO) << "RegisterOnCreateFunc_002 end";
 }

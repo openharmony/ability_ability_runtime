@@ -2417,6 +2417,23 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want,
     return abms->StartSelfUIAbilityWithPidResult(want, options, callbackId);
 }
 
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithToken(const Want &want, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbilityWithToken(want, callerToken);
+}
+
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptionsAndToken(const Want &want,
+    const StartOptions &options, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbilityWithStartOptionsAndToken(want, options, callerToken);
+}
+
 void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");

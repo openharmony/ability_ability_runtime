@@ -742,6 +742,12 @@ enum class AbilityManagerInterfaceCode {
 
     // start self ability with token
     START_SELF = 6166,
+
+    // start self uiability with caller token
+    START_SELF_UI_ABILITY_WITH_TOKEN = 6167,
+
+    // start self uiability with start options and caller token
+    START_SELF_UI_ABILITY_WITH_OPTIONS_AND_TOKEN = 6168,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

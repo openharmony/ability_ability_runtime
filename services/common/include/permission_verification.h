@@ -93,6 +93,8 @@ struct VerificationInfo {
 
     int CheckStartByCallPermission(const VerificationInfo &verificationInfo) const;
 
+    int CheckCallModularObjectExtensionPermission(const VerificationInfo &verificationInfo) const;
+
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
 
     bool JudgeCallerIsAllowedToUseSystemAPIByTokenId(uint64_t specifiedFullTokenId) const;

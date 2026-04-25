@@ -1603,5 +1603,66 @@ HWTEST_F(AbilityManagerProxyTest, GetUserLockedBundleList_0200, TestSize.Level1)
     EXPECT_EQ(result, NO_ERROR);
     GTEST_LOG_(INFO) << "GetUserLockedBundleList_0200 end";
 }
+
+/**
+ * @tc.name: StartSelfUIAbilityWithToken_0100
+ * @tc.desc: StartSelfUIAbilityWithToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, StartSelfUIAbilityWithToken_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartSelfUIAbilityWithToken_0100 start";
+
+    Want want;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    int32_t result = proxy_->StartSelfUIAbilityWithToken(want, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_TOKEN), mock_->code_);
+    EXPECT_NE(result, NO_ERROR);
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    result = proxy_->StartSelfUIAbilityWithToken(want, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_TOKEN), mock_->code_);
+    EXPECT_EQ(result, NO_ERROR);
+
+    GTEST_LOG_(INFO) << "StartSelfUIAbilityWithToken_0100 end";
+}
+
+/**
+ * @tc.name: StartSelfUIAbilityWithStartOptionsAndToken_0100
+ * @tc.desc: StartSelfUIAbilityWithStartOptionsAndToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, StartSelfUIAbilityWithStartOptionsAndToken_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartSelfUIAbilityWithStartOptionsAndToken_0100 start";
+
+    Want want;
+    StartOptions options;
+    sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    int32_t result = proxy_->StartSelfUIAbilityWithStartOptionsAndToken(want, options, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_OPTIONS_AND_TOKEN),
+        mock_->code_);
+    EXPECT_NE(result, NO_ERROR);
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    result = proxy_->StartSelfUIAbilityWithStartOptionsAndToken(want, options, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_OPTIONS_AND_TOKEN),
+        mock_->code_);
+    EXPECT_EQ(result, NO_ERROR);
+
+    GTEST_LOG_(INFO) << "StartSelfUIAbilityWithStartOptionsAndToken_0100 end";
+}
 } // namespace AAFwk
 } // namespace OHOS

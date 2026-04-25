@@ -27,7 +27,7 @@
  *
  * @brief Declares the modular object extension ability.
  *
- * @library libmodular_object_extension.so
+ * @library libability_runtime.so
  * @kit AbilityKit
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
  * @since 26.0.0
@@ -111,9 +111,8 @@ typedef void (*OH_AbilityRuntime_ModObjExtensionAbility_OnDisconnectFunc)(
  * @param instance Points to an {@link OH_AbilityRuntime_ModObjExtensionInstance} instance.
  * @param onCreateFunc Represents the onCreate callback function.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnCreateFunc(
@@ -127,9 +126,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnCrea
  * @param instance Points to an {@link OH_AbilityRuntime_ModObjExtensionInstance} instance.
  * @param onDestroyFunc Represents the onDestroy callback function.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDestroyFunc(
@@ -143,9 +141,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDest
  * @param instance Points to an {@link OH_AbilityRuntime_ModObjExtensionInstance} instance.
  * @param onConnectFunc Represents the onConnect callback function.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnConnectFunc(
@@ -159,9 +156,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnConn
  * @param instance Points to an {@link OH_AbilityRuntime_ModObjExtensionInstance} instance.
  * @param onDisconnectFunc Represents the onDisconnect callback function.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDisconnectFunc(
@@ -175,9 +171,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_RegisterOnDisc
  * @param instance Points to an {@link OH_AbilityRuntime_ModObjExtensionInstance} instance.
  * @param context Represents a pointer to the modular object extension ability context.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_GetContextFromInstance(
@@ -191,10 +186,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionAbility_GetContextFrom
  * @param modObjExtensionInstance Represents a pointer to an {@link
  * OH_AbilityRuntime_ModObjExtensionInstanceHandle} instance that is an output parameter.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} - if the ability instance is not
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability instance is not
  *         a modular object extension.
  * @since 26.0.0
  */

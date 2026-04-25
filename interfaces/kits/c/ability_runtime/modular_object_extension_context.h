@@ -27,7 +27,7 @@
  *
  * @brief Declares the modular object extension context.
  *
- * @library libmodular_object_extension.so
+ * @library libability_runtime.so
  * @kit AbilityKit
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
  * @since 26.0.0
@@ -61,9 +61,8 @@ typedef struct OH_AbilityRuntime_ModularObjectExtensionContext* OH_AbilityRuntim
  * @param modObjExtensionContext Represents a pointer to a modular object extension ability context.
  * @param baseContext Represents a pointer to a {@link AbilityRuntime_ContextHandle} base extension ability context.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - device not supported.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionContext_GetBaseContext(
@@ -77,26 +76,26 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionContext_GetBaseContext
  * @param want The arguments passed to start the self UIAbility.
  * For details, see {@link AbilityBase_Want}.
  * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - if the call is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} - if the caller has no correct permission.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - if the arguments provided is invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - if the device does not support starting self UIAbility.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} - if the target ability does not exist.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} - if the ability type is incorrect.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} - if the crowdtesting application expires.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} - if the ability cannot be started in Wukong mode.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} - if the app is controlled.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} - if the app is controlled by EDM.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} - if the caller tries to start a different application.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} - if an internal error occurs.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} - if the caller is not top ability.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED} - if the app clone or multi-instance is
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} if the caller has no correct permission.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided is invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support starting self UIAbility.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} if the target ability does not exist.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability type is incorrect.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} if the crowdtesting application expires.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} if the ability cannot be started in Wukong mode.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} if the app is controlled.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} if the app is controlled by EDM.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if an internal error occurs.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not top ability.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED} if the app clone or multi-instance is
             not supported.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY} - if the app instance key is invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} - if the number of app instances has reached
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY} if the app instance key is invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} if the number of app instances has reached
             the limit.
- *          {@link ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED} - if multi-instance is not supported.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED} - if the APP_INSTANCE_KEY cannot
+ *          {@link ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED} if multi-instance is not supported.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED} if the APP_INSTANCE_KEY cannot
             be specified.
  * @since 26.0.0
  */
@@ -113,27 +112,27 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionContext_StartSelfUIAbi
  * @param options The start options passed to start the self UIAbility.
  * For details, see {@link AbilityRuntime_StartOptions}.
  * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - if the call is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} - if the caller has no correct permission.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - if the arguments provided are invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - if the device does not support starting self UIAbility.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} - if the target ability does not exist.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} - if the ability type is incorrect.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} - if the crowdtesting application expires.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} - if the ability cannot be started in Wukong mode.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} - if the app is controlled.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} - if the app is controlled by EDM.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} - if the caller tries to start a different application.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} - if an internal error occurs.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} - if the caller is not a foreground process.
- *          {@link ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED} - if setting visibility is disabled.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED} - if the app clone or multi-instance is
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} if the caller has no correct permission.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support starting self UIAbility.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} if the target ability does not exist.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability type is incorrect.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} if the crowdtesting application expires.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} if the ability cannot be started in Wukong mode.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} if the app is controlled.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} if the app is controlled by EDM.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if an internal error occurs.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not a foreground process.
+ *          {@link ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED} if setting visibility is disabled.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED} if the app clone or multi-instance is
             not supported.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY} - if the app instance key is invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} - if the number of app instances has reached
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY} if the app instance key is invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} if the number of app instances has reached
             the limit.
- *          {@link ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED} - if multi-instance is not supported.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED} - if the APP_INSTANCE_KEY cannot
+ *          {@link ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED} if multi-instance is not supported.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED} if the APP_INSTANCE_KEY cannot
             be specified.
  * @since 26.0.0
  */
@@ -146,12 +145,11 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionContext_StartSelfUIAbi
  *
  * @param context Represents a pointer to a modular object extension ability context.
  * @return Returns a specific error code.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - if the call is successful.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - if the arguments provided are invalid.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} - if the device does not support starting self UIAbility.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} - if the ability cannot be started in Wukong mode.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} - if the context does not exist.
- *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} - if an internal error occurs.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided are invalid.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} if the ability cannot be started in Wukong mode.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the context does not exist.
+ *          {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if an internal error occurs.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ModObjExtensionContext_TerminateSelf(

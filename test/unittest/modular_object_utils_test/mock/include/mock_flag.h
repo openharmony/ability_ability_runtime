@@ -59,6 +59,13 @@ public:
     static bool uiAbilityMgrNull;
     // UIExtensionAbilityManager
     static bool uiExtMgrNull;
+
+    // PermissionVerification
+    static bool isSACall;
+    static int32_t checkCallModularObjectExtensionPermissionRet;
+
+    // RateLimiter
+    static bool modularObjectLimited;
 };
 
 #endif // MOCK_FLAG_H
