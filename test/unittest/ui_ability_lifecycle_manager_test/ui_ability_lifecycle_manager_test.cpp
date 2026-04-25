@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -428,6 +428,21 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_002, TestSize.Level1)
     sessionInfo = mgr->CreateSessionInfo(abilityRequest, requestId);
     EXPECT_NE(sessionInfo, nullptr);
     EXPECT_TRUE(sessionInfo->specifiedFlag.empty());
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_003
+ * @tc.desc: Verify CreateSessionInfo sets splitRatioPreference correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.startOptions.SetSplitRatioPreference(2);
+    sptr<SessionInfo> sessionInfo = uiAbilityLifecycleManager->CreateSessionInfo(abilityRequest, 0);
+    EXPECT_EQ(sessionInfo->splitRatioPreference, 2);
 }
 
 /**
@@ -2062,10 +2077,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBPendingActivation_001, TestSize
     auto token = abilityRecord->GetToken();
     EXPECT_NE(token, nullptr);
     abilityRequest.callerToken = token->AsObject();
-    abilityRequest.startOptions.SetSplitRatioPreference(2);
     std::string errMsg;
     uiAbilityLifecycleManager->NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
-    EXPECT_EQ(sessionInfo->splitRatioPreference, 2);
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
 /**
