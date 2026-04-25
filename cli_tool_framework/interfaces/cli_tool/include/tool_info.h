@@ -89,9 +89,26 @@ public:
     static ToolInfo *Unmarshalling(Parcel &parcel);
 
     /**
-     * @brief Parse ToolInfo from JSON object
+     * @brief Validate tool name
+     * @param name Tool name to validate
+     * @return bool true if valid
      */
-    static ToolInfo ParseFromJson(const nlohmann::json &json);
+    static bool ValidateName(const std::string &name);
+
+    /**
+     * @brief Validate executable path (must be absolute path)
+     * @param path Executable path to validate
+     * @return bool true if valid
+     */
+    static bool ValidateExecutablePath(const std::string &path);
+
+    /**
+     * @brief Parse ToolInfo from JSON object
+     * @param json Input JSON object
+     * @param tool Output ToolInfo
+     * @return bool true if parse success and required fields are valid
+     */
+    static bool ParseFromJson(const nlohmann::json &json, ToolInfo &tool);
 
     /**
      * @brief Convert ToolInfo to JSON object
