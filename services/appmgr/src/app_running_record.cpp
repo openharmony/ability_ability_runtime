@@ -2020,7 +2020,8 @@ void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool
                 isFloatingWindowMode = true;
             }
             if (windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
-                windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY) {
+                windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY ||
+                windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SPLIT) {
                 isSplitScreenMode = true;
             }
         }
