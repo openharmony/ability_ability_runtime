@@ -909,7 +909,8 @@ void EtsAbilityContext::InheritWindowMode(AAFwk::Want &want)
     auto windowMode = context->GetCurrentWindowMode();
     if (AAFwk::AppUtils::GetInstance().IsInheritWindowSplitScreenMode() &&
         (windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
-            windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY)) {
+            windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY ||
+            windowMode == AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SPLIT)) {
         want.SetParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, windowMode);
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "window mode is %{public}d", windowMode);
