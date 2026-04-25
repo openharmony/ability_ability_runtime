@@ -137,9 +137,9 @@ HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_003, TestSize.
 HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_004 start";
-    // ERR_CHECK_CALL_FROM_BACKGROUND_FAILED -> NO_RUNNING_ABILITIES_WITH_UI
-    auto ret = CModularObjectUtils::ConvertConnectBusinessErrorCode(ERR_CHECK_CALL_FROM_BACKGROUND_FAILED);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_RUNNING_ABILITIES_WITH_UI);
+    // ERR_INVALID_DISTRIBUTION_TYPE -> INVALID_DISTRIBUTION_TYPE
+    auto ret = CModularObjectUtils::ConvertConnectBusinessErrorCode(ERR_INVALID_DISTRIBUTION_TYPE);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_INVALID_DISTRIBUTION_TYPE);
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_004 end";
 }
 
@@ -155,27 +155,29 @@ HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_005, TestSize.
 HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_006 start";
-    // ERR_REACH_UPPER_LIMIT -> UPPER_CONNECTION_NUMBER_LIMIT
+    // ERR_REACH_UPPER_LIMIT -> falls to default -> ConvertToCommonBusinessErrorCode
+    MyFlag::retConvertToCommonBusinessErrorCode = ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED;
     auto ret = CModularObjectUtils::ConvertConnectBusinessErrorCode(ERR_REACH_UPPER_LIMIT);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_UPPER_CONNECTION_NUMBER_LIMIT);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED);
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_006 end";
 }
 
 HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_007 start";
-    // ERR_UPPER_LIMIT -> UPPER_CONNECTION_NUMBER_LIMIT (same as ERR_REACH_UPPER_LIMIT)
+    // ERR_UPPER_LIMIT -> falls to default -> ConvertToCommonBusinessErrorCode
+    MyFlag::retConvertToCommonBusinessErrorCode = 0;
     auto ret = CModularObjectUtils::ConvertConnectBusinessErrorCode(ERR_UPPER_LIMIT);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_UPPER_CONNECTION_NUMBER_LIMIT);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_007 end";
 }
 
 HWTEST_F(CModularObjectUtilsTest, ConvertConnectBusinessErrorCode_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_008 start";
-    // ERR_MODULAR_OBJECT_DISABLED -> MODULAR_OBJECT_EXTENSION_DISABLED
+    // ERR_MODULAR_OBJECT_DISABLED -> NO_SUCH_ABILITY
     auto ret = CModularObjectUtils::ConvertConnectBusinessErrorCode(ERR_MODULAR_OBJECT_DISABLED);
-    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_MODULAR_OBJECT_EXTENSION_DISABLED);
+    EXPECT_EQ(ret, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
     GTEST_LOG_(INFO) << "ConvertConnectBusinessErrorCode_008 end";
 }
 
@@ -414,10 +416,10 @@ HWTEST_F(CModularObjectUtilsTest, NotifyFailed_005, TestSize.Level1)
     state->owner = nullptr;
     state->onFailedCallback = MockOnFailedCallback;
 
-    int32_t businessCode = ABILITY_RUNTIME_ERROR_CODE_MODULAR_OBJECT_EXTENSION_DISABLED;
+    int32_t businessCode = ABILITY_RUNTIME_ERROR_CODE_INVALID_DISTRIBUTION_TYPE;
     CModularObjectUtils::NotifyFailed(state, businessCode);
     EXPECT_EQ(g_callbackCallCount, 1);
-    EXPECT_EQ(g_capturedErrorCode, ABILITY_RUNTIME_ERROR_CODE_MODULAR_OBJECT_EXTENSION_DISABLED);
+    EXPECT_EQ(g_capturedErrorCode, ABILITY_RUNTIME_ERROR_CODE_INVALID_DISTRIBUTION_TYPE);
     GTEST_LOG_(INFO) << "NotifyFailed_005 end";
 }
 

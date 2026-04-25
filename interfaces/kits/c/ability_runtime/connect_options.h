@@ -74,8 +74,7 @@ typedef void (*OH_AbilityRuntime_ConnectOptions_OnConnectCallback)(
 /**
  * @brief The callback interface is invoked when the disconnection occurs.
  *
- * @param connectOptions Represents a pointer to an {@link
- * OH_AbilityRuntime_ConnectOptions} instance.
+ * @param connectOptions Represents a pointer to an {@link OH_AbilityRuntime_ConnectOptions} instance.
  * @param element Represents the element name of the modular object extension ability.
  *
  * @since 26.0.0
@@ -86,8 +85,7 @@ typedef void (*OH_AbilityRuntime_ConnectOptions_OnDisconnectCallback)(
 /**
  * @brief The callback interface is invoked when the connection fails.
  *
- * @param connectOptions Represents a pointer to an {@link
- * OH_AbilityRuntime_ConnectOptions} instance.
+ * @param connectOptions Represents a pointer to an {@link OH_AbilityRuntime_ConnectOptions} instance.
  * @param code Represents the error code of the failure.
  *
  * @since 26.0.0
@@ -125,8 +123,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_DestroyConnectOptions(OH_AbilityRunti
  * @param onConnectCallback Represents {@link OH_AbilityRuntime_ConnectOptions_OnConnectCallback} instance
  * which will be set in.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnConnectCallback(
@@ -141,8 +139,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnConnectCallback(
  * @param onDisconnectCallback Represents {@link OH_AbilityRuntime_ConnectOptions_OnDisconnectCallback} instance
  * which will be set in.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnDisconnectCallback(
@@ -157,8 +155,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnDisconnectCallbac
  * @param onFailedCallback Represents {@link OH_AbilityRuntime_ConnectOptions_OnFailedCallback} instance
  * which will be set in.
  * @return Returns a specific error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} - success.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} - parameter check failed.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} success.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} parameter check failed.
  * @since 26.0.0
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ConnectOptions_SetOnFailedCallback(

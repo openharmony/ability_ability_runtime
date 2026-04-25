@@ -14,6 +14,9 @@
  */
 
 #include "mock_flag.h"
+#include "ability_record.h"
+#include "base_extension_record.h"
+#include "ability_record/ability_record_utils.h"
 
 bool MockFlag::isSupportModularObjectExtension = true;
 int32_t MockFlag::callingUid = 1000;
@@ -36,3 +39,13 @@ bool MockFlag::hasRunningUIExtension = false;
 bool MockFlag::missionListMgrNull = false;
 bool MockFlag::uiAbilityMgrNull = false;
 bool MockFlag::uiExtMgrNull = false;
+bool MockFlag::isSACall = false;
+int32_t MockFlag::checkCallModularObjectExtensionPermissionRet = 0;
+bool MockFlag::modularObjectLimited = false;
+
+// Token mock
+std::shared_ptr<OHOS::AAFwk::AbilityRecord> OHOS::AAFwk::Token::abilityRecord_ = nullptr;
+
+// AbilityRecord mock
+OHOS::AppExecFwk::AbilityInfo OHOS::AAFwk::AbilityRecord::abilityInfo;
+pid_t OHOS::AAFwk::BaseExtensionRecord::clientPid = -1;

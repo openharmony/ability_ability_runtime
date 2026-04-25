@@ -74,6 +74,11 @@ public:
      */
     ErrCode StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options, uint64_t callbackId);
 
+    ErrCode StartSelfUIAbilityWithToken(const Want &want, sptr<IRemoteObject> callerToken);
+
+    ErrCode StartSelfUIAbilityWithStartOptionsAndToken(const Want &want,
+        const StartOptions &options, sptr<IRemoteObject> callerToken);
+
     /**
      * AttachAbilityThread, ability call this interface after loaded.
      *

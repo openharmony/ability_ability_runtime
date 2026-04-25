@@ -351,6 +351,16 @@ int PermissionVerification::CheckStartByCallPermission(const VerificationInfo &v
     return ERR_OK;
 }
 
+int PermissionVerification::CheckCallModularObjectExtensionPermission(
+    const VerificationInfo &verificationInfo) const
+{
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller INVISIBLE permission invalid");
+        return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
+    }
+    return ERR_OK;
+}
+
 unsigned int PermissionVerification::GetCallingTokenID() const
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
