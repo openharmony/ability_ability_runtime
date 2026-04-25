@@ -578,5 +578,270 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_ParseToJson_RoundTrip_
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_ParseToJson_RoundTrip_0100 end";
 }
 
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0400
+ * @tc.desc: Test SubCommandInfo ParseToJson with invalid inputSchema JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0400 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid inputSchema test";
+    subCmd.inputSchema = "invalid json string";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.eventSchemas = R"({"event1": {"type": "object"}})";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Invalid inputSchema test");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"], "invalid json string");
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"], R"({"type": "string"})");
+    EXPECT_TRUE(json.contains("eventSchemas"));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0500
+ * @tc.desc: Test SubCommandInfo ParseToJson with invalid outputSchema JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0500 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid outputSchema test";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = "{invalid json}";
+    subCmd.eventSchemas = "{}";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Invalid outputSchema test");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"], R"({"type": "object"})");
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"], "{invalid json}");
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0500 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0600
+ * @tc.desc: Test SubCommandInfo ParseToJson with invalid eventSchemas JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0600 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid eventSchemas test";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.eventSchemas = "not a valid json";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Invalid eventSchemas test");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_EQ(json["eventSchemas"], "not a valid json");
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0600 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0700
+ * @tc.desc: Test SubCommandInfo ParseToJson with complex valid inputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0700 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Complex schema test";
+    subCmd.inputSchema = R"({
+        "type": "object",
+        "properties": {
+            "name": {"type": "string", "description": "User name"},
+            "age": {"type": "number", "minimum": 0},
+            "address": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string"},
+                    "country": {"type": "string"}
+                },
+                "required": ["city"]
+            }
+        },
+        "required": ["name"]
+    })";
+    subCmd.outputSchema = R"({"type": "array", "items": {"type": "string"}})";
+    subCmd.eventSchemas = R"({
+        "stdout": {"type": "string"},
+        "stderr": {"type": "string"},
+        "exit": {"type": "number"}
+    })";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json["inputSchema"].is_object());
+    EXPECT_TRUE(json["inputSchema"].contains("properties"));
+    EXPECT_TRUE(json["inputSchema"]["properties"].contains("name"));
+    EXPECT_TRUE(json["inputSchema"]["properties"].contains("address"));
+
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json["outputSchema"].is_object());
+    EXPECT_EQ(json["outputSchema"]["type"], "array");
+
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_TRUE(json["eventSchemas"].is_object());
+    EXPECT_TRUE(json["eventSchemas"].contains("stdout"));
+    EXPECT_TRUE(json["eventSchemas"].contains("exit"));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0700 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0800
+ * @tc.desc: Test SubCommandInfo ParseToJson with all invalid schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0800 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "All invalid schemas";
+    subCmd.inputSchema = "invalid";
+    subCmd.outputSchema = "also invalid";
+    subCmd.eventSchemas = "invalid too";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "All invalid schemas");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_EQ(json["inputSchema"], "invalid");
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_EQ(json["outputSchema"], "also invalid");
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_EQ(json["eventSchemas"], "invalid too");
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0800 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_0900
+ * @tc.desc: Test SubCommandInfo ParseToJson with empty inputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0900 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty inputSchema test";
+    subCmd.inputSchema = "";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.eventSchemas = "{}";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Empty inputSchema test");
+    EXPECT_FALSE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_0900 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_1000
+ * @tc.desc: Test SubCommandInfo ParseToJson with empty outputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1000 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty outputSchema test";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = "";
+    subCmd.eventSchemas = "{}";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Empty outputSchema test");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_FALSE(json.contains("outputSchema"));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1000 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_1100
+ * @tc.desc: Test SubCommandInfo ParseToJson with empty eventSchemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1100 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty eventSchemas test";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.eventSchemas = "";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_EQ(json["description"], "Empty eventSchemas test");
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_FALSE(json.contains("eventSchemas"));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseToJson_1200
+ * @tc.desc: Test SubCommandInfo ParseToJson with array type schemas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_1200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1200 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Array schema test";
+    subCmd.inputSchema = R"({"type": "array", "items": {"type": "number"}})";
+    subCmd.outputSchema = R"({"type": "array", "items": {"type": "object"}})";
+    subCmd.eventSchemas = R"({"events": {"type": "array"}})";
+
+    nlohmann::json json = subCmd.ParseToJson();
+
+    EXPECT_TRUE(json.contains("inputSchema"));
+    EXPECT_TRUE(json["inputSchema"].is_object());
+    EXPECT_EQ(json["inputSchema"]["type"], "array");
+
+    EXPECT_TRUE(json.contains("outputSchema"));
+    EXPECT_TRUE(json["outputSchema"].is_object());
+    EXPECT_EQ(json["outputSchema"]["type"], "array");
+
+    EXPECT_TRUE(json.contains("eventSchemas"));
+    EXPECT_TRUE(json["eventSchemas"].is_object());
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1200 end";
+}
+
 } // namespace CliTool
 } // namespace OHOS

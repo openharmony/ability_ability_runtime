@@ -158,10 +158,31 @@ nlohmann::json SubCommandInfo::ParseToJson() const
 
     json["description"] = description;
     json["requirePermissions"] = requirePermissions;
-    json["inputSchema"] = inputSchema;
-    json["outputSchema"] = outputSchema;
+    if (!inputSchema.empty()) {
+        nlohmann::json inputSchemaJson = nlohmann::json::parse(inputSchema, nullptr, false);
+        if (!inputSchemaJson.is_discarded()) {
+            json["inputSchema"] = inputSchemaJson;
+        } else {
+            json["inputSchema"] = inputSchema;
+        }
+    }
+    if (!outputSchema.empty()) {
+        nlohmann::json outputSchemaJson = nlohmann::json::parse(outputSchema, nullptr, false);
+        if (!outputSchemaJson.is_discarded()) {
+            json["outputSchema"] = outputSchemaJson;
+        } else {
+            json["outputSchema"] = outputSchema;
+        }
+    }
     json["eventTypes"] = eventTypes;
-    json["eventSchemas"] = eventSchemas;
+    if (!eventSchemas.empty()) {
+        nlohmann::json eventSchemasJson = nlohmann::json::parse(eventSchemas, nullptr, false);
+        if (!eventSchemasJson.is_discarded()) {
+            json["eventSchemas"] = eventSchemasJson;
+        } else {
+            json["eventSchemas"] = eventSchemas;
+        }
+    }
     if (argMapping != nullptr) {
         json["argMapping"] = argMapping->ParseToJson();
     }
