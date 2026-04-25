@@ -57,33 +57,41 @@ ArgMapping *ArgMapping::Unmarshalling(Parcel &parcel)
     return mapping.release();
 }
 
-std::shared_ptr<ArgMapping> ArgMapping::ParseFromJson(const nlohmann::json &json)
+bool ArgMapping::ParseFromJson(const nlohmann::json &json, ArgMapping &argMapping)
 {
-    auto argMapping = std::make_shared<ArgMapping>();
-    if (json.contains("type") && json["type"].is_string()) {
-        std::string typeStr = json["type"];
-        if (typeStr == "flag") {
-            argMapping->type = ArgMappingType::FLAG;
-        } else if (typeStr == "positional") {
-            argMapping->type = ArgMappingType::POSITIONAL;
-        } else if (typeStr == "flattened") {
-            argMapping->type = ArgMappingType::FLATTENED;
-        } else if (typeStr == "jsonString") {
-            argMapping->type = ArgMappingType::JSONSTRING;
-        } else if (typeStr == "mixed") {
-            argMapping->type = ArgMappingType::MIXED;
-        }
+    // type is required
+    if (!json.contains("type") || !json["type"].is_string()) {
+        return false;
     }
+
+    std::string typeStr = json["type"];
+    if (typeStr == "flag") {
+        argMapping.type = ArgMappingType::FLAG;
+    } else if (typeStr == "positional") {
+        argMapping.type = ArgMappingType::POSITIONAL;
+    } else if (typeStr == "flattened") {
+        argMapping.type = ArgMappingType::FLATTENED;
+    } else if (typeStr == "jsonString") {
+        argMapping.type = ArgMappingType::JSONSTRING;
+    } else if (typeStr == "mixed") {
+        argMapping.type = ArgMappingType::MIXED;
+    } else {
+        return false;  // invalid type value
+    }
+
     if (json.contains("separator") && json["separator"].is_string()) {
-        argMapping->separator = json["separator"];
+        argMapping.separator = json["separator"];
     }
     if (json.contains("order") && json["order"].is_string()) {
-        argMapping->order = json["order"];
+        argMapping.order = json["order"];
     }
-    if (json.contains("templates") && json["templates"].is_object()) {
-        argMapping->templates = json["templates"].dump();
+    if (json.contains("templates")) {
+        if (!json["templates"].is_object()) {
+            return false;  // templates must be an object
+        }
+        argMapping.templates = json["templates"].dump();
     }
-    return argMapping;
+    return true;
 }
 
 nlohmann::json ArgMapping::ParseToJson() const
@@ -121,6 +129,25 @@ nlohmann::json ArgMapping::ParseToJson() const
         }
     }
     return j;
+}
+
+bool ArgMapping::Validate(const ArgMapping &argMapping)
+{
+    // type must be valid enum value
+    int32_t typeValue = static_cast<int32_t>(argMapping.type);
+    if (typeValue < 0 || typeValue > static_cast<int32_t>(ArgMappingType::MIXED)) {
+        return false;
+    }
+
+    // templates must be valid JSON object if not empty
+    if (!argMapping.templates.empty()) {
+        nlohmann::json templatesJson = nlohmann::json::parse(argMapping.templates, nullptr, false);
+        if (templatesJson.is_discarded() || !templatesJson.is_object()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // namespace CliTool

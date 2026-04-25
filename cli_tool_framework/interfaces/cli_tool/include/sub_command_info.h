@@ -48,8 +48,11 @@ public:
 
     /**
      * @brief Parse SubCommandInfo from JSON object
+     * @param json Input JSON object
+     * @param subCmd Output SubCommandInfo
+     * @return bool true if parse success
      */
-    static SubCommandInfo ParseFromJson(const nlohmann::json &json);
+    static bool ParseFromJson(const nlohmann::json &json, SubCommandInfo &subCmd);
 
     /**
      * @brief Convert SubCommandInfo to JSON object
