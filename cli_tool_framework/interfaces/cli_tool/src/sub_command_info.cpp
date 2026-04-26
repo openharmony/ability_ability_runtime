@@ -15,6 +15,8 @@
 
 #include "sub_command_info.h"
 
+#include <set>
+
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -117,22 +119,47 @@ SubCommandInfo *SubCommandInfo::Unmarshalling(Parcel &parcel)
 
 bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &subCmd)
 {
-    if (json.contains("description") && json["description"].is_string()) {
-        subCmd.description = json["description"];
+    // description is required and must be non-empty
+    if (!json.contains("description") || !json["description"].is_string()) {
+        return false;
     }
-    if (json.contains("requirePermissions") && json["requirePermissions"].is_array()) {
+    std::string description = json["description"];
+    if (description.empty()) {
+        return false;
+    }
+    subCmd.description = description;
+
+    // requirePermissions is optional, but if present must be array of unique strings
+    if (json.contains("requirePermissions")) {
+        if (!json["requirePermissions"].is_array()) {
+            return false;
+        }
+        std::set<std::string> seenPerms;
         for (const auto &perm : json["requirePermissions"]) {
-            if (perm.is_string()) {
-                subCmd.requirePermissions.push_back(perm);
+            if (!perm.is_string()) {
+                return false;
             }
+            std::string permStr = perm;
+            if (seenPerms.find(permStr) != seenPerms.end()) {
+                return false;  // duplicate permission
+            }
+            seenPerms.insert(permStr);
+            subCmd.requirePermissions.push_back(permStr);
         }
     }
-    if (json.contains("inputSchema") && json["inputSchema"].is_object()) {
-        subCmd.inputSchema = json["inputSchema"].dump();
+
+    // inputSchema is required and must be JSON object
+    if (!json.contains("inputSchema") || !json["inputSchema"].is_object()) {
+        return false;
     }
-    if (json.contains("outputSchema") && json["outputSchema"].is_object()) {
-        subCmd.outputSchema = json["outputSchema"].dump();
+    subCmd.inputSchema = json["inputSchema"].dump();
+
+    // outputSchema is required and must be JSON object
+    if (!json.contains("outputSchema") || !json["outputSchema"].is_object()) {
+        return false;
     }
+    subCmd.outputSchema = json["outputSchema"].dump();
+
     // argMapping is required
     if (!json.contains("argMapping") || !json["argMapping"].is_object()) {
         return false;
@@ -142,14 +169,31 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
         subCmd.argMapping = nullptr;
         return false;  // argMapping parse failed
     }
-    if (json.contains("eventTypes") && json["eventTypes"].is_array()) {
+
+    // eventTypes is optional, but if present must be array of unique strings
+    if (json.contains("eventTypes")) {
+        if (!json["eventTypes"].is_array()) {
+            return false;
+        }
+        std::set<std::string> seenEvents;
         for (const auto &evt : json["eventTypes"]) {
-            if (evt.is_string()) {
-                subCmd.eventTypes.push_back(evt);
+            if (!evt.is_string()) {
+                return false;
             }
+            std::string evtStr = evt;
+            if (seenEvents.find(evtStr) != seenEvents.end()) {
+                return false;  // duplicate event type
+            }
+            seenEvents.insert(evtStr);
+            subCmd.eventTypes.push_back(evtStr);
         }
     }
-    if (json.contains("eventSchemas") && json["eventSchemas"].is_object()) {
+
+    // eventSchemas is optional, but if present must be JSON object
+    if (json.contains("eventSchemas")) {
+        if (!json["eventSchemas"].is_object()) {
+            return false;
+        }
         subCmd.eventSchemas = json["eventSchemas"].dump();
     }
 
@@ -192,6 +236,82 @@ nlohmann::json SubCommandInfo::ParseToJson() const
     }
 
     return json;
+}
+
+bool SubCommandInfo::Validate(const SubCommandInfo &subCmd)
+{
+    // description is required and must be non-empty
+    if (subCmd.description.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: description is empty");
+        return false;
+    }
+
+    // requirePermissions: if not empty, all items must be unique strings
+    if (!subCmd.requirePermissions.empty()) {
+        std::set<std::string> seenPerms;
+        for (const auto &perm : subCmd.requirePermissions) {
+            if (seenPerms.find(perm) != seenPerms.end()) {
+                TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: duplicate permission %{public}s", perm.c_str());
+                return false;
+            }
+            seenPerms.insert(perm);
+        }
+    }
+
+    // inputSchema is required and must be valid JSON object
+    if (subCmd.inputSchema.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is empty");
+        return false;
+    }
+    nlohmann::json inputSchemaJson = nlohmann::json::parse(subCmd.inputSchema, nullptr, false);
+    if (inputSchemaJson.is_discarded() || !inputSchemaJson.is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is not a valid JSON object");
+        return false;
+    }
+
+    // outputSchema is required and must be valid JSON object
+    if (subCmd.outputSchema.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: outputSchema is empty");
+        return false;
+    }
+    nlohmann::json outputSchemaJson = nlohmann::json::parse(subCmd.outputSchema, nullptr, false);
+    if (outputSchemaJson.is_discarded() || !outputSchemaJson.is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: outputSchema is not a valid JSON object");
+        return false;
+    }
+
+    // argMapping is required
+    if (subCmd.argMapping == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: argMapping is null");
+        return false;
+    }
+    if (!ArgMapping::Validate(*subCmd.argMapping)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: argMapping validation failed");
+        return false;
+    }
+
+    // eventTypes: if not empty, all items must be unique strings
+    if (!subCmd.eventTypes.empty()) {
+        std::set<std::string> seenEvents;
+        for (const auto &evt : subCmd.eventTypes) {
+            if (seenEvents.find(evt) != seenEvents.end()) {
+                TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: duplicate eventType %{public}s", evt.c_str());
+                return false;
+            }
+            seenEvents.insert(evt);
+        }
+    }
+
+    // eventSchemas: if not empty, must be valid JSON object
+    if (!subCmd.eventSchemas.empty()) {
+        nlohmann::json eventSchemasJson = nlohmann::json::parse(subCmd.eventSchemas, nullptr, false);
+        if (eventSchemasJson.is_discarded() || !eventSchemasJson.is_object()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: eventSchemas is not a valid JSON object");
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // namespace CliTool
