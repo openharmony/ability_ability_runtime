@@ -53,13 +53,23 @@ public:
 
     /**
      * @brief Parse ArgMapping from JSON object
+     * @param json Input JSON object
+     * @param argMapping Output ArgMapping
+     * @return bool true if parse success and required fields are valid
      */
-    static std::shared_ptr<ArgMapping> ParseFromJson(const nlohmann::json &json);
+    static bool ParseFromJson(const nlohmann::json &json, ArgMapping &argMapping);
 
     /**
      * @brief Convert ArgMapping to JSON object
      */
     nlohmann::json ParseToJson() const;
+
+    /**
+     * @brief Validate ArgMapping fields
+     * @param argMapping ArgMapping to validate
+     * @return bool true if valid
+     */
+    static bool Validate(const ArgMapping &argMapping);
 };
 
 } // namespace CliTool

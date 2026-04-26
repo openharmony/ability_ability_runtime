@@ -170,7 +170,10 @@ int32_t CliToolDataManager::GetAllTools(std::vector<ToolInfo> &tools)
             TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to parse tool: %{public}s", entry.key.ToString().c_str());
             continue;
         }
-        tools.push_back(ToolInfo::ParseFromJson(j));
+        ToolInfo tool;
+        if (ToolInfo::ParseFromJson(j, tool)) {
+            tools.push_back(std::move(tool));
+        }
     }
 
     TAG_LOGI(AAFwkTag::CLI_TOOL, "Retrieved %{public}zu tools", tools.size());
@@ -203,14 +206,11 @@ int32_t CliToolDataManager::GetToolByName(const std::string &name, ToolInfo &too
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to parse JSON for tool: %{public}s", name.c_str());
         return ERR_JSON_PARSE_FAILED;
     }
-    tool = ToolInfo::ParseFromJson(j);
+    if (!ToolInfo::ParseFromJson(j, tool)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Invalid tool name for: %{public}s", name.c_str());
+        return ERR_JSON_PARSE_FAILED;
+    }
     return ERR_OK;
-}
-
-bool CliToolDataManager::ToolExists(const std::string &name)
-{
-    ToolInfo tool;
-    return GetToolByName(name, tool) == ERR_OK;
 }
 
 int32_t CliToolDataManager::ParseJsonFile(const std::string &filePath, std::vector<ToolInfo> &tools)
@@ -254,10 +254,13 @@ int32_t CliToolDataManager::ParseJsonFile(const std::string &filePath, std::vect
     }
 
     for (const auto &item : root) {
-        ToolInfo tool = ToolInfo::ParseFromJson(item);
-
-        tools.push_back(tool);
-        TAG_LOGI(AAFwkTag::CLI_TOOL, "Parsed tool: %{public}s", tool.name.c_str());
+        ToolInfo tool;
+        if (ToolInfo::ParseFromJson(item, tool)) {
+            tools.push_back(std::move(tool));
+            TAG_LOGI(AAFwkTag::CLI_TOOL, "Parsed tool: %{public}s", tool.name.c_str());
+        } else {
+            TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to parse tool: invalid name");
+        }
     }
 
     TAG_LOGI(AAFwkTag::CLI_TOOL, "Successfully parsed %{public}zu tools", tools.size());
@@ -278,7 +281,10 @@ int32_t CliToolDataManager::JsonArrayToTools(const std::string &jsonStr, std::ve
 
     tools.clear();
     for (const auto &item : j) {
-        tools.push_back(ToolInfo::ParseFromJson(item));
+        ToolInfo tool;
+        if (ToolInfo::ParseFromJson(item, tool)) {
+            tools.push_back(std::move(tool));
+        }
     }
 
     return ERR_OK;
@@ -322,7 +328,10 @@ int32_t CliToolDataManager::QueryToolSummaries(std::vector<ToolSummary> &summari
             TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to parse tool: %{public}s", entry.key.ToString().c_str());
             continue;
         }
-        ToolInfo tool = ToolInfo::ParseFromJson(j);
+        ToolInfo tool;
+        if (!ToolInfo::ParseFromJson(j, tool)) {
+            continue;
+        }
 
         ToolSummary summary;
         summary.name = tool.name;
