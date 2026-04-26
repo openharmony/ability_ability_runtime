@@ -409,7 +409,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0100, TestSize.Level1)
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_0200
- * @tc.desc: Test SubCommandInfo ParseFromJson with empty JSON (argMapping is required)
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty JSON (required fields missing)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0200, TestSize.Level1)
@@ -421,13 +421,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0200, TestSize.Level1)
     SubCommandInfo subCmd;
     bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
-    EXPECT_FALSE(result);  // argMapping is required
-
-    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0200 end";
-}
-    EXPECT_EQ(subCmd.argMapping, nullptr);
-    EXPECT_TRUE(subCmd.eventTypes.empty());
-    EXPECT_TRUE(subCmd.eventSchemas.empty());
+    EXPECT_FALSE(result);  // required fields missing
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0200 end";
 }
@@ -443,10 +437,8 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0300, TestSize.Level1)
 
     nlohmann::json json = R"({
         "description": "No argMapping",
-        "requirePermissions": [],
         "inputSchema": {"type": "object"},
-        "outputSchema": {"type": "array"},
-        "eventTypes": []
+        "outputSchema": {"type": "array"}
     })"_json;
 
     SubCommandInfo subCmd;
@@ -468,6 +460,8 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0400, TestSize.Level1)
 
     nlohmann::json json = R"({
         "description": "Invalid argMapping",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "argMapping": {"type": "invalid_type"}
     })"_json;
 
@@ -490,6 +484,8 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0500, TestSize.Level1)
 
     nlohmann::json json = R"({
         "description": "argMapping without type",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "argMapping": {"separator": ","}
     })"_json;
 
@@ -890,6 +886,826 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_1200, TestSize.Level1)
     EXPECT_TRUE(json["eventSchemas"].is_object());
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseToJson_1200 end";
+}
+
+// ==================== ParseFromJson Validation Tests ====================
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0100
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty description (description is required)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0100 start";
+
+    nlohmann::json json = R"({
+        "description": "",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // description must be non-empty
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0200
+ * @tc.desc: Test SubCommandInfo ParseFromJson without description (description is required)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0200 start";
+
+    nlohmann::json json = R"({
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // description is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0200 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0300
+ * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate requirePermissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0300 start";
+
+    nlohmann::json json = R"({
+        "description": "Duplicate permissions",
+        "requirePermissions": ["ohos.permission.INTERNET", "ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // duplicate permissions not allowed
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0300 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0400
+ * @tc.desc: Test SubCommandInfo ParseFromJson with non-string requirePermissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0400 start";
+
+    nlohmann::json json = R"({
+        "description": "Non-string permission",
+        "requirePermissions": ["ohos.permission.INTERNET", 123],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // all permissions must be strings
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0500
+ * @tc.desc: Test SubCommandInfo ParseFromJson with requirePermissions not array
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0500 start";
+
+    nlohmann::json json = R"({
+        "description": "Permissions not array",
+        "requirePermissions": "ohos.permission.INTERNET",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // requirePermissions must be array
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0500 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0600
+ * @tc.desc: Test SubCommandInfo ParseFromJson without inputSchema (inputSchema is required)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0600 start";
+
+    nlohmann::json json = R"({
+        "description": "No inputSchema",
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // inputSchema is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0600 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0700
+ * @tc.desc: Test SubCommandInfo ParseFromJson with inputSchema not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0700 start";
+
+    nlohmann::json json = R"({
+        "description": "inputSchema not object",
+        "inputSchema": "not an object",
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // inputSchema must be object
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0700 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0800
+ * @tc.desc: Test SubCommandInfo ParseFromJson without outputSchema (outputSchema is required)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0800 start";
+
+    nlohmann::json json = R"({
+        "description": "No outputSchema",
+        "inputSchema": {"type": "object"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // outputSchema is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0800 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0900
+ * @tc.desc: Test SubCommandInfo ParseFromJson with outputSchema not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0900 start";
+
+    nlohmann::json json = R"({
+        "description": "outputSchema not object",
+        "inputSchema": {"type": "object"},
+        "outputSchema": 123,
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // outputSchema must be object
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0900 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1000
+ * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate eventTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1000 start";
+
+    nlohmann::json json = R"({
+        "description": "Duplicate eventTypes",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventTypes": ["stdout", "stdout"]
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // duplicate eventTypes not allowed
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1000 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1100
+ * @tc.desc: Test SubCommandInfo ParseFromJson with non-string eventTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1100 start";
+
+    nlohmann::json json = R"({
+        "description": "Non-string eventType",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventTypes": ["stdout", 123]
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // all eventTypes must be strings
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1200
+ * @tc.desc: Test SubCommandInfo ParseFromJson with eventTypes not array
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1200 start";
+
+    nlohmann::json json = R"({
+        "description": "eventTypes not array",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventTypes": "stdout"
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // eventTypes must be array
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1200 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1300
+ * @tc.desc: Test SubCommandInfo ParseFromJson with eventSchemas not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1300 start";
+
+    nlohmann::json json = R"({
+        "description": "eventSchemas not object",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventSchemas": "not an object"
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // eventSchemas must be object
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1300 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1400
+ * @tc.desc: Test SubCommandInfo ParseFromJson with valid minimal data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1400 start";
+
+    nlohmann::json json = R"({
+        "description": "Minimal valid subcommand",
+        "inputSchema": {},
+        "outputSchema": {},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(subCmd.description, "Minimal valid subcommand");
+    EXPECT_TRUE(subCmd.requirePermissions.empty());
+    EXPECT_TRUE(subCmd.eventTypes.empty());
+    EXPECT_TRUE(subCmd.eventSchemas.empty());
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1500
+ * @tc.desc: Test SubCommandInfo ParseFromJson with unique requirePermissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1500 start";
+
+    nlohmann::json json = R"({
+        "description": "Unique permissions",
+        "requirePermissions": ["ohos.permission.INTERNET", "ohos.permission.CAMERA", "ohos.permission.READ_STORAGE"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(subCmd.requirePermissions.size(), 3u);
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1500 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1600
+ * @tc.desc: Test SubCommandInfo ParseFromJson with unique eventTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1600 start";
+
+    nlohmann::json json = R"({
+        "description": "Unique eventTypes",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventTypes": ["stdout", "stderr", "exit"]
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(subCmd.eventTypes.size(), 3u);
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1600 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1700
+ * @tc.desc: Test SubCommandInfo ParseFromJson with valid eventSchemas object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1700 start";
+
+    nlohmann::json json = R"({
+        "description": "Valid eventSchemas",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventSchemas": {"stdout": {"type": "string"}, "exit": {"type": "number"}}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(subCmd.eventSchemas.empty());
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1700 end";
+}
+
+// ==================== Validate Tests ====================
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0100
+ * @tc.desc: Test SubCommandInfo::Validate with valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0100 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Valid subcommand";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.argMapping->type = ArgMappingType::FLAG;
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0200
+ * @tc.desc: Test SubCommandInfo::Validate with empty description
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0200 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0200 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0300
+ * @tc.desc: Test SubCommandInfo::Validate with duplicate requirePermissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0300 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Duplicate permissions";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.INTERNET"};
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0300 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0400
+ * @tc.desc: Test SubCommandInfo::Validate with unique requirePermissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0400 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Unique permissions";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.CAMERA"};
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0500
+ * @tc.desc: Test SubCommandInfo::Validate with empty inputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0500 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty inputSchema";
+    subCmd.inputSchema = "";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0500 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0600
+ * @tc.desc: Test SubCommandInfo::Validate with invalid inputSchema JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0600 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid inputSchema";
+    subCmd.inputSchema = "not a valid json";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0600 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0700
+ * @tc.desc: Test SubCommandInfo::Validate with inputSchema not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0700 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "inputSchema not object";
+    subCmd.inputSchema = R"("just a string")";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0700 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0800
+ * @tc.desc: Test SubCommandInfo::Validate with empty outputSchema
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0800 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty outputSchema";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = "";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0800 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0900
+ * @tc.desc: Test SubCommandInfo::Validate with invalid outputSchema JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0900 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid outputSchema";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = "{invalid json}";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0900 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1000
+ * @tc.desc: Test SubCommandInfo::Validate with outputSchema not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1000 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "outputSchema not object";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = "123";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1000 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1100
+ * @tc.desc: Test SubCommandInfo::Validate with null argMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1100 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Null argMapping";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = nullptr;
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1200
+ * @tc.desc: Test SubCommandInfo::Validate with invalid argMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1200 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid argMapping";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.argMapping->type = static_cast<ArgMappingType>(-1);  // invalid type
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1200 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1300
+ * @tc.desc: Test SubCommandInfo::Validate with duplicate eventTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1300 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Duplicate eventTypes";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.eventTypes = {"stdout", "stdout"};
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1300 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1400
+ * @tc.desc: Test SubCommandInfo::Validate with unique eventTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1400 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Unique eventTypes";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.eventTypes = {"stdout", "stderr", "exit"};
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1500
+ * @tc.desc: Test SubCommandInfo::Validate with invalid eventSchemas JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1500 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Invalid eventSchemas";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.eventSchemas = "not a valid json";
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1500 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1600
+ * @tc.desc: Test SubCommandInfo::Validate with eventSchemas not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1600 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "eventSchemas not object";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.eventSchemas = R"("just a string")";
+
+    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1600 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1700
+ * @tc.desc: Test SubCommandInfo::Validate with valid eventSchemas object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1700 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Valid eventSchemas";
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.eventSchemas = R"({"stdout": {"type": "string"}})";
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1700 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1800
+ * @tc.desc: Test SubCommandInfo::Validate with all valid fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1800 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "All valid fields";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.CAMERA"};
+    subCmd.inputSchema = R"({"type": "object", "properties": {"input": {"type": "string"}}})";
+    subCmd.outputSchema = R"({"type": "array", "items": {"type": "string"}})";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+    subCmd.argMapping->type = ArgMappingType::POSITIONAL;
+    subCmd.argMapping->order = "arg1,arg2";
+    subCmd.eventTypes = {"stdout", "stderr", "exit"};
+    subCmd.eventSchemas = R"({"stdout": {"type": "string"}, "exit": {"type": "number"}})";
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1800 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_1900
+ * @tc.desc: Test SubCommandInfo::Validate with minimal valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1900 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Minimal";
+    subCmd.inputSchema = "{}";
+    subCmd.outputSchema = "{}";
+    subCmd.argMapping = std::make_shared<ArgMapping>();
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1900 end";
 }
 
 } // namespace CliTool
