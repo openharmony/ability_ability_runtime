@@ -13,29 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
+#include "ccm_util.h"
 
-#include <map>
-#include <string>
-
-#include "parcel.h"
+#include "hilog_tag_wrapper.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace CliTool {
-/**
- * @struct ExecOptions
- * @brief Options for executing CLI tools.
- */
-class ExecOptions : public Parcelable {
-public:
-    bool background = false;
-    int32_t yieldMs = 0;
-    int32_t timeout = 0;
+namespace {
+constexpr const char* MAX_CLI_QUANTITY = "const.sys.cli.limit_maximum_concurrency_quantity";
+}
 
-    bool Marshalling(Parcel &parcel) const;
-    static ExecOptions *Unmarshalling(Parcel &parcel);
-};
+CcmUtil &CcmUtil::GetInstance()
+{
+    static CcmUtil util;
+    return util;
+}
+
+int32_t CcmUtil::GetCliConcurrencyLimit()
+{
+    if (!maxCliQuantity_.isLoaded) {
+        maxCliQuantity_.value =
+            system::GetIntParameter<int32_t>(MAX_CLI_QUANTITY, DEFAULT_MAX_CLI_QUANTITY);
+        maxCliQuantity_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::CLI_TOOL, "MaxCLiQuantity: %{public}d", maxCliQuantity_.value);
+    return maxCliQuantity_.value;
+}
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H

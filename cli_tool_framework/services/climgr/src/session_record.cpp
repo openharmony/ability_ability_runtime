@@ -13,29 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
-
-#include <map>
-#include <string>
-
-#include "parcel.h"
+#include "session_record.h"
 
 namespace OHOS {
 namespace CliTool {
-/**
- * @struct ExecOptions
- * @brief Options for executing CLI tools.
- */
-class ExecOptions : public Parcelable {
-public:
-    bool background = false;
-    int32_t yieldMs = 0;
-    int32_t timeout = 0;
 
-    bool Marshalling(Parcel &parcel) const;
-    static ExecOptions *Unmarshalling(Parcel &parcel);
-};
+
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H

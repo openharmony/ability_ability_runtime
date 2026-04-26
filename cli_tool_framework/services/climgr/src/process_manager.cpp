@@ -32,7 +32,7 @@ ProcessManager &ProcessManager::GetInstance()
 }
 
 int32_t ProcessManager::CreateChildProcess(const ExecToolParam &param, const std::string &sandboxConfig,
-    pid_t &childPid) const
+    const std::string &executablePath, pid_t &childPid) const
 {
     pid_t pid = fork();
     if (pid < 0) {
@@ -49,12 +49,13 @@ int32_t ProcessManager::CreateChildProcess(const ExecToolParam &param, const std
         execArgs.push_back(const_cast<char *>(configPrompt.c_str()));
         execArgs.push_back(const_cast<char *>(sandboxConfig.c_str()));
         execArgs.push_back(const_cast<char *>(cmdPrompt.c_str()));
-        std::string cmdLine = param.toolName;
+        std::string cmdLine = executablePath;
         if (!param.subcommand.empty()) {
             cmdLine += " " + param.subcommand;
         }
         ToolUtil::TransferToCmdParam(param.args, cmdLine);
         execArgs.push_back(const_cast<char *>(cmdLine.c_str()));
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "cmd: %{public}s", cmdLine.c_str());
         execArgs.push_back(nullptr);
         TAG_LOGI(AAFwkTag::CLI_TOOL, "Before execvp");
         execvp(execArgs[0], execArgs.data());
