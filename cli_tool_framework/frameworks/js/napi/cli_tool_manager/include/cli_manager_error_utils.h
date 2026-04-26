@@ -23,6 +23,8 @@ namespace OHOS {
 namespace CliTool {
 
 enum class CliManagerErrorCode {
+    ERROR_PERMISSION_DENIED = 201,
+    ERROR_NOT_SYSTEM_APP = 202,
     ERROR_INVALID_PARAM = 401,
 
     ERROR_TOOL_NOT_FOUND = 35600030,

@@ -15,18 +15,28 @@
 
 #include "cli_tool_manager_service.h"
 
+#include <sys/wait.h>
+
+#include "accesstoken_kit.h"
+#include "ccm_util.h"
 #include "cli_error_code.h"
 #include "hilog_tag_wrapper.h"
 #include "iexec_tool_callback.h"
 #include "if_system_ability_manager.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "permission_util.h"
 #include "process_manager.h"
+#include "session_record.h"
+#include "tokenid_kit.h"
 #include "tool_util.h"
 
 namespace OHOS {
 namespace CliTool {
 namespace {
-constexpr int32_t MAX_CONCURRENT_SESSIONS = 8;
+constexpr const char* PERMISSION_EXEC_CLI_TOOL = "ohos.permission.EXEC_CLI_TOOL";
+
+constexpr int32_t COEFFICIENT = 1000;
 } // namespace
 
 std::mutex g_mutex;
@@ -100,13 +110,25 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const sptr<I
     TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: toolName=%{public}s, subcommand=%{public}s",
         param.toolName.c_str(), param.subcommand.c_str());
 
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (!AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Not system app");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    if (!PermissionUtil::VerifyAccessToken(tokenId, PERMISSION_EXEC_CLI_TOOL)) {
+        return ERR_PERMISSION_DENIED;
+    }
+
     if (objectCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "objectCallback is null");
         return ERR_INNER_PARAM_INVALID;
     }
 
-    if (activeSessionCount_.load() >= MAX_CONCURRENT_SESSIONS) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Session limit exceeded: %{public}d", MAX_CONCURRENT_SESSIONS);
+    auto cliQuantity = CcmUtil::GetInstance().GetCliConcurrencyLimit();
+    if (activeSessionCount_.load() >= cliQuantity) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Session limit exceeded: %{public}d", cliQuantity);
         return ERR_SESSION_LIMIT_EXCEEDED;
     }
 
@@ -116,43 +138,156 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const sptr<I
         return ERR_TOOL_NOT_EXIST;
     }
 
-    auto checkPramRet = ToolUtil::ValidateProperties(toolInfo, param.subcommand, param.args);
+    auto checkPramRet = ToolUtil::ValidateProperties(toolInfo, const_cast<ExecToolParam &>(param), tokenId);
     if (checkPramRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Input schema validation failed");
         return checkPramRet;
     }
-
+    
     std::string sandboxConfig;
-    if (!ToolUtil::GenerateSandboxConfig(param.challenge, sandboxConfig)) {
+    if (!ToolUtil::GenerateSandboxConfig(param.challenge, tokenId, sandboxConfig)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "caller is not hap");
         return ERR_NOT_HAP;
     }
 
     pid_t childPid = -1;
-    auto createRet = ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, childPid);
+    auto createRet =
+        ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, toolInfo.executablePath, childPid);
     if (createRet != ERR_OK) {
         return createRet;
     }
     activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
-    CliSessionInfo session;
-    session.toolName = param.toolName;
-    session.sessionId = ToolUtil::GenerateCliSessionId(param.toolName);
-    session.status = "running";
 
+    struct sigaction sa = {};
+    sa.sa_handler = CliToolManagerService::sigchld_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGCHLD, &sa, nullptr);
+
+    auto session = std::make_shared<CliSessionInfo>();
+    auto sessionRecord = std::make_shared<SessionRecord>(session, childPid, objectCallback);
+    {
+        std::lock_guard<ffrt::mutex> guard(callbackMutex_);
+        session->sessionId = ToolUtil::GenerateCliSessionId(param.toolName, sessionRecord);
+        session->toolName = param.toolName;
+        session->status = "running";
+        sessionCallbacks_[session->sessionId] = sessionRecord;
+    }
+
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "Tool executed successfully: sessionId=%{public}s", session->sessionId.c_str());
     if (param.options.background) {
         auto cbProxy = sptr<IExecToolCallback>(iface_cast<IExecToolCallback>(objectCallback));
         if (cbProxy != nullptr) {
-            cbProxy->SendResult(session);
+            cbProxy->SendResult(*session);
         }
-    } else {
-        // Store objectCallback for session completion notification
-        std::lock_guard<std::mutex> lock(callbackMutex_);
-        sessionCallbacks_[session.sessionId] = objectCallback;
-        sessionPidMap_[session.sessionId] = childPid;
+        return ERR_OK;
+    }
+    if (param.options.yieldMs != 0) {
+        PostExecToolTask(param.options.yieldMs, session->sessionId, false);
+    }
+    if (param.options.timeout != 0) {
+        PostExecToolTask(param.options.timeout * COEFFICIENT, session->sessionId, true);
     }
 
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "Tool executed successfully: sessionId=%{public}s", session.sessionId.c_str());
     return ERR_OK;
+}
+
+void CliToolManagerService::PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout)
+{
+    auto timeoutTask = [wThis = weak_from_this(), sessionId, isTimeout]() {
+        auto pThis = wThis.lock();
+        if (pThis != nullptr) {
+            pThis->TimeIsUp(sessionId, isTimeout);
+        }
+    };
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(time * COEFFICIENT));
+}
+
+void CliToolManagerService::TimeIsUp(const std::string &sessionId, bool isTimeout)
+{
+    std::lock_guard<ffrt::mutex> guard(callbackMutex_);
+    auto search = sessionCallbacks_.find(sessionId);
+    if (search == sessionCallbacks_.end()) {
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "sessionId=%{public}s not exist", sessionId.c_str());
+        return;
+    }
+
+    auto sessionRecord = search->second;
+    if (sessionRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "sessionRecord is nullptr");
+        // need erase
+        sessionCallbacks_.erase(search);
+        return;
+    }
+
+    if (isTimeout) {
+        auto sessionInfo = sessionRecord->GetCliSessionInfo();
+        if (sessionInfo != nullptr) {
+            sessionInfo->status = "failed";
+            auto result = std::make_shared<ExecResult>();
+            result->timedOut = true;
+            auto timestamp = std::chrono::system_clock::now().time_since_epoch();
+            auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count();
+            result->executionTime = endTime - sessionRecord->GetStartTime();
+            sessionInfo->result = result;
+        }
+    }
+
+    auto cbProxy = sptr<IExecToolCallback>(iface_cast<IExecToolCallback>(sessionRecord->GetCallback()));
+    if (cbProxy != nullptr) {
+        cbProxy->SendResult(*(sessionRecord->GetCliSessionInfo()));
+    }
+}
+
+void CliToolManagerService::WaitPid(pid_t pid, int32_t status)
+{
+    std::lock_guard<ffrt::mutex> guard(callbackMutex_);
+    for (auto iter = sessionCallbacks_.begin(); iter != sessionCallbacks_.end(); ++iter) {
+        if (iter->second == nullptr || pid != iter->second->GetPid()) {
+            continue;
+        }
+        auto sessionInfo = iter->second->GetCliSessionInfo();
+        if (sessionInfo == nullptr) {
+            continue;
+        }
+        if (status == 0) {
+            sessionInfo->status = "completed";
+        } else {
+            sessionInfo->status = "failed";
+        }
+        auto result = std::make_shared<ExecResult>();
+        auto timestamp = std::chrono::system_clock::now().time_since_epoch();
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count();
+        result->executionTime = endTime - iter->second->GetStartTime();
+        result->exitCode = status;
+        sessionInfo->result = result;
+        auto cbProxy = sptr<IExecToolCallback>(iface_cast<IExecToolCallback>(iter->second->GetCallback()));
+        if (cbProxy != nullptr) {
+            cbProxy->SendResult(*(iter->second->GetCliSessionInfo()));
+        }
+        sessionCallbacks_.erase(iter);
+        break;
+    }
+}
+
+void CliToolManagerService::sigchld_handler(int sig)
+{
+    int32_t status;
+    pid_t pid;
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        auto instance = CliToolManagerService::GetInstance();
+        if (instance != nullptr) {
+            instance->WaitPid(pid, status);
+        }
+        pid_t gPid = getpgid(pid);
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "gPid=%{public}d", gPid);
+        if (gPid == -1) {
+            TAG_LOGI(AAFwkTag::CLI_TOOL, "Fial to get gPid");
+            return;
+        }
+        int32_t killRet = killpg(gPid, SIGTERM);
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "killpg result:%{public}d", killRet);
+    }
 }
 } // namespace CliTool
 } // namespace OHOS

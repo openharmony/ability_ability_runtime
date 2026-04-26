@@ -13,29 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
+#ifndef OHOS_ABILITY_RUNTIME_PERMISSION_UTIL_H
+#define OHOS_ABILITY_RUNTIME_PERMISSION_UTIL_H
 
-#include <map>
-#include <string>
-
-#include "parcel.h"
+#include <access_token.h>
 
 namespace OHOS {
 namespace CliTool {
-/**
- * @struct ExecOptions
- * @brief Options for executing CLI tools.
- */
-class ExecOptions : public Parcelable {
-public:
-    bool background = false;
-    int32_t yieldMs = 0;
-    int32_t timeout = 0;
 
-    bool Marshalling(Parcel &parcel) const;
-    static ExecOptions *Unmarshalling(Parcel &parcel);
+using namespace OHOS::Security;
+
+class PermissionUtil {
+public:
+    PermissionUtil() = default;
+    ~PermissionUtil() = default;
+
+    static bool VerifyAccessToken(AccessToken::AccessTokenID tokenId,
+        const std::vector<std::string> &requirePermissions);
+    
+    static bool VerifyAccessToken(AccessToken::AccessTokenID tokenId, const std::string &requirePermission);
 };
+
 } // namespace CliTool
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_EXEC_OPTIONS_H
+
+#endif // OHOS_ABILITY_RUNTIME_PERMISSION_UTIL_H

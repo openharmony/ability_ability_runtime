@@ -17,18 +17,19 @@
 #define OHOS_ABILITY_RUNTIME_CLI_TOOL_MGR_SERVICE_H
 
 #include <map>
-#include <mutex>
 #include <string>
 #include <vector>
 
 #include "cli_tool_manager_stub.h"
 #include "cli_tool_data_manager.h"
+#include "ffrt.h"
 #include "iremote_object.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
 namespace CliTool {
+class SessionRecord;
 class CliToolManagerService : public SystemAbility,
                         public CliToolManagerStub,
                         public std::enable_shared_from_this<CliToolManagerService> {
@@ -74,10 +75,16 @@ private:
     CliToolManagerService() : SystemAbility(CLI_TOOL_MGR_SERVICE_ID, false) {};
     DISALLOW_COPY_AND_MOVE(CliToolManagerService);
     static sptr<CliToolManagerService> instance_;
+
+    static void sigchld_handler(int sig);
+
+    void PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout);
+    void TimeIsUp(const std::string &sessionId, bool isTimeout);
+    void WaitPid(pid_t pid, int32_t status);
+
     std::atomic<int32_t> activeSessionCount_ = 0;
-    std::mutex callbackMutex_;
-    std::map<std::string, sptr<IRemoteObject>> sessionCallbacks_;
-    std::map<std::string, pid_t> sessionPidMap_;
+    ffrt::mutex callbackMutex_;
+    std::map<std::string, std::shared_ptr<SessionRecord>> sessionCallbacks_;
 };
 
 } // namespace CliTool

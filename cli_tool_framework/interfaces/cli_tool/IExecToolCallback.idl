@@ -16,5 +16,5 @@
 sequenceable CliSessionInfo..OHOS.CliTool.CliSessionInfo;
 
 interface OHOS.CliTool.IExecToolCallback {
-    void SendResult([in] CliSessionInfo session);
+    [oneway] void SendResult([in] CliSessionInfo session);
 }
