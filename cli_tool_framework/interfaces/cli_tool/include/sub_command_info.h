@@ -58,6 +58,13 @@ public:
      * @brief Convert SubCommandInfo to JSON object
      */
     nlohmann::json ParseToJson() const;
+
+    /**
+     * @brief Validate SubCommandInfo fields
+     * @param subCmd SubCommandInfo to validate
+     * @return bool true if valid
+     */
+    static bool Validate(const SubCommandInfo &subCmd);
 };
 
 } // namespace CliTool
