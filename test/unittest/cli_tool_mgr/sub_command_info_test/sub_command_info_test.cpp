@@ -388,8 +388,10 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0100, TestSize.Level1)
         "eventSchemas": {"stdout": {"type": "string"}}
     })"_json;
 
-    SubCommandInfo subCmd = SubCommandInfo::ParseFromJson(json);
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
+    EXPECT_TRUE(result);
     EXPECT_EQ(subCmd.description, "Test subcommand from JSON");
     EXPECT_EQ(subCmd.requirePermissions.size(), 2u);
     EXPECT_EQ(subCmd.requirePermissions[0], "ohos.permission.INTERNET");
@@ -407,7 +409,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0100, TestSize.Level1)
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_0200
- * @tc.desc: Test SubCommandInfo ParseFromJson with empty JSON
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty JSON (argMapping is required)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0200, TestSize.Level1)
@@ -416,12 +418,13 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0200, TestSize.Level1)
 
     nlohmann::json json;
 
-    SubCommandInfo subCmd = SubCommandInfo::ParseFromJson(json);
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
-    EXPECT_TRUE(subCmd.description.empty());
-    EXPECT_TRUE(subCmd.requirePermissions.empty());
-    EXPECT_TRUE(subCmd.inputSchema.empty());
-    EXPECT_TRUE(subCmd.outputSchema.empty());
+    EXPECT_FALSE(result);  // argMapping is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0200 end";
+}
     EXPECT_EQ(subCmd.argMapping, nullptr);
     EXPECT_TRUE(subCmd.eventTypes.empty());
     EXPECT_TRUE(subCmd.eventSchemas.empty());
@@ -431,7 +434,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0200, TestSize.Level1)
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_0300
- * @tc.desc: Test SubCommandInfo ParseFromJson without argMapping
+ * @tc.desc: Test SubCommandInfo ParseFromJson without argMapping (argMapping is required)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0300, TestSize.Level1)
@@ -446,12 +449,56 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0300, TestSize.Level1)
         "eventTypes": []
     })"_json;
 
-    SubCommandInfo subCmd = SubCommandInfo::ParseFromJson(json);
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
-    EXPECT_EQ(subCmd.description, "No argMapping");
-    EXPECT_EQ(subCmd.argMapping, nullptr);
+    EXPECT_FALSE(result);  // argMapping is required
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0300 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_0400
+ * @tc.desc: Test SubCommandInfo ParseFromJson with invalid argMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0400 start";
+
+    nlohmann::json json = R"({
+        "description": "Invalid argMapping",
+        "argMapping": {"type": "invalid_type"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // argMapping parse failed
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_0500
+ * @tc.desc: Test SubCommandInfo ParseFromJson with argMapping missing type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0500 start";
+
+    nlohmann::json json = R"({
+        "description": "argMapping without type",
+        "argMapping": {"separator": ","}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // argMapping type is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_0500 end";
 }
 
 // ==================== ParseToJson Tests ====================
@@ -568,7 +615,9 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_ParseToJson_RoundTrip_
         "eventSchemas": {"stdout": {"type": "string"}, "exit": {"type": "number"}}
     })"_json;
 
-    SubCommandInfo subCmd = SubCommandInfo::ParseFromJson(originalJson);
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(originalJson, subCmd);
+    EXPECT_TRUE(result);
     nlohmann::json resultJson = subCmd.ParseToJson();
 
     EXPECT_EQ(resultJson["description"], originalJson["description"]);

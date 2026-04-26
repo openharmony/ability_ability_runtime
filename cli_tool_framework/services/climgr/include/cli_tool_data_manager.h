@@ -72,13 +72,6 @@ public:
     int32_t RegisterTool(const ToolInfo &tool);
 
     /**
-     * @brief Check if tool exists
-     * @param name Tool name
-     * @return bool true if exists
-     */
-    bool ToolExists(const std::string &name);
-
-    /**
      * @brief Parse JSON file to ToolInfo list
      * @param filePath Path to JSON file
      * @param tools Output vector of ToolInfo

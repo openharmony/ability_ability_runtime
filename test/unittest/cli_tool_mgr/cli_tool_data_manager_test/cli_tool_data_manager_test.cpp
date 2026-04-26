@@ -238,7 +238,7 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_001, testing::ext::TestS
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ToolInfo_ParseFromJson_001 start");
 
     nlohmann::json json = R"({
-        "name": "json_tool",
+        "name": "ohos-json_tool",
         "version": "1.0.0",
         "description": "JSON test tool",
         "executablePath": "/bin/jsontest",
@@ -253,9 +253,11 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_001, testing::ext::TestS
         "subcommands": {}
     })"_json;
 
-    ToolInfo tool = ToolInfo::ParseFromJson(json);
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_EQ(tool.name, "json_tool");
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.name, "ohos-json_tool");
     EXPECT_EQ(tool.version, "1.0.0");
     EXPECT_EQ(tool.description, "JSON test tool");
     EXPECT_EQ(tool.executablePath, "/bin/jsontest");
@@ -277,7 +279,7 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_002, testing::ext::TestS
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ToolInfo_ParseFromJson_002 start");
 
     nlohmann::json json = R"({
-        "name": "tool_with_subs",
+        "name": "hms-tool_with_subs",
         "version": "1.0.0",
         "description": "Tool with subcommands",
         "executablePath": "/bin/tool",
@@ -286,17 +288,21 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_002, testing::ext::TestS
             "build": {
                 "description": "Build subcommand",
                 "inputSchema": {"type": "object"},
-                "outputSchema": {"type": "string"}
+                "outputSchema": {"type": "string"},
+                "argMapping": {"type": "flag"}
             },
             "run": {
-                "description": "Run subcommand"
+                "description": "Run subcommand",
+                "argMapping": {"type": "positional", "order": "arg1"}
             }
         }
     })"_json;
 
-    ToolInfo tool = ToolInfo::ParseFromJson(json);
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_EQ(tool.name, "tool_with_subs");
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.name, "hms-tool_with_subs");
     EXPECT_TRUE(tool.hasSubCommand);
     EXPECT_EQ(tool.subcommands.size(), 2u);
     EXPECT_EQ(tool.subcommands["build"].description, "Build subcommand");
@@ -315,12 +321,11 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_003, testing::ext::TestS
 
     nlohmann::json json;
 
-    ToolInfo tool = ToolInfo::ParseFromJson(json);
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
 
+    EXPECT_FALSE(result);
     EXPECT_TRUE(tool.name.empty());
-    EXPECT_TRUE(tool.version.empty());
-    EXPECT_EQ(tool.argMapping, nullptr);
-    EXPECT_FALSE(tool.hasSubCommand);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ToolInfo_ParseFromJson_003 end");
 }
@@ -337,7 +342,7 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_00
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ToolInfo_ParseFromJson_ParseToJson_RoundTrip_001 start");
 
     nlohmann::json originalJson = R"({
-        "name": "roundtrip_tool",
+        "name": "ohos-roundtrip_tool",
         "version": "3.0.0",
         "description": "Round trip test",
         "executablePath": "/bin/roundtrip",
@@ -353,12 +358,15 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_00
             "sub1": {
                 "description": "Sub 1",
                 "inputSchema": {"type": "object"},
-                "outputSchema": {"type": "string"}
+                "outputSchema": {"type": "string"},
+                "argMapping": {"type": "flag"}
             }
         }
     })"_json;
 
-    ToolInfo tool = ToolInfo::ParseFromJson(originalJson);
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(originalJson, tool);
+    EXPECT_TRUE(result);
     nlohmann::json resultJson = tool.ParseToJson();
 
     EXPECT_EQ(resultJson["name"], originalJson["name"]);
