@@ -79,10 +79,16 @@ bool ArgMapping::ParseFromJson(const nlohmann::json &json, ArgMapping &argMappin
         return false;  // invalid type value
     }
 
-    if (json.contains("separator") && json["separator"].is_string()) {
+    if (json.contains("separator")) {
+        if (!json["separator"].is_string()) {
+            return false;  // separator must be a string
+        }
         argMapping.separator = json["separator"];
     }
-    if (json.contains("order") && json["order"].is_string()) {
+    if (json.contains("order")) {
+        if (!json["order"].is_string()) {
+            return false;  // order must be a string
+        }
         argMapping.order = json["order"];
     }
     if (json.contains("templates")) {
