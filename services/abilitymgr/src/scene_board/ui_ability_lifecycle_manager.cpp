@@ -2038,8 +2038,9 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     sessionInfo->canStartAbilityFromBackground = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s, "
-        "splitRatio:%{public}d, windowMode:%{public}d",
-        sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->splitRatioPreference,
+        "splitRatio:%{public}d, flags:%{public}u, windowMode:%{public}d",
+        sessionInfo->want.GetElement().GetAbilityName().c_str(),
+        sessionInfo->splitRatioPreference, sessionInfo->want.GetFlags(),
         sessionInfo->want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
             AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED));
     auto ret = static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
@@ -2641,7 +2642,7 @@ void UIAbilityLifecycleManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordI
 
 void UIAbilityLifecycleManager::SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SetRootSceneSession begin");
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession);
     if (tmpSceneSession == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "rootSceneSession invalid");
@@ -2649,6 +2650,7 @@ void UIAbilityLifecycleManager::SetRootSceneSession(const sptr<IRemoteObject> &r
     }
     std::lock_guard guard(sessionLock_);
     rootSceneSession_ = rootSceneSession;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SetRootSceneSession end");
 }
 
 void UIAbilityLifecycleManager::NotifySCBToHandleException(const UIAbilityRecordPtr &abilityRecord,
