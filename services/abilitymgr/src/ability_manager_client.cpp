@@ -368,6 +368,16 @@ ErrCode AbilityManagerClient::StartAbilityOnlyUIAbility(const Want &want, sptr<I
     return abms->StartAbilityOnlyUIAbility(want, callerToken, specifyTokenId);
 }
 
+ErrCode AbilityManagerClient::StartUIAbilityWithCallback(const Want &want, sptr<IRemoteObject> callerToken,
+    sptr<IRequestStartAbilityCallback> callback)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUIAbilityWithCallback ability:%{public}s/%{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
+    return abms->StartUIAbilityWithCallback(want, callerToken, callback);
+}
+
 ErrCode AbilityManagerClient::SendResultToAbility(int requestCode, int resultCode, Want& resultWant)
 {
     auto abms = GetAbilityManager();

@@ -430,6 +430,8 @@ enum class AbilityManagerInterfaceCode {
     // ipc id for get want from proxy
     GET_PENDING_REQUEST_WANT_FROM_PROXY = 1075,
 
+    START_UI_ABILITY_WITH_CALLBACK = 1076,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 

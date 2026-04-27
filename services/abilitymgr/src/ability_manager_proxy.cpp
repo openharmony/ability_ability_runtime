@@ -7451,6 +7451,42 @@ int32_t AbilityManagerProxy::StartAbilityWithWait(Want &want, sptr<IAbilityStart
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerProxy::StartUIAbilityWithCallback(const Want &want, sptr<IRemoteObject> callerToken,
+    sptr<IRequestStartAbilityCallback> callback)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return INNER_ERR;
+    }
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &want);
+    if (callerToken) {
+        PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Bool, true);
+        PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, RemoteObject, callerToken);
+    } else {
+        PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Bool, false);
+    }
+    if (callback != nullptr) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(callback->AsObject())) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "callback write fail");
+            return INNER_ERR;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
+            return INNER_ERR;
+        }
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int error = SendRequest(AbilityManagerInterfaceCode::START_UI_ABILITY_WITH_CALLBACK, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
 {
     MessageParcel data;
