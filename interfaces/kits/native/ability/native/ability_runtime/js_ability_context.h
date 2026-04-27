@@ -54,9 +54,7 @@ public:
     static napi_value StopServiceExtensionAbilityWithAccount(napi_env env, napi_callback_info info);
     static napi_value ConnectAbility(napi_env env, napi_callback_info info);
     static napi_value ConnectAbilityWithAccount(napi_env env, napi_callback_info info);
-    static napi_value ConnectAbilityWithAccountRestricted(napi_env env, napi_callback_info info);
     static napi_value DisconnectAbility(napi_env env, napi_callback_info info);
-    static napi_value DisconnectAbilityRestricted(napi_env env, napi_callback_info info);
     static napi_value TerminateSelf(napi_env env, napi_callback_info info);
     static napi_value TerminateSelfWithResult(napi_env env, napi_callback_info info);
     static napi_value BackToCallerAbilityWithResult(napi_env env, napi_callback_info info);
@@ -113,8 +111,6 @@ private:
 private:
     static void ClearFailedCallConnection(
         const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback);
-    static bool CheckSatisfyTargetAPIVersion(
-        const std::weak_ptr<AbilityContext>& context, int32_t version);
     napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info, bool isStartRecent = false);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want &want, int requestCode, const std::string &startTime,
