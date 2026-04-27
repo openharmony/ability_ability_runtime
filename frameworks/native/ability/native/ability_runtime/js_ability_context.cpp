@@ -71,8 +71,6 @@ const std::string KEY_REQUEST_ID = "com.ohos.param.requestId";
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 constexpr int32_t CALLER_TIME_OUT = 10; // 10s
 const std::string JSON_KEY_ERR_MSG = "errMsg";
-constexpr const int32_t API26 = 26;
-constexpr const int32_t API_VERSION_MOD = 100;
 
 namespace {
 static std::map<ConnectionKey, sptr<JSAbilityConnection>, KeyCompare> g_connects;
@@ -354,46 +352,9 @@ napi_value JsAbilityContext::ConnectAbilityWithAccount(napi_env env, napi_callba
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnConnectAbilityWithAccount);
 }
 
-napi_value JsAbilityContext::ConnectAbilityWithAccountRestricted(napi_env env, napi_callback_info info)
-{
-    NapiCallbackInfo napiInfo;
-    JsAbilityContext* jsContext = static_cast<JsAbilityContext*>(
-        GetNapiCallbackInfoAndThis(env, info, napiInfo, nullptr));
-    if (jsContext == nullptr) {
-        return CreateJsUndefined(env);
-    }
-    if (CheckSatisfyTargetAPIVersion(jsContext->context_, API26)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "connectAbilityWithAccount is not supported for API 26+");
-        ThrowInvalidParamError(env, "connectAbilityWithAccount is not supported for API 26+, "
-            "please use connectServiceExtensionAbilityWithAccount instead.");
-        return CreateJsUndefined(env);
-    }
-
-    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnConnectAbilityWithAccount);
-}
-
 napi_value JsAbilityContext::DisconnectAbility(napi_env env, napi_callback_info info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnDisconnectAbility);
-}
-
-napi_value JsAbilityContext::DisconnectAbilityRestricted(napi_env env, napi_callback_info info)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    NapiCallbackInfo napiInfo;
-    JsAbilityContext* jsContext = static_cast<JsAbilityContext*>(
-        GetNapiCallbackInfoAndThis(env, info, napiInfo, nullptr));
-    if (jsContext == nullptr) {
-        return CreateJsUndefined(env);
-    }
-    if (CheckSatisfyTargetAPIVersion(jsContext->context_, API26)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "disconnectAbility is not supported for API 26+");
-        ThrowInvalidParamError(env, "disconnectAbility is not supported for API 26+, "
-            "please use disconnectServiceExtensionAbility instead.");
-        return CreateJsUndefined(env);
-    }
-
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnDisconnectAbility);
 }
 
@@ -2467,10 +2428,10 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::StopServiceExtensionAbilityWithAccount);
     BindNativeFunction(env, object, "connectServiceExtensionAbility", moduleName, JsAbilityContext::ConnectAbility);
     BindNativeFunction(env, object, "connectAbilityWithAccount", moduleName,
-        JsAbilityContext::ConnectAbilityWithAccountRestricted);
+        JsAbilityContext::ConnectAbilityWithAccount);
     BindNativeFunction(env, object, "connectServiceExtensionAbilityWithAccount", moduleName,
         JsAbilityContext::ConnectAbilityWithAccount);
-    BindNativeFunction(env, object, "disconnectAbility", moduleName, JsAbilityContext::DisconnectAbilityRestricted);
+    BindNativeFunction(env, object, "disconnectAbility", moduleName, JsAbilityContext::DisconnectAbility);
     BindNativeFunction(
         env, object, "disconnectServiceExtensionAbility", moduleName, JsAbilityContext::DisconnectAbility);
     BindNativeFunction(env, object, "terminateSelf", moduleName, JsAbilityContext::TerminateSelf);
@@ -3588,25 +3549,6 @@ napi_value JsAbilityContext::OnSetMissionWindowIcon(napi_env env, NapiCallbackIn
 #else
     return CreateJsUndefined(env);
 #endif
-}
-
-bool JsAbilityContext::CheckSatisfyTargetAPIVersion(
-    const std::weak_ptr<AbilityContext>& context, int32_t version)
-{
-    auto abilityContext = context.lock();
-    if (!abilityContext) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null context when check api version");
-        return false;
-    }
-
-    auto applicationInfo = abilityContext->GetApplicationInfo();
-    if (!applicationInfo) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null applicationInfo");
-        return false;
-    }
-
-    TAG_LOGD(AAFwkTag::CONTEXT, "targetAPIVersion: %{public}d", applicationInfo->apiTargetVersion);
-    return applicationInfo->apiTargetVersion % API_VERSION_MOD >= version;
 }
 
 int32_t JsAbilityContext::GenerateRequestCode()
