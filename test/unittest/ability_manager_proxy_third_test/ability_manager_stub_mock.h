@@ -333,6 +333,8 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject>& token, const int32_t& resultCode,
                                     const int32_t& uniqueId, WantParams& wantParam));
     MOCK_METHOD1(MoveUIAbilityToBackground, int(const sptr<IRemoteObject> token));
+    MOCK_METHOD3(StartUIAbilityWithCallback, int32_t(const Want&, sptr<IRemoteObject>,
+        sptr<IRequestStartAbilityCallback>));
 
     int StartUserTest(const Want& want, const sptr<IRemoteObject>& observer) override
     {

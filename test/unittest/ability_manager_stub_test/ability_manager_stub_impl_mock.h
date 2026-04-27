@@ -454,6 +454,12 @@ public:
         return ERR_OK;
     }
 
+    int32_t StartUIAbilityWithCallback(const Want &want, sptr<IRemoteObject> callerToken,
+        sptr<IRequestStartAbilityCallback> callback)
+    {
+        return ERR_OK;
+    }
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     int ForceTimeoutForTest(const std::string& abilityName, const std::string& state) override
     {
