@@ -15,8 +15,6 @@
 
 #include "sub_command_info.h"
 
-#include <set>
-
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -129,22 +127,19 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
     }
     subCmd.description = description;
 
-    // requirePermissions is optional, but if present must be array of unique strings
+    // requirePermissions is optional, but if present must be array of strings
     if (json.contains("requirePermissions")) {
         if (!json["requirePermissions"].is_array()) {
             return false;
         }
-        std::set<std::string> seenPerms;
         for (const auto &perm : json["requirePermissions"]) {
             if (!perm.is_string()) {
                 return false;
             }
             std::string permStr = perm;
-            if (seenPerms.find(permStr) != seenPerms.end()) {
-                return false;  // duplicate permission
+            if (!permStr.empty()) {
+                subCmd.requirePermissions.push_back(std::move(permStr));
             }
-            seenPerms.insert(permStr);
-            subCmd.requirePermissions.push_back(permStr);
         }
     }
 
@@ -170,22 +165,19 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
         return false;  // argMapping parse failed
     }
 
-    // eventTypes is optional, but if present must be array of unique strings
+    // eventTypes is optional, but if present must be array of strings
     if (json.contains("eventTypes")) {
         if (!json["eventTypes"].is_array()) {
             return false;
         }
-        std::set<std::string> seenEvents;
         for (const auto &evt : json["eventTypes"]) {
             if (!evt.is_string()) {
                 return false;
             }
             std::string evtStr = evt;
-            if (seenEvents.find(evtStr) != seenEvents.end()) {
-                return false;  // duplicate event type
+            if (!evtStr.empty()) {
+                subCmd.eventTypes.push_back(std::move(evtStr));
             }
-            seenEvents.insert(evtStr);
-            subCmd.eventTypes.push_back(evtStr);
         }
     }
 
@@ -246,18 +238,6 @@ bool SubCommandInfo::Validate(const SubCommandInfo &subCmd)
         return false;
     }
 
-    // requirePermissions: if not empty, all items must be unique strings
-    if (!subCmd.requirePermissions.empty()) {
-        std::set<std::string> seenPerms;
-        for (const auto &perm : subCmd.requirePermissions) {
-            if (seenPerms.find(perm) != seenPerms.end()) {
-                TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: duplicate permission %{public}s", perm.c_str());
-                return false;
-            }
-            seenPerms.insert(perm);
-        }
-    }
-
     // inputSchema is required and must be valid JSON object
     if (subCmd.inputSchema.empty()) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is empty");
@@ -288,18 +268,6 @@ bool SubCommandInfo::Validate(const SubCommandInfo &subCmd)
     if (!ArgMapping::Validate(*subCmd.argMapping)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: argMapping validation failed");
         return false;
-    }
-
-    // eventTypes: if not empty, all items must be unique strings
-    if (!subCmd.eventTypes.empty()) {
-        std::set<std::string> seenEvents;
-        for (const auto &evt : subCmd.eventTypes) {
-            if (seenEvents.find(evt) != seenEvents.end()) {
-                TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: duplicate eventType %{public}s", evt.c_str());
-                return false;
-            }
-            seenEvents.insert(evt);
-        }
     }
 
     // eventSchemas: if not empty, must be valid JSON object

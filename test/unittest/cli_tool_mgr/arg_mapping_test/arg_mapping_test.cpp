@@ -895,6 +895,182 @@ HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_1500, TestSize.Level1)
     GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1500 end";
 }
 
+/**
+ * @tc.name: ArgMapping_ParseFromJson_1600
+ * @tc.desc: Test ArgMapping_ParseFromJson with separator as number (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_1600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1600 start";
+
+    nlohmann::json json = {
+        {"type", "flag"},
+        {"separator", 123}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // separator must be string, not number
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1600 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_1700
+ * @tc.desc: Test ArgMapping_ParseFromJson with separator as object (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_1700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1700 start";
+
+    nlohmann::json json = {
+        {"type", "flag"},
+        {"separator", {{"key", "value"}}}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // separator must be string, not object
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1700 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_1800
+ * @tc.desc: Test ArgMapping_ParseFromJson with separator as array (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_1800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1800 start";
+
+    nlohmann::json json = {
+        {"type", "flag"},
+        {"separator", {"a", "b"}}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // separator must be string, not array
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1800 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_1900
+ * @tc.desc: Test ArgMapping_ParseFromJson with separator as boolean (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_1900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1900 start";
+
+    nlohmann::json json = {
+        {"type", "flag"},
+        {"separator", true}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // separator must be string, not boolean
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_1900 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_2000
+ * @tc.desc: Test ArgMapping_ParseFromJson with order as number (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_2000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2000 start";
+
+    nlohmann::json json = {
+        {"type", "positional"},
+        {"order", 123}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // order must be string, not number
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2000 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_2100
+ * @tc.desc: Test ArgMapping_ParseFromJson with order as object (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_2100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2100 start";
+
+    nlohmann::json json = {
+        {"type", "positional"},
+        {"order", {{"key", "value"}}}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // order must be string, not object
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2100 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_2200
+ * @tc.desc: Test ArgMapping_ParseFromJson with order as array (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_2200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2200 start";
+
+    nlohmann::json json = {
+        {"type", "positional"},
+        {"order", {"a", "b"}}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // order must be string, not array
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2200 end";
+}
+
+/**
+ * @tc.name: ArgMapping_ParseFromJson_2300
+ * @tc.desc: Test ArgMapping_ParseFromJson with order as boolean (must be string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArgMappingTest, ArgMapping_ParseFromJson_2300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2300 start";
+
+    nlohmann::json json = {
+        {"type", "positional"},
+        {"order", false}
+    };
+
+    ArgMapping result;
+    bool ret = ArgMapping::ParseFromJson(json, result);
+
+    ASSERT_FALSE(ret);  // order must be string, not boolean
+
+    GTEST_LOG_(INFO) << "ArgMapping_ParseFromJson_2300 end";
+}
+
 // ==================== ArgMapping ParseToJson Tests ====================
 
 /**
