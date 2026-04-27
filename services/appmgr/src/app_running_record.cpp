@@ -409,6 +409,8 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNWebPreload(isAllowedNWebPreload_);
     launchData.SetPreloadModuleName(preloadModuleName_);
     launchData.SetDebugFromLocal(isDebugFromLocal_);
+    launchData.SetArkChildProcessSupported(isArkChildProcessSupported_);
+    launchData.SetNativeChildProcessSupported(isNativeChildProcessSupported_);
     launchData.SetStartupTaskData(startupTaskData_);
     launchData.SetImageProcessType(static_cast<int32_t>(imageProcessType_));
 

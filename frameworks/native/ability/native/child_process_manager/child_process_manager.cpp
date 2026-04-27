@@ -628,47 +628,25 @@ ChildProcessManagerErrorCode ChildProcessManager::KillChildProcessByPid(int32_t 
     }
     return ChildProcessManagerErrorCode::ERR_OK;
 }
-bool ChildProcessManager::IsChildProcessSupportedImpl(bool isNative)
-{
-    TAG_LOGD(AAFwkTag::PROCESSMGR, "called");
-    if (AAFwk::AppUtils::GetInstance().IsMultiProcessModel()) {
-        TAG_LOGD(AAFwkTag::PROCESSMGR, "MultiProcessModel enabled, support %{public}s child process",
-            isNative ? "native" : "ark");
-        return true;
-    }
 
-    AppExecFwk::BundleInfo bundleInfo;
-    bool hasBundleInfo = GetBundleInfo(bundleInfo);
-    if (!hasBundleInfo) {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Failed to get bundle info");
-        return false;
-    }
-    if (isNative) {
-        std::string appIdentifier = bundleInfo.signatureInfo.appIdentifier;
-        if (!appIdentifier.empty() && AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess(appIdentifier)) {
-            TAG_LOGD(AAFwkTag::PROCESSMGR, "App %{public}s in whitelist, support native child process",
-                bundleInfo.name.c_str());
-            return true;
-        }
-    }
-    if (AAFwk::AppUtils::GetInstance().AllowChildProcessInMultiProcessFeatureApp()) {
-        if (IsMultiProcessFeatureApp(bundleInfo)) {
-            TAG_LOGD(AAFwkTag::PROCESSMGR, "MultiProcessFeatureApp with large_screen, support %{public}s child process",
-                isNative ? "native" : "ark");
-            return true;
-        }
-    }
-    return false;
+void ChildProcessManager::SetArkChildProcessSupported(bool supported)
+{
+    isArkChildProcessSupported_ = supported;
+}
+
+void ChildProcessManager::SetNativeChildProcessSupported(bool supported)
+{
+    isNativeChildProcessSupported_ = supported;
 }
 
 bool ChildProcessManager::IsArkChildProcessSupported()
 {
-    return IsChildProcessSupportedImpl(false);
+    return isArkChildProcessSupported_;
 }
 
 bool ChildProcessManager::IsNativeChildProcessSupported()
 {
-    return IsChildProcessSupportedImpl(true);
+    return isNativeChildProcessSupported_;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

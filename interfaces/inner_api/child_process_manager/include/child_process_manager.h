@@ -46,6 +46,8 @@ public:
     bool IsChildProcessBySelfFork();
     bool IsArkChildProcessSupported();
     bool IsNativeChildProcessSupported();
+    void SetArkChildProcessSupported(bool supported);
+    void SetNativeChildProcessSupported(bool supported);
     ChildProcessManagerErrorCode StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid,
         bool isStaticChildProcess = false);
     ChildProcessManagerErrorCode StartChildProcessByAppSpawnFork(const std::string &srcEntry, pid_t &pid,
@@ -93,12 +95,13 @@ private:
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     void MakeProcessName(const std::string &srcEntry);
     bool IsMultiProcessFeatureApp(const AppExecFwk::BundleInfo &bundleInfo);
-    bool IsChildProcessSupportedImpl(bool isNative);
     ChildProcessManagerErrorCode GetErrorCodeCompat(int32_t ret, int32_t childProcessType);
 
     static bool signalRegistered_;
     bool isChildProcessBySelfFork_ = false;
     std::atomic<int32_t> childProcessCount_ = 0;
+    bool isArkChildProcessSupported_ = false;
+    bool isNativeChildProcessSupported_ = false;
     mutable std::mutex appMutex_;
     std::weak_ptr<AppExecFwk::OHOSApplication> application_;
 
