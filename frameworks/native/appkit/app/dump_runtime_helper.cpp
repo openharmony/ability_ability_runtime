@@ -69,6 +69,8 @@ static constexpr uint32_t BUF_SIZE_256 = 256;
 static constexpr int DECIMAL_BASE = 10;
 static constexpr int KB_PER_MB = 1024;
 static constexpr size_t MEM_LEAK_MAX_SIZE = 100;
+static constexpr int JSVM_SNAPSHOT = 0;
+static constexpr int JSVM_RAW = 1;
 
 enum {
     INDEX_DELIVERY_TS = 0,
@@ -458,7 +460,7 @@ void DumpRuntimeHelper::DumpKmpKotlinHeap(const OHOS::AppExecFwk::MemDumpInfo &i
 
 void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
 {
-    TAG_LOGE(AAFwkTag::APPKIT, "dump jsvm heap, tid:%{public}d", info.tid);
+    TAG_LOGI(AAFwkTag::APPKIT, "dump jsvm heap, tid:%{public}d", info.tid);
     void* jsvmHandle = dlopen("libjsvm.so", RTLD_LAZY);
     if (jsvmHandle == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "jsvm dlopen failed");
@@ -471,7 +473,8 @@ void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
         dlclose(jsvmHandle);
         return;
     }
-    int ret = jsvmDump(info.tid);
+    int dumpType = info.needRaw ? JSVM_RAW : JSVM_SNAPSHOT;
+    int ret = jsvmDump(info.tid, dumpType);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "jsvm dump failed");
         dlclose(jsvmHandle);
