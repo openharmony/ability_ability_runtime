@@ -78,7 +78,7 @@ public:
     std::shared_ptr<ArgMapping> argMapping;
     std::vector<std::string> eventTypes;
     std::string eventSchemas;      // JSON string (map of event type to schema)
-    int32_t timeout = 30;
+    int32_t timeout = 1800;
     bool hasSubCommand = false;
     std::map<std::string, SubCommandInfo> subcommands;
 
@@ -103,6 +103,20 @@ public:
     static bool ValidateExecutablePath(const std::string &path);
 
     /**
+     * @brief Validate requirePermissions array (all items must be unique strings)
+     * @param permissions Permissions array to validate
+     * @return bool true if valid
+     */
+    static bool ValidateRequirePermissions(const std::vector<std::string> &permissions);
+
+    /**
+     * @brief Validate eventTypes array (all items must be unique strings)
+     * @param eventTypes Event types array to validate
+     * @return bool true if valid
+     */
+    static bool ValidateEventTypes(const std::vector<std::string> &eventTypes);
+
+    /**
      * @brief Parse ToolInfo from JSON object
      * @param json Input JSON object
      * @param tool Output ToolInfo
@@ -114,6 +128,13 @@ public:
      * @brief Convert ToolInfo to JSON object
      */
     nlohmann::json ParseToJson() const;
+
+    /**
+     * @brief Validate ToolInfo fields
+     * @param tool ToolInfo to validate
+     * @return bool true if valid
+     */
+    static bool Validate(const ToolInfo &tool);
 };
 } // namespace CliTool
 } // namespace OHOS
