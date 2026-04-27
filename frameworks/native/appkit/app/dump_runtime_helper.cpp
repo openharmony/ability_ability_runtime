@@ -468,7 +468,7 @@ void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
     }
     using jsvmFunc = int (*)(uint32_t, int);
     auto jsvmDump = reinterpret_cast<jsvmFunc>(dlsym(jsvmHandle, "jsvm_dump_heapsnapshot"));
-    if (jsvmFunc == nullptr) {
+    if (jsvmDump == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "jsvm dlsym failed");
         dlclose(jsvmHandle);
         return;
