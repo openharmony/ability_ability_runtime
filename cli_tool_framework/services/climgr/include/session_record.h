@@ -42,153 +42,44 @@ public:
     ~SessionRecord() = default;
 
     int32_t callerPid = -1;
-    std::string sessionId;
-    std::string toolName;
-    std::string eventId;
+    std::string sessionId = "";
+    std::string toolName = "";
+    std::string eventId = "";
     pid_t processId = -1;
     int64_t startTime = 0;
     int32_t timeoutMs = 0;
     int32_t stdinPipe[2] = {-1, -1};        // [0]=read, [1]=write
-    int32_t stdoutPipe[2] = {-1, -1};       // [0]=read, [1]=write
+    int32_t stdoutPipe[2] = {-1, -1};
     int32_t stderrPipe[2] = {-1, -1};
 
-    void SetState(SessionState state)
-    {
-        state_.store(state, std::memory_order_release);
-    }
+    void SetState(SessionState state);
+    SessionState GetState() const;
 
-    SessionState GetState() const
-    {
-        return state_.load(std::memory_order_acquire);
-    }
+    void SetTerminalResult(int32_t status, int32_t sig);
+    int32_t GetTerminalStatus() const;
 
-    void SetTerminalResult(int status)
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        terminalStatus_ = status;
-        endTimeMs_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        processExited_.store(true, std::memory_order_release);
-    }
+    void SetTimedOut(bool timedOut);
+    bool TimedOut() const;
+    int64_t GetEndTimeMs() const;
 
-    int GetTerminalStatus() const
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        return terminalStatus_;
-    }
+    bool HasProcessExited() const;
+    void MarkStdoutClosed();
+    void MarkStderrClosed();
+    bool OutputDrained() const;
 
-    void SetTimedOut(bool timedOut)
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        timedOut_ = timedOut;
-    }
+    bool BeginCleanup();
 
-    bool TimedOut() const
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        return timedOut_;
-    }
+    void AppendOutput(bool isStdout, const std::string &data);
 
-    int64_t GetEndTimeMs() const
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        return endTimeMs_;
-    }
+    bool SetBackground(bool background);
+    bool Background() const;
 
-    bool HasProcessExited() const
-    {
-        return processExited_.load(std::memory_order_acquire);
-    }
-
-    void MarkStdoutClosed()
-    {
-        stdoutClosed_.store(true, std::memory_order_release);
-    }
-
-    void MarkStderrClosed()
-    {
-        stderrClosed_.store(true, std::memory_order_release);
-    }
-
-    bool OutputDrained() const
-    {
-        return stdoutClosed_.load(std::memory_order_acquire) &&
-            stderrClosed_.load(std::memory_order_acquire);
-    }
-
-    bool BeginCleanup()
-    {
-        bool expected = false;
-        return cleanupStarted_.compare_exchange_strong(expected, true, std::memory_order_acq_rel);
-    }
-
-    void AppendOutput(bool isStdout, const std::string &data)
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        if (isStdout) {
-            stdoutText_ += data;
-            TrimBufferedOutput(stdoutText_);
-            return;
-        }
-        stderrText_ += data;
-        TrimBufferedOutput(stderrText_);
-    }
-
-    bool SetBackground(bool background)
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        bool oldBackground = background_;
-        background_ = background;
-        return oldBackground;
-    }
-
-    bool Background() const
-    {
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        return background_;
-    }
-
-    void BuildSessionInfo(CliSessionInfo &session) const
-    {
-        session.sessionId = sessionId;
-        session.toolName = toolName;
-
-        if (!HasProcessExited() || !OutputDrained()) {
-            session.result = nullptr;
-            session.status = "running";
-        } else {
-            session.result = BuildExecResult();
-            session.status =
-                (!session.result || session.result->timedOut || session.result->exitCode != 0) ?
-                "failed" : "completed";
-        }
-    }
+    void BuildSessionInfo(CliSessionInfo &session) const;
 
 private:
-    void TrimBufferedOutput(std::string &buffer)
-    {
-        if (buffer.size() <= MAX_BUFFERED_OUTPUT_BYTES) {
-            return;
-        }
-        buffer.erase(0, buffer.size() - MAX_BUFFERED_OUTPUT_BYTES);
-    }
+    void TrimBufferedOutput(std::string &buffer);
 
-    std::shared_ptr<ExecResult> BuildExecResult() const
-    {
-        auto result = std::make_shared<ExecResult>();
-        if (result == nullptr) {
-            return nullptr;
-        }
-
-        std::lock_guard<std::mutex> lock(resultMutex_);
-        result->exitCode = WIFEXITED(terminalStatus_) ? WEXITSTATUS(terminalStatus_) : -1;
-        result->outputText = stdoutText_;
-        result->errorText = stderrText_;
-        result->signalNumber = WIFSIGNALED(terminalStatus_) ? WTERMSIG(terminalStatus_) : 0;
-        result->timedOut = timedOut_;
-        result->executionTime = (endTimeMs_ > startTime) ? (endTimeMs_ - startTime) : 0;
-        return result;
-    }
+    std::shared_ptr<ExecResult> BuildExecResult() const;
 
 private:
     std::atomic<SessionState> state_ {SessionState::SPAWNING};
@@ -197,7 +88,8 @@ private:
     std::atomic<bool> stderrClosed_ {false};
     std::atomic<bool> cleanupStarted_ {false};
     mutable std::mutex resultMutex_;
-    int terminalStatus_ = 0;
+    int32_t terminalStatus_ = 0;
+    int32_t signalNumber_ = 0;
     bool timedOut_ = false;
     bool background_ = true;
     int64_t endTimeMs_ = 0;

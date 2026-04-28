@@ -118,8 +118,7 @@ void EventDispatcher::UnregisterScheduler(int32_t callerPid)
 }
 
 bool EventDispatcher::RegisterSubscriber(const std::string &sessionId,
-                                         const std::string &subscriptionId,
-                                         int32_t callerPid)
+    const std::string &subscriptionId, int32_t callerPid)
 {
     if (sessionId.empty() || subscriptionId.empty() || callerPid <= 0) {
         TAG_LOGE(AAFwkTag::CLI_TOOL,
@@ -145,8 +144,7 @@ bool EventDispatcher::RegisterSubscriber(const std::string &sessionId,
 }
 
 bool EventDispatcher::UnregisterSubscriber(const std::string &sessionId,
-                                              const std::string &subscriptionId,
-                                              int32_t callerPid)
+    const std::string &subscriptionId, int32_t callerPid)
 {
     if (sessionId.empty() || subscriptionId.empty() || callerPid <= 0) {
         TAG_LOGE(AAFwkTag::CLI_TOOL,
@@ -171,8 +169,7 @@ bool EventDispatcher::UnregisterSubscriber(const std::string &sessionId,
 }
 
 void EventDispatcher::DispatchIOEvent(const std::string &sessionId,
-                                      const std::string &eventType,
-                                      const std::string &data)
+    const std::string &eventType, const std::string &data)
 {
     CliToolEvent event;
     event.type = eventType;

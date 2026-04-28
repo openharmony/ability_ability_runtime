@@ -29,9 +29,7 @@
 
 #include "io_monitor.h"
 #include "process_manager.h"
-#include "process_monitor.h"
 #include "session_record.h"
-#include "timeout_manager.h"
 
 namespace OHOS {
 namespace CliTool {
@@ -101,12 +99,11 @@ private:
     std::shared_ptr<SessionRecord> GetSessionRecord(const std::string &sessionId);
     void RemoveSessionRecord(const std::string &sessionId);
 
-    bool RegisterSessionWithMonitors(const std::shared_ptr<SessionRecord> &record, bool background, int32_t yieldMs);
+    bool RegisterSessionWithMonitors(const std::shared_ptr<SessionRecord> &record, const ExecToolParam &param);
     void UnregisterSessionWithMonitors(const std::string &sessionId);
 
     void HandleProcessTimeout(const std::string &sessionId);
     void HandleProcessYieldTimeout(const std::string &sessionId);
-    void HandleProcessExit(const std::string &sessionId, int status);
     void HandleOutputClosed(const std::string &sessionId, bool isStdout);
     void HandleOutputDrained(const std::string &sessionId);
     void FinalizeBackgroundSession(const std::shared_ptr<SessionRecord> &record);
@@ -114,20 +111,18 @@ private:
     DISALLOW_COPY_AND_MOVE(CliToolManagerService);
 
 private:
-    bool initialized_ = false;
-
-    std::shared_ptr<TimeoutManager> timeoutManager_ = nullptr;
-    std::shared_ptr<IOMonitor> ioMonitor_ = nullptr;
-    ProcessMonitor processMonitor_;
-
     static sptr<CliToolManagerService> instance_;
 
     static void sigchld_handler(int sig);
 
-    void WaitPid(pid_t pid, int32_t status);
+    void PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout);
+    void WaitPid(pid_t pid, int32_t status, int32_t sig);
 
-    std::mutex sessionsMutex_;
+    bool initialized_ = false;
+    std::shared_ptr<IOMonitor> ioMonitor_ = nullptr;
+
     std::atomic<int32_t> activeSessionCount_ = 0;
+    std::mutex sessionsMutex_;
     std::unordered_map<std::string, std::shared_ptr<SessionRecord>> sessionRecords_;
 };
 

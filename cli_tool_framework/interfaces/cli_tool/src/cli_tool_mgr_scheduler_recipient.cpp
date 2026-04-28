@@ -34,8 +34,7 @@ int32_t CliToolManagerSchedulerRecipient::SchedulerInputReplyEvent(const std::st
 }
 
 int32_t CliToolManagerSchedulerRecipient::SchedulerExecToolReplyEvent(const std::string &eventId,
-                                                                      int32_t resultCode,
-                                                                      const CliSessionInfo &session)
+    int32_t resultCode, const CliSessionInfo &session)
 {
     return CliEventReplyManager::GetInstance().HandleEventReply(eventId, CliEventReplyResult {resultCode, session});
 }

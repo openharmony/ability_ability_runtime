@@ -31,11 +31,10 @@ ohos_unittest("cli_tool_mgr_service_test") {
     "${cli_tool_framework_path}/services/climgr/src/cli_tool_manager_service.cpp",
     "${cli_tool_framework_path}/services/climgr/src/cli_tool_data_manager.cpp",
     "${cli_tool_framework_path}/services/climgr/src/process_manager.cpp",
+    "${cli_tool_framework_path}/services/climgr/src/session_record.cpp",
     "${cli_tool_framework_path}/services/climgr/src/tool_util.cpp",
     "${cli_tool_framework_path}/services/climgr/src/event_dispatcher.cpp",
     "${cli_tool_framework_path}/services/climgr/src/io_monitor.cpp",
-    "${cli_tool_framework_path}/services/climgr/src/process_monitor.cpp",
-    "${cli_tool_framework_path}/services/climgr/src/timeout_manager.cpp",
   ]
 
   cflags = []

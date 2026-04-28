@@ -78,7 +78,20 @@ void CliToolManagerService::HandleProcessTimeout(const std::string &sessionId)
     }
     TAG_LOGI(AAFwkTag::CLI_TOOL, "HandleProcessTimeout: sessionId=%{public}s", sessionId.c_str());
     record->SetTimedOut(true);
+    record->SetState(SessionState::CANCELLING);
+
+    auto oldBackground = record->SetBackground(true);
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "HandleProcessTimeout: sessionId=%{public}s, background=%{public}d",
+        sessionId.c_str(), oldBackground);
+    if (oldBackground == false) {
+        CliSessionInfo session;
+        record->BuildSessionInfo(session);
+        EventDispatcher::GetInstance().DispatchExecToolReplyEvent(
+            record->callerPid, record->eventId, ERR_OK, session);
+    }
+
     EventDispatcher::GetInstance().DispatchErrorEvent(sessionId, "session timed out");
+    ProcessManager::GetInstance().TerminateProcess(record->processId, SIGKILL);
 }
 
 void CliToolManagerService::HandleProcessYieldTimeout(const std::string &sessionId)
@@ -97,23 +110,6 @@ void CliToolManagerService::HandleProcessYieldTimeout(const std::string &session
         record->BuildSessionInfo(session);
         EventDispatcher::GetInstance().DispatchExecToolReplyEvent(
             record->callerPid, record->eventId, ERR_OK, session);
-    }
-}
-
-void CliToolManagerService::HandleProcessExit(const std::string &sessionId, int status)
-{
-    auto record = GetSessionRecord(sessionId);
-    if (record == nullptr) {
-        TAG_LOGW(AAFwkTag::CLI_TOOL,
-            "HandleProcessExit skipped: sessionId=%{public}s not found, status=%{public}d",
-            sessionId.c_str(), status);
-        return;
-    }
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "HandleProcessExit: sessionId=%{public}s, status=%{public}d",
-        sessionId.c_str(), status);
-    record->SetTerminalResult(status);
-    if (record->OutputDrained()) {
-        FinalizeBackgroundSession(record);
     }
 }
 
@@ -165,21 +161,12 @@ void CliToolManagerService::FinalizeBackgroundSession(const std::shared_ptr<Sess
         EventDispatcher::GetInstance().DispatchExecToolReplyEvent(
             record->callerPid, record->eventId, ERR_OK, session);
     }
-
-    const int status = record->GetTerminalStatus();
-    const int32_t exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "Finalizing background session: sessionId=%{public}s, exitCode=%{public}d",
-        sessionId.c_str(), exitCode);
-
-    if (timeoutManager_) {
-        timeoutManager_->CancelTimeoutTask(sessionId);
-    }
     if (ioMonitor_) {
         ioMonitor_->UnregisterSession(sessionId);
     }
-    processMonitor_.UnregisterSession(sessionId);
 
-    EventDispatcher::GetInstance().DispatchExitEvent(sessionId, exitCode);
+    const int32_t status = record->GetTerminalStatus();
+    EventDispatcher::GetInstance().DispatchExitEvent(sessionId, status);
     EventDispatcher::GetInstance().ClearSessionSubscribers(sessionId);
     RemoveSessionRecord(sessionId);
 }
@@ -190,21 +177,11 @@ void CliToolManagerService::Init()
         return;
     }
 
-    timeoutManager_ = std::make_shared<TimeoutManager>();
-    if (timeoutManager_ != nullptr) {
-        timeoutManager_->SetTimeoutCallback([this](const std::string &sessionId) {
-            HandleProcessTimeout(sessionId);
-        });
-        timeoutManager_->SetYieldTimeoutCallback([this](const std::string &sessionId) {
-            HandleProcessYieldTimeout(sessionId);
-        });
-        timeoutManager_->Start();
-    }
-
-    processMonitor_.SetExitCallback([this](const std::string &sessionId, int status) {
-        HandleProcessExit(sessionId, status);
-    });
-    processMonitor_.Start();
+    struct sigaction sa = {};
+    sa.sa_handler = CliToolManagerService::sigchld_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGCHLD, &sa, nullptr);
 
     ioMonitor_ = IOMonitor::Create();
     if (ioMonitor_ != nullptr) {
@@ -293,10 +270,6 @@ void CliToolManagerService::OnStop()
     if (ioMonitor_ != nullptr) {
         ioMonitor_->Stop();
     }
-    processMonitor_.Stop();
-    if (timeoutManager_ != nullptr) {
-        timeoutManager_->Stop();
-    }
 }
 
 void CliToolManagerService::AddSessionRecord(const std::shared_ptr<SessionRecord> &record)
@@ -323,10 +296,10 @@ void CliToolManagerService::RemoveSessionRecord(const std::string &sessionId)
 }
 
 bool CliToolManagerService::RegisterSessionWithMonitors(const std::shared_ptr<SessionRecord> &record,
-    bool background, int32_t yieldMs)
+    const ExecToolParam &param)
 {
-    if (ioMonitor_ == nullptr || ioMonitor_->RegisterSession(record->sessionId, record->stdoutPipe[0],
-            record->stderrPipe[0], record->stdinPipe[1]) == false) {
+    if (ioMonitor_ == nullptr || ioMonitor_->RegisterSession(
+        record->sessionId, record->stdoutPipe[0], record->stderrPipe[0], record->stdinPipe[1]) == false) {
         close(record->stdoutPipe[0]);
         close(record->stderrPipe[0]);
         close(record->stdinPipe[1]);
@@ -335,12 +308,11 @@ bool CliToolManagerService::RegisterSessionWithMonitors(const std::shared_ptr<Se
         return false;
     }
 
-    processMonitor_.RegisterSession(record->processId, record->sessionId);
-
-    if (timeoutManager_ != nullptr) {
-        timeoutManager_->AddTimeoutTask(record->sessionId, record->processId,
-            static_cast<uint32_t>(record->timeoutMs),
-            background ? 0 : static_cast<uint32_t>(yieldMs));
+    if (param.options.background == false && param.options.yieldMs != 0) {
+        PostExecToolTask(param.options.yieldMs, record->sessionId, false);
+    }
+    if (record->timeoutMs != 0) {
+        PostExecToolTask(record->timeoutMs, record->sessionId, true);
     }
     return true;
 }
@@ -349,10 +321,6 @@ void CliToolManagerService::UnregisterSessionWithMonitors(const std::string &ses
 {
     if (ioMonitor_) {
         ioMonitor_->UnregisterSession(sessionId);
-    }
-    processMonitor_.UnregisterSession(sessionId);
-    if (timeoutManager_) {
-        timeoutManager_->CancelTimeoutTask(sessionId);
     }
 }
 
@@ -434,15 +402,9 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
     }
     activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
 
-    struct sigaction sa = {};
-    sa.sa_handler = CliToolManagerService::sigchld_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGCHLD, &sa, nullptr);
-
     AddSessionRecord(record);
 
-    if (RegisterSessionWithMonitors(record, param.options.background, param.options.yieldMs) == false) {
+    if (RegisterSessionWithMonitors(record, param) == false) {
         ProcessManager::GetInstance().TerminateProcess(record->processId, SIGKILL);
         RemoveSessionRecord(record->sessionId);
         return ERR_NO_INIT;
@@ -459,21 +421,39 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
     return ERR_OK;
 }
 
-void CliToolManagerService::WaitPid(pid_t pid, int32_t status)
+void CliToolManagerService::PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout)
+{
+    auto timeoutTask = [sessionId, isTimeout]() {
+        auto service = CliToolManagerService::GetInstance();
+        if (service) {
+            if (isTimeout) {
+                service->HandleProcessTimeout(sessionId);
+            } else {
+                service->HandleProcessYieldTimeout(sessionId);
+            }
+        }
+    };
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(time * COEFFICIENT));
+}
+
+void CliToolManagerService::WaitPid(pid_t pid, int32_t status, int32_t sig)
 {
     std::shared_ptr<SessionRecord> record = nullptr;
-    std::lock_guard<std::mutex> lock(sessionsMutex_);
-    for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end(); ++iter) {
-        record = iter->second;
-        if (record == nullptr || pid != record->processId) {
-            continue;
+    {
+        std::lock_guard<std::mutex> lock(sessionsMutex_);
+        for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end(); ++iter) {
+            if (iter->second == nullptr || pid != iter->second->processId) {
+                continue;
+            }
+            record = iter->second;
+            break;
         }
-        CliSessionInfo session;
-        record->BuildSessionInfo(session);
-        EventDispatcher::GetInstance().DispatchExecToolReplyEvent(
-            record->callerPid, record->eventId, ERR_OK, session);
-        sessionRecords_.erase(iter);
-        break;
+    }
+    if (record) {
+        record->SetTerminalResult(status, sig);
+        if (record->OutputDrained()) {
+            FinalizeBackgroundSession(record);
+        }
     }
 }
 
@@ -484,7 +464,7 @@ void CliToolManagerService::sigchld_handler(int sig)
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
         auto instance = CliToolManagerService::GetInstance();
         if (instance != nullptr) {
-            instance->WaitPid(pid, status);
+            instance->WaitPid(pid, status, sig);
         }
         pid_t gPid = getpgid(pid);
         TAG_LOGI(AAFwkTag::CLI_TOOL, "gPid=%{public}d", gPid);

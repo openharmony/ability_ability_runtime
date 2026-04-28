@@ -239,7 +239,6 @@ napi_value JSCliManager::OnSendMessage(napi_env env, size_t argc, napi_value *ar
 {
     HandleEscape handleEscape(env);
     if (argc < INDEX_TWO) {
-
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -361,7 +360,7 @@ napi_value JSCliManager::OnGetToolInfoByName(napi_env env, size_t argc, napi_val
     napi_value asyncResult = nullptr;
     NapiAsyncTask::Schedule("JsCliManager::OnGetToolInfoByName", env,
         CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &asyncResult));
-     return handleEscape.Escape(asyncResult);
+    return handleEscape.Escape(asyncResult);
 }
 
 napi_value JSCliManager::OnQueryToolSummaries(napi_env env, size_t argc, napi_value *argv)
