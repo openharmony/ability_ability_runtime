@@ -38,9 +38,8 @@ public:
     void ActivateSubscription(const std::string &subscriptionId);
     void RemoveSubscription(const std::string &subscriptionId);
     void ClearAllSubscriptions();
-    int32_t HandleSessionEvent(const std::string &sessionId,
-                               const std::string &subscriptionId,
-                               const CliToolEvent &event);
+    int32_t HandleSessionEvent(const std::string &sessionId, const std::string &subscriptionId,
+        const CliToolEvent &event);
 
 private:
     struct SubscriptionRecord {
