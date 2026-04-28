@@ -435,8 +435,7 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
     }
     record->eventId = eventId;
 
-    auto createRet = ProcessManager::GetInstance().CreateChildProcess(
-        param, sandboxConfig, toolInfo.executablePath, record);
+    auto createRet = ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, toolInfo, record);
     if (createRet != ERR_OK) {
         return createRet;
     }
@@ -497,7 +496,7 @@ void CliToolManagerService::WaitPid(pid_t pid, int32_t status, int32_t sig)
     }
 }
 
-void CliToolManagerService::sigchld_handler(int sig)
+void CliToolManagerService::sigchld_handler(int32_t sig)
 {
     int32_t status;
     pid_t pid;

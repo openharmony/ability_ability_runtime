@@ -26,6 +26,8 @@
 namespace OHOS {
 namespace CliTool {
 class ExecToolParam;
+class ToolInfo;
+
 class ProcessManager {
 public:
     static ProcessManager &GetInstance();
@@ -36,7 +38,7 @@ public:
     ProcessManager &operator=(ProcessManager &&) = delete;
 
     int32_t CreateChildProcess(const ExecToolParam &param, const std::string &sandboxConfig,
-        const std::string &executablePath, std::shared_ptr<SessionRecord> record) const;
+        const ToolInfo &toolInfo, std::shared_ptr<SessionRecord> record) const;
 
     bool TerminateProcess(pid_t pid, int signal = SIGTERM) const;
 
