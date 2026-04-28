@@ -13985,6 +13985,32 @@ int32_t AbilityManagerService::StartAbilityWithServiceMatch(const InsightIntentE
 
 }
 
+int32_t AbilityManagerService::ExecuteIntentForDistributed(const Want &want, const std::string &srcDeviceId, 
+    uint64_t requestCode, uint64_t specifiedFullTokenId)
+{
+    AppExecFwk::InsightIntentExecuteParam param;
+    if (!AppExecFwk::InsightIntentExecuteParam::GenerateFromWant(want, param)) {
+        TAG_LOGE(AAFwkTag::INTENT, "GenerateFromWant failed, not a valid insight intent");
+        return ERR_INVALID_VALUE;
+    }
+    auto paramCopy = std::make_shared<InsightIntentExecuteParam>(param);
+    
+    uint64_t key = requestCode;
+    
+    auto callerBundlename = InsightIntentGetcallerBundleName();
+    if (callerBundlename.empty()) {
+        TAG_LOGD(AAFwkTag::INTENT, "callerBundlename is null");
+    }
+    
+    AbilityRuntime::ExtractInsightIntentGenericInfo infos = GetInsightIntentGenericInfo(*paramCopy);
+    bool openLinkExecuteFlag = infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
+    bool ignoreAbilityName = openLinkExecuteFlag ||
+        (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_PAGE) ||
+        (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION);
+ 
+    return ERR_OK;
+}
+
 int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
     const InsightIntentExecuteParam &param)
 {

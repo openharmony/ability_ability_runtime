@@ -345,6 +345,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel
     if (interfaceCode == AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_IN_CURRENT_PROCESS) {
         return StartSelfUIAbilityInCurrentProcessInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::EXECUTE_INTENT_FOR_DISTRIBUTED) {
+ 	    return ExecuteIntentForDistributedInner(data, reply);
+ 	}
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4259,6 +4262,31 @@ int AbilityManagerStub::QueryEntityInner(MessageParcel &data, MessageParcel &rep
         return ERR_INVALID_VALUE;
     }
     auto result = QueryEntityInfo(key, callerToken, *param);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::ExecuteIntentForDistributedInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    
+    std::string srcDeviceId = data.ReadString();
+    if (srcDeviceId.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "srcDeviceId empty");
+        return ERR_INVALID_VALUE;
+    }
+    
+    uint64_t requestCode = data.ReadUint64();
+    uint64_t specifiedFullTokenId = data.ReadUint64();
+    
+    auto result = ExecuteIntentForDistributed(*want, srcDeviceId, requestCode, specifiedFullTokenId);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;

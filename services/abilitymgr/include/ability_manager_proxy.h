@@ -1533,6 +1533,18 @@ public:
         const InsightIntentExecuteParam &param) override;
 
     /**
+     * @brief Execute intent for distributed scenario.
+     *
+     * @param want The want containing intent execution information.
+     * @param srcDeviceId The source device id.
+     * @param requestCode The Intent id.
+     * @param specifiedFullTokenId The caller token id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExecuteIntentForDistributed(const Want &want, const std::string &srcDeviceId,
+        uint64_t requestCode, uint64_t specifiedFullTokenId = 0) override;
+
+    /**
      * @brief Query entity.
      * @param key The key of intent executing client.
      * @param callerToken Caller ability token.
