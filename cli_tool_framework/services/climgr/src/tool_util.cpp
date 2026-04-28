@@ -127,7 +127,7 @@ std::string ToolUtil::GenerateCliSessionId(const std::string &name, std::shared_
     auto timestamp = std::chrono::system_clock::now().time_since_epoch();
     auto time = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count();
     if (record != nullptr) {
-        record->AddStartTime(time);
+        record->startTime = time;
     }
     return name + "_" + std::to_string(time) + "_" + std::to_string(randomDigit);
 }

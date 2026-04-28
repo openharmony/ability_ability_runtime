@@ -18,6 +18,7 @@
 #include <nlohmann/json.hpp>
 
 #include "cli_session_info.h"
+#include "cli_tool_event.h"
 #include "exec_options.h"
 #include "hilog_tag_wrapper.h"
 #include "napi_common_util.h"
@@ -352,6 +353,49 @@ napi_value CreateJsSubCommandInfo(napi_env env, const SubCommandInfo &subcmd)
     napi_set_named_property(env, jsObj, "eventSchemas", jsEventSchemas);
 
     return jsObj;
+}
+
+bool IsValidToolEventCallback(napi_env env, napi_value obj)
+{
+    if (obj == nullptr) {
+        return false;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, obj, &valueType);
+    if (status != napi_ok || valueType != napi_object) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Input is not an object");
+        return false;
+    }
+
+    napi_value onEventProp = nullptr;
+    if (napi_get_named_property(env, obj, "onEvent", &onEventProp) != napi_ok || !onEventProp) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "invalid onEvent property");
+        return false;
+    }
+
+    napi_valuetype callbackType = napi_undefined;
+    if (napi_typeof(env, onEventProp, &callbackType) != napi_ok || callbackType != napi_function) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "onEvent must be a function");
+        return false;
+    }
+
+    return true;
+}
+
+napi_value CreateJsCliToolEvent(napi_env env, const CliToolEvent &event)
+{
+    HandleEscape handleEscape(env);
+    napi_value objValue = nullptr;
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create CliToolEvent object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "toolEventType", CreateJsValue(env, event.type));
+    napi_set_named_property(env, objValue, "data", CreateJsValue(env, event.eventData));
+
+    return handleEscape.Escape(objValue);
 }
 
 napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool)
