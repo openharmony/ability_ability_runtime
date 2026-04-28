@@ -2181,6 +2181,8 @@ public:
 
     int32_t StartAbilityByCallWithInsightIntent(const Want &want, const sptr<IRemoteObject> &callerToken,
         const InsightIntentExecuteParam &param, int32_t userId = DEFAULT_INVAL_VALUE);
+    int32_t ExecuteIntentForDistributed(const Want &want, const std::string &srcDeviceId,
+        uint64_t requestCode, uint64_t specifiedFullTokenId = 0) override;
 
     /**
      * @brief Check if ability controller can start.

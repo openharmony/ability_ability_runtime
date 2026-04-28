@@ -116,6 +116,11 @@ abilityms_files = [
   "src/free_install_manager.cpp",
   "src/free_install_observer_manager.cpp",
 
+  #remote_intent
+  "src/remote_intent_result_callback.cpp",
+  "src/remote_intent_result_callback_proxy.cpp",
+  "src/remote_intent_result_callback_stub.cpp",
+
   #erms
   "src/query_erms_manager.cpp",
   "src/query_erms_observer_manager.cpp",

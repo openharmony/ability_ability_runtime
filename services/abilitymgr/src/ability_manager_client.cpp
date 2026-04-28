@@ -2136,6 +2136,15 @@ ErrCode AbilityManagerClient::ExecuteIntent(uint64_t key, sptr<IRemoteObject> ca
     return abms->ExecuteIntent(key, callerToken, param);
 }
 
+ErrCode AbilityManagerClient::ExecuteIntentForDistributed(const Want &want, const std::string &srcDeviceId,
+    uint64_t requestCode, uint64_t specifiedFullTokenId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ExecuteIntentForDistributed(want, srcDeviceId, requestCode, specifiedFullTokenId);
+}
+
 ErrCode AbilityManagerClient::QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
     const InsightIntentQueryParam &param)
 {
