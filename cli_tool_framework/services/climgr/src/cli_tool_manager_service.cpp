@@ -35,6 +35,7 @@ namespace OHOS {
 namespace CliTool {
 namespace {
 constexpr const char* PERMISSION_EXEC_CLI_TOOL = "ohos.permission.EXEC_CLI_TOOL";
+constexpr const char* PERMISSION_QUERY_CLI_TOOL = "ohos.permission.QUERY_CLI_TOOL";
 
 constexpr int32_t COEFFICIENT = 1000;
 } // namespace
@@ -84,18 +85,57 @@ void CliToolManagerService::OnStop()
 int32_t CliToolManagerService::GetAllToolInfos(std::vector<ToolInfo> &tools)
 {
     TAG_LOGI(AAFwkTag::CLI_TOOL, "GetAllToolInfos called");
+
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (!AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetAllToolInfos: Not system app");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    if (!PermissionUtil::VerifyAccessToken(tokenId, PERMISSION_QUERY_CLI_TOOL)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetAllToolInfos: Permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+
     return CliToolDataManager::GetInstance().GetAllTools(tools);
 }
 
 int32_t CliToolManagerService::GetAllToolSummaries(std::vector<ToolSummary> &summaries)
 {
     TAG_LOGI(AAFwkTag::CLI_TOOL, "GetAllToolSummaries called");
+
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (!AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetAllToolSummaries: Not system app");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    if (!PermissionUtil::VerifyAccessToken(tokenId, PERMISSION_QUERY_CLI_TOOL)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetAllToolSummaries: Permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+
     return CliToolDataManager::GetInstance().QueryToolSummaries(summaries);
 }
 
 int32_t CliToolManagerService::GetToolInfoByName(const std::string &name, ToolInfo &tool)
 {
     TAG_LOGI(AAFwkTag::CLI_TOOL, "GetToolInfoByName called, name='%{public}s'", name.c_str());
+
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (!AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetToolInfoByName: Not system app");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    if (!PermissionUtil::VerifyAccessToken(tokenId, PERMISSION_QUERY_CLI_TOOL)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "GetToolInfoByName: Permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+
     return CliToolDataManager::GetInstance().GetToolByName(name, tool);
 }
 
