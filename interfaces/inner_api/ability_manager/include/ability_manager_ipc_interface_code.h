@@ -491,6 +491,8 @@ enum class AbilityManagerInterfaceCode {
     // ipc for request modal UIExtension with account
     REQUEST_MODAL_UI_EXTENSION_WITH_ACCOUNT = 1144,
 
+    EXECUTE_INTENT_FOR_DISTRIBUTED = 1145,
+
     // ipc id 2001-3000 for tools
     // ipc id for dumping state (2001)
     DUMP_STATE = 2001,
