@@ -460,7 +460,7 @@ void DumpRuntimeHelper::DumpKmpKotlinHeap(const OHOS::AppExecFwk::MemDumpInfo &i
 
 void DumpRuntimeHelper::DumpJsvmHeap(const OHOS::AppExecFwk::MemDumpInfo &info)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "dump jsvm heap, tid:%{public}d, needRaw:%{public}d", info.tid, info.needRaw);
+    TAG_LOGI(AAFwkTag::APPKIT, "dump jsvm heaps, tid:%{public}d, needRaw:%{public}d", info.tid, info.needRaw);
     void* jsvmHandle = dlopen("libjsvm.so", RTLD_LAZY);
     if (jsvmHandle == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "jsvm dlopen failed");
