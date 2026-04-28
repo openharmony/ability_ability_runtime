@@ -98,6 +98,7 @@ abilityms_files = [
   "src/rdb/parser_util.cpp",
   "src/rdb/rdb_data_manager.cpp",
   "src/remote_mission_listener_proxy.cpp",
+  "src/request_start_ability_callback_proxy.cpp",
   "src/scene_board/status_bar_delegate_manager.cpp",
   "src/scene_board/ui_ability_lifecycle_manager.cpp",
   "src/scene_board/ui_ability_record.cpp",

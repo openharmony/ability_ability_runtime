@@ -1321,6 +1321,44 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityByUIContentSessi
 
 /*
  * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnRemoteRequest
+ * EnvConditions: code is START_UI_ABILITY_WITH_CALLBACK
+ * CaseDescription: Verify that sending request of StartUIAbilityWithCallback
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilityWithCallbackInner_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    data.WriteParcelable(nullptr);
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITY_WITH_CALLBACK),
+        data, reply, option);
+    EXPECT_EQ(res, ERR_READ_WANT);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilityWithCallbackInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilityWithCallbackInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartUIAbilityWithCallbackInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilityWithCallbackInner_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->StartUIAbilityWithCallbackInner(data, reply);
+    EXPECT_EQ(res, ERR_READ_WANT);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartExtensionAbilityInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartExtensionAbilityInner

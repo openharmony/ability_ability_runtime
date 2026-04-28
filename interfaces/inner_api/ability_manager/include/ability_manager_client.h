@@ -399,6 +399,19 @@ public:
         uint32_t specifyTokenId);
 
     /**
+     * Start UIAbility with callback to receive the request result, the callback is valid only for SA callers.
+     *
+     * @param want Indicates the ability to start.
+     * @param callerToken Indicates the caller ability token.
+     * @param callback Indicates the callback used to receive the result of request start ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartUIAbilityWithCallback(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        sptr<IRequestStartAbilityCallback> callback);
+
+    /**
      * Start extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
