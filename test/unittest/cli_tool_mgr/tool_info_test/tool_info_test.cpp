@@ -1275,7 +1275,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ValidateEventTypes_0500, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_ParseFromJson_EventTypes_0100
- * @tc.desc: Test ToolInfo ParseFromJson with duplicate eventTypes
+ * @tc.desc: Test ToolInfo ParseFromJson with duplicate eventTypes (now allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0100, TestSize.Level1)
@@ -1287,13 +1287,16 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "eventTypes": ["stdout", "stdout"]
     })"_json;
 
     ToolInfo tool;
     bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_FALSE(result);
+    // After removing ValidateEventTypes call, duplicate eventTypes are now allowed
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.eventTypes.size(), 2u);
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventTypes_0100 end";
 }
@@ -1312,6 +1315,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "eventTypes": ["stdout", "stderr", "exit"]
     })"_json;
 
@@ -1338,6 +1342,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "eventTypes": []
     })"_json;
 
@@ -1350,11 +1355,39 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0300, TestSize.Level1)
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventTypes_0300 end";
 }
 
+/**
+ * @tc.name: ToolInfo_ParseFromJson_EventTypes_0400
+ * @tc.desc: Test ToolInfo ParseFromJson with empty string in eventTypes (should be skipped)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventTypes_0400 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "eventTypes": ["", "stdout", ""]
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.eventTypes.size(), 1u);
+    EXPECT_EQ(tool.eventTypes[0], "stdout");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventTypes_0400 end";
+}
+
 // ==================== ParseFromJson RequirePermissions Validation Tests ====================
 
 /**
  * @tc.name: ToolInfo_ParseFromJson_RequirePermissions_0100
- * @tc.desc: Test ToolInfo ParseFromJson with duplicate requirePermissions
+ * @tc.desc: Test ToolInfo ParseFromJson with duplicate requirePermissions (now allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0100, TestSize.Level1)
@@ -1372,7 +1405,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0100, TestSize.
     ToolInfo tool;
     bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_FALSE(result);
+    // After removing ValidateRequirePermissions call, duplicate permissions are now allowed
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.requirePermissions.size(), 2u);
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0100 end";
 }
@@ -1429,6 +1464,218 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0300, TestSize.
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0300 end";
 }
 
+/**
+ * @tc.name: ToolInfo_ParseFromJson_RequirePermissions_0400
+ * @tc.desc: Test ToolInfo ParseFromJson with empty string in requirePermissions (should be skipped)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0400 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "requirePermissions": ["", "ohos.permission.INTERNET", ""]
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.requirePermissions.size(), 1u);
+    EXPECT_EQ(tool.requirePermissions[0], "ohos.permission.INTERNET");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0400 end";
+}
+
+// ==================== ParseFromJson ArgMapping Validation Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0100
+ * @tc.desc: Test ToolInfo ParseFromJson without argMapping (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0100 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test"
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0200
+ * @tc.desc: Test ToolInfo ParseFromJson with argMapping not object (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0200 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": "not an object"
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0300
+ * @tc.desc: Test ToolInfo ParseFromJson with valid argMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0300 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    ASSERT_NE(tool.argMapping, nullptr);
+    EXPECT_EQ(tool.argMapping->type, ArgMappingType::FLAG);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0300 end";
+}
+
+// ==================== ParseFromJson EventSchemas Validation Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_EventSchemas_0100
+ * @tc.desc: Test ToolInfo ParseFromJson without eventSchemas (valid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0100 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(tool.eventSchemas.empty());
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_EventSchemas_0200
+ * @tc.desc: Test ToolInfo ParseFromJson with valid eventSchemas object
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0200 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "eventSchemas": {"stdout": {"type": "string"}}
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(tool.eventSchemas, R"({"stdout":{"type":"string"}})");
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_EventSchemas_0300
+ * @tc.desc: Test ToolInfo ParseFromJson with eventSchemas not object (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0300 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "eventSchemas": "not an object"
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0300 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_EventSchemas_0400
+ * @tc.desc: Test ToolInfo ParseFromJson with eventSchemas as array (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0400 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "eventSchemas": ["a", "b"]
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_EventSchemas_0400 end";
+}
+
 // ==================== ParseFromJson InputSchema/OutputSchema Validation Tests ====================
 
 /**
@@ -1445,6 +1692,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "inputSchema": "not an object"
     })"_json;
 
@@ -1470,6 +1718,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "inputSchema": ["a", "b"]
     })"_json;
 
@@ -1495,6 +1744,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "inputSchema": 123
     })"_json;
 
@@ -1520,6 +1770,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0400, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "inputSchema": {"type": "object"}
     })"_json;
 
@@ -1545,7 +1796,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0500, TestSize.Level1)
         "name": "ohos-test",
         "version": "1.0.0",
         "description": "Test tool",
-        "executablePath": "/bin/test"
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -1571,6 +1823,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0600, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "outputSchema": "not an object"
     })"_json;
 
@@ -1596,6 +1849,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0700, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "outputSchema": ["a", "b"]
     })"_json;
 
@@ -1621,6 +1875,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0800, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "outputSchema": {"type": "string"}
     })"_json;
 
@@ -1646,7 +1901,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0900, TestSize.Level1)
         "name": "ohos-test",
         "version": "1.0.0",
         "description": "Test tool",
-        "executablePath": "/bin/test"
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -1672,6 +1928,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_1000, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "inputSchema": {"type": "object"},
         "outputSchema": {"type": "array"}
     })"_json;
@@ -1702,6 +1959,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": "30"
     })"_json;
 
@@ -1727,6 +1985,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": 0
     })"_json;
 
@@ -1752,6 +2011,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": 1801
     })"_json;
 
@@ -1777,6 +2037,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0400, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": 60
     })"_json;
 
@@ -1803,6 +2064,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0500, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": 1800
     })"_json;
 
@@ -1829,6 +2091,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0600, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
         "timeout": 1
     })"_json;
 
@@ -1854,7 +2117,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0700, TestSize.Level1)
         "name": "ohos-test",
         "version": "1.0.0",
         "description": "Test tool",
-        "executablePath": "/bin/test"
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -2209,7 +2473,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequiredFields_0900, TestSize.Leve
         "name": "ohos-testtool",
         "version": "1.0.0",
         "description": "A valid tool",
-        "executablePath": "/bin/test"
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -2349,7 +2614,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0500, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Validate_0600
- * @tc.desc: Test ToolInfo::Validate with duplicate requirePermissions
+ * @tc.desc: Test ToolInfo::Validate with duplicate requirePermissions (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Validate_0600, TestSize.Level1)
@@ -2367,7 +2632,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0600, TestSize.Level1)
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.timeout = 30;
 
-    EXPECT_FALSE(ToolInfo::Validate(tool));
+    EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate permissions are now allowed
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_0600 end";
 }
@@ -2619,7 +2884,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1600, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Validate_1700
- * @tc.desc: Test ToolInfo::Validate with duplicate eventTypes
+ * @tc.desc: Test ToolInfo::Validate with duplicate eventTypes (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Validate_1700, TestSize.Level1)
@@ -2637,7 +2902,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1700, TestSize.Level1)
     tool.timeout = 30;
     tool.eventTypes = {"stdout", "stdout"};
 
-    EXPECT_FALSE(ToolInfo::Validate(tool));
+    EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate eventTypes are now allowed
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_1700 end";
 }
@@ -2799,6 +3064,183 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2300, TestSize.Level1)
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_2300 end";
+}
+
+// ==================== ParseFromJson HasSubCommand Validation Tests ====================
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0100
+ * @tc.desc: Test ToolInfo ParseFromJson with hasSubCommand not boolean (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0100 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "hasSubCommand": "true"
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0100 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0200
+ * @tc.desc: Test ToolInfo ParseFromJson with hasSubCommand false and subcommands present (ignored)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0200 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "hasSubCommand": false,
+        "subcommands": {
+            "sub1": {
+                "description": "Subcommand 1",
+                "argMapping": {"type": "flag"}
+            }
+        }
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(tool.hasSubCommand);
+    EXPECT_TRUE(tool.subcommands.empty());
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0200 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0300
+ * @tc.desc: Test ToolInfo ParseFromJson with hasSubCommand true but no subcommands (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0300 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "hasSubCommand": true
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0300 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0400
+ * @tc.desc: Test ToolInfo ParseFromJson with hasSubCommand true but empty subcommands (should fail)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0400 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "hasSubCommand": true,
+        "subcommands": {}
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0400 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0500
+ * @tc.desc: Test ToolInfo ParseFromJson with hasSubCommand true and valid subcommands
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0500 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"},
+        "hasSubCommand": true,
+        "subcommands": {
+            "build": {
+                "description": "Build subcommand",
+                "argMapping": {"type": "flag"}
+            }
+        }
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(tool.hasSubCommand);
+    EXPECT_EQ(tool.subcommands.size(), 1u);
+    EXPECT_TRUE(tool.subcommands.contains("build"));
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0500 end";
+}
+
+/**
+ * @tc.name: ToolInfo_ParseFromJson_HasSubCommand_0600
+ * @tc.desc: Test ToolInfo ParseFromJson without hasSubCommand (default false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0600 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test",
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(tool.hasSubCommand);
+    EXPECT_TRUE(tool.subcommands.empty());
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_HasSubCommand_0600 end";
 }
 
 /**

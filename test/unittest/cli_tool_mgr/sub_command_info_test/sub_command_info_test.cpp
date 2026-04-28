@@ -939,7 +939,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0200, TestS
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_Validation_0300
- * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate requirePermissions
+ * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate requirePermissions (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0300, TestSize.Level1)
@@ -957,7 +957,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0300, TestS
     SubCommandInfo subCmd;
     bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
-    EXPECT_FALSE(result);  // duplicate permissions not allowed
+    EXPECT_TRUE(result);  // duplicate permissions are now allowed
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0300 end";
 }
@@ -985,6 +985,34 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0400, TestS
     EXPECT_FALSE(result);  // all permissions must be strings
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_0401
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty string in requirePermissions (empty strings are skipped)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0401, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0401 start";
+
+    nlohmann::json json = R"({
+        "description": "Empty string permission",
+        "requirePermissions": ["ohos.permission.INTERNET", "", "ohos.permission.CAMERA"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);  // empty strings are skipped
+    EXPECT_EQ(subCmd.requirePermissions.size(), 2u);  // only non-empty permissions stored
+    EXPECT_EQ(subCmd.requirePermissions[0], "ohos.permission.INTERNET");
+    EXPECT_EQ(subCmd.requirePermissions[1], "ohos.permission.CAMERA");
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_0401 end";
 }
 
 /**
@@ -1108,7 +1136,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_0900, TestS
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_Validation_1000
- * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate eventTypes
+ * @tc.desc: Test SubCommandInfo ParseFromJson with duplicate eventTypes (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1000, TestSize.Level1)
@@ -1126,7 +1154,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1000, TestS
     SubCommandInfo subCmd;
     bool result = SubCommandInfo::ParseFromJson(json, subCmd);
 
-    EXPECT_FALSE(result);  // duplicate eventTypes not allowed
+    EXPECT_TRUE(result);  // duplicate eventTypes are now allowed
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1000 end";
 }
@@ -1154,6 +1182,34 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1100, TestS
     EXPECT_FALSE(result);  // all eventTypes must be strings
 
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1100 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1101
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty string in eventTypes (empty strings are skipped)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1101, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1101 start";
+
+    nlohmann::json json = R"({
+        "description": "Empty string eventType",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
+        "argMapping": {"type": "flag"},
+        "eventTypes": ["stdout", "", "stderr"]
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);  // empty strings are skipped
+    EXPECT_EQ(subCmd.eventTypes.size(), 2u);  // only non-empty eventTypes stored
+    EXPECT_EQ(subCmd.eventTypes[0], "stdout");
+    EXPECT_EQ(subCmd.eventTypes[1], "stderr");
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1101 end";
 }
 
 /**
@@ -1357,7 +1413,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0200, TestSize.Level1)
 
 /**
  * @tc.name: SubCommandInfo_Validate_0300
- * @tc.desc: Test SubCommandInfo::Validate with duplicate requirePermissions
+ * @tc.desc: Test SubCommandInfo::Validate with duplicate requirePermissions (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0300, TestSize.Level1)
@@ -1371,7 +1427,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0300, TestSize.Level1)
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.argMapping = std::make_shared<ArgMapping>();
 
-    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));  // duplicate permissions are now allowed
 
     GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0300 end";
 }
@@ -1560,7 +1616,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1200, TestSize.Level1)
 
 /**
  * @tc.name: SubCommandInfo_Validate_1300
- * @tc.desc: Test SubCommandInfo::Validate with duplicate eventTypes
+ * @tc.desc: Test SubCommandInfo::Validate with duplicate eventTypes (duplicates are allowed)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1300, TestSize.Level1)
@@ -1574,7 +1630,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1300, TestSize.Level1)
     subCmd.argMapping = std::make_shared<ArgMapping>();
     subCmd.eventTypes = {"stdout", "stdout"};
 
-    EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));  // duplicate eventTypes are now allowed
 
     GTEST_LOG_(INFO) << "SubCommandInfo_Validate_1300 end";
 }

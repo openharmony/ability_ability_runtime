@@ -254,11 +254,10 @@ bool ToolInfo::ParseFromJson(const nlohmann::json &json, ToolInfo &tool)
                 TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions contains non-string item");
                 return false;
             }
-            perms.push_back(perm.get<std::string>());
-        }
-        if (!ValidateRequirePermissions(perms)) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions validation failed");
-            return false;
+            std::string permStr = perm.get<std::string>();
+            if (!permStr.empty()) {
+                perms.push_back(std::move(permStr));
+            }
         }
         tool.requirePermissions = std::move(perms);
     }
@@ -276,15 +275,21 @@ bool ToolInfo::ParseFromJson(const nlohmann::json &json, ToolInfo &tool)
         }
         tool.outputSchema = json["outputSchema"].dump();
     }
-    if (json.contains("argMapping") && json["argMapping"].is_object()) {
-        tool.argMapping = std::make_shared<ArgMapping>();
-        if (!ArgMapping::ParseFromJson(json["argMapping"], *tool.argMapping)) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: argMapping parse failed");
-            tool.argMapping = nullptr;
+    if (!json.contains("argMapping") || !json["argMapping"].is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: argMapping is required and must be an object");
+        return false;
+    }
+    tool.argMapping = std::make_shared<ArgMapping>();
+    if (!ArgMapping::ParseFromJson(json["argMapping"], *tool.argMapping)) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: argMapping parse failed");
+        tool.argMapping = nullptr;
+        return false;
+    }
+    if (json.contains("eventSchemas")) {
+        if (!json["eventSchemas"].is_object()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventSchemas is not a JSON object");
             return false;
         }
-    }
-    if (json.contains("eventSchemas") && json["eventSchemas"].is_object()) {
         tool.eventSchemas = json["eventSchemas"].dump();
     }
     if (json.contains("timeout")) {
@@ -311,18 +316,25 @@ bool ToolInfo::ParseFromJson(const nlohmann::json &json, ToolInfo &tool)
                 TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventTypes contains non-string item");
                 return false;
             }
-            types.push_back(item.get<std::string>());
-        }
-        if (!ValidateEventTypes(types)) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventTypes validation failed");
-            return false;
+            std::string typeStr = item.get<std::string>();
+            if (!typeStr.empty()) {
+                types.push_back(std::move(typeStr));
+            }
         }
         tool.eventTypes = std::move(types);
     }
-    if (json.contains("hasSubCommand") && json["hasSubCommand"].is_boolean()) {
+    if (json.contains("hasSubCommand")) {
+        if (!json["hasSubCommand"].is_boolean()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: hasSubCommand is not a boolean");
+            return false;
+        }
         tool.hasSubCommand = json["hasSubCommand"];
     }
-    if (json.contains("subcommands") && json["subcommands"].is_object()) {
+    if (tool.hasSubCommand) {
+        if (!json.contains("subcommands") || !json["subcommands"].is_object() || json["subcommands"].empty()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: subcommands is required when hasSubCommand is true");
+            return false;
+        }
         for (auto it = json["subcommands"].begin(); it != json["subcommands"].end(); ++it) {
             SubCommandInfo subCmd;
             if (!SubCommandInfo::ParseFromJson(it.value(), subCmd)) {
@@ -414,11 +426,6 @@ bool ToolInfo::Validate(const ToolInfo &tool)
         return false;
     }
 
-    // requirePermissions: if not empty, all items must be unique
-    if (!ValidateRequirePermissions(tool.requirePermissions)) {
-        return false;
-    }
-
     // inputSchema: if not empty, must be valid JSON string
     if (!tool.inputSchema.empty()) {
         nlohmann::json inputSchemaJson = nlohmann::json::parse(tool.inputSchema, nullptr, false);
@@ -451,11 +458,6 @@ bool ToolInfo::Validate(const ToolInfo &tool)
     if (tool.timeout <= 0 || tool.timeout > 1800) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: timeout %{public}d is out of range (0, 1800]",
             tool.timeout);
-        return false;
-    }
-
-    // eventTypes: if not empty, all items must be unique
-    if (!ValidateEventTypes(tool.eventTypes)) {
         return false;
     }
 
