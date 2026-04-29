@@ -76,6 +76,11 @@ public:
 
     void BuildSessionInfo(CliSessionInfo &session) const;
 
+    inline pid_t GetCallerPid()
+    {
+        return callerPid;
+    }
+
 private:
     void TrimBufferedOutput(std::string &buffer);
 

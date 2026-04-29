@@ -32,6 +32,9 @@
 #include "session_record.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+class IApplicationStateObserver;
+}
 namespace CliTool {
 class SessionRecord;
 class CliToolManagerService : public SystemAbility,
@@ -102,6 +105,14 @@ private:
     bool RegisterSessionWithMonitors(const std::shared_ptr<SessionRecord> &record, const ExecToolParam &param);
     void UnregisterSessionWithMonitors(const std::string &sessionId);
 
+    int32_t ValidateExecToolPermissions();
+    int32_t ValidateSessionLimit();
+    int32_t ValidateAndPrepareTool(const ExecToolParam &param, uint32_t tokenId,
+        ToolInfo &toolInfo, std::string &sandboxConfig, std::string &bundleName);
+    int32_t SetupAndStartSession(const ExecToolParam &param, const std::string &eventId,
+        const ToolInfo &toolInfo, const std::string &sandboxConfig, const std::string &bundleName);
+    void HandleBackgroundSessionReply(const std::shared_ptr<SessionRecord> &record, const std::string &eventId);
+
     void HandleProcessTimeout(const std::string &sessionId);
     void HandleProcessYieldTimeout(const std::string &sessionId);
     void HandleOutputClosed(const std::string &sessionId, bool isStdout);
@@ -115,15 +126,19 @@ private:
 
     static void sigchld_handler(int32_t sig);
 
-    void PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout);
+    void PostExecToolTask(int64_t time, const std::string &sessionId, bool isTimeout);
     void WaitPid(pid_t pid, int32_t status, int32_t sig);
+    void Killpg(pid_t pid);
+    void RegisterAppStateObserver(const std::string &bundleName, pid_t callerPid);
+    void OnProcessDied(const std::string &bundleName, pid_t diedPid);
 
     bool initialized_ = false;
     std::shared_ptr<IOMonitor> ioMonitor_ = nullptr;
 
     std::atomic<int32_t> activeSessionCount_ = 0;
-    std::mutex sessionsMutex_;
+    ffrt::mutex sessionsMutex_;
     std::unordered_map<std::string, std::shared_ptr<SessionRecord>> sessionRecords_;
+    std::unordered_map<std::string, sptr<AppExecFwk::IApplicationStateObserver>> bundleObservers_;
 };
 
 } // namespace CliTool
