@@ -19,7 +19,6 @@
 #include <map>
 #include <string>
 
-#include "arg_mapping.h"
 #include "native_engine/native_engine.h"
 #include "tool_info.h"
 #include "tool_summary.h"
@@ -65,14 +64,6 @@ bool IsValidToolEventCallback(napi_env env, napi_value obj);
  * @return Returns the JavaScript object.
  */
 napi_value CreateJsCliToolEvent(napi_env env, const CliToolEvent &event);
-
-/**
- * @brief Create JavaScript ArgMapping object.
- * @param env The N-API environment.
- * @param argMapping The ArgMapping structure.
- * @return Returns the JavaScript object.
- */
-napi_value CreateJsArgMapping(napi_env env, const ArgMapping &argMapping);
 
 /**
  * @brief Create JavaScript SubCommandInfo object.

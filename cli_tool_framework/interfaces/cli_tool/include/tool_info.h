@@ -16,7 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 #define OHOS_ABILITY_RUNTIME_TOOL_INFO_H
 
-#include "arg_mapping.h"
 #include "sub_command_info.h"
 #include "tool_summary.h"
 
@@ -75,7 +74,6 @@ public:
     std::vector<std::string> requirePermissions;
     std::string inputSchema;       // JSON string
     std::string outputSchema;      // JSON string
-    std::shared_ptr<ArgMapping> argMapping;
     std::vector<std::string> eventTypes;
     std::string eventSchemas;      // JSON string (map of event type to schema)
     bool hasSubCommand = false;

@@ -28,29 +28,6 @@ using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace CliTool {
 namespace {
-const std::string ARG_MAPPING_TYPE_FLAG = "flag";
-const std::string ARG_MAPPING_TYPE_POSITIONAL = "positional";
-const std::string ARG_MAPPING_TYPE_FLATTENED = "flattened";
-const std::string ARG_MAPPING_TYPE_JSONSTRING = "jsonString";
-const std::string ARG_MAPPING_TYPE_MIXED = "mixed";
-
-std::string ArgMappingTypeToString(ArgMappingType type)
-{
-    switch (type) {
-        case ArgMappingType::FLAG:
-            return ARG_MAPPING_TYPE_FLAG;
-        case ArgMappingType::POSITIONAL:
-            return ARG_MAPPING_TYPE_POSITIONAL;
-        case ArgMappingType::FLATTENED:
-            return ARG_MAPPING_TYPE_FLATTENED;
-        case ArgMappingType::JSONSTRING:
-            return ARG_MAPPING_TYPE_JSONSTRING;
-        case ArgMappingType::MIXED:
-            return ARG_MAPPING_TYPE_MIXED;
-        default:
-            return ARG_MAPPING_TYPE_FLAG;
-    }
-}
 
 napi_value ParseJsonStringToJsObject(napi_env env, const std::string &jsonStr)
 {
@@ -280,34 +257,6 @@ napi_value CreateJsCliSessionInfo(napi_env env, const CliSessionInfo &session)
     return handleEscape.Escape(jsObj);
 }
 
-napi_value CreateJsArgMapping(napi_env env, const ArgMapping &argMapping)
-{
-    napi_value jsObj = nullptr;
-    napi_status status = napi_create_object(env, &jsObj);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create JS object");
-        return nullptr;
-    }
-
-    // Set type (string: 'flag', 'positional', 'flattened', 'jsonString', 'mixed')
-    napi_value jsType = AppExecFwk::WrapStringToJS(env, ArgMappingTypeToString(argMapping.type));
-    napi_set_named_property(env, jsObj, "type", jsType);
-
-    // Set separator
-    napi_value jsSeparator = AppExecFwk::WrapStringToJS(env, argMapping.separator);
-    napi_set_named_property(env, jsObj, "separator", jsSeparator);
-
-    // Set order
-    napi_value jsOrder = AppExecFwk::WrapStringToJS(env, argMapping.order);
-    napi_set_named_property(env, jsObj, "order", jsOrder);
-
-    // Set templates (parse JSON string to object)
-    napi_value jsTemplates = ParseJsonStringToJsObject(env, argMapping.templates);
-    napi_set_named_property(env, jsObj, "templates", jsTemplates);
-
-    return jsObj;
-}
-
 napi_value CreateJsSubCommandInfo(napi_env env, const SubCommandInfo &subcmd)
 {
     napi_value jsObj = nullptr;
@@ -337,14 +286,6 @@ napi_value CreateJsSubCommandInfo(napi_env env, const SubCommandInfo &subcmd)
     // Set outputSchema (parse JSON string to object)
     napi_value jsOutputSchema = ParseJsonStringToJsObject(env, subcmd.outputSchema);
     napi_set_named_property(env, jsObj, "outputSchema", jsOutputSchema);
-
-    // Set argMapping
-    if (subcmd.argMapping != nullptr) {
-        napi_value jsArgMapping = CreateJsArgMapping(env, *subcmd.argMapping);
-        if (jsArgMapping != nullptr) {
-            napi_set_named_property(env, jsObj, "argMapping", jsArgMapping);
-        }
-    }
 
     // Set eventTypes (array)
     napi_value jsEventTypes = nullptr;
@@ -446,14 +387,6 @@ napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool)
     // Set outputSchema (parse JSON string to object)
     napi_value jsOutputSchema = ParseJsonStringToJsObject(env, tool.outputSchema);
     napi_set_named_property(env, jsObj, "outputSchema", jsOutputSchema);
-
-    // Set argMapping
-    if (tool.argMapping != nullptr) {
-        napi_value jsArgMapping = CreateJsArgMapping(env, *tool.argMapping);
-        if (jsArgMapping != nullptr) {
-            napi_set_named_property(env, jsObj, "argMapping", jsArgMapping);
-        }
-    }
 
     // Set eventTypes (array)
     napi_value jsEventTypes = nullptr;
