@@ -60,7 +60,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0100, TestSize.Level1)
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.argMapping->type = ArgMappingType::FLAG;
     tool.eventSchemas = "{}";
-    tool.timeout = 30000;
     tool.eventTypes = {"stdout"};
     tool.hasSubCommand = false;
 
@@ -91,7 +90,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0200, TestSize.Level1)
     tool.outputSchema = "{}";
     tool.argMapping = nullptr;
     tool.eventSchemas = "{}";
-    tool.timeout = 0;
     tool.eventTypes = {};
     tool.hasSubCommand = true;
     SubCommandInfo subCmd;
@@ -129,7 +127,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
     original.argMapping->order = "arg1,arg2,arg3";
     original.argMapping->templates = "{}";
     original.eventSchemas = "{}";
-    original.timeout = 60000;
     original.eventTypes = {"stdout", "stderr", "exit"};
     original.hasSubCommand = true;
     SubCommandInfo buildSubCmd;
@@ -148,7 +145,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
     EXPECT_EQ(result->requirePermissions.size(), 2u);
     EXPECT_TRUE(result->argMapping != nullptr);
     EXPECT_EQ(result->argMapping->type, ArgMappingType::POSITIONAL);
-    EXPECT_EQ(result->timeout, 60000);
     EXPECT_TRUE(result->hasSubCommand);
     EXPECT_EQ(result->subcommands.size(), 1u);
 
@@ -176,7 +172,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0200, TestSize.Level1)
     original.outputSchema = "{}";
     original.argMapping = nullptr;
     original.eventSchemas = "{}";
-    original.timeout = 0;
     original.eventTypes = {};
     original.hasSubCommand = false;
 
@@ -393,7 +388,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0100, TestSize.Level1)
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.argMapping->type = ArgMappingType::FLAG;
     tool.eventSchemas = R"({"stdout": {"type": "string"}})";
-    tool.timeout = 30000;
     tool.eventTypes = {"stdout", "stderr"};
     tool.hasSubCommand = false;
 
@@ -403,7 +397,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0100, TestSize.Level1)
     EXPECT_EQ(json["version"], "1.0.0");
     EXPECT_EQ(json["description"], "JSON test tool");
     EXPECT_EQ(json["executablePath"], "/bin/json");
-    EXPECT_EQ(json["timeout"], 30000);
     EXPECT_TRUE(json.contains("argMapping"));
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0100 end";
@@ -478,7 +471,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0100, TestSize.Level1)
         "outputSchema": {"type": "array"},
         "argMapping": {"type": "positional", "order": "arg1,arg2"},
         "eventSchemas": {"exit": {"type": "number"}},
-        "timeout": 60000,
         "eventTypes": ["stdout", "exit"],
         "hasSubCommand": false
     })"_json;
@@ -492,7 +484,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0100, TestSize.Level1)
     EXPECT_EQ(tool.description, "Parsed from JSON");
     EXPECT_EQ(tool.executablePath, "/bin/parsed");
     EXPECT_EQ(tool.requirePermissions.size(), 1u);
-    EXPECT_EQ(tool.timeout, 60000);
     EXPECT_FALSE(tool.hasSubCommand);
     ASSERT_NE(tool.argMapping, nullptr);
     EXPECT_EQ(tool.argMapping->type, ArgMappingType::POSITIONAL);
@@ -582,7 +573,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSi
         "outputSchema": {"type": "array"},
         "argMapping": {"type": "mixed", "separator": ",", "order": "a,b"},
         "eventSchemas": {"stdout": {"type": "string"}},
-        "timeout": 45000,
         "eventTypes": ["stdout", "stderr"],
         "hasSubCommand": true,
         "subcommands": {
@@ -604,7 +594,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSi
     EXPECT_EQ(resultJson["version"], originalJson["version"]);
     EXPECT_EQ(resultJson["description"], originalJson["description"]);
     EXPECT_EQ(resultJson["executablePath"], originalJson["executablePath"]);
-    EXPECT_EQ(resultJson["timeout"], originalJson["timeout"]);
     EXPECT_EQ(resultJson["hasSubCommand"], originalJson["hasSubCommand"]);
     EXPECT_EQ(resultJson["eventTypes"], originalJson["eventTypes"]);
 
@@ -1943,193 +1932,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_1000, TestSize.Level1)
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Schema_1000 end";
 }
 
-// ==================== ParseFromJson Timeout Validation Tests ====================
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0100
- * @tc.desc: Test ToolInfo ParseFromJson with timeout not integer
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0100 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": "30"
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_FALSE(result);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0100 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0200
- * @tc.desc: Test ToolInfo ParseFromJson with timeout <= 0
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0200 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": 0
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_FALSE(result);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0200 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0300
- * @tc.desc: Test ToolInfo ParseFromJson with timeout > 1800
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0300 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": 1801
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_FALSE(result);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0300 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0400
- * @tc.desc: Test ToolInfo ParseFromJson with valid timeout
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0400, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0400 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": 60
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_TRUE(result);
-    EXPECT_EQ(tool.timeout, 60);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0400 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0500
- * @tc.desc: Test ToolInfo ParseFromJson with timeout = 1800 (boundary)
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0500, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0500 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": 1800
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_TRUE(result);
-    EXPECT_EQ(tool.timeout, 1800);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0500 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0600
- * @tc.desc: Test ToolInfo ParseFromJson with timeout = 1 (boundary)
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0600, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0600 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
-        "timeout": 1
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_TRUE(result);
-    EXPECT_EQ(tool.timeout, 1);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0600 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_Timeout_0700
- * @tc.desc: Test ToolInfo ParseFromJson without timeout (use default)
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Timeout_0700, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0700 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_TRUE(result);
-    EXPECT_EQ(tool.timeout, 1800);  // default value
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Timeout_0700 end";
-}
-
 // ==================== ParseFromJson Name Validation Tests ====================
 
 /**
@@ -2509,7 +2311,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0100, TestSize.Level1)
     tool.outputSchema = R"({"type": "string"})";
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.argMapping->type = ArgMappingType::FLAG;
-    tool.timeout = 30;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2533,7 +2334,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0200, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2557,7 +2357,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0300, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2581,7 +2380,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0400, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2605,7 +2403,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0500, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2630,7 +2427,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0600, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate permissions are now allowed
 
@@ -2655,7 +2451,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0700, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2679,7 +2474,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0800, TestSize.Level1)
     tool.inputSchema = "";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2703,7 +2497,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0900, TestSize.Level1)
     tool.inputSchema = "not valid json";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2727,7 +2520,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1000, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2751,7 +2543,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1100, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{invalid}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2775,7 +2566,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1200, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = nullptr;
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2800,86 +2590,10 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1300, TestSize.Level1)
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.argMapping->type = static_cast<ArgMappingType>(-1);
-    tool.timeout = 30;
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_1300 end";
-}
-
-/**
- * @tc.name: ToolInfo_Validate_1400
- * @tc.desc: Test ToolInfo::Validate with timeout <= 0
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_Validate_1400, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1400 start";
-
-    ToolInfo tool;
-    tool.name = "ohos-test";
-    tool.version = "1.0.0";
-    tool.description = "Test";
-    tool.executablePath = "/bin/test";
-    tool.inputSchema = "{}";
-    tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 0;
-
-    EXPECT_FALSE(ToolInfo::Validate(tool));
-
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1400 end";
-}
-
-/**
- * @tc.name: ToolInfo_Validate_1500
- * @tc.desc: Test ToolInfo::Validate with timeout > 1800
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_Validate_1500, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1500 start";
-
-    ToolInfo tool;
-    tool.name = "ohos-test";
-    tool.version = "1.0.0";
-    tool.description = "Test";
-    tool.executablePath = "/bin/test";
-    tool.inputSchema = "{}";
-    tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 1801;
-
-    EXPECT_FALSE(ToolInfo::Validate(tool));
-
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1500 end";
-}
-
-/**
- * @tc.name: ToolInfo_Validate_1600
- * @tc.desc: Test ToolInfo::Validate with valid timeout range
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_Validate_1600, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1600 start";
-
-    ToolInfo tool;
-    tool.name = "ohos-test";
-    tool.version = "1.0.0";
-    tool.description = "Test";
-    tool.executablePath = "/bin/test";
-    tool.inputSchema = "{}";
-    tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 1;
-
-    EXPECT_TRUE(ToolInfo::Validate(tool));
-
-    tool.timeout = 1800;
-    EXPECT_TRUE(ToolInfo::Validate(tool));
-
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1600 end";
 }
 
 /**
@@ -2899,7 +2613,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1700, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.eventTypes = {"stdout", "stdout"};
 
     EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate eventTypes are now allowed
@@ -2924,7 +2637,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1800, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.eventTypes = {"stdout", "stderr", "exit"};
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
@@ -2949,7 +2661,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1900, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.eventSchemas = "invalid json";
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
@@ -2974,7 +2685,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2000, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.eventSchemas = R"({"stdout": {"type": "string"}})";
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
@@ -2999,7 +2709,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2100, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.hasSubCommand = true;
     tool.subcommands = {};
 
@@ -3025,7 +2734,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2200, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.hasSubCommand = true;
 
     SubCommandInfo subCmd;
@@ -3057,7 +2765,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2300, TestSize.Level1)
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.argMapping = std::make_shared<ArgMapping>();
-    tool.timeout = 30;
     tool.hasSubCommand = false;
     tool.subcommands = {};
 
@@ -3263,7 +2970,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2400, TestSize.Level1)
     tool.argMapping = std::make_shared<ArgMapping>();
     tool.argMapping->type = ArgMappingType::POSITIONAL;
     tool.argMapping->order = "arg1,arg2";
-    tool.timeout = 60;
     tool.eventTypes = {"stdout", "stderr", "exit"};
     tool.eventSchemas = R"({"stdout": {"type": "string"}, "exit": {"type": "number"}})";
     tool.hasSubCommand = false;
