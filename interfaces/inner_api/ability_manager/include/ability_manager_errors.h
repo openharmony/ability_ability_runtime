@@ -1138,6 +1138,12 @@ enum {
      */
     ERR_NOT_SUPPORT_SCREEN = 2099411,
 
+    ERR_MODULAR_OBJECT_DISABLED = 2099412,
+
+    ERR_NO_RUNNING_ABILITIES_WITH_UI = 2099413,
+    
+    ERR_INVALID_DISTRIBUTION_TYPE = 2099414,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

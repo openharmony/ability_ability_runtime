@@ -25,6 +25,7 @@ enum class MemDumpType : uint32_t {
     INVALID = 0,
     NATIVE = 1,
     JSVM = 2,
+    KMP_KOTLIN = 3,
 };
 
 struct MemDumpInfo : public Parcelable {
@@ -32,7 +33,8 @@ struct MemDumpInfo : public Parcelable {
     bool needLeakobj = false;
     uint32_t pid = 0;
     uint32_t tid = 0;
-    bool isSync = true;
+    bool isSync = false;
+    bool mayReportToOEM = false;
     virtual bool Marshalling(Parcel &parcel) const override;
     static MemDumpInfo *Unmarshalling(Parcel &parcel);
 };

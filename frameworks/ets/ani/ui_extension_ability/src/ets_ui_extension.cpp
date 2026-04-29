@@ -424,6 +424,7 @@ bool EtsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::
     InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
     executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
     executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
+    executorInfo.decoratorClass = want.GetStringParam(INSIGHT_INTENT_DECORATOR_CLASS);
     TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
         executorInfo.executeParam->insightIntentId_);
     return true;
@@ -643,7 +644,14 @@ sptr<Rosen::Window> EtsUIExtension::CreateUIWindow(const std::shared_ptr<UIExten
     option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
-    return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+    return Rosen::Window::Create(
+        option,
+        GetContext(),
+        sessionInfo->sessionToken,
+        Rosen::DefaultCreateErrCode,
+        "",
+        false,
+        sessionInfo->renderSession);
 }
 
 std::unique_ptr<AppExecFwk::ETSNativeReference> EtsUIExtension::CreateAppWindowStage(sptr<Rosen::Window> uiWindow,

@@ -15,6 +15,8 @@
 
 #include "extract_insight_intent_profile.h"
 
+#include <algorithm>
+
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
 
@@ -52,6 +54,7 @@ const std::string INSIGHT_INTENT_NAVIGATION_ID = "navigationId";
 const std::string INSIGHT_INTENT_NAV_DESTINATION_NAME = "navDestinationName";
 const std::string INSIGHT_INTENT_ABILITY_NAME = "abilityName";
 const std::string INSIGHT_INTENT_FUNCTION_NAME = "functionName";
+const std::string INSIGHT_INTENT_FUNCTION_RETURN_TYPE = "functionReturnType";
 const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParamList";
 const std::string INSIGHT_INTENT_PARAM_NAME = "paramName";
 const std::string INSIGHT_INTENT_PARAM_MAPPING_NAME = "paramMappingName";
@@ -67,6 +70,8 @@ const std::string INSIGHT_INTENT_ENTITY_ID = "entityId";
 const std::string INSIGHT_INTENT_ENTITY_CATEGORY = "entityCategory";
 const std::string INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME = "parentClassName";
 const std::string INSIGHT_INTENT_ENTITY_PARAMETERS = "parameters";
+const std::string INSIGHT_INTENT_ARKTS_MODE = "arkTSMode";
+const std::string INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES = "supportedQueryProperties";
 
 enum DecoratorType {
     DECORATOR_LINK = 0,
@@ -162,6 +167,14 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentEntityInfo &entity
         entityInfo.parentClassName,
         false,
         g_extraParseResult);
+    AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES,
+        entityInfo.supportedQueryProperties,
+        JsonType::ARRAY,
+        false,
+        g_extraParseResult,
+        ArrayType::STRING);
 
     if (jsonObject.find(INSIGHT_INTENT_ENTITY_PARAMETERS) != jsonObjectEnd) {
         if (jsonObject.at(INSIGHT_INTENT_ENTITY_PARAMETERS).is_object()) {
@@ -327,6 +340,12 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         insightIntentInfo.functionName,
         false,
         g_extraParseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FUNCTION_RETURN_TYPE,
+        insightIntentInfo.functionReturnType,
+        false,
+        g_extraParseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_FUNCTION_PARAMS,
@@ -347,6 +366,12 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         jsonObjectEnd,
         INSIGHT_INTENT_FORM_NAME,
         insightIntentInfo.formName,
+        false,
+        g_extraParseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ARKTS_MODE,
+        insightIntentInfo.arkTSMode,
         false,
         g_extraParseResult);
 
@@ -401,7 +426,8 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentEntityInfo &info)
         {INSIGHT_INTENT_ENTITY_DECORETOR_TYPE, info.decoratorType},
         {INSIGHT_INTENT_ENTITY_ID, info.entityId},
         {INSIGHT_INTENT_ENTITY_CATEGORY, info.entityCategory},
-        {INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, info.parentClassName}
+        {INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, info.parentClassName},
+        {INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES, info.supportedQueryProperties},
     };
 
     if (!info.parameters.empty()) {
@@ -444,9 +470,11 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
         {INSIGHT_INTENT_EXECUTE_MODE, info.executeMode},
         {INSIGHT_INTENT_FUNCTION_NAME, info.functionName},
+        {INSIGHT_INTENT_FUNCTION_RETURN_TYPE, info.functionReturnType},
         {INSIGHT_INTENT_FUNCTION_PARAMS, info.functionParams},
         {INSIGHT_INTENT_FORM_NAME, info.formName},
-        {INSIGHT_INTENT_ENTITES, info.entities}
+        {INSIGHT_INTENT_ENTITES, info.entities},
+        {INSIGHT_INTENT_ARKTS_MODE, info.arkTSMode}
     };
 
     if (!info.parameters.empty()) {
@@ -539,7 +567,7 @@ bool CheckProfileInfo(const ExtractInsightIntentProfileInfo &insightIntent)
     }
 
     for (const auto &entity: insightIntent.entities) {
-        if (entity.className.empty() || entity.entityId.empty()) {
+        if (entity.className.empty() || (entity.entityId.empty() && !entity.isQueryable())) {
             TAG_LOGE(AAFwkTag::INTENT, "entity exist empty param, intentName: %{public}s, "
                 "className: %{public}s, entityId: %{public}s",
                 insightIntent.intentName.c_str(), entity.className.c_str(), entity.entityId.c_str());
@@ -610,6 +638,8 @@ bool TransformToFunctionInfo(const ExtractInsightIntentProfileInfo &insightInten
 {
     info.functionName = insightIntent.functionName;
     TAG_LOGD(AAFwkTag::INTENT, "functionName: %{public}s", info.functionName.c_str());
+    info.functionReturnType = insightIntent.functionReturnType;
+    TAG_LOGD(AAFwkTag::INTENT, "functionReturnType: %{public}s", info.functionReturnType.c_str());
     info.functionParams.assign(insightIntent.functionParams.begin(), insightIntent.functionParams.end());
     for (size_t i = 0; i < info.functionParams.size(); i++) {
         TAG_LOGD(AAFwkTag::INTENT, "functionParams[%{public}zu]: %{public}s", i, info.functionParams[i].c_str());
@@ -691,15 +721,16 @@ bool ExtractInsightIntentProfile::ProfileInfoFormat(const ExtractInsightIntentPr
     info.example = insightIntent.example;
     info.result = insightIntent.result;
     info.keywords.assign(insightIntent.keywords.begin(), insightIntent.keywords.end());
+    info.arkTSMode = insightIntent.arkTSMode;
     info.entities = insightIntent.entities;
     TAG_LOGD(AAFwkTag::INTENT, "entities size: %{public}zu", info.entities.size());
     for (auto iter = info.entities.begin(); iter != info.entities.end(); iter++) {
         TAG_LOGD(AAFwkTag::INTENT, "entity decoratorFile: %{public}s, className: %{public}s, "
             "decoratorType: %{public}s, entityId: %{public}s, entityCategory: %{public}s, "
-            "parentClassName: %{public}s, parameters: %{public}s",
+            "parentClassName: %{public}s, parameters: %{public}s, supportedQueryProperties: %{public}zu",
             (*iter).decoratorFile.c_str(), (*iter).className.c_str(), (*iter).decoratorType.c_str(),
             (*iter).entityId.c_str(), (*iter).entityCategory.c_str(), (*iter).parentClassName.c_str(),
-            (*iter).parameters.c_str());
+            (*iter).parameters.c_str(), (*iter).supportedQueryProperties.size());
     }
 
     info.genericInfo.bundleName = insightIntent.bundleName;

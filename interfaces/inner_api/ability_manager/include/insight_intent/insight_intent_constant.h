@@ -68,6 +68,8 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENT_OUTPUT_PARAMS[] = "outputParams";
     constexpr char INSIGHT_INTENT_ENTITES[] = "cfgEntities";
     constexpr char INSIGHT_INTENT_DEVELOP_TYPE[] = "developType ";
+    constexpr char INSIGHT_INTENT_QUERY_ENTITY_FUNC[] = "onQueryEntity";
+    constexpr char INSIGHT_INTENT_ENTITY_SUPPORTED_QUERY_PROPERTIES[] = "supportedQueryProperties";
     enum class InsightIntentExecuteMode {
         UIABILITY_FOREGROUND,
         UIABILITY_BACKGROUND,
@@ -98,6 +100,7 @@ namespace OHOS::AbilityRuntime {
         DECOR_FUNC = 3,
         DECOR_FORM = 4,
         DECOR_ENTRY = 5,
+        DECOR_QUERY_ENTITY = 6,
     };
 
     enum InsightIntentReturnMode {

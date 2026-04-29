@@ -106,6 +106,12 @@ bool PermissionVerification::VerifyMissionPermission() const
     return !!(MyFlag::flag_);
 }
 
+bool PermissionVerification::VerifyContinuationNotifyPermission() const
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
+    return !!(MyFlag::flag_);
+}
+
 int PermissionVerification::VerifyAppStateObserverPermission() const
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
@@ -299,6 +305,12 @@ bool PermissionVerification::VerifyFusionAccessPermission() const
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s enter", __func__);
     return true;
+}
+
+int PermissionVerification::CheckCallModularObjectExtensionPermission(
+    const VerificationInfo &verificationInfo) const
+{
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

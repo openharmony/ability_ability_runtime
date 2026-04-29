@@ -29,6 +29,7 @@
 #include "configuration_convertor.h"
 #include "connection_state_manager.h"
 #include "common_event_manager.h"
+#include "dms_util.h"
 #include "error_msg_util.h"
 #include "foreground_app_connection_manager.h"
 #include "freeze_util.h"
@@ -128,7 +129,11 @@ constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
 const std::string JSON_KEY_ERR_MSG = "errMsg";
 const int32_t BY_CALL_HALF_TIMEOUT_MS = 2500;
 const int32_t BY_CALL_TIMEOUT_MS = 5000;
+constexpr int32_t NON_BY_CALL = 0;
+constexpr int32_t CALL_TO_BACKGROUND = 1;
+constexpr int32_t CALL_TO_FOREGROUND = 2;
 const bool BETA_VERSION = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
+
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -331,6 +336,7 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     loadParam.isPrelaunch = isPrelaunch_;
     loadParam.isPreloadStart = isPreloadStart_;
     loadParam.selfPid = selfPid;
+    loadParam.byCallStatus = GetByCallStatus();
     auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
         MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
@@ -1498,7 +1504,7 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
         return;
     }
     std::string srcDeviceId = data[0];
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", srcDeviceId.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcDeviceId = %{public}s", DmsUtil::AnonymizeDeviceId(srcDeviceId).c_str());
     int missionId = atoi(data[1].c_str());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "get missionId: %{public}d", missionId);
     resultWant.SetParam(DMS_SRC_NETWORK_ID, srcDeviceId);
@@ -2404,6 +2410,16 @@ void AbilityRecord::SetSceneFlag(uint32_t sceneFlag)
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
 }
 
+void AbilityRecord::SetIsFromScreenOffBackground(bool isFromScreenOffBackground)
+{
+    isFromScreenOffBackground_ = isFromScreenOffBackground;
+}
+
+bool AbilityRecord::IsFromScreenOffBackground() const
+{
+    return isFromScreenOffBackground_;
+}
+
 void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;
@@ -2465,6 +2481,17 @@ bool AbilityRecord::IsStartedByCall() const
 void AbilityRecord::SetStartedByCall(const bool isFlag)
 {
     isStartedByCall_ = isFlag;
+}
+
+int32_t AbilityRecord::GetByCallStatus() const
+{
+    if (!isStartedByCall_) {
+        return NON_BY_CALL;
+    }
+    if (want_.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+        return CALL_TO_FOREGROUND;
+    }
+    return CALL_TO_BACKGROUND;
 }
 
 bool AbilityRecord::IsStartToBackground() const
