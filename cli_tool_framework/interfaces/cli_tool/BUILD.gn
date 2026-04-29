@@ -51,7 +51,6 @@ ohos_shared_library("cli_tool_client") {
   public_configs = [ ":cli_tool_client_config" ]
 
   sources = [
-    "src/arg_mapping.cpp",
     "src/cli_mgr_load_callback.cpp",
     "src/cli_event_reply_manager.cpp",
     "src/cli_session_info.cpp",
