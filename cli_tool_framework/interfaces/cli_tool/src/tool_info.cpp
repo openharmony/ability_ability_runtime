@@ -46,7 +46,6 @@ bool ToolInfo::Marshalling(Parcel &parcel) const
            parcel.WriteBool(argMapping != nullptr) &&
            (argMapping == nullptr || argMapping->Marshalling(parcel)) &&
            parcel.WriteString(eventSchemas) &&
-           parcel.WriteInt32(timeout) &&
            parcel.WriteStringVector(eventTypes) &&
            parcel.WriteBool(hasSubCommand) &&
            parcel.WriteString(subcommandsJson);
@@ -82,7 +81,6 @@ ToolInfo *ToolInfo::Unmarshalling(Parcel &parcel)
     }
 
     if (!parcel.ReadString(tool->eventSchemas) ||
-        !parcel.ReadInt32(tool->timeout) ||
         !parcel.ReadStringVector(&tool->eventTypes) ||
         !parcel.ReadBool(tool->hasSubCommand) ||
         !parcel.ReadString(subcommandsJson)) {
@@ -292,19 +290,6 @@ bool ToolInfo::ParseFromJson(const nlohmann::json &json, ToolInfo &tool)
         }
         tool.eventSchemas = json["eventSchemas"].dump();
     }
-    if (json.contains("timeout")) {
-        if (!json["timeout"].is_number_integer()) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: timeout is not an integer");
-            return false;
-        }
-        int32_t timeoutValue = json["timeout"];
-        if (timeoutValue <= 0 || timeoutValue > 1800) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: timeout %{public}d is out of range (0, 1800]",
-                timeoutValue);
-            return false;
-        }
-        tool.timeout = timeoutValue;
-    }
     if (json.contains("eventTypes")) {
         if (!json["eventTypes"].is_array()) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventTypes is not an array");
@@ -385,7 +370,6 @@ nlohmann::json ToolInfo::ParseToJson() const
             j["eventSchemas"] = eventSchemas;
         }
     }
-    j["timeout"] = timeout;
     j["eventTypes"] = eventTypes;
     j["hasSubCommand"] = hasSubCommand;
     if (!subcommands.empty()) {
@@ -451,13 +435,6 @@ bool ToolInfo::Validate(const ToolInfo &tool)
     }
     if (!ArgMapping::Validate(*tool.argMapping)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: argMapping validation failed");
-        return false;
-    }
-
-    // timeout must be > 0 and <= 1800
-    if (tool.timeout <= 0 || tool.timeout > 1800) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: timeout %{public}d is out of range (0, 1800]",
-            tool.timeout);
         return false;
     }
 
