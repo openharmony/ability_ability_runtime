@@ -1104,6 +1104,7 @@ private:
         }
         if (CheckTypeForNapiValue(env, function, napi_undefined)) {
             TAG_LOGI(AAFwkTag::JSNAPI, "func is undefined.");
+            function = nullptr;
         }
         std::lock_guard<std::mutex> lock(g_defaultFreezeMtx);
         napi_value object = nullptr;
