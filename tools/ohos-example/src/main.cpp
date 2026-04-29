@@ -26,25 +26,41 @@ namespace {
 
 void EmitProgress(int percentage, const std::string& status)
 {
-    std::cout << "{\"event\": \"progress\", \"data\": {"
+    std::cout << "{\"type\": \"progress\", "
               << "\"percentage\": " << percentage << ", "
               << "\"status\": \"" << status << "\""
-              << "}}" << std::endl;
+              << "}" << std::endl;
 }
 
-void EmitResult(const std::string& result)
+void EmitRunResult(const std::string& result)
 {
-    std::cout << "{\"event\": \"result\", \"data\": {"
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"success\", "
+              << "\"data\": {"
               << "\"result\": \"" << result << "\""
-              << "}}" << std::endl;
+              << "}}"
+              << "}" << std::endl;
 }
 
-void EmitResultWithFields(const std::string& version, const std::string& buildTime)
+void EmitVersionResult(const std::string& version, const std::string& buildTime)
 {
-    std::cout << "{\"event\": \"result\", \"data\": {"
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"success\", "
+              << "\"data\": {"
               << "\"version\": \"" << version << "\", "
               << "\"build_time\": \"" << buildTime << "\""
-              << "}}" << std::endl;
+              << "}}"
+              << "}" << std::endl;
+}
+
+void EmitError(const std::string& errCode, const std::string& errMsg, const std::string& suggestion)
+{
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"failed\", "
+              << "\"errCode\": \"" << errCode << "\", "
+              << "\"errMsg\": \"" << errMsg << "\", "
+              << "\"suggestion\": \"" << suggestion << "\""
+              << "}" << std::endl;
 }
 
 int RunCommand(const std::vector<std::string>& args)
@@ -63,7 +79,7 @@ int RunCommand(const std::vector<std::string>& args)
     }
 
     EmitProgress(PROGRESS_MAX, "completed");
-    EmitResult(result);
+    EmitRunResult(result);
 
     return 0;
 }
@@ -74,7 +90,7 @@ int VersionCommand()
 
     const char* buildTime = "2026-04-04 00:00:00";
 
-    EmitResultWithFields(version, buildTime);
+    EmitVersionResult(version, buildTime);
 
     return 0;
 }

@@ -25,11 +25,24 @@ namespace {
 
 void EmitResult(const std::string& status, const std::string& message, int repeatCount)
 {
-    std::cout << "{\"event\": \"result\", \"data\": {"
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"" << status << "\", "
+              << "\"data\": {"
               << "\"status\": \"" << status << "\", "
               << "\"message\": \"" << message << "\", "
               << "\"repeat_count\": " << repeatCount
-              << "}}" << std::endl;
+              << "}}"
+              << "}" << std::endl;
+}
+
+void EmitError(const std::string& errCode, const std::string& errMsg, const std::string& suggestion)
+{
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"failed\", "
+              << "\"errCode\": \"" << errCode << "\", "
+              << "\"errMsg\": \"" << errMsg << "\", "
+              << "\"suggestion\": \"" << suggestion << "\""
+              << "}" << std::endl;
 }
 
 void ShowHelp()
