@@ -55,7 +55,6 @@ void CliToolDataManagerTest::SetUpTestCase()
         "requirePermissions": ["ohos.permission.INTERNET"],
         "inputSchema": {},
         "outputSchema": {},
-        "argMapping": {"type": "flag", "separator": " "},
         "eventSchemas": {"stdout": {"type": "string"}},
         "timeout": 30000,
         "eventTypes": ["stdout", "stderr"],
@@ -74,7 +73,6 @@ void CliToolDataManagerTest::SetUpTestCase()
         "requirePermissions": ["ohos.permission.READ_STORAGE"],
         "inputSchema": {},
         "outputSchema": {},
-        "argMapping": {"type": "positional", "order": "arg1,arg2"},
         "eventSchemas": {"stdout": {"type": "string"}},
         "timeout": 60000,
         "eventTypes": ["exit"],
@@ -84,7 +82,6 @@ void CliToolDataManagerTest::SetUpTestCase()
                 "description": "Subcommand 1",
                 "inputSchema": {},
                 "outputSchema": {},
-                "argMapping": {"type": "flag"}
             }
         }
     })";
@@ -153,9 +150,6 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseToJson_001, testing::ext::TestSiz
     tool.description = "Test description";
     tool.executablePath = "/bin/test";
     tool.requirePermissions = {"ohos.permission.INTERNET"};
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = ArgMappingType::FLAG;
-    tool.argMapping->separator = " ";
     tool.timeout = 30000;
     tool.hasSubCommand = false;
 
@@ -216,7 +210,6 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_001, testing::ext::TestS
         "requirePermissions": ["ohos.permission.INTERNET"],
         "inputSchema": {"type": "object"},
         "outputSchema": {"type": "string"},
-        "argMapping": {"type": "flag", "separator": " "},
         "eventSchemas": {"stdout": {"type": "string"}},
         "timeout": 30000,
         "eventTypes": ["stdout"],
@@ -234,8 +227,6 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_001, testing::ext::TestS
     EXPECT_EQ(tool.executablePath, "/bin/jsontest");
     EXPECT_EQ(tool.timeout, 30000);
     EXPECT_EQ(tool.hasSubCommand, false);
-    EXPECT_TRUE(tool.argMapping != nullptr);
-    EXPECT_EQ(tool.argMapping->type, ArgMappingType::FLAG);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ToolInfo_ParseFromJson_001 end");
 }
@@ -259,12 +250,12 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_002, testing::ext::TestS
             "build": {
                 "description": "Build subcommand",
                 "inputSchema": {"type": "object"},
-                "outputSchema": {"type": "string"},
-                "argMapping": {"type": "flag"}
+                "outputSchema": {"type": "string"}
             },
             "run": {
                 "description": "Run subcommand",
-                "argMapping": {"type": "positional", "order": "arg1"}
+                "inputSchema": {"type": "object"},
+                "outputSchema": {"type": "string"}
             }
         }
     })"_json;
@@ -320,7 +311,6 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_00
         "requirePermissions": ["ohos.permission.CAMERA"],
         "inputSchema": {"type": "object", "properties": {"input": {"type": "string"}}},
         "outputSchema": {"type": "array"},
-        "argMapping": {"type": "positional", "order": "arg1,arg2"},
         "eventSchemas": {"exit": {"type": "number"}},
         "timeout": 60000,
         "eventTypes": ["stdout", "stderr", "exit"],
@@ -330,7 +320,6 @@ HWTEST_F(CliToolDataManagerTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_00
                 "description": "Sub 1",
                 "inputSchema": {"type": "object"},
                 "outputSchema": {"type": "string"},
-                "argMapping": {"type": "flag"}
             }
         }
     })"_json;
@@ -372,7 +361,6 @@ HWTEST_F(CliToolDataManagerTest, CliToolDataManager_SyncToolNames_001, testing::
         "requirePermissions": [],
         "inputSchema": {},
         "outputSchema": {},
-        "argMapping": {"type": "flag"},
         "eventSchemas": {},
         "timeout": 30000,
         "eventTypes": [],

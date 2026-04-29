@@ -42,7 +42,7 @@ void ToolInfoTest::TearDown() {}
 
 /**
  * @tc.name: ToolInfo_Marshalling_0100
- * @tc.desc: Test ToolInfo Marshalling with argMapping
+ * @tc.desc: Test ToolInfo Marshalling
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0100, TestSize.Level1)
@@ -57,8 +57,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0100, TestSize.Level1)
     tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = ArgMappingType::FLAG;
     tool.eventSchemas = "{}";
     tool.eventTypes = {"stdout"};
     tool.hasSubCommand = false;
@@ -73,7 +71,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0100, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Marshalling_0200
- * @tc.desc: Test ToolInfo Marshalling without argMapping
+ * @tc.desc: Test ToolInfo Marshalling with subcommands
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0200, TestSize.Level1)
@@ -83,12 +81,11 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0200, TestSize.Level1)
     ToolInfo tool;
     tool.name = "test_tool_no_arg";
     tool.version = "2.0.0";
-    tool.description = "Tool without argMapping";
+    tool.description = "Tool with subcommands";
     tool.executablePath = "/bin/test2";
     tool.requirePermissions = {};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = nullptr;
     tool.eventSchemas = "{}";
     tool.eventTypes = {};
     tool.hasSubCommand = true;
@@ -106,7 +103,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0200, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Unmarshalling_0100
- * @tc.desc: Test ToolInfo Unmarshalling with argMapping
+ * @tc.desc: Test ToolInfo Unmarshalling
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
@@ -121,11 +118,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
     original.requirePermissions = {"ohos.permission.CAMERA", "ohos.permission.MICROPHONE"};
     original.inputSchema = R"({"type": "object", "properties": {"input": {"type": "string"}}})";
     original.outputSchema = R"({"type": "string"})";
-    original.argMapping = std::make_shared<ArgMapping>();
-    original.argMapping->type = ArgMappingType::POSITIONAL;
-    original.argMapping->separator = "";
-    original.argMapping->order = "arg1,arg2,arg3";
-    original.argMapping->templates = "{}";
     original.eventSchemas = "{}";
     original.eventTypes = {"stdout", "stderr", "exit"};
     original.hasSubCommand = true;
@@ -143,8 +135,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
     EXPECT_EQ(result->name, "original_tool");
     EXPECT_EQ(result->version, "3.0.0");
     EXPECT_EQ(result->requirePermissions.size(), 2u);
-    EXPECT_TRUE(result->argMapping != nullptr);
-    EXPECT_EQ(result->argMapping->type, ArgMappingType::POSITIONAL);
     EXPECT_TRUE(result->hasSubCommand);
     EXPECT_EQ(result->subcommands.size(), 1u);
 
@@ -155,7 +145,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0100, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Unmarshalling_0200
- * @tc.desc: Test ToolInfo Unmarshalling without argMapping
+ * @tc.desc: Test ToolInfo Unmarshalling with simple data
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0200, TestSize.Level1)
@@ -170,7 +160,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0200, TestSize.Level1)
     original.requirePermissions = {};
     original.inputSchema = "{}";
     original.outputSchema = "{}";
-    original.argMapping = nullptr;
     original.eventSchemas = "{}";
     original.eventTypes = {};
     original.hasSubCommand = false;
@@ -183,7 +172,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0200, TestSize.Level1)
 
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->name, "simple_tool");
-    EXPECT_TRUE(result->argMapping == nullptr);
     EXPECT_FALSE(result->hasSubCommand);
 
     delete result;
@@ -229,11 +217,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0400, TestSize.Level1)
     subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object", "properties": {"arg": {"type": "string"}}})";
     subCmd.outputSchema = R"({"type": "string"})";
-    subCmd.argMapping = std::make_shared<ArgMapping>();
-    subCmd.argMapping->type = ArgMappingType::MIXED;
-    subCmd.argMapping->separator = ",";
-    subCmd.argMapping->order = "arg1,arg2";
-    subCmd.argMapping->templates = R"({"arg1": "--input=${value}"})";
     subCmd.eventTypes = {"stdout", "stderr"};
     subCmd.eventSchemas = R"({"stdout": {"type": "string"}})";
 
@@ -257,11 +240,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0400, TestSize.Level1)
     EXPECT_EQ(resultSubCmd.requirePermissions[0], "ohos.permission.INTERNET");
     EXPECT_EQ(resultSubCmd.inputSchema, R"({"type": "object", "properties": {"arg": {"type": "string"}}})");
     EXPECT_EQ(resultSubCmd.outputSchema, R"({"type": "string"})");
-    ASSERT_NE(resultSubCmd.argMapping, nullptr);
-    EXPECT_EQ(resultSubCmd.argMapping->type, ArgMappingType::MIXED);
-    EXPECT_EQ(resultSubCmd.argMapping->separator, ",");
-    EXPECT_EQ(resultSubCmd.argMapping->order, "arg1,arg2");
-    EXPECT_EQ(resultSubCmd.argMapping->templates, R"({"arg1": "--input=${value}"})");
     EXPECT_EQ(resultSubCmd.eventTypes.size(), 2u);
     EXPECT_EQ(resultSubCmd.eventSchemas, R"({"stdout": {"type": "string"}})");
 
@@ -385,8 +363,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0100, TestSize.Level1)
     tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = R"({"type": "object"})";
     tool.outputSchema = R"({"type": "string"})";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = ArgMappingType::FLAG;
     tool.eventSchemas = R"({"stdout": {"type": "string"}})";
     tool.eventTypes = {"stdout", "stderr"};
     tool.hasSubCommand = false;
@@ -397,14 +373,13 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0100, TestSize.Level1)
     EXPECT_EQ(json["version"], "1.0.0");
     EXPECT_EQ(json["description"], "JSON test tool");
     EXPECT_EQ(json["executablePath"], "/bin/json");
-    EXPECT_TRUE(json.contains("argMapping"));
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0100 end";
 }
 
 /**
  * @tc.name: ToolInfo_ParseToJson_0200
- * @tc.desc: Test ToolInfo ParseToJson without argMapping
+ * @tc.desc: Test ToolInfo ParseToJson with minimal data
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0200, TestSize.Level1)
@@ -413,12 +388,10 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseToJson_0200, TestSize.Level1)
 
     ToolInfo tool;
     tool.name = "no_arg_tool";
-    tool.argMapping = nullptr;
 
     nlohmann::json json = tool.ParseToJson();
 
     EXPECT_EQ(json["name"], "no_arg_tool");
-    EXPECT_FALSE(json.contains("argMapping"));
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseToJson_0200 end";
 }
@@ -469,7 +442,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0100, TestSize.Level1)
         "requirePermissions": ["ohos.permission.CAMERA"],
         "inputSchema": {"type": "object"},
         "outputSchema": {"type": "array"},
-        "argMapping": {"type": "positional", "order": "arg1,arg2"},
         "eventSchemas": {"exit": {"type": "number"}},
         "eventTypes": ["stdout", "exit"],
         "hasSubCommand": false
@@ -485,8 +457,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0100, TestSize.Level1)
     EXPECT_EQ(tool.executablePath, "/bin/parsed");
     EXPECT_EQ(tool.requirePermissions.size(), 1u);
     EXPECT_FALSE(tool.hasSubCommand);
-    ASSERT_NE(tool.argMapping, nullptr);
-    EXPECT_EQ(tool.argMapping->type, ArgMappingType::POSITIONAL);
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_0100 end";
 }
@@ -510,12 +480,12 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0200, TestSize.Level1)
             "build": {
                 "description": "Build the project",
                 "inputSchema": {"type": "object"},
-                "outputSchema": {"type": "string"},
-                "argMapping": {"type": "flag"}
+                "outputSchema": {"type": "string"}
             },
             "run": {
                 "description": "Run the project",
-                "argMapping": {"type": "positional", "order": "arg1"}
+                "inputSchema": {"type": "object"},
+                "outputSchema": {"type": "string"}
             }
         }
     })"_json;
@@ -571,7 +541,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSi
         "requirePermissions": ["ohos.permission.INTERNET", "ohos.permission.CAMERA"],
         "inputSchema": {"type": "object", "properties": {"input": {"type": "string"}}},
         "outputSchema": {"type": "array"},
-        "argMapping": {"type": "mixed", "separator": ",", "order": "a,b"},
         "eventSchemas": {"stdout": {"type": "string"}},
         "eventTypes": ["stdout", "stderr"],
         "hasSubCommand": true,
@@ -579,8 +548,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ParseToJson_RoundTrip_0100, TestSi
             "sub1": {
                 "description": "Sub 1",
                 "inputSchema": {"type": "object"},
-                "outputSchema": {"type": "string"},
-                "argMapping": {"type": "flag"}
+                "outputSchema": {"type": "string"}
             }
         }
     })"_json;
@@ -1276,7 +1244,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventTypes": ["stdout", "stdout"]
     })"_json;
 
@@ -1304,7 +1271,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventTypes": ["stdout", "stderr", "exit"]
     })"_json;
 
@@ -1331,7 +1297,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventTypes": []
     })"_json;
 
@@ -1358,7 +1323,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventTypes_0400, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventTypes": ["", "stdout", ""]
     })"_json;
 
@@ -1480,84 +1444,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0400, TestSize.
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0400 end";
 }
 
-// ==================== ParseFromJson ArgMapping Validation Tests ====================
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0100
- * @tc.desc: Test ToolInfo ParseFromJson without argMapping (should fail)
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0100 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test"
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_FALSE(result);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0100 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0200
- * @tc.desc: Test ToolInfo ParseFromJson with argMapping not object (should fail)
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0200 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": "not an object"
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_FALSE(result);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0200 end";
-}
-
-/**
- * @tc.name: ToolInfo_ParseFromJson_ArgMapping_0300
- * @tc.desc: Test ToolInfo ParseFromJson with valid argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_ArgMapping_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0300 start";
-
-    nlohmann::json json = R"({
-        "name": "ohos-test",
-        "version": "1.0.0",
-        "description": "Test tool",
-        "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
-    })"_json;
-
-    ToolInfo tool;
-    bool result = ToolInfo::ParseFromJson(json, tool);
-
-    EXPECT_TRUE(result);
-    ASSERT_NE(tool.argMapping, nullptr);
-    EXPECT_EQ(tool.argMapping->type, ArgMappingType::FLAG);
-
-    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_ArgMapping_0300 end";
-}
-
 // ==================== ParseFromJson EventSchemas Validation Tests ====================
 
 /**
@@ -1574,7 +1460,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0100, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -1600,7 +1485,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0200, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventSchemas": {"stdout": {"type": "string"}}
     })"_json;
 
@@ -1627,7 +1511,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0300, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventSchemas": "not an object"
     })"_json;
 
@@ -1653,7 +1536,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0400, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "eventSchemas": ["a", "b"]
     })"_json;
 
@@ -1681,7 +1563,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "inputSchema": "not an object"
     })"_json;
 
@@ -1707,7 +1588,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "inputSchema": ["a", "b"]
     })"_json;
 
@@ -1733,7 +1613,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "inputSchema": 123
     })"_json;
 
@@ -1759,7 +1638,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0400, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "inputSchema": {"type": "object"}
     })"_json;
 
@@ -1786,7 +1664,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0500, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -1812,7 +1689,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0600, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "outputSchema": "not an object"
     })"_json;
 
@@ -1838,7 +1714,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0700, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "outputSchema": ["a", "b"]
     })"_json;
 
@@ -1864,7 +1739,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0800, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "outputSchema": {"type": "string"}
     })"_json;
 
@@ -1891,7 +1765,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0900, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -1917,7 +1790,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_1000, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "inputSchema": {"type": "object"},
         "outputSchema": {"type": "array"}
     })"_json;
@@ -2276,7 +2148,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequiredFields_0900, TestSize.Leve
         "version": "1.0.0",
         "description": "A valid tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -2309,8 +2180,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0100, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = R"({"type": "object"})";
     tool.outputSchema = R"({"type": "string"})";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = ArgMappingType::FLAG;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2333,7 +2202,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0200, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2356,7 +2224,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0300, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2379,7 +2246,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0400, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2402,7 +2268,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0500, TestSize.Level1)
     tool.executablePath = "bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2426,7 +2291,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0600, TestSize.Level1)
     tool.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate permissions are now allowed
 
@@ -2450,7 +2314,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0700, TestSize.Level1)
     tool.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.CAMERA"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2473,7 +2336,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0800, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2496,7 +2358,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0900, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "not valid json";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
@@ -2519,7 +2380,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1000, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
 
@@ -2542,58 +2402,10 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1100, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{invalid}";
-    tool.argMapping = std::make_shared<ArgMapping>();
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_1100 end";
-}
-
-/**
- * @tc.name: ToolInfo_Validate_1200
- * @tc.desc: Test ToolInfo::Validate with null argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_Validate_1200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1200 start";
-
-    ToolInfo tool;
-    tool.name = "ohos-test";
-    tool.version = "1.0.0";
-    tool.description = "Test";
-    tool.executablePath = "/bin/test";
-    tool.inputSchema = "{}";
-    tool.outputSchema = "{}";
-    tool.argMapping = nullptr;
-
-    EXPECT_FALSE(ToolInfo::Validate(tool));
-
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1200 end";
-}
-
-/**
- * @tc.name: ToolInfo_Validate_1300
- * @tc.desc: Test ToolInfo::Validate with invalid argMapping
- * @tc.type: FUNC
- */
-HWTEST_F(ToolInfoTest, ToolInfo_Validate_1300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1300 start";
-
-    ToolInfo tool;
-    tool.name = "ohos-test";
-    tool.version = "1.0.0";
-    tool.description = "Test";
-    tool.executablePath = "/bin/test";
-    tool.inputSchema = "{}";
-    tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = static_cast<ArgMappingType>(-1);
-
-    EXPECT_FALSE(ToolInfo::Validate(tool));
-
-    GTEST_LOG_(INFO) << "ToolInfo_Validate_1300 end";
 }
 
 /**
@@ -2612,7 +2424,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1700, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.eventTypes = {"stdout", "stdout"};
 
     EXPECT_TRUE(ToolInfo::Validate(tool));  // duplicate eventTypes are now allowed
@@ -2636,7 +2447,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1800, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.eventTypes = {"stdout", "stderr", "exit"};
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
@@ -2660,7 +2470,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1900, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.eventSchemas = "invalid json";
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
@@ -2684,7 +2493,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2000, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.eventSchemas = R"({"stdout": {"type": "string"}})";
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
@@ -2708,7 +2516,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2100, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.hasSubCommand = true;
     tool.subcommands = {};
 
@@ -2733,14 +2540,12 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2200, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.hasSubCommand = true;
 
     SubCommandInfo subCmd;
     subCmd.description = "Test subcommand";
     subCmd.inputSchema = "{}";
     subCmd.outputSchema = "{}";
-    subCmd.argMapping = std::make_shared<ArgMapping>();
     tool.subcommands["sub1"] = subCmd;
 
     EXPECT_TRUE(ToolInfo::Validate(tool));
@@ -2764,7 +2569,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2300, TestSize.Level1)
     tool.executablePath = "/bin/test";
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
-    tool.argMapping = std::make_shared<ArgMapping>();
     tool.hasSubCommand = false;
     tool.subcommands = {};
 
@@ -2789,7 +2593,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0100, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "hasSubCommand": "true"
     })"_json;
 
@@ -2815,12 +2618,12 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0200, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "hasSubCommand": false,
         "subcommands": {
             "sub1": {
                 "description": "Subcommand 1",
-                "argMapping": {"type": "flag"}
+                "inputSchema": {},
+                "outputSchema": {}
             }
         }
     })"_json;
@@ -2849,7 +2652,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0300, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "hasSubCommand": true
     })"_json;
 
@@ -2875,7 +2677,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0400, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "hasSubCommand": true,
         "subcommands": {}
     })"_json;
@@ -2902,12 +2703,12 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0500, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"},
         "hasSubCommand": true,
         "subcommands": {
             "build": {
                 "description": "Build subcommand",
-                "argMapping": {"type": "flag"}
+                "inputSchema": {},
+                "outputSchema": {}
             }
         }
     })"_json;
@@ -2937,7 +2738,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0600, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "argMapping": {"type": "flag"}
     })"_json;
 
     ToolInfo tool;
@@ -2967,9 +2767,6 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2400, TestSize.Level1)
     tool.requirePermissions = {"ohos.permission.INTERNET", "ohos.permission.CAMERA"};
     tool.inputSchema = R"({"type": "object", "properties": {"input": {"type": "string"}}})";
     tool.outputSchema = R"({"type": "array", "items": {"type": "string"}})";
-    tool.argMapping = std::make_shared<ArgMapping>();
-    tool.argMapping->type = ArgMappingType::POSITIONAL;
-    tool.argMapping->order = "arg1,arg2";
     tool.eventTypes = {"stdout", "stderr", "exit"};
     tool.eventSchemas = R"({"stdout": {"type": "string"}, "exit": {"type": "number"}})";
     tool.hasSubCommand = false;
