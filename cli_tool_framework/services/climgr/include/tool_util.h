@@ -48,7 +48,7 @@ public:
     static std::string GenerateCliSessionId(const std::string &name, std::shared_ptr<SessionRecord> record);
 
     static bool GenerateSandboxConfig(const std::string &challenge, AccessToken::AccessTokenID tokenId,
-        std::string &sandboxConfig);
+        std::string &sandboxConfig, std::string &bundleName);
 
     static void TransferToCmdParam(const ToolInfo &toolInfo, const AAFwk::WantParams &args, std::string &cmdLine);
 
@@ -86,14 +86,9 @@ private:
         const AAFwk::WantParams &args, std::string &cmdLine);
     static void ApplyJsonStringMapping(const std::string &templates, const AAFwk::WantParams &args,
         std::string &cmdLine);
-    static void ApplyMixedMapping(const std::string &templates, const AAFwk::WantParams &args, std::string &cmdLine);
     static std::string FormatTemplate(const std::string &tmpl, const std::string &value);
 
     // Helper methods for mode processing (extracted to reduce nesting depth)
-    static void ProcessPositionalMode(const sptr<AAFwk::IInterface> &value, const nlohmann::json &paramConfig,
-        std::vector<std::pair<int, std::string>> &positionalParams);
-    static void ProcessFlattenedMode(const std::string &key, const sptr<AAFwk::IInterface> &value,
-        const nlohmann::json &paramConfig, const AAFwk::WantParams &args, std::string &cmdLine);
     static void ProcessArrayExpansion(const sptr<AAFwk::IInterface> &value, const std::string &tmpl,
         std::string &cmdLine);
     static void ProcessJsonStringTemplate(const std::string &key, const sptr<AAFwk::IInterface> &value,
@@ -124,10 +119,6 @@ private:
 
     // WantParams to JSON conversion helper for nested objects
     static std::string WantParamsToJson(const AAFwk::WantParams &wantParams);
-
-    static void ApplyFlattenedModeToSingleParam(const std::string &key, const sptr<AAFwk::IInterface> &value,
-        const std::string &separator, const nlohmann::json &templateValue, const AAFwk::WantParams &args,
-        std::string &cmdLine);
 
     // Core parameter processing logic (extracted for reuse)
     static void ApplyFlagModeLogic(const sptr<AAFwk::IInterface> &value,
