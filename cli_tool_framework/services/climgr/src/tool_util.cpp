@@ -40,6 +40,7 @@ namespace OHOS {
 namespace CliTool {
 namespace {
 constexpr int32_t MILLISECOND_COEFFICIENT = 1000;
+constexpr int64_t MAX_TIMEOUT = 30 * 60; // 30 m
 }
 int32_t ToolUtil::ValidateProperties(const ToolInfo &toolInfo, ExecToolParam &param,
     AccessToken::AccessTokenID tokenId)
@@ -70,9 +71,9 @@ int32_t ToolUtil::ValidateProperties(const ToolInfo &toolInfo, ExecToolParam &pa
     }
 
     if (param.options.timeout == 0) {
-        param.options.timeout = toolInfo.timeout;
-        TAG_LOGI(AAFwkTag::CLI_TOOL, "use toolInfo timeout");
-    } else if (param.options.timeout > toolInfo.timeout) {
+        param.options.timeout = MAX_TIMEOUT;
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "use max timeout");
+    } else if (param.options.timeout > MAX_TIMEOUT) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Excessively large timeout");
         return ERR_INVALID_PARAM;
     }
@@ -147,7 +148,7 @@ std::string ToolUtil::GenerateCliSessionId(const std::string &name, std::shared_
 }
 
 bool ToolUtil::GenerateSandboxConfig(const std::string &challenge, AccessToken::AccessTokenID tokenId,
-    std::string &sandboxConfig)
+    std::string &sandboxConfig, std::string &bundleName)
 {
     AppExecFwk::BundleInfo bundleInfo;
     if (!ToolUtil::GetBundleInfoByTokenId(tokenId, bundleInfo)) {
@@ -162,6 +163,7 @@ bool ToolUtil::GenerateSandboxConfig(const std::string &challenge, AccessToken::
     config["gid"] = bundleInfo.gid;
     config["appId"] = bundleInfo.appId;
     sandboxConfig = config.dump();
+    bundleName = bundleInfo.name;
     TAG_LOGE(AAFwkTag::CLI_TOOL, "sandboxConfig: %{public}s", sandboxConfig.c_str());
     return true;
 }
@@ -225,9 +227,6 @@ void ToolUtil::TransferToCmdParam(const ToolInfo &toolInfo, const AAFwk::WantPar
             break;
         case ArgMappingType::JSONSTRING:
             ApplyJsonStringMapping(toolInfo.argMapping->templates, args, cmdLine);
-            break;
-        case ArgMappingType::MIXED:
-            ApplyMixedMapping(toolInfo.argMapping->templates, args, cmdLine);
             break;
         default:
             TAG_LOGW(AAFwkTag::CLI_TOOL, "Unknown argMapping type");
@@ -327,68 +326,6 @@ void ToolUtil::ApplyJsonStringMapping(const std::string &templates, const AAFwk:
             ProcessJsonStringTemplate(key, value, templateValue, cmdLine);
         } else if (templateValue.is_object()) {
             ProcessBooleanTemplate(key, value, templateValue, cmdLine);
-        }
-    }
-}
-
-void ToolUtil::ApplyMixedMapping(const std::string &templates, const AAFwk::WantParams &args, std::string &cmdLine)
-{
-    nlohmann::json templatesJson = nlohmann::json::parse(templates, nullptr, false);
-    if (templatesJson.is_discarded() || !templatesJson.is_object()) {
-        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to parse templates JSON");
-        return;
-    }
-
-    // First pass: collect positional parameters to ensure correct order
-    std::vector<std::pair<int, std::string>> positionalParams; // (order, value)
-
-    for (const auto &[key, value] : args.GetParams()) {
-        // Skip if key not in templates
-        if (!templatesJson.contains(key)) {
-            continue;
-        }
-
-        auto paramConfig = templatesJson[key];
-        // Skip if invalid config
-        if (!paramConfig.is_object() || !paramConfig.contains("mode")) {
-            continue;
-        }
-
-        std::string mode = paramConfig["mode"].get<std::string>();
-        // FLAG mode: process immediately
-        if (mode == "flag" && paramConfig.contains("template")) {
-            ApplyFlagModeLogic(value, paramConfig["template"], cmdLine);
-            continue;
-        }
-
-        // POSITIONAL mode: collect for later processing
-        if (mode == "positional") {
-            ProcessPositionalMode(value, paramConfig, positionalParams);
-            continue;
-        }
-
-        // FLATTENED mode: process immediately
-        if (mode == "flattened") {
-            ProcessFlattenedMode(key, value, paramConfig, args, cmdLine);
-            continue;
-        }
-
-        // JSON-STRING mode: process immediately
-        if (mode == "json-string" && paramConfig.contains("template")) {
-            ProcessJsonStringTemplate(key, value, paramConfig["template"], cmdLine);
-            continue;
-        }
-    }
-
-    // Second pass: append positional parameters in correct order
-    if (!positionalParams.empty()) {
-        // Sort by order value
-        std::sort(positionalParams.begin(), positionalParams.end(),
-            [](const auto &a, const auto &b) { return a.first < b.first; });
-
-        // Append in sorted order
-        for (const auto &param : positionalParams) {
-            cmdLine += " " + param.second;
         }
     }
 }
@@ -703,51 +640,6 @@ bool ToolUtil::GetParamArrayValue(const sptr<AAFwk::IInterface> &value, std::vec
     return foundAny;
 }
 
-void ToolUtil::ApplyFlattenedModeToSingleParam(const std::string &key, const sptr<AAFwk::IInterface> &value,
-    const std::string &separator, const nlohmann::json &templateValue,
-    const AAFwk::WantParams &args, std::string &cmdLine)
-{
-    // This method applies FLATTENED mode logic for a single parameter
-    // It uses nested path query to get the value from the nested structure
-
-    // In flattened mode, templateValue should be a string template
-    if (!templateValue.is_string()) {
-        TAG_LOGW(AAFwkTag::CLI_TOOL, "Flattened mode requires string template for key '%{public}s'", key.c_str());
-        return;
-    }
-
-    // Inline logic to reduce call depth
-    std::string tmpl = templateValue.get<std::string>();
-    std::string sep = separator.empty() ? "." : separator;
-    sptr<AAFwk::IInterface> nestedValue = QueryNestedValue(args, key, sep);
-
-    if (nestedValue == nullptr) {
-        TAG_LOGW(AAFwkTag::CLI_TOOL, "Could not find nested param for key '%{public}s'", key.c_str());
-        return;
-    }
-
-    // Convert the found value to string
-    std::string strValue = GetParamStringValue(nestedValue);
-
-    // Handle boolean conditions
-    bool boolValue = false;
-    if (GetParamBoolValue(nestedValue, boolValue)) {
-        if (boolValue && tmpl.find("{value}") != std::string::npos) {
-            // Boolean value with {value} placeholder
-            std::string formatted = FormatTemplate(tmpl, (boolValue ? "true" : "false"));
-            cmdLine += " " + formatted;
-        } else {
-            // Boolean without placeholder, skip
-            TAG_LOGW(AAFwkTag::CLI_TOOL, "Boolean value for key '%{public}s' but no boolean template",
-                key.c_str());
-        }
-    } else if (!strValue.empty()) {
-        // Regular string value
-        std::string formatted = FormatTemplate(tmpl, strValue);
-        cmdLine += " " + formatted;
-    }
-}
-
 // ============================================================================
 // Helper methods for code reuse
 // ============================================================================
@@ -888,47 +780,6 @@ void ToolUtil::ApplyFlagModeLogic(const sptr<AAFwk::IInterface> &value,
 
     std::string tmpl = templateValue.get<std::string>();
     ProcessArrayExpansion(value, tmpl, cmdLine);
-}
-
-// ============================================================================
-// Helper methods for mode processing (extracted to reduce nesting depth)
-// ============================================================================
-
-void ToolUtil::ProcessPositionalMode(const sptr<AAFwk::IInterface> &value, const nlohmann::json &paramConfig,
-    std::vector<std::pair<int, std::string>> &positionalParams)
-{
-    // POSITIONAL mode: handle order and order arrays
-    if (!paramConfig.contains("order")) {
-        return;
-    }
-
-    auto orderValue = paramConfig["order"];
-    if (!orderValue.is_number_integer()) {
-        return;
-    }
-
-    // Single order value
-    std::string strValue = GetParamStringValue(value);
-    if (!strValue.empty()) {
-        positionalParams.push_back({orderValue.get<int32_t>(), strValue});
-    }
-}
-
-void ToolUtil::ProcessFlattenedMode(const std::string &key, const sptr<AAFwk::IInterface> &value,
-    const nlohmann::json &paramConfig, const AAFwk::WantParams &args, std::string &cmdLine)
-{
-    // FLATTENED mode: handle both single template and multiple templates
-    std::string separator = ".";
-    if (paramConfig.contains("separator")) {
-        separator = paramConfig["separator"].get<std::string>();
-    }
-
-    if (!paramConfig.contains("template")) {
-        return;
-    }
-
-    // Single template
-    ApplyFlattenedModeToSingleParam(key, value, separator, paramConfig["template"], args, cmdLine);
 }
 
 void ToolUtil::ProcessJsonStringTemplate(const std::string &key, const sptr<AAFwk::IInterface> &value,

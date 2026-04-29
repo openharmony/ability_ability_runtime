@@ -18,9 +18,11 @@
 #include <sys/wait.h>
 
 #include "accesstoken_kit.h"
+#include "app_mgr_client.h"
 #include "ccm_util.h"
 #include "cli_error_code.h"
 #include "event_dispatcher.h"
+#include "cli_tool_app_state_observer.h"
 #include "hilog_tag_wrapper.h"
 #include "iexec_tool_callback.h"
 #include "if_system_ability_manager.h"
@@ -250,7 +252,7 @@ void CliToolManagerService::OnStop()
     // Collect active PIDs before clearing sessions
     std::vector<pid_t> activePids;
     {
-        std::lock_guard<std::mutex> lock(sessionsMutex_);
+        std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
         for (const auto &[sessionId, record] : sessionRecords_) {
             if (record != nullptr && record->processId > 0) {
                 activePids.push_back(record->processId);
@@ -275,13 +277,13 @@ void CliToolManagerService::OnStop()
 
 void CliToolManagerService::AddSessionRecord(const std::shared_ptr<SessionRecord> &record)
 {
-    std::lock_guard<std::mutex> lock(sessionsMutex_);
+    std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
     sessionRecords_[record->sessionId] = record;
 }
 
 std::shared_ptr<SessionRecord> CliToolManagerService::GetSessionRecord(const std::string &sessionId)
 {
-    std::lock_guard<std::mutex> lock(sessionsMutex_);
+    std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
     auto it = sessionRecords_.find(sessionId);
     if (it == sessionRecords_.end()) {
         TAG_LOGW(AAFwkTag::CLI_TOOL, "GetSessionRecord failed: sessionId=%{public}s not found", sessionId.c_str());
@@ -292,7 +294,7 @@ std::shared_ptr<SessionRecord> CliToolManagerService::GetSessionRecord(const std
 
 void CliToolManagerService::RemoveSessionRecord(const std::string &sessionId)
 {
-    std::lock_guard<std::mutex> lock(sessionsMutex_);
+    std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
     sessionRecords_.erase(sessionId);
 }
 
@@ -388,11 +390,8 @@ int32_t CliToolManagerService::RegisterTool(const ToolInfo &tool)
     return CliToolDataManager::GetInstance().RegisterTool(tool);
 }
 
-int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::string &eventId)
+int32_t CliToolManagerService::ValidateExecToolPermissions()
 {
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: toolName=%{public}s, subcommand=%{public}s",
-        param.toolName.c_str(), param.subcommand.c_str());
-
     auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (!AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Not system app");
@@ -403,14 +402,22 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
     if (!PermissionUtil::VerifyAccessToken(tokenId, PERMISSION_EXEC_CLI_TOOL)) {
         return ERR_PERMISSION_DENIED;
     }
+    return ERR_OK;
+}
 
+int32_t CliToolManagerService::ValidateSessionLimit()
+{
     auto cliQuantity = CcmUtil::GetInstance().GetCliConcurrencyLimit();
     if (activeSessionCount_.load() >= cliQuantity) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Session limit exceeded: %{public}d", cliQuantity);
         return ERR_SESSION_LIMIT_EXCEEDED;
     }
+    return ERR_OK;
+}
 
-    ToolInfo toolInfo;
+int32_t CliToolManagerService::ValidateAndPrepareTool(const ExecToolParam &param, uint32_t tokenId,
+    ToolInfo &toolInfo, std::string &sandboxConfig, std::string &bundleName)
+{
     if (GetToolInfoByName(param.toolName, toolInfo) != ERR_OK) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Tool not found");
         return ERR_TOOL_NOT_EXIST;
@@ -422,13 +429,16 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
         return checkPramRet;
     }
 
-    std::string sandboxConfig;
-    if (!ToolUtil::GenerateSandboxConfig(param.challenge, tokenId, sandboxConfig)) {
+    if (!ToolUtil::GenerateSandboxConfig(param.challenge, tokenId, sandboxConfig, bundleName)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "caller is not hap");
         return ERR_NOT_HAP;
     }
+    return ERR_OK;
+}
 
-    // Create and initialize session record
+int32_t CliToolManagerService::SetupAndStartSession(const ExecToolParam &param, const std::string &eventId,
+    const ToolInfo &toolInfo, const std::string &sandboxConfig, const std::string &bundleName)
+{
     std::shared_ptr<SessionRecord> record = CreateSessionRecord(param);
     if (record == nullptr) {
         return ERR_NO_INIT;
@@ -449,18 +459,51 @@ int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::s
         return ERR_NO_INIT;
     }
 
-    // Background session, immediately notify session info
-    if (param.options.background) {
-        CliSessionInfo session;
-        record->BuildSessionInfo(session);
-        EventDispatcher::GetInstance().DispatchExecToolReplyEvent(record->callerPid, eventId, ERR_OK, session);
+    if (!bundleName.empty()) {
+        RegisterAppStateObserver(bundleName, record->callerPid);
     }
 
-    // Frontground session, after waiting for the yieldMs timeout, notify the session info
+    if (param.options.background) {
+        HandleBackgroundSessionReply(record, eventId);
+    }
+
     return ERR_OK;
 }
 
-void CliToolManagerService::PostExecToolTask(int32_t time, const std::string &sessionId, bool isTimeout)
+void CliToolManagerService::HandleBackgroundSessionReply(
+    const std::shared_ptr<SessionRecord> &record, const std::string &eventId)
+{
+    CliSessionInfo session;
+    record->BuildSessionInfo(session);
+    EventDispatcher::GetInstance().DispatchExecToolReplyEvent(record->callerPid, eventId, ERR_OK, session);
+}
+
+int32_t CliToolManagerService::ExecTool(const ExecToolParam &param, const std::string &eventId)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "ExecTool called: toolName=%{public}s, subcommand=%{public}s",
+        param.toolName.c_str(), param.subcommand.c_str());
+
+    if (auto ret = ValidateExecToolPermissions(); ret != ERR_OK) {
+        return ret;
+    }
+
+    if (auto ret = ValidateSessionLimit(); ret != ERR_OK) {
+        return ret;
+    }
+
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    ToolInfo toolInfo;
+    std::string sandboxConfig;
+    std::string bundleName;
+
+    if (auto ret = ValidateAndPrepareTool(param, tokenId, toolInfo, sandboxConfig, bundleName); ret != ERR_OK) {
+        return ret;
+    }
+
+    return SetupAndStartSession(param, eventId, toolInfo, sandboxConfig, bundleName);
+}
+
+void CliToolManagerService::PostExecToolTask(int64_t time, const std::string &sessionId, bool isTimeout)
 {
     auto timeoutTask = [sessionId, isTimeout]() {
         auto service = CliToolManagerService::GetInstance();
@@ -479,7 +522,7 @@ void CliToolManagerService::WaitPid(pid_t pid, int32_t status, int32_t sig)
 {
     std::shared_ptr<SessionRecord> record = nullptr;
     {
-        std::lock_guard<std::mutex> lock(sessionsMutex_);
+        std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
         for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end(); ++iter) {
             if (iter->second == nullptr || pid != iter->second->processId) {
                 continue;
@@ -504,16 +547,96 @@ void CliToolManagerService::sigchld_handler(int32_t sig)
         auto instance = CliToolManagerService::GetInstance();
         if (instance != nullptr) {
             instance->WaitPid(pid, status, sig);
+            instance->Killpg(pid);
         }
-        pid_t gPid = getpgid(pid);
-        TAG_LOGI(AAFwkTag::CLI_TOOL, "gPid=%{public}d", gPid);
-        if (gPid == -1) {
-            TAG_LOGI(AAFwkTag::CLI_TOOL, "Fial to get gPid");
-            return;
-        }
-        int32_t killRet = killpg(gPid, SIGTERM);
-        TAG_LOGI(AAFwkTag::CLI_TOOL, "killpg result:%{public}d", killRet);
     }
+}
+
+void CliToolManagerService::Killpg(pid_t pid)
+{
+    pid_t gPid = getpgid(pid);
+    if (gPid == -1) {
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "Fial to get gPid");
+        return;
+    }
+    int32_t killRet = killpg(gPid, SIGTERM);
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "killpg result:%{public}d", killRet);
+}
+
+void CliToolManagerService::OnProcessDied(const std::string &bundleName, pid_t diedPid)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "OnProcessDied called: bundleName=%{public}s, diedPid=%{public}d",
+        bundleName.c_str(), diedPid);
+    std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
+    // Iterate through sessionRecords_ to find matching SessionRecord by callerPid
+    for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end();) {
+        auto sessionRecord = iter->second;
+        if (sessionRecord == nullptr) {
+            iter = sessionRecords_.erase(iter);
+            activeSessionCount_.fetch_sub(1, std::memory_order_relaxed);
+            TAG_LOGW(AAFwkTag::CLI_TOOL, "delete leak sessionId:%{public}s", iter->first.c_str());
+            continue;
+        }
+
+        // Check if this session's callerPid matches the diedPid
+        if (sessionRecord->GetCallerPid() != diedPid) {
+            ++iter;
+            continue;
+        }
+
+        // Kill the CLI process group
+        Killpg(sessionRecord->processId);
+
+        // Clean up session
+        iter = sessionRecords_.erase(iter);
+        activeSessionCount_.fetch_sub(1, std::memory_order_relaxed);
+    }
+}
+
+void CliToolManagerService::RegisterAppStateObserver(const std::string &bundleName, pid_t callerPid)
+{
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "RegisterAppStateObserver called: bundleName=%{public}s, callerPid=%{public}d",
+        bundleName.c_str(), callerPid);
+
+    // Check if observer already exists for this bundle
+    if (bundleObservers_.find(bundleName) != bundleObservers_.end()) {
+        TAG_LOGI(AAFwkTag::CLI_TOOL, "Observer already registered for bundleName=%{public}s", bundleName.c_str());
+        return;
+    }
+
+    // Create observer with callback to OnProcessDied
+    auto callback = [](const std::string &bundleName, pid_t diedPid) {
+        auto service = CliToolManagerService::GetInstance();
+        if (service != nullptr) {
+            service->OnProcessDied(bundleName, diedPid);
+        }
+    };
+
+    sptr<CliToolAppStateObserver> observer = new CliToolAppStateObserver(bundleName, callback);
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to create observer for bundleName=%{public}s", bundleName.c_str());
+        return;
+    }
+
+    // Register observer through AppMgrClient
+    AppExecFwk::AppMgrClient appMgrClient;
+    auto ret = appMgrClient.ConnectAppMgrService();
+    if (ret != AppExecFwk::AppMgrResultCode::RESULT_OK) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to connect to AppMgrService");
+        return;
+    }
+
+    std::vector<std::string> bundleNameList = { bundleName };
+    auto registerRet = appMgrClient.RegisterApplicationStateObserver(observer, bundleNameList);
+    if (registerRet != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Failed to register observer for bundleName=%{public}s, ret=%{public}d",
+            bundleName.c_str(), registerRet);
+        return;
+    }
+
+    // Store observer
+    bundleObservers_[bundleName] = observer;
+    TAG_LOGI(AAFwkTag::CLI_TOOL, "Successfully registered observer for bundleName=%{public}s", bundleName.c_str());
 }
 
 std::shared_ptr<SessionRecord> CliToolManagerService::CreateSessionRecord(const ExecToolParam &param)

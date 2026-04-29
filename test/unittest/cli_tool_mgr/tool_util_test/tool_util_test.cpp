@@ -456,8 +456,10 @@ HWTEST_F(ToolUtilTest, GenerateSandboxConfig_0100, TestSize.Level1)
 
     std::string challenge = "test_challenge_123";
     std::string sandboxConfig;
+    std::string bundleName;
+    AccessToken::AccessTokenID tokenId = 1; // Invalid token ID for testing
 
-    bool result = ToolUtil::GenerateSandboxConfig(challenge, sandboxConfig);
+    bool result = ToolUtil::GenerateSandboxConfig(challenge, tokenId, sandboxConfig, bundleName);
 
     // In test environment, this will likely fail because we're not a HAP
     // Expected: return false, sandboxConfig may be empty or unchanged
