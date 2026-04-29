@@ -468,10 +468,6 @@ napi_value CreateJsToolInfo(napi_env env, const ToolInfo &tool)
     napi_value jsEventSchemas = ParseJsonStringToJsObject(env, tool.eventSchemas);
     napi_set_named_property(env, jsObj, "eventSchemas", jsEventSchemas);
 
-    // Set timeout
-    napi_value jsTimeout = AppExecFwk::WrapInt32ToJS(env, tool.timeout);
-    napi_set_named_property(env, jsObj, "timeout", jsTimeout);
-
     // Set hasSubCommand
     napi_value jsHasSubCommand = AppExecFwk::WrapBoolToJS(env, tool.hasSubCommand);
     napi_set_named_property(env, jsObj, "hasSubCommand", jsHasSubCommand);

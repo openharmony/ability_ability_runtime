@@ -78,7 +78,6 @@ public:
     std::shared_ptr<ArgMapping> argMapping;
     std::vector<std::string> eventTypes;
     std::string eventSchemas;      // JSON string (map of event type to schema)
-    int32_t timeout = 1800;
     bool hasSubCommand = false;
     std::map<std::string, SubCommandInfo> subcommands;
 
