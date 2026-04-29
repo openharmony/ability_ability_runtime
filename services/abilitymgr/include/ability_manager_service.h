@@ -3474,6 +3474,7 @@ private:
     void SetAppDeathRecipient(const sptr<IRemoteObject>& abilityToken);
     void HandleAppDiedForRecovery(const sptr<IRemoteObject>& remote, const AbilityInfo& abilityInfo,
         int32_t pid, int32_t uid, int32_t userId);
+    int32_t AtomicServicePreprocess(const Want &want);
     void startRecoveryMgr();
     int getAppRecoveryFlag(const sptr<IRemoteObject> &token);
     void HandleRecoveryRecipient(const std::shared_ptr<AbilityRecord>& abilityRecord,
