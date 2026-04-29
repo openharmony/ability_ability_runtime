@@ -36,6 +36,9 @@ bool MemDumpInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isSync)) {
         return false;
     }
+    if (!parcel.WriteBool(mayReportToOEM)) {
+        return false;
+    }
     return true;
 }
 
@@ -71,6 +74,10 @@ MemDumpInfo *MemDumpInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     if (!parcel.ReadBool(info->isSync)) {
+        delete info;
+        return nullptr;
+    }
+    if (!parcel.ReadBool(info->mayReportToOEM)) {
         delete info;
         return nullptr;
     }

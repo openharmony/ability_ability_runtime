@@ -607,5 +607,89 @@ HWTEST_F(InsightIntentInfoForQueryTest, MarshallingAndUnmarshalling_CfgEntities_
     delete result;
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
+
+/**
+ * @tc.name: EntityInfoForQuery_IsQueryable_0100
+ * @tc.desc: Test EntityInfoForQuery::isQueryable with matching parentClassName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentInfoForQueryTest, EntityInfoForQuery_IsQueryable_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    EntityInfoForQuery entity;
+    entity.className = TEST_ENTITY_CLASS;
+    entity.entityId = TEST_ENTITY_ID;
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    EXPECT_TRUE(entity.isQueryable());
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: EntityInfoForQuery_IsQueryable_0200
+ * @tc.desc: Test EntityInfoForQuery::isQueryable with non-matching parentClassName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentInfoForQueryTest, EntityInfoForQuery_IsQueryable_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    EntityInfoForQuery entity;
+    entity.className = TEST_ENTITY_CLASS;
+    entity.entityId = TEST_ENTITY_ID;
+    entity.parentClassName = "other.ParentClass";
+    EXPECT_FALSE(entity.isQueryable());
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: EntityInfoForQuery_IsQueryable_0300
+ * @tc.desc: Test EntityInfoForQuery::isQueryable with empty parentClassName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentInfoForQueryTest, EntityInfoForQuery_IsQueryable_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    EntityInfoForQuery entity;
+    entity.className = TEST_ENTITY_CLASS;
+    entity.entityId = TEST_ENTITY_ID;
+    entity.parentClassName = "";
+    EXPECT_FALSE(entity.isQueryable());
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: InsightIntentInfoForQuery_EntityVector_0100
+ * @tc.desc: Test Marshalling/Unmarshalling with entity vector containing multiple entities.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentInfoForQueryTest, InsightIntentInfoForQuery_EntityVector_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    MessageParcel parcel;
+    InsightIntentInfoForQuery info;
+    info.bundleName = TEST_BUNDLE_NAME;
+    info.intentType = INSIGHT_INTENTS_TYPE_PAGE;
+    info.pageInfo.uiAbility = TEST_ABILITY_NAME;
+
+    EntityInfoForQuery entity1;
+    entity1.className = "Entity1";
+    entity1.entityId = "id1";
+    entity1.parentClassName = "insightIntent.AppIntentEntity";
+
+    EntityInfoForQuery entity2;
+    entity2.className = "Entity2";
+    entity2.entityId = "id2";
+    entity2.parentClassName = "other.ParentClass";
+
+    info.entities = {entity1, entity2};
+
+    EXPECT_TRUE(info.Marshalling(parcel));
+    auto result = InsightIntentInfoForQuery::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result->entities.size(), 2U);
+    EXPECT_TRUE(result->entities[0].isQueryable());
+    EXPECT_FALSE(result->entities[1].isQueryable());
+    delete result;
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

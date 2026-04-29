@@ -436,6 +436,7 @@ ohos_shared_library("user_controller") {
   external_deps = [
     "c_utils:utils",
     "ffrt:libffrt",
+    "graphic_2d:color_manager",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]
@@ -486,6 +487,7 @@ ohos_static_library("user_controller_static") {
   external_deps = [
     "c_utils:utils",
     "ffrt:libffrt",
+    "graphic_2d:color_manager",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]

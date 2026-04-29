@@ -205,6 +205,15 @@ bool PermissionVerification::VerifyMissionPermission() const
     return false;
 }
 
+bool PermissionVerification::VerifyContinuationNotifyPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_CONTINUATION_NOTIFY)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    return false;
+}
+
 int PermissionVerification::VerifyAppStateObserverPermission() const
 {
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {
@@ -339,6 +348,16 @@ int PermissionVerification::CheckStartByCallPermission(const VerificationInfo &v
         return CHECK_PERMISSION_FAILED;
     }
 
+    return ERR_OK;
+}
+
+int PermissionVerification::CheckCallModularObjectExtensionPermission(
+    const VerificationInfo &verificationInfo) const
+{
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller INVISIBLE permission invalid");
+        return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
+    }
     return ERR_OK;
 }
 

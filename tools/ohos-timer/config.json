@@ -1,0 +1,90 @@
+{
+  "name": "ohos-timer",
+  "version": "1.0.0",
+  "description": "Timer tool example, supports progress event output",
+  "executablePath": "/system/bin/cli_tool/executable/ohos-timer",
+  "timeout": 30,
+  "requirePermissions": [],
+  "eventTypes": ["progress"],
+  "inputSchema": {
+    "type": "object",
+    "description": "Tool input parameters",
+    "properties": {
+      "duration": {
+        "type": "integer",
+        "description": "Running duration (seconds)",
+        "minimum": 1
+      },
+      "interval": {
+        "type": "integer",
+        "description": "Progress update interval (seconds)",
+        "default": 1,
+        "minimum": 1
+      },
+      "showProgress": {
+        "type": "boolean",
+        "description": "Show progress events",
+        "default": false
+      },
+      "verbose": {
+        "type": "boolean",
+        "description": "Verbose mode",
+        "default": false
+      }
+    },
+    "required": ["duration"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "Tool output result",
+    "properties": {
+      "status": {
+        "type": "string",
+        "description": "Execution status"
+      },
+      "duration": {
+        "type": "integer",
+        "description": "Planned duration (seconds)"
+      },
+      "actual_duration": {
+        "type": "integer",
+        "description": "Actual duration (seconds)"
+      }
+    },
+    "required": ["status", "duration", "actual_duration"]
+  },
+  "eventSchemas": {
+    "progress": {
+      "type": "object",
+      "description": "Progress event",
+      "properties": {
+        "percentage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Completion percentage"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status"
+        }
+      },
+      "required": ["percentage", "status"]
+    }
+  },
+  "argMapping": {
+    "type": "flag",
+    "templates": {
+      "duration": "--duration={value}",
+      "interval": "--interval={value}",
+      "showProgress": {
+        "if_true": "--progress",
+        "if_false": ""
+      },
+      "verbose": {
+        "if_true": "--verbose",
+        "if_false": ""
+      }
+    }
+  }
+}

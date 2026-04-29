@@ -18,7 +18,10 @@
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_execute_param.h"
+#include "insight_intent_query_param.h"
+#include "extract_insight_intent_profile.h"
 #include "mock_ability_token.h"
+#include "string_wrapper.h"
 #include "want.h"
 
 using namespace testing;
@@ -856,7 +859,8 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GetMainElementName_0100, TestSiz
     param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
     auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
     paramPtr->moduleName_ = "test.entry";
-    std::string retString = InsightIntentExecuteManager::GetMainElementName(paramPtr);
+    std::string retString = InsightIntentExecuteManager::GetMainElementName(paramPtr->bundleName_,
+        paramPtr->moduleName_);
     EXPECT_EQ(retString, "");
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -1356,5 +1360,602 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateDecoratorParams_01
         paramPtr, decoratorInfo, want);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0100
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with null callerToken
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0100 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = nullptr;
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0100 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0200
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with null param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0200 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    std::shared_ptr<AppExecFwk::InsightIntentQueryParam> paramPtr = nullptr;
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0200 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0300
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0300 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "";  // empty bundleName
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0300 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0400
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with empty moduleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0400 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0400 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0500
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with empty intentName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0500 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "";
+    param.className_ = "test.className";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0500 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0600
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with empty className
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0600 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0600 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0700
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with valid params
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0700 begin.");
+
+    auto manager = DelayedSingleton<InsightIntentExecuteManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.userId_ = 100;
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 1001;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(paramPtr->intentId_, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0700 end.");
+}
+
+/**
+ * @tc.name: GenerateQueryEntityWant_0100
+ * @tc.desc: Test GenerateQueryEntityWant with null param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateQueryEntityWant_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GenerateQueryEntityWant_0100 begin.");
+
+    std::shared_ptr<AppExecFwk::InsightIntentQueryParam> paramPtr = nullptr;
+    Want want;
+
+    auto ret = InsightIntentExecuteManager::GenerateQueryEntityWant(paramPtr, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "GenerateQueryEntityWant_0100 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0100
+ * @tc.desc: Test CheckCanQueryEntity with empty className
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0100 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    std::string className = "";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0100 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0200
+ * @tc.desc: Test CheckCanQueryEntity with empty entities
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0200 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    intentInfo.entities.clear();
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0200 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0300
+ * @tc.desc: Test CheckCanQueryEntity with entity not queryable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0300 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "test.className";
+    entity.parentClassName = "not.insightIntent.AppIntentEntity";
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0300 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0400
+ * @tc.desc: Test CheckCanQueryEntity with className not match
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0400 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "other.className";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0400 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0500
+ * @tc.desc: Test CheckCanQueryEntity with queryable entity
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0500 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "test.className";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    entity.supportedQueryProperties = {"prop1", "prop2"};
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_TRUE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0500 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0600
+ * @tc.desc: Test CheckCanQueryEntity with multiple entities
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0600 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+
+    AbilityRuntime::InsightIntentEntityInfo entity1;
+    entity1.className = "test.className";
+    entity1.parentClassName = "not.queryable";
+    intentInfo.entities.push_back(entity1);
+
+    AbilityRuntime::InsightIntentEntityInfo entity2;
+    entity2.className = "test.className";
+    entity2.parentClassName = "insightIntent.AppIntentEntity";
+    entity2.supportedQueryProperties = {"prop1"};
+    intentInfo.entities.push_back(entity2);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_TRUE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0600 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0700
+ * @tc.desc: Test CheckCanQueryEntity with empty queryParams
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0700 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "test.className";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    entity.supportedQueryProperties = {"prop1", "prop2"};
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_TRUE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0700 end.");
+}
+
+/**
+ * @tc.name: InsightIntentEntityInfo_IsQueryable_0100
+ * @tc.desc: Test InsightIntentEntityInfo::isQueryable with matching parentClassName.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, InsightIntentEntityInfo_IsQueryable_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0100 begin.");
+
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "TestClass";
+    entity.entityId = "testId";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    EXPECT_TRUE(entity.isQueryable());
+
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0100 end.");
+}
+
+/**
+ * @tc.name: InsightIntentEntityInfo_IsQueryable_0200
+ * @tc.desc: Test InsightIntentEntityInfo::isQueryable with non-matching parentClassName.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, InsightIntentEntityInfo_IsQueryable_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0200 begin.");
+
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "TestClass";
+    entity.entityId = "testId";
+    entity.parentClassName = "other.ParentClass";
+    EXPECT_FALSE(entity.isQueryable());
+
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0200 end.");
+}
+
+/**
+ * @tc.name: InsightIntentEntityInfo_IsQueryable_0300
+ * @tc.desc: Test InsightIntentEntityInfo::isQueryable with empty parentClassName.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, InsightIntentEntityInfo_IsQueryable_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0300 begin.");
+
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "TestClass";
+    entity.entityId = "testId";
+    entity.parentClassName = "";
+    EXPECT_FALSE(entity.isQueryable());
+
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentEntityInfo_IsQueryable_0300 end.");
+}
+
+/**
+ * @tc.name: GenerateQueryEntityWant_0200
+ * @tc.desc: Test GenerateQueryEntityWant with CheckCanQueryEntity returning false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateQueryEntityWant_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GenerateQueryEntityWant_0200 begin.");
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.queryEntityParam_.queryType_ = "all";
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    Want want;
+    auto ret = InsightIntentExecuteManager::GenerateQueryEntityWant(paramPtr, want);
+    EXPECT_EQ(ret, INTENT_NOT_EXIST);
+
+    TAG_LOGI(AAFwkTag::TEST, "GenerateQueryEntityWant_0200 end.");
+}
+
+/**
+ * @tc.name: CheckAndUpdateQueryEntityParam_0800
+ * @tc.desc: Test CheckAndUpdateQueryEntityParam with userId set to default value.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckAndUpdateQueryEntityParam_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0800 begin.");
+
+    auto manager = std::make_shared<InsightIntentExecuteManager>();
+    ASSERT_NE(manager, nullptr);
+
+    AppExecFwk::InsightIntentQueryParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.module";
+    param.intentName_ = "test.intent";
+    param.className_ = "test.className";
+    param.userId_ = -1;
+    param.queryEntityParam_.parameters_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentQueryParam>(param);
+
+    sptr<IRemoteObject> callerToken = new AppExecFwk::MockAbilityToken();
+    uint64_t key = 2001;
+    std::string callerBundleName = "com.bundlename.test";
+
+    auto ret = manager->CheckAndUpdateQueryEntityParam(key, callerToken, paramPtr, callerBundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(paramPtr->userId_, -1);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckAndUpdateQueryEntityParam_0800 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0800
+ * @tc.desc: Test CheckCanQueryEntity with query key not in supported properties.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0800 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "test.className";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    entity.supportedQueryProperties = {"prop1", "prop2"};
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    queryParams->SetParam("unsupportedKey", AAFwk::String::Box("value"));
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.queryType_ = "all";
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_TRUE(ret);
+
+    param.queryType_ = "byProperty";
+    param.parameters_ = queryParams;
+    ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    param.queryType_ = "byProperty";
+    param.parameters_ = nullptr;
+    ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_FALSE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0800 end.");
+}
+
+/**
+ * @tc.name: CheckCanQueryEntity_0900
+ * @tc.desc: Test CheckCanQueryEntity with query key in supported properties.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckCanQueryEntity_0900, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0900 begin.");
+
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    AbilityRuntime::InsightIntentEntityInfo entity;
+    entity.className = "test.className";
+    entity.parentClassName = "insightIntent.AppIntentEntity";
+    entity.supportedQueryProperties = {"prop1", "prop2"};
+    intentInfo.entities.push_back(entity);
+
+    std::string className = "test.className";
+    auto queryParams = std::make_shared<WantParams>();
+    queryParams->SetParam("prop1", AAFwk::String::Box("value"));
+    AppExecFwk::InsightIntentQueryEntityParam param;
+    param.parameters_ = queryParams;
+    auto ret = InsightIntentExecuteManager::CheckEntityQueryable(intentInfo, className, param);
+    EXPECT_TRUE(ret);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckCanQueryEntity_0900 end.");
+}
+
 } // namespace AAFwk
 } // namespace OHOS

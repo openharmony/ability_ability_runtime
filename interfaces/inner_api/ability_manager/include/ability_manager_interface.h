@@ -42,7 +42,9 @@
 #include "insight_intent/insight_intent_execute_param.h"
 #include "insight_intent/insight_intent_execute_result.h"
 #include "insight_intent/insight_intent_info_for_query.h"
+#include "insight_intent/insight_intent_query_param.h"
 #include "iprepare_terminate_callback_interface.h"
+#include "irequest_start_ability_callback.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
 #include "modular_object_extension_info.h"
@@ -90,6 +92,7 @@ using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
+using InsightIntentQueryParam = AppExecFwk::InsightIntentQueryParam;
 using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 using UIExtensionHostInfo = AbilityRuntime::UIExtensionHostInfo;
 using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
@@ -144,6 +147,32 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options, uint64_t callbackId)
+    {
+        return 0;
+    }
+
+    /**
+     * StartSelfUIAbility with want and callerToken.
+     *
+     * @param want, the want of the ability to start.
+     * @param callerToken, the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelfUIAbilityWithToken(const Want &want, sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
+     * StartSelfUIAbility with want, startOptions and callerToken.
+     *
+     * @param want, the want of the ability to start.
+     * @param options, the startOptions of the ability to start.
+     * @param callerToken, the caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelfUIAbilityWithStartOptionsAndToken(const Want &want,
+        const StartOptions &options, sptr<IRemoteObject> callerToken)
     {
         return 0;
     }
@@ -471,6 +500,18 @@ public:
     }
 
     /**
+     * Request modal UIExtension with account id.
+     *
+     * @param want, the want of the modal UIExtension to request.
+     * @param accountId, the account id for multi-user scenario.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RequestModalUIExtensionWithAccount(const Want &want, int32_t accountId)
+    {
+        return 0;
+    }
+
+    /**
      * Preload UIExtension with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -575,6 +616,17 @@ public:
         bool isNeedLocalDeviceId = true)
     {
         return {};
+    }
+
+    /**
+     * StartSelf, start the ability itself with token.
+     *
+     * @param token, the token of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelf(sptr<IRemoteObject> token)
+    {
+        return 0;
     }
 
     /**
@@ -725,10 +777,11 @@ public:
      *
      * @param sessionInfo the session info of the ability to minimize.
      * @param fromUser, Whether form user.
+     * @param backgroundReason The reason for moving to background (3: screen off).
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false,
-        uint32_t sceneFlag = 0)
+        uint32_t sceneFlag = 0, int32_t backgroundReason = 0)
     {
         return 0;
     };
@@ -1964,6 +2017,21 @@ public:
         const InsightIntentExecuteParam &param) = 0;
 
     /**
+      * @brief Execute intent for distributed scenario.
+      *
+      * @param want The want containing intent execution information.
+      * @param srcDeviceId The source device id.
+      * @param requestCode The Intent id.
+      * @param specifiedFullTokenId The caller token id.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    virtual int32_t ExecuteIntentForDistributed(const Want &want, const std::string &srcDeviceId,
+        uint64_t requestCode, uint64_t specifiedFullTokenId = 0)
+    {
+        return 0;
+    }
+
+    /**
      * @brief Check if ability controller can start.
      * @param want The want of ability to start.
      * @return Return true to allow ability to start, or false to reject.
@@ -2480,6 +2548,19 @@ public:
     }
 
     /**
+     * @brief Query entity.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent query param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode QueryEntityInfo(uint64_t key, sptr<IRemoteObject> callerToken,
+        const InsightIntentQueryParam &param)
+    {
+        return 0;
+    };
+
+    /**
      * StartAbilityWithWait, send want and abilityStartWithWaitObserver to abms.
      *
      * @param want Ability want.
@@ -2487,6 +2568,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer)
+    {
+        return 0;
+    }
+
+    /**
+     * Start UIAbility with callback to receive the request result, the callback is valid only for SA callers.
+     *
+     * @param want Indicates the ability to start.
+     * @param callerToken Indicates the caller ability token.
+     * @param callback Indicates the callback used to receive the result of request start ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartUIAbilityWithCallback(const Want &want, sptr<IRemoteObject> callerToken,
+        sptr<IRequestStartAbilityCallback> callback)
     {
         return 0;
     }

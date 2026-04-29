@@ -21,6 +21,7 @@
 
 #include "ability_info.h"
 #include "extension_ability_info.h"
+#include "irequest_start_ability_callback.h"
 #include "start_specified_ability_params.h"
 #include "want.h"
 
@@ -67,7 +68,8 @@ struct StartAbilityUtils {
     static int32_t HandleSelfRedirection(bool isFromOpenLink,
         const std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     static std::string GenerateAsCallerForAncoSessionId();
-    static void RemoveAtomicServiceShareRouterIfNeeded(Want &want, const AppExecFwk::AbilityInfo &targetAbilityInfo);
+    static void RemoveAtomicServiceShareRouterIfNeeded(Want &want, const AppExecFwk::AbilityInfo &targetAbilityInfo,
+        uint32_t callerTokenId);
 
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;
@@ -112,6 +114,7 @@ struct StartAbilityWrapParam {
     bool isStartByOEExt = false;
     std::string specifiedFlag;
     bool isGamePrelaunch = false;
+    sptr<IRequestStartAbilityCallback> requestCallback = nullptr;
 };
 }
 }

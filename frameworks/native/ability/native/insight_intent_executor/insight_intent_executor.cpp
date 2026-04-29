@@ -21,6 +21,7 @@
 #include "js_insight_intent_executor.h"
 #include "js_insight_intent_func.h"
 #include "js_insight_intent_page.h"
+#include "js_insight_intent_query_entity.h"
 #include "js_runtime.h"
 #include "runtime.h"
 
@@ -43,14 +44,32 @@ std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& ru
                 case InsightIntentType::DECOR_PAGE:
                     return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentPage::Create(
                         static_cast<JsRuntime&>(runtime)));
+                case InsightIntentType::DECOR_QUERY_ENTITY:
+                    return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentQueryEntity::Create(
+                        static_cast<JsRuntime&>(runtime)));
                 case InsightIntentType::DECOR_LINK:
                 case InsightIntentType::DECOR_FORM:
                 default:
                     return nullptr;
-                }
             }
+        }
         case Runtime::Language::ETS:
-            return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentExecutor(runtime));
+            switch (type) {
+                case InsightIntentType::DECOR_NONE:
+                    return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentExecutor(runtime));
+                case InsightIntentType::DECOR_ENTRY:
+                    return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentEntry(runtime));
+                case InsightIntentType::DECOR_FUNC:
+                    return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentFunc(runtime));
+                case InsightIntentType::DECOR_PAGE:
+                    return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentPage(runtime));
+                case InsightIntentType::DECOR_QUERY_ENTITY:
+                    return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentQueryEntity(runtime));
+                case InsightIntentType::DECOR_LINK:
+                case InsightIntentType::DECOR_FORM:
+                default:
+                    return nullptr;
+            }
         default:
             return nullptr;
     }
