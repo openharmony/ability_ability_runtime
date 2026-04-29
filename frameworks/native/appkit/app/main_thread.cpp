@@ -3180,7 +3180,12 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "Start");
     mainHandler_ = std::make_shared<MainHandler>(runner, this);
-    watchdog_ = std::make_shared<Watchdog>();
+    bool isRescueMode = (system::GetParameter("soc.boot.mode", "") == "rescue");
+    if (!isRescueMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "is not in rescue mode");
+        watchdog_ = std::make_shared<Watchdog>();
+    }
+
     extensionConfigMgr_ = std::make_shared<AbilityRuntime::ExtensionConfigMgr>();
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -3196,7 +3201,11 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     }
     TaskTimeoutDetected(runner);
 
-    watchdog_->Init(mainHandler_);
+    if (!isRescueMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "is not in rescue mode");
+        watchdog_->Init(mainHandler_);
+    }
+
     AppExecFwk::AppfreezeInner::GetInstance()->SetMainHandler(mainHandler_);
 }
 
