@@ -20,6 +20,15 @@
 
 #include "tool_util.h"
 #include "cli_error_code.h"
+#include "want_params.h"
+#include "want_params_wrapper.h"
+#include "string_wrapper.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
+#include "long_wrapper.h"
+#include "double_wrapper.h"
+#include "float_wrapper.h"
+#include "array_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::CliTool;
@@ -548,6 +557,663 @@ HWTEST_F(ToolUtilTest, GenerateCliSessionId_EdgeCase_0200, TestSize.Level1)
     EXPECT_TRUE(sessionId.find(name) == 0);
 
     GTEST_LOG_(INFO) << "ToolUtil_GenerateCliSessionId_EdgeCase_0200 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0100
+ * @tc.desc: Test ValidateInputSchemaProperties with correct string type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0100 start";
+
+    std::string schema = R"({
+        "properties": {
+            "target": {"type": "string"},
+            "output": {"type": "string"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("target", AAFwk::String::Box("192.168.1.1"));
+    args.SetParam("output", AAFwk::String::Box("/tmp/output.txt"));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0100 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0200
+ * @tc.desc: Test ValidateInputSchemaProperties with type mismatch (string vs boolean)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0200 start";
+
+    std::string schema = R"({
+        "properties": {
+            "verbose": {"type": "boolean"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("verbose", AAFwk::String::Box("true"));  // Wrong: string instead of boolean
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0200 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0300
+ * @tc.desc: Test ValidateInputSchemaProperties with correct boolean type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0300 start";
+
+    std::string schema = R"({
+        "properties": {
+            "verbose": {"type": "boolean"},
+            "force": {"type": "boolean"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("verbose", AAFwk::Boolean::Box(true));
+    args.SetParam("force", AAFwk::Boolean::Box(false));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0300 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0400
+ * @tc.desc: Test ValidateInputSchemaProperties with correct integer type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0400 start";
+
+    std::string schema = R"({
+        "properties": {
+            "timeout": {"type": "integer"},
+            "port": {"type": "integer"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("timeout", AAFwk::Integer::Box(5000));
+    args.SetParam("port", AAFwk::Integer::Box(8080));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0400 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0500
+ * @tc.desc: Test ValidateInputSchemaProperties with type mismatch (integer vs string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0500 start";
+
+    std::string schema = R"({
+        "properties": {
+            "timeout": {"type": "integer"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("timeout", AAFwk::String::Box("5000"));  // Wrong: string instead of integer
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0500 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0600
+ * @tc.desc: Test ValidateInputSchemaProperties with correct number type (double)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0600 start";
+
+    std::string schema = R"({
+        "properties": {
+            "rate": {"type": "number"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("rate", AAFwk::Double::Box(3.14));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0600 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0700
+ * @tc.desc: Test ValidateInputSchemaProperties with correct array type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0700 start";
+
+    std::string schema = R"({
+        "properties": {
+            "ports": {"type": "array"}
+        }
+    })";
+    AAFwk::WantParams args;
+    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(3, AAFwk::g_IID_IInteger);
+    if (array != nullptr) {
+        array->Set(0, AAFwk::Integer::Box(80).GetRefPtr());
+        array->Set(1, AAFwk::Integer::Box(443).GetRefPtr());
+        array->Set(2, AAFwk::Integer::Box(8080).GetRefPtr());
+        args.SetParam("ports", array);
+    }
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0700 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0800
+ * @tc.desc: Test ValidateInputSchemaProperties with type mismatch (array vs string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0800 start";
+
+    std::string schema = R"({
+        "properties": {
+            "ports": {"type": "array"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("ports", AAFwk::String::Box("80,443,8080"));  // Wrong: string instead of array
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0800 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_0900
+ * @tc.desc: Test ValidateInputSchemaProperties with correct object type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0900 start";
+
+    std::string schema = R"({
+        "properties": {
+            "config": {"type": "object"}
+        }
+    })";
+    AAFwk::WantParams args;
+    AAFwk::WantParams nestedConfig;
+    nestedConfig.SetParam("key", AAFwk::String::Box("value"));
+    args.SetParam("config", AAFwk::WantParamWrapper::Box(nestedConfig));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_0900 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_1000
+ * @tc.desc: Test ValidateInputSchemaProperties with mixed types
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_1000 start";
+
+    std::string schema = R"({
+        "properties": {
+            "target": {"type": "string"},
+            "timeout": {"type": "integer"},
+            "verbose": {"type": "boolean"},
+            "ports": {"type": "array"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("target", AAFwk::String::Box("192.168.1.1"));
+    args.SetParam("timeout", AAFwk::Integer::Box(5000));
+    args.SetParam("verbose", AAFwk::Boolean::Box(true));
+    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(2, AAFwk::g_IID_IInteger);
+    if (array != nullptr) {
+        array->Set(0, AAFwk::Integer::Box(80).GetRefPtr());
+        array->Set(1, AAFwk::Integer::Box(443).GetRefPtr());
+        args.SetParam("ports", array);
+    }
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_1000 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_TypeValidation_1100
+ * @tc.desc: Test ValidateInputSchemaProperties with no type specified (should pass)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_TypeValidation_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_1100 start";
+
+    std::string schema = R"({
+        "properties": {
+            "target": {"description": "Target address"}
+        }
+    })";
+    AAFwk::WantParams args;
+    args.SetParam("target", AAFwk::String::Box("192.168.1.1"));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    // Should pass because no type is specified
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_TypeValidation_1100 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_NestedObject_0100
+ * @tc.desc: Test ValidateInputSchemaProperties with nested object validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_NestedObject_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0100 start";
+
+    std::string schema = R"({
+        "properties": {
+            "app": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "version": {"type": "string"},
+                    "env": {
+                        "type": "object",
+                        "properties": {
+                            "production": {"type": "boolean"},
+                            "debug": {"type": "boolean"}
+                        }
+                    }
+                }
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    AAFwk::WantParams appParams;
+    appParams.SetParam("name", AAFwk::String::Box("myapp"));
+    appParams.SetParam("version", AAFwk::String::Box("1.0.0"));
+    AAFwk::WantParams envParams;
+    envParams.SetParam("production", AAFwk::Boolean::Box(true));
+    envParams.SetParam("debug", AAFwk::Boolean::Box(false));
+    appParams.SetParam("env", AAFwk::WantParamWrapper::Box(envParams));
+    args.SetParam("app", AAFwk::WantParamWrapper::Box(appParams));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0100 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_NestedObject_0200
+ * @tc.desc: Test ValidateInputSchemaProperties with nested object type mismatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_NestedObject_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0200 start";
+
+    std::string schema = R"({
+        "properties": {
+            "app": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "version": {"type": "string"}
+                }
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    AAFwk::WantParams appParams;
+    appParams.SetParam("name", AAFwk::String::Box("myapp"));
+    appParams.SetParam("version", AAFwk::Integer::Box(100));  // Wrong: integer instead of string
+    args.SetParam("app", AAFwk::WantParamWrapper::Box(appParams));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0200 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_NestedObject_0300
+ * @tc.desc: Test ValidateInputSchemaProperties with nested object missing required property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_NestedObject_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0300 start";
+
+    std::string schema = R"({
+        "properties": {
+            "server": {
+                "type": "object",
+                "properties": {
+                    "host": {"type": "string"},
+                    "port": {"type": "integer"}
+                },
+                "required": ["host", "port"]
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    AAFwk::WantParams serverParams;
+    serverParams.SetParam("host", AAFwk::String::Box("localhost"));
+    // Missing required "port" property
+    args.SetParam("server", AAFwk::WantParamWrapper::Box(serverParams));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0300 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_NestedObject_0400
+ * @tc.desc: Test ValidateInputSchemaProperties with deep nested objects
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_NestedObject_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0400 start";
+
+    std::string schema = R"({
+        "properties": {
+            "config": {
+                "type": "object",
+                "properties": {
+                    "app": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "settings": {
+                                "type": "object",
+                                "properties": {
+                                    "timeout": {"type": "integer"},
+                                    "retries": {"type": "integer"}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    AAFwk::WantParams configParams;
+    AAFwk::WantParams appParams;
+    appParams.SetParam("name", AAFwk::String::Box("myapp"));
+    AAFwk::WantParams settingsParams;
+    settingsParams.SetParam("timeout", AAFwk::Integer::Box(5000));
+    settingsParams.SetParam("retries", AAFwk::Integer::Box(3));
+    appParams.SetParam("settings", AAFwk::WantParamWrapper::Box(settingsParams));
+    configParams.SetParam("app", AAFwk::WantParamWrapper::Box(appParams));
+    args.SetParam("config", AAFwk::WantParamWrapper::Box(configParams));
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_NestedObject_0400 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_ArrayItems_0100
+ * @tc.desc: Test ValidateInputSchemaProperties with array item type validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_ArrayItems_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_ArrayItems_0100 start";
+
+    std::string schema = R"({
+        "properties": {
+            "ports": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                }
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(3, AAFwk::g_IID_IInteger);
+    if (array != nullptr) {
+        array->Set(0, AAFwk::Integer::Box(80).GetRefPtr());
+        array->Set(1, AAFwk::Integer::Box(443).GetRefPtr());
+        array->Set(2, AAFwk::Integer::Box(8080).GetRefPtr());
+        args.SetParam("ports", array);
+    }
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_ArrayItems_0100 end";
+}
+
+/**
+ * @tc.name: ToolUtil_ValidateInputSchemaProperties_ArrayItems_0200
+ * @tc.desc: Test ValidateInputSchemaProperties with array item type mismatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, ValidateInputSchemaProperties_ArrayItems_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_ArrayItems_0200 start";
+
+    std::string schema = R"({
+        "properties": {
+            "ports": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                }
+            }
+        }
+    })";
+    AAFwk::WantParams args;
+    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(2, AAFwk::g_IID_IInteger);
+    if (array != nullptr) {
+        array->Set(0, AAFwk::Integer::Box(80).GetRefPtr());
+        array->Set(1, AAFwk::String::Box("443").GetRefPtr());  // Wrong: string in integer array
+        args.SetParam("ports", array);
+    }
+
+    int32_t result = ToolUtil::ValidateInputSchemaProperties(schema, args);
+
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ToolUtil_ValidateInputSchemaProperties_ArrayItems_0200 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0100
+ * @tc.desc: Test SplitPathBySeparator with normal path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0100 start";
+
+    std::string path = "app.config.name";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    EXPECT_EQ(result.size(), 3UL);
+    EXPECT_EQ(result[0], "app");
+    EXPECT_EQ(result[1], "config");
+    EXPECT_EQ(result[2], "name");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0100 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0200
+ * @tc.desc: Test SplitPathBySeparator with trailing separator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0200 start";
+
+    std::string path = "app.config.name.";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    // Should filter out empty segment
+    EXPECT_EQ(result.size(), 3UL);
+    EXPECT_EQ(result[0], "app");
+    EXPECT_EQ(result[1], "config");
+    EXPECT_EQ(result[2], "name");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0200 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0300
+ * @tc.desc: Test SplitPathBySeparator with leading separator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0300 start";
+
+    std::string path = ".app.config.name";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    // Should filter out empty segment
+    EXPECT_EQ(result.size(), 3UL);
+    EXPECT_EQ(result[0], "app");
+    EXPECT_EQ(result[1], "config");
+    EXPECT_EQ(result[2], "name");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0300 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0400
+ * @tc.desc: Test SplitPathBySeparator with multiple consecutive separators
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0400 start";
+
+    std::string path = "app..config...name";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    // Should filter out all empty segments
+    EXPECT_EQ(result.size(), 3UL);
+    EXPECT_EQ(result[0], "app");
+    EXPECT_EQ(result[1], "config");
+    EXPECT_EQ(result[2], "name");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0400 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0500
+ * @tc.desc: Test SplitPathBySeparator with empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0500 start";
+
+    std::string path = "";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    EXPECT_EQ(result.size(), 0UL);
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0500 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0600
+ * @tc.desc: Test SplitPathBySeparator with single segment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0600 start";
+
+    std::string path = "app";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, ".");
+
+    EXPECT_EQ(result.size(), 1UL);
+    EXPECT_EQ(result[0], "app");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0600 end";
+}
+
+/**
+ * @tc.name: ToolUtil_SplitPathBySeparator_0700
+ * @tc.desc: Test SplitPathBySeparator with custom separator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolUtilTest, SplitPathBySeparator_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0700 start";
+
+    std::string path = "app-config-name";
+    std::vector<std::string> result = ToolUtil::SplitPathBySeparator(path, "-");
+
+    EXPECT_EQ(result.size(), 3UL);
+    EXPECT_EQ(result[0], "app");
+    EXPECT_EQ(result[1], "config");
+    EXPECT_EQ(result[2], "name");
+
+    GTEST_LOG_(INFO) << "ToolUtil_SplitPathBySeparator_0700 end";
 }
 
 } // namespace CliTool
