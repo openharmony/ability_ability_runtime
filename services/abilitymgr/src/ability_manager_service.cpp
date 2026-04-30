@@ -149,6 +149,10 @@
 #endif
 #include "xcollie/process_kill_reason.h"
 #include "xcollie/watchdog.h"
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+#include "ag_convert_callback_impl.h"
+#include "app_domain_verify_mgr_client.h"
+#endif
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -365,6 +369,8 @@ constexpr int64_t USER_SWITCH_TIMEOUT = 3 * 1000; // 3s
 constexpr const char* SUPPORT_LINKAGE_SCENE = "const.window.supportLinkageScene";
 constexpr const char* KEY_SPECIFIED_FLAG = "com.ohos.param.specifiedFlag";
 constexpr const char* KEY_SKIP_ABILITY_STAGE_LIFECYCLE = "ohos.ability.param.skipAbilityStageLifecycle";
+constexpr int32_t ATOMIC_URL = 1;
+constexpr int32_t NOT_ATOMIC_URL = 0;
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<AbilityManagerService>::GetInstance().get());
@@ -1483,6 +1489,8 @@ int AbilityManagerService::StartAbilityInner(StartAbilityWrapParam &param)
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(param.want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
+        int32_t isAtomicUrl = AtomicServicePreprocess(param.want);
+        abilityRequest.atomicServiceShortLink = isAtomicUrl;
         auto checkResult = AbilityUtil::CheckInstanceKey(param.want);
         if (checkResult != ERR_OK) {
             AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, checkResult, "CheckInstanceKey failed");
@@ -2291,6 +2299,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
+        int32_t isAtomicUrl = AtomicServicePreprocess(want);
+        abilityRequest.atomicServiceShortLink = isAtomicUrl;
         auto checkResult = AbilityUtil::CheckInstanceKey(want);
         if (checkResult != ERR_OK) {
             AbilityEventUtil::SendStartAbilityErrorEvent(eventInfo, checkResult, "CheckInstanceKey failed");
@@ -17683,6 +17693,25 @@ void AbilityManagerService::HandleAppDiedForRecovery(const sptr<IRemoteObject>& 
     if (remote != nullptr) {
         AppRecoveryMgr::AppRecoveryMgr::GetInstance().RemoveOnRemoteDieCallback(remote);
     }
+}
+
+int32_t AbilityManagerService::AtomicServicePreprocess(const Want &want)
+{
+    if (!WantUtils::IsShortUrl(want)) {
+        return NOT_ATOMIC_URL;
+    }
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+    Want asyncWant = want;
+    ConvertCallbackTask task = [](int resultCode, AppDomainVerify::TargetInfo &targetInfo) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR,
+            "AtomicServicePreprocess async callback, resultCode=%{public}d, targetType=%{public}u",
+            resultCode, targetInfo.targetType);
+    };
+    sptr<ConvertCallbackImpl> callbackTask = new ConvertCallbackImpl(std::move(task));
+    sptr<OHOS::AppDomainVerify::IConvertCallback> callback = callbackTask;
+    AppDomainVerify::AppDomainVerifyMgrClient::GetInstance()->ConvertToExplicitWant(asyncWant, callback);
+#endif
+    return ATOMIC_URL;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
