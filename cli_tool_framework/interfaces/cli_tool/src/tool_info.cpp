@@ -229,34 +229,38 @@ bool ToolInfo::ParseFromJson(const nlohmann::json &json, ToolInfo &tool)
     }
     tool.executablePath = executablePath;
 
-    if (json.contains("requirePermissions") && json["requirePermissions"].is_array()) {
-        std::vector<std::string> perms;
-        for (const auto &perm : json["requirePermissions"]) {
-            if (!perm.is_string()) {
-                TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions contains non-string item");
-                return false;
-            }
-            std::string permStr = perm.get<std::string>();
-            if (!permStr.empty()) {
-                perms.push_back(std::move(permStr));
-            }
-        }
-        tool.requirePermissions = std::move(perms);
+    // requirePermissions is required and must be array
+    if (!json.contains("requirePermissions") || !json["requirePermissions"].is_array()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions is missing or not an array");
+        return false;
     }
-    if (json.contains("inputSchema")) {
-        if (!json["inputSchema"].is_object()) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: inputSchema is not a JSON object");
+    std::vector<std::string> perms;
+    for (const auto &perm : json["requirePermissions"]) {
+        if (!perm.is_string()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions contains non-string item");
             return false;
         }
-        tool.inputSchema = json["inputSchema"].dump();
-    }
-    if (json.contains("outputSchema")) {
-        if (!json["outputSchema"].is_object()) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: outputSchema is not a JSON object");
-            return false;
+        std::string permStr = perm.get<std::string>();
+        if (!permStr.empty()) {
+            perms.push_back(std::move(permStr));
         }
-        tool.outputSchema = json["outputSchema"].dump();
     }
+    tool.requirePermissions = std::move(perms);
+
+    // inputSchema is required and must be a JSON object
+    if (!json.contains("inputSchema") || !json["inputSchema"].is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: inputSchema is missing or not a JSON object");
+        return false;
+    }
+    tool.inputSchema = json["inputSchema"].dump();
+
+    // outputSchema is required and must be a JSON object
+    if (!json.contains("outputSchema") || !json["outputSchema"].is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: outputSchema is missing or not a JSON object");
+        return false;
+    }
+    tool.outputSchema = json["outputSchema"].dump();
+
     if (json.contains("eventSchemas")) {
         if (!json["eventSchemas"].is_object()) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventSchemas is not a JSON object");
@@ -381,22 +385,26 @@ bool ToolInfo::Validate(const ToolInfo &tool)
         return false;
     }
 
-    // inputSchema: if not empty, must be valid JSON string
-    if (!tool.inputSchema.empty()) {
-        nlohmann::json inputSchemaJson = nlohmann::json::parse(tool.inputSchema, nullptr, false);
-        if (inputSchemaJson.is_discarded()) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is not valid JSON");
-            return false;
-        }
+    // inputSchema is required and must be valid JSON string
+    if (tool.inputSchema.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is empty");
+        return false;
+    }
+    nlohmann::json inputSchemaJson = nlohmann::json::parse(tool.inputSchema, nullptr, false);
+    if (inputSchemaJson.is_discarded()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: inputSchema is not valid JSON");
+        return false;
     }
 
-    // outputSchema: if not empty, must be valid JSON string
-    if (!tool.outputSchema.empty()) {
-        nlohmann::json outputSchemaJson = nlohmann::json::parse(tool.outputSchema, nullptr, false);
-        if (outputSchemaJson.is_discarded()) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: outputSchema is not valid JSON");
-            return false;
-        }
+    // outputSchema is required and must be valid JSON string
+    if (tool.outputSchema.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: outputSchema is empty");
+        return false;
+    }
+    nlohmann::json outputSchemaJson = nlohmann::json::parse(tool.outputSchema, nullptr, false);
+    if (outputSchemaJson.is_discarded()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "Validate failed: outputSchema is not valid JSON");
+        return false;
     }
 
     // eventSchemas: if not empty, must be valid JSON string
