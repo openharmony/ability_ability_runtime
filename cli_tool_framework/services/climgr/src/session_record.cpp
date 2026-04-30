@@ -28,7 +28,7 @@ SessionState SessionRecord::GetState() const
     return state_.load(std::memory_order_acquire);
 }
 
-void SessionRecord::SetTerminalResult(int32_t status, int32_t sig)
+void SessionRecord::SetTerminalResult(int32_t status, int32_t sig) // for waitpid
 {
     std::lock_guard<std::mutex> lock(resultMutex_);
     terminalStatus_ = status;
@@ -120,7 +120,7 @@ void SessionRecord::BuildSessionInfo(CliSessionInfo &session) const
     session.sessionId = sessionId;
     session.toolName = toolName;
 
-    if (!HasProcessExited() || !OutputDrained()) {
+    if ((!HasProcessExited() || !OutputDrained()) && !timedOut_) {
         session.result = nullptr;
         session.status = "running";
     } else {
@@ -147,12 +147,16 @@ std::shared_ptr<ExecResult> SessionRecord::BuildExecResult() const
     }
 
     std::lock_guard<std::mutex> lock(resultMutex_);
-    result->exitCode = terminalStatus_;
+    if (timedOut_) {
+        result->executionTime = timeoutMs;
+    } else {
+        result->exitCode = terminalStatus_;
+        result->executionTime = (endTimeMs_ > startTime) ? (endTimeMs_ - startTime) : 0;
+    }
     result->outputText = stdoutText_;
     result->errorText = stderrText_;
     result->signalNumber = signalNumber_;
     result->timedOut = timedOut_;
-    result->executionTime = (endTimeMs_ > startTime) ? (endTimeMs_ - startTime) : 0;
     return result;
 }
 

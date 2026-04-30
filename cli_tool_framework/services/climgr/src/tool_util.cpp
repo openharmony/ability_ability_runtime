@@ -48,13 +48,13 @@ int32_t ToolUtil::ValidateProperties(const ToolInfo &toolInfo, ExecToolParam &pa
     if (!param.subcommand.empty()) {
         if (!toolInfo.hasSubCommand) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "not have subcommand");
-            return ERR_INVALID_PARAM;
+            return ERR_TOOL_NOT_EXIST;
         }
 
         auto search = toolInfo.subcommands.find(param.subcommand);
         if (search == toolInfo.subcommands.end()) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "not have subcommand");
-            return ERR_INVALID_PARAM;
+            return ERR_TOOL_NOT_EXIST;
         }
         if (!PermissionUtil::VerifyAccessToken(tokenId, search->second.requirePermissions)) {
             return ERR_PERMISSION_DENIED;
@@ -78,16 +78,20 @@ int32_t ToolUtil::ValidateProperties(const ToolInfo &toolInfo, ExecToolParam &pa
         return ERR_INVALID_PARAM;
     }
 
-    if (!param.options.background) {
-        if (param.options.yieldMs == 0) {
-            param.options.yieldMs = param.options.timeout * MILLISECOND_COEFFICIENT;
-        } else if (param.options.yieldMs > param.options.timeout * MILLISECOND_COEFFICIENT) {
-            TAG_LOGE(AAFwkTag::CLI_TOOL, "yieldTime exceeds timeout.");
-            return ERR_INVALID_PARAM;
-        }
+    if (!param.options.background && param.options.yieldMs > param.options.timeout * MILLISECOND_COEFFICIENT) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "yieldTime exceeds timeout.");
+        return ERR_INVALID_PARAM;
     }
 
-    return ValidateInputSchemaProperties(toolInfo.inputSchema, param.args);
+    if (param.subcommand.empty()) {
+        return ValidateInputSchemaProperties(toolInfo.inputSchema, param.args);
+    }
+
+    auto it = toolInfo.subcommands.find(param.subcommand);
+    if (it == toolInfo.subcommands.end()) {
+        TAG_LOGW(AAFwkTag::CLI_TOOL, "GetSubCommandInfo failed: subcommand=%{public}s", param.subcommand.c_str());
+    }
+    return ValidateInputSchemaProperties(it->second.inputSchema, param.args);
 }
 
 int32_t ToolUtil::ValidateInputSchemaProperties(const std::string &inputSchema,
@@ -147,7 +151,7 @@ std::string ToolUtil::GenerateCliSessionId(const std::string &name, std::shared_
     return name + "_" + std::to_string(time) + "_" + std::to_string(randomDigit);
 }
 
-bool ToolUtil::GenerateSandboxConfig(const std::string &challenge, AccessToken::AccessTokenID tokenId,
+bool ToolUtil::GenerateSandboxConfig(const ExecToolParam &param, AccessToken::AccessTokenID tokenId,
     std::string &sandboxConfig, std::string &bundleName)
 {
     AppExecFwk::BundleInfo bundleInfo;
@@ -157,12 +161,14 @@ bool ToolUtil::GenerateSandboxConfig(const std::string &challenge, AccessToken::
 
     nlohmann::json config;
     config["callerTokenId"] = IPCSkeleton::GetCallingFullTokenID();
-    config["challenge"] = challenge;
+    config["challenge"] = param.challenge;
     config["uid"] = IPCSkeleton::GetCallingUid();
     config["callerPid"] = IPCSkeleton::GetCallingPid();
     config["gid"] = bundleInfo.gid;
     config["appId"] = bundleInfo.appId;
     config["bundleName"] = bundleInfo.name;
+    config["cliName"] = param.toolName;
+    config["subCliName"] = param.subcommand;
     sandboxConfig = config.dump();
     bundleName = bundleInfo.name;
     TAG_LOGE(AAFwkTag::CLI_TOOL, "sandboxConfig: %{public}s", sandboxConfig.c_str());
