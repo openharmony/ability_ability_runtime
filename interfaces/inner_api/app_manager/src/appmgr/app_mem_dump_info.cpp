@@ -27,6 +27,9 @@ bool MemDumpInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(needLeakobj)) {
         return false;
     }
+    if (!parcel.WriteBool(needRaw)) {
+        return false;
+    }
     if (!parcel.WriteUint32(pid)) {
         return false;
     }
@@ -58,6 +61,10 @@ MemDumpInfo *MemDumpInfo::Unmarshalling(Parcel &parcel)
     info->dumpType = static_cast<MemDumpType>(dumpTypeValue);
 
     if (!parcel.ReadBool(info->needLeakobj)) {
+        delete info;
+        return nullptr;
+    }
+    if (!parcel.ReadBool(info->needRaw)) {
         delete info;
         return nullptr;
     }
