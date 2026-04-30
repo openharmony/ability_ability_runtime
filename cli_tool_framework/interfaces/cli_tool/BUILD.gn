@@ -19,7 +19,6 @@ idl_gen_interface("cli_tool_manager_interface") {
   sources = [
     "ICliToolManager.idl",
     "ICliToolManagerScheduler.idl",
-    "IExecToolCallback.idl",
   ]
 
   sources_common = [ "ICliToolCmd.idl" ]
@@ -60,7 +59,6 @@ ohos_shared_library("cli_tool_client") {
     "src/cli_tool_mgr_scheduler_recipient.cpp",
     "src/exec_options.cpp",
     "src/exec_result.cpp",
-    "src/exec_tool_callback_impl.cpp",
     "src/exec_tool_param.cpp",
     "src/sub_command_info.cpp",
     "src/tool_info.cpp",

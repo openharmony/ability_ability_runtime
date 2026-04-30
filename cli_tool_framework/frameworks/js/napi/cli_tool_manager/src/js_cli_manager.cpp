@@ -22,7 +22,6 @@
 #include "cli_manager_error_utils.h"
 #include "cli_session_info.h"
 #include "cli_tool_mgr_client.h"
-#include "exec_tool_callback_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "js_cli_manager_utils.h"
 #include "js_error_utils.h"
