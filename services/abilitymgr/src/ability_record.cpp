@@ -1867,9 +1867,9 @@ void AbilityRecord::DumpAbilityState(
 
 void AbilityRecord::SetStartTime()
 {
-    if (startTime_ == 0) {
-        startTime_ = AbilityUtil::SystemTimeMillis();
-    }
+    int64_t expected = 0;
+    int64_t desired = AbilityUtil::SystemTimeMillis();
+    startTime_.compare_exchange_strong(expected, desired);
 }
 
 int64_t AbilityRecord::GetStartTime() const
