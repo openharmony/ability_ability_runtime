@@ -41,19 +41,32 @@ struct TimerConfig {
 
 void EmitProgress(int percentage, const std::string& status)
 {
-    std::cout << "{\"event\": \"progress\", \"data\": {"
+    std::cout << "{\"type\": \"progress\", "
               << "\"percentage\": " << percentage << ", "
               << "\"status\": \"" << status << "\""
-              << "}}" << std::endl;
+              << "}" << std::endl;
 }
 
 void EmitResult(const std::string& status, int duration, int actualDuration)
 {
-    std::cout << "{\"event\": \"result\", \"data\": {"
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"" << status << "\", "
+              << "\"data\": {"
               << "\"status\": \"" << status << "\", "
               << "\"duration\": " << duration << ", "
               << "\"actual_duration\": " << actualDuration
-              << "}}" << std::endl;
+              << "}}"
+              << "}" << std::endl;
+}
+
+void EmitError(const std::string& errCode, const std::string& errMsg, const std::string& suggestion)
+{
+    std::cout << "{\"type\": \"result\", "
+              << "\"status\": \"failed\", "
+              << "\"errCode\": \"" << errCode << "\", "
+              << "\"errMsg\": \"" << errMsg << "\", "
+              << "\"suggestion\": \"" << suggestion << "\""
+              << "}" << std::endl;
 }
 
 void ShowHelp()
