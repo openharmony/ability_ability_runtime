@@ -103,7 +103,7 @@ private:
 
     void Init();
 
-    std::shared_ptr<SessionRecord> CreateSessionRecord(const ExecToolParam &param);
+    std::shared_ptr<SessionRecord> CreateSessionRecord(const ExecToolParam &param, const std::string &eventId);
     void AddSessionRecord(const std::shared_ptr<SessionRecord> &record);
     std::shared_ptr<SessionRecord> GetSessionRecord(const std::string &sessionId);
     void RemoveSessionRecord(const std::string &sessionId);
@@ -134,7 +134,6 @@ private:
 
     void PostExecToolTask(int64_t time, const std::string &sessionId, bool isTimeout);
     void WaitPid(pid_t pid, int32_t status, int32_t sig);
-    void Killpg(pid_t pid);
     void RegisterAppStateObserver(const std::string &bundleName, pid_t callerPid);
     void OnProcessDied(const std::string &bundleName, pid_t diedPid);
 
