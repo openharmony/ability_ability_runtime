@@ -141,11 +141,16 @@ int32_t ProcessManager::CreateChildProcess(const ExecToolParam &param, const std
     return ERR_OK;
 }
 
-bool ProcessManager::TerminateProcess(pid_t pid, int signal) const
+bool ProcessManager::Killpg(pid_t pid) const
 {
-    if (pid > 0 && kill(pid, signal) != 0 && errno != ESRCH) {
-        TAG_LOGW(AAFwkTag::CLI_TOOL, "Failed to kill process %{public}d: %{public}s",
-            pid, strerror(errno));
+    pid_t gPid = getpgid(pid);
+    if (gPid == -1) {
+        TAG_LOGW(AAFwkTag::CLI_TOOL, "Fial to get gPid");
+        return false;
+    }
+    int32_t killRet = killpg(gPid, SIGTERM);
+    if (killRet != 0) {
+        TAG_LOGW(AAFwkTag::CLI_TOOL, "killpg result:%{public}d", killRet);
         return false;
     }
     return true;

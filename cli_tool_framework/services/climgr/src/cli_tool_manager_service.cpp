@@ -98,7 +98,8 @@ void CliToolManagerService::HandleProcessTimeout(const std::string &sessionId)
     }
 
     EventDispatcher::GetInstance().DispatchErrorEvent(sessionId, "session timed out");
-    ProcessManager::GetInstance().TerminateProcess(record->processId, SIGKILL);
+    ProcessManager::GetInstance().Killpg(record->processId);
+    RemoveSessionRecord(sessionId);
 }
 
 void CliToolManagerService::HandleProcessYieldTimeout(const std::string &sessionId)
@@ -244,7 +245,6 @@ void CliToolManagerService::OnStart()
 
     if (!Publish(cliService)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Publish failed");
-        return;
     }
 }
 
@@ -271,7 +271,7 @@ void CliToolManagerService::OnStop()
     // Kill all active processes
     auto &processManager = ProcessManager::GetInstance();
     for (pid_t pid : activePids) {
-        processManager.TerminateProcess(pid, SIGKILL);
+        processManager.Killpg(pid);
     }
 
     if (ioMonitor_ != nullptr) {
@@ -283,6 +283,7 @@ void CliToolManagerService::AddSessionRecord(const std::shared_ptr<SessionRecord
 {
     std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
     sessionRecords_[record->sessionId] = record;
+    activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
 }
 
 std::shared_ptr<SessionRecord> CliToolManagerService::GetSessionRecord(const std::string &sessionId)
@@ -293,6 +294,10 @@ std::shared_ptr<SessionRecord> CliToolManagerService::GetSessionRecord(const std
         TAG_LOGW(AAFwkTag::CLI_TOOL, "GetSessionRecord failed: sessionId=%{public}s not found", sessionId.c_str());
         return nullptr;
     }
+    if (it->second == nullptr) {
+        sessionRecords_.erase(it); // for leak
+        activeSessionCount_.fetch_sub(1, std::memory_order_relaxed);
+    }
     return it->second;
 }
 
@@ -300,6 +305,7 @@ void CliToolManagerService::RemoveSessionRecord(const std::string &sessionId)
 {
     std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
     sessionRecords_.erase(sessionId);
+    activeSessionCount_.fetch_sub(1, std::memory_order_relaxed);
 }
 
 bool CliToolManagerService::RegisterSessionWithMonitors(const std::shared_ptr<SessionRecord> &record,
@@ -422,7 +428,7 @@ int32_t CliToolManagerService::ValidateSessionLimit()
 int32_t CliToolManagerService::ValidateAndPrepareTool(const ExecToolParam &param, uint32_t tokenId,
     ToolInfo &toolInfo, std::string &sandboxConfig, std::string &bundleName)
 {
-    if (GetToolInfoByName(param.toolName, toolInfo) != ERR_OK) {
+    if (CliToolDataManager::GetInstance().GetToolByName(param.toolName, toolInfo) != ERR_OK) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "Tool not found");
         return ERR_TOOL_NOT_EXIST;
     }
@@ -433,7 +439,7 @@ int32_t CliToolManagerService::ValidateAndPrepareTool(const ExecToolParam &param
         return checkPramRet;
     }
 
-    if (!ToolUtil::GenerateSandboxConfig(param.challenge, tokenId, sandboxConfig, bundleName)) {
+    if (!ToolUtil::GenerateSandboxConfig(param, tokenId, sandboxConfig, bundleName)) {
         TAG_LOGE(AAFwkTag::CLI_TOOL, "caller is not hap");
         return ERR_NOT_HAP;
     }
@@ -443,22 +449,19 @@ int32_t CliToolManagerService::ValidateAndPrepareTool(const ExecToolParam &param
 int32_t CliToolManagerService::SetupAndStartSession(const ExecToolParam &param, const std::string &eventId,
     const ToolInfo &toolInfo, const std::string &sandboxConfig, const std::string &bundleName)
 {
-    std::shared_ptr<SessionRecord> record = CreateSessionRecord(param);
+    std::shared_ptr<SessionRecord> record = CreateSessionRecord(param, eventId);
     if (record == nullptr) {
         return ERR_NO_INIT;
     }
-    record->eventId = eventId;
 
     auto createRet = ProcessManager::GetInstance().CreateChildProcess(param, sandboxConfig, toolInfo, record);
     if (createRet != ERR_OK) {
         return createRet;
     }
-    activeSessionCount_.fetch_add(1, std::memory_order_relaxed);
-
     AddSessionRecord(record);
 
     if (RegisterSessionWithMonitors(record, param) == false) {
-        ProcessManager::GetInstance().TerminateProcess(record->processId, SIGKILL);
+        ProcessManager::GetInstance().Killpg(record->processId);
         RemoveSessionRecord(record->sessionId);
         return ERR_NO_INIT;
     }
@@ -527,12 +530,18 @@ void CliToolManagerService::WaitPid(pid_t pid, int32_t status, int32_t sig)
     std::shared_ptr<SessionRecord> record = nullptr;
     {
         std::lock_guard<ffrt::mutex> guard(sessionsMutex_);
-        for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end(); ++iter) {
-            if (iter->second == nullptr || pid != iter->second->processId) {
+        for (auto iter = sessionRecords_.begin(); iter != sessionRecords_.end();) {
+            if (iter->second == nullptr) {
+                iter = sessionRecords_.erase(iter);
+                activeSessionCount_.fetch_sub(1, std::memory_order_relaxed);
+                TAG_LOGW(AAFwkTag::CLI_TOOL, "delete leak sessionId:%{public}s", iter->first.c_str());
                 continue;
             }
-            record = iter->second;
-            break;
+            if (pid == iter->second->processId) {
+                record = iter->second;
+                break;
+            }
+            ++iter;
         }
     }
     AccessToken::AccessTokenKit::DeleteToolTokenByPid(pid);
@@ -553,20 +562,9 @@ void CliToolManagerService::sigchld_handler(int32_t sig)
         auto instance = CliToolManagerService::GetInstance();
         if (instance != nullptr) {
             instance->WaitPid(pid, status, sig);
-            instance->Killpg(pid);
+            ProcessManager::GetInstance().Killpg(pid);
         }
     }
-}
-
-void CliToolManagerService::Killpg(pid_t pid)
-{
-    pid_t gPid = getpgid(pid);
-    if (gPid == -1) {
-        TAG_LOGI(AAFwkTag::CLI_TOOL, "Fial to get gPid");
-        return;
-    }
-    int32_t killRet = killpg(gPid, SIGTERM);
-    TAG_LOGI(AAFwkTag::CLI_TOOL, "killpg result:%{public}d", killRet);
 }
 
 void CliToolManagerService::OnProcessDied(const std::string &bundleName, pid_t diedPid)
@@ -591,7 +589,7 @@ void CliToolManagerService::OnProcessDied(const std::string &bundleName, pid_t d
         }
 
         // Kill the CLI process group
-        Killpg(sessionRecord->processId);
+        ProcessManager::GetInstance().Killpg(sessionRecord->processId);
 
         // Clean up session
         iter = sessionRecords_.erase(iter);
@@ -645,19 +643,17 @@ void CliToolManagerService::RegisterAppStateObserver(const std::string &bundleNa
     TAG_LOGI(AAFwkTag::CLI_TOOL, "Successfully registered observer for bundleName=%{public}s", bundleName.c_str());
 }
 
-std::shared_ptr<SessionRecord> CliToolManagerService::CreateSessionRecord(const ExecToolParam &param)
+std::shared_ptr<SessionRecord> CliToolManagerService::CreateSessionRecord(const ExecToolParam &param,
+    const std::string &eventId)
 {
     auto record = std::make_shared<SessionRecord>();
-    if (record == nullptr) {
-        return nullptr;
-    }
-    int32_t timeoutMs = param.options.timeout * COEFFICIENT;
     record->callerPid = IPCSkeleton::GetCallingPid();
     record->sessionId = ToolUtil::GenerateCliSessionId(param.toolName, record);
     record->toolName = param.toolName;
-    record->timeoutMs = timeoutMs;
+    record->timeoutMs = param.options.timeout * COEFFICIENT;
     record->SetState(SessionState::RUNNING);
     record->SetBackground(param.options.background);
+    record->eventId = eventId;
     return record;
 }
 
@@ -687,8 +683,8 @@ int32_t CliToolManagerService::ClearSession(const std::string &sessionId)
     }
     TAG_LOGI(AAFwkTag::CLI_TOOL, "ClearSession: sessionId=%{public}s, pid=%{public}d",
         sessionId.c_str(), record->processId);
-    if (!ProcessManager::GetInstance().TerminateProcess(record->processId, SIGTERM)) {
-        return ERR_PERMISSION_DENIED;
+    if (!ProcessManager::GetInstance().Killpg(record->processId)) {
+        return ERR_NOT_KILL;
     }
     record->SetState(SessionState::CANCELLING);
     return ERR_OK;
