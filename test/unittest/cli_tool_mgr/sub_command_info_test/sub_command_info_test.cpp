@@ -73,7 +73,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Marshalling_0200, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Test subcommand with empty data";
-    subCmd.requirePermissions = {};
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = "";
     subCmd.outputSchema = "";
     subCmd.eventTypes = {};
@@ -155,7 +155,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Unmarshalling_0200, TestSize.Level1)
 
     SubCommandInfo original;
     original.description = "Empty data";
-    original.requirePermissions = {};
+    original.requirePermissions = {"ohos.permission.INTERNET"};
     original.inputSchema = "";
     original.outputSchema = "";
     original.eventTypes = {};
@@ -352,6 +352,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_0300, TestSize.Level1)
 
     nlohmann::json json = R"({
         "description": "Minimal required data",
+        "requirePermissions": ["ohos.permission.INTERNET"],
         "inputSchema": {},
         "outputSchema": {}
     })"_json;
@@ -407,7 +408,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseToJson_0200, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Empty data to JSON";
-    subCmd.requirePermissions = {};
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = "";
     subCmd.outputSchema = "";
     subCmd.eventTypes = {};
@@ -1110,7 +1111,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1300, TestS
 
 /**
  * @tc.name: SubCommandInfo_ParseFromJson_Validation_1400
- * @tc.desc: Test SubCommandInfo ParseFromJson with valid minimal data
+ * @tc.desc: Test SubCommandInfo ParseFromJson without requirePermissions (requirePermissions is required)
  * @tc.type: FUNC
  */
 HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1400, TestSize.Level1)
@@ -1118,7 +1119,58 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1400, TestS
     GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1400 start";
 
     nlohmann::json json = R"({
-        "description": "Minimal valid subcommand"
+        "description": "No requirePermissions",
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_FALSE(result);  // requirePermissions is required
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1400 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1401
+ * @tc.desc: Test SubCommandInfo ParseFromJson with empty requirePermissions array (valid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1401, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1401 start";
+
+    nlohmann::json json = R"({
+        "description": "Empty requirePermissions",
+        "requirePermissions": [],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
+    })"_json;
+
+    SubCommandInfo subCmd;
+    bool result = SubCommandInfo::ParseFromJson(json, subCmd);
+
+    EXPECT_TRUE(result);  // empty requirePermissions array is valid
+    EXPECT_TRUE(subCmd.requirePermissions.empty());
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1401 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_ParseFromJson_Validation_1402
+ * @tc.desc: Test SubCommandInfo ParseFromJson with valid minimal data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1402, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1402 start";
+
+    nlohmann::json json = R"({
+        "description": "Minimal valid subcommand",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     SubCommandInfo subCmd;
@@ -1126,11 +1178,11 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_ParseFromJson_Validation_1400, TestS
 
     EXPECT_TRUE(result);
     EXPECT_EQ(subCmd.description, "Minimal valid subcommand");
-    EXPECT_TRUE(subCmd.requirePermissions.empty());
+    EXPECT_EQ(subCmd.requirePermissions.size(), 1u);
     EXPECT_TRUE(subCmd.eventTypes.empty());
     EXPECT_TRUE(subCmd.eventSchemas.empty());
 
-    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1400 end";
+    GTEST_LOG_(INFO) << "SubCommandInfo_ParseFromJson_Validation_1402 end";
 }
 
 /**
@@ -1221,6 +1273,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0100, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Valid subcommand";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
 
@@ -1240,12 +1293,33 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0200, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
 
     EXPECT_FALSE(SubCommandInfo::Validate(subCmd));
 
     GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0200 end";
+}
+
+/**
+ * @tc.name: SubCommandInfo_Validate_0250
+ * @tc.desc: Test SubCommandInfo::Validate with empty requirePermissions (valid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0250, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0250 start";
+
+    SubCommandInfo subCmd;
+    subCmd.description = "Empty requirePermissions";
+    subCmd.requirePermissions = {};
+    subCmd.inputSchema = R"({"type": "object"})";
+    subCmd.outputSchema = R"({"type": "string"})";
+
+    EXPECT_TRUE(SubCommandInfo::Validate(subCmd));  // empty requirePermissions is valid
+
+    GTEST_LOG_(INFO) << "SubCommandInfo_Validate_0250 end";
 }
 
 /**
@@ -1299,6 +1373,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0500, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Empty inputSchema";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = "";
     subCmd.outputSchema = R"({"type": "string"})";
 
@@ -1318,6 +1393,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0600, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Invalid inputSchema";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = "not a valid json";
     subCmd.outputSchema = R"({"type": "string"})";
 
@@ -1337,6 +1413,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0700, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "inputSchema not object";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"("just a string")";
     subCmd.outputSchema = R"({"type": "string"})";
 
@@ -1356,6 +1433,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0800, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Empty outputSchema";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = "";
 
@@ -1375,6 +1453,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_0900, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Invalid outputSchema";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = "{invalid json}";
 
@@ -1394,6 +1473,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1000, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "outputSchema not object";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = "123";
 
@@ -1413,6 +1493,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1100, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Duplicate eventTypes";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.eventTypes = {"stdout", "stdout"};
@@ -1433,6 +1514,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1200, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Unique eventTypes";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.eventTypes = {"stdout", "stderr", "exit"};
@@ -1453,6 +1535,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1300, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Invalid eventSchemas";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.eventSchemas = "not a valid json";
@@ -1473,6 +1556,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1400, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "eventSchemas not object";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.eventSchemas = R"("just a string")";
@@ -1493,6 +1577,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1500, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Valid eventSchemas";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = R"({"type": "object"})";
     subCmd.outputSchema = R"({"type": "string"})";
     subCmd.eventSchemas = R"({"stdout": {"type": "string"}})";
@@ -1535,6 +1620,7 @@ HWTEST_F(SubCommandInfoTest, SubCommandInfo_Validate_1700, TestSize.Level1)
 
     SubCommandInfo subCmd;
     subCmd.description = "Minimal";
+    subCmd.requirePermissions = {"ohos.permission.INTERNET"};
     subCmd.inputSchema = "{}";
     subCmd.outputSchema = "{}";
 
