@@ -115,7 +115,7 @@ napi_value JSCliManager::OnExecTool(napi_env env, size_t argc, napi_value *argv)
         return CreateJsUndefined(env);
     }
 
-    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_THREE], param.challenge)) {
+    if (!AppExecFwk::UnwrapStringFromJS2(env, argv[INDEX_THREE], param.challenge) || param.challenge.empty()) {
         ThrowInvalidParamError(env, "Tool challenge is required");
         return CreateJsUndefined(env);
     }
