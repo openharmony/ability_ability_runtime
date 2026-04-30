@@ -72,6 +72,8 @@ private:
     static bool IsArrayType(const sptr<AAFwk::IInterface> &value);
 
     // Helper methods for mode processing (extracted to reduce nesting depth)
+    static void ProcessBooleanParam(const std::string &key, const sptr<AAFwk::IInterface> &value,
+        std::string &cmdLine);
     static void ProcessArrayExpansion(const std::string &key, const sptr<AAFwk::IInterface> &value,
         std::string &cmdLine);
 
