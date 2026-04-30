@@ -95,20 +95,24 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
 {
     // description is required and must be non-empty
     if (!json.contains("description") || !json["description"].is_string()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: description is missing or not a string");
         return false;
     }
     std::string description = json["description"];
     if (description.empty()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: description is empty");
         return false;
     }
     subCmd.description = description;
 
     // requirePermissions is required and must be array
     if (!json.contains("requirePermissions") || !json["requirePermissions"].is_array()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions is missing or not an array");
         return false;
     }
     for (const auto &perm : json["requirePermissions"]) {
         if (!perm.is_string()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: requirePermissions contains non-string item");
             return false;
         }
         std::string permStr = perm;
@@ -119,12 +123,14 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
 
     // inputSchema is required and must be JSON object
     if (!json.contains("inputSchema") || !json["inputSchema"].is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: inputSchema is missing or not a JSON object");
         return false;
     }
     subCmd.inputSchema = json["inputSchema"].dump();
 
     // outputSchema is required and must be JSON object
     if (!json.contains("outputSchema") || !json["outputSchema"].is_object()) {
+        TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: outputSchema is missing or not a JSON object");
         return false;
     }
     subCmd.outputSchema = json["outputSchema"].dump();
@@ -132,10 +138,12 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
     // eventTypes is optional, but if present must be array of strings
     if (json.contains("eventTypes")) {
         if (!json["eventTypes"].is_array()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventTypes is not an array");
             return false;
         }
         for (const auto &evt : json["eventTypes"]) {
             if (!evt.is_string()) {
+                TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventTypes contains non-string item");
                 return false;
             }
             std::string evtStr = evt;
@@ -148,6 +156,7 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
     // eventSchemas is optional, but if present must be JSON object
     if (json.contains("eventSchemas")) {
         if (!json["eventSchemas"].is_object()) {
+            TAG_LOGE(AAFwkTag::CLI_TOOL, "ParseFromJson failed: eventSchemas is not a JSON object");
             return false;
         }
         subCmd.eventSchemas = json["eventSchemas"].dump();
