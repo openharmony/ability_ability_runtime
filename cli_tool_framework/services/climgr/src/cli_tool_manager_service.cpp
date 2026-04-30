@@ -24,7 +24,6 @@
 #include "event_dispatcher.h"
 #include "cli_tool_app_state_observer.h"
 #include "hilog_tag_wrapper.h"
-#include "iexec_tool_callback.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"

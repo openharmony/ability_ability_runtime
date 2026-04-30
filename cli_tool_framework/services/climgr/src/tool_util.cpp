@@ -118,6 +118,12 @@ int32_t ToolUtil::ValidateInputSchemaProperties(const std::string &inputSchema,
     }
     auto properties = schema["properties"];
     for (auto &[key, value] : args.GetParams()) {
+        if (key == "help") {
+            if (args.Size() != 1) {
+                TAG_LOGE(AAFwkTag::CLI_TOOL, "args size > 1");
+                return ERR_INVALID_PARAM;
+            }
+        }
         if (!properties.contains(key)) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "args key '%{public}s' not found in properties", key.c_str());
             return ERR_INVALID_PARAM;
@@ -221,11 +227,13 @@ void ToolUtil::TransferToCmdParam(const ToolInfo &toolInfo, const AAFwk::WantPar
             continue;
         }
 
+        if (key == "help") {
+            ProcessBooleanParam(key, value, cmdLine);
+            continue;
+        }
+
         if (IsBooleanType(value)) {
-            bool boolValue = false;
-            if (GetParamBoolValue(value, boolValue) && boolValue) {
-                cmdLine += " --" + key;
-            }
+            ProcessBooleanParam(key, value, cmdLine);
             continue;
         }
 
@@ -238,6 +246,18 @@ void ToolUtil::TransferToCmdParam(const ToolInfo &toolInfo, const AAFwk::WantPar
         if (!strValue.empty()) {
             cmdLine += " --" + key + " " + strValue;
         }
+    }
+}
+
+void ToolUtil::ProcessBooleanParam(const std::string &key, const sptr<AAFwk::IInterface> &value, std::string &cmdLine)
+{
+    if (!IsBooleanType(value)) {
+        return;
+    }
+
+    bool boolValue = false;
+    if (GetParamBoolValue(value, boolValue) && boolValue) {
+        cmdLine += " --" + key;
     }
 }
 
