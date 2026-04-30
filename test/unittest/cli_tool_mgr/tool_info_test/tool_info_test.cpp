@@ -83,7 +83,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Marshalling_0200, TestSize.Level1)
     tool.version = "2.0.0";
     tool.description = "Tool with subcommands";
     tool.executablePath = "/bin/test2";
-    tool.requirePermissions = {};
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.eventSchemas = "{}";
@@ -157,7 +157,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Unmarshalling_0200, TestSize.Level1)
     original.version = "1.0.0";
     original.description = "Simple tool";
     original.executablePath = "/bin/simple";
-    original.requirePermissions = {};
+    original.requirePermissions = {"ohos.permission.INTERNET"};
     original.inputSchema = "{}";
     original.outputSchema = "{}";
     original.eventSchemas = "{}";
@@ -475,6 +475,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Tool with subcommands",
         "executablePath": "/bin/tool",
+        "requirePermissions": ["ohos.permission.INTERNET"],
         "hasSubCommand": true,
         "subcommands": {
             "build": {
@@ -1393,7 +1394,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0200, TestSize.
 
 /**
  * @tc.name: ToolInfo_ParseFromJson_RequirePermissions_0300
- * @tc.desc: Test ToolInfo ParseFromJson with empty requirePermissions
+ * @tc.desc: Test ToolInfo ParseFromJson with empty requirePermissions (valid)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0300, TestSize.Level1)
@@ -1405,7 +1406,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0300, TestSize.
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "requirePermissions": []
+        "requirePermissions": [],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1444,6 +1447,30 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0400, TestSize.
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0400 end";
 }
 
+/**
+ * @tc.name: ToolInfo_ParseFromJson_RequirePermissions_0500
+ * @tc.desc: Test ToolInfo ParseFromJson without requirePermissions field (should fail - required field)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequirePermissions_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0500 start";
+
+    nlohmann::json json = R"({
+        "name": "ohos-test",
+        "version": "1.0.0",
+        "description": "Test tool",
+        "executablePath": "/bin/test"
+    })"_json;
+
+    ToolInfo tool;
+    bool result = ToolInfo::ParseFromJson(json, tool);
+
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_RequirePermissions_0500 end";
+}
+
 // ==================== ParseFromJson EventSchemas Validation Tests ====================
 
 /**
@@ -1460,6 +1487,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0100, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1485,6 +1515,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0200, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "eventSchemas": {"stdout": {"type": "string"}}
     })"_json;
 
@@ -1511,6 +1544,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0300, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "eventSchemas": "not an object"
     })"_json;
 
@@ -1536,6 +1572,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_EventSchemas_0400, TestSize.Level1
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "eventSchemas": ["a", "b"]
     })"_json;
 
@@ -1563,7 +1602,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0100, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "inputSchema": "not an object"
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": "not an object",
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1588,7 +1629,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0200, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "inputSchema": ["a", "b"]
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": ["a", "b"],
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1613,7 +1656,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0300, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "inputSchema": 123
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": 123,
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1638,7 +1683,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0400, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
-        "inputSchema": {"type": "object"}
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -1652,7 +1699,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0400, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_ParseFromJson_Schema_0500
- * @tc.desc: Test ToolInfo ParseFromJson without inputSchema (valid)
+ * @tc.desc: Test ToolInfo ParseFromJson without inputSchema (should fail - required field)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0500, TestSize.Level1)
@@ -1664,13 +1711,14 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0500, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
     bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(tool.inputSchema.empty());
+    EXPECT_FALSE(result);
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Schema_0500 end";
 }
@@ -1689,6 +1737,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0600, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
         "outputSchema": "not an object"
     })"_json;
 
@@ -1714,6 +1764,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0700, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
         "outputSchema": ["a", "b"]
     })"_json;
 
@@ -1739,6 +1791,8 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0800, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
         "outputSchema": {"type": "string"}
     })"_json;
 
@@ -1753,7 +1807,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0800, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_ParseFromJson_Schema_0900
- * @tc.desc: Test ToolInfo ParseFromJson without outputSchema (valid)
+ * @tc.desc: Test ToolInfo ParseFromJson without outputSchema (should fail - required field)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0900, TestSize.Level1)
@@ -1765,13 +1819,14 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_0900, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"}
     })"_json;
 
     ToolInfo tool;
     bool result = ToolInfo::ParseFromJson(json, tool);
 
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(tool.outputSchema.empty());
+    EXPECT_FALSE(result);
 
     GTEST_LOG_(INFO) << "ToolInfo_ParseFromJson_Schema_0900 end";
 }
@@ -1790,6 +1845,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_Schema_1000, TestSize.Level1)
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
         "inputSchema": {"type": "object"},
         "outputSchema": {"type": "array"}
     })"_json;
@@ -2148,6 +2204,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_RequiredFields_0900, TestSize.Leve
         "version": "1.0.0",
         "description": "A valid tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;
@@ -2178,6 +2237,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0100, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "A valid tool";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = R"({"type": "object"})";
     tool.outputSchema = R"({"type": "string"})";
 
@@ -2200,6 +2260,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0200, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
 
@@ -2222,6 +2283,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0300, TestSize.Level1)
     tool.version = "";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
 
@@ -2244,6 +2306,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0400, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
 
@@ -2266,12 +2329,36 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0500, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
 
     EXPECT_FALSE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_0500 end";
+}
+
+/**
+ * @tc.name: ToolInfo_Validate_0550
+ * @tc.desc: Test ToolInfo::Validate with empty requirePermissions (valid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolInfoTest, ToolInfo_Validate_0550, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ToolInfo_Validate_0550 start";
+
+    ToolInfo tool;
+    tool.name = "ohos-test";
+    tool.version = "1.0.0";
+    tool.description = "Test";
+    tool.executablePath = "/bin/test";
+    tool.requirePermissions = {};
+    tool.inputSchema = "{}";
+    tool.outputSchema = "{}";
+
+    EXPECT_TRUE(ToolInfo::Validate(tool));
+
+    GTEST_LOG_(INFO) << "ToolInfo_Validate_0550 end";
 }
 
 /**
@@ -2322,7 +2409,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0700, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Validate_0800
- * @tc.desc: Test ToolInfo::Validate with empty inputSchema (valid)
+ * @tc.desc: Test ToolInfo::Validate with empty inputSchema (should fail - required field)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Validate_0800, TestSize.Level1)
@@ -2334,10 +2421,11 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0800, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "";
     tool.outputSchema = "{}";
 
-    EXPECT_TRUE(ToolInfo::Validate(tool));
+    EXPECT_FALSE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_0800 end";
 }
@@ -2356,6 +2444,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0900, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "not valid json";
     tool.outputSchema = "{}";
 
@@ -2366,7 +2455,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_0900, TestSize.Level1)
 
 /**
  * @tc.name: ToolInfo_Validate_1000
- * @tc.desc: Test ToolInfo::Validate with empty outputSchema (valid)
+ * @tc.desc: Test ToolInfo::Validate with empty outputSchema (should fail - required field)
  * @tc.type: FUNC
  */
 HWTEST_F(ToolInfoTest, ToolInfo_Validate_1000, TestSize.Level1)
@@ -2378,10 +2467,11 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1000, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "";
 
-    EXPECT_TRUE(ToolInfo::Validate(tool));
+    EXPECT_FALSE(ToolInfo::Validate(tool));
 
     GTEST_LOG_(INFO) << "ToolInfo_Validate_1000 end";
 }
@@ -2400,6 +2490,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1100, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{invalid}";
 
@@ -2422,6 +2513,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1700, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.eventTypes = {"stdout", "stdout"};
@@ -2445,6 +2537,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1800, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.eventTypes = {"stdout", "stderr", "exit"};
@@ -2468,6 +2561,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_1900, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.eventSchemas = "invalid json";
@@ -2491,6 +2585,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2000, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.eventSchemas = R"({"stdout": {"type": "string"}})";
@@ -2514,6 +2609,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2100, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.hasSubCommand = true;
@@ -2538,6 +2634,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2200, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.hasSubCommand = true;
@@ -2567,6 +2664,7 @@ HWTEST_F(ToolInfoTest, ToolInfo_Validate_2300, TestSize.Level1)
     tool.version = "1.0.0";
     tool.description = "Test";
     tool.executablePath = "/bin/test";
+    tool.requirePermissions = {"ohos.permission.INTERNET"};
     tool.inputSchema = "{}";
     tool.outputSchema = "{}";
     tool.hasSubCommand = false;
@@ -2618,6 +2716,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0200, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "hasSubCommand": false,
         "subcommands": {
             "sub1": {
@@ -2703,6 +2804,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0500, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"},
         "hasSubCommand": true,
         "subcommands": {
             "build": {
@@ -2738,6 +2842,9 @@ HWTEST_F(ToolInfoTest, ToolInfo_ParseFromJson_HasSubCommand_0600, TestSize.Level
         "version": "1.0.0",
         "description": "Test tool",
         "executablePath": "/bin/test",
+        "requirePermissions": ["ohos.permission.INTERNET"],
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "string"}
     })"_json;
 
     ToolInfo tool;

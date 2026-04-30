@@ -103,19 +103,17 @@ bool SubCommandInfo::ParseFromJson(const nlohmann::json &json, SubCommandInfo &s
     }
     subCmd.description = description;
 
-    // requirePermissions is optional, but if present must be array of strings
-    if (json.contains("requirePermissions")) {
-        if (!json["requirePermissions"].is_array()) {
+    // requirePermissions is required and must be array
+    if (!json.contains("requirePermissions") || !json["requirePermissions"].is_array()) {
+        return false;
+    }
+    for (const auto &perm : json["requirePermissions"]) {
+        if (!perm.is_string()) {
             return false;
         }
-        for (const auto &perm : json["requirePermissions"]) {
-            if (!perm.is_string()) {
-                return false;
-            }
-            std::string permStr = perm;
-            if (!permStr.empty()) {
-                subCmd.requirePermissions.push_back(std::move(permStr));
-            }
+        std::string permStr = perm;
+        if (!permStr.empty()) {
+            subCmd.requirePermissions.push_back(std::move(permStr));
         }
     }
 
