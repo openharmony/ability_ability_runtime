@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Example CLI tool, demonstrates CLI tool specification implementation (with subcommand format)",
   "executablePath": "/system/bin/cli_tool/executable/ohos-example",
-  "hasSubcommands": true,
+  "hasSubCommand": true,
   "requirePermissions": [],
   "inputSchema": {
     "type": "object",
@@ -56,7 +56,7 @@
               "description": "Current status"
             }
           },
-          "required": ["percentage", "status"]
+          "required": ["type", "percentage", "status"]
         }
       }
     },
@@ -65,12 +65,7 @@
       "requirePermissions": [],
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "reserved": {
-            "type": "string",
-            "description": "Reserved placeholder parameter for future use, not required for normal calls"
-          }
-        }
+        "properties": {}
       },
       "outputSchema": {
         "type": "object",
