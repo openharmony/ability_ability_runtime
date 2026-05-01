@@ -123,6 +123,7 @@ int32_t ToolUtil::ValidateInputSchemaProperties(const std::string &inputSchema,
                 TAG_LOGE(AAFwkTag::CLI_TOOL, "args size > 1");
                 return ERR_INVALID_PARAM;
             }
+            return ERR_OK;
         }
         if (!properties.contains(key)) {
             TAG_LOGE(AAFwkTag::CLI_TOOL, "args key '%{public}s' not found in properties", key.c_str());
