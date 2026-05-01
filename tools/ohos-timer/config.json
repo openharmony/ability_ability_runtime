@@ -37,10 +37,6 @@
     "type": "object",
     "description": "Tool output result",
     "properties": {
-      "status": {
-        "type": "string",
-        "description": "Execution status"
-      },
       "duration": {
         "type": "integer",
         "description": "Planned duration (seconds)"
@@ -50,7 +46,7 @@
         "description": "Actual duration (seconds)"
       }
     },
-    "required": ["status", "duration", "actual_duration"]
+    "required": ["duration", "actual_duration"]
   },
   "eventSchemas": {
     "progress": {
@@ -71,7 +67,7 @@
           "description": "Current status"
         }
       },
-      "required": ["percentage", "status"]
+      "required": ["type", "percentage", "status"]
     }
   }
 }
