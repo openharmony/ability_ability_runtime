@@ -32,10 +32,6 @@
     "type": "object",
     "description": "Tool execution result",
     "properties": {
-      "status": {
-        "type": "string",
-        "description": "Execution status, success when completed successfully"
-      },
       "message": {
         "type": "string",
         "description": "Processed output message"
@@ -45,6 +41,6 @@
         "description": "Actual repeat count"
       }
     },
-    "required": ["status", "message", "repeat_count"]
+    "required": ["message", "repeat_count"]
   }
 }
