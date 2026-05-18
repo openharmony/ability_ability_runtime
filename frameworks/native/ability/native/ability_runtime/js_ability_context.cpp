@@ -25,9 +25,6 @@
 #include "ability_manager_errors.h"
 #include "app_utils.h"
 #include "event_handler.h"
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-#include "histogram_plugin_macros.h"
-#endif
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
@@ -1374,13 +1371,7 @@ napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo
     if (!CheckStartAbilityByCallParams(env, info, want, userId, lastParam)) {
         return CreateJsUndefined(env);
     }
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    if (userId == DEFAULT_INVAL_VALUE) {
-        HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.startAbilityByCall", 1);
-    } else {
-        HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.startAbilityByCallWithAccount", 1);
-    }
-#endif
+
     // 2. create CallBack function
     auto calls = std::make_shared<StartAbilityByCallParameters>();
     auto callerCallBack = std::make_shared<CallerCallBack>();
@@ -1819,9 +1810,6 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
 napi_value JsAbilityContext::OnBackToCallerAbilityWithResult(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "start");
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.backToCallerAbilityWithResult", 1);
-#endif
     if (info.argc < ARGC_TWO) {
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid argc");
         ThrowTooFewParametersError(env);
@@ -3240,17 +3228,11 @@ napi_value JsAbilityContext::OnRequestModalUIExtensionWithAccount(napi_env env, 
 
 napi_value JsAbilityContext::OnShowAbility(napi_env env, NapiCallbackInfo& info)
 {
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.showAbility", 1);
-#endif
     return ChangeAbilityVisibility(env, info, true);
 }
 
 napi_value JsAbilityContext::OnHideAbility(napi_env env, NapiCallbackInfo& info)
 {
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.hideAbility", 1);
-#endif
     return ChangeAbilityVisibility(env, info, false);
 }
 
@@ -3395,9 +3377,6 @@ napi_value JsAbilityContext::OpenAtomicServiceInner(napi_env env, NapiCallbackIn
 napi_value JsAbilityContext::OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.setRestoreEnabled", 1);
-#endif
     if (info.argc == ARGC_ZERO) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
         ThrowTooFewParametersError(env);
@@ -3481,9 +3460,6 @@ napi_value JsAbilityContext::OnRevokeDelegator(napi_env env, NapiCallbackInfo& i
 napi_value JsAbilityContext::OnSetOnNewWantSkipScenarios(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "OnSetOnNewWantSkipScenarios called");
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.setOnNewWantSkipScenarios", 1);
-#endif
     if (info.argc < ARGC_ONE) {
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
@@ -3542,9 +3518,6 @@ napi_value JsAbilityContext::OnConnectAppServiceExtensionAbility(napi_env env, N
 napi_value JsAbilityContext::OnRestartAppWithWindow(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "OnRestartAppWithWindow called");
-#ifdef HIVIEWDFX_RUNTIME_API_METRICS
-    HISTOGRAM_BOOLEAN("AbilityKit.UIAbilityContext.restartApp", 1);
-#endif
     if (info.argc < ARGC_ONE) {
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
