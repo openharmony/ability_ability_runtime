@@ -14,6 +14,7 @@
  */
 
 #include "js_runtime.h"
+#include "parse_jsperf_interval.h"
 
 #include <cerrno>
 #include <climits>
@@ -343,8 +344,12 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
         TAG_LOGD(AAFwkTag::JSRUNTIME, "empty interval");
         return defaultValue;
     }
-
-    return std::stoi(interval);
+    int32_t parsed = 0;
+    if (!ParseJsperfInterval(interval, parsed)) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "invalid interval");
+        return defaultValue;
+    }
+    return parsed;
 }
 
 void JsRuntime::StartProfiler(const DebugOption dOption)
