@@ -14,6 +14,7 @@
  */
 #include "data_uri_utils.h"
 
+#include <charconv>
 #include <memory>
 #include <regex>
 #include <vector>
@@ -106,7 +107,12 @@ long long DataUriUtils::GetId(const Uri &dataUri)
     if (!IsNumber(lastPath)) {
         return -1;
     }
-    return std::atoll(lastPath.c_str());
+    long long id = 0;
+    auto parsed = std::from_chars(lastPath.data(), lastPath.data() + lastPath.size(), id);
+    if (parsed.ec != std::errc{} || parsed.ptr != lastPath.data() + lastPath.size()) {
+        return -1;
+    }
+    return id;
 }
 
 /**
