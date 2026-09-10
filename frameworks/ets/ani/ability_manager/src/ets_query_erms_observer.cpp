@@ -15,6 +15,8 @@
 
 #include "ets_query_erms_observer.h"
 
+#include <charconv>
+
 #include "ets_ability_manager_utils.h"
 #include "ets_error_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -26,6 +28,17 @@ namespace AbilityRuntime {
 namespace {
 constexpr const char *ATOMIC_SERVICE_STARTUP_RULE_IMPL_CLASS_NAME =
     "@ohos.app.ability.abilityManager.abilityManager.AtomicServiceStartupRuleImpl";
+
+int32_t ParseStartTime(const std::string &startTime)
+{
+    int32_t traceId = 0;
+    auto parsed = std::from_chars(startTime.data(), startTime.data() + startTime.size(), traceId);
+    if (parsed.ec != std::errc{} || parsed.ptr != startTime.data() + startTime.size()) {
+        TAG_LOGW(AAFwkTag::QUERY_ERMS, "Invalid startTime format: %{public}s", startTime.c_str());
+        return 0;
+    }
+    return traceId;
+}
 }
 EtsQueryERMSObserver::EtsQueryERMSObserver(ani_vm *etsVm) : etsVm_(etsVm) {}
 
@@ -75,7 +88,7 @@ void EtsQueryERMSObserver::HandleOnQueryFinished(const std::string &appId, const
     }
     for (const auto &callback : callbacks) {
         CallCallback(callback, rule, resultCode);
-        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartQueryERMS", atoi(startTime.c_str()));
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartQueryERMS", ParseStartTime(startTime));
     }
 }
 
@@ -122,13 +135,8 @@ void EtsQueryERMSObserver::AddEtsObserverObject(const std::string &appId, const 
         }
     }
 
-    int traceId = 0;
-    try {
-        traceId = std::stoi(startTime);
-    } catch (...) {
-        TAG_LOGW(AAFwkTag::QUERY_ERMS, "Invalid startTime format: %{public}s", startTime.c_str());
-    }
-    StartAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartQueryERMS", atoi(startTime.c_str()));
+    int32_t traceId = ParseStartTime(startTime);
+    StartAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartQueryERMS", traceId);
     EtsQueryERMSObserverObject object;
     object.appId = appId;
     object.startTime = startTime;
