@@ -15,6 +15,7 @@
 
 #include "extension_plugin_info.h"
 
+#include <charconv>
 #include <dirent.h>
 #include <dlfcn.h>
 #include <unistd.h>
@@ -82,10 +83,10 @@ void ExtensionPluginInfo::ParseExtensions(const std::vector<std::string>& extens
             continue;
         }
         int32_t type = -1;
-        try {
-            type = static_cast<int32_t>(std::stoi(it->second));
-        } catch (...) {
-            TAG_LOGW(AAFwkTag::APPKIT, "stoi(%{public}s) failed", it->second.c_str());
+        const std::string &typeText = it->second;
+        auto parsed = std::from_chars(typeText.data(), typeText.data() + typeText.size(), type);
+        if (parsed.ec != std::errc{} || parsed.ptr != typeText.data() + typeText.size()) {
+            TAG_LOGW(AAFwkTag::APPKIT, "invalid extension type: %{public}s", typeText.c_str());
             continue;
         }
 
